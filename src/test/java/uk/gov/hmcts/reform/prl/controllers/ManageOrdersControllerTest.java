@@ -74,6 +74,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTS_DONT_MATCH_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -170,7 +171,7 @@ public class ManageOrdersControllerTest {
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
+        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(YesOrNo.Yes);
 
         when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
@@ -1721,9 +1722,9 @@ public class ManageOrdersControllerTest {
     @Test
     public void testJudgesListsDontMatch() throws Exception {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(false);
+        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(YesOrNo.No);
         List<String> errorList = new ArrayList<>();
-        errorList.add("The List does not match RefData");
+        errorList.add(LISTS_DONT_MATCH_ERROR);
         assertEquals(AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build(), manageOrdersController
                 .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, CallbackRequest.builder().build()));
     }

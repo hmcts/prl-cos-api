@@ -3284,8 +3284,8 @@ public class ManageOrderServiceTest {
                         .builder()
                         .listItems(dynamicListElementsList)
                         .build());
-        boolean bool = manageOrderService.checkJudgeOrMagistrateList("test");
-        assertEquals(false, bool);
+        YesOrNo bool = manageOrderService.checkJudgeOrMagistrateList("test");
+        assertEquals(YesOrNo.No, bool);
     }
 
     @Test
@@ -3299,8 +3299,8 @@ public class ManageOrderServiceTest {
                         .builder()
                         .listItems(dynamicListElementsList)
                         .build());
-        boolean bool = manageOrderService.checkJudgeOrMagistrateList("test");
-        assertEquals(true, bool);
+        YesOrNo bool = manageOrderService.checkJudgeOrMagistrateList("test");
+        assertEquals(YesOrNo.Yes, bool);
     }
 
     @Test

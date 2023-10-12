@@ -66,8 +66,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTS_DONT_MATCH_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
@@ -131,10 +133,10 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            boolean listMatchesRefData = manageOrderService.checkJudgeOrMagistrateList(authorisation);
+            YesOrNo listMatchesRefData = manageOrderService.checkJudgeOrMagistrateList(authorisation);
             List<String> errorList = new ArrayList<>();
-            if (listMatchesRefData == false) {
-                errorList.add("The List does not match RefData");
+            if (listMatchesRefData.equals(No)) {
+                errorList.add(LISTS_DONT_MATCH_ERROR);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
@@ -389,7 +391,7 @@ public class ManageOrdersController {
 
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
+        if ((No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
         } else {
             caseDataUpdated.put("isWithdrawRequestSent", "Approved");
@@ -490,7 +492,7 @@ public class ManageOrdersController {
                 );
                 manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
             } else {
-                caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
+                caseDataUpdated.put("ordersNeedToBeServed", No);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)

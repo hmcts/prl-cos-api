@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
@@ -61,6 +62,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTS_DONT_MATCH_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -120,7 +122,7 @@ public class DraftAnOrderControllerTest {
         when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
+        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(YesOrNo.Yes);
     }
 
     @Test
@@ -879,9 +881,9 @@ public class DraftAnOrderControllerTest {
     @Test
     public void testJudgesListsDontMatch() throws Exception {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(false);
+        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(YesOrNo.No);
         List<String> errorList = new ArrayList<>();
-        errorList.add("The List does not match RefData");
+        errorList.add(LISTS_DONT_MATCH_ERROR);
         assertEquals(AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build(), draftAnOrderController
                 .populateFl404Fields(authToken, s2sToken, CallbackRequest.builder().build()));
     }

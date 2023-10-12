@@ -2291,7 +2291,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public boolean checkJudgeOrMagistrateList(String authorisation) {
+    public YesOrNo checkJudgeOrMagistrateList(String authorisation) {
         DynamicList listOfJudges = sendAndReplyService.getJudiciaryTierDynamicList(authorisation,
                 authTokenGenerator.generate(),
                 serviceCode,
@@ -2309,7 +2309,7 @@ public class ManageOrderService {
             displayedJudgeValue.add(enumValue.getDisplayedValue());
         }
 
-        return displayedJudgeValue.containsAll(listOfJudgesLabels) ? true : false;
+        return displayedJudgeValue.containsAll(listOfJudgesLabels) ? Yes : No;
     }
 
     /**

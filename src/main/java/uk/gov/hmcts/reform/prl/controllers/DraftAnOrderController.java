@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -31,6 +32,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTS_DONT_MATCH_ERROR;
 
 @Slf4j
 @RestController
@@ -97,10 +99,10 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            boolean listMatchesRefData = manageOrderService.checkJudgeOrMagistrateList(authorisation);
+            YesOrNo listMatchesRefData = manageOrderService.checkJudgeOrMagistrateList(authorisation);
             List<String> errorList = new ArrayList<>();
-            if (listMatchesRefData == false) {
-                errorList.add("The List does not match RefData");
+            if (listMatchesRefData.equals(YesOrNo.No)) {
+                errorList.add(LISTS_DONT_MATCH_ERROR);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
