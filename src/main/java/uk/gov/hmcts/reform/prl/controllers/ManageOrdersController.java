@@ -587,17 +587,16 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList;
             //PRL-4260 - hearing screen validations
-            if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                errorList = getHearingScreenValidationsForSdo(
+                    caseData.getStandardDirectionOrder()
+                );
+            } else {
                 errorList = getHearingScreenValidations(
                     caseData.getManageOrders().getOrdersHearingDetails(),
                     caseData.getCreateSelectOrderOptions(),
                     false
                 );
-            } else {
-                errorList = getHearingScreenValidationsForSdo(
-                    caseData.getStandardDirectionOrder()
-                );
-
             }
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
