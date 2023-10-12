@@ -10,7 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -123,6 +125,9 @@ public class ManageOrderServiceTest {
     private Time dateTime;
 
     @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @Mock
@@ -133,6 +138,15 @@ public class ManageOrderServiceTest {
 
     @Mock
     DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Mock
+    private SendAndReplyService sendAndReplyService;
+
+    @Value("${sendandreply.category-id}")
+    private String categoryId;
+
+    @Value("${sendandreply.service-code}")
+    private String serviceCode;
 
     private DynamicList dynamicList;
     private DynamicMultiSelectList dynamicMultiSelectList;
@@ -148,6 +162,8 @@ public class ManageOrderServiceTest {
     private HearingService hearingService;
 
     public static final String authToken = "Bearer TestAuthToken";
+
+    public static final String s2sToken = "s2s token";
 
     @Before
     public void setup() {
@@ -3255,6 +3271,34 @@ public class ManageOrderServiceTest {
         List<Element<AdditionalOrderDocument>> additionalOrderDocuments =
             (List<Element<AdditionalOrderDocument>>) caseDataUpdated.get("additionalOrderDocuments");
         assertEquals(2, additionalOrderDocuments.get(0).getValue().getAdditionalDocuments().size());
+    }
+
+    @Test
+    public void testCheckJudgeOrMagistrateList() {
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(DynamicListElement.builder().label("test").build());
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(sendAndReplyService.getJudiciaryTierDynamicList("test", s2sToken, serviceCode, categoryId))
+                .thenReturn(DynamicList
+                        .builder()
+                        .listItems(dynamicListElementsList)
+                        .build());
+        boolean bool = manageOrderService.checkJudgeOrMagistrateList("test");
+        assertEquals(false, bool);
+    }
+
+    @Test
+    public void testCheckJudgeOrMagistrateListReturnsTrue() {
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(DynamicListElement.builder().label("Her Honour Judge").build());
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(sendAndReplyService.getJudiciaryTierDynamicList("test", s2sToken, serviceCode, categoryId))
+                .thenReturn(DynamicList
+                        .builder()
+                        .listItems(dynamicListElementsList)
+                        .build());
+        boolean bool = manageOrderService.checkJudgeOrMagistrateList("test");
+        assertEquals(true, bool);
     }
 
     @Test

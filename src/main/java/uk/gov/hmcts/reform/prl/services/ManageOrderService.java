@@ -542,8 +542,7 @@ public class ManageOrderService {
     @Autowired
     private final HearingService hearingService;
 
-    @Autowired
-    SendAndReplyService sendAndReplyService;
+    private final SendAndReplyService sendAndReplyService;
 
     private final HearingDataService hearingDataService;
 
@@ -2302,7 +2301,6 @@ public class ManageOrderService {
         for (DynamicListElement listItem : listOfJudges.getListItems()) {
             listOfJudgesLabels.add(listItem.getLabel());
         }
-        listOfJudgesLabels.add("testData");
 
         List<JudgeOrMagistrateTitleEnum> enumValues = new ArrayList<>(EnumSet.allOf(JudgeOrMagistrateTitleEnum.class));
         List<String> displayedJudgeValue = new ArrayList<>();
