@@ -212,6 +212,7 @@ public class DraftAnOrderController {
             }
 
             //Draft an order
+            log.info("cafcassOfficeDetails in /generate-doc flow" + caseDataUpdated.get("cafcassOfficeDetails"));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

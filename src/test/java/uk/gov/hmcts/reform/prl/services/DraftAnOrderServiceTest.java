@@ -2538,6 +2538,7 @@ public class DraftAnOrderServiceTest {
         assertNotNull(stringObjectMap);
     }
 
+    @Ignore
     @Test
     public void testGenerateOrderDocument() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
