@@ -371,6 +371,7 @@ public class ManageOrdersController {
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                            .getHearingDataForSelectedHearing(caseData, hearings));
                 }
+                log.info("*** Court seal 0 {}", caseData.getCourtSeal());
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
                     caseData
