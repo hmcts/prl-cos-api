@@ -151,6 +151,15 @@ public class PartyDetails {
         }
     }
 
+    @JsonIgnore
+    public String getRepresentativeDetailsForCaseFlags() {
+        return String.format(
+            "%s %s",
+            StringUtils.capitalize(this.representativeFirstName.trim()),
+            StringUtils.capitalize(this.representativeLastName.trim())
+        );
+    }
+
     private UUID partyId;
 
     private UUID solicitorOrgUuid;
