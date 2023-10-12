@@ -33,6 +33,7 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
 
 @Slf4j
 @RestController
@@ -189,7 +190,11 @@ public class DraftAnOrderController {
                     .errors((List<String>) caseDataUpdated.get(HEARING_SCREEN_ERRORS))
                     .build();
             }
-
+            if (ObjectUtils.isNotEmpty(caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors((List<String>) caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))
+                    .build();
+            }
             //Draft an order
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {

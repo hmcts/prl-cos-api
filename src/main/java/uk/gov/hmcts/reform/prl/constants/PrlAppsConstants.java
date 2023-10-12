@@ -790,5 +790,6 @@ public class PrlAppsConstants {
     public static final String DISPOSITION = "disposition";
 
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
+    public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
 
 }

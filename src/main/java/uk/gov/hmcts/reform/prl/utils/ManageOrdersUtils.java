@@ -44,7 +44,7 @@ public class ManageOrdersUtils {
         FL404 fl404CustomFields = casedata.getManageOrders().getFl404CustomFields();
         if (CollectionUtils
             .isNotEmpty(fl404CustomFields.getFl404bApplicantIsEntitledToOccupy())
-            && CollectionUtils
+            || CollectionUtils
                 .isNotEmpty(fl404CustomFields.getFl404bApplicantAllowedToOccupy())) {
             return errorList;
         } else {
