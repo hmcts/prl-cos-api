@@ -82,13 +82,12 @@ public class PartyLevelCaseFlagsService {
                             if (!StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
                                 boolean sameSolicitorFound = false;
                                 for (Element<PartyDetails> partyDetailsElement : caElements) {
-                                    if (i != caElements.indexOf(partyDetailsElement)
-                                        && partyDetailsElement.getValue().getRepresentativeDetailsForCaseFlags().equalsIgnoreCase(
+                                    if (partyDetailsElement.getValue().getRepresentativeDetailsForCaseFlags().equalsIgnoreCase(
                                         partyDetails.get().getValue().getRepresentativeDetailsForCaseFlags())) {
                                         sameSolicitorFound = true;
                                     }
                                 }
-                                if (!sameSolicitorFound) {
+                                if (sameSolicitorFound) {
                                     data.put(
                                         caseDataField,
                                         partyLevelCaseFlagsGenerator.generatePartyFlags(
