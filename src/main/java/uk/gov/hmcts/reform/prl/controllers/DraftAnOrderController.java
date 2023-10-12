@@ -49,6 +49,7 @@ public class DraftAnOrderController {
 
     private final HearingService hearingService;
 
+    @Autowired
     private ManageOrderService manageOrderService;
 
     @Autowired

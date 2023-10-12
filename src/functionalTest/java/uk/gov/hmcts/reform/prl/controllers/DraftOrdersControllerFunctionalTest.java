@@ -9,7 +9,6 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -119,7 +118,7 @@ public class DraftOrdersControllerFunctionalTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE).id(Long.parseLong("1647373355918192"))
             .build();
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(YesOrNo.Yes);
+        when(manageOrderService.checkJudgeOrMagistrateList(any())).thenReturn(YesOrNo.Yes);
         when(manageOrderService.populateCustomOrderFields(any())).thenReturn(caseData);
         mockMvc.perform(post("/populate-draft-order-fields")
                             .contentType(MediaType.APPLICATION_JSON)
