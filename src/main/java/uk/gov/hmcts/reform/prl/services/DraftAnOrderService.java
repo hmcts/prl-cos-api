@@ -1399,6 +1399,10 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder.getOrderType());
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(draftOrder) ? Yes : No);
+        if (draftOrder.getOrderType().equals(CreateSelectOrderOptionsEnum.appointmentOfGuardian)) {
+            log.info("cafcassOfficeDetails in /generate-doc flow" + draftOrder.getCafcassOfficeDetails());
+            caseDataMap.put("cafcassOfficeDetails", draftOrder.getCafcassOfficeDetails());
+        }
         log.info(
             "is getDraftOrderInfo in isOrderCreatedBySolicitor:::{}::::::: isHearingPageNeeded :::::{}",
             caseDataMap.get(IS_ORDER_CREATED_BY_SOLICITOR), caseDataMap.get(IS_HEARING_PAGE_NEEDED)
