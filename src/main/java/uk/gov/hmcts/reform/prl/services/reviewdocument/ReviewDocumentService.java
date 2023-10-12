@@ -19,23 +19,26 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -84,27 +87,33 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getLegalProfQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getDocument().getDocumentFileName()
-                                                          + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.ENGLISH)))
-                                               .build()).collect(Collectors.toList()));
+                                                          + " - " + CommonUtils.formatDateTime(DATE_TIME_PATTERN,
+                                                                                               element.getValue().getDocumentUploadedDate())
+                                                   .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE,PM_UPPER_CASE))
+                                               .build())
+                                           .toList());
         }
         //added for cafcass
         if (CollectionUtils.isNotEmpty(caseData.getCafcassQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
-                                                          + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.ENGLISH)))
-                                               .build()).collect(Collectors.toList()));
+                                                          + " - " + CommonUtils.formatDateTime(DATE_TIME_PATTERN,
+                                                                                               element.getValue().getDocumentUploadedDate())
+                                                   .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE,PM_UPPER_CASE))
+                                               .build())
+                                           .toList());
         }
         //court staff
         if (CollectionUtils.isNotEmpty(caseData.getCourtStaffQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCourtStaffQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
-                                                          + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.ENGLISH)))
-                                               .build()).collect(Collectors.toList()));
+                                                          + " - " + CommonUtils.formatDateTime(DATE_TIME_PATTERN,
+                                                                                               element.getValue().getDocumentUploadedDate())
+                                                   .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE,PM_UPPER_CASE))
+                                               .build())
+                                           .toList());
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarantineDocsList().stream()

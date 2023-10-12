@@ -180,18 +180,14 @@ public class CommonUtils {
         return null;
     }
 
-
-    public static String getFormattedStringDate(String date, String format) {
+    public static String formatDateTime(String pattern, LocalDateTime localDateTime) {
         try {
-            if (date != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-                LocalDate parse = LocalDate.parse(date, formatter);
-                return parse.toString();
+            if (null != localDateTime) {
+                return localDateTime.format(DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH));
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error("Error while formatting the date time", e);
         }
-        return " ";
+        return "";
     }
-
 }
