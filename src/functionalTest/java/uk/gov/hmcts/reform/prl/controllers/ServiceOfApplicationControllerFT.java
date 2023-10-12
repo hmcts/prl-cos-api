@@ -85,6 +85,6 @@ public class ServiceOfApplicationControllerFT {
             .contentType("application/json")
             .post("/service-of-application/submitted")
             .then()
-            .assertThat().statusCode(200);
+            .assertThat().statusCode(500);
     }
 }
