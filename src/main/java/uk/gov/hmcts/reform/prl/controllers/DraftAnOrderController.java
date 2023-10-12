@@ -47,7 +47,8 @@ public class DraftAnOrderController {
 
     private final HearingService hearingService;
 
-    private final ManageOrderService manageOrderService;
+    @Autowired
+    private ManageOrderService manageOrderService;
 
     @Autowired
     private AuthorisationService authorisationService;
@@ -96,6 +97,12 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            boolean listMatchesRefData = manageOrderService.checkJudgeOrMagistrateList(authorisation);
+            List<String> errorList = new ArrayList<>();
+            if (listMatchesRefData == false) {
+                errorList.add("The List does not match RefData");
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation)).build();
         }  else {

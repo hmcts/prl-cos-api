@@ -170,6 +170,8 @@ public class ManageOrdersControllerTest {
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
+        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
+
         when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
 
@@ -211,7 +213,6 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, callbackRequest);
         assertNotNull(callbackResponse);
@@ -251,7 +252,6 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken,callbackRequest);
         assertNotNull(callbackResponse);
@@ -286,7 +286,6 @@ public class ManageOrdersControllerTest {
                                        .build())
             .build();
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         Map<String, Object> stringObjectMap = expectedCaseData.toMap(new ObjectMapper());
         Map<String, String> dataFieldMap = new HashMap<>();
         dataFieldMap.put(PrlAppsConstants.TEMPLATE, "templateName");
@@ -345,7 +344,6 @@ public class ManageOrdersControllerTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(documentLanguage);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -414,7 +412,6 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken, s2sToken,callbackRequest);
         assertNotNull(callbackResponse);
     }
@@ -473,7 +470,6 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
@@ -542,7 +538,6 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .prepopulateFL401CaseDetails("auth-test", s2sToken, callbackRequest);
         assertNotNull(callbackResponse);
@@ -612,7 +607,6 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .prepopulateFL401CaseDetails("auth-test", s2sToken, callbackRequest);
         assertNotNull(callbackResponse);
@@ -683,7 +677,6 @@ public class ManageOrdersControllerTest {
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = manageOrdersController.prepopulateFL401CaseDetails("auth-test", s2sToken, callbackRequest);
         assertNotNull(response);
     }
@@ -736,7 +729,6 @@ public class ManageOrdersControllerTest {
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
         when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
         assertEquals(
@@ -817,7 +809,6 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             s2sToken,
@@ -925,7 +916,6 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
             authToken,
             s2sToken,
@@ -963,7 +953,6 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateHeader(
             callbackRequest, authToken, s2sToken
         );
@@ -1144,7 +1133,6 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.sendEmailNotificationOnClosingOrder(
             authToken,
             s2sToken,
@@ -1243,7 +1231,6 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(manageOrderService.getOrderToAmendDownloadLink(caseData)).thenReturn(new HashMap<>());
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.populateOrderToAmendDownloadLink(
             authToken,
             s2sToken,
@@ -1343,7 +1330,6 @@ public class ManageOrdersControllerTest {
             .thenReturn(Map.of("orderCollection", orderDetailsList));
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -1381,7 +1367,6 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.manageOrderMidEvent(
             authToken,
             s2sToken,
@@ -1433,7 +1418,6 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
             authToken,
             s2sToken,
@@ -1485,7 +1469,6 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
             authToken,
             s2sToken,
@@ -1529,7 +1512,6 @@ public class ManageOrdersControllerTest {
             .thenReturn(stringObjectMap);
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -1560,7 +1542,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.populatePreviewOrderWhenOrderUploaded(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
@@ -1580,7 +1561,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.prepopulateFL401CaseDetails(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
@@ -1600,7 +1580,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.populateHeader(callbackRequest, authToken, s2sToken);
         }, RuntimeException.class, "Invalid Client");
@@ -1620,7 +1599,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.sendEmailNotificationOnClosingOrder(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
@@ -1640,7 +1618,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.showPreviewOrderWhenOrderCreated(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
@@ -1660,7 +1637,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.populateOrderToAmendDownloadLink(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
@@ -1680,7 +1656,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.addUploadOrder(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
@@ -1700,7 +1675,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.manageOrderMidEvent(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
@@ -1720,7 +1694,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.serveOrderMidEvent(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
@@ -1740,7 +1713,6 @@ public class ManageOrdersControllerTest {
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
-        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
         assertExpectedException(() -> {
             manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");

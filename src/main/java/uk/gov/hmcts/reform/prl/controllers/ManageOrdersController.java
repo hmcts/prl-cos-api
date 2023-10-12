@@ -133,7 +133,6 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             boolean listMatchesRefData = manageOrderService.checkJudgeOrMagistrateList(authorisation);
             List<String> errorList = new ArrayList<>();
-            log.info("listMatchesRefData {}", listMatchesRefData);
             if (listMatchesRefData == false) {
                 errorList.add("The List does not match RefData");
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();

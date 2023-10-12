@@ -13,6 +13,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -116,10 +117,10 @@ public class DraftAnOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
-
         when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(true);
     }
 
     @Test
@@ -873,6 +874,16 @@ public class DraftAnOrderControllerTest {
         assertExpectedException(() -> {
             draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testJudgesListsDontMatch() throws Exception {
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(false);
+        List<String> errorList = new ArrayList<>();
+        errorList.add("The List does not match RefData");
+        assertEquals(AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build(), draftAnOrderController
+                .populateFl404Fields(authToken, s2sToken, CallbackRequest.builder().build()));
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,

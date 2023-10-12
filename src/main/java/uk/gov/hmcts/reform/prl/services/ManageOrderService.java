@@ -2301,15 +2301,13 @@ public class ManageOrderService {
         for (DynamicListElement listItem : listOfJudges.getListItems()) {
             listOfJudgesLabels.add(listItem.getLabel());
         }
+        listOfJudgesLabels.add("test");
 
         List<JudgeOrMagistrateTitleEnum> enumValues = new ArrayList<>(EnumSet.allOf(JudgeOrMagistrateTitleEnum.class));
         List<String> displayedJudgeValue = new ArrayList<>();
         for (JudgeOrMagistrateTitleEnum enumValue: enumValues) {
             displayedJudgeValue.add(enumValue.getDisplayedValue());
         }
-
-        log.info("listOfJudgesLabels: {}",listOfJudgesLabels);
-        log.info("displayedJudgeValue: {}", displayedJudgeValue);
 
         return displayedJudgeValue.containsAll(listOfJudgesLabels) ? true : false;
     }
