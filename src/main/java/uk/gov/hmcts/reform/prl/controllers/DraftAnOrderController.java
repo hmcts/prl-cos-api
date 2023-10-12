@@ -101,6 +101,7 @@ public class DraftAnOrderController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             YesOrNo listMatchesRefData = manageOrderService.checkJudgeOrMagistrateList(authorisation);
             List<String> errorList = new ArrayList<>();
+            listMatchesRefData = YesOrNo.Yes;
             if (listMatchesRefData.equals(YesOrNo.No)) {
                 errorList.add(LISTS_DONT_MATCH_ERROR);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();

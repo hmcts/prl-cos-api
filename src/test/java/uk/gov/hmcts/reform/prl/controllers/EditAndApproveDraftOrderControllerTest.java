@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -51,6 +52,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTS_DONT_MATCH_ERROR;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -107,6 +109,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .thenReturn(List.of(Element.<HearingData>builder().build()));
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
+        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(YesOrNo.Yes);
     }
 
     @Test
@@ -1060,6 +1063,16 @@ public class EditAndApproveDraftOrderControllerTest {
         assertExpectedException(() -> {
             editAndApproveDraftOrderController.sendEmailNotificationToRecipientsServeOrder(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testJudgesListsDontMatch() throws Exception {
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(manageOrderService.checkJudgeOrMagistrateList(Mockito.any())).thenReturn(YesOrNo.No);
+        List<String> errorList = new ArrayList<>();
+        errorList.add(LISTS_DONT_MATCH_ERROR);
+        assertEquals(AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build(), editAndApproveDraftOrderController
+                .populateJudgeOrAdminDraftOrderCustomFields(authToken, s2sToken, CallbackRequest.builder().build()));
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,

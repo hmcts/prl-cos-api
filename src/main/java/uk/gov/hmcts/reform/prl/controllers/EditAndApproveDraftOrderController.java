@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -39,6 +40,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTS_DONT_MATCH_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -172,6 +174,12 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws  Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            YesOrNo listMatchesRefData = manageOrderService.checkJudgeOrMagistrateList(authorisation);
+            List<String> errorList = new ArrayList<>();
+            if (listMatchesRefData.equals(YesOrNo.No)) {
+                errorList.add(LISTS_DONT_MATCH_ERROR);
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class

@@ -794,5 +794,5 @@ public class PrlAppsConstants {
     public static final String PM_LOWER_CASE = "pm";
     public static final String PM_UPPER_CASE = "PM";
 
-    public static final String LISTS_DONT_MATCH_ERROR = "Please contact support and update the judicial title list with refdata";
+    public static final String LISTS_DONT_MATCH_ERROR = "Please contact support and update the judicial title list so it is inline with refdata";
 }
