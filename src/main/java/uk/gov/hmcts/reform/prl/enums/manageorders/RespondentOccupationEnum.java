@@ -27,7 +27,7 @@ public enum RespondentOccupationEnum {
                               "must not obstruct, harass, or interfere with the applicant's peaceful occupation of the address"),
 
     @JsonProperty("other2")
-    other2("other2", "Other");
+    other2("other2", "other");
 
     private final String id;
     private final String displayedValue;
