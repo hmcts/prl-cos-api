@@ -657,6 +657,11 @@ public class DraftAnOrderService {
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
+        if (selectedOrder.getOrderType().equals(CreateSelectOrderOptionsEnum.appointmentOfGuardian)) {
+            caseData = caseData.toBuilder()
+                .cafcassOfficeDetails(selectedOrder.getCafcassOfficeDetails())
+                .build();
+        }
         //PRL-3319 - Fetch hearings dropdown
         DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorization, caseData);
         caseDataMap.put("hearingsType", hearingsDynamicList);
@@ -1400,8 +1405,8 @@ public class DraftAnOrderService {
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(draftOrder) ? Yes : No);
         if (draftOrder.getOrderType().equals(CreateSelectOrderOptionsEnum.appointmentOfGuardian)) {
-            log.info("cafcassOfficeDetails in /generate-doc flow" + draftOrder.getCafcassOfficeDetails());
-            caseDataMap.put("cafcassOfficeDetails", draftOrder.getCafcassOfficeDetails());
+            log.info("cafcassOfficeDetails in /generate-doc flow" + caseData.getCafcassOfficeDetails());
+            caseDataMap.put("cafcassOfficeDetails", caseData.getCafcassOfficeDetails());
         }
         log.info(
             "is getDraftOrderInfo in isOrderCreatedBySolicitor:::{}::::::: isHearingPageNeeded :::::{}",
