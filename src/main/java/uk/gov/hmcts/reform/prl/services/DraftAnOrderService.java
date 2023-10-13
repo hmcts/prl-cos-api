@@ -134,6 +134,8 @@ public class DraftAnOrderService {
 
     private static final String SOLICITOR_ORDERS_HEARING_DETAILS = "solicitorOrdersHearingDetails";
     private static final String ORDERS_HEARING_DETAILS = "ordersHearingDetails";
+    private static final String DATE_ORDER_MADE = "dateOrderMade";
+    private static final String SELECTED_ORDER = "selectedOrder";
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -245,22 +247,9 @@ public class DraftAnOrderService {
             log.info("*** eid, Selected order id {} {}", e.getId(), selectedOrderId);
             log.info("*** Equals {}", e.getId().equals(selectedOrderId));
             if (e.getId().equals(selectedOrderId)) {
-                /*if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                    updatedCaseData.put(
-                        ORDER_HEARING_DETAILS,
-                        caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                    );
-                } else {
-                    updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
-                }*/
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
-                    /*if (caseData.getManageOrders().getOrdersHearingDetails() == null && CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
-                        caseData.getManageOrders()
-                            .setOrdersHearingDetails(caseData.getOrderCollection().get(0)
-                                                         .getValue().getManageOrderHearingDetails());
-                    }*/
                     if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                         && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
@@ -617,7 +606,7 @@ public class DraftAnOrderService {
                         .getOrderType().getDisplayedValue() + BOLD_END : null);
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
-        caseDataMap.put("dateOrderMade", selectedOrder.getDateOrderMade());
+        caseDataMap.put(DATE_ORDER_MADE, selectedOrder.getDateOrderMade());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
         caseDataMap.put("judgeOrMagistrateTitle", selectedOrder.getJudgeOrMagistrateTitle());
         caseDataMap.put("judgeOrMagistratesLastName", selectedOrder.getJudgeOrMagistratesLastName());
@@ -1533,7 +1522,7 @@ public class DraftAnOrderService {
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             return caseDataUpdated;
         }
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -1557,7 +1546,7 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
             if (Objects.nonNull(caseData.getSelectedOrder())) {
-                caseDataUpdated.put("selectedOrder", BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
+                caseDataUpdated.put(SELECTED_ORDER, BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             }
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
@@ -1580,7 +1569,7 @@ public class DraftAnOrderService {
 
             }
             caseDataUpdated.put("appointedGuardianName", caseData.getAppointedGuardianName());
-            caseDataUpdated.put("dateOrderMade", caseData.getDateOrderMade());
+            caseDataUpdated.put(DATE_ORDER_MADE, caseData.getDateOrderMade());
             CaseData caseData1 = caseData.toBuilder().build();
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
@@ -1603,7 +1592,7 @@ public class DraftAnOrderService {
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            caseDataUpdated.put("selectedOrder", manageOrderService.getSelectedOrderInfoForUpload(caseData));
+            caseDataUpdated.put(SELECTED_ORDER, manageOrderService.getSelectedOrderInfoForUpload(caseData));
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -1628,9 +1617,9 @@ public class DraftAnOrderService {
                     .getC21OrderOptions().getDisplayedValue() + BOLD_END);
             }
 
-            caseDataUpdated.put("selectedOrder", null != caseData.getCreateSelectOrderOptions()
+            caseDataUpdated.put(SELECTED_ORDER, null != caseData.getCreateSelectOrderOptions()
                 ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : "");
-            caseDataUpdated.put("dateOrderMade", LocalDate.now());
+            caseDataUpdated.put(DATE_ORDER_MADE, LocalDate.now());
             caseDataUpdated.put("isTheOrderByConsent", Yes);
 
             return AboutToStartOrSubmitCallbackResponse.builder()
