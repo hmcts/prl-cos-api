@@ -2382,7 +2382,6 @@ public class ManageOrderService {
 
     public Map<String, Object> handleFetchOrderDetails(String authorisation,
                                                        CallbackRequest callbackRequest) {
-        log.info("******************* Data from callback request {}", callbackRequest.getCaseDetails().getData());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -2394,13 +2393,9 @@ public class ManageOrderService {
         //common fields
         updateOrderDetails(authorisation, caseData, caseDataUpdated);
 
-        //is it really needed ?
-        //caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
-
         //PRL-4212 - populate hearing details only orders where it's needed
         populateHearingData(authorisation, caseData, caseDataUpdated);
 
-        log.info("################## Case data map after /fetch-order-details {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
@@ -2484,7 +2479,6 @@ public class ManageOrderService {
         caseDataUpdated.put("hearingsType", populateHearingsDropdown(authorisation, caseData));
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
         caseDataUpdated.put("isTheOrderByConsent", Yes);
-        log.info("MagistrateLastName {}", caseData.getMagistrateLastName());
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
             ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
     }
