@@ -195,5 +195,4 @@ public class HearingData {
     private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
 
     private final YesOrNo isCafcassCymru;
-
 }

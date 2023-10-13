@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseLinkedRequest;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
 
@@ -22,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
@@ -67,8 +67,8 @@ public class HearingService {
                 }
 
                 List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream()
-                    .sorted(Comparator.comparing(CaseHearing::getNextHearingDate, Comparator.nullsLast(Comparator.naturalOrder())))
-                    .toList();
+                    .sorted(Comparator.comparing(CaseHearing::getNextHearingDate, Comparator.nullsLast(Comparator.naturalOrder()))).collect(
+                        Collectors.toList());
 
                 hearings.setCaseHearings(sortedByLatest);
             }
@@ -119,8 +119,8 @@ public class HearingService {
         LocalDateTime tempNextDateListed = null;
         if (hearing.getHmcStatus().equals(LISTED)) {
             Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule()).stream()
-                .map(HearingDaySchedule::getHearingStartDateTime)
-                .filter(hearingStartDateTime -> hearingStartDateTime.isAfter(LocalDateTime.now()))
+                .filter(u -> u.getHearingStartDateTime().isAfter(LocalDateTime.now()))
+                .map(u -> u.getHearingStartDateTime())
                 .min(LocalDateTime::compareTo);
             if (minDateOfHearingDaySche.isPresent() && (tempNextDateListed == null || tempNextDateListed.isAfter(minDateOfHearingDaySche.get()))) {
                 tempNextDateListed = minDateOfHearingDaySche.get();
@@ -134,7 +134,7 @@ public class HearingService {
 
         LocalDateTime urgencyLimitDate = LocalDateTime.now().plusDays(5).plusMinutes(1).withNano(1);
         final List<String> hearingStatuses =
-            futureHearingStatusList.stream().map(String::trim).toList();
+            futureHearingStatusList.stream().map(String::trim).collect(Collectors.toList());
 
         boolean isInFutureHearingStatusList = hearingStatuses.stream()
             .anyMatch(
@@ -143,7 +143,7 @@ public class HearingService {
 
         return isInFutureHearingStatusList && hearing.getHmcStatus().equals(LISTED)
             && hearing.getHearingDaySchedule() != null
-            && !hearing.getHearingDaySchedule().stream()
+            && hearing.getHearingDaySchedule().stream()
             .filter(
                 hearDaySche ->
                     hearDaySche
@@ -157,8 +157,8 @@ public class HearingService {
                             .isBefore(
                                 urgencyLimitDate)
             )
-            .toList()
-            .isEmpty();
+            .collect(Collectors.toList())
+            .size() > 0;
 
     }
 
@@ -183,40 +183,5 @@ public class HearingService {
         return Collections.emptyMap();
     }
 
-    public List<Hearings> getHearingsByListOfCaseIds(String userToken, Map<String, String> caseIds) {
-
-        try {
-
-            List<Hearings> hearingsList = hearingApiClient.getHearingsByListOfCaseIds(userToken, authTokenGenerator.generate(), caseIds);
-            if (null != hearingsList) {
-                for (Hearings hearings : hearingsList) {
-                    Map<String, String> refDataCategoryValueMap = getRefDataMap(
-                        userToken,
-                        authTokenGenerator.generate(),
-                        hearings.getHmctsServiceCode(),
-                        hearingTypeCategoryId
-                    );
-
-                    for (CaseHearing eachHearing : hearings.getCaseHearings()) {
-                        eachHearing.setNextHearingDate(getNextHearingDateWithInHearing(eachHearing));
-                        eachHearing.setUrgentFlag(getUrgentFlagWithInHearing(eachHearing));
-                        eachHearing.setHearingTypeValue(getHearingTypeValueWithInHearing(eachHearing,refDataCategoryValueMap));
-                    }
-
-                    List<CaseHearing> sortedByLatest = hearings.getCaseHearings().stream()
-                        .sorted(Comparator.comparing(CaseHearing::getNextHearingDate,
-                                                     Comparator.nullsLast(Comparator.naturalOrder()))
-                        ).toList();
-
-                    hearings.setCaseHearings(sortedByLatest);
-                }
-            }
-            return hearingsList;
-
-        } catch (Exception e) {
-            log.error("Error in getting hearings ", e);
-        }
-        return Collections.emptyList();
-    }
 
 }
