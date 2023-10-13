@@ -862,6 +862,7 @@ public class ManageOrderService {
         } else {
             flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         }
+        log.info("*** Court seal 2 {}", caseData.getCourtSeal());
         if (caseData.getCreateSelectOrderOptions() != null
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
@@ -1071,6 +1072,7 @@ public class ManageOrderService {
                     log.info("Second");
                     return setDraftOrderCollection(caseData, loggedInUserType);
                 } else {
+                    log.info("*** Court seal 1 {}", caseData.getCourtSeal());
                     orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
                     List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
                     if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
@@ -1964,6 +1966,7 @@ public class ManageOrderService {
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseData = filterEmptyHearingDetails(caseData);
         }
+        log.info("*** Court seal {}", caseData.getCourtSeal());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
@@ -2127,16 +2130,35 @@ public class ManageOrderService {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
+
         if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
             log.info("*****");
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+            if (caseData.getCreateSelectOrderOptions() != null
+                && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
+                caseDataUpdated.put("appointedGuardianName",
+                                    addGuardianDetails(caseData));
+
+            }
         } else {
             caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
         }
         return caseDataUpdated;
+    }
+
+    public List<Element<AppointedGuardianFullName>> addGuardianDetails(CaseData caseData) {
+        if (Objects.isNull(caseData.getAppointedGuardianName())
+            || CollectionUtils.size(caseData.getAppointedGuardianName()) < 1) {
+            List<Element<AppointedGuardianFullName>> appointedGuardianList = new ArrayList<>();
+            Element<AppointedGuardianFullName> appointedGuardianFullNameElement =
+                element(AppointedGuardianFullName.builder().guardianFullName("").build());
+            appointedGuardianList.add(appointedGuardianFullNameElement);
+            return appointedGuardianList;
+        }
+        return caseData.getAppointedGuardianName();
     }
 
     public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
