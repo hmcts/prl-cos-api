@@ -277,8 +277,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        //assertNotNull(responseMap.get("caseTypeOfApplication"));
-        assertNotNull(responseMap);
+        assertNotNull(responseMap.get("caseTypeOfApplication"));
 
     }
 
@@ -652,7 +651,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        assertNotNull(responseMap);
+        assertEquals("C100", responseMap.get("caseTypeOfApplication"));
 
     }
 
@@ -672,8 +671,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        assertNotNull(responseMap);
-        //assertEquals("C100", responseMap.get("caseTypeOfApplication"));
+        assertEquals("C100", responseMap.get("caseTypeOfApplication"));
 
     }
 
@@ -693,8 +691,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        assertNotNull(responseMap);
-        //assertEquals("C100", responseMap.get("caseTypeOfApplication"));
+        assertEquals("C100", responseMap.get("caseTypeOfApplication"));
     }
 
     @Test
@@ -709,8 +706,7 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        assertNotNull(responseMap);
-        //assertEquals("FL401", responseMap.get("caseTypeOfApplication"));
+        assertEquals("FL401", responseMap.get("caseTypeOfApplication"));
 
     }
 
@@ -1479,8 +1475,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        //assertNotNull(manageOrderService.populateHeader(caseData).get("caseTypeOfApplication"));
-        assertNotNull(manageOrderService.populateHeader(caseData));
+        assertNotNull(manageOrderService.populateHeader(caseData).get("caseTypeOfApplication"));
     }
 
     @Test
@@ -1510,8 +1505,7 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        //assertNotNull(manageOrderService.populateHeader(caseData).get("caseTypeOfApplication"));
-        assertNotNull(manageOrderService.populateHeader(caseData));
+        assertNotNull(manageOrderService.populateHeader(caseData).get("caseTypeOfApplication"));
     }
 
 
