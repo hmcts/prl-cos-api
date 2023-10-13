@@ -945,6 +945,7 @@ public class DraftAnOrderService {
                                   .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
         } else {
+            log.info("cafcassOfficeDetails in ManageOrders " + caseData.getManageOrders().getCafcassOfficeDetails());
             caseData = caseData.toBuilder()
                 .appointedGuardianName(caseData.getAppointedGuardianName())
                 .dateOrderMade(caseData.getDateOrderMade())
@@ -955,6 +956,7 @@ public class DraftAnOrderService {
                                   .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
                                   .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
                                   .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                                  .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
                                   .orderDirections(caseData.getManageOrders().getOrderDirections())
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                                   .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
@@ -1405,8 +1407,8 @@ public class DraftAnOrderService {
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(draftOrder) ? Yes : No);
         if (draftOrder.getOrderType().equals(CreateSelectOrderOptionsEnum.appointmentOfGuardian)) {
-            log.info("cafcassOfficeDetails in /generate-doc flow" + caseData.getCafcassOfficeDetails());
-            caseDataMap.put("cafcassOfficeDetails", caseData.getCafcassOfficeDetails());
+            log.info("cafcassOfficeDetails in /generate-doc flow" + draftOrder.getCafcassOfficeDetails());
+            caseDataMap.put("cafcassOfficeDetails", draftOrder.getCafcassOfficeDetails());
         }
         log.info(
             "is getDraftOrderInfo in isOrderCreatedBySolicitor:::{}::::::: isHearingPageNeeded :::::{}",
