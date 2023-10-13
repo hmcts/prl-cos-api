@@ -44,12 +44,6 @@ public enum JudgeOrMagistrateTitleEnum {
     @JsonProperty("justicesClerk")
     justicesClerk("justicesClerk", "Justices' Clerk"),
 
-    @JsonProperty("theHonourableMrsJustice")
-    theHonourableMrsJustice("theHonourableMrsJustice", "The Honourable Mrs Justice"),
-
-    @JsonProperty("theHonourableMrJustice")
-    theHonourableMrJustice("theHonourableMrJustice", "The Honourable Mr Justice"),
-
     @JsonProperty("deputyHighCourtJudge")
     deputyHighCourtJudge("deputyHighCourtJudge","Deputy High Court Judge"),
 
