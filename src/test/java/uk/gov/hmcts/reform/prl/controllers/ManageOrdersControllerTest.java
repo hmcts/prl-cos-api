@@ -23,8 +23,10 @@ import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -255,6 +257,85 @@ public class ManageOrdersControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken,callbackRequest);
+        assertNotNull(callbackResponse);
+    }
+
+    @Test
+    public void testPopulatePreviewOrderWithError() throws Exception {
+        CaseData expectedCaseData = CaseData.builder()
+                .id(12345L)
+                .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
+                .uploadOrderDoc(Document.builder().build())
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+                .dateOrderMade(LocalDate.now())
+                .build();
+
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        objectMapper1.findAndRegisterModules();
+
+        Map<String, Object> stringObjectMap = expectedCaseData.toMap(objectMapper1);
+
+        CaseData caseData = CaseData.builder()
+                .manageOrders(ManageOrders.builder().build())
+                .previewOrderDoc(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c21DraftFilename")
+                        .build())
+                .build();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(12345L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+                .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken,callbackRequest);
+        assertNotNull(callbackResponse);
+    }
+
+    @Test
+    public void testPopulatePreviewOrderWithErrorblank() throws Exception {
+        CaseData expectedCaseData = CaseData.builder()
+                .id(12345L)
+                .justiceLegalAdviserFullName(" ")
+                .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
+                .uploadOrderDoc(Document.builder().build())
+                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
+                .dateOrderMade(LocalDate.now())
+                .build();
+
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        objectMapper1.findAndRegisterModules();
+
+        Map<String, Object> stringObjectMap = expectedCaseData.toMap(objectMapper1);
+
+        CaseData caseData = CaseData.builder()
+                .manageOrders(ManageOrders.builder().build())
+                .previewOrderDoc(Document.builder()
+                        .documentUrl(generatedDocumentInfo.getUrl())
+                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                        .documentHash(generatedDocumentInfo.getHashToken())
+                        .documentFileName("c21DraftFilename")
+                        .build())
+                .build();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(12345L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+                .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken,callbackRequest);
         assertNotNull(callbackResponse);
     }
 
@@ -494,7 +575,7 @@ public class ManageOrdersControllerTest {
         List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder().c21OrderOptions(C21OrderOptionsEnum.c21other).build())
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
@@ -507,7 +588,7 @@ public class ManageOrdersControllerTest {
 
         CaseData updatedCaseData = CaseData.builder()
             .id(12345L)
-            .manageOrders(ManageOrders.builder().build())
+            .manageOrders(ManageOrders.builder().c21OrderOptions(C21OrderOptionsEnum.c21other).build())
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .manageOrders(ManageOrders.builder().build())
@@ -650,9 +731,6 @@ public class ManageOrdersControllerTest {
             .childrenList("Child 1: TestName\n")
             .manageOrders(ManageOrders.builder().build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
-            .selectedOrder(
-                "Test Case 45678\\n\\nFamily Man ID: familyman12345\\n\\nFinancial compensation order following C79 "
-                    + "enforcement application (C82)\\n\\n")
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -816,7 +894,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+            .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
     }
 
     @Test
@@ -1140,7 +1218,7 @@ public class ManageOrdersControllerTest {
             callbackRequest
         );
         verify(manageOrderEmailService, times(1))
-            .sendEmailWhenOrderIsServed(callbackRequest.getCaseDetails());
+            .sendEmailWhenOrderIsServed("Bearer TestAuthToken", caseData, stringObjectMap);
     }
 
     @Test

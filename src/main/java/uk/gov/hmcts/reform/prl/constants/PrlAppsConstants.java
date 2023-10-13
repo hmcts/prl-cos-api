@@ -788,7 +788,17 @@ public class PrlAppsConstants {
     public static final String CONTENT = "content";
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
+    public static final String MANDATORY_JUDGE =
+            "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
 
+    public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+    public static final String AM_LOWER_CASE = "am";
+    public static final String AM_UPPER_CASE = "AM";
+    public static final String PM_LOWER_CASE = "pm";
+    public static final String PM_UPPER_CASE = "PM";
+
+    public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
+            + " Magistrate (JP)";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
 
