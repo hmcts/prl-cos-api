@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -33,6 +34,8 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
 
 @Slf4j
@@ -76,7 +79,7 @@ public class DraftAnOrderController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Populated Headers"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse populateHeader(
+    public AboutToStartOrSubmitCallbackResponse populateHeader(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
@@ -99,6 +102,23 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                    callbackRequest.getCaseDetails().getData(),
+                    CaseData.class
+            );
+            List<String> errorList = new ArrayList<>();
+            if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .justicesLegalAdviser == caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle() && (StringUtils.isBlank(caseData.getJusticeLegalAdviserFullName()))) {
+                errorList.add(MANDATORY_JUDGE);
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            } else if (caseData.getManageOrders() != null && JudgeOrMagistrateTitleEnum
+                    .magistrate == caseData.getManageOrders()
+                    .getJudgeOrMagistrateTitle() && ((caseData.getMagistrateLastName() == null)
+                    || (caseData.getMagistrateLastName().isEmpty()))) {
+                errorList.add(MANDATORY_MAGISTRATE);
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authorisation)).build();
         }  else {
