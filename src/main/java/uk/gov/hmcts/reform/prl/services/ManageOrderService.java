@@ -1695,6 +1695,7 @@ public class ManageOrderService {
                 log.info("StandardDirectionOrder before generating document " + caseData.getStandardDirectionOrder());
             }
             log.info("*** Manage orders: {}", caseData.getManageOrders());
+            log.info("*** Case Data Json : {}", objectMapper.writeValueAsString(caseData));
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
