@@ -657,11 +657,6 @@ public class DraftAnOrderService {
         caseData = caseData.toBuilder()
             .manageOrders(manageOrders)
             .build();
-        if (selectedOrder.getOrderType().equals(CreateSelectOrderOptionsEnum.appointmentOfGuardian)) {
-            caseData = caseData.toBuilder()
-                .cafcassOfficeDetails(selectedOrder.getCafcassOfficeDetails())
-                .build();
-        }
         //PRL-3319 - Fetch hearings dropdown
         DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorization, caseData);
         caseDataMap.put("hearingsType", hearingsDynamicList);
