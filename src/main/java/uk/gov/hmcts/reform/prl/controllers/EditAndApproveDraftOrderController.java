@@ -165,7 +165,7 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
-    @PostMapping(path = "    /judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
+    @PostMapping(path = "/judge-or-admin-populate-draft-order-custom-fields", consumes = APPLICATION_JSON,
         produces = APPLICATION_JSON)
     @Operation(description = "Remove dynamic list from the caseData")
     @ApiResponses(value = {
