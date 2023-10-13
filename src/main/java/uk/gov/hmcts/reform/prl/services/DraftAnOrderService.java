@@ -1548,7 +1548,10 @@ public class DraftAnOrderService {
             //add hearing screen field show params
             ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
         }
-
+        if (caseData.getCreateSelectOrderOptions() != null
+            && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
+            caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
+        }
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
             && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             if (Objects.nonNull(caseData.getCreateSelectOrderOptions())) {
@@ -1558,7 +1561,7 @@ public class DraftAnOrderService {
                 caseDataUpdated.putAll(caseData.getManageOrders().toMap(CcdObjectMapper.getObjectMapper()));
             }
             if (Objects.nonNull(caseData.getSelectedOrder())) {
-                caseDataUpdated.put(SELECTED_ORDER, caseData.getSelectedOrder());
+                caseDataUpdated.put(SELECTED_ORDER, BOLD_BEGIN + caseData.getSelectedOrder() + BOLD_END);
             }
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
