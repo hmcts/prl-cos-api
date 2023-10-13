@@ -113,7 +113,9 @@ public class FL401SubmitApplicationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("******* callbackRequest is :: " + objectMapper.writeValueAsString(callbackRequest));
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            log.info("******* case data is :: " + objectMapper.writeValueAsString(callbackRequest));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(fl401SubmitApplicationService.fl401GenerateDocumentSubmitApplication(
                     authorisation,
