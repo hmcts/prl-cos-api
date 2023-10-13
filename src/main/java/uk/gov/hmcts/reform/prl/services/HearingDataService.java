@@ -526,21 +526,7 @@ public class HearingDataService {
             LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingDaySchedule
                                                               .getHearingStartDateTime());
             log.info("hearing start date time after converting to bst - {}", ldt);
-            if (ldt.equals(hearingDaySchedule
-                               .getHearingStartDateTime())) {
-                log.error("Error : Hearing time from HMC is now in BST - Expected is UTC");
-                ldt = null;
-            }
-            log.info(
-                "hearing date sent to docmosis - {} for case id {}",
-                hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter),
-                caseData.getId()
-            );
-            log.info(
-                "hearing time sent to docmosis - {} for case id {}",
-                CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt),
-                caseData.getId()
-            );
+
             return element(HearingDataFromTabToDocmosis.builder()
                                .hearingEstimatedDuration(getHearingDuration(
                                    hearingDaySchedule.getHearingStartDateTime(),
