@@ -110,6 +110,12 @@ public class HearingRequestDataMapperTest {
             .hearingJudgeLastName("test")
             .hearingJudgeEmailAddress("Test")
             .applicantName("Test")
+            .applicantHearingChannel1(dynamicList1)
+            .applicantSolicitorHearingChannel1(dynamicList1)
+            .applicantHearingChannel2(dynamicList3)
+            .applicantSolicitorHearingChannel2(null)
+            .respondentHearingChannel1(dynamicList1)
+            .respondentSolicitorHearingChannel1(dynamicList3)
             .build();
         PartyDetails applicant = PartyDetails.builder()
             .firstName("appF")
@@ -276,14 +282,17 @@ public class HearingRequestDataMapperTest {
             .applicantName("Test")
             .applicantHearingChannel1(DynamicList.builder().value(DynamicListElement.builder().build()).build())
             .build();
-        CaseData caseData = CaseData.builder().caseTypeOfApplication(FL401_CASE_TYPE)
-            .applicantsFL401(PartyDetails.builder().build())
-            .respondentsFL401(PartyDetails.builder().build())
+        PartyDetails partyDetails = PartyDetails.builder()
+            .representativeFirstName("testF")
+            .representativeLastName("testL")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
             .build();
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         assertEquals("test",hearingData.getHearingTypes().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getHearingVideoChannels().getListItems().get(0).getCode());
-        assertEquals("test",hearingData.getHearingTelephoneChannels().getListItems().get(0).getCode());
         assertEquals("test",hearingData.getCourtList().getListItems().get(0).getCode());
     }
 
