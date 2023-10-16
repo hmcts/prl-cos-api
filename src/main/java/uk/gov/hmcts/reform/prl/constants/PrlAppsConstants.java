@@ -223,19 +223,28 @@ public class PrlAppsConstants {
         + "management review with details of the next hearing and any directions. ";
     public static final String HEARING_NOT_NEEDED = "A (Judge/justices' legal adviser) has decided that appropriate directions "
         + "can be given to progress the matter without the need for a hearing.";
-    public static final String PARTICIPATION_DIRECTIONS = "If they have not already done so, any party who considers that specific "
-        + "measures need to be taken to enable a party or witness to understand the "
-        + "proceedings and their role in them when in court, put their views to the "
-        + "court, instruct their representatives before, during, and after the hearing "
-        + "or attend the hearing without significant distress should file an application "
-        + "notice and include the following information as far as practicable:"
+    public static final String PARTICIPATION_DIRECTIONS = "If they have not already done so, any party who considers special "
+        + "measures need to be taken should file an application notice."
         + System.lineSeparator() + System.lineSeparator()
-        + "a. why the party or witness would benefit from assistance;"
+        + "Special measures may need to be taken to enable a party or witness to:"
         + System.lineSeparator() + System.lineSeparator()
-        + "b. the measure or measures that would be likely to maximise as far as practicable the "
-        + "quality of their evidence or participation and why;"
+        + "a) understand the proceedings, and their role in them when in court"
+        + System.lineSeparator()
+        + "b) put their views to the court"
+        + System.lineSeparator()
+        + "c) instruct their representatives before, during, and after the hearing"
+        + System.lineSeparator()
+        + "d) attend the hearing without significant distress"
         + System.lineSeparator() + System.lineSeparator()
-        + "c. written confirmation from any relevant witness of his/her views.";
+        + "The application notice should include:"
+        + System.lineSeparator() + System.lineSeparator()
+        + "a) details of why the party or witness would benefit from assistance"
+        + System.lineSeparator()
+        + "b) the measure or measures that would be likely to maximise (as far as practicable) "
+        + "the quality of their evidence or participation"
+        + System.lineSeparator()
+        + "c) written confirmation from any relevant witness of his or her views";
+
     public static final String JOINING_INSTRUCTIONS = "Joining instructions";
     public static final String UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or missing from "
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
@@ -273,8 +282,8 @@ public class PrlAppsConstants {
         + System.lineSeparator() + System.lineSeparator()
         + "The court is to appoint a qualified legal representative on behalf of [name/s] "
         + "for the hearing listed on [date] at [time] at [name of court].";
-    public static final String SPECIFIED_DOCUMENTS = "No document other than a document specified in an order or filled in accordance "
-        + "with the Rules or any Practice Direction shall be filled without the court's permission.";
+    public static final String SPECIFIED_DOCUMENTS = "No document other than a document specified in an order or filed in accordance "
+        + "with the Rules or any Practice Direction shall be filed without the court's permission.";
     public static final String SPIP_ATTENDANCE = "Both parents must attend the following programme, at dates and at times to be confirmed "
         + "by the activity provider."
         + System.lineSeparator() + System.lineSeparator()

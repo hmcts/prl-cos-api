@@ -2391,16 +2391,16 @@ public class ManageOrderService {
         caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
         return caseData;
     }
-  
+
     private CaseData updateExistingHearingData(String authorisation,
                                            CaseData caseData,
                                            Map<String, Object> caseDataUpdated) {
         String caseReferenceNumber = String.valueOf(caseData.getId());
         log.info("Inside updateExistingHearingData for {}", caseReferenceNumber);
         log.info("existingOrderHearingDetails : {}", caseData.getManageOrders().getOrdersHearingDetails());
+        Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             log.info("Existing hearing details are not empty");
-            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
 
