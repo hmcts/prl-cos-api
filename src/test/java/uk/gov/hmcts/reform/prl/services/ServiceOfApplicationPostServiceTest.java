@@ -132,28 +132,14 @@ public class ServiceOfApplicationPostServiceTest {
         List<Element<PartyDetails>> otherParities = new ArrayList<>();
         Element partyDetailsElement = element(partyDetails);
         otherParities.add(partyDetailsElement);
-        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
-            .code(partyDetailsElement.getId().toString())
-            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
-            .build();
+
 
 
         List<Document> packN = List.of(Document.builder().build());
 
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTypeOfApplication","C100");
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaOtherParties(DynamicMultiSelectList.builder()
-                                                           .value(List.of(dynamicListElement))
-                                                           .build()).build())
-            .othersToNotify(otherParities)
-            .build();
+
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
 
@@ -184,7 +170,10 @@ public class ServiceOfApplicationPostServiceTest {
         final List<Document> documentList = List.of(coverSheet, finalDoc);
 
         when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
-
+        DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
+            .code(partyDetailsElement.getId().toString())
+            .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
+            .build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")

@@ -169,7 +169,7 @@ public class SendgridServiceTest {
 
     }
 
-   @Test
+    @Test
     public void testTransferCourtEmailWithAttachments() throws Exception {
 
         PartyDetails applicant = PartyDetails.builder()
