@@ -1007,6 +1007,7 @@ public class SendAndReplyService {
             .judgeEmail(message.getJudgeEmail())
             .senderName(message.getSenderName())
             .senderRole(message.getSenderRole())
+            .updatedTime(message.getUpdatedTime())
             .build();
     }
 

@@ -261,6 +261,7 @@ public class SendAndReplyController extends AbstractCallbackController {
         //clear temp fields
         sendAndReplyService.removeTemporaryFields(caseDataMap, temporaryFieldsAboutToSubmit());
 
+        log.info("sendReplyTempDocs in caseDataMap {}", caseDataMap.get("sendReplyTempDocs"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
