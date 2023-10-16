@@ -1523,22 +1523,25 @@ public class DraftAnOrderService {
             return caseDataUpdated;
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-        Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+
+        //PRL-4212 - Fetch & populate hearing data only in case order needs
+        final CaseData finalCaseData = caseData;
+        if (isNotEmpty(finalCaseData.getCreateSelectOrderOptions())
+            && Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS).anyMatch(
+                orderId -> orderId.equalsIgnoreCase(String.valueOf(finalCaseData.getCreateSelectOrderOptions())))) {
+            log.info("hearing data needed, fetch & populate");
+            HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
+            log.info("Hearing data {}", hearingData);
+            caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+            //add hearing screen field show params
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
+        }
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             caseData.setAppointedGuardianName(manageOrderService.addGuardianDetails(caseData));
         }
-        HearingData hearingData = hearingDataService.generateHearingData(
-            hearingDataPrePopulatedDynamicLists, caseData);
-        caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
-        //add hearing screen field show params
-        ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
         if (!(CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions()))
-            && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
-        ) {
+            && PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             if (Objects.nonNull(caseData.getCreateSelectOrderOptions())) {
                 caseData = manageOrderService.populateCustomOrderFields(caseData);
             }
@@ -1587,7 +1590,7 @@ public class DraftAnOrderService {
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
@@ -1608,8 +1611,7 @@ public class DraftAnOrderService {
                 .build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
-            DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-            caseDataUpdated.put("hearingsType", hearingsDynamicList);
+            caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
 
             if (null != caseData.getManageOrders()
                 && null != caseData.getManageOrders().getC21OrderOptions()) {
@@ -1621,6 +1623,19 @@ public class DraftAnOrderService {
                 ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : "");
             caseDataUpdated.put(DATE_ORDER_MADE, LocalDate.now());
             caseDataUpdated.put("isTheOrderByConsent", Yes);
+
+            //PRL-4212 - Fetch & populate hearing data only in case order needs
+            final CaseData finalCaseData = caseData;
+            if (isNotEmpty(finalCaseData.getCreateSelectOrderOptions())
+                && Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS).anyMatch(
+                    orderId -> orderId.equalsIgnoreCase(String.valueOf(finalCaseData.getCreateSelectOrderOptions())))) {
+                log.info("hearing data needed, fetch & populate");
+                HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
+                log.info("Hearing data {}", hearingData);
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
+                //add hearing screen field show params
+                ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
+            }
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
