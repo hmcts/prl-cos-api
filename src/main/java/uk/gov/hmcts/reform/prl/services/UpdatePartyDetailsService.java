@@ -266,10 +266,7 @@ public class UpdatePartyDetailsService {
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         List<Element<PartyDetails>> respondentList = null;
-        PartyDetails respondentDetailsFL401 = null;
-        log.info("case type: {}", caseDataBefore.getCaseTypeOfApplication());
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
-            log.info("inside c100");
             respondentList = caseDataBefore.getRespondents().stream()
                     .filter(resp1 -> resp1.getId().equals(respondent.getId())
                             && (!StringUtils.equals(resp1.getValue().getEmail(),respondent.getValue().getEmail())
@@ -281,7 +278,7 @@ public class UpdatePartyDetailsService {
                             .getLabelForDynamicList())))
                     .collect(Collectors.toList());
         } else {
-            respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
+            PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
                     || (respondentDetailsFL401.getAddress() != null
                     && !respondentDetailsFL401.getAddress().equals(respondent.getValue().getAddress()))
