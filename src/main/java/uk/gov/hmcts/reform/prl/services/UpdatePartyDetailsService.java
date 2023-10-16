@@ -281,17 +281,12 @@ public class UpdatePartyDetailsService {
                             .getLabelForDynamicList())))
                     .collect(Collectors.toList());
         } else {
-            log.info("inside fl401");
             respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
-            if (!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail())) {
-                log.info("respondent data changed for fl401");
-                return true;
-            } else if (respondentDetailsFL401.getAddress() != null
-                    && !respondentDetailsFL401.getAddress().equals(respondent.getValue().getAddress())) {
-                log.info("respondent data changed for fl401");
-                return true;
-            } else if (!StringUtils.equalsIgnoreCase(respondentDetailsFL401.getPhoneNumber(),
-                    respondent.getValue().getPhoneNumber())) {
+            if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
+                    || (respondentDetailsFL401.getAddress() != null
+                    && !respondentDetailsFL401.getAddress().equals(respondent.getValue().getAddress()))
+                    || (!StringUtils.equalsIgnoreCase(respondentDetailsFL401.getPhoneNumber(),
+                    respondent.getValue().getPhoneNumber()))) {
                 log.info("respondent data changed for fl401");
                 return true;
             }
