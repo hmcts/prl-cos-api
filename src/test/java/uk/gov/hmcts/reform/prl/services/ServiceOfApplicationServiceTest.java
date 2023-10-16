@@ -131,9 +131,10 @@ public class ServiceOfApplicationServiceTest {
                                              "Amended, discharged or varied order (FL404B)",
                                              "General form of undertaking (N117)",
                                              "Notice of proceedings (FL402)",
-                                             "Blank order (FL404B)");
+                                             "Blank order (FL404B)",
+                                             "Other (upload an order)");
         Map<String, Object> responseMap = serviceOfApplicationService.getOrderSelectionsEnumValues(createdOrders, new HashMap<>());
-        assertEquals(17,responseMap.values().size());
+        assertEquals(18,responseMap.values().size());
         assertEquals("1", responseMap.get("option1"));
 
     }
