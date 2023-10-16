@@ -431,7 +431,7 @@ public class HearingDataService {
         //Note: When we add new fields , we need to add those fields in respective if else blocks to nullify to handle the data clearing issue from UI
         if (null != listWithoutNoticeHeardetailsObj) {
             List<Object> list = (List) listWithoutNoticeHeardetailsObj;
-            if (list.size() > 0) {
+            if (!list.isEmpty()) {
                 list.parallelStream().forEach(i -> {
                     LinkedHashMap<String,Object> hearingDataFromMap = (LinkedHashMap) (((LinkedHashMap) i).get("value"));
                     if (null != hearingDataFromMap) {
@@ -507,8 +507,7 @@ public class HearingDataService {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
-                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
-                                                                                      caseHearing.get().getHearingType()))
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
                         .build();
                 }
             }
@@ -518,7 +517,7 @@ public class HearingDataService {
     }
 
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
-                                                                                           CaseData caseData, String hearingType) {
+                                                                                           CaseData caseData) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> {
             log.info("hearing start date time received from hmc {} for case id - {}", hearingDaySchedule
                 .getHearingStartDateTime(), caseData.getId());
