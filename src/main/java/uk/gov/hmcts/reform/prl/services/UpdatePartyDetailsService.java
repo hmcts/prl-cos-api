@@ -265,16 +265,37 @@ public class UpdatePartyDetailsService {
     public Boolean checkIfDetailsChanged(CallbackRequest callbackRequest, Element<PartyDetails> respondent) {
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
-        List<Element<PartyDetails>> respondentList = caseDataBefore.getRespondents().stream()
-            .filter(resp1 -> resp1.getId().equals(respondent.getId())
-                && (!StringUtils.equals(resp1.getValue().getEmail(),respondent.getValue().getEmail())
-                || (resp1.getValue().getAddress() != null
-                && !resp1.getValue().getAddress().equals(respondent.getValue().getAddress()))
-                || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
-                                                 respondent.getValue().getPhoneNumber())
-                || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                .getLabelForDynamicList())))
-            .collect(Collectors.toList());
+        List<Element<PartyDetails>> respondentList = null;
+        PartyDetails respondentDetailsFL401 = null;
+        log.info("case type: {}", caseDataBefore.getCaseTypeOfApplication());
+        if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+            log.info("inside c100");
+            respondentList = caseDataBefore.getRespondents().stream()
+                    .filter(resp1 -> resp1.getId().equals(respondent.getId())
+                            && (!StringUtils.equals(resp1.getValue().getEmail(),respondent.getValue().getEmail())
+                            || (resp1.getValue().getAddress() != null
+                            && !resp1.getValue().getAddress().equals(respondent.getValue().getAddress()))
+                            || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
+                            respondent.getValue().getPhoneNumber())
+                            || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
+                            .getLabelForDynamicList())))
+                    .collect(Collectors.toList());
+        } else {
+            log.info("inside fl401");
+            respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
+            if (!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail())) {
+                log.info("respondent data changed for fl401");
+                return true;
+            } else if (respondentDetailsFL401.getAddress() != null
+                    && !respondentDetailsFL401.getAddress().equals(respondent.getValue().getAddress())) {
+                log.info("respondent data changed for fl401");
+                return true;
+            } else if (!StringUtils.equalsIgnoreCase(respondentDetailsFL401.getPhoneNumber(),
+                    respondent.getValue().getPhoneNumber())) {
+                log.info("respondent data changed for fl401");
+                return true;
+            }
+        }
         if (respondentList != null && respondentList.size() > 0) {
             log.info("respondent data changed");
             return true;
