@@ -35,7 +35,14 @@ import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_END;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_START;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.FINAL_ORDER_TITLE;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.NEW_ORDER_TITLE;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -49,6 +56,9 @@ public class SendgridService {
     public static final String CASE_NAME = "caseName";
     @Value("${send-grid.api-key}")
     private String apiKey;
+
+    @Value("${xui.url}")
+    private String manageCaseUrl;
 
     @Value("${send-grid.rpa.email.to}")
     private String toEmail;
@@ -92,17 +102,35 @@ public class SendgridService {
     }
 
     public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
-                                                             String toEmailAddress, List<Document> listOfAttachments,String servedParty)
+                                                             String toEmailAddress, List<Document> listOfAttachments, String servedParty)
         throws IOException {
 
+        Content content = new Content();
         String subject = emailProps.get("subject");
-        Content content = new Content("text/plain", String.format(
-            (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
-                .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
-            emailProps.get(CASE_NAME),
-            emailProps.get("caseNumber"),
-            emailProps.get("solicitorName")
-        ));
+        if (emailProps.containsKey("orderURLLinkNeeded")) {
+            subject = emailProps.get("orderSubject");
+            emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get("caseNumber") + "#Orders");
+            String title = emailProps.containsKey("finalOrder") ? FINAL_ORDER_TITLE : NEW_ORDER_TITLE;
+            String body = emailProps.containsKey("finalOrder")
+                    ? RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY : RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
+
+            content = new Content("text/html", String.format(
+                   title + EMAIL_START
+                            + body + EMAIL_END,
+                    emailProps.get(CASE_NAME),
+                    emailProps.get("caseNumber"),
+                    emailProps.get("solicitorName"),
+                    emailProps.get("orderUrLLink")
+            ));
+        } else {
+            content = new Content("text/plain", String.format(
+                    (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
+                            .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
+                    emailProps.get(CASE_NAME),
+                    emailProps.get("caseNumber"),
+                    emailProps.get("solicitorName")
+            ));
+        }
         Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);

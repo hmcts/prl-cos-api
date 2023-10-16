@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -21,13 +22,16 @@ import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -52,22 +56,25 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class ServiceOfApplicationPostService {
 
     @Autowired
-    private BulkPrintService bulkPrintService;
+    private final BulkPrintService bulkPrintService;
 
     @Autowired
-    private DocumentGenService documentGenService;
+    private final DocumentGenService documentGenService;
 
     @Autowired
-    private DocumentLanguageService documentLanguageService;
+    private final DocumentLanguageService documentLanguageService;
 
     @Autowired
-    private DgsService dgsService;
+    private final DgsService dgsService;
 
     @Autowired
-    private CaseDocumentClient caseDocumentClient;
+    private final CaseDocumentClient caseDocumentClient;
 
     @Autowired
-    private AuthTokenGenerator authTokenGenerator;
+    private final AuthTokenGenerator authTokenGenerator;
+
+    @Autowired
+    private final LaunchDarklyClient launchDarklyClient;
 
     private static final String LETTER_TYPE = "ApplicationPack";
 
@@ -104,11 +111,47 @@ public class ServiceOfApplicationPostService {
                     caseData,
                     DOCUMENT_COVER_SHEET_HINT,
                     documentLanguage.isGenEng() ? Boolean.FALSE : Boolean.TRUE
-                ));
+                )
+            );
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
         }
         return generatedDocumentInfo;
+    }
+
+    public List<Document> getCoverLetter(CaseData caseData, String auth, Address address, String name) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = null;
+        Map<String, Object> dataMap = new HashMap<>();
+        List<Document> coverLetterDocs = new ArrayList<>();
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (null != address && null != address.getAddressLine1()) {
+            dataMap.put("coverPagePartyName", name);
+            dataMap.put("coverPageAddress", address);
+            dataMap.put("id", String.valueOf(caseData.getId()));
+            if (documentLanguage.isGenEng()) {
+                generatedDocumentInfo = dgsService.generateDocument(
+                    auth, String.valueOf(caseData.getId()),
+                    documentGenService.getTemplate(
+                        caseData,
+                        DOCUMENT_COVER_SHEET_HINT, Boolean.FALSE
+                    ), dataMap
+                );
+                coverLetterDocs.add(DocumentUtils.toCoverLetterDocument(generatedDocumentInfo));
+            }
+            if (documentLanguage.isGenWelsh()) {
+                generatedDocumentInfo = dgsService.generateDocument(
+                    auth, String.valueOf(caseData.getId()),
+                    documentGenService.getTemplate(
+                        caseData,
+                        DOCUMENT_COVER_SHEET_HINT, Boolean.TRUE
+                    ), dataMap
+                );
+                coverLetterDocs.add(DocumentUtils.toCoverLetterDocument(generatedDocumentInfo));
+            }
+        } else {
+            log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
+        }
+        return coverLetterDocs;
     }
 
     public List<Document> getStaticDocs(String auth, CaseData caseData) {
@@ -208,31 +251,30 @@ public class ServiceOfApplicationPostService {
         try {
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");
-            for (Document doc:docs) {
-                pdfDocs.add(documentGenService.convertToPdf(authorisation, doc));
-            }
-            log.info("*** pdfDocs -- > {} ",pdfDocs);
-            UUID bulkPrintId = bulkPrintService.send(
-                String.valueOf(caseData.getId()),
-                authorisation,
-                LETTER_TYPE,
-                pdfDocs,
-                name
-            );
-            log.info("ID in the queue from bulk print service : {}", bulkPrintId);
-            bulkPrintedId = String.valueOf(bulkPrintId);
-            sentDocs.addAll(pdfDocs);
 
+            if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {
+                log.info("*** pdfDocs -- > {} ",pdfDocs);
+                log.info("******Bulk print is enabled****");
+                UUID bulkPrintId = bulkPrintService.send(
+                    String.valueOf(caseData.getId()),
+                    authorisation,
+                    LETTER_TYPE,
+                    pdfDocs,
+                    name
+                );
+                log.info("ID in the queue from bulk print service : {}", bulkPrintId);
+                bulkPrintedId = String.valueOf(bulkPrintId);
+                sentDocs.addAll(pdfDocs);
+            }
         } catch (Exception e) {
-            log.info("The bulk print service has failed: {}", e);
+            log.error("The bulk print service has failed", e);
         }
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
             .servedParty(servedParty)
-            .printedDocs(String.join(",", pdfDocs.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .printedDocs(String.join(",", pdfDocs.stream().map(Document::getDocumentFileName).toList()))
             .recipientsName(name)
-            .printDocs(pdfDocs.stream().map(e -> element(e)).collect(Collectors.toList()))
+            .printDocs(pdfDocs.stream().map(ElementUtils::element).toList())
             .postalAddress(address)
             .timeStamp(currentDate).build();
     }
