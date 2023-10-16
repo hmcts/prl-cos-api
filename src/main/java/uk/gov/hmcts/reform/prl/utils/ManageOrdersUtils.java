@@ -223,14 +223,30 @@ public class ManageOrdersUtils {
     public static List<String> getErrorForOccupationScreen(CaseData casedata) {
         List<String> errorList = new ArrayList<>();
         FL404 fl404CustomFields = casedata.getManageOrders().getFl404CustomFields();
-        if (CollectionUtils
-            .isNotEmpty(fl404CustomFields.getFl404bApplicantIsEntitledToOccupy())
-            || CollectionUtils
-            .isNotEmpty(fl404CustomFields.getFl404bApplicantAllowedToOccupy())) {
+        if (isApplicantSectionFilled(fl404CustomFields)
+            || isRespondentSectionFilled(fl404CustomFields)) {
             return errorList;
         } else {
             errorList.add("Please enter either applicant or respondent section");
         }
         return errorList;
+    }
+
+    private static boolean isApplicantSectionFilled(FL404 fl404CustomFields) {
+        return CollectionUtils
+            .isNotEmpty(fl404CustomFields.getFl404bApplicantIsEntitledToOccupy())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bApplicantHasHomeRight())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bApplicantHasRightToEnter())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bApplicantHasOtherInstruction());
+    }
+
+    private static boolean isRespondentSectionFilled(FL404 fl404CustomFields) {
+        return CollectionUtils
+            .isNotEmpty(fl404CustomFields.getFl404bApplicantAllowedToOccupy())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentMustNotOccupyAddress())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentShallLeaveAddress())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentMustNotEnterAddress())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentObstructOrHarass())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentOtherInstructions());
     }
 }
