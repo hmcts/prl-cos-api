@@ -2413,7 +2413,7 @@ public class ManageOrderService {
             caseData.getManageOrders()
                 .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                caseData = setHearingDataForSdo(caseData, hearings);
+            caseData = setHearingDataForSdo(caseData, hearings);
         }
         return caseData;
     }
