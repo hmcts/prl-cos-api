@@ -1007,7 +1007,8 @@ public class C100RespondentSolicitorService {
         } else {
             dataMap.put(ADDRESS, solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
         }
-        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
+        dataMap.put("gender", solicitorRepresentedRespondent.getValue()
+                .getGender() != null ? solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue() : "");
         if (null != solicitorRepresentedRespondent.getValue().getRepresentativeFirstName()
             && null != solicitorRepresentedRespondent.getValue().getRepresentativeLastName()) {
             dataMap.put("repFirstName", solicitorRepresentedRespondent.getValue().getRepresentativeFirstName());
