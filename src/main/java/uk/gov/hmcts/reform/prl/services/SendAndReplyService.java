@@ -808,6 +808,7 @@ public class SendAndReplyService {
                             ))
                             .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                            .submittedDocumentsList(getCategoriesAndDocuments(authorization, String.valueOf(caseData.getId())))
                             .build())
                     .sendReplyTempDocs(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
                     .build())
