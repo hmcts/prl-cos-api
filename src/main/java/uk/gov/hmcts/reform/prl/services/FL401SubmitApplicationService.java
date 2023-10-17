@@ -56,21 +56,23 @@ public class FL401SubmitApplicationService {
 
         final LocalDate localDate = LocalDate.now();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
+        log.info("******* caseDataUpdated is :: " + objectMapper.writeValueAsString(caseDataUpdated));
         String baseLocationId = caseData.getSubmitCountyCourtSelection().getValue().getCode().split(":")[0];
+        log.info("******* baseLocationId is :: " + baseLocationId);
         Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId(
             baseLocationId,
             authorisation
         );
-
+        log.info("******* courtVenue is :: " + objectMapper.writeValueAsString(courtVenue));
         Map<String, Object> courtDetailsMap = CaseUtils.getCourtDetails(courtVenue, baseLocationId);
         courtDetailsMap.put("submitCountyCourtSelection", DynamicList.builder()
             .value(caseData.getSubmitCountyCourtSelection().getValue()).build());
+        log.info("******* courtDetailsMap is :: " + objectMapper.writeValueAsString(courtDetailsMap));
         caseData = caseData.toBuilder().issueDate(localDate).courtName(courtDetailsMap.containsKey(COURT_NAME_FIELD) ? courtDetailsMap.get(
             COURT_NAME_FIELD).toString() : null)
             .isCourtEmailFound(YES)
             .build();
-
+        log.info("******* caseData is :: " + objectMapper.writeValueAsString(caseData));
         if (courtVenue.isPresent()) {
             String regionId = courtVenue.get().getRegionId();
             String courtSeal = courtSealFinderService.getCourtSeal(regionId);
@@ -112,6 +114,7 @@ public class FL401SubmitApplicationService {
 
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+        log.info("******* caseDataUpdated is :: " + objectMapper.writeValueAsString(caseDataUpdated));
         return caseDataUpdated;
     }
 
