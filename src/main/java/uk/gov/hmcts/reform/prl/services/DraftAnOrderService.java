@@ -123,6 +123,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_N
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
@@ -295,11 +296,9 @@ public class DraftAnOrderService {
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            manageOrderService.updateCurrentOrderId(
-                caseData.getManageOrders().getServeOrderDynamicList(),
-                orderCollection,
-                newOrderDetails
-            );
+            updateCurrentOrderId(caseData.getManageOrders().getServeOrderDynamicList(),
+                                 orderCollection,
+                                 newOrderDetails);
         }
 
         orderCollection.addAll(newOrderDetails);
@@ -602,10 +601,7 @@ public class DraftAnOrderService {
 
         log.info("selected order: {}", selectedOrder);
 
-        caseDataMap.put("orderName", selectedOrder.getC21OrderOptions() != null ? BOLD_BEGIN + selectedOrder
-                .getC21OrderOptions().getDisplayedValue() + BOLD_END :
-                selectedOrder.getOrderType() != null ? BOLD_BEGIN + selectedOrder
-                        .getOrderType().getDisplayedValue() + BOLD_END : null);
+        caseDataMap.put("orderName", getOrderName(selectedOrder));
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put(DATE_ORDER_MADE, selectedOrder.getDateOrderMade());
@@ -1727,6 +1723,15 @@ public class DraftAnOrderService {
             existingOrderHearingDetails,
             isSolicitorOrdersHearings
         );
+    }
+
+    private String getOrderName(DraftOrder selectedOrder) {
+        if (null != selectedOrder.getC21OrderOptions()) {
+            return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
+        } else if (null != selectedOrder.getOrderType()) {
+            return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
+        }
+        return null;
     }
 
     private Map<String, Object> populateOrClearErrors(List<String> errorList, CallbackRequest callbackRequest, String hearingScreenErrors) {
