@@ -1078,7 +1078,7 @@ public class DraftAnOrderService {
     private static void populateSdoPartiesRaisedAbuseCollection(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<PartyNameDA>> sdoPartiesRaisedAbuseCollection = new ArrayList<>();
         sdoPartiesRaisedAbuseCollection.add(element(PartyNameDA.builder().build()));
-        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterDialectRequired())) {
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoPartiesRaisedAbuseCollection())) {
             caseDataUpdated.put("sdoPartiesRaisedAbuseCollection", sdoPartiesRaisedAbuseCollection);
         }
     }
@@ -1094,7 +1094,7 @@ public class DraftAnOrderService {
     private static void populateSdoMiamAttendingPerson(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<MiamAttendingPersonName>> sdoMiamAttendingPersons = new ArrayList<>();
         sdoMiamAttendingPersons.add(element(MiamAttendingPersonName.builder().build()));
-        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterDialectRequired())) {
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoMiamAttendingPerson())) {
             caseDataUpdated.put("sdoMiamAttendingPerson", sdoMiamAttendingPersons);
         }
     }
@@ -1102,7 +1102,7 @@ public class DraftAnOrderService {
     private static void populateSdoFurtherDirectionDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails = new ArrayList<>();
         sdoFurtherDirectionDetails.add(element(SdoFurtherDirections.builder().build()));
-        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterDialectRequired())) {
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoFurtherDirectionDetails())) {
             caseDataUpdated.put("sdoFurtherDirectionDetails", sdoFurtherDirectionDetails);
         }
     }
