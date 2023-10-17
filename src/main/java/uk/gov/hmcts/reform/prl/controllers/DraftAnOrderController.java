@@ -31,6 +31,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
 
 @Slf4j
 @RestController
@@ -185,14 +186,17 @@ public class DraftAnOrderController {
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest);
-
             //PRL-4260 - hearing screen validations
             if (ObjectUtils.isNotEmpty(caseDataUpdated.get(HEARING_SCREEN_ERRORS))) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors((List<String>) caseDataUpdated.get(HEARING_SCREEN_ERRORS))
                     .build();
             }
-
+            if (ObjectUtils.isNotEmpty(caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors((List<String>) caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))
+                    .build();
+            }
             //Draft an order
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
