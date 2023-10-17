@@ -1017,7 +1017,7 @@ public class SendAndReplyService {
                                                 sendMessageObject.getJudicialOrMagistrateTierList())) {
                 sendMessageObject.setJudicialOrMagistrateTierList(sendMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                       .value(DynamicListElement.EMPTY).build());
-                sendMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
+                sendMessageObject.setSendReplyJudgeName(null);
             }
 
             if (canClearInternalWhoToSendFields(sendMessageObject.getInternalMessageWhoToSendTo(),
@@ -1056,7 +1056,7 @@ public class SendAndReplyService {
                    && isNotNull(replyMessageObject.getJudicialOrMagistrateTierList())) {
                 replyMessageObject.setJudicialOrMagistrateTierList(replyMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                        .value(DynamicListElement.EMPTY).build());
-                replyMessageObject.setSendReplyJudgeName(JudicialUser.builder().build());
+                replyMessageObject.setSendReplyJudgeName(null);
             }
         }
 
