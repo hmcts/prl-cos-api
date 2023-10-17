@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.AddNewPreamble;
@@ -1008,6 +1009,7 @@ public class DraftAnOrderService {
         populateSdoSection7FactsEditContent(caseData, caseDataUpdated);
         populateSdoSection7daOccuredEditContent(caseData, caseDataUpdated);
         populateSdoLsApplicantRespondentNameCollection(caseData, caseDataUpdated);
+        populateSdoMiamAttendingPerson(caseData, caseDataUpdated);
 
         if (caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList() == null
             || CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList().getListItems())) {
@@ -1084,6 +1086,14 @@ public class DraftAnOrderService {
         sdoInterpreterDialectRequiredList.add(element(SdoLanguageDialect.builder().build()));
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterDialectRequired())) {
             caseDataUpdated.put("sdoInterpreterDialectRequired", sdoInterpreterDialectRequiredList);
+        }
+    }
+
+    private static void populateSdoMiamAttendingPerson(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<MiamAttendingPersonName>> sdoMiamAttendingPersons = new ArrayList<>();
+        sdoMiamAttendingPersons.add(element(MiamAttendingPersonName.builder().build()));
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterDialectRequired())) {
+            caseDataUpdated.put("sdoMiamAttendingPerson", sdoMiamAttendingPersons);
         }
     }
 
