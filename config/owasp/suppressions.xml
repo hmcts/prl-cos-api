@@ -36,7 +36,7 @@
   </suppress>
   <suppress>
     <notes>temporary></notes>
-    <cve>CCVE-2023-45648</cve>
+    <cve>CVE-2023-45648</cve>
     <cve>CVE-2023-42795</cve>
   </suppress>
 </suppressions>
