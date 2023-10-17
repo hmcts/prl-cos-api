@@ -132,10 +132,10 @@ public class DocumentGenService {
     @Value("${document.templates.c100.c100_resp_c8_template}")
     protected String c100RespC8Template;
 
-    @Value("${document.templates.c100.fl401_resp_c8_template}")
+    @Value("${document.templates.fl401.fl401_resp_c8_template}")
     protected String fl401RespC8Template;
 
-    @Value("${document.templates.c100.fl401_resp_c8_template_welsh}")
+    @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
     protected String fl401RespC8TemplateWelsh;
 
     @Value("${document.templates.c100.c100_resp_c8_draft_template}")
@@ -854,6 +854,7 @@ public class DocumentGenService {
                 template = findFinalRespondentC8Template(isWelsh);
                 break;
             case C8_RESP_FL401_FINAL_HINT:
+                log.info("cas is c8");
                 template = findFinalDaRespondentC8Template(isWelsh);
                 break;
             case C1A_HINT:
@@ -947,6 +948,7 @@ public class DocumentGenService {
     }
 
     private String findFinalDaRespondentC8Template(boolean isWelsh) {
+        log.info("inside da c8 template");
         return !isWelsh ? fl401RespC8Template  : fl401RespC8TemplateWelsh;
     }
 
@@ -1010,6 +1012,7 @@ public class DocumentGenService {
                                            CaseData caseData,
                                            String hint,
                                            boolean isWelsh, Map<String, Object> respondentDetails) throws Exception {
+        log.info("hint is: {}", hint);
         return getDocument(authorisation, caseData, hint, isWelsh, respondentDetails);
     }
 
