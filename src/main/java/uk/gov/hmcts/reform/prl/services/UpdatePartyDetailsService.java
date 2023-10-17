@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
@@ -367,19 +368,23 @@ public class UpdatePartyDetailsService {
                     + " " + LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).format(dateTimeFormatter);
                 dataMap.put("dynamic_fileName", fileName + ".pdf");
                 c8FinalDocument = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    C8_RESP_FINAL_HINT,
-                    false,
-                    dataMap
+                        authorisation,
+                        caseData,
+                        caseData.getCaseTypeOfApplication()
+                                .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
+                                : C8_RESP_FL401_FINAL_HINT,
+                        false,
+                        dataMap
                 );
                 dataMap.put("dynamic_fileName", fileName + " welsh" + ".pdf");
                 c8FinalWelshDocument = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    C8_RESP_FINAL_HINT,
-                    true,
-                    dataMap
+                        authorisation,
+                        caseData,
+                        caseData.getCaseTypeOfApplication()
+                                .equals(C100_CASE_TYPE) ? C8_RESP_FINAL_HINT
+                                : C8_RESP_FL401_FINAL_HINT,
+                        true,
+                        dataMap
                 );
                 Element<ResponseDocuments> newC8Document = ElementUtils.element(ResponseDocuments.builder()
                                                                                     .dateTimeCreated(LocalDateTime.now())
