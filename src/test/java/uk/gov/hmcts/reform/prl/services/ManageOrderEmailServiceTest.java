@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import javassist.NotFoundException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -1285,6 +1284,74 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
+    public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefPost() throws Exception {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        LocalDateTime now = LocalDateTime.of(2023,8, 23, 0, 0, 0);
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code(uuid.toString())
+            .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(serveOrderDynamicMultiselectListElement))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .build();
+        PartyDetails respondent = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .user(User.builder().idamId("abc123").build())
+            .contactPreferences(ContactPreferences.post)
+            .build();
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("abc")
+            .dateCreated(now)
+            .orderDocument(Document.builder().build())
+            .orderDocumentWelsh(Document.builder().build())
+            .serveOrderDetails(ServeOrderDetails.builder()
+                                   .additionalDocuments(List.of(element(Document.builder().build())))
+                                   .build())
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                              .cafcassEmailId("test").build())
+            .orderCollection(List.of(element(uuid,orderDetails)))
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(serviceOfApplicationPostService
+                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
+                                                 any(Address.class),
+                                                 anyString()
+                 )).thenReturn(GeneratedDocumentInfo.builder().build());
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
+                                                           Mockito.any(),
+                                                           Mockito.any(),Mockito.any());
+    }
+
+    @Test
     public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefDigital() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
@@ -1398,7 +1465,6 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    @Ignore
     public void testSendOrderAndAdditionalDocsToRespondentViaPost() throws Exception {
 
         //Given
@@ -1431,12 +1497,11 @@ public class ManageOrderEmailServiceTest {
         //noinspection unchecked
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) caseDataMap.get("orderCollection");
         assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails());
-        //assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
+        assertEquals(1, orderCollection.get(0).getValue().getBulkPrintOrderDetails().size());
         assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
     }
 
     @Test
-    @Ignore
     public void testServeOrderDocsToRespondentsEmailOtherPersonPost() throws Exception {
         //Given
         PartyDetails respondent1 = PartyDetails.builder()
