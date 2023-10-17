@@ -125,6 +125,7 @@ public class CaseDataService {
             }
         } catch (Exception e) {
             log.error("Error in search cases {}", e);
+            throw e;
         }
         return cafCassResponse;
     }
@@ -141,7 +142,7 @@ public class CaseDataService {
                 orgIdList.addAll(cafCassCaseData.getRespondents().stream()
                                      .filter(party -> party.getValue().getSolicitorOrg() != null)
                                      .map(partyDetail -> partyDetail.getValue().getSolicitorOrg().getOrganisationID())
-                                     .collect(Collectors.toList()));
+                                     .toList());
                 orgIdList.stream().distinct()
                     .forEach(orgId ->
                                  orgIdToAddressMap.put(
@@ -175,7 +176,7 @@ public class CaseDataService {
                                                        )
                                                        .build()).build();
                                     })
-                                    .collect(Collectors.toList())).build();
+                                    .toList()).build();
 
 
                 cafCassCaseData = cafCassCaseData.toBuilder()
@@ -200,7 +201,7 @@ public class CaseDataService {
                                                         )
                                                         .build()).build();
                                      })
-                                     .collect(Collectors.toList())).build();
+                                     .toList()).build();
                 caseDetail.setCaseData(cafCassCaseData);
             }
 
