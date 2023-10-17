@@ -43,23 +43,14 @@ public enum ManageOrderFieldsEnum {
     appointedGuardianName("appointedGuardianName"),
     orderName("orderName"),
     orderType("orderType"),
-    otherParties("otherParties"),
-    cafcassEmailId("cafcassEmailId"),
-    cafcassCymruEmail("cafcassCymruEmail"),
     previewDraftOrder("previewDraftOrder"),
-    emailInformationCA("emailInformationCA"),
-    deliveryByOptionsCA("deliveryByOptionsCA"),
     isHearingPageNeeded("isHearingPageNeeded"),
     postalInformationCA("postalInformationCA"),
-    serveOtherPartiesCA("serveOtherPartiesCA"),
-    cafcassServedOptions("cafcassServedOptions"),
     cafcassCymruDocuments("cafcassCymruDocuments"),
     draftOrdersDynamicList("draftOrdersDynamicList"),
     previewDraftOrderWelsh("previewDraftOrderWelsh"),
     whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
-    serveToRespondentOptions("serveToRespondentOptions"),
-    cafcassCymruServedOptions("cafcassCymruServedOptions"),
     isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
     servingRespondentsOptionsCA("servingRespondentsOptionsCA"),
     otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
@@ -67,8 +58,7 @@ public enum ManageOrderFieldsEnum {
     isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
-    selectTypeOfOrder("selectTypeOfOrder"),
-    recipientsOptions("recipientsOptions");
+    selectTypeOfOrder("selectTypeOfOrder");
 
     private final String value;
 
