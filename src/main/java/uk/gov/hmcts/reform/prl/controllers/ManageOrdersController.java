@@ -429,8 +429,6 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = new HashMap<>();
-            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-            log.info("Manage orders options {}", caseData.getManageOrdersOptions());
             if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
             }
