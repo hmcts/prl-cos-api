@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
@@ -49,6 +50,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
@@ -137,9 +139,9 @@ public class HearingDataServiceTest {
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
-            .hearingEstimatedHours(5)
-            .hearingEstimatedMinutes(40)
-            .hearingEstimatedDays(15)
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .hearingJudgePersonalCode("test")
@@ -278,9 +280,9 @@ public class HearingDataServiceTest {
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
-            .hearingEstimatedHours(5)
-            .hearingEstimatedMinutes(40)
-            .hearingEstimatedDays(15)
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .applicantName("Test")
@@ -298,7 +300,96 @@ public class HearingDataServiceTest {
         assertNotNull(expectedResponse);
     }
 
+    @Test()
+    public void testGetHearingDataForSdo() {
 
+        List<CategoryValues> categoryValues = new ArrayList<>();
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
+        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        List<DynamicListElement> listHearingTypes = new ArrayList<>();
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
+
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .idamId("Test")
+            .build();
+
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
+        JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
+            //.emailId("Test")
+            //.fullName("Test")
+            //.surname("Test")
+            .personalCode("Test")
+            .build();
+        judicialUsersApiResponses.add(judicialUsersApiResponse);
+        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
+            .personalCode(new String[]{"Test2", "test","test5"}).build();
+        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test","test5"});
+        when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
+        DynamicList dynamicList1 = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        DynamicList dynamicList = DynamicList.builder()
+            //.listItems(dynamicListElementsList)
+            .build();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingTypes(dynamicList)
+                .hearingListedLinkedCases(dynamicList1)
+                .retrievedHearingDates(dynamicList1)
+                .retrievedHearingChannels(dynamicList1)
+                .retrievedVideoSubChannels(dynamicList1)
+                .retrievedTelephoneSubChannels(dynamicList1)
+                .retrievedCourtLocations(dynamicList)
+                .hearingListedLinkedCases(dynamicList)
+                .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .applicantName("Test")
+            .hearingJudgeNameAndEmail(judicialUser)
+            .build();
+
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .build();
+        HearingData  expectedResponse =
+            hearingDataService.getHearingDataForSdo(hearingData,hearingDataPrePopulatedDynamicLists,caseData);
+        assertNotNull(expectedResponse);
+    }
 
     @Test()
     public void testGetHearingDataSetJ() {
@@ -372,9 +463,9 @@ public class HearingDataServiceTest {
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
-            .hearingEstimatedHours(5)
-            .hearingEstimatedMinutes(40)
-            .hearingEstimatedDays(15)
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .applicantName("Test")
@@ -440,7 +531,9 @@ public class HearingDataServiceTest {
             .applicants(applicantList)
             .respondents(respondentList)
             .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
             .caseTypeOfApplication("FL401")
+            .caseManagementLocation(CaseManagementLocation.builder().region("2").build())
             .build();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             HearingDataPrePopulatedDynamicLists.builder()
@@ -471,12 +564,12 @@ public class HearingDataServiceTest {
             .hmcStatus("LISTED").build();
         List<CaseHearing> caseHearings =  new ArrayList<>();
         caseHearings.add(caseHearing);
-        hearingDetails = Hearings.hearingsWith()
-            .hmctsServiceCode("CaseName-Test10")
+        Hearings hearings = Hearings.hearingsWith()
             .caseRef("1677767515750127")
             .caseHearings(caseHearings)
             .build();
-        when(hearingService.getHearings(any(), any())).thenReturn(hearingDetails);
+
+        when(hearingService.getHearingsByListOfCaseIds(any(), anyMap())).thenReturn(List.of(hearings));
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -632,6 +725,70 @@ public class HearingDataServiceTest {
                                                                       .build()))
                                       .build())).build();
         assertNotNull(hearingDataService.getHearingStartDate("123", hearings));
+    }
+
+    @Test()
+    public void testGenerateHearingDataForCafcassCymru() {
+        List<CategoryValues> categoryValues = new ArrayList<>();
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Review").build());
+        categoryValues.add(CategoryValues.builder().categoryKey(HEARINGTYPE).valueEn("Allocation").build());
+        CommonDataResponse commonDataResponse = CommonDataResponse.builder().categoryValues(categoryValues).build();
+        when(refDataUserService.retrieveCategoryValues(authToken,HEARINGTYPE,IS_HEARINGCHILDREQUIRED_N)).thenReturn(commonDataResponse);
+        List<DynamicListElement> listHearingTypes = new ArrayList<>();
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-REV").label("Review").build());
+        listHearingTypes.add(DynamicListElement.builder().code("ABA5-ALL").label("Allocation").build());
+        when(refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse,HEARINGTYPE)).thenReturn(listHearingTypes);
+        when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestName")
+            .representativeFirstName("Ram")
+            .representativeLastName("Mer")
+            .build();
+        PartyDetails respondent = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .build();
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
+        List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .applicantName("test")
+            .solicitorName("Test")
+            .respondentName("Test")
+            .applicants(applicantList)
+            .respondents(respondentList)
+            .caseTypeOfApplication("C100")
+            .caseManagementLocation(CaseManagementLocation.builder().region("9").build())
+            .build();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            HearingDataPrePopulatedDynamicLists.builder()
+                .retrievedHearingTypes(dynamicList)
+                .hearingListedLinkedCases(dynamicList)
+                .retrievedHearingDates(dynamicList)
+                .retrievedHearingChannels(dynamicList)
+                .retrievedCourtLocations(dynamicList)
+                .retrievedVideoSubChannels(dynamicList)
+                .retrievedTelephoneSubChannels(dynamicList)
+                .retrievedCourtLocations(dynamicList)
+                .hearingListedLinkedCases(dynamicList)
+                .build();
+        HearingData expectedResponse = hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
+        assertNotNull(expectedResponse);
     }
 }
 
