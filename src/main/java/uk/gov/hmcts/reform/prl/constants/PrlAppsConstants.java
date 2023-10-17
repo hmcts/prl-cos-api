@@ -110,6 +110,7 @@ public class PrlAppsConstants {
     public static final String C8_DRAFT_HINT = "C8_DRAFT";
     public static final String C8_RESP_DRAFT_HINT = "C8_RESPONDENT_DRAFT";
     public static final String C8_RESP_FINAL_HINT = "C8_RESPONDENT_FINAL";
+    public static final String C8_RESP_FL401_FINAL_HINT = "C8_RESPONDENT_FL401_FINAL";
     public static final String C1A_DRAFT_HINT = "C1A_DRAFT";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
@@ -787,4 +788,10 @@ public class PrlAppsConstants {
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
 
+
+    public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+    public static final String AM_LOWER_CASE = "am";
+    public static final String AM_UPPER_CASE = "AM";
+    public static final String PM_LOWER_CASE = "pm";
+    public static final String PM_UPPER_CASE = "PM";
 }
