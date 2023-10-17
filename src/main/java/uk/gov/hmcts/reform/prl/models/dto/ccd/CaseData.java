@@ -558,6 +558,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final ManageOrdersOptionsEnum manageOrdersOptions;
     private final CreateSelectOrderOptionsEnum createSelectOrderOptions;
     private final List<OrderRecipientsEnum> orderRecipients;
+    @JsonProperty("selectTypeOfOrder")
     private final SelectTypeOfOrderEnum selectTypeOfOrder;
 
     @JsonProperty("doesOrderClosesCase")
