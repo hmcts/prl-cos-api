@@ -95,6 +95,9 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
@@ -277,9 +280,9 @@ public class ManageOrderServiceTest {
 
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
-        //assertNotNull(responseMap.get("caseTypeOfApplication"));
         assertNotNull(responseMap);
-
+        assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
+        assertEquals(FL401_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
 
@@ -653,7 +656,8 @@ public class ManageOrderServiceTest {
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
         assertNotNull(responseMap);
-
+        assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
+        assertEquals(C100_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -673,8 +677,8 @@ public class ManageOrderServiceTest {
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
         assertNotNull(responseMap);
-        //assertEquals("C100", responseMap.get("caseTypeOfApplication"));
-
+        assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
+        assertEquals(C100_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -694,7 +698,8 @@ public class ManageOrderServiceTest {
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
         assertNotNull(responseMap);
-        //assertEquals("C100", responseMap.get("caseTypeOfApplication"));
+        assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
+        assertEquals(C100_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -710,8 +715,8 @@ public class ManageOrderServiceTest {
         Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
 
         assertNotNull(responseMap);
-        //assertEquals("FL401", responseMap.get("caseTypeOfApplication"));
-
+        assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
+        assertEquals(FL401_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -1479,8 +1484,11 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        //assertNotNull(manageOrderService.populateHeader(caseData).get("caseTypeOfApplication"));
-        assertNotNull(manageOrderService.populateHeader(caseData));
+        Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
+
+        assertNotNull(responseMap);
+        assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
+        assertEquals(C100_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
     @Test
@@ -1510,8 +1518,11 @@ public class ManageOrderServiceTest {
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .build();
 
-        //assertNotNull(manageOrderService.populateHeader(caseData).get("caseTypeOfApplication"));
-        assertNotNull(manageOrderService.populateHeader(caseData));
+        Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
+
+        assertNotNull(responseMap);
+        assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
+        assertEquals(C100_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
     }
 
 

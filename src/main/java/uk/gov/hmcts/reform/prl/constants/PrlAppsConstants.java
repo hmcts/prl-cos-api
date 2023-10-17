@@ -208,7 +208,7 @@ public class PrlAppsConstants {
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
-        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
+        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties", "blank"};
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without a hearing,"
         + " you may ask the court to reconsider this order. "
         + "You must do that within 7 days of receiving this order by writing to the court"
@@ -841,4 +841,6 @@ public class PrlAppsConstants {
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrate (JP)";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
+    public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
+
 }

@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
@@ -2360,5 +2361,90 @@ public class ManageOrdersControllerTest {
         assertExpectedException(() -> {
             manageOrdersController.prePopulateJudgeOrLegalAdviser(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testPopulatePreviewOrderWhenOccupationOrderCreated() throws Exception {
+        CaseData expectedCaseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder()
+                              .fl404CustomFields(FL404.builder()
+                                                     .build()).build())
+            .uploadOrderDoc(Document.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.occupation)
+            .dateOrderMade(LocalDate.now())
+            .build();
+
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        objectMapper1.findAndRegisterModules();
+
+        Map<String, Object> stringObjectMap = expectedCaseData.toMap(objectMapper1);
+
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.occupation)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("c21DraftFilename")
+                                 .build())
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken,callbackRequest);
+        assertNotNull(callbackResponse);
+    }
+
+    @Test
+    public void testPopulatePreviewOrderWhenOccupationOrderAndAppOrRespPresent() throws Exception {
+        CaseData expectedCaseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(ManageOrders.builder()
+                              .fl404CustomFields(FL404.builder()
+                                                     .fl404bApplicantIsEntitledToOccupy(List.of("test"))
+                                                     .build()).build())
+            .uploadOrderDoc(Document.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.occupation)
+            .dateOrderMade(LocalDate.now())
+            .build();
+
+        ObjectMapper objectMapper1 = new ObjectMapper();
+        objectMapper1.findAndRegisterModules();
+
+        Map<String, Object> stringObjectMap = expectedCaseData.toMap(objectMapper1);
+
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.occupation)
+            .previewOrderDoc(Document.builder()
+                                 .documentUrl(generatedDocumentInfo.getUrl())
+                                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                 .documentHash(generatedDocumentInfo.getHashToken())
+                                 .documentFileName("c21DraftFilename")
+                                 .build())
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(expectedCaseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken,callbackRequest);
+        assertNotNull(callbackResponse);
     }
 }

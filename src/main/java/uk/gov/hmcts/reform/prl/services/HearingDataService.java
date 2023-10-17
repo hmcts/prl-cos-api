@@ -464,7 +464,8 @@ public class HearingDataService {
             if (caseLinkedDataList.isPresent()) {
                 return caseLinkedDataList.get().stream()
                     .map(cData -> DynamicListElement.builder()
-                        .code(cData.getCaseReference()).label(cData.getCaseReference()).build()).collect(Collectors.toList());
+                        .code(cData.getCaseReference()).label(cData.getCaseReference()).build())
+                    .toList();
             }
         } catch (Exception e) {
             log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
@@ -488,7 +489,7 @@ public class HearingDataService {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
-                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData, null))
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
                         .build();
                 }
             }

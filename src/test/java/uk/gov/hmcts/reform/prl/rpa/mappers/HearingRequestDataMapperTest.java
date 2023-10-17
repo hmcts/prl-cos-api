@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
+
 @RunWith(MockitoJUnitRunner.class)
 public class HearingRequestDataMapperTest {
 
