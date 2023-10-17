@@ -85,7 +85,7 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.ENGLISH)))
                                                .build()).collect(Collectors.toList()));
         }
         //added for cafcass
@@ -94,7 +94,7 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.ENGLISH)))
                                                .build()).collect(Collectors.toList()));
         }
         //court staff
@@ -103,7 +103,7 @@ public class ReviewDocumentService {
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
                                                           + " - " + element.getValue().getDocumentUploadedDate()
-                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
+                                                   .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.ENGLISH)))
                                                .build()).collect(Collectors.toList()));
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadQuarantineDocsList())) {

@@ -275,8 +275,8 @@
           "otherDetails" : {
             "createdBy" : "fsfsd",
             "orderRecipients" : "\n",
-            "orderCreatedDate" : "20 January 2023",
-            "orderMadeDate" : "1 January 1990"
+            "orderCreatedDate" : "20 Jan 2023",
+            "orderMadeDate" : "1 Jan 1990"
           },
           "orderTypeId" : "specialGuardianShip",
           "orderDocument" : {
@@ -292,8 +292,8 @@
           "otherDetails" : {
             "createdBy" : "test",
             "orderRecipients" : " (Applicant's Solicitor)\n",
-            "orderCreatedDate" : "20 January 2023",
-            "orderMadeDate" : "11 January 2023"
+            "orderCreatedDate" : "20 Jan 2023",
+            "orderMadeDate" : "11 Jan 2023"
           },
           "orderTypeId" : "parentalResponsibility",
           "orderDocument" : {
