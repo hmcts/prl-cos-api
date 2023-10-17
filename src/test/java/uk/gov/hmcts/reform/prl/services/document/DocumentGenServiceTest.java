@@ -365,6 +365,7 @@ public class DocumentGenServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetailsWithOrganisations)
+            .respondentsFL401(partyDetailsWithOrganisations)
             .isEngDocGen("Yes")
             .isWelshDocGen("Yes")
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -759,6 +760,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(homefull)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -874,6 +876,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(homefull)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -979,6 +982,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -1070,6 +1074,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -1161,6 +1166,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -1247,6 +1253,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -2648,6 +2655,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(homefull)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -2762,6 +2770,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(homefull)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -2867,6 +2876,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -2950,6 +2960,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3022,6 +3033,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3089,6 +3101,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3152,6 +3165,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3221,6 +3235,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3283,6 +3298,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();

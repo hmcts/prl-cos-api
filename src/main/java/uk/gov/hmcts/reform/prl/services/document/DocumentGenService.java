@@ -489,7 +489,9 @@ public class DocumentGenService {
             && ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
             && !caseData.getApplicantsConfidentialDetails().isEmpty()
             || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-            && !caseData.getChildrenConfidentialDetails().isEmpty();
+            && !caseData.getChildrenConfidentialDetails().isEmpty()
+            || ofNullable(caseData.getRespondentConfidentialDetails()).isPresent()
+            && !caseData.getRespondentConfidentialDetails().isEmpty();
     }
 
     public Map<String, Object> generateDraftDocuments(String authorisation, CaseData caseData) throws Exception {
@@ -947,11 +949,13 @@ public class DocumentGenService {
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
         PartyDetails partyDetails = caseData.getApplicantsFL401();
+        PartyDetails respondentDetails = caseData.getRespondentsFL401();
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
 
         boolean isChildrenConfidential = isChildrenDetailsConfidentiality(caseData, typeOfApplicationOrders);
 
-        return isApplicantDetailsConfidential(partyDetails) || isChildrenConfidential;
+        return isPartyDetailsConfidential(respondentDetails) || isPartyDetailsConfidential(partyDetails)
+            || isChildrenConfidential;
 
     }
 
@@ -977,19 +981,19 @@ public class DocumentGenService {
         return childrenConfidentiality;
     }
 
-    private boolean isApplicantDetailsConfidential(PartyDetails applicant) {
+    private boolean isPartyDetailsConfidential(PartyDetails applicant) {
 
-        boolean isApplicantInformationConfidential = false;
+        boolean isPartyInformationConfidential = false;
         if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential())) {
-            isApplicantInformationConfidential = true;
+            isPartyInformationConfidential = true;
         }
         if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential())) {
-            isApplicantInformationConfidential = true;
+            isPartyInformationConfidential = true;
         }
         if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential())) {
-            isApplicantInformationConfidential = true;
+            isPartyInformationConfidential = true;
         }
-        return isApplicantInformationConfidential;
+        return isPartyInformationConfidential;
     }
 
     public Document generateSingleDocument(String authorisation,
