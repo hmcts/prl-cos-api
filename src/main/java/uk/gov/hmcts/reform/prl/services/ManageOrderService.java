@@ -553,6 +553,7 @@ public class ManageOrderService {
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
         //PRL-4212 - populate fields only when it's needed
+        headerMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         if (caseData.getOrderCollection() != null) {
             if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
                 headerMap.put("amendOrderDynamicList", getOrdersAsDynamicList(caseData));
