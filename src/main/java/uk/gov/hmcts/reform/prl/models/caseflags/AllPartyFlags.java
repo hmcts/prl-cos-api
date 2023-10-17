@@ -1,12 +1,18 @@
 package uk.gov.hmcts.reform.prl.models.caseflags;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 
-@Value
+@Data
 @Builder(toBuilder = true)
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
+@AllArgsConstructor
+@NoArgsConstructor
+@Jacksonized
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AllPartyFlags {
     private PartyFlags caApplicant1Flags;
     private PartyFlags caApplicant2Flags;

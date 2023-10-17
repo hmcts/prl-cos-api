@@ -16,7 +16,6 @@ import java.util.List;
 @NoArgsConstructor
 @Jacksonized
 public class Flags {
-
     String roleOnCase;
     String partyName;
     String groupId;
