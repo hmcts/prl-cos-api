@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -235,5 +236,35 @@ public class ManageOrdersUtils {
             }
         }
         return errorList;
+    }
+
+    public static List<String> getErrorForOccupationScreen(CaseData casedata) {
+        List<String> errorList = new ArrayList<>();
+        FL404 fl404CustomFields = casedata.getManageOrders().getFl404CustomFields();
+        if (isApplicantSectionFilled(fl404CustomFields)
+            || isRespondentSectionFilled(fl404CustomFields)) {
+            return errorList;
+        } else {
+            errorList.add("Please enter either applicant or respondent section");
+        }
+        return errorList;
+    }
+
+    private static boolean isApplicantSectionFilled(FL404 fl404CustomFields) {
+        return CollectionUtils
+            .isNotEmpty(fl404CustomFields.getFl404bApplicantIsEntitledToOccupy())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bApplicantHasHomeRight())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bApplicantHasRightToEnter())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bApplicantHasOtherInstruction());
+    }
+
+    private static boolean isRespondentSectionFilled(FL404 fl404CustomFields) {
+        return CollectionUtils
+            .isNotEmpty(fl404CustomFields.getFl404bApplicantAllowedToOccupy())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentMustNotOccupyAddress())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentShallLeaveAddress())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentMustNotEnterAddress())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentObstructOrHarass())
+            || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentOtherInstructions());
     }
 }
