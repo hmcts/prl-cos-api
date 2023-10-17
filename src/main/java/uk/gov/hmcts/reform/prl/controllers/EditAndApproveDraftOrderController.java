@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -152,7 +153,7 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-            //Cleanup
+
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
@@ -287,6 +288,10 @@ public class EditAndApproveDraftOrderController {
                 }
 
                 caseDataUpdated.put(STATE, caseData.getState());
+
+                //Cleanup
+                /*ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);*/
+
                 coreCaseDataService.triggerEvent(
                         JURISDICTION,
                         CASE_TYPE,

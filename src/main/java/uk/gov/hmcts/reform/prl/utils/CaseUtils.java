@@ -89,6 +89,7 @@ public class CaseUtils {
     }
 
     public static SelectTypeOfOrderEnum getSelectTypeOfOrder(CaseData caseData) {
+        log.info("final order {}", caseData.getSelectTypeOfOrder());
         return caseData.getSelectTypeOfOrder();
     }
 

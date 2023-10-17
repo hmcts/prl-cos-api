@@ -355,8 +355,6 @@ public class ManageOrdersController {
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
-            //Cleanup
-            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
             //Added below fields for WA purpose
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
@@ -375,6 +373,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
