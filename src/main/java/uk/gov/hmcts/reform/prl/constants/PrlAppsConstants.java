@@ -800,4 +800,6 @@ public class PrlAppsConstants {
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrate (JP)";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
+    public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
+
 }

@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
@@ -63,6 +64,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -70,8 +72,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.noticeOfProceedingsParties;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.occupation;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -1136,5 +1140,76 @@ public class DraftAnOrderControllerTest {
         assertEquals("Please enter numeric value for Hearing estimated days", callbackResponse.getErrors().get(1));
         assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(2));
         assertEquals("Please enter numeric value for Hearing estimated minutes", callbackResponse.getErrors().get(3));
+    }
+
+    @Test
+    public void testOccupationTypeScreenValidations() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(occupation)
+            .manageOrders(ManageOrders.builder().fl404CustomFields(FL404.builder().build()).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(OCCUPATIONAL_SCREEN_ERRORS, List.of("Please select either applicant or participant section"));
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(occupation)
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
+            .generateDoc(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("Please select either applicant or participant section", callbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testOccupationTypeScreenValidationsForNoErrors() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(occupation)
+            .manageOrders(ManageOrders.builder().fl404CustomFields(FL404.builder().build()).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(OCCUPATIONAL_SCREEN_ERRORS, new ArrayList<String>());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(occupation)
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
+            .generateDoc(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNull(callbackResponse.getErrors());
     }
 }

@@ -100,6 +100,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
@@ -124,6 +125,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
@@ -855,6 +857,8 @@ public class DraftAnOrderService {
                         caseData.getApplicantsFL401().getFirstName(),
                         caseData.getApplicantsFL401().getLastName()
                     ))
+                    .fl404bApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
+                                                  ? caseData.getApplicantsFL401().getSolicitorReference() : "")
                     .fl404bCourtName(caseData.getCourtName())
                     .fl404bRespondentName(String.format(
                         PrlAppsConstants.FORMAT,
@@ -1648,6 +1652,7 @@ public class DraftAnOrderService {
         List<Element<HearingData>> existingOrderHearingDetails = null;
         List<String> errorList = null;
         boolean isSolicitorOrdersHearings = false;
+        List<String> occupationErrorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
@@ -1659,12 +1664,20 @@ public class DraftAnOrderService {
                                                         caseData.getCreateSelectOrderOptions(),
                                                         true);
             }
+            if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
+                && null != caseData.getManageOrders().getFl404CustomFields()) {
+                occupationErrorList = getErrorForOccupationScreen(caseData);
+            }
         } else if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()))) {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
             Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(draftOrder.getOrderType()))).findFirst();
+            if (CreateSelectOrderOptionsEnum.occupation.equals(draftOrder.getOrderType())
+                && null != caseData.getManageOrders().getFl404CustomFields()) {
+                occupationErrorList = getErrorForOccupationScreen(caseData);
+            }
             if (hearingPageNeeded.isPresent()) {
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
@@ -1681,15 +1694,27 @@ public class DraftAnOrderService {
                 }
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
-                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
+                errorList = getHearingScreenValidationsForSdo(
+                    caseData.getStandardDirectionOrder()
+                );
+
+            }
+            Map<String, Object> caseDataUpdated = populateOrClearErrors(
+                errorList,
+                callbackRequest,
+                HEARING_SCREEN_ERRORS
+            );
+            if (caseDataUpdated != null) {
+                return caseDataUpdated;
             }
         }
-        if (CollectionUtils.isNotEmpty(errorList)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put(HEARING_SCREEN_ERRORS, errorList);
+        Map<String, Object> caseDataUpdated = populateOrClearErrors(
+            occupationErrorList,
+            callbackRequest,
+            OCCUPATIONAL_SCREEN_ERRORS
+        );
+        if (caseDataUpdated != null) {
             return caseDataUpdated;
-        } else {
-            callbackRequest.getCaseDetails().getData().remove(HEARING_SCREEN_ERRORS);
         }
 
         return generateOrderDocument(
@@ -1705,6 +1730,17 @@ public class DraftAnOrderService {
             return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
         } else if (null != selectedOrder.getOrderType()) {
             return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
+        }
+        return null;
+    }
+
+    private Map<String, Object> populateOrClearErrors(List<String> errorList, CallbackRequest callbackRequest, String hearingScreenErrors) {
+        if (CollectionUtils.isNotEmpty(errorList)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            caseDataUpdated.put(hearingScreenErrors, errorList);
+            return caseDataUpdated;
+        } else {
+            callbackRequest.getCaseDetails().getData().remove(hearingScreenErrors);
         }
         return null;
     }
