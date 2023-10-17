@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -26,7 +27,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
@@ -48,6 +48,7 @@ import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
@@ -84,6 +85,9 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Mock
     private DocumentLanguageService documentLanguageService;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -133,24 +137,6 @@ public class ServiceOfApplicationPostServiceTest {
             .label(partyDetails.getFirstName() + " " + partyDetails.getLastName())
             .build();
 
-        List<Document> packN = List.of(Document.builder().build());
-
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("FL401")
-            .applicantCaseName("Test Case 45678")
-            .fl401FamilymanCaseNumber("familyman12345")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .soaOtherParties(DynamicMultiSelectList.builder()
-                                                           .value(List.of(dynamicListElement))
-                                                           .build()).build())
-            .othersToNotify(otherParities)
-            .build();
-        Map<String,Object> casedata = new HashMap<>();
-        casedata.put("caseTypeOfApplication","C100");
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         when(bulkPrintService.send(
             Mockito.any(),
             Mockito.any(),
@@ -171,15 +157,22 @@ public class ServiceOfApplicationPostServiceTest {
             .build();
 
         final List<Document> documentList = List.of(coverSheet, finalDoc);
-        BulkPrintDetails bulkPrintDetails = BulkPrintDetails.builder()
-            .recipientsName("fn ln")
-            .postalAddress(Address.builder()
-                               .addressLine1("line1")
-                               .build())
-            .servedParty(SERVED_PARTY_OTHER)
-            .timeStamp(currentDate)
-            .printDocs(documentList.stream().map(e -> element(e)).collect(Collectors.toList()))
+
+        when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaOtherParties(DynamicMultiSelectList.builder()
+                                                           .value(List.of(dynamicListElement))
+                                                           .build()).build())
+            .othersToNotify(otherParities)
             .build();
+
         assertNotNull(serviceOfApplicationPostService
                          .sendPostNotificationToParty(caseData,
                                                       AUTH, partyDetails, documentList, SERVED_PARTY_OTHER));
@@ -531,5 +524,79 @@ public class ServiceOfApplicationPostServiceTest {
         document.originalDocumentName = randomAlphaNumeric;
 
         return document;
+    }
+
+    @Test
+    public void testGetCoverLetterForEnglish() throws Exception {
+
+        final CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .build();
+
+
+        final Address address = Address.builder().addressLine1("157").addressLine2("London")
+            .postCode("SE1 234").country("UK").build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(documentGenService.getTemplate(
+            Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
+        assertNotNull(serviceOfApplicationPostService
+                          .getCoverLetter(caseData,
+                                                          AUTH, address, "test name"));
+
+    }
+
+    @Test
+    public void testGetCoverLetterForWelsh() throws Exception {
+
+        final CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .build();
+
+
+        final Address address = Address.builder().addressLine1("157").addressLine2("London")
+            .postCode("SE1 234").country("UK").build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(documentGenService.getTemplate(
+            Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
+        assertNotNull(serviceOfApplicationPostService
+                          .getCoverLetter(caseData,
+                                          AUTH, address, "test name"));
+
+    }
+
+    @Test
+    public void testGetCoverLetterWithNoAddressLine1() throws Exception {
+
+        final CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .build();
+
+
+        final Address address = Address.builder().build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.anyString(), Mockito.anyMap()))
+            .thenReturn(generatedDocumentInfo);
+        when(documentGenService.getTemplate(
+            Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
+        assertTrue(serviceOfApplicationPostService
+                          .getCoverLetter(caseData,
+                                          AUTH, address, "test name").isEmpty());
+
     }
 }
