@@ -413,12 +413,16 @@ public class ManageOrderEmailService {
                                            Map<String, Object> caseDataMap) {
         List<String> listOfOtherAndCafcassEmails = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
+        log.info("aaaaaa {}",manageOrders.getServeToRespondentOptions());
+        log.info("bbbbbbb {}",manageOrders.getServeToRespondentOptionsOnlyC47a());
+        log.info("cccccc {}",manageOrders);
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
-
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            log.info("999999");
             List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
+            log.info("8888888");
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
                 || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
                 log.info("** CA case email notifications***");
@@ -431,6 +435,7 @@ public class ManageOrderEmailService {
                                                 isFinalOrder, caseData
                 );
                 //respondents
+                log.info("7777777");
                 sendEmailToSolicitorOrPostToRespondent(recipientsOptions.getValue(),
                                                        caseData.getRespondents(), isFinalOrder, caseData,
                                                        authorisation, orderDocuments, bulkPrintOrderDetails
@@ -621,12 +626,15 @@ public class ManageOrderEmailService {
                                              CaseData caseData, String authorisation,
                                              List<Document> orderDocuments,
                                              List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
+        log.info("666666");
         value.forEach(element -> {
             Optional<Element<PartyDetails>> partyDataOptional = partyDetails.stream()
                     .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
             if (partyDataOptional.isPresent()) {
+                log.info("55555");
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
+                    log.info("444444");
                     try {
                         log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
                         sendgridService.sendEmailWithAttachments(authorisation,
@@ -648,6 +656,7 @@ public class ManageOrderEmailService {
                     }
                 } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
                             && isPartyProvidedWithEmail(partyData)) {
+                    log.info("33333");
                     log.info("Contact preference set as email");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
                             buildApplicantRespondentEmail(caseData,
@@ -656,8 +665,10 @@ public class ManageOrderEmailService {
                             caseData
                     );
                 } else {
+                    log.info("2222222");
                     try {
                         if (isNotEmpty(partyData.getAddress()) && isNotEmpty(partyData.getAddress().getAddressLine1())) {
+                            log.info("33333");
                             UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData, authorisation, orderDocuments);
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
@@ -681,6 +692,7 @@ public class ManageOrderEmailService {
                                           PartyDetails partyData,
                                           String authorisation,
                                           List<Document> orderDocuments) throws Exception {
+
         List<Document> documents = new ArrayList<>();
         //generate cover letter
         List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
@@ -695,6 +707,7 @@ public class ManageOrderEmailService {
 
         //cover should be the first doc in the list, append all order docs
         documents.addAll(orderDocuments);
+        log.info("1111111111111 {}",documents);
 
         return bulkPrintService.send(
                 String.valueOf(caseData.getId()),
