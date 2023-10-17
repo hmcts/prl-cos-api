@@ -61,8 +61,6 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static org.apache.logging.log4j.util.Strings.isNotBlank;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -72,14 +70,13 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.CLOSED;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.MessageStatus.OPEN;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.REPLY;
 import static uk.gov.hmcts.reform.prl.enums.sendmessages.SendOrReply.SEND;
 import static uk.gov.hmcts.reform.prl.models.documents.Document.buildFromDocument;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getDynamicList;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -639,9 +636,7 @@ public class SendAndReplyService {
             // in case of Other, change status to Close while sending message
             .status(InternalMessageWhoToSendToEnum.OTHER
                         .equals(message.getInternalMessageWhoToSendTo()) ? CLOSED : OPEN)
-            .dateSent(dateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.ENGLISH))
-                          .replace(AM_LOWER_CASE, AM_UPPER_CASE)
-                          .replace(PM_LOWER_CASE,PM_UPPER_CASE))
+            .dateSent(formatDateTime(DATE_TIME_PATTERN, dateTime.now()))
             .internalOrExternalMessage(message.getInternalOrExternalMessage())
             .internalMessageUrgent(message.getInternalMessageUrgent())
             .internalMessageWhoToSendTo(REPLY.equals(caseData.getChooseSendOrReply())
@@ -825,7 +820,7 @@ public class SendAndReplyService {
         //latest message at top
         lines.add(MESSAGE_TABLE_HEADER);
         lines.add(TABLE_BEGIN);
-        addRowToMessageTable(lines, DATE_SENT, message.getDateSent());
+        addRowToMessageTable(lines, DATE_SENT, formatDateTime(DATE_TIME_PATTERN, message.getUpdatedTime()));
         addRowToMessageTable(lines, SENDER_ROLE, message.getSenderRole());
         addRowToMessageTable(lines, SENDERS_NAME, message.getSenderName());
         addRowToMessageTable(lines, SENDERS_EMAIL, message.getSenderEmail());
@@ -985,8 +980,7 @@ public class SendAndReplyService {
             .messageFrom(message.getSenderEmail())
             .messageTo(message.getInternalMessageWhoToSendTo() != null
                            ? message.getInternalMessageWhoToSendTo().getDisplayedValue() : null)
-            .messageDate(message.getUpdatedTime().format(DateTimeFormatter.ofPattern(DATE_TIME_PATTERN, Locale.ENGLISH))
-                             .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE,PM_UPPER_CASE))
+            .messageDate(formatDateTime(DATE_TIME_PATTERN, message.getUpdatedTime()))
             .messageSubject(message.getMessageSubject())
             .isUrgent(message.getInternalMessageUrgent())
             .messageContent(message.getMessageContent())
