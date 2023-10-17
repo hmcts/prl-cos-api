@@ -483,7 +483,8 @@ public class HearingDataService {
             if (caseLinkedDataList.isPresent()) {
                 return caseLinkedDataList.get().stream()
                     .map(cData -> DynamicListElement.builder()
-                        .code(cData.getCaseReference()).label(cData.getCaseReference()).build()).collect(Collectors.toList());
+                        .code(cData.getCaseReference()).label(cData.getCaseReference()).build())
+                    .toList();
             }
         } catch (Exception e) {
             log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
