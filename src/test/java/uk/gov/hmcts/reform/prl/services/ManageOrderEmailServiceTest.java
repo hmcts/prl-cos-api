@@ -1330,7 +1330,7 @@ public class ManageOrderEmailServiceTest {
 
         Mockito.verify(emailService,Mockito.times(3)).send(Mockito.anyString(),
                                                            Mockito.any(),
-                                                           Mockito.any(),Mockito.any());;
+                                                           Mockito.any(),Mockito.any());
     }
 
     @Test

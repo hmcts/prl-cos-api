@@ -672,7 +672,6 @@ public class ManageOrderEmailService {
                         log.error("Exception occurred in sending order docs to respondent", e);
                     }
                 }
-
             }
         });
     }
@@ -681,7 +680,6 @@ public class ManageOrderEmailService {
                                           PartyDetails partyData,
                                           String authorisation,
                                           List<Document> orderDocuments) throws Exception {
-
         List<Document> documents = new ArrayList<>();
         //generate cover letter
         List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
