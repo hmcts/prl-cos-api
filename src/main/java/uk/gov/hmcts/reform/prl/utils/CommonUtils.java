@@ -23,6 +23,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
+
 
 @Slf4j
 public class CommonUtils {
@@ -183,7 +188,8 @@ public class CommonUtils {
     public static String formatDateTime(String pattern, LocalDateTime localDateTime) {
         try {
             if (null != localDateTime) {
-                return localDateTime.format(DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH));
+                return localDateTime.format(DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH))
+                    .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE, PM_UPPER_CASE);
             }
         } catch (Exception e) {
             log.error("Error while formatting the date time", e);

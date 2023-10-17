@@ -27,8 +27,6 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -37,9 +35,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -87,9 +84,8 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getLegalProfQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getDocument().getDocumentFileName()
-                                                          + " - " + CommonUtils.formatDateTime(DATE_TIME_PATTERN,
-                                                                                               element.getValue().getDocumentUploadedDate())
-                                                   .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE,PM_UPPER_CASE))
+                                                          + " - " + formatDateTime(DATE_TIME_PATTERN,
+                                                                                   element.getValue().getDocumentUploadedDate()))
                                                .build())
                                            .toList());
         }
@@ -98,9 +94,8 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
-                                                          + " - " + CommonUtils.formatDateTime(DATE_TIME_PATTERN,
-                                                                                               element.getValue().getDocumentUploadedDate())
-                                                   .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE,PM_UPPER_CASE))
+                                                          + " - " + formatDateTime(DATE_TIME_PATTERN,
+                                                                                   element.getValue().getDocumentUploadedDate()))
                                                .build())
                                            .toList());
         }
@@ -109,9 +104,8 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getCourtStaffQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
-                                                          + " - " + CommonUtils.formatDateTime(DATE_TIME_PATTERN,
-                                                                                               element.getValue().getDocumentUploadedDate())
-                                                   .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE,PM_UPPER_CASE))
+                                                          + " - " + formatDateTime(DATE_TIME_PATTERN,
+                                                                                   element.getValue().getDocumentUploadedDate()))
                                                .build())
                                            .toList());
         }
