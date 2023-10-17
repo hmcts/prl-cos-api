@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -108,6 +107,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_AS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
@@ -2639,7 +2639,7 @@ public class DraftAnOrderServiceTest {
 
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest,
                                                                     List.of(element(HearingData.builder().build())),
-                                                                    false);
+                                                                    true);
         assertNotNull(stringObjectMap);
     }
 
@@ -2965,7 +2965,6 @@ public class DraftAnOrderServiceTest {
 
     }
 
-    @Ignore
     @Test
     public void testSelectedOrderForDraftAnOrderScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
@@ -2997,7 +2996,6 @@ public class DraftAnOrderServiceTest {
         //assertEquals(1, response.getData().getChildren().size());
     }
 
-    @Ignore
     @Test
     public void testSelectedOrderForDraftAnOrderC21Scenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
@@ -3031,7 +3029,7 @@ public class DraftAnOrderServiceTest {
         //assertEquals(1, response.getData().getChildren().size());
     }
 
-    @Ignore
+
     @Test
     public void testSelectedOrderForSdoDraftAnOrderScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
@@ -3063,7 +3061,7 @@ public class DraftAnOrderServiceTest {
 
     }
 
-    @Ignore
+
     @Test
     public void testSelectedOrderForDioDraftAnOrderScenario() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
@@ -3408,5 +3406,52 @@ public class DraftAnOrderServiceTest {
         assertEquals("Please enter numeric value for Hearing estimated days", errors.get(1));
         assertEquals("Please enter numeric value for Hearing estimated hours", errors.get(2));
         assertEquals("Please enter numeric value for Hearing estimated minutes", errors.get(3));
+    }
+
+    @Test
+    public void testPopulateDraftOrderHearingFieldsWhenDraftAnOrder() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderByConsent(Yes)
+                              .recitalsOrPreamble("test recitals")
+                              .orderDirections("test orders")
+                              .furtherDirectionsIfRequired("test further directions")
+                              .furtherInformationIfRequired("test further information")
+                              .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
+                              .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
+                              .isTheOrderAboutChildren(Yes)
+                              .childOption(DynamicMultiSelectList.builder()
+                                               .value(List.of(DynamicMultiselectListElement.builder().label(
+                                                   "John (Child 1)").build())).build()
+                              )
+                              .cafcassCymruEmail("test@test.com")
+                              .build())
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoAfterSecondGatekeeping("test")
+                                        .sdoAllocateOrReserveJudge(AllocateOrReserveJudgeEnum.allocatedTo)
+                                        .build())
+            .selectedOrder("ABC")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        )).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
+
+        Map<String, Object> caseDataMap = draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken);
+
+        Assert.assertEquals(stringObjectMap, caseDataMap);
+        Assert.assertNotNull(caseDataMap.get(ORDER_HEARING_DETAILS));
     }
 }

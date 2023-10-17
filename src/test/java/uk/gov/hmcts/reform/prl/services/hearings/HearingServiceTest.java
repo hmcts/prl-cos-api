@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
@@ -94,6 +95,11 @@ public class HearingServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenReturn(hearings);
+        when(hearingApiClient.getHearingsByListOfCaseIds(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(List.of(hearings));
 
         refDataCategoryValueMap.put("ABA5-FFH", "Full/Final hearing");
         refDataCategoryValueMap.put("ABA5-CHR", "Celebration hearing");
@@ -258,6 +264,36 @@ public class HearingServiceTest {
         Assert.assertEquals(null, response);
     }
 
+    @Test
+    @DisplayName("test case for HearingService getHearings for given list of case ids success.")
+    public void getHearingsByListOfCaseIdsTestSuccess() {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        Map<String, String> caseIds = new HashMap<>();
+        caseIds.put(caseReferenceNumber, null);
+        List<Hearings> hearingsResp = hearingService.getHearingsByListOfCaseIds(auth, caseIds);
+
+        assertNotNull(hearingsResp);
+        assertFalse(hearingsResp.isEmpty());
+    }
+
+    @Test
+    @DisplayName("test case for HearingService getHearings for given list of case ids success.")
+    public void getHearingsByListOfCaseIdsTestException() {
+
+        when(hearingApiClient.getHearingsByListOfCaseIds(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenThrow(new RuntimeException());
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        Map<String, String> caseIds = new HashMap<>();
+        caseIds.put(caseReferenceNumber, null);
+        List<Hearings> hearingsResp = hearingService.getHearingsByListOfCaseIds(auth, caseIds);
+
+        Assert.assertTrue(hearingsResp.isEmpty());
+    }
 }
 
 
