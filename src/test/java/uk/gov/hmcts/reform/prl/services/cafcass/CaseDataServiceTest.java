@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -266,9 +267,9 @@ public class CaseDataServiceTest {
         caseStateList.add("DECISION_OUTCOME");
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
 
-        CafCassResponse realCafCassResponse = caseDataService.getCaseData("authorisation",
-                                                                          "start", "end"
-        );
+        assertThrows(RuntimeException.class, () -> caseDataService.getCaseData("authorisation",
+                                                                               "start", "end"
+        ));
 
     }
 }
