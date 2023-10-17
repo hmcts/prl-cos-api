@@ -330,5 +330,7 @@ public class StandardDirectionOrder implements MappableObject {
     private final DynamicMultiSelectList sdoNewPartnerPartiesCafcassCymru;
     private final String sdoNewPartnerPartiesCafcassText;
     private final String sdoNewPartnerPartiesCafcassCymruText;
+    @JsonProperty("sdoAllocateDecisionJudgeFullName")
+    private String sdoAllocateDecisionJudgeFullName;
 
 }

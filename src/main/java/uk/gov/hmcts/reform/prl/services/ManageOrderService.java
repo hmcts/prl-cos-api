@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.ApplicantChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -106,6 +107,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PERMISSION_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRST_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
@@ -894,7 +896,7 @@ public class ManageOrderService {
                 caseData = populateCustomOrderFields(caseData);
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                caseData = populateJudgeName(authorisation, caseData);
+                caseData = populateJudgeNames(authorisation, caseData);
                 caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
             }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
@@ -1713,7 +1715,7 @@ public class ManageOrderService {
                 }
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
-                caseData = populateJudgeName(authorisation, caseData);
+                caseData = populateJudgeNames(authorisation, caseData);
                 caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
                 log.info("StandardDirectionOrder before generating document " + caseData.getStandardDirectionOrder());
             }
@@ -1750,6 +1752,27 @@ public class ManageOrderService {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
         }
         return caseDataUpdated;
+    }
+
+    private CaseData populateJudgeNames(String authorisation, CaseData caseData) {
+        if (isNotEmpty(caseData.getStandardDirectionOrder())
+            && (isNotEmpty(caseData.getStandardDirectionOrder().getSdoAllocateOrReserveJudgeName())
+            || isNotEmpty(caseData.getStandardDirectionOrder().getSdoNextStepJudgeName()))) {
+            String sdoNamedJudgeFullName = getJudgeFullName(
+                authorisation,
+                caseData.getStandardDirectionOrder().getSdoAllocateOrReserveJudgeName()
+            );
+            String sdoAllocateDecisionJudgeFullName = getJudgeFullName(
+                authorisation,
+                caseData.getStandardDirectionOrder().getSdoNextStepJudgeName()
+            );
+            caseData = caseData.toBuilder()
+                .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder()
+                                            .sdoNamedJudgeFullName(sdoNamedJudgeFullName)
+                                            .sdoAllocateDecisionJudgeFullName(sdoAllocateDecisionJudgeFullName).build())
+                .build();
+        }
+        return caseData;
     }
 
     private CaseData populatePartyDetailsOfNewParterForDocmosis(CaseData caseData) {
@@ -2295,27 +2318,24 @@ public class ManageOrderService {
         }
     }
 
-    public CaseData populateJudgeName(String authorisation, CaseData caseData) {
-        StandardDirectionOrder sdo = caseData.getStandardDirectionOrder();
-        if (null != sdo && null != sdo.getSdoAllocateOrReserveJudgeName()) {
-            String idamId = caseData.getStandardDirectionOrder()
-                .getSdoAllocateOrReserveJudgeName().getIdamId();
+    public String getJudgeFullName(String authorisation, JudicialUser judge) {
+        String judgeFullName = EMPTY_STRING;
+        if (isNotEmpty(judge)) {
+            String idamId = judge.getIdamId();
             if (StringUtils.isNotBlank(idamId)) {
                 try {
                     idamId = "5464226c-9860-46e0-bd8f-96fc2bb5bc05";
                     UserDetails userDetails = userService.getUserByUserId(authorisation, idamId);
                     if (null != userDetails) {
                         log.info("populateJudgeName for SDO ==>" + userDetails.getFullName());
-                        return caseData.toBuilder()
-                            .standardDirectionOrder(sdo.toBuilder().sdoNamedJudgeFullName(userDetails.getFullName()).build())
-                            .build();
+                        judgeFullName = userDetails.getFullName();
                     }
                 } catch (Exception e) {
                     log.error("User details not found for idam id {}", idamId);
                 }
             }
         }
-        return caseData;
+        return judgeFullName;
     }
 
     public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {

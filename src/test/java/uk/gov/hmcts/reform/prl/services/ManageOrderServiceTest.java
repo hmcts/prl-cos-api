@@ -2956,7 +2956,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateJudgeName() {
+    public void testGetJudgeFullName() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("1234").personalCode("ABC").build())
             .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
@@ -2968,8 +2968,8 @@ public class ManageOrderServiceTest {
             .build();
         when(userService.getUserByUserId(any(), any())).thenReturn(UserDetails.builder().surname("Judge").forename(
             "Test").build());
-        CaseData actualCaseData = manageOrderService.populateJudgeName("Bearer test", caseData);
-        assertEquals("Test Judge", actualCaseData.getStandardDirectionOrder().getSdoNamedJudgeFullName());
+        String name = manageOrderService.getJudgeFullName("Bearer test", JudicialUser.builder().idamId("1234").personalCode("ABC").build());
+        assertEquals("Test Judge", name);
     }
 
 

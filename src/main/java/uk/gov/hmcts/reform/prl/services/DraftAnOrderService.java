@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoFurtherDirections;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoNameOfApplicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoNameOfRespondent;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -1010,6 +1011,7 @@ public class DraftAnOrderService {
         populateSdoSection7daOccuredEditContent(caseData, caseDataUpdated);
         populateSdoLsApplicantRespondentNameCollection(caseData, caseDataUpdated);
         populateSdoMiamAttendingPerson(caseData, caseDataUpdated);
+        populateSdoFurtherDirectionDetails(caseData, caseDataUpdated);
 
         if (caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList() == null
             || CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList().getListItems())) {
@@ -1094,6 +1096,14 @@ public class DraftAnOrderService {
         sdoMiamAttendingPersons.add(element(MiamAttendingPersonName.builder().build()));
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterDialectRequired())) {
             caseDataUpdated.put("sdoMiamAttendingPerson", sdoMiamAttendingPersons);
+        }
+    }
+
+    private static void populateSdoFurtherDirectionDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails = new ArrayList<>();
+        sdoFurtherDirectionDetails.add(element(SdoFurtherDirections.builder().build()));
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterDialectRequired())) {
+            caseDataUpdated.put("sdoFurtherDirectionDetails", sdoFurtherDirectionDetails);
         }
     }
 
