@@ -79,7 +79,7 @@ public class CaseUtils {
 
         CaseData caseData = caseDataBuilder.build();
 
-        if ((State.SUBMITTED_PAID.equals(state)) && caseData.getDateSubmitted() == null) {
+        if ((State.SUBMITTED_PAID.equals(state))) {
             caseData = caseData.setDateSubmittedDate();
         }
 
