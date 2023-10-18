@@ -401,6 +401,7 @@ public class SendgridServiceTest {
         combinedMap.put("attachmentType", "pdf");
         combinedMap.put("disposition", "attachment");
         combinedMap.put("specialNote", "Yes");
+        combinedMap.put("finalOrder", "Yes");
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);

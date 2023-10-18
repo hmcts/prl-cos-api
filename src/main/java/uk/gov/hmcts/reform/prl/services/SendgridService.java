@@ -161,9 +161,6 @@ public class SendgridService {
                 throw new IOException(ex.getMessage());
             } catch (Exception e) {
                 log.info("inside exception block");
-                log.info("Runtime.getRuntime().totalMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().totalMemory()));
-                log.info("Runtime.getRuntime().maxMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
-                log.info("Runtime.getRuntime().freeMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().freeMemory()));
             }
         }
         return EmailNotificationDetails.builder()
@@ -227,12 +224,6 @@ public class SendgridService {
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
             attachments.setContent(documentAsString);
-            /*attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
-                                                                      .getDocumentBytes(
-                                                                          d.getDocumentUrl(),
-                                                                          authorization,
-                                                                          s2sToken
-                                                                      )));*/
             mail.addAttachments(attachments);
 
         }
