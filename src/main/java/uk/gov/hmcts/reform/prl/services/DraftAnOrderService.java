@@ -264,7 +264,8 @@ public class DraftAnOrderService {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                     log.info("removeDraftOrderAndAddToFinalOrder caseId ==> " + caseData.getId());
                     log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistratesLastName ==> " + caseData.getJudgeOrMagistratesLastName());
-                    log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistrateTitle ==> " + caseData.getManageOrders().getJudgeOrMagistrateTitle());
+                    log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistrateTitle ==> "
+                                 + caseData.getManageOrders().getJudgeOrMagistrateTitle());
                 }
                 updatedCaseData.put(
                     "orderCollection",
