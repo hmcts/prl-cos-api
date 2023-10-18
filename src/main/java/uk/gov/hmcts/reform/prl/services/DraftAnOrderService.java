@@ -366,6 +366,10 @@ public class DraftAnOrderService {
                 .build();
         } else {
             manageOrderService.populateChildrenListForDocmosis(caseData);
+            if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
+                && draftOrder.getOrderType().equals("appointmentOfGuardian")) {
+                caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
+            }
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
@@ -862,6 +866,7 @@ public class DraftAnOrderService {
                                   .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
                                   .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
                                   .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                                  .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
                                   .orderDirections(caseData.getManageOrders().getOrderDirections())
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                                   .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
@@ -915,6 +920,7 @@ public class DraftAnOrderService {
                                   .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
                                   .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
                                   .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+                                  .cafcassOfficeDetails(caseData.getManageOrders().getCafcassOfficeDetails())
                                   .orderDirections(caseData.getManageOrders().getOrderDirections())
                                   .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
                                   .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
