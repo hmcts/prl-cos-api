@@ -77,11 +77,13 @@ public class CaseUtils {
             .createdDate(caseDetails.getCreatedDate())
             .lastModifiedDate(caseDetails.getLastModified());
 
-        if ((State.SUBMITTED_PAID.equals(state))) {
-            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-            caseDataBuilder.dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
+        CaseData caseData = caseDataBuilder.build();
+
+        if ((State.SUBMITTED_PAID.equals(state)) && caseData.getDateSubmitted() == null) {
+            caseData = caseData.setDateSubmittedDate();
         }
-        return caseDataBuilder.build();
+
+        return caseData;
     }
 
     public static String getStateLabel(State state) {
