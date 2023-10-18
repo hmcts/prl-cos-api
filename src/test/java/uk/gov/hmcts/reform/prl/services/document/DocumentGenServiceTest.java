@@ -3394,7 +3394,7 @@ public class DocumentGenServiceTest {
 
 
     @Test
-    public void testGenerateCitizenDocument111111() throws Exception {
+    public void testUploadDocument() throws Exception {
 
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
         binaryLink.href = randomAlphanumeric(10);

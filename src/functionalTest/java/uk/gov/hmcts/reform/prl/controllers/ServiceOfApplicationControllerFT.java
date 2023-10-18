@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 public class ServiceOfApplicationControllerFT {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
+    private static final String VALID_REQUEST_BODY_SUBMITTED = "requests/service-of-application-submitted.json";
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -50,6 +51,23 @@ public class ServiceOfApplicationControllerFT {
             .when()
             .contentType("application/json")
             .post("/service-of-application/about-to-start")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenRequestWithCaseData_ResponseSubmitted() throws Exception {
+
+        final String userToken = "Bearer testToken";
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_SUBMITTED);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/submitted")
             .then()
             .assertThat().statusCode(200);
     }
