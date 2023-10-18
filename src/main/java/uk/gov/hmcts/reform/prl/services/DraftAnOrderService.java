@@ -267,6 +267,7 @@ public class DraftAnOrderService {
                     log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistrateTitle ==> "
                                  + caseData.getManageOrders().getJudgeOrMagistrateTitle());
                 }
+                caseData = caseData.toBuilder().judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName()).build();
                 updatedCaseData.put(
                     "orderCollection",
                     getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
