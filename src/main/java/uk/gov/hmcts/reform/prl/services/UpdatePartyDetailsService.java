@@ -300,7 +300,7 @@ public class UpdatePartyDetailsService {
     private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
-        if (partyIndex >= 0 && caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
+        if (partyIndex >= 0) {
             switch (partyIndex) {
                 case 0:
                     updatedCaseData
@@ -349,14 +349,6 @@ public class UpdatePartyDetailsService {
                 default:
                     break;
             }
-        } else {
-            log.info("inside switch for fl401");
-            updatedCaseData
-                    .put("respondentAc8Documents",getOrCreateC8DocumentList(authorisation, caseData, dataMap,
-                            caseData.getRespondentC8Document()
-                                    .getRespondentAc8Documents(),
-                            isDetailsChanged,
-                            respondent));
         }
     }
 
