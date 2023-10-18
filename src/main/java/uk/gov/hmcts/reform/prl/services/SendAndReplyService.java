@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -47,6 +48,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -669,6 +671,9 @@ public class SendAndReplyService {
             .replyHistory(null)
             .otherApplicationLink(isNotBlank(getValueCode(message.getApplicationsList())) ? otherApplicationsUrl : null)
             .hearingsLink(isNotBlank(getValueCode(message.getFutureHearingsList())) ? hearingsUrl : null)
+            .documents(REPLY.equals(caseData.getChooseSendOrReply())
+                           ? getReplyDocuments(authorization, caseData.getSendOrReplyMessage().getReplyDocuments())
+                           : List.of(element(getSelectedDocument(authorization, message.getSubmittedDocumentsList()))))
             .build();
     }
 
@@ -810,15 +815,11 @@ public class SendAndReplyService {
                             ))
                             .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
-                            .replyDocuments(Arrays.asList(
-                                element(ReplyDocument.builder()
-                                            .submittedDocsRefList(getCategoriesAndDocuments(
-                                                authorization,
-                                                String.valueOf(caseData.getId())
-                                            ))
-                                            .build())))
                             .build())
                     .sendReplyTempDocs(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
+                    .replyDocuments(Arrays.asList(element(ReplyDocument.builder()
+                                    .submittedDocsRefList(getCategoriesAndDocuments(authorization, String.valueOf(caseData.getId())))
+                                    .build())))
                     .build())
             .build();
     }
@@ -1011,6 +1012,7 @@ public class SendAndReplyService {
             .senderName(message.getSenderName())
             .senderRole(message.getSenderRole())
             .updatedTime(message.getUpdatedTime())
+            .documents(message.getDocuments())
             .build();
     }
 
@@ -1134,5 +1136,18 @@ public class SendAndReplyService {
         }
 
         return sendReplyTempDocs;
+    }
+
+    private List<Element<Document>> getReplyDocuments(String authorization,
+                                                      List<Element<ReplyDocument>> replyDocuments) {
+        if (isNotEmpty(replyDocuments)) {
+            return replyDocuments.stream()
+                .map(Element::getValue)
+                .map(replyDocument -> element(getSelectedDocument(authorization,
+                                                                  replyDocument.getSubmittedDocsRefList())))
+                .toList();
+        }
+
+        return Collections.emptyList();
     }
 }

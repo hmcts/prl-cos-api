@@ -28,9 +28,12 @@ public class SendOrReplyMessage {
     @JsonProperty("sendReplyTempDocs")
     private final List<Element<SendReplyTempDoc>> sendReplyTempDocs;
 
+    @JsonProperty("replyDocuments")
+    private List<Element<ReplyDocument>> replyDocuments;
+
     public static String[] temporaryFieldsAboutToStart() {
         return new String[]{
-            "messageContent", "respondToMessage", "sendReplyTempDocs",
+            "messageContent", "respondToMessage", "sendReplyTempDocs", "replyDocuments",
             "messageMetaData", "messageReplyDynamicList", "sendMessageObject",
             "replyMessageObject", "messageReplyTable", "chooseSendOrReply"
         };
@@ -38,7 +41,7 @@ public class SendOrReplyMessage {
 
     public static String[] temporaryFieldsAboutToSubmit() {
         return new String[]{
-            "messageContent", "sendReplyTempDocs",
+            "messageContent", "sendReplyTempDocs", "replyDocuments",
             "messageMetaData", "messageReplyDynamicList", "messageReplyTable"
         };
     }
