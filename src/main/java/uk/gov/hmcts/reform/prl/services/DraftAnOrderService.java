@@ -269,6 +269,9 @@ public class DraftAnOrderService {
                     caseData = caseData.toBuilder()
                         .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
                         .dateOrderMade(draftOrder.getDateOrderMade())
+                        .wasTheOrderApprovedAtHearing(draftOrder.getWasTheOrderApprovedAtHearing())
+                        .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
+                        .magistrateLastName(draftOrder.getMagistrateLastName())
                         .build();
                 }
 
