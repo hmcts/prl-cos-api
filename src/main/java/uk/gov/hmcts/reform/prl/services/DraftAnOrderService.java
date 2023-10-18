@@ -262,6 +262,9 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
+                    log.info("removeDraftOrderAndAddToFinalOrder caseId ==> " + caseData.getId());
+                    log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistratesLastName ==> " + caseData.getJudgeOrMagistratesLastName());
+                    log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistrateTitle ==> " + caseData.getManageOrders().getJudgeOrMagistrateTitle());
                 }
                 updatedCaseData.put(
                     "orderCollection",
@@ -375,6 +378,9 @@ public class DraftAnOrderService {
                 log.info("inside filterEmptyHearingDetails");
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
             }
+            log.info("before creating final order caseId ==> " + caseData.getId());
+            log.info("before creating final order getJudgeOrMagistratesLastName ==> " + caseData.getJudgeOrMagistratesLastName());
+            log.info("before creating final order getJudgeOrMagistrateTitle ==> " + caseData.getManageOrders().getJudgeOrMagistrateTitle());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
