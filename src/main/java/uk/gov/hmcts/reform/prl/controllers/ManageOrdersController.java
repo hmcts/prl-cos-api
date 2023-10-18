@@ -292,6 +292,7 @@ public class ManageOrdersController {
 
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
+                log.info("** 111111111");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             // The following can be removed or utilised based on requirement
