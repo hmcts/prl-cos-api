@@ -372,7 +372,7 @@ public class DraftAnOrderService {
         } else {
             manageOrderService.populateChildrenListForDocmosis(caseData);
             if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
-                && draftOrder.getOrderType().equals("appointmentOfGuardian")) {
+                && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
                 caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
             }
             caseData = caseData.toBuilder().manageOrders(
