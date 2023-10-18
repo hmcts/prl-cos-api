@@ -1276,6 +1276,36 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
+    public void testServeOrdersToOtherOrganisationPostalInformationIsEmpty() {
+        OrderDetails orderDetails = OrderDetails.builder()
+                .orderTypeId("abc")
+                .dateCreated(LocalDateTime.now())
+                .orderDocument(englishOrderDoc)
+                .orderDocumentWelsh(welshOrderDoc)
+                .serveOrderDetails(ServeOrderDetails.builder()
+                        .additionalDocuments(List.of(element(additionalOrderDoc)))
+                        .otherPartiesServed(YesOrNo.Yes)
+                        .build())
+                .build();
+
+        caseData = CaseData.builder()
+                .id(12345L)
+                .applicantCaseName("TestCaseName")
+                .caseTypeOfApplication("C100")
+                .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+                .manageOrders(ManageOrders.builder()
+                        .serveOrderDynamicList(dynamicMultiSelectList)
+                        .build())
+                .orderCollection(List.of(element(uuid,orderDetails)))
+                .build();
+
+        Map<String, Object> dataMap = new HashMap<>();
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        assertNotNull(dataMap.get("orderCollection"));
+    }
+
+    @Test
     public void testServeOrdersDetailsNull() {
         OrderDetails orderDetails = OrderDetails.builder()
                 .orderTypeId("abc")
