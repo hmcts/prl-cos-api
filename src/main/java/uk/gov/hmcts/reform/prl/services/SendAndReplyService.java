@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1114,25 +1115,30 @@ public class SendAndReplyService {
         List<Element<SendReplyTempDoc>> sendReplyTempDocs = new ArrayList<>();
 
         //document from latest message
-        if (ObjectUtils.isNotEmpty(message.getSelectedDocument())) {
-            sendReplyTempDocs.add(element(SendReplyTempDoc.builder()
-                                              .attachedTime(message.getUpdatedTime())
-                                              .document(message.getSelectedDocument())
-                                              .build()));
+        if (isNotEmpty(message.getDocuments())) {
+            message.getDocuments().stream()
+                .map(Element::getValue)
+                .forEach(document -> sendReplyTempDocs.add(
+                    element(SendReplyTempDoc.builder()
+                                .attachedTime(message.getUpdatedTime())
+                                .document(document).build())));
         }
 
         //documents from message history
-        if (null != message.getReplyHistory()) {
-            message.getReplyHistory().stream().map(Element::getValue)
-                .filter(messageHistory -> ObjectUtils.isNotEmpty(messageHistory.getSelectedDocument()))
-                .forEach(history ->
-                             sendReplyTempDocs.add(
-                                 element(SendReplyTempDoc.builder()
-                                             .attachedTime(history.getUpdatedTime())
-                                             .document(history.getSelectedDocument())
-                                             .build())
-                             )
-            );
+        if (isNotEmpty(message.getReplyHistory())) {
+            message.getReplyHistory().stream()
+                .map(Element::getValue)
+                .forEach(history -> {
+                    LocalDateTime attachedTime = history.getUpdatedTime();
+                    if (isNotEmpty(history.getDocuments())) {
+                        history.getDocuments().stream()
+                            .map(Element::getValue)
+                            .forEach(document -> sendReplyTempDocs.add(
+                                element(SendReplyTempDoc.builder()
+                                            .attachedTime(attachedTime)
+                                            .document(document).build())));
+                    }
+                });
         }
 
         return sendReplyTempDocs;
