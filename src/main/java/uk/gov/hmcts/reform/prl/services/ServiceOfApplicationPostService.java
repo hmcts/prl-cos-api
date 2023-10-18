@@ -255,6 +255,11 @@ public class ServiceOfApplicationPostService {
             if (launchDarklyClient.isFeatureEnabled("soa-bulk-print")) {
                 log.info("*** pdfDocs -- > {} ",pdfDocs);
                 log.info("******Bulk print is enabled****");
+
+                for (Document doc:docs) {
+                    pdfDocs.add(documentGenService.convertToPdf(authorisation, doc));
+                }
+                log.info("*** pdfDocs11111 -- > {} ",pdfDocs);
                 UUID bulkPrintId = bulkPrintService.send(
                     String.valueOf(caseData.getId()),
                     authorisation,
