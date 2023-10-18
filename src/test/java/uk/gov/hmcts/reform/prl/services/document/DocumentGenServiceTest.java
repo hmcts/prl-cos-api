@@ -73,6 +73,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
@@ -3389,6 +3390,38 @@ public class DocumentGenServiceTest {
         verify(caseDocumentClient, times(1)).getDocumentBinary(
             authToken, "s2s token", generatedDocumentInfo.getUrl()
         );
+    }
+
+
+    @Test
+    public void testGenerateCitizenDocument111111() throws Exception {
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        binaryLink.href = randomAlphanumeric(10);
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        selfLink.href = randomAlphanumeric(10);
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        links.binary = binaryLink;
+        links.self = selfLink;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        document.links = links;
+        document.originalDocumentName = randomAlphanumeric(10);
+
+        when(uploadService.uploadDocument(any(), any(), any(), any())).thenReturn(document);
+
+        documentGenService.uploadDocument(authToken, file);
+
+        verify(uploadService, times(1)).uploadDocument(
+            file.getBytes(),
+            file.getOriginalFilename(),
+            file.getContentType(),
+            authToken
+        );
+
+        verifyNoMoreInteractions(uploadService);
+
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
