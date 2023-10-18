@@ -249,7 +249,6 @@ public class UpdatePartyDetailsService {
         throws Exception {
         int respondentIndex = 0;
         for (Element<PartyDetails> respondent: currentRespondents) {
-            log.info("respondent index {}", respondentIndex);
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
                 respondent
@@ -301,7 +300,7 @@ public class UpdatePartyDetailsService {
     private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
                                       Element<PartyDetails> respondent) throws Exception {
-        if (partyIndex >= 0) {
+        if (partyIndex >= 0 && caseData.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             switch (partyIndex) {
                 case 0:
                     updatedCaseData
@@ -350,6 +349,14 @@ public class UpdatePartyDetailsService {
                 default:
                     break;
             }
+        } else {
+            log.info("inside switch for fl401");
+            updatedCaseData
+                    .put("respondentAc8Documents",getOrCreateC8DocumentList(authorisation, caseData, dataMap,
+                            caseData.getRespondentC8Document()
+                                    .getRespondentAc8Documents(),
+                            isDetailsChanged,
+                            respondent));
         }
     }
 
