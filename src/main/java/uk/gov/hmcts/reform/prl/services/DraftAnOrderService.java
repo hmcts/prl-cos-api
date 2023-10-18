@@ -266,8 +266,12 @@ public class DraftAnOrderService {
                     log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistratesLastName ==> " + caseData.getJudgeOrMagistratesLastName());
                     log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistrateTitle ==> "
                                  + caseData.getManageOrders().getJudgeOrMagistrateTitle());
+                    caseData = caseData.toBuilder()
+                        .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
+                        .dateOrderMade(draftOrder.getDateOrderMade())
+                        .build();
                 }
-                caseData = caseData.toBuilder().judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName()).build();
+
                 updatedCaseData.put(
                     "orderCollection",
                     getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
