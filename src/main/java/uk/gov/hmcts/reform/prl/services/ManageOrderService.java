@@ -2370,6 +2370,20 @@ public class ManageOrderService {
 
     }
 
+    public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData = caseData.toBuilder()
+                    .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
+                    .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
+                    .magistrateLastName(draftOrder.getMagistrateLastName())
+                    .dateOrderMade(draftOrder.getDateOrderMade() != null ? draftOrder.getDateOrderMade() : draftOrder.getDateOrderMade())
+            .build();
+
+        }
+        return  caseData;
+
+    }
+
     public List<Element<HearingData>> getHearingDataFromExistingHearingData(String authorisation,
                                                                             List<Element<HearingData>> existingOrderHearingDetails,
                                                                             CaseData caseData) {
