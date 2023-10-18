@@ -1211,6 +1211,7 @@ public class ManageOrderEmailServiceTest {
                 .dateCreated(LocalDateTime.now())
                 .orderDocument(englishOrderDoc)
                 .orderDocumentWelsh(welshOrderDoc)
+                .typeOfOrder("Final")
                 .serveOrderDetails(ServeOrderDetails.builder()
                         .additionalDocuments(List.of(element(additionalOrderDoc)))
                         .otherPartiesServed(YesOrNo.Yes)
