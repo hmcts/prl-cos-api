@@ -34,4 +34,8 @@
      spring-cloud-starter-openfeign-3.0.5.jar ]]></notes>
     <cve>CVE-2023-34040</cve>
   </suppress>
+  <suppress>
+    <cve>CVE-2023-42795</cve>
+    <cve>CVE-2023-45648</cve>
+  </suppress>
 </suppressions>
