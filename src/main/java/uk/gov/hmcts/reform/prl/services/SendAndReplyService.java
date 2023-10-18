@@ -35,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageHistory;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
+import uk.gov.hmcts.reform.prl.models.sendandreply.ReplyDocument;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendReplyTempDoc;
 import uk.gov.hmcts.reform.prl.services.cafcass.RefDataService;
@@ -44,6 +45,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -808,7 +810,13 @@ public class SendAndReplyService {
                             ))
                             .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
-                            .submittedDocumentsList(getCategoriesAndDocuments(authorization, String.valueOf(caseData.getId())))
+                            .replyDocuments(Arrays.asList(
+                                element(ReplyDocument.builder()
+                                            .submittedDocsRefList(getCategoriesAndDocuments(
+                                                authorization,
+                                                String.valueOf(caseData.getId())
+                                            ))
+                                            .build())))
                             .build())
                     .sendReplyTempDocs(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
                     .build())
