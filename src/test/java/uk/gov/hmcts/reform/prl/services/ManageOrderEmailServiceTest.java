@@ -1277,6 +1277,15 @@ public class ManageOrderEmailServiceTest {
 
     @Test
     public void testServeOrdersToOtherOrganisationPostalInformationIsEmpty() {
+        PostalInformation address = PostalInformation.builder()
+                .postalName("Test")
+                .postalAddress(Address.builder().build())
+                .build();
+        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
+                .id(uuid)
+                .value(address).build();
+        List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
+
         OrderDetails orderDetails = OrderDetails.builder()
                 .orderTypeId("abc")
                 .dateCreated(LocalDateTime.now())
@@ -1285,6 +1294,7 @@ public class ManageOrderEmailServiceTest {
                 .serveOrderDetails(ServeOrderDetails.builder()
                         .additionalDocuments(List.of(element(additionalOrderDoc)))
                         .otherPartiesServed(YesOrNo.Yes)
+                        .postalInformation(listOfAddress)
                         .build())
                 .build();
 
