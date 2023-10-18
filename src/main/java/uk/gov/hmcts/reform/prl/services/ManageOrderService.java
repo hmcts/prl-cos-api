@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -2314,5 +2315,23 @@ public class ManageOrderService {
             caseDataUpdated.put("additionalOrderDocuments", additionalOrderDocuments);
         }
 
+    }
+
+    public String checkIfHearingTaskNeeded(List<Element<HearingData>> ordersHearingDetails) {
+        String isTaskNeeded = "No";
+        if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
+            List<HearingData> hearingList = ordersHearingDetails.stream()
+                .map(Element::getValue).collect(Collectors.toList());
+            for (HearingData hearing : hearingList) {
+                if (hearing.getHearingDateConfirmOptionEnum() != null) {
+                    if (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum())) {
+                        isTaskNeeded = "Yes";
+                    }
+                }
+            }
+        }
+        return isTaskNeeded;
     }
 }

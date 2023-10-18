@@ -14,12 +14,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
-import uk.gov.hmcts.reform.prl.enums.Roles;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -3274,5 +3269,56 @@ public class ManageOrderServiceTest {
 
         //Then
         assertNull(caseDataUpdated.get("additionalOrderDocuments"));
+    }
+
+    @Test
+    public void testWaHearingTaskCreationFlag(){
+        List<Element<HearingData>> hearingDataList  = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(manageOrders).build();
+
+        assertEquals("Yes", manageOrderService.checkIfHearingTaskNeeded(hearingDataList));
+    }
+
+    @Test
+    public void testWaHearingTaskCreationFlagShouldReturnNo(){
+        List<Element<HearingData>> hearingDataList  = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(manageOrders).build();
+
+        assertEquals("No", manageOrderService.checkIfHearingTaskNeeded(hearingDataList));
+    }
+
+    @Test
+    public void testWaHearingTaskCreationFlagShouldReturnYes(){
+        List<Element<HearingData>> hearingDataList  = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .manageOrders(manageOrders).build();
+
+        assertEquals("Yes", manageOrderService.checkIfHearingTaskNeeded(hearingDataList));
     }
 }
