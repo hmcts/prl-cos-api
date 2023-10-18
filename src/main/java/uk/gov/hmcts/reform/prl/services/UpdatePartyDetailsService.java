@@ -249,6 +249,7 @@ public class UpdatePartyDetailsService {
         throws Exception {
         int respondentIndex = 0;
         for (Element<PartyDetails> respondent: currentRespondents) {
+            log.info("respondent index {}", respondentIndex);
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
                 respondent
@@ -377,7 +378,6 @@ public class UpdatePartyDetailsService {
                         dataMap
                 );
                 dataMap.put("dynamic_fileName", fileName + " welsh" + ".pdf");
-                log.info("updating c8 form");
                 c8FinalWelshDocument = documentGenService.generateSingleDocument(
                         authorisation,
                         caseData,
