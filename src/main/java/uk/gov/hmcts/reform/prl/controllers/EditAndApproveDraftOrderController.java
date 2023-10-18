@@ -25,17 +25,17 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
-import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -49,10 +49,8 @@ public class EditAndApproveDraftOrderController {
     private final ObjectMapper objectMapper;
     private final DraftAnOrderService draftAnOrderService;
     private final ManageOrderService manageOrderService;
-    private final HearingDataService hearingDataService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
-    private final HearingService hearingService;
     private final CoreCaseDataService coreCaseDataService;
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -176,6 +174,14 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+
+            List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
+
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
@@ -287,9 +293,6 @@ public class EditAndApproveDraftOrderController {
                 }
 
                 caseDataUpdated.put(STATE, caseData.getState());
-
-                //Cleanup
-                /*ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);*/
 
                 coreCaseDataService.triggerEvent(
                         JURISDICTION,
