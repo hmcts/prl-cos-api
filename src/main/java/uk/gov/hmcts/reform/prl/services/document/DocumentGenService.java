@@ -1264,7 +1264,6 @@ public class DocumentGenService {
                 authTokenGenerator.generate(),
                 document.getDocumentBinaryUrl()
             );
-            //ByteArrayResource resource = (ByteArrayResource) responseEntity.getBody();
             byte[] docInBytes = Optional.ofNullable(responseEntity)
                 .map(ResponseEntity::getBody)
                 .map(resource -> {
@@ -1277,7 +1276,6 @@ public class DocumentGenService {
                 .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
 
             Map<String, Object> tempCaseDetails = new HashMap<>();
-            //byte[] docInBytes = resource.getByteArray();
             tempCaseDetails.put("fileName", docInBytes);
             GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
                 document.getDocumentFileName(),
