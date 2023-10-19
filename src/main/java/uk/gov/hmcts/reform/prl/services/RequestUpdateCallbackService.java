@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPayment;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CcdPaymentServiceRequestUpdate;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -46,6 +47,7 @@ public class RequestUpdateCallbackService {
     private final AllTabServiceImpl allTabService;
     private final CourtFinderService courtFinderService;
     private final CcdCoreCaseDataService coreCaseDataService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     public void processCallback(ServiceRequestUpdateDto serviceRequestUpdateDto) {
         String systemAuthorisation = systemUserService.getSysUserToken();
@@ -177,6 +179,7 @@ public class RequestUpdateCallbackService {
         } catch (Exception e) {
             log.error("Error while populating case date in payment request call {}", caseData.getId());
         }
+        caseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(caseData);
         return caseData;
     }
 
