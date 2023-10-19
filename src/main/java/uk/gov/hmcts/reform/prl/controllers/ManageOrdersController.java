@@ -338,7 +338,6 @@ public class ManageOrdersController {
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
-            manageOrderService.setIsHearingTaskNeedFlag(caseData, caseDataUpdated);
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
