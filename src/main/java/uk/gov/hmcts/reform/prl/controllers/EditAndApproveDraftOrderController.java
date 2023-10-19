@@ -154,13 +154,13 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-
-            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
-            //Added this for hearing WA task creation
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
                 isHearingTaskNeeded = manageOrderService.checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
             }
             caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
+
+            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            //Added this for hearing WA task creation
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {
