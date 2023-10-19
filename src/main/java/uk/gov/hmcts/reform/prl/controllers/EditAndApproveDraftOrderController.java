@@ -152,6 +152,7 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            manageOrderService.setIsHearingTaskNeedFlag(caseData, caseDataUpdated);
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             //Added this for hearing WA task creation
             return AboutToStartOrSubmitCallbackResponse.builder()
