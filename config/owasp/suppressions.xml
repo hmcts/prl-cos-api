@@ -31,6 +31,11 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+     json-20230227.jar ]]></notes>
+    <cve>CVE-2023-5072</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
      tomcat-embed-websocket-10.1.12.jar ]]></notes>
     <cve>CVE-2023-42795</cve>
     <cve>CVE-2023-45648</cve>
