@@ -122,6 +122,8 @@ public class AmendOrderService {
                 updatedOrders = orders;
             }
             orderMap.put("orderCollection", updatedOrders);
+            orderMap.put("isHearingTaskNeeded", caseData.getIsHearingTaskNeeded());
+            log.info("*** Hearing task needed : {}", orderMap.get("isHearingTaskNeeded"));
             return orderMap;
         } else {
             return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType);
