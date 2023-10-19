@@ -338,12 +338,15 @@ public class ManageOrdersController {
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
+            log.info("aaaaaa --> {}",caseData.getManageOrders().getServeToRespondentOptions());
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
+                log.info("bbbbb --> {}",caseData.getManageOrders().getServeToRespondentOptions());
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
+                    log.info("ccccc --> {}",caseData.getManageOrders().getServeToRespondentOptions());
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                            .getHearingDataForSelectedHearing(caseData, hearings));
@@ -356,7 +359,7 @@ public class ManageOrdersController {
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
-
+            log.info("ddddddd --> {}",caseData.getManageOrders().getServeToRespondentOptions());
             //Added below fields for WA purpose
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
                 || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
@@ -375,6 +378,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            log.info("eeeeeeeee --> {}",caseData.getManageOrders().getServeToRespondentOptions());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
