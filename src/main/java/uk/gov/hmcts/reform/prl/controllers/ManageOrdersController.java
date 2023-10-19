@@ -332,15 +332,13 @@ public class ManageOrdersController {
             String performingUser = null;
             String performingAction = null;
             String judgeLaReviewRequired = null;
+            log.info("CASEDETAILSSSSSSSS --> {}",callbackRequest.getCaseDetails().getData());
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            log.info("CASEDATAAAFIRSTtt --> {}",caseData);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
-            log.info("CASEDATAAA --> {}",caseData);
-            log.info("===========================END========= -->");
             log.info("getManageOrders --> {}",caseData.getManageOrders());
             log.info("aaaaaa --> {}",caseData.getManageOrders().getServeToRespondentOptions());
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
