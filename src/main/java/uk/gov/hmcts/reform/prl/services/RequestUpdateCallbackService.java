@@ -73,11 +73,11 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getServiceRequestReference()
         );
         if (isCasePayment) {
+            CaseData paymentCaseData = setCaseData(serviceRequestUpdateDto);
+            paymentCaseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(paymentCaseData);
             caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
-                setCaseData(
-                    serviceRequestUpdateDto
-                )
+                paymentCaseData
             );
         } else {
             caseDataContent = coreCaseDataService.createCaseDataContent(
@@ -123,6 +123,7 @@ public class RequestUpdateCallbackService {
                 serviceRequestUpdateDto,
                 allTabsUpdateCaseData
             );
+            log.info("*** court code from fact  {}", allTabsUpdateCaseData.getCourtCodeFromFact());
 
             allTabService.updateAllTabsIncludingConfTabRefactored(
                 systemAuthorisation,
@@ -178,7 +179,6 @@ public class RequestUpdateCallbackService {
         } catch (Exception e) {
             log.error("Error while populating case date in payment request call {}", caseData.getId());
         }
-        caseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(caseData);
         return caseData;
     }
 
