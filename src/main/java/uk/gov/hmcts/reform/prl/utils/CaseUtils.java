@@ -79,8 +79,9 @@ public class CaseUtils {
 
         CaseData caseData = caseDataBuilder.build();
 
-        if ((State.SUBMITTED_PAID.equals(state))) {
-            caseData = caseData.setDateSubmittedDate();
+        if ((State.SUBMITTED_PAID.equals(state)) && caseData.getDateSubmitted() == null) {
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            caseData = caseData.toBuilder().dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
         }
 
         return caseData;
