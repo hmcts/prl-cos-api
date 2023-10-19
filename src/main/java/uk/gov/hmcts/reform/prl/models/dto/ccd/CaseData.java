@@ -614,11 +614,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        this.toBuilder()
+        return this.toBuilder()
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .build();
-
-        return this;
     }
 
     public CaseData setIssueDate() {
