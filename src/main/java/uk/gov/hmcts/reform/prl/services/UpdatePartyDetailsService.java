@@ -377,7 +377,6 @@ public class UpdatePartyDetailsService {
                         dataMap
                 );
                 dataMap.put("dynamic_fileName", fileName + " welsh" + ".pdf");
-                log.info("updating c8 form");
                 c8FinalWelshDocument = documentGenService.generateSingleDocument(
                         authorisation,
                         caseData,
