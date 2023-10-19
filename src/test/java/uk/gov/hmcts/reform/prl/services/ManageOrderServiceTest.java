@@ -14,7 +14,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.*;
+import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
+import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -3272,7 +3278,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaHearingTaskCreationFlag(){
+    public void testWaHearingTaskCreationFlag() {
         List<Element<HearingData>> hearingDataList  = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
@@ -3289,7 +3295,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaHearingTaskCreationFlagShouldReturnNo(){
+    public void testWaHearingTaskCreationFlagShouldReturnNo() {
         List<Element<HearingData>> hearingDataList  = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
@@ -3306,7 +3312,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWaHearingTaskCreationFlagShouldReturnYes(){
+    public void testWaHearingTaskCreationFlagShouldReturnYes() {
         List<Element<HearingData>> hearingDataList  = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
