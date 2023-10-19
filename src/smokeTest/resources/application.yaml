@@ -311,6 +311,10 @@ document:
       fl401_fl406_welsh_draft_filename: Welsh_Power_of_arrest_draft.pdf
       fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_welsh_filename: Welsh_Power_of_arrest.pdf
+      fl401_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FL401-FINAL.docx
+      fl401_resp_c8_filename: C8Document.pdf
+      fl401_resp_c8_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-FINAL.docx
+      fl401_resp_c8_filename_welsh: C8Document.pdf
     common:
       doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
       doc_cover_sheet_welsh_template: PRL-WEL-DOCUMENT-COVER-SHEET.docx
