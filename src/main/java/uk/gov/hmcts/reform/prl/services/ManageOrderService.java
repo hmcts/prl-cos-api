@@ -2337,6 +2337,7 @@ public class ManageOrderService {
 
     public void setIsHearingTaskNeedFlag(CaseData caseData, Map<String,Object> caseDataUpdated) {
         String isHearingTaskNeeded = null;
+        log.info("*** Draft order collection {}", caseData.getDraftOrderCollection());
         log.info("*** Do you want to edit this order {}", caseData.getDoYouWantToEditTheOrder());
 
         if (YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {

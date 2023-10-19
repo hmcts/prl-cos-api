@@ -139,20 +139,20 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
-            caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
-                authorisation,
-                callbackRequest
-            ));
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            manageOrderService.setIsHearingTaskNeedFlag(caseData, caseDataUpdated);
+            caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+                authorisation,
+                callbackRequest
+            ));
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-            manageOrderService.setIsHearingTaskNeedFlag(caseData, caseDataUpdated);
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             //Added this for hearing WA task creation
             return AboutToStartOrSubmitCallbackResponse.builder()
