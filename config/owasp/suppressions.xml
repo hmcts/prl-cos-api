@@ -39,4 +39,9 @@
     <cve>CVE-2023-45648</cve>
     <cve>CVE-2023-42795</cve>
   </suppress>
+  <suppress>
+    <notes>tomcat-embed></notes>
+    <cve>CVE-2023-44487</cve>
+    <cve>CVE-2023-5072</cve>
+  </suppress>
 </suppressions>
