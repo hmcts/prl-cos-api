@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -48,6 +47,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARING_CHANNEL;
@@ -94,6 +94,7 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -201,27 +202,48 @@ public class HearingDataService {
     public List<DynamicListElement> getLinkedCases(String authorisation, CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
-            log.info("Linked case method ", caseData.getId());
+            log.info("Fetched linked cases for hearing {}", caseData.getId());
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
                 .caseReference(String.valueOf(caseData.getId())).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
-            if (caseLinkedDataList.isPresent()) {
-                for (CaseLinkedData caseLinkedData : caseLinkedDataList.get()) {
-                    Hearings hearingDetails = hearingService.getHearings(authorisation, caseLinkedData.getCaseReference());
-                    if (!ofNullable(hearingDetails).isEmpty() && !ofNullable(hearingDetails.getCaseHearings()).isEmpty()) {
-                        List<CaseHearing> caseHearingsList = hearingDetails.getCaseHearings().stream()
-                            .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
-                        if (ofNullable(caseHearingsList).isPresent()) {
-                            dynamicListElements.add(DynamicListElement.builder().code(caseLinkedData.getCaseReference())
-                                                        .label(caseLinkedData.getCaseName()).build());
+            log.info("Linked cases {}", caseLinkedDataList);
+            if (caseLinkedDataList.isPresent() && isNotEmpty(caseLinkedDataList.get())) {
+                Map<String, String> caseIdNameMap = new HashMap<>();
+                Map<String, String> caseIds = new HashMap<>();
+                caseLinkedDataList.get().forEach(caseLinkedData -> {
+                    caseIdNameMap.put(caseLinkedData.getCaseReference(), caseLinkedData.getCaseName());
+                    caseIds.put(caseLinkedData.getCaseReference(), null);
+                });
+                log.info("Linked caseIdNameMap {}", caseIdNameMap);
+                log.info("Linked caseIds to hearings {}", caseIds);
+                if (!caseIds.isEmpty()) {
+                    List<Hearings> hearingsList = hearingService.getHearingsByListOfCaseIds(authorisation, caseIds);
+                    log.info("Hearings list for linked caseIds {}", hearingsList);
+
+                    if (isNotEmpty(hearingsList)) {
+                        Map<String, List<CaseHearing>> caseHearingsByCaseIdMap = hearingsList.stream()
+                            .filter(caseHearing -> ifListedHearings(caseHearing.getCaseHearings()))
+                            .collect(Collectors.toMap(Hearings::getCaseRef, Hearings::getCaseHearings));
+
+                        for (Map.Entry<String, List<CaseHearing>> entry : caseHearingsByCaseIdMap.entrySet()) {
+                            dynamicListElements.add(DynamicListElement.builder()
+                                                        .code(entry.getKey())
+                                                        .label(caseIdNameMap.get(entry.getKey()))
+                                                        .build());
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            log.error("Exception occured in Linked case method for hmc api calls ", e.getMessage());
+            log.error("Exception occurred in Linked case method for hmc api calls ", e);
         }
         return dynamicListElements;
+    }
+
+    private boolean ifListedHearings(List<CaseHearing> caseHearings) {
+        return nullSafeCollection(caseHearings).stream()
+            .anyMatch(caseHearing -> LISTED.equalsIgnoreCase(
+                caseHearing.getHmcStatus()));
     }
 
 
@@ -409,7 +431,7 @@ public class HearingDataService {
         //Note: When we add new fields , we need to add those fields in respective if else blocks to nullify to handle the data clearing issue from UI
         if (null != listWithoutNoticeHeardetailsObj) {
             List<Object> list = (List) listWithoutNoticeHeardetailsObj;
-            if (list.size() > 0) {
+            if (!list.isEmpty()) {
                 list.parallelStream().forEach(i -> {
                     LinkedHashMap<String,Object> hearingDataFromMap = (LinkedHashMap) (((LinkedHashMap) i).get("value"));
                     if (null != hearingDataFromMap) {
@@ -461,7 +483,8 @@ public class HearingDataService {
             if (caseLinkedDataList.isPresent()) {
                 return caseLinkedDataList.get().stream()
                     .map(cData -> DynamicListElement.builder()
-                        .code(cData.getCaseReference()).label(cData.getCaseReference()).build()).collect(Collectors.toList());
+                        .code(cData.getCaseReference()).label(cData.getCaseReference()).build())
+                    .toList();
             }
         } catch (Exception e) {
             log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
@@ -471,9 +494,9 @@ public class HearingDataService {
 
     public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings) {
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+        if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-        } else if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
+        } else if (isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         }
         return hearingDetails.stream().parallel().map(hearingDataElement -> {
@@ -485,8 +508,7 @@ public class HearingDataService {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
-                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
-                                                                                      caseHearing.get().getHearingType()))
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
                         .build();
                 }
             }
@@ -496,7 +518,7 @@ public class HearingDataService {
     }
 
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
-                                                                                           CaseData caseData, String hearingType) {
+                                                                                           CaseData caseData) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> {
             log.info("hearing start date time received from hmc {} for case id - {}", hearingDaySchedule
                 .getHearingStartDateTime(), caseData.getId());
@@ -504,21 +526,7 @@ public class HearingDataService {
             LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingDaySchedule
                                                               .getHearingStartDateTime());
             log.info("hearing start date time after converting to bst - {}", ldt);
-            if (ldt.equals(hearingDaySchedule
-                               .getHearingStartDateTime())) {
-                log.error("Error : Hearing time from HMC is now in BST - Expected is UTC");
-                ldt = null;
-            }
-            log.info(
-                "hearing date sent to docmosis - {} for case id {}",
-                hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter),
-                caseData.getId()
-            );
-            log.info(
-                "hearing time sent to docmosis - {} for case id {}",
-                CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt),
-                caseData.getId()
-            );
+
             return element(HearingDataFromTabToDocmosis.builder()
                                .hearingEstimatedDuration(getHearingDuration(
                                    hearingDaySchedule.getHearingStartDateTime(),
