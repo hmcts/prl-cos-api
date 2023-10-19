@@ -14,9 +14,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.HashMap;
@@ -39,6 +41,9 @@ public class TaskListControllerTest {
 
     @Mock
     AllTabServiceImpl tabService;
+
+    @Mock
+    DocumentGenService dgsService;
 
     @Mock
     UserService userService;
@@ -88,6 +93,22 @@ public class TaskListControllerTest {
 
     @Test
     public void testHandleSubmittedWithCourtStaffRoles() throws JsonProcessingException {
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(ROLES).build());
+        taskListController.handleSubmitted(callbackRequest,"testAuth");
+        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+    }
+
+    @Test
+    public void testHandleSubmittedForGateKeepingState() throws Exception {
+        Map<String, Object> documentMap = new HashMap<>();
+        documentMap.put("c1ADocument", Document.builder().build());
+        documentMap.put("c8Document", Document.builder().build());
+        documentMap.put("C8WelshDocument", Document.builder().build());
+        documentMap.put("finalDocument", Document.builder().build());
+        documentMap.put("finalWelshDocument", Document.builder().build());
+        documentMap.put("c1AWelshDocument", Document.builder().build());
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(dgsService.generateDocuments("testAuth",caseData)).thenReturn(documentMap);
         when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(ROLES).build());
         taskListController.handleSubmitted(callbackRequest,"testAuth");
         verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
