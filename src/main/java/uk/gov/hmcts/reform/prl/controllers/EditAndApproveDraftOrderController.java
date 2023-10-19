@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -137,7 +136,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            String isHearingTaskNeeded = null;
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
@@ -154,11 +152,7 @@ public class EditAndApproveDraftOrderController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-                isHearingTaskNeeded = manageOrderService.checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
-            }
-            caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
-
+            manageOrderService.setIsHearingTaskNeedFlag(caseData, caseDataUpdated);
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             //Added this for hearing WA task creation
             return AboutToStartOrSubmitCallbackResponse.builder()
