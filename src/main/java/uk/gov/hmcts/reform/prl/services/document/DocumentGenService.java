@@ -360,16 +360,15 @@ public class DocumentGenService {
     }
 
     public Map<String, Object> generateDocuments(String authorisation, CaseData caseData) throws Exception {
-
-        Map<String, Object> updatedCaseData = new HashMap<>();
-
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
 
+        Map<String, Object> updatedCaseData = new HashMap<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
+        log.info("case state :: >> {}", caseData.getState());
+        log.info("case state check :: >> {}", State.JUDICIAL_REVIEW.equals(caseData.getState()));
         documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
         documentLanguageIsWelsh(authorisation, caseData, updatedCaseData, documentLanguage);
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
@@ -392,6 +391,7 @@ public class DocumentGenService {
             isC100CaseTypeWelsh(authorisation, caseData, updatedCaseData);
             if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
                 caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
+                log.info("Generating Welsh document for {}", caseData.getState());
                 updatedCaseData.put(
                     DOCUMENT_FIELD_FINAL_WELSH,
                     getDocument(authorisation, caseData, FINAL_HINT, true)
@@ -446,6 +446,7 @@ public class DocumentGenService {
             isC100CaseTypeEng(authorisation, caseData, updatedCaseData);
             if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication()) || State.CASE_ISSUED.equals(
                 caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
+                log.info("Generating english document for {}", caseData.getState());
                 updatedCaseData.put(DOCUMENT_FIELD_FINAL, getDocument(authorisation, caseData, FINAL_HINT, false));
             }
         }
