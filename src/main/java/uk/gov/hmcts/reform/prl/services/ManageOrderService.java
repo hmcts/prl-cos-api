@@ -2337,6 +2337,8 @@ public class ManageOrderService {
 
     public void setIsHearingTaskNeedFlag(CaseData caseData, Map<String,Object> caseDataUpdated) {
         String isHearingTaskNeeded = null;
+        log.info("*** Do you want to edit this order {}", caseData.getDoYouWantToEditTheOrder());
+
         if (YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
             UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                 caseData.getDraftOrdersDynamicList(), objectMapper);
@@ -2348,6 +2350,7 @@ public class ManageOrderService {
                     if ("Yes".equalsIgnoreCase(checkIfHearingTaskNeeded(draftOrder.getManageOrderHearingDetails()))) {
                         caseDataUpdated.put("isHearingTaskNeeded", "Yes");
                     }
+                    log.info("*** Hearing task needed {}", caseDataUpdated.get("isHearingTaskNeeded"));
                 }
             }
         } else if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())){
@@ -2355,6 +2358,7 @@ public class ManageOrderService {
                 isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
             }
             caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
+            log.info("*** Hearing task needed {}", caseDataUpdated.get("isHearingTaskNeeded"));
         }
     }
 }
