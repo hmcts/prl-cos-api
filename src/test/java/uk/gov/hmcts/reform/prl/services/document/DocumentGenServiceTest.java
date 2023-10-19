@@ -81,6 +81,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -1352,6 +1353,22 @@ public class DocumentGenServiceTest {
         DocumentResponse response = documentGenService.deleteDocument(authToken, "TEST_DOCUMENT_ID");
         //Then
         assertEquals(documentResponse, response);
+    }
+
+    @Test
+    public void testDeleteDocumentException() throws Exception {
+        //Given
+        DocumentResponse documentResponse = DocumentResponse
+            .builder()
+            .status("Success")
+            .build();
+        doThrow(new RuntimeException("Exception while delete document")).when(uploadService).deleteDocument(any(),any());
+
+        assertExpectedException(() -> {
+            documentGenService
+                .deleteDocument(authToken, "TEST_DOCUMENT_ID");
+        }, RuntimeException.class,"Exception while delete document");
+
     }
 
     @Test
@@ -3321,10 +3338,10 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testForConvertToPdf() throws Exception {
+    public void testForGetDocumentBytesFileNotFoundException() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
-            .binaryUrl("TestUrl")
+            .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
         PartyDetails applicant = PartyDetails.builder()
@@ -3359,14 +3376,59 @@ public class DocumentGenServiceTest {
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
 
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Resource expectedResource = new ClassPathResource("documents/document1.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(caseDocumentClient.getDocumentBinary(authToken, "s2s token", generatedDocumentInfo.getUrl()))
+            .thenReturn(expectedResponse);
+
+        assertExpectedException(() -> {
+            documentGenService
+                .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
+        }, InvalidResourceException.class, "Doc name TestUrl");
+
+    }
+
+    @Test
+    public void testForConvertToPdf() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("TestUrl")
+            .hashToken("testHashToken")
+            .build();
+        PartyDetails applicant = PartyDetails.builder()
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
         Resource expectedResource = new ClassPathResource("documents/document.pdf");
         HttpHeaders headers = new HttpHeaders();
         ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
         when(authTokenGenerator.generate()).thenReturn("s2s token");
         when(caseDocumentClient.getDocumentBinary(authToken, "s2s token", generatedDocumentInfo.getUrl()))
             .thenReturn(expectedResponse);
-
-
 
         Document document = Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
@@ -3383,6 +3445,53 @@ public class DocumentGenServiceTest {
         verify(caseDocumentClient, times(1)).getDocumentBinary(
             authToken, "s2s token", generatedDocumentInfo.getUrl()
         );
+    }
+
+    @Test
+    public void testForConvertToPdfException() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("TestUrl")
+            .hashToken("testHashToken")
+            .build();
+        PartyDetails applicant = PartyDetails.builder()
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .phoneNumber("1234567890")
+            .isEmailAddressConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .address(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+
+        Resource expectedResource = new ClassPathResource("documents/document1.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(authTokenGenerator.generate()).thenReturn("s2s token");
+        when(caseDocumentClient.getDocumentBinary(authToken, "s2s token", generatedDocumentInfo.getUrl()))
+            .thenReturn(expectedResponse);
+
+        Document document = Document.builder()
+            .documentUrl(generatedDocumentInfo.getUrl())
+            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+            .documentHash(generatedDocumentInfo.getHashToken())
+            .documentFileName("FL401-Final.docx")
+            .build();
+
+        when(dgsApiClient.convertDocToPdf(anyString(),anyString(),any()))
+            .thenReturn(generatedDocumentInfo);
+
+        assertExpectedException(() -> {
+            documentGenService
+                .convertToPdf(authToken,document);
+        }, InvalidResourceException.class, "Doc name FL401-Final.docx");
     }
 
 

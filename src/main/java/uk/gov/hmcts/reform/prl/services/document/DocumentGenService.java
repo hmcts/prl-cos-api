@@ -1256,7 +1256,7 @@ public class DocumentGenService {
         }
     }
 
-    public Document convertToPdf(String authorisation, Document document) throws IOException {
+    public Document convertToPdf(String authorisation, Document document) {
         String filename = document.getDocumentFileName();
         if (checkFileFormat(document.getDocumentFileName())) {
             ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
