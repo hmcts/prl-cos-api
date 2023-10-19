@@ -2353,7 +2353,7 @@ public class ManageOrderService {
                     log.info("*** Hearing task needed {}", caseDataUpdated.get("isHearingTaskNeeded"));
                 }
             }
-        } else if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())){
+        } else if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
                 isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
             }
