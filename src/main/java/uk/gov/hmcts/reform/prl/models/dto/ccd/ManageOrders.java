@@ -181,10 +181,8 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("serveOrderAdditionalDocuments")
     private final List<Element<Document>> serveOrderAdditionalDocuments;
 
-    @JsonProperty("serveToRespondentOptions")
     private final YesOrNo serveToRespondentOptions;
     private final ServingRespondentsEnum servingRespondentsOptionsCA;
-    @JsonProperty("recipientsOptions")
     private final DynamicMultiSelectList recipientsOptions;
     private final DynamicMultiSelectList otherParties;
     private final YesOrNo cafcassServedOptions;

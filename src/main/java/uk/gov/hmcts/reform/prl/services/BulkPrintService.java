@@ -49,7 +49,6 @@ public class BulkPrintService {
 
 
     public UUID send(String caseId, String userToken, String letterType, List<Document> documents, String recipientName) {
-        log.info("** 88888888");
         String s2sToken = authTokenGenerator.generate();
         List<Document> pdfDocuments = new ArrayList<>();
 
