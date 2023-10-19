@@ -2337,9 +2337,24 @@ public class ManageOrderService {
 
     public void setIsHearingTaskNeedFlag(CaseData caseData, Map<String,Object> caseDataUpdated) {
         String isHearingTaskNeeded = null;
-        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-            isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
+        if (YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
+            UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
+                caseData.getDraftOrdersDynamicList(), objectMapper);
+            for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+                DraftOrder draftOrder = e.getValue();
+                log.info("*** eid, Selected order id {} {}", e.getId(), selectedOrderId);
+                log.info("*** Equals {}", e.getId().equals(selectedOrderId));
+                if (e.getId().equals(selectedOrderId)) {
+                    if ("Yes".equalsIgnoreCase(checkIfHearingTaskNeeded(draftOrder.getManageOrderHearingDetails()))) {
+                        caseDataUpdated.put("isHearingTaskNeeded", "Yes");
+                    }
+                }
+            }
+        } else if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())){
+            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+                isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
+            }
+            caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
         }
-        caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
     }
 }
