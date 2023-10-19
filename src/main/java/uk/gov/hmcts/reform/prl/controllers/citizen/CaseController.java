@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.CitizenSetPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
@@ -130,6 +131,29 @@ public class CaseController {
                 caseId,
                 eventId,
                 updateCaseData
+            );
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(value = "{caseId}/{eventId}/case-update-ra", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Set party flags for citizen")
+    public CaseData setPartyFlagsForCitizen(
+        @NotNull @Valid @RequestBody CitizenSetPartyFlagsRequest citizenSetPartyFlagsRequest,
+        @PathVariable("eventId") String eventId,
+        @PathVariable("caseId") String caseId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = null;
+            caseDetails = caseService.setPartyFlagsForCitizen(
+                authorisation,
+                caseId,
+                eventId,
+                citizenSetPartyFlagsRequest
             );
             return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
