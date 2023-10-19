@@ -2339,6 +2339,7 @@ public class ManageOrderService {
         String isHearingTaskNeeded = null;
         log.info("*** Draft order collection {}", caseData.getDraftOrderCollection());
         log.info("*** Do you want to edit this order {}", caseData.getDoYouWantToEditTheOrder());
+        log.info("*** Draft order dynamic list {}", caseData.getDraftOrdersDynamicList());
 
         if (YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
             UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
