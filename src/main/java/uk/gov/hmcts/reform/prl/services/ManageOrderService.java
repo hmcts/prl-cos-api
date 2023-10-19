@@ -2334,4 +2334,12 @@ public class ManageOrderService {
         }
         return isTaskNeeded;
     }
+
+    public void setIsHearingTaskNeedFlag(CaseData caseData, Map<String,Object> caseDataUpdated) {
+        String isHearingTaskNeeded = null;
+        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
+        }
+        caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
+    }
 }

@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -332,7 +331,6 @@ public class ManageOrdersController {
             String performingUser = null;
             String performingAction = null;
             String judgeLaReviewRequired = null;
-            String isHearingTaskNeeded = null;
 
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
@@ -340,10 +338,7 @@ public class ManageOrdersController {
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
-            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-                isHearingTaskNeeded = manageOrderService.checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
-            }
-            caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
+            manageOrderService.setIsHearingTaskNeedFlag(caseData, caseDataUpdated);
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
