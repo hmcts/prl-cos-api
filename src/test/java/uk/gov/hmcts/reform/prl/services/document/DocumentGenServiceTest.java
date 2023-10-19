@@ -196,9 +196,6 @@ public class DocumentGenServiceTest {
 
     @Before
     public void setUp() {
-
-
-
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
