@@ -1316,8 +1316,6 @@ public class DraftAnOrderService {
                     "orderCollection",
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
-                caseDataUpdated.put("isHearingTaskNeeded", modifiedCaseData.getIsHearingTaskNeeded());
-                log.info("*** Hearing task needed : {}", caseDataUpdated.get("isHearingTaskNeeded"));
             }
         } else {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));

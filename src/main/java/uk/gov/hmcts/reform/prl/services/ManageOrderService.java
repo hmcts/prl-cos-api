@@ -1082,8 +1082,6 @@ public class ManageOrderService {
                     ));
                     if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                         orderCollection = serveOrder(caseData, orderCollection);
-                        orderMap.put("isHearingTaskNeeded", caseData.getIsHearingTaskNeeded());
-                        log.info("*** Hearing task needed : {}", orderMap.get("isHearingTaskNeeded"));
                     }
                     LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
@@ -1091,8 +1089,6 @@ public class ManageOrderService {
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
-            orderMap.put("isHearingTaskNeeded", caseData.getIsHearingTaskNeeded());
-            log.info("*** Hearing task needed : {}", orderMap.get("isHearingTaskNeeded"));
         }
         orderMap.put("orderCollection", orderCollection);
         return orderMap;
@@ -1345,8 +1341,6 @@ public class ManageOrderService {
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
-                    setIsHearingTaskNeedFlag(order.getValue(), caseData);
-                    log.info("*** Hearing flag {} for order type : {}", caseData.getIsHearingTaskNeeded(), order.getValue().getOrderType());
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         log.info("***** serving c100 order *******");
                         servedC100Order(caseData, orders, order);
@@ -2341,15 +2335,11 @@ public class ManageOrderService {
         return isTaskNeeded;
     }
 
-    public void setIsHearingTaskNeedFlag(OrderDetails orderDetails, CaseData caseData) {
-        if (CollectionUtils.isNotEmpty(orderDetails.getManageOrderHearingDetails())) {
-            Optional<HearingData> hearingData = orderDetails.getManageOrderHearingDetails().stream().map(Element::getValue)
-                .filter(hearing -> !(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab
-                    .equals(hearing.getHearingDateConfirmOptionEnum())))
-                .findFirst();
-            if (hearingData.isPresent()) {
-                caseData.setIsHearingTaskNeeded("Yes");
-            }
+    public void setIsHearingTaskNeedFlag(CaseData caseData, Map<String,Object> caseDataUpdated) {
+        String isHearingTaskNeeded = null;
+        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
         }
+        caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
     }
 }
