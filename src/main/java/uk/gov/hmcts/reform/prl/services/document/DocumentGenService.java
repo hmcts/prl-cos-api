@@ -851,7 +851,6 @@ public class DocumentGenService {
                 template = findFinalRespondentC8Template(isWelsh);
                 break;
             case C8_RESP_FL401_FINAL_HINT:
-                log.info("cas is c8");
                 template = findFinalDaRespondentC8Template(isWelsh);
                 break;
             case C1A_HINT:
@@ -945,7 +944,6 @@ public class DocumentGenService {
     }
 
     private String findFinalDaRespondentC8Template(boolean isWelsh) {
-        log.info("inside da c8 template");
         return !isWelsh ? fl401RespC8Template  : fl401RespC8TemplateWelsh;
     }
 
