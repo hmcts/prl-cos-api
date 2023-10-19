@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -44,7 +43,6 @@ public class UpdatePartyDetailsService {
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
-    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Qualifier("caseSummaryTab")
@@ -63,7 +61,6 @@ public class UpdatePartyDetailsService {
         final Flags caseFlags = Flags.builder().build();
 
         updatedCaseData.put("caseFlags", caseFlags);
-        updatedCaseData.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         try {
             log.info(objectMapper.writeValueAsString(updatedCaseData));
         } catch (JsonProcessingException e) {
