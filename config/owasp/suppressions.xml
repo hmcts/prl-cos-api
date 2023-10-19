@@ -37,9 +37,5 @@
   <suppress>
     <cve>CVE-2023-5072</cve>
     <cve>CVE-2023-44487</cve>
-    <notes><![CDATA[
-     tomcat-embed-core-10.1.12.jar ]]></notes>
-    <cve>CVE-2023-42795</cve>
-    <cve>CVE-2023-45648</cve>
   </suppress>
 </suppressions>
