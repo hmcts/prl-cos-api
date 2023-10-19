@@ -493,9 +493,7 @@ public class DocumentGenService {
             && ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
             && !caseData.getApplicantsConfidentialDetails().isEmpty()
             || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
-            && !caseData.getChildrenConfidentialDetails().isEmpty()
-            || ofNullable(caseData.getRespondentConfidentialDetails()).isPresent()
-            && !caseData.getRespondentConfidentialDetails().isEmpty();
+            && !caseData.getChildrenConfidentialDetails().isEmpty();
     }
 
     public Map<String, Object> generateDraftDocuments(String authorisation, CaseData caseData) throws Exception {
@@ -962,14 +960,12 @@ public class DocumentGenService {
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
         PartyDetails partyDetails = caseData.getApplicantsFL401();
-        PartyDetails respondentDetails = caseData.getRespondentsFL401();
         Optional<TypeOfApplicationOrders> typeOfApplicationOrders = ofNullable(caseData.getTypeOfApplicationOrders());
 
         boolean isChildrenConfidential = isChildrenDetailsConfidentiality(caseData, typeOfApplicationOrders);
 
-        return isPartyDetailsConfidential(respondentDetails) || isPartyDetailsConfidential(partyDetails)
+        return isPartyDetailsConfidential(partyDetails)
             || isChildrenConfidential;
-
     }
 
     private boolean isChildrenDetailsConfidentiality(CaseData caseData,
