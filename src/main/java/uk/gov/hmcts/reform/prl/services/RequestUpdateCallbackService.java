@@ -73,11 +73,9 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getServiceRequestReference()
         );
         if (isCasePayment) {
-            CaseData paymentCaseData = setCaseData(serviceRequestUpdateDto);
-            paymentCaseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(paymentCaseData);
             caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
-                paymentCaseData
+                setCaseData(serviceRequestUpdateDto, startEventResponse)
             );
         } else {
             caseDataContent = coreCaseDataService.createCaseDataContent(
@@ -182,8 +180,9 @@ public class RequestUpdateCallbackService {
         return caseData;
     }
 
-    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
-        return CaseData.builder()
+    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, StartEventResponse startEventResponse) {
+        CaseData startEventResponseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        startEventResponseData = startEventResponseData.toBuilder()
             .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
             .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
                                                      .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
@@ -198,6 +197,10 @@ public class RequestUpdateCallbackService {
                                                                   .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
                                                                   .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
                                                                   .build()).build()).build();
+
+        startEventResponseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(startEventResponseData);
+
+        return startEventResponseData;
     }
 
     private Map<String, Object> setAwPPaymentCaseData(StartEventResponse startEventResponse, ServiceRequestUpdateDto serviceRequestUpdateDto) {
