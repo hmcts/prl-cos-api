@@ -2324,6 +2324,7 @@ public class ManageOrderService {
                 .map(Element::getValue).collect(Collectors.toList());
             for (HearingData hearing : hearingList) {
                 if (hearing.getHearingDateConfirmOptionEnum() != null) {
+                    log.info("**** Hearing option selected {}",hearing.getHearingDateConfirmOptionEnum());
                     if (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
                         || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
                         || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum())) {
@@ -2337,7 +2338,6 @@ public class ManageOrderService {
 
     public void setIsHearingTaskNeedFlag(CaseData caseData, Map<String,Object> caseDataUpdated) {
         String isHearingTaskNeeded = null;
-        log.info("*** Draft order collection {}", caseData.getDraftOrderCollection());
         log.info("*** Do you want to edit this order {}", caseData.getDoYouWantToEditTheOrder());
         log.info("*** Draft order dynamic list {}", caseData.getDraftOrdersDynamicList());
 
@@ -2357,6 +2357,7 @@ public class ManageOrderService {
             }
         } else if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+                log.info("*** Orders hearing details present: {}", caseData.getManageOrders().getOrdersHearingDetails());
                 isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
             }
             caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
