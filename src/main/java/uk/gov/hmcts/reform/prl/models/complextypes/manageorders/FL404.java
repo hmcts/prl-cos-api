@@ -4,10 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonSetter;
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -38,7 +36,6 @@ public class FL404 {
     private final String fl404bPowerOfArrestParagraph;
     private final String fl404bRiskOfSignificantHarm;
     private final String fl404bDateOrderMade;
-    @Setter(AccessLevel.NONE)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime fl404bDateOrderEnd;
     private final String fl404bDateOrderEndTime;
