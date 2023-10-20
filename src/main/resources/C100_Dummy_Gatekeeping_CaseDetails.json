@@ -3189,20 +3189,6 @@
     ],
     "taskListVersion": "v2",
     "allegationOfHarm": {},
-    "c1ADraftDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a598c30a-b147-4911-8c19-7fe0dfd3023c",
-      "document_filename": "C1A_DocumentDraft.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a598c30a-b147-4911-8c19-7fe0dfd3023c/binary",
-      "document_creation_date": null
-    },
-    "c1AWelshDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b85a0efc-fb8e-4eb5-9996-2b4187aa23b6",
-      "document_filename": "C1A_Document_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b85a0efc-fb8e-4eb5-9996-2b4187aa23b6/binary",
-      "document_creation_date": null
-    },
     "caseFromCourtNav": null,
     "dateOfSubmission": {
       "dateOfSubmission": "04 09 2023"
@@ -5211,13 +5197,6 @@
       "serviceRequestReference": "2023-1693818908073"
     },
     "requestToForeignAuthorityGiveReason": "Yes",
-    "submitAndPayDownloadApplicationLink": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/54703d77-77d0-402b-bbea-2caec57ef8f7",
-      "document_filename": "Draft_C100_application.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/54703d77-77d0-402b-bbea-2caec57ef8f7/binary",
-      "document_creation_date": null
-    },
     "welshLanguageRequirementApplication": "english",
     "childrenSubjectOfChildProtectionPlan": "no",
     "newOrdersUndertakingInPlaceCourtName": "SWAE",
@@ -5248,13 +5227,6 @@
     "newAllegationsOfHarmOtherConcernsDetails": "welfare",
     "newOrdersForcedMarriageProtectionCurrent": null,
     "newOrdersForcedMarriageProtectionEndDate": null,
-    "submitAndPayDownloadApplicationWelshLink": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a88f5df9-0971-4574-946a-5a93e478b43d",
-      "document_filename": "Draft_C100_application_welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a88f5df9-0971-4574-946a-5a93e478b43d/binary",
-      "document_creation_date": null
-    },
     "allegationsOfHarmRevisedChildContactTable": {
       "newAgreeChildOtherContact": "No",
       "newAgreeChildSupervisedTime": "No",
