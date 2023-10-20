@@ -477,23 +477,23 @@ public class HearingDataService {
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
                                                                                            CaseData caseData) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> {
+            log.info("hearing start date time received from hmc {} for case id - {}", hearingDaySchedule
+                .getHearingStartDateTime(), caseData.getId());
+
             LocalDateTime ldt = CaseUtils.convertUtcToBst(hearingDaySchedule
-                                     .getHearingStartDateTime());
-            if (ldt.equals(hearingDaySchedule
-                               .getHearingStartDateTime())) {
-                log.error("Error : Hearing time from HMC is now in BST - Expected is UTC");
-                ldt = null;
-            }
+                                                              .getHearingStartDateTime());
+            log.info("hearing start date time after converting to bst - {}", ldt);
+
             return element(HearingDataFromTabToDocmosis.builder()
-                        .hearingEstimatedDuration(getHearingDuration(
-                            hearingDaySchedule.getHearingStartDateTime(),
-                            hearingDaySchedule.getHearingEndDateTime()
-                        ))
-                        .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
-                        .hearingLocation(hearingDaySchedule.getHearingVenueName() + ", " + hearingDaySchedule.getHearingVenueAddress())
-                        .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
-                        .hearingArrangementsFromHmc(getHearingArrangementsData(hearingDaySchedules, caseData))
-                        .build());
+                               .hearingEstimatedDuration(getHearingDuration(
+                                   hearingDaySchedule.getHearingStartDateTime(),
+                                   hearingDaySchedule.getHearingEndDateTime()
+                               ))
+                               .hearingDate(hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter))
+                               .hearingLocation(hearingDaySchedule.getHearingVenueName() + ", " + hearingDaySchedule.getHearingVenueAddress())
+                               .hearingTime(CaseUtils.convertLocalDateTimeToAmOrPmTime(ldt))
+                               .hearingArrangementsFromHmc(getHearingArrangementsData(hearingDaySchedules, caseData))
+                               .build());
         }).toList();
     }
 
