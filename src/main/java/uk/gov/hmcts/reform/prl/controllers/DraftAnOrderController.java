@@ -181,6 +181,8 @@ public class DraftAnOrderController {
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             //Draft an order
+            log.info("*** Orderhearing details present start : {}", callbackRequest.getCaseDetails().getData()
+                .get("ordersHearingDetails"));
             return AboutToStartOrSubmitCallbackResponse.builder().data(
                 draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest)).build();
         } else {

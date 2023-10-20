@@ -114,13 +114,10 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            log.info("*** Orderhearing details present start : {}", callbackRequest.getCaseDetails().getData()
-                .get("ordersHearingDetails"));
             Map<String, Object> caseDataUpdated = draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
                 authorisation,
                 callbackRequest
             );
-            log.info("/judge-or-admin-edit-approve/mid-event caseDataUpdated {}", caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {
@@ -217,6 +214,8 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            log.info("*** Orderhearing details present start : {}", callbackRequest.getCaseDetails().getData()
+                .get("ordersHearingDetails"));
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(response).build();
