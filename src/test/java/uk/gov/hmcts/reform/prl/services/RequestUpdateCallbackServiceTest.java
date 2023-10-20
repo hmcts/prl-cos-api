@@ -117,7 +117,7 @@ public class RequestUpdateCallbackServiceTest {
             Mockito.anyBoolean()
         )).thenReturn(
             startEventResponse);
-        when(partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(any())).thenCallRealMethod();
+        when(partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(any(), any())).thenCallRealMethod();
     }
 
     @Test(expected = NullPointerException.class)
