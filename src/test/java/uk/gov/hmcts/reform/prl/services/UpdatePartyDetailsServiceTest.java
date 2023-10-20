@@ -10,6 +10,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -805,5 +806,145 @@ public class UpdatePartyDetailsServiceTest {
             .build();
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull("respondents");
+    }
+
+    @Test
+    public void checkIfDetailsChangedFl401All() {
+        PartyDetails respondentBefore = PartyDetails.builder()
+                .email("test")
+                .address(Address.builder()
+                        .addressLine1("test")
+                        .build())
+                .phoneNumber("01234")
+                .build();
+        CaseData caseDataBefore = CaseData.builder()
+                .caseTypeOfApplication("FL401")
+                .respondentsFL401(respondentBefore)
+                .build();
+        Map<String, Object> objectMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetailsBefore(CaseDetails
+                        .builder()
+                        .data(objectMap)
+                        .build())
+                .build();
+        Map<String, Object> stringObjectMap = callbackRequest.getCaseDetailsBefore().getData();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataBefore);
+        PartyDetails respondent = PartyDetails.builder()
+                .email("test1")
+                .address(Address.builder()
+                        .addressLine1("test1")
+                        .build())
+                .phoneNumber("012345")
+                .build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        assertEquals(true, bool);
+    }
+
+    @Test
+    public void checkIfDetailsChangedFl401EmailOnly() {
+        PartyDetails respondentBefore = PartyDetails.builder()
+                .email("test")
+                .build();
+        CaseData caseDataBefore = CaseData.builder()
+                .caseTypeOfApplication("FL401")
+                .respondentsFL401(respondentBefore)
+                .build();
+        Map<String, Object> objectMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetailsBefore(CaseDetails
+                        .builder()
+                        .data(objectMap)
+                        .build())
+                .build();
+        Map<String, Object> stringObjectMap = callbackRequest.getCaseDetailsBefore().getData();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataBefore);
+        PartyDetails respondent = PartyDetails.builder()
+                .email("test1")
+                .build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        assertEquals(true, bool);
+    }
+
+    @Test
+    public void checkIfDetailsChangedFl401AddressOnly() {
+        PartyDetails respondentBefore = PartyDetails.builder()
+                .address(Address.builder()
+                        .addressLine1("test")
+                        .build())
+                .build();
+        CaseData caseDataBefore = CaseData.builder()
+                .caseTypeOfApplication("FL401")
+                .respondentsFL401(respondentBefore)
+                .build();
+        Map<String, Object> objectMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetailsBefore(CaseDetails
+                        .builder()
+                        .data(objectMap)
+                        .build())
+                .build();
+        Map<String, Object> stringObjectMap = callbackRequest.getCaseDetailsBefore().getData();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataBefore);
+        PartyDetails respondent = PartyDetails.builder()
+                .address(Address.builder()
+                        .addressLine1("test1")
+                        .build())
+                .build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        assertEquals(true, bool);
+    }
+
+    @Test
+    public void checkIfDetailsChangedPhoneOnly() {
+        PartyDetails respondentBefore = PartyDetails.builder()
+                .phoneNumber("01234")
+                .build();
+        CaseData caseDataBefore = CaseData.builder()
+                .caseTypeOfApplication("FL401")
+                .respondentsFL401(respondentBefore)
+                .build();
+        Map<String, Object> objectMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetailsBefore(CaseDetails
+                        .builder()
+                        .data(objectMap)
+                        .build())
+                .build();
+        Map<String, Object> stringObjectMap = callbackRequest.getCaseDetailsBefore().getData();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataBefore);
+        PartyDetails respondent = PartyDetails.builder()
+                .phoneNumber("012345")
+                .build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        assertEquals(true, bool);
+    }
+
+    @Test
+    public void checkIfDetailsChangedFl401NoChange() {
+        PartyDetails respondentBefore = PartyDetails.builder()
+                .build();
+        CaseData caseDataBefore = CaseData.builder()
+                .caseTypeOfApplication("FL401")
+                .respondentsFL401(respondentBefore)
+                .build();
+        Map<String, Object> objectMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetailsBefore(CaseDetails
+                        .builder()
+                        .data(objectMap)
+                        .build())
+                .build();
+        Map<String, Object> stringObjectMap = callbackRequest.getCaseDetailsBefore().getData();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataBefore);
+        PartyDetails respondent = PartyDetails.builder()
+                .build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        assertEquals(false, bool);
     }
 }
