@@ -785,7 +785,7 @@ public class HearingDataServiceTest {
                                                                           03,
                                                                           11,
                                                                           11,
-                                                                          0,
+                                                                          1,
                                                                           0
                                                                       ))
                                                                       .hearingVenueAddress("abc")
@@ -842,8 +842,8 @@ public class HearingDataServiceTest {
                                                                           2023,
                                                                           10,
                                                                           17,
-                                                                          10,
-                                                                          0,
+                                                                          11,
+                                                                          30,
                                                                           0
                                                                       ))
                                                                       .attendees(List.of(
