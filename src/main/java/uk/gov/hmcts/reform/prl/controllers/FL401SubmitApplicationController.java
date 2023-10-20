@@ -78,7 +78,7 @@ public class FL401SubmitApplicationController {
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             List<String> errorList = new ArrayList<>();
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             boolean mandatoryEventStatus = fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData);
@@ -112,8 +112,10 @@ public class FL401SubmitApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("******* callbackRequest is :: " + objectMapper.writeValueAsString(callbackRequest));
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            log.info("******* case data is :: " + objectMapper.writeValueAsString(callbackRequest));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(fl401SubmitApplicationService.fl401GenerateDocumentSubmitApplication(
                     authorisation,
@@ -132,10 +134,10 @@ public class FL401SubmitApplicationController {
         @ApiResponse(responseCode = "200", description = "Application Submitted."),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public CallbackResponse fl401SendApplicationNotification(
-        @RequestHeader("Authorization") @Parameter(hidden = true)  String authorisation,
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return CallbackResponse.builder()
                 .data(fl401SubmitApplicationService.fl401SendApplicationNotification(authorisation, callbackRequest))
                 .build();

@@ -420,7 +420,8 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> nocMap = Map.of("some", "stuff",
-                                            "applicantOrganisationPolicy", organisationPolicy);
+                                            "applicantOrganisationPolicy", organisationPolicy
+        );
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
             "field5", "value5"
