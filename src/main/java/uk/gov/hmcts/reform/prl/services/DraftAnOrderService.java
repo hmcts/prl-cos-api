@@ -462,6 +462,8 @@ public class DraftAnOrderService {
         }
         caseDataMap.put(IS_HEARING_PAGE_NEEDED, isHearingPageNeeded(selectedOrder) ? Yes : No);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+        log.info("*** Orderhearing details present end : {}", caseDataMap.get("ordersHearingDetails"));
+
         return caseDataMap;
     }
 

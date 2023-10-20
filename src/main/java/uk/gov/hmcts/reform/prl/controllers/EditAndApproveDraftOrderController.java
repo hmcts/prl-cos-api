@@ -96,13 +96,14 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            log.info("*** Orderhearing details present start : {}", callbackRequest.getCaseDetails().getData()
+                .get("ordersHearingDetails"));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderDocument(
                     caseData)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-
     }
 
     @PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
@@ -113,6 +114,8 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("*** Orderhearing details present start : {}", callbackRequest.getCaseDetails().getData()
+                .get("ordersHearingDetails"));
             Map<String, Object> caseDataUpdated = draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
                 authorisation,
                 callbackRequest
@@ -180,20 +183,22 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("*** Orderhearing details present start : {}", caseDataUpdated.get("ordersHearingDetails"));
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
+                log.info("*** Orderhearing details present end : {}", caseDataUpdated.get("ordersHearingDetails"));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }
+            log.info("*** Orderhearing details present end : {}", caseDataUpdated.get("ordersHearingDetails"));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-
     }
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-common-fields", consumes = APPLICATION_JSON,
