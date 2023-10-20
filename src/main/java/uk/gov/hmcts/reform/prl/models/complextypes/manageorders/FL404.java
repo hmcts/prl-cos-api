@@ -1,7 +1,9 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.manageorders;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
@@ -103,11 +105,13 @@ public class FL404 {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime orderSpecifiedDateTime;
 
+    @JsonSetter("fl404bDateOrderEnd")
     public void setFl404bDateOrderEnd(LocalDateTime fl404bDateOrderEnd) {
         log.info("inside :: setFl404bDateOrderEnd ");
         this.fl404bDateOrderEnd = fl404bDateOrderEnd;
     }
 
+    @JsonGetter("fl404bDateOrderEnd")
     public LocalDateTime getFl404bDateOrderEnd() {
         log.info("inside :: getFl404bDateOrderEnd");
         return fl404bDateOrderEnd;
