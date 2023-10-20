@@ -266,23 +266,25 @@ public class PartyLevelCaseFlagsService {
         return caseData;
     }
 
-    public CaseData generateC100AllPartyCaseFlags(CaseData caseData) {
-        caseData = generateC100IndividualPartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANT);
-        caseData = generateC100IndividualPartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTSOLICITOR);
-        caseData = generateC100IndividualPartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENT);
-        caseData = generateC100IndividualPartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTSOLCIITOR);
-        caseData = generateC100IndividualPartyCaseFlags(caseData, PartyRole.Representing.CAOTHERPARTY);
+    public CaseData generateC100AllPartyCaseFlags(CaseData caseData, CaseData startEventResponseData) {
+        caseData = generateC100IndividualPartyCaseFlags(caseData, startEventResponseData, PartyRole.Representing.CAAPPLICANT);
+        log.info("1234 applicant is still there: " + caseData.getAllPartyFlags().getCaApplicant1Flags().getPartyExternalFlags().getPartyName());
+        caseData = generateC100IndividualPartyCaseFlags(caseData, startEventResponseData, PartyRole.Representing.CAAPPLICANTSOLICITOR);
+        caseData = generateC100IndividualPartyCaseFlags(caseData, startEventResponseData, PartyRole.Representing.CARESPONDENT);
+        caseData = generateC100IndividualPartyCaseFlags(caseData, startEventResponseData, PartyRole.Representing.CARESPONDENTSOLCIITOR);
+        caseData = generateC100IndividualPartyCaseFlags(caseData, startEventResponseData, PartyRole.Representing.CAOTHERPARTY);
+        log.info("applicant is still there: " + caseData.getAllPartyFlags().getCaApplicant1Flags().getPartyExternalFlags().getPartyName());
         return caseData;
     }
 
-    public CaseData generateC100IndividualPartyCaseFlags(CaseData caseData, PartyRole.Representing representing) {
-        List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
+    public CaseData generateC100IndividualPartyCaseFlags(CaseData caseData, CaseData startEventResponseData, PartyRole.Representing representing) {
+        List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(startEventResponseData);
         int numElements = null != caElements ? caElements.size() : 0;
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
             log.info("Party role we have now::" + partyRole.getCaseRoleLabel());
-            log.info("Representing is now::" + partyRole.getCaseRoleLabel());
+            log.info("Representing is now::" + representing);
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetails = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
                 if (partyDetails.isPresent()) {
@@ -298,6 +300,7 @@ public class PartyLevelCaseFlagsService {
                                     caseDataField,
                                     partyRole.getCaseRoleLabel()
                                 );
+                                log.info("flag is set");
                             }
                             break;
                         }
@@ -309,6 +312,7 @@ public class PartyLevelCaseFlagsService {
                                     caseDataField,
                                     partyRole.getCaseRoleLabel()
                                 );
+                                log.info("flag is set");
                             }
                             break;
                         }

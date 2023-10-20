@@ -181,6 +181,7 @@ public class RequestUpdateCallbackService {
     }
 
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, StartEventResponse startEventResponse) {
+        CaseData startEventResponseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
         CaseData caseData = CaseData.builder()
             .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
             .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
@@ -197,7 +198,7 @@ public class RequestUpdateCallbackService {
                                                                   .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
                                                                   .build()).build()).build();
 
-        caseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(caseData);
+        caseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(caseData, startEventResponseData);
 
         log.info("applicant is still there: " + caseData.getAllPartyFlags().getCaApplicant1Flags().getPartyExternalFlags().getPartyName());
 
