@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -71,6 +72,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -167,6 +169,9 @@ public class DocumentGenServiceTest {
 
     @Mock
     AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
+    protected String fl401RespC8TemplateWelsh;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -3306,6 +3311,50 @@ public class DocumentGenServiceTest {
                 .getDocumentBytes(generatedDocumentInfo.getUrl(), authToken, "s2s token");
         }, InvalidResourceException.class, "Resource is invalid TestUrl");
 
+    }
+
+    @Test
+    public void c8RespondentDaFinalDocWelsh() {
+        CaseData caseData = CaseData.builder().build();
+        String template = documentGenService.getTemplate(caseData, "C8_RESPONDENT_FL401_FINAL", true);
+        assertNull(template);
+    }
+
+    @Test
+    public void c8RespondentDaFinalDoc() {
+        CaseData caseData = CaseData.builder().build();
+        String template = documentGenService.getTemplate(caseData, "C8_RESPONDENT_FL401_FINAL", false);
+        assertNull(template);
+    }
+
+    @Test
+    public void c8RespondentCaFinalDocWelsh() {
+        CaseData caseData = CaseData.builder().build();
+        String template = documentGenService.getTemplate(caseData, "C8_RESPONDENT_FINAL", true);
+        assertNull(template);
+    }
+
+    @Test
+    public void c8RespondentCaFinalDoc() {
+        CaseData caseData = CaseData.builder().build();
+        String template = documentGenService.getTemplate(caseData, "C8_RESPONDENT_FINAL", false);
+        assertNull(template);
+    }
+
+    @Test
+    public void c8RespondentCaFinalFilenameWelsh() throws Exception {
+        Map<String, Object> respondentDetails = new HashMap<>();
+        CaseData caseData = CaseData.builder().build();
+        Document template = documentGenService.generateSingleDocument(authToken, caseData, "C8_RESPONDENT_FINAL", true, respondentDetails);
+        assertNull(template);
+    }
+
+    @Test
+    public void c8RespondentCaFinalFilename() throws Exception {
+        Map<String, Object> respondentDetails = new HashMap<>();
+        CaseData caseData = CaseData.builder().build();
+        Document template = documentGenService.generateSingleDocument(authToken, caseData, "C8_RESPONDENT_FINAL", false, respondentDetails);
+        assertNull(template);
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
