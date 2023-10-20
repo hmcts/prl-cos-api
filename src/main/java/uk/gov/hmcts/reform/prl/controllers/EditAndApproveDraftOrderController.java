@@ -138,7 +138,7 @@ public class EditAndApproveDraftOrderController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            log.info("order hearing details {}", caseDataUpdated.get("ordersHearingDetails"));
+            log.info("draft order collection {}", caseDataUpdated.get("draftOrderCollection"));
 
             log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
             CaseData caseData = objectMapper.convertValue(
