@@ -2,8 +2,11 @@ package uk.gov.hmcts.reform.prl.models.complextypes.manageorders;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -12,6 +15,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Builder(toBuilder = true)
 @Data
 public class FL404 {
@@ -32,8 +36,9 @@ public class FL404 {
     private final String fl404bPowerOfArrestParagraph;
     private final String fl404bRiskOfSignificantHarm;
     private final String fl404bDateOrderMade;
+    @Setter(AccessLevel.NONE)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private final LocalDateTime fl404bDateOrderEnd;
+    private LocalDateTime fl404bDateOrderEnd;
     private final String fl404bDateOrderEndTime;
 
     private final String fl404bMentionedProperty;
@@ -97,5 +102,15 @@ public class FL404 {
     private DateOrderEndsTimeEnum orderEndDateAndTimeOptions;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     private LocalDateTime orderSpecifiedDateTime;
+
+    public void setFl404bDateOrderEnd(LocalDateTime fl404bDateOrderEnd) {
+        log.info("inside :: setFl404bDateOrderEnd ");
+        this.fl404bDateOrderEnd = fl404bDateOrderEnd;
+    }
+
+    public LocalDateTime getFl404bDateOrderEnd() {
+        log.info("inside :: getFl404bDateOrderEnd");
+        return fl404bDateOrderEnd;
+    }
 
 }
