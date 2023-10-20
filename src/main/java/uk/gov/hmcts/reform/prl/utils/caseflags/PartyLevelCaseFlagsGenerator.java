@@ -53,22 +53,22 @@ public class PartyLevelCaseFlagsGenerator {
                 break;
             }
             case "caApplicant2Flags" -> {
-                caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant1Flags(
-                    partyFlags).build()).build();
-                break;
-            }
-            case "caApplicant3Flags" -> {
                 caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant2Flags(
                     partyFlags).build()).build();
                 break;
             }
-            case "caApplicant4Flags" -> {
+            case "caApplicant3Flags" -> {
                 caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant3Flags(
                     partyFlags).build()).build();
                 break;
             }
-            case "caApplicant5Flags" -> {
+            case "caApplicant4Flags" -> {
                 caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant4Flags(
+                    partyFlags).build()).build();
+                break;
+            }
+            case "caApplicant5Flags" -> {
+                caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant5Flags(
                     partyFlags).build()).build();
                 break;
             }
