@@ -276,8 +276,7 @@ public class UpdatePartyDetailsService {
                             || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
                             respondent.getValue().getPhoneNumber())
                             || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                            .getLabelForDynamicList())))
-                    .collect(Collectors.toList());
+                            .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
@@ -289,7 +288,7 @@ public class UpdatePartyDetailsService {
                 return true;
             }
         }
-        if (respondentList != null && respondentList.size() > 0) {
+        if (respondentList != null && !respondentList.isEmpty()) {
             log.info("respondent data changed");
             return true;
         }
@@ -398,7 +397,7 @@ public class UpdatePartyDetailsService {
                 return  c8Documents;
             }
         } else {
-            return null;
+            return c8Documents;
         }
     }
 
