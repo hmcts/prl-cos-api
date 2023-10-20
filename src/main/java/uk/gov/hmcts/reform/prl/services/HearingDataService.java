@@ -559,7 +559,7 @@ public class HearingDataService {
                 durationInText = durationInText.append(COMMA + " ");
             }
             durationInText = durationInText.append(durationInMinutes);
-            if (durationInHours > 1) {
+            if (durationInMinutes > 1) {
                 durationInText = durationInText.append(" minutes");
             } else {
                 durationInText = durationInText.append(" minute");
