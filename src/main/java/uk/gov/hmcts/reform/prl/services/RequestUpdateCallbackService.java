@@ -181,8 +181,7 @@ public class RequestUpdateCallbackService {
     }
 
     private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, StartEventResponse startEventResponse) {
-        CaseData startEventResponseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
-        startEventResponseData = startEventResponseData.toBuilder()
+        CaseData caseData = CaseData.builder()
             .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
             .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
                                                      .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
@@ -198,9 +197,11 @@ public class RequestUpdateCallbackService {
                                                                   .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
                                                                   .build()).build()).build();
 
-        startEventResponseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(startEventResponseData);
+        caseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(caseData);
 
-        return startEventResponseData;
+        log.info("applicant is still there: " + caseData.getAllPartyFlags().getCaApplicant1Flags().getPartyExternalFlags().getPartyName());
+
+        return caseData;
     }
 
     private Map<String, Object> setAwPPaymentCaseData(StartEventResponse startEventResponse, ServiceRequestUpdateDto serviceRequestUpdateDto) {
@@ -224,11 +225,11 @@ public class RequestUpdateCallbackService {
                                  .status(PaymentStatus.PAID.getDisplayedValue())
                                  .build())
                     .c2DocumentBundle(null != additionalApplicationsBundleElement.get().getValue().getC2DocumentBundle()
-                                      ? additionalApplicationsBundleElement.get().getValue().getC2DocumentBundle().toBuilder().applicationStatus(
+                                          ? additionalApplicationsBundleElement.get().getValue().getC2DocumentBundle().toBuilder().applicationStatus(
                         ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
                     .otherApplicationsBundle(null != additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
-                                             ? additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
-                                                 .toBuilder().applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
+                                                 ? additionalApplicationsBundleElement.get().getValue().getOtherApplicationsBundle()
+                        .toBuilder().applicationStatus(ApplicationStatus.SUBMITTED.getDisplayedValue()).build() : null)
                     .build();
 
                 int index = startEventResponseData.getAdditionalApplicationsBundle().indexOf(
@@ -243,7 +244,10 @@ public class RequestUpdateCallbackService {
                             )
                         );
                 }
-                caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
+                caseDataUpdated.put(
+                    "additionalApplicationsBundle",
+                    startEventResponseData.getAdditionalApplicationsBundle()
+                );
             }
         }
         return caseDataUpdated;
