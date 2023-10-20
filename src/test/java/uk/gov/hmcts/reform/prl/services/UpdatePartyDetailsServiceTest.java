@@ -1105,4 +1105,22 @@ public class UpdatePartyDetailsServiceTest {
         boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondentBefore);
         assertEquals(false, bool);
     }
+
+    @Test
+    public void testUpdateApplicantRespondentAndChildDataCaseTypeEmpty(){
+        CaseData caseData = CaseData.builder().build();
+        Map<String, Object> objectMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
+                .data(objectMap)
+                .build())
+                .build();
+        when(confidentialDetailsMapper.mapConfidentialData(
+                Mockito.any(CaseData.class),
+                Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> updatedCaseData = updatePartyDetailsService
+                .updateApplicantRespondentAndChildData(callbackRequest, "test");
+        assertNotNull(updatedCaseData);
+    }
 }
