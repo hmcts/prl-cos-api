@@ -604,7 +604,9 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndOtherPeopleInThisApplicationChecker.java',
   '**/uk/gov/hmcts/reform/prl/services/validators/ChildrenAndApplicantsChecker.java',
   '**/uk/gov/hmcts/reform/prl/services/noticeofchange/NoticeOfChangePartiesService.java',
-  '**/uk/gov/hmcts/reform/prl/services/RequestUpdateCallbackService.java'
+  '**/uk/gov/hmcts/reform/prl/services/RequestUpdateCallbackService.java',
+  '**/uk/gov/hmcts/reform/prl/utils/caseflags/PartyLevelCaseFlagsGenerator.java',
+  '**/uk/gov/hmcts/reform/prl/services/caseflags/PartyLevelCaseFlagsService.java'
 ]
 
 sonarqube {
