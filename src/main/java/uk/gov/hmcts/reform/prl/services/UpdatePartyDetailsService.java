@@ -256,14 +256,14 @@ public class UpdatePartyDetailsService {
             populateC8Documents(authorisation,
                         updatedCaseData,
                         caseData,
-                        dataMap, checkIfDetailsChanged(callbackRequest,respondent),
+                        dataMap, checkIfConfidentialityDetailsChangedRespondent(callbackRequest,respondent),
                         respondentIndex,respondent
             );
             respondentIndex++;
         }
     }
 
-    public Boolean checkIfDetailsChanged(CallbackRequest callbackRequest, Element<PartyDetails> respondent) {
+    public Boolean checkIfConfidentialityDetailsChangedRespondent(CallbackRequest callbackRequest, Element<PartyDetails> respondent) {
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         List<Element<PartyDetails>> respondentList = null;

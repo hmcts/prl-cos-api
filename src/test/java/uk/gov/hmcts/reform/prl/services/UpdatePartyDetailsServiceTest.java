@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static java.util.UUID.randomUUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
@@ -839,7 +838,7 @@ public class UpdatePartyDetailsServiceTest {
                 .phoneNumber("012345")
                 .build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondent);
         assertEquals(true, bool);
     }
 
@@ -865,7 +864,7 @@ public class UpdatePartyDetailsServiceTest {
                 .email("test1")
                 .build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondent);
         assertEquals(true, bool);
     }
 
@@ -895,7 +894,7 @@ public class UpdatePartyDetailsServiceTest {
                         .build())
                 .build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondent);
         assertEquals(true, bool);
     }
 
@@ -921,7 +920,7 @@ public class UpdatePartyDetailsServiceTest {
                 .phoneNumber("012345")
                 .build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondent);
         assertEquals(true, bool);
     }
 
@@ -945,7 +944,7 @@ public class UpdatePartyDetailsServiceTest {
         PartyDetails respondent = PartyDetails.builder()
                 .build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondent);
         assertEquals(false, bool);
     }
 
@@ -983,7 +982,7 @@ public class UpdatePartyDetailsServiceTest {
                 .phoneNumber("012345")
                 .build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().id(uuid).value(respondentBefore).build();
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondent);
         assertEquals(true, bool);
     }
 
@@ -1013,7 +1012,7 @@ public class UpdatePartyDetailsServiceTest {
                 .email("test1")
                 .build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().id(uuid).value(respondentBefore).build();
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondent);
         assertEquals(true, bool);
     }
 
@@ -1047,7 +1046,7 @@ public class UpdatePartyDetailsServiceTest {
                         .build())
                 .build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().id(uuid).value(respondentBefore).build();
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondent);
         assertEquals(true, bool);
     }
 
@@ -1077,7 +1076,7 @@ public class UpdatePartyDetailsServiceTest {
                 .phoneNumber("012345")
                 .build();
         Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().id(uuid).value(respondentBefore).build();
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondent);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondent);
         assertEquals(true, bool);
     }
 
@@ -1103,7 +1102,7 @@ public class UpdatePartyDetailsServiceTest {
                 .build();
         Map<String, Object> stringObjectMap = callbackRequest.getCaseDetailsBefore().getData();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseDataBefore);
-        boolean bool = updatePartyDetailsService.checkIfDetailsChanged(callbackRequest, wrappedRespondentBefore);
+        boolean bool = updatePartyDetailsService.checkIfConfidentialityDetailsChangedRespondent(callbackRequest, wrappedRespondentBefore);
         assertEquals(false, bool);
     }
 }
