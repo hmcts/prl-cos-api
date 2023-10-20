@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils.caseflags;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.PartyFlags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -39,6 +40,8 @@ public class PartyLevelCaseFlagsGenerator {
 
     public CaseData generatePartyFlags(CaseData caseData, String partyName, String caseDataField, String roleOnCase) {
         PartyFlags partyFlags = generatePartyFlags(partyName, caseDataField, roleOnCase);
+        AllPartyFlags allPartyFlags = AllPartyFlags.builder().build();
+        caseData = caseData.toBuilder().allPartyFlags(allPartyFlags).build();
 
         switch (caseDataField) {
             case "caApplicant1Flags" -> {
