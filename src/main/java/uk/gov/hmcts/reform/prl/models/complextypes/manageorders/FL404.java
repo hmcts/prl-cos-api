@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 
 @Builder(toBuilder = true)
@@ -33,7 +35,7 @@ public class FL404 {
     private final String fl404bRiskOfSignificantHarm;
     private final String fl404bDateOrderMade;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private final LocalDateTime fl404bDateOrderEnd;
+    private final String fl404bDateOrderEnd;
     private final String fl404bDateOrderEndTime;
 
     private final String fl404bMentionedProperty;
