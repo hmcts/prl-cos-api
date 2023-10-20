@@ -1107,7 +1107,7 @@ public class UpdatePartyDetailsServiceTest {
     }
 
     @Test
-    public void testUpdateApplicantRespondentAndChildDataCaseTypeEmpty(){
+    public void testUpdateApplicantRespondentAndChildDataCaseTypeEmpty() {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> objectMap = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
@@ -1118,6 +1118,49 @@ public class UpdatePartyDetailsServiceTest {
                 Mockito.any(CaseData.class),
                 Mockito.anyBoolean()
         )).thenReturn(caseData);
+        when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> updatedCaseData = updatePartyDetailsService
+                .updateApplicantRespondentAndChildData(callbackRequest, "test");
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testGenerateC8DocsAllRespondents() {
+        UUID uuid = UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a");
+        PartyDetails respondentBefore = PartyDetails.builder()
+                .partyId(uuid)
+                .phoneNumber("01234")
+                .build();
+        Element<PartyDetails> wrappedRespondentBefore = Element.<PartyDetails>builder().id(uuid).value(respondentBefore).build();
+        List<Element<PartyDetails>> listOfRespondents = new ArrayList<>();
+        listOfRespondents.add(wrappedRespondentBefore);
+        listOfRespondents.add(wrappedRespondentBefore);
+        listOfRespondents.add(wrappedRespondentBefore);
+        listOfRespondents.add(wrappedRespondentBefore);
+        listOfRespondents.add(wrappedRespondentBefore);
+        CaseData caseData = CaseData.builder()
+                .caseTypeOfApplication("C100")
+                .respondents(listOfRespondents)
+                .respondentC8Document(RespondentC8Document.builder().build())
+                .respondentAc8(ResponseDocuments.builder().build())
+                .respondentBc8(ResponseDocuments.builder().build())
+                .respondentCc8(ResponseDocuments.builder().build())
+                .respondentDc8(ResponseDocuments.builder().build())
+                .respondentEc8(ResponseDocuments.builder().build())
+                .build();
+        Map<String, Object> objectMap = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
+                        .data(objectMap)
+                        .build())
+                .caseDetailsBefore(CaseDetails.builder()
+                        .data(objectMap)
+                        .build())
+                .build();
+        when(confidentialDetailsMapper.mapConfidentialData(
+                Mockito.any(CaseData.class),
+                Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(objectMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> updatedCaseData = updatePartyDetailsService
                 .updateApplicantRespondentAndChildData(callbackRequest, "test");
