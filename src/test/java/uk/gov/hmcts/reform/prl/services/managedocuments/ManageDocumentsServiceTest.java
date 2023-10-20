@@ -101,7 +101,7 @@ public class ManageDocumentsServiceTest {
 
     List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
 
-    List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
+    List<Element<QuarantineLegalDoc>> courtStaffUploadDocListConfTab;
 
     List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
 
@@ -394,7 +394,7 @@ public class ManageDocumentsServiceTest {
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
         List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsListInitial = new ArrayList<>();
-        caseDataMapInitial.put("courtStaffQuarantineDocsList",courtStaffQuarantineDocsListInitial);
+        caseDataMapInitial.put("courtStaffUploadDocListConfTab",courtStaffQuarantineDocsListInitial);
 
         List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
         caseDataMapInitial.put("courtStaffUploadDocListDocTab",courtStaffUploadDocListDocTabInitial);
@@ -413,18 +413,17 @@ public class ManageDocumentsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
-        courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
+        courtStaffUploadDocListConfTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListConfTab");
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(1,courtStaffQuarantineDocsList.size());
-        assertEquals(0,courtStaffUploadDocListDocTab.size());
+        assertEquals(1, courtStaffUploadDocListConfTab.size());
+        assertEquals(0, courtStaffUploadDocListDocTab.size());
     }
 
     @Test
@@ -441,7 +440,7 @@ public class ManageDocumentsServiceTest {
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
         List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsListInitial = new ArrayList<>();
-        caseDataMapInitial.put("courtStaffQuarantineDocsList",courtStaffQuarantineDocsListInitial);
+        caseDataMapInitial.put("courtStaffUploadDocListConfTab",courtStaffQuarantineDocsListInitial);
 
         List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
 
@@ -462,18 +461,17 @@ public class ManageDocumentsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
-        courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
+        courtStaffUploadDocListConfTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListConfTab");
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(1,courtStaffQuarantineDocsList.size());
-        assertEquals(1,courtStaffUploadDocListDocTab.size());
+        assertEquals(1, courtStaffUploadDocListConfTab.size());
+        assertEquals(1, courtStaffUploadDocListDocTab.size());
     }
 
     @Test

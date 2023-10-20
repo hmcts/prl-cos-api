@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.common.lang.Nullable;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -194,4 +195,11 @@ public class CommonUtils {
         return " ";
     }
 
+    public static boolean isEmpty(@Nullable String string) {
+        return string == null || string.isEmpty();
+    }
+
+    public static boolean isNotEmpty(@Nullable String string) {
+        return !isEmpty(string);
+    }
 }

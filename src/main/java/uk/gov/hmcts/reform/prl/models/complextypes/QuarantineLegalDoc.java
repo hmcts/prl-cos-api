@@ -78,6 +78,7 @@ public class QuarantineLegalDoc {
     private final Document caseSummaryDocument;
     private final Document legalProfQuarantineDocument;
     private final Document cafcassQuarantineDocument;
+    //PRL-4328 - To be deleted
     private final Document courtStaffQuarantineDocument;
 
     public static String[] quarantineCategoriesToRemove() {
