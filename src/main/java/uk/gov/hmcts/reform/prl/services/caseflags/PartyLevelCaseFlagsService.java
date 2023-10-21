@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -190,7 +191,10 @@ public class PartyLevelCaseFlagsService {
         return data;
     }
 
-    public CaseData generateIndividualPartySolicitorCaseFlags(CaseData caseData, int partyIndex, PartyRole.Representing representing) {
+    public CaseData generateIndividualPartySolicitorCaseFlags(CaseData caseData,
+                                                              int partyIndex,
+                                                              PartyRole.Representing representing,
+                                                              boolean solicitorRepresented) {
         String caseDataField = String.format(representing.getCaseDataField(), partyIndex + 1);
         Optional<Object> partyFlags = Optional.empty();
         log.info("caseDataField is::" + caseDataField);
@@ -205,7 +209,8 @@ public class PartyLevelCaseFlagsService {
                         partyDetails.get().getValue(),
                         representing,
                         caseDataField,
-                        partyIndex
+                        partyIndex,
+                        solicitorRepresented
                     );
                 }
                 break;
@@ -218,7 +223,8 @@ public class PartyLevelCaseFlagsService {
                         partyDetails.get(),
                         representing,
                         caseDataField,
-                        partyIndex
+                        partyIndex,
+                        solicitorRepresented
                     );
                 }
                 break;
@@ -234,12 +240,14 @@ public class PartyLevelCaseFlagsService {
                                               PartyDetails partyDetails,
                                               PartyRole.Representing representing,
                                               String caseDataField,
-                                              int partyIndex) {
+                                              int partyIndex,
+                                              boolean solicitorRepresented) {
         Optional<Object> partyFlags = Optional.empty();
         log.info("regenerateSolicitorFlags");
         if (!StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())
-            && PartyRole.fromRepresentingAndIndex(representing, partyIndex + 1).isPresent()) {
-            log.info("inside now");
+            && PartyRole.fromRepresentingAndIndex(representing, partyIndex + 1).isPresent()
+            && solicitorRepresented) {
+            log.info("inside now:: is represented -- " + solicitorRepresented);
             partyFlags = Optional.ofNullable(partyLevelCaseFlagsGenerator.generatePartyFlags(
                 partyDetails.getRepresentativeFullNameForCaseFlags(),
                 caseDataField,
@@ -249,6 +257,16 @@ public class PartyLevelCaseFlagsService {
                 ).get())
             ));
             log.info("got the flags");
+        } else {
+            log.info("inside now:: is represented false-- " + solicitorRepresented);
+            partyFlags = Optional.ofNullable(partyLevelCaseFlagsGenerator.generatePartyFlags(
+                PrlAppsConstants.EMPTY_STRING,
+                caseDataField,
+                String.valueOf(PartyRole.fromRepresentingAndIndex(
+                    representing,
+                    partyIndex + 1
+                ).get())
+            ));
         }
         if (partyFlags.isPresent()) {
             PartyFlags updatedPartyFlags = (PartyFlags) partyFlags.get();
