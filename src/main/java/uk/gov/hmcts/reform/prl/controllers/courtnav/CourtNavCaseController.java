@@ -75,6 +75,7 @@ public class CourtNavCaseController {
             log.info("Case has been created {}", caseDetails.getId());
             courtNavCaseService.refreshTabs(authorisation, caseDetails.getData(), caseDetails.getId());
             partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
+            log.info("**********************Tab refresh and Courtnav case creation complete**************************");
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {
