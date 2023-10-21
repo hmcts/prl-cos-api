@@ -116,6 +116,7 @@ public class FL401SubmitApplicationService {
 
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+        caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         log.info("******* caseDataUpdated is :: " + objectMapper.writeValueAsString(caseDataUpdated));
         return caseDataUpdated;
     }
