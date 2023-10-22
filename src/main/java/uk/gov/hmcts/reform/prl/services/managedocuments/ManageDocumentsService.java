@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -115,7 +116,8 @@ public class ManageDocumentsService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
-        String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorization));
+        UserDetails userDetails = userService.getUserDetails(authorization);
+        String userRole = CaseUtils.getUserRole(userDetails);
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
@@ -140,7 +142,8 @@ public class ManageDocumentsService {
                     restricted,
                     userRole,
                     quarantineDocs,
-                    tabDocuments
+                    tabDocuments,
+                    userDetails.getFullName()
                 )) {
                     isRestrictedFlag = true;
                 }
@@ -168,7 +171,7 @@ public class ManageDocumentsService {
         return caseDataUpdated;
     }
 
-    private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {
+    private void updateCaseDataUpdatedByRole(Map<String, Object> caseDataUpdated, String userRole) {
 
         if (SOLICITOR.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
@@ -183,14 +186,14 @@ public class ManageDocumentsService {
                                                                          Predicate<Element<ManageDocuments>> restricted,
                                                                          String userRole,
                                                                          List<Element<QuarantineLegalDoc>> quarantineDocs,
-                                                                         List<Element<QuarantineLegalDoc>> tabDocuments) {
+                                                                         List<Element<QuarantineLegalDoc>> tabDocuments, String uploadedBy) {
 
         ManageDocuments manageDocument = element.getValue();
         boolean confidentialityFlag = false;
         // if restricted then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-            quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
+            quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument, uploadedBy);
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
         } else {
@@ -201,7 +204,7 @@ public class ManageDocumentsService {
                     manageDocument.getDocument().toBuilder()
                         .documentCreatedOn(localZoneDate).build()
                 );
-            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument);
+            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, uploadedBy);
 
             tabDocuments.add(element(quarantineUploadDoc));
         }

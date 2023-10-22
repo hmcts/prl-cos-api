@@ -190,7 +190,7 @@ public class DocumentUtils {
     }
 
     public static QuarantineLegalDoc addQuarantineFields(QuarantineLegalDoc quarantineLegalDoc,
-                                                         ManageDocuments manageDocument) {
+                                                         ManageDocuments manageDocument, String uploadedBy) {
         return quarantineLegalDoc.toBuilder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
@@ -198,6 +198,7 @@ public class DocumentUtils {
             .notes(manageDocument.getDocumentDetails())
             .categoryId(manageDocument.getDocumentCategories().getValueCode())
             .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            .uploadedBy(uploadedBy)
             .build();
     }
 
