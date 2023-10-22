@@ -20,6 +20,7 @@ public class QuarantineLegalDoc {
     private final String categoryName;
     private final List<RestrictToCafcassHmcts> restrictCheckboxCorrespondence;
     private final String documentParty;
+    private final String uploadedBy;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
     private final LocalDateTime documentUploadedDate;
     //PRL-3564 manage documents categories to fields
