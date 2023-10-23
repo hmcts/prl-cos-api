@@ -289,7 +289,7 @@ public class ManageOrdersController {
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
+            log.info("** manageOrders casedatamap** {}", caseDataUpdated);
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
