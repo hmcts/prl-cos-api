@@ -412,7 +412,7 @@ public class PrlAppsConstants {
         + "b) if the application is not dismissed, any further directions "
         + System.lineSeparator()
         + "c) whether an order under section 91 (14) of the Children Act 1989 should be made. "
-        + " Such orders prevent the making of further applications without the court’s permission";
+        + "Such orders prevent the making of further applications without the court’s permission";
 
     public static final String SDO_CROSS_EXAMINATION_EX741 = "Under Section 31U of the MFPA, it appears to the court "
         + "that the quality of the party’s evidence on cross-examination is likely to be diminished if the "
