@@ -44,6 +44,7 @@ public class DraftAnOrderController {
     private final HearingDataService hearingDataService;
     private final HearingService hearingService;
     private final ManageOrderService manageOrderService;
+    @Autowired
     private AuthorisationService authorisationService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
