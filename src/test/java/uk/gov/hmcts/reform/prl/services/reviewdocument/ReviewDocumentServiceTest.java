@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -98,6 +99,27 @@ public class ReviewDocumentServiceTest {
     }
 
     @Test
+    public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForBulkscanDocuments() {
+        CaseData caseData =  CaseData.builder()
+            .scannedDocuments(List.of(ElementUtils.element(
+                ScannedDocument.builder()
+                    .scannedDate(LocalDateTime.now())
+                    .url(Document.builder().build())
+                    .controlNumber("123")
+                    .deliveryDate(LocalDateTime.now())
+                    .exceptionRecordReference("EXREF")
+                    .type("Other")
+                    .subtype("test")
+                    .fileName("filename")
+                    .build()
+
+            )))
+            .build();
+
+        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
+    }
+
+    @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForCitizenUploadQuarantineDocsList() {
         CaseData caseData =  CaseData.builder()
             .citizenUploadQuarantineDocsList(List.of(ElementUtils.element(UploadedDocuments.builder()
@@ -168,6 +190,33 @@ public class ReviewDocumentServiceTest {
                                  ).build())
                                  .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
             .build();
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        reviewDocumentService.getReviewedDocumentDetails(caseData,caseDataMap);
+        Assert.assertNotNull(caseDataMap.get("docToBeReviewed"));
+    }
+
+    @Test
+    public void testGetDocumentDetailsWhenUploadedByBulkscan() {
+        Element element1 =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(ScannedDocument.builder()
+                       .scannedDate(LocalDateTime.now())
+                       .url(Document.builder().build())
+                       .controlNumber("123")
+                       .deliveryDate(LocalDateTime.now())
+                       .exceptionRecordReference("EXREF")
+                       .type("Other")
+                       .subtype("test")
+                       .fileName("filename")
+                       .build()).build();
+        CaseData caseData =  CaseData.builder()
+            .scannedDocuments(List.of(element1))
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDocsDynamicList(DynamicList.builder().value(
+                                     DynamicListElement.builder()
+                                         .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
+                                 ).build())
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build()).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.getReviewedDocumentDetails(caseData,caseDataMap);
@@ -406,6 +455,95 @@ public class ReviewDocumentServiceTest {
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_IN_REVIEW, response.getBody().getConfirmationHeader());
         Assert.assertEquals(REVIEW_NOT_SURE, response.getBody().getConfirmationBody());
+    }
+
+
+    @Test
+    public void testReviewResultWhenLegalCourtCitizenCafcassQuarantineDocListIsEmpty() {
+
+        CaseData caseData =  CaseData.builder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
+        Assert.assertNotNull(response);
+        Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
+        Assert.assertEquals(REVIEW_YES, response.getBody().getConfirmationBody());
+    }
+
+    @Test
+    public void testReviewProcessOfDocumentToConfidentialTabForScanDocWhenNoIsSelected() {
+
+        List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
+        documentList.add(element);
+        CaseData caseData =  CaseData.builder()
+            .scannedDocuments(List.of(ElementUtils.element(
+                ScannedDocument.builder()
+                    .scannedDate(LocalDateTime.now())
+                    .url(Document.builder().build())
+                    .controlNumber("123")
+                    .deliveryDate(LocalDateTime.now())
+                    .exceptionRecordReference("EXREF")
+                    .type("Other")
+                    .subtype("test")
+                    .fileName("filename")
+                    .build()
+
+            )))
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.no)
+                                 .legalProfUploadDocListDocTab(new ArrayList<>()).build())
+            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        Assert.assertNotNull(caseDataMap.get("scannedDocuments"));
+        List<Element<ScannedDocument>>  listScannedDocuments =
+            (List<Element<ScannedDocument>>) caseDataMap.get("scannedDocuments");
+
+        Assert.assertEquals(caseData.getScannedDocuments().get(0).getValue().controlNumber,
+                            listScannedDocuments.get(0).getValue().getControlNumber());
+
+        Assert.assertEquals(caseData.getScannedDocuments().get(0).getValue().exceptionRecordReference,
+                            listScannedDocuments.get(0).getValue().getExceptionRecordReference());
+
+    }
+
+    @Test
+    public void testReviewProcessOfDocumentToConfidentialTabForScanDocWhenYesIsSelected() {
+
+        List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
+        documentList.add(element);
+        CaseData caseData =  CaseData.builder()
+            .scannedDocuments(List.of(ElementUtils.element(
+                ScannedDocument.builder()
+                    .scannedDate(LocalDateTime.now())
+                    .url(Document.builder().build())
+                    .controlNumber("123")
+                    .deliveryDate(LocalDateTime.now())
+                    .exceptionRecordReference("EXREF")
+                    .type("Other")
+                    .subtype("test")
+                    .fileName("filename")
+                    .build()
+
+            )))
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .legalProfUploadDocListConfTab(new ArrayList<>()).build())
+            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        Assert.assertNotNull(caseDataMap.get("scannedDocuments"));
+        List<Element<ScannedDocument>>  listScannedDocuments =
+            (List<Element<ScannedDocument>>) caseDataMap.get("scannedDocuments");
+
+        Assert.assertEquals(caseData.getScannedDocuments().get(0).getValue().controlNumber,
+                            listScannedDocuments.get(0).getValue().getControlNumber());
+
+        Assert.assertEquals(caseData.getScannedDocuments().get(0).getValue().exceptionRecordReference,
+                            listScannedDocuments.get(0).getValue().getExceptionRecordReference());
+
     }
 
 

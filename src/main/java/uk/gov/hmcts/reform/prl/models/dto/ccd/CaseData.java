@@ -75,6 +75,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationDateInfo;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationObjectType;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentRelationOptionsInfo;
+import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.StatementOfTruth;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -772,6 +773,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
     @JsonProperty("citizenUploadQuarantineDocsList")
     private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
+    @JsonProperty("scannedDocuments")
+    private List<Element<ScannedDocument>> scannedDocuments;
 
     /**
      * Review documents.
