@@ -124,7 +124,7 @@ public class FL404 {
     }
 
     private boolean isDateValid(String fl404bDateOrderEnd) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
             sdf.parse(fl404bDateOrderEnd);
             log.info("Parsed date successfully");
