@@ -11,9 +11,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Slf4j
@@ -105,43 +106,56 @@ public class FL404 {
 
     @JsonSetter("fl404bDateOrderEnd")
     public void setFl404bDateOrderEnd(String fl404bDateOrderEnd) {
-        log.info("inside :: setFl404bDateOrderEnd {}", fl404bDateOrderEnd);
         this.fl404bDateOrderEnd = fl404bDateOrderEnd;
     }
 
     @JsonGetter("fl404bDateOrderEnd")
     public String getFl404bDateOrderEnd() {
-        log.info("inside :: getFl404bDateOrderEnd {}", fl404bDateOrderEnd);
-        if (null != fl404bDateOrderEnd && isDateValid(fl404bDateOrderEnd)) {
-            if (null != fl404bDateOrderEndTime && isTimeValid(fl404bDateOrderEndTime)) {
-                fl404bDateOrderEnd = fl404bDateOrderEnd + "T" + fl404bDateOrderEndTime + ":00.000";
-            } else {
-                fl404bDateOrderEnd = fl404bDateOrderEnd + "T00:00:00.000";
-            }
-        }
-        log.info("inside :: after conversion getFl404bDateOrderEnd {}", fl404bDateOrderEnd);
-        return fl404bDateOrderEnd;
+        return getFormattedDate(fl404bDateOrderEnd, fl404bDateOrderEndTime);
     }
 
-    private boolean isDateValid(String fl404bDateOrderEnd) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    @JsonGetter("fl404bOccupationDate1")
+    public String getFl404bOccupationDate1() {
+        return getFormattedDate(fl404bOccupationDate1, fl404bOccupationTime1);
+    }
+
+    @JsonGetter("fl404bOccupationDate2")
+    public String getFl404bOccupationDate2() {
+        return getFormattedDate(fl404bOccupationDate2, fl404bOccupationTime2);
+    }
+
+    private String getFormattedDate(String date, String time) {
+        log.info("inside :: getFormattedDate {}", date);
+        if (null != date && isOldDateFormat(date)) {
+            if (null != time && isOldTimeFormat(time)) {
+                return date + "T" + time + ":00.000";
+            } else {
+                return date + "T00:00:00.000";
+            }
+        }
+        log.info("inside :: after conversion getFormattedDate {}", date);
+        return date;
+    }
+
+    private boolean isOldDateFormat(String date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         try {
-            sdf.parse(fl404bDateOrderEnd);
+            LocalDate.parse(date, formatter);
             log.info("Parsed date successfully");
             return true;
-        } catch (Exception e) {
+        } catch (DateTimeParseException e) {
             log.error("Failed to parse date");
         }
         return false;
     }
 
-    private boolean isTimeValid(String fl404bDateOrderEndTime) {
-        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+    private boolean isOldTimeFormat(String time) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         try {
-            sdf.parse(fl404bDateOrderEndTime);
+            LocalDate.parse(time, formatter);
             log.info("Parsed time successfully");
             return true;
-        } catch (Exception e) {
+        } catch (DateTimeParseException e) {
             log.error("Failed to parse time");
         }
         return false;
