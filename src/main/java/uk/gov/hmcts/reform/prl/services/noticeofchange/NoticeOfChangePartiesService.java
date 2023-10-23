@@ -406,17 +406,32 @@ public class NoticeOfChangePartiesService {
             }
             caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
             log.info("We are here");
-            caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR);
+            if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
+                caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+                    caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR, true);
+            } else {
+                if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
+                    caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+                        caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR, false);
+                }
+            }
         } else if (CAAPPLICANT.equals(representing)) {
             updatedRepresentedRespondentElement = ElementUtils
                 .element(partyDetailsElement.getId(), updPartyDetails);
             caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
-            caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                caseData,
-                partyIndex,
-                PartyRole.Representing.CAAPPLICANTSOLICITOR
-            );
+            if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
+                caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+                    caseData,
+                    partyIndex,
+                    PartyRole.Representing.CAAPPLICANTSOLICITOR, true
+                );
+            } else {
+                caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+                    caseData,
+                    partyIndex,
+                    PartyRole.Representing.CAAPPLICANTSOLICITOR, false
+                );
+            }
         }
         return caseData;
     }
@@ -434,11 +449,19 @@ public class NoticeOfChangePartiesService {
                 typeOfNocEvent
             );
             caseData = caseData.toBuilder().applicantsFL401(updPartyDetails).build();
-            caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                caseData,
-                0,
-                PartyRole.Representing.DAAPPLICANTSOLICITOR
-            );
+            if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
+                caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+                    caseData,
+                    0,
+                    PartyRole.Representing.DAAPPLICANTSOLICITOR, true
+                );
+            } else {
+                caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+                    caseData,
+                    0,
+                    PartyRole.Representing.DAAPPLICANTSOLICITOR,false
+                );
+            }
         } else if (DARESPONDENT.equals(representing)) {
             PartyDetails updPartyDetails = updatePartyDetails(
                 legalRepresentativeSolicitorDetails,
@@ -447,11 +470,19 @@ public class NoticeOfChangePartiesService {
                 typeOfNocEvent
             );
             caseData = caseData.toBuilder().respondentsFL401(updPartyDetails).build();
-            caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                caseData,
-                0,
-                PartyRole.Representing.DARESPONDENTSOLCIITOR
-            );
+            if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
+                caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+                    caseData,
+                    0,
+                    PartyRole.Representing.DARESPONDENTSOLCIITOR, true
+                );
+            } else {
+                caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+                    caseData,
+                    0,
+                    PartyRole.Representing.DARESPONDENTSOLCIITOR, false
+                );
+            }
         }
         return caseData;
     }
