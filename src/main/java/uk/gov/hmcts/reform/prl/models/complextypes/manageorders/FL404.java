@@ -107,13 +107,13 @@ public class FL404 {
     @JsonSetter("fl404bDateOrderEnd")
     public void setFl404bDateOrderEnd(String fl404bDateOrderEnd) {
         log.info("inside setter --> {}", fl404bDateOrderEnd);
-        this.fl404bDateOrderEnd = getFormattedDate(fl404bDateOrderEnd,fl404bDateOrderEndTime);
-        log.info("after formatting --> {}", this.fl404bDateOrderEnd);
+        this.fl404bDateOrderEnd = fl404bDateOrderEnd;
     }
 
     @JsonGetter("fl404bDateOrderEnd")
     public String getFl404bDateOrderEnd() {
-        return getFormattedDate(fl404bDateOrderEnd, fl404bDateOrderEndTime);
+        this.fl404bDateOrderEnd = getFormattedDate(fl404bDateOrderEnd, fl404bDateOrderEndTime);
+        return this.fl404bDateOrderEnd;
     }
 
     @JsonGetter("fl404bOccupationDate1")
@@ -127,8 +127,8 @@ public class FL404 {
     }
 
     private String getFormattedDate(String date, String time) {
-        log.info("inside :: getFormattedDate {}", date);
         if (null != date && isOldDateFormat(date)) {
+            log.info("inside :: getFormattedDate {}", date);
             if (null != time && isOldTimeFormat(time)) {
                 return date + "T" + time + ":00.000";
             } else {
@@ -136,6 +136,7 @@ public class FL404 {
             }
         }
         log.info("inside :: after conversion getFormattedDate {}", date);
+
         return date;
     }
 
