@@ -74,6 +74,9 @@ public class ManageDocumentsService {
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
             .build();
 
+        DynamicList s = getCategoriesSubcategories(authorization, String.valueOf(caseData.getId()));
+        log.info("DDDDDD  {}",s);
+
         return caseData.toBuilder()
             .manageDocuments(Arrays.asList(element(manageDocuments)))
             .build();
@@ -86,6 +89,7 @@ public class ManageDocumentsService {
                 authTokenGenerator.generate(),
                 caseReference
             );
+            log.info("22222222 {}",categoriesAndDocuments.getCategories());
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
