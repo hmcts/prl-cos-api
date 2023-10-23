@@ -113,7 +113,6 @@ public class DraftAnOrderControllerTest {
             .surname("Solicitor")
             .build();
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
@@ -125,7 +124,7 @@ public class DraftAnOrderControllerTest {
     @Test
     public void testResetFields() {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             0,
             draftAnOrderController.resetFields(authToken, s2sToken, callbackRequest).getData().size()
@@ -154,7 +153,7 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken)).thenReturn(CallbackResponse.builder().data(caseData).build());
         CaseData updatedCaseData = draftAnOrderController.populateHeader(
             authToken, s2sToken, callbackRequest
@@ -188,7 +187,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.handleSelectedOrder(any(),
                                                      any())).thenReturn(CallbackResponse.builder().errors(List.of(
             "This order is not available to be drafted")).build());
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             "This order is not available to be drafted",
             draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getErrors().get(0)
@@ -213,7 +212,7 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handleSelectedOrder(any(),
                                                      any())).thenReturn(CallbackResponse.builder().errors(List.of(
             "This order is not available to be drafted")).build());
@@ -309,7 +308,7 @@ public class DraftAnOrderControllerTest {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
@@ -387,7 +386,7 @@ public class DraftAnOrderControllerTest {
             caseData = manageOrderService.populateCustomOrderFields(caseData);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
@@ -422,7 +421,6 @@ public class DraftAnOrderControllerTest {
             .thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
         when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest).getData());
@@ -457,7 +455,7 @@ public class DraftAnOrderControllerTest {
             caseData,
             CreateSelectOrderOptionsEnum.blankOrderOrDirections
         ));
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.prepareDraftOrderCollection(
@@ -499,13 +497,12 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.isAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest).getData()
         );
-
     }
 
     @Test
@@ -539,7 +536,7 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             "Please select at least one options from below",
@@ -577,7 +574,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getData()
@@ -614,7 +611,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             "Please select at least one options from below",
             draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getErrors().get(0)

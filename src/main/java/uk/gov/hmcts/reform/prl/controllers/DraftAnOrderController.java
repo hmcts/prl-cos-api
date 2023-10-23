@@ -39,15 +39,12 @@ public class DraftAnOrderController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final DraftAnOrderService draftAnOrderService;
-
+    @Autowired
+    private DraftAnOrderService draftAnOrderService;
     private final HearingDataService hearingDataService;
-
     private final HearingService hearingService;
-
     private final ManageOrderService manageOrderService;
-
-    private final AuthorisationService authorisationService;
+    private AuthorisationService authorisationService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
