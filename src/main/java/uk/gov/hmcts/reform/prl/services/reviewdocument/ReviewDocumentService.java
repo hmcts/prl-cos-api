@@ -22,25 +22,11 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -560,7 +546,7 @@ public class ReviewDocumentService {
     private QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
                                                            QuarantineLegalDoc quarantineLegalDoc) {
 
-        legalProfUploadDoc = legalProfUploadDoc.toBuilder()
+        return legalProfUploadDoc.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
             .notes(quarantineLegalDoc.getNotes())
@@ -572,13 +558,10 @@ public class ReviewDocumentService {
             .subtype(quarantineLegalDoc.getSubtype())
             .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
             .url(legalProfUploadDoc.getConfidentialDocument() == null ? quarantineLegalDoc.getUrl() : null)
+            .uploadedBy(StringUtils.isNotEmpty(quarantineLegalDoc.getUploadedBy()) ? quarantineLegalDoc.getUploadedBy() : null)
             .scannedDate(quarantineLegalDoc.getScannedDate())
             .deliveryDate(quarantineLegalDoc.getDeliveryDate())
             .build();
-        if (StringUtils.isNotEmpty(quarantineLegalDoc.getUploadedBy())) {
-            legalProfUploadDoc = legalProfUploadDoc.toBuilder().uploadedBy(quarantineLegalDoc.getUploadedBy()).build();
-        }
-        return legalProfUploadDoc;
     }
 
 }
