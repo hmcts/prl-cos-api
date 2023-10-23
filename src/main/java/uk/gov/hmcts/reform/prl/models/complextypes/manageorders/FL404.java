@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Builder(toBuilder = true)
@@ -111,6 +112,14 @@ public class FL404 {
     @JsonGetter("fl404bDateOrderEnd")
     public String getFl404bDateOrderEnd() {
         log.info("inside :: getFl404bDateOrderEnd {}", fl404bDateOrderEnd);
+        if (null != fl404bDateOrderEnd && Pattern.matches("yyyy-MM-dd",fl404bDateOrderEnd)) {
+            if (null != fl404bDateOrderEndTime && Pattern.matches("HH:mm", fl404bDateOrderEndTime)) {
+                fl404bDateOrderEnd = fl404bDateOrderEnd + "T" + fl404bDateOrderEndTime + ":00.000";
+            } else {
+                fl404bDateOrderEnd = fl404bDateOrderEnd + "T00:00:00.000";
+            }
+        }
+        log.info("inside :: after conversion getFl404bDateOrderEnd {}", fl404bDateOrderEnd);
         return fl404bDateOrderEnd;
     }
 
