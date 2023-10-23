@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -18,8 +19,9 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
-import uk.gov.hmcts.reform.prl.models.CitizenSetPartyFlagsRequest;
+import uk.gov.hmcts.reform.prl.models.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -33,34 +35,17 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.*;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -397,58 +382,91 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
-    public CaseDetails setPartyFlagsForCitizen(String authToken,
-                                               String caseId, String eventId, CitizenSetPartyFlagsRequest citizenSetPartyFlagsRequest) {
+    public CaseData updatePartyFlagsForCitizen(String authToken,
+                                                  String caseId, String eventId, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
 
-        CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        StringBuilder caseDataFieldName = new StringBuilder();
+        String systemAuthorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
+        log.info("Following case event will be triggered {}", caseEvent.getValue());
+
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+            caseEvent,
+            systemUpdateUserId
+        );
+
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                systemAuthorisation,
+                eventRequestData,
+                caseId,
+                true
+            );
+        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+
+        String caseDataFieldName = "";
         OptionalInt partyIndex = OptionalInt.empty();
-        if (StringUtils.isNotEmpty(citizenSetPartyFlagsRequest.getPartyIdamId())
-            && ObjectUtils.isNotEmpty(citizenSetPartyFlagsRequest.getPartyFlags())) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(citizenSetPartyFlagsRequest.getCaseTypeOfApplication())) {
+        if (StringUtils.isNotEmpty(citizenPartyFlagsRequest.getPartyIdamId())
+            && ObjectUtils.isNotEmpty(citizenPartyFlagsRequest.getPartyExternalFlags())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(citizenPartyFlagsRequest.getCaseTypeOfApplication())
+                && PartyEnum.applicant.equals(citizenPartyFlagsRequest.getPartyType())) {
                 partyIndex = getPartyIndexForCa(
                     caseData,
-                    citizenSetPartyFlagsRequest
+                    citizenPartyFlagsRequest.getPartyIdamId(),
+                    PartyRole.Representing.CAAPPLICANT
+                );
+                caseDataFieldName = String.format(
+                    PartyRole.Representing.CAAPPLICANT.getCaseDataField(),
+                    partyIndex.getAsInt() + 1
+                );
+            } else if (C100_CASE_TYPE.equalsIgnoreCase(citizenPartyFlagsRequest.getCaseTypeOfApplication())
+                && PartyEnum.respondent.equals(citizenPartyFlagsRequest.getPartyType())) {
+                partyIndex = getPartyIndexForCa(
+                    caseData,
+                    citizenPartyFlagsRequest.getPartyIdamId(),
+                    PartyRole.Representing.CARESPONDENT
+                );
+                caseDataFieldName = String.format(
+                    PartyRole.Representing.CARESPONDENT.getCaseDataField(),
+                    partyIndex.getAsInt() + 1
                 );
             } else {
-                partyIndex = getPartyIndexForDa(caseData, citizenSetPartyFlagsRequest);
+                partyIndex = getPartyIndexForDa(caseData, citizenPartyFlagsRequest);
             }
-            if (partyIndex.isPresent()) {
-                caseDataFieldName = caseDataFieldName.append(
-                    C100_CASE_TYPE.equalsIgnoreCase(citizenSetPartyFlagsRequest.getCaseTypeOfApplication()) ? "ca" : "da")
-                    .append(citizenSetPartyFlagsRequest.getPartyType().getDisplayedValue()).append(Integer.sum(
-                        partyIndex.getAsInt(),
-                        1
-                    )).append("Flags");
-            }
+
             // call the generic method here to set the PartyFlags inside AllPartyFlags in caseData based on caseDataFieldName
-            return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
+            //set the case data content
+            CaseDataContent caseDataContent = null;
+            caseDataContent = coreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                null
+            );
+            coreCaseDataService.submitUpdate(
+                systemAuthorisation,
+                eventRequestData,
+                caseDataContent,
+                caseId,
+                true
+            );
+
+            return caseData;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
-    private OptionalInt getPartyIndexForCa(CaseData caseData, CitizenSetPartyFlagsRequest citizenSetPartyFlagsRequest) {
-        OptionalInt partyIndex = OptionalInt.empty();
-        if (PartyEnum.applicant.equals(citizenSetPartyFlagsRequest.getPartyType())) {
-            List<Element<PartyDetails>> applicants = caseData.getApplicants();
-            partyIndex = IntStream.range(0, applicants.size())
-                .filter(i -> citizenSetPartyFlagsRequest.getPartyIdamId().equals(applicants.get(i).getValue().getUser().getIdamId()))
-                .findFirst();
-        } else if (PartyEnum.respondent.equals(citizenSetPartyFlagsRequest.getPartyType())) {
-            List<Element<PartyDetails>> respondents = caseData.getRespondents();
-            partyIndex = IntStream.range(0, respondents.size())
-                .filter(i -> citizenSetPartyFlagsRequest.equals(respondents.get(i).getValue().getUser().getIdamId()))
-                .findFirst();
-        }
-        return partyIndex;
+    private OptionalInt getPartyIndexForCa(CaseData caseData, String partyIdamId, PartyRole.Representing representing) {
+        List<Element<PartyDetails>> parties = representing.getCaTarget().apply(caseData);
+        return IntStream.range(0, parties.size())
+            .filter(i -> partyIdamId.equals(parties.get(i).getValue().getUser().getIdamId()))
+            .findFirst();
+
     }
 
-    private static OptionalInt getPartyIndexForDa(CaseData caseData, CitizenSetPartyFlagsRequest citizenSetPartyFlagsRequest) {
+    private static OptionalInt getPartyIndexForDa(CaseData caseData, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
         OptionalInt partyIndex = OptionalInt.empty();
-        if (citizenSetPartyFlagsRequest.getPartyIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())
-            || citizenSetPartyFlagsRequest.getPartyIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+        if (citizenPartyFlagsRequest.getPartyIdamId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())
+            || citizenPartyFlagsRequest.getPartyIdamId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
             partyIndex = OptionalInt.of(1);
         }
         return partyIndex;
