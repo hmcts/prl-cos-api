@@ -36,8 +36,8 @@ public class FL404 {
     private final String fl404bPowerOfArrestParagraph;
     private final String fl404bRiskOfSignificantHarm;
     private final String fl404bDateOrderMade;
-    //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private LocalDateTime fl404bDateOrderEnd;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private String fl404bDateOrderEnd;
     private final String fl404bDateOrderEndTime;
 
     private final String fl404bMentionedProperty;
@@ -103,13 +103,13 @@ public class FL404 {
     private LocalDateTime orderSpecifiedDateTime;
 
     @JsonSetter("fl404bDateOrderEnd")
-    public void setFl404bDateOrderEnd(LocalDateTime fl404bDateOrderEnd) {
+    public void setFl404bDateOrderEnd(String fl404bDateOrderEnd) {
         log.info("inside :: setFl404bDateOrderEnd ");
         this.fl404bDateOrderEnd = fl404bDateOrderEnd;
     }
 
     @JsonGetter("fl404bDateOrderEnd")
-    public LocalDateTime getFl404bDateOrderEnd() {
+    public String getFl404bDateOrderEnd() {
         log.info("inside :: getFl404bDateOrderEnd");
         return fl404bDateOrderEnd;
     }
