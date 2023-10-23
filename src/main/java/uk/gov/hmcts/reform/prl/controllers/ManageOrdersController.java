@@ -90,7 +90,8 @@ public class ManageOrdersController {
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
-    private final AmendOrderService amendOrderService;
+    @Autowired
+    private AmendOrderService amendOrderService;
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
