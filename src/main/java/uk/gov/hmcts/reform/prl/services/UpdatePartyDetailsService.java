@@ -256,14 +256,14 @@ public class UpdatePartyDetailsService {
             populateC8Documents(authorisation,
                         updatedCaseData,
                         caseData,
-                        dataMap, checkIfDetailsChanged(callbackRequest,respondent),
+                        dataMap, checkIfConfidentialityDetailsChangedRespondent(callbackRequest,respondent),
                         respondentIndex,respondent
             );
             respondentIndex++;
         }
     }
 
-    public Boolean checkIfDetailsChanged(CallbackRequest callbackRequest, Element<PartyDetails> respondent) {
+    public Boolean checkIfConfidentialityDetailsChangedRespondent(CallbackRequest callbackRequest, Element<PartyDetails> respondent) {
         Map<String, Object> casDataMap = callbackRequest.getCaseDetailsBefore().getData();
         CaseData caseDataBefore = objectMapper.convertValue(casDataMap, CaseData.class);
         List<Element<PartyDetails>> respondentList = null;
@@ -276,8 +276,7 @@ public class UpdatePartyDetailsService {
                             || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
                             respondent.getValue().getPhoneNumber())
                             || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
-                            .getLabelForDynamicList())))
-                    .collect(Collectors.toList());
+                            .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
@@ -289,7 +288,7 @@ public class UpdatePartyDetailsService {
                 return true;
             }
         }
-        if (respondentList != null && respondentList.size() > 0) {
+        if (respondentList != null && !respondentList.isEmpty()) {
             log.info("respondent data changed");
             return true;
         }
@@ -398,7 +397,7 @@ public class UpdatePartyDetailsService {
                 return  c8Documents;
             }
         } else {
-            return null;
+            return c8Documents;
         }
     }
 
