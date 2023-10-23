@@ -82,11 +82,13 @@ public class ManageOrdersController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private final ManageOrderService manageOrderService;
+    @Autowired
+    private ManageOrderService manageOrderService;
 
     private final DocumentLanguageService documentLanguageService;
 
-    private final ManageOrderEmailService manageOrderEmailService;
+    @Autowired
+    private ManageOrderEmailService manageOrderEmailService;
 
     private final AmendOrderService amendOrderService;
 
@@ -97,7 +99,8 @@ public class ManageOrdersController {
 
     private final HearingDataService hearingDataService;
 
-    private final AuthorisationService authorisationService;
+    @Autowired
+    private AuthorisationService authorisationService;
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
