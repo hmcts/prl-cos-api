@@ -48,8 +48,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReviewDocumentService {
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
+    private final CoreCaseDataService coreCaseDataService;
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
