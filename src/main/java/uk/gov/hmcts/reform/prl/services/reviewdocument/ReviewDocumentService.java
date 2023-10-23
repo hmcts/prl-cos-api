@@ -174,7 +174,7 @@ public class ReviewDocumentService {
                 if (quarantineBulkscanDocElement.isPresent()) {
                     updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                         caseDataUpdated,
-                        quarantineBulkscanDocElement,
+                        quarantineBulkscanDocElement.get(),
                         BULK_SCAN
                     );
                 }
