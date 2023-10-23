@@ -420,6 +420,9 @@ public class ManageOrderEmailService {
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             log.info("** Inside admin serve order***");
             List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
+            log.info("** manageOrders.getServeToRespondentOptions()** {}", manageOrders.getServeToRespondentOptions());
+            log.info("** manageOrders.getEmailInformationCA()** {}", manageOrders.getEmailInformationCA());
+            log.info("** manageOrders.getCafcassCymruServedOptions()** {}", manageOrders.getCafcassCymruServedOptions());
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
                 || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
                 log.info("** CA case email notifications***");
