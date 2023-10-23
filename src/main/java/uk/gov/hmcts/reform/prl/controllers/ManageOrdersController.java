@@ -82,29 +82,22 @@ public class ManageOrdersController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private ManageOrderService manageOrderService;
+    private final ManageOrderService manageOrderService;
 
-    @Autowired
     private final DocumentLanguageService documentLanguageService;
 
-    @Autowired
-    private ManageOrderEmailService manageOrderEmailService;
+    private final ManageOrderEmailService manageOrderEmailService;
 
-    @Autowired
-    private AmendOrderService amendOrderService;
+    private final AmendOrderService amendOrderService;
 
-    @Autowired
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @Autowired
     RefDataUserService refDataUserService;
 
-    @Autowired
-    private HearingDataService hearingDataService;
+    private final HearingDataService hearingDataService;
 
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
