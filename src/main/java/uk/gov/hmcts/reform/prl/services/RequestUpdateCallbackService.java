@@ -75,7 +75,9 @@ public class RequestUpdateCallbackService {
         if (isCasePayment) {
             caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
-                setCaseData(serviceRequestUpdateDto, startEventResponse)
+                setCaseData(
+                    serviceRequestUpdateDto
+                )
             );
         } else {
             caseDataContent = coreCaseDataService.createCaseDataContent(
@@ -94,6 +96,8 @@ public class RequestUpdateCallbackService {
             serviceRequestUpdateDto.getCcdCaseNumber(),
             true
         );
+
+        partyLevelCaseFlagsService.generateAndStoreCaseFlags(serviceRequestUpdateDto.getCcdCaseNumber());
 
         if (isCasePayment) {
             EventRequestData allTabsUpdateEventRequestData = coreCaseDataService.eventRequest(
@@ -180,9 +184,8 @@ public class RequestUpdateCallbackService {
         return caseData;
     }
 
-    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto, StartEventResponse startEventResponse) {
-        CaseData startEventResponseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
-        CaseData caseData = CaseData.builder()
+    private CaseData setCaseData(ServiceRequestUpdateDto serviceRequestUpdateDto) {
+        return CaseData.builder()
             .id(Long.valueOf(serviceRequestUpdateDto.getCcdCaseNumber()))
             .paymentCallbackServiceRequestUpdate(CcdPaymentServiceRequestUpdate.builder()
                                                      .serviceRequestReference(serviceRequestUpdateDto.getServiceRequestReference())
@@ -197,12 +200,6 @@ public class RequestUpdateCallbackService {
                                                                   .caseReference(serviceRequestUpdateDto.getPayment().getCaseReference())
                                                                   .accountNumber(serviceRequestUpdateDto.getPayment().getAccountNumber())
                                                                   .build()).build()).build();
-
-        caseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(caseData, startEventResponseData);
-
-        log.info("applicant is still there: " + caseData.getAllPartyFlags().getCaApplicant1Flags().getPartyExternalFlags().getPartyName());
-
-        return caseData;
     }
 
     private Map<String, Object> setAwPPaymentCaseData(StartEventResponse startEventResponse, ServiceRequestUpdateDto serviceRequestUpdateDto) {
@@ -245,10 +242,7 @@ public class RequestUpdateCallbackService {
                             )
                         );
                 }
-                caseDataUpdated.put(
-                    "additionalApplicationsBundle",
-                    startEventResponseData.getAdditionalApplicationsBundle()
-                );
+                caseDataUpdated.put("additionalApplicationsBundle", startEventResponseData.getAdditionalApplicationsBundle());
             }
         }
         return caseDataUpdated;
