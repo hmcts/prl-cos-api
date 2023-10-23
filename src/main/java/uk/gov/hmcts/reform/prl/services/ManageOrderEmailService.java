@@ -418,6 +418,7 @@ public class ManageOrderEmailService {
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            log.info("** Inside admin serve order***");
             List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
                 || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
@@ -473,6 +474,7 @@ public class ManageOrderEmailService {
                     .add(value.getEmailAddress()));
             }
         }
+        log.info("***listOfOtherAndCafcassEmails*** size {}", listOfOtherAndCafcassEmails.size());
         // Send email notification to other organisations
         listOfOtherAndCafcassEmails.forEach(email ->
                                                 emailService.send(
