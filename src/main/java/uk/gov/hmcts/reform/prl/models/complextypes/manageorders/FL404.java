@@ -11,10 +11,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.regex.Pattern;
 
 @Slf4j
 @Builder(toBuilder = true)
@@ -112,8 +112,8 @@ public class FL404 {
     @JsonGetter("fl404bDateOrderEnd")
     public String getFl404bDateOrderEnd() {
         log.info("inside :: getFl404bDateOrderEnd {}", fl404bDateOrderEnd);
-        if (null != fl404bDateOrderEnd && Pattern.matches("yyyy-MM-dd",fl404bDateOrderEnd)) {
-            if (null != fl404bDateOrderEndTime && Pattern.matches("HH:mm", fl404bDateOrderEndTime)) {
+        if (null != fl404bDateOrderEnd && isDateValid(fl404bDateOrderEnd)) {
+            if (null != fl404bDateOrderEndTime && isTimeValid(fl404bDateOrderEndTime)) {
                 fl404bDateOrderEnd = fl404bDateOrderEnd + "T" + fl404bDateOrderEndTime + ":00.000";
             } else {
                 fl404bDateOrderEnd = fl404bDateOrderEnd + "T00:00:00.000";
@@ -123,4 +123,27 @@ public class FL404 {
         return fl404bDateOrderEnd;
     }
 
+    private boolean isDateValid(String fl404bDateOrderEnd) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyy-MM-dd");
+        try {
+            sdf.parse(fl404bDateOrderEnd);
+            log.info("Parsed date successfully");
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to parse date");
+        }
+        return false;
+    }
+
+    private boolean isTimeValid(String fl404bDateOrderEndTime) {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        try {
+            sdf.parse(fl404bDateOrderEndTime);
+            log.info("Parsed time successfully");
+            return true;
+        } catch (Exception e) {
+            log.error("Failed to parse time");
+        }
+        return false;
+    }
 }
