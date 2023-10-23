@@ -1,13 +1,9 @@
 package uk.gov.hmcts.reform.prl.models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
-import uk.gov.hmcts.reform.prl.models.caseflags.PartyFlags;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 
 @Data
 @AllArgsConstructor
@@ -15,10 +11,9 @@ import uk.gov.hmcts.reform.prl.models.caseflags.PartyFlags;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CitizenSetPartyFlagsRequest {
-
-    private String partyIdamId;
-    private PartyFlags partyFlags;
+public class CitizenPartyFlagsRequest {
     private final String caseTypeOfApplication;
     private PartyEnum partyType;
+    private String partyIdamId;
+    private Flags partyExternalFlags;
 }
