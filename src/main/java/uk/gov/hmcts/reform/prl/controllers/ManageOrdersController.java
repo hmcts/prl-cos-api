@@ -87,6 +87,7 @@ public class ManageOrdersController {
 
     private final DocumentLanguageService documentLanguageService;
 
+    @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
     @Autowired
