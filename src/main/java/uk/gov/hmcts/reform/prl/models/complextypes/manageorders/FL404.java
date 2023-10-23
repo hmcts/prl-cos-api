@@ -106,7 +106,9 @@ public class FL404 {
 
     @JsonSetter("fl404bDateOrderEnd")
     public void setFl404bDateOrderEnd(String fl404bDateOrderEnd) {
-        this.fl404bDateOrderEnd = fl404bDateOrderEnd;
+        log.info("inside setter --> {}", fl404bDateOrderEnd);
+        this.fl404bDateOrderEnd = getFormattedDate(fl404bDateOrderEnd,fl404bDateOrderEndTime);
+        log.info("after formatting --> {}", this.fl404bDateOrderEnd);
     }
 
     @JsonGetter("fl404bDateOrderEnd")
