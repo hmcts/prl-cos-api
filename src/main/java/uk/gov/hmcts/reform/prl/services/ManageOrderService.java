@@ -63,6 +63,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -896,7 +898,7 @@ public class ManageOrderService {
                 caseData = populateCustomOrderFields(caseData);
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                caseData = populateJudgeNames(authorisation, caseData);
+                caseData = populateJudgeNames(caseData);
                 caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
             }
             orderCollection.add(getOrderDetailsElement(authorisation, flagSelectedOrderId, flagSelectedOrder,
@@ -1715,7 +1717,7 @@ public class ManageOrderService {
                 }
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
-                caseData = populateJudgeNames(authorisation, caseData);
+                caseData = populateJudgeNames(caseData);
                 caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
                 log.info("StandardDirectionOrder before generating document " + caseData.getStandardDirectionOrder());
             }
@@ -1754,18 +1756,18 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    private CaseData populateJudgeNames(String authorisation, CaseData caseData) {
+    private CaseData populateJudgeNames(CaseData caseData) {
         if (isNotEmpty(caseData.getStandardDirectionOrder())
             && (isNotEmpty(caseData.getStandardDirectionOrder().getSdoAllocateOrReserveJudgeName())
             || isNotEmpty(caseData.getStandardDirectionOrder().getSdoNextStepJudgeName()))) {
             String sdoNamedJudgeFullName = getJudgeFullName(
-                authorisation,
                 caseData.getStandardDirectionOrder().getSdoAllocateOrReserveJudgeName()
             );
+            log.info("sdoNamedJudgeFullName " + sdoNamedJudgeFullName);
             String sdoAllocateDecisionJudgeFullName = getJudgeFullName(
-                authorisation,
                 caseData.getStandardDirectionOrder().getSdoNextStepJudgeName()
             );
+            log.info("sdoAllocateDecisionJudgeFullName " + sdoAllocateDecisionJudgeFullName);
             caseData = caseData.toBuilder()
                 .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder()
                                             .sdoNamedJudgeFullName(sdoNamedJudgeFullName)
@@ -2318,21 +2320,21 @@ public class ManageOrderService {
         }
     }
 
-    public String getJudgeFullName(String authorisation, JudicialUser judge) {
+    public String getJudgeFullName(JudicialUser judge) {
         String judgeFullName = EMPTY_STRING;
         if (isNotEmpty(judge)) {
-            String idamId = judge.getIdamId();
-            if (StringUtils.isNotBlank(idamId)) {
-                try {
-                    idamId = "5464226c-9860-46e0-bd8f-96fc2bb5bc05";
-                    UserDetails userDetails = userService.getUserByUserId(authorisation, idamId);
-                    if (null != userDetails) {
-                        log.info("populateJudgeName for SDO ==>" + userDetails.getFullName());
-                        judgeFullName = userDetails.getFullName();
-                    }
-                } catch (Exception e) {
-                    log.error("User details not found for idam id {}", idamId);
+            String[] personalCodes = new String[1];
+            personalCodes[0] = judge.getPersonalCode();
+            try {
+                List<JudicialUsersApiResponse> judicialUsersApiResponses = refDataUserService.getAllJudicialUserDetails(
+                    JudicialUsersApiRequest.builder()
+                        .personalCode(personalCodes).build());
+                if (CollectionUtils.isNotEmpty(judicialUsersApiResponses)) {
+                    log.info("populateJudgeName for SDO ==>" + judicialUsersApiResponses.get(0));
+                    judgeFullName = judicialUsersApiResponses.get(0).getFullName();
                 }
+            } catch (Exception e) {
+                log.error("User details not found for personal code {}", personalCodes);
             }
         }
         return judgeFullName;
