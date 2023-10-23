@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -167,6 +168,9 @@ public class DocumentGenServiceTest {
 
     @Mock
     AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
+    protected String fl401RespC8TemplateWelsh;
 
     public static final String authToken = "Bearer TestAuthToken";
 
