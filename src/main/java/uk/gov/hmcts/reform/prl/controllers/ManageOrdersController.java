@@ -87,7 +87,6 @@ public class ManageOrdersController {
 
     private final DocumentLanguageService documentLanguageService;
 
-    @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
     @Autowired
@@ -95,16 +94,14 @@ public class ManageOrdersController {
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
-    @Autowired
-    RefDataUserService refDataUserService;
+    private final RefDataUserService refDataUserService;
 
     private final HearingDataService hearingDataService;
 
     @Autowired
     private AuthorisationService authorisationService;
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
+    private final CoreCaseDataService coreCaseDataService;
 
     private final HearingService hearingService;
 
