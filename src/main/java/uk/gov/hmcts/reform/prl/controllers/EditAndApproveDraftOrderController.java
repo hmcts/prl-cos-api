@@ -278,11 +278,13 @@ public class EditAndApproveDraftOrderController {
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("** caseDataUpdated*** {}", caseDataUpdated);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
+                log.info("** Inside admin serve***");
                 if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+                    log.info("** After serve field check***");
                     manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
                 }
 
