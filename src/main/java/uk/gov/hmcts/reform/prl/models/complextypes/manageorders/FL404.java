@@ -104,13 +104,13 @@ public class FL404 {
 
     @JsonSetter("fl404bDateOrderEnd")
     public void setFl404bDateOrderEnd(String fl404bDateOrderEnd) {
-        log.info("inside :: setFl404bDateOrderEnd ");
+        log.info("inside :: setFl404bDateOrderEnd {}", fl404bDateOrderEnd);
         this.fl404bDateOrderEnd = fl404bDateOrderEnd;
     }
 
     @JsonGetter("fl404bDateOrderEnd")
     public String getFl404bDateOrderEnd() {
-        log.info("inside :: getFl404bDateOrderEnd");
+        log.info("inside :: getFl404bDateOrderEnd {}", fl404bDateOrderEnd);
         return fl404bDateOrderEnd;
     }
 
