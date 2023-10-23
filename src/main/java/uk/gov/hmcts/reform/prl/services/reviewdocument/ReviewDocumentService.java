@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services.reviewdocument;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -559,7 +560,7 @@ public class ReviewDocumentService {
     private QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
                                                            QuarantineLegalDoc quarantineLegalDoc) {
 
-        return legalProfUploadDoc.toBuilder()
+        legalProfUploadDoc = legalProfUploadDoc.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
             .notes(quarantineLegalDoc.getNotes())
@@ -574,6 +575,10 @@ public class ReviewDocumentService {
             .scannedDate(quarantineLegalDoc.getScannedDate())
             .deliveryDate(quarantineLegalDoc.getDeliveryDate())
             .build();
+        if (StringUtils.isNotEmpty(quarantineLegalDoc.getUploadedBy())) {
+            legalProfUploadDoc = legalProfUploadDoc.toBuilder().uploadedBy(quarantineLegalDoc.getUploadedBy()).build();
+        }
+        return legalProfUploadDoc;
     }
 
 }

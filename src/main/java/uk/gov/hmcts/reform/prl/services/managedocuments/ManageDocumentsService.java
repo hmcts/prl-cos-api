@@ -118,7 +118,7 @@ public class ManageDocumentsService {
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
         UserDetails userDetails = userService.getUserDetails(authorization);
         String userRole = CaseUtils.getUserRole(userDetails);
-
+        log.info("*** userDetails fullname *** {}", userDetails.getFullName());
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
 
