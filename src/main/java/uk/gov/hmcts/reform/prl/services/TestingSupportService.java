@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -96,6 +97,7 @@ public class TestingSupportService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
 
@@ -216,6 +218,7 @@ public class TestingSupportService {
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             if (adminCreateApplication) {
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
+                caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(updatedCaseData));
                 try {
                     caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(
                         authorisation,
@@ -243,6 +246,8 @@ public class TestingSupportService {
             caseDataUpdated = caseDetails.getData();
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             caseDataUpdated.putAll(updateDateInCase(FL401_CASE_TYPE, fl401CourtNav));
+            CaseData updatedCaseData = CaseUtils.getCaseData(initialCaseDetails, objectMapper);
+            caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(updatedCaseData));
         }
 
         return caseDataUpdated;
