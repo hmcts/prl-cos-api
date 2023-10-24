@@ -148,7 +148,7 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
-            return caseService.updatePartyFlagsForCitizen(
+            return caseService.updatePartyFlagsAsCitizen(
                 authorisation,
                 caseId,
                 eventId,
