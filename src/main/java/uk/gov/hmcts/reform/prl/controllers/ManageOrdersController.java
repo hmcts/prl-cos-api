@@ -216,42 +216,6 @@ public class ManageOrdersController {
                 errorList.add(ORDER_NOT_AVAILABLE_FL401);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
-                && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
-                ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
-            caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
-            if (callbackRequest
-                .getCaseDetailsBefore() != null && callbackRequest
-                .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
-                caseDataUpdated.put("courtName", callbackRequest
-                    .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
-            }
-            log.info(
-                "Print CreateSelectOrderOptions after court name set:: {}",
-                caseData.getCreateSelectOrderOptions()
-            );
-            log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
-
-            C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
-                ? caseData.getManageOrders().getC21OrderOptions() : null;
-            caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
-
-            caseDataUpdated.put("c21OrderOptions", c21OrderType);
-            caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
-                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
-
-            if (null != caseData.getCreateSelectOrderOptions()
-                && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-                caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
-                    ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
-
-            }
-
-            //PRL-3254 - Populate hearing details dropdown for create order
-            DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
-            caseDataUpdated.put("hearingsType", hearingsDynamicList);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest))
                 .build();
