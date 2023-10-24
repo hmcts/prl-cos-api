@@ -2176,7 +2176,7 @@ public class ManageOrderService {
         log.info("Retrieving hearings for caseId: {}", caseData.getId());
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
-                "1690816812182881"
+            String.valueOf(caseData.getId())
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         List<CaseHearing> completedHearings = caseHearings.stream()
