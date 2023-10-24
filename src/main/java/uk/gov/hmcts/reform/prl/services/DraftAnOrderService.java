@@ -207,16 +207,6 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-
-        List<Element<DraftOrder>> newDraftOrderCollection = new ArrayList<>();
-        for (Element<DraftOrder> draftOrder : caseData.getDraftOrderCollection()) {
-            FL404 customFields = draftOrder.getValue().getFl404CustomFields();
-            FL404 newCustomFields = customFields.toBuilder()
-                .fl404bDateOrderEnd(customFields.getFl404bDateOrderEnd()).build();
-            draftOrder.getValue().setFl404CustomFields(newCustomFields);
-            newDraftOrderCollection.add(draftOrder);
-        }
-        caseDataMap.put("draftOrderCollection", newDraftOrderCollection);
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
