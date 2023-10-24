@@ -1521,11 +1521,25 @@ public class DraftAnOrderService {
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
+            populateNewOrderCollection(caseDataUpdated, caseData);
             log.info("Successfully got order Info");
         } else {
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
         return caseDataUpdated;
+    }
+
+    private void populateNewOrderCollection(Map<String, Object> caseDataUpdated, CaseData caseData) {
+        List<Element> newDraftOrderCollection = new ArrayList<>();
+        for (Element<DraftOrder> draftOrderElement: caseData.getDraftOrderCollection()) {
+            FL404 customFields = draftOrderElement.getValue().getFl404CustomFields();
+            customFields.setFl404bDateOrderEnd(draftOrderElement.getValue().getFl404CustomFields().getFl404bDateOrderEnd());
+            draftOrderElement.getValue().setFl404CustomFields(customFields);
+            log.info("customFields {} {}", customFields, draftOrderElement);
+            newDraftOrderCollection.add(draftOrderElement);
+        }
+        log.info("new draft order collection {}", newDraftOrderCollection);
+        caseDataUpdated.put("draftOrderCollection", newDraftOrderCollection);
     }
 
     public Map<String, Object> prepareDraftOrderCollection(String authorisation, CallbackRequest callbackRequest) {
