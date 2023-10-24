@@ -500,13 +500,15 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList = null;
-            //PRL-4260 - hearing screen validations
-            if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                //SDO - hearing screen validations
+                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
+            } else {
+                //PRL-4260 - hearing screen validations
                 errorList = getHearingScreenValidations(caseData.getManageOrders().getOrdersHearingDetails(),
                                                         caseData.getCreateSelectOrderOptions(),
                                                         false);
-            } else {
-                errorList = getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder());
             }
 
             if (isNotEmpty(errorList)) {

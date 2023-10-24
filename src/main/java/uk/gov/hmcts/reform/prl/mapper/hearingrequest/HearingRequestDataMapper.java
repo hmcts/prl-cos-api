@@ -24,8 +24,6 @@ public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? Boolean.FALSE  : Boolean.TRUE;
-        log.info("Inside HearingRequestDataMapper::mapHearingData");
-        log.info("HearingRequestDataMapper::CaseTypeOfApplication {}", caseData.getCaseTypeOfApplication());
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapConfirmedHearingDatesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapHearingChannelsListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
@@ -150,7 +148,6 @@ public class HearingRequestDataMapper {
                                                                                       isHearingDynamicListItemsNullifyReq,
                                                                                       hearingDataPrePopulatedDynamicLists) : null);
         }
-        log.info("HearingRequestDataMapper::mapHearingData -> hearingData {}", hearingData);
     }
 
     private DynamicList mapHearingChannel(DynamicList hearingChannel,
