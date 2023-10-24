@@ -191,17 +191,8 @@ public class EditAndApproveDraftOrderController {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }
-
-            caseDataUpdated = draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation);
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-all-tabs",
-                caseDataUpdated
-            );
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

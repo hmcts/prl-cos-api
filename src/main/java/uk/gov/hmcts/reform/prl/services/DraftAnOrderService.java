@@ -877,7 +877,10 @@ public class DraftAnOrderService {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            FL404 fl404CustomFields = getFl404CustomFields(caseData);
+            FL404 fl404CustomFields = getFl404CustomFields(caseData).toBuilder()
+                .fl404bDateOrderEnd(caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd())
+                .build();
+            log.info("Custom fields {}", fl404CustomFields);
             caseData = caseData.toBuilder()
                 .standardDirectionOrder(caseData.getStandardDirectionOrder())
                 .manageOrders(caseData.getManageOrders().toBuilder()
