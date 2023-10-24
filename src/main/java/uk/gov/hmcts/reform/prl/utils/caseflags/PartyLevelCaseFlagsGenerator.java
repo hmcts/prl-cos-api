@@ -16,7 +16,7 @@ public class PartyLevelCaseFlagsGenerator {
             .builder()
             .partyName(partyName)
             .roleOnCase(roleOnCase)
-            .visibility("Internal")
+            .visibility("External")
             .groupId(caseDataField)
             .details(Collections.emptyList())
             .build();
