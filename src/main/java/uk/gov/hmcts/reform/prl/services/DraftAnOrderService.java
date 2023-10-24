@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -1641,12 +1642,12 @@ public class DraftAnOrderService {
 
         if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(selectedOrder)) {
             errorList.add("This order is not available to be drafted");
-            return CallbackResponse.builder()
+            return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();
         } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(selectedOrder)) {
             errorList.add("This order is not available to be drafted");
-            return CallbackResponse.builder()
+            return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();
         }
@@ -1659,7 +1660,7 @@ public class DraftAnOrderService {
                 && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder))) {
             errorList.add(ORDER_NOT_AVAILABLE_C100);
-            return CallbackResponse.builder().errors(errorList).build();
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
         } else if (Objects.equals(caseType, "FL401") && (!CreateSelectOrderOptionsEnum.nonMolestation.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.occupation.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.amendDischargedVaried.getDisplayedValue().equals(selectedOrder)
@@ -1668,7 +1669,7 @@ public class DraftAnOrderService {
                 && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder)
                 && !CreateSelectOrderOptionsEnum.noticeOfProceedings.getDisplayedValue().equals(selectedOrder))) {
             errorList.add(ORDER_NOT_AVAILABLE_FL401);
-            return CallbackResponse.builder().errors(errorList).build();
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
