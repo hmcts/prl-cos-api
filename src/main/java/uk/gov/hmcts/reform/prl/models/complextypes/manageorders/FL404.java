@@ -130,13 +130,13 @@ public class FL404 {
         if (null != date && isOldDateFormat(date)) {
             log.info("inside :: getFormattedDate {}", date);
             if (null != time && isOldTimeFormat(time)) {
-                return date + "T" + time + ":00.000";
+                date = date + "T" + time + ":00.000";
             } else {
-                return date + "T00:00:00.000";
+                date = date + "T00:00:00.000";
             }
+            log.info("inside :: after conversion getFormattedDate {}", date);
         }
-        log.info("inside :: after conversion getFormattedDate {}", date);
-
+        log.info("outside :: after conversion getFormattedDate {}", date);
         return date;
     }
 
@@ -144,10 +144,10 @@ public class FL404 {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         try {
             LocalDate.parse(date, formatter);
-            log.info("Parsed date successfully");
+            log.info("Parsed date successfully {}", date);
             return true;
         } catch (DateTimeParseException e) {
-            log.error("Failed to parse date");
+            log.error("Failed to parse date {}", date);
         }
         return false;
     }
