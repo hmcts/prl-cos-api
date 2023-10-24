@@ -1637,7 +1637,7 @@ public class DraftAnOrderService {
         }
 
         String caseType =  CaseUtils.getCaseTypeOfApplication(caseData);
-        String selectedOrder =  caseData.getSelectedOrder();;
+        String selectedOrder =  caseData.getCreateSelectOrderOptions().getDisplayedValue();;
         List<String> errorList = new ArrayList<>();
 
         if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(selectedOrder)) {
