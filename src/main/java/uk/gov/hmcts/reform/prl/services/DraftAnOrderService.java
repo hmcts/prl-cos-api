@@ -860,7 +860,7 @@ public class DraftAnOrderService {
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
             .hearingsType(caseData.getManageOrders().getHearingsType())
-            .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
+            .c21OrderOptions(draftOrder.getC21OrderOptions())
             .build();
     }
 
@@ -1719,23 +1719,11 @@ public class DraftAnOrderService {
                 errorList = getHearingScreenValidationsForSdo(
                     caseData.getStandardDirectionOrder()
                 );
-
-            }
-            Map<String, Object> caseDataUpdated = populateOrClearErrors(
-                errorList,
-                callbackRequest,
-                HEARING_SCREEN_ERRORS
-            );
-            if (caseDataUpdated != null) {
-                return caseDataUpdated;
             }
         }
-        Map<String, Object> caseDataUpdated = populateOrClearErrors(
-            occupationErrorList,
-            callbackRequest,
-            OCCUPATIONAL_SCREEN_ERRORS
-        );
-        if (caseDataUpdated != null) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        if (populateAndReturnIfErrors(errorList, caseDataUpdated, HEARING_SCREEN_ERRORS)
+            || populateAndReturnIfErrors(occupationErrorList, caseDataUpdated, OCCUPATIONAL_SCREEN_ERRORS)) {
             return caseDataUpdated;
         }
 
@@ -1756,14 +1744,15 @@ public class DraftAnOrderService {
         return null;
     }
 
-    private Map<String, Object> populateOrClearErrors(List<String> errorList, CallbackRequest callbackRequest, String hearingScreenErrors) {
+    private boolean populateAndReturnIfErrors(List<String> errorList,
+                                              Map<String, Object> caseDataUpdated,
+                                              String errorsField) {
         if (CollectionUtils.isNotEmpty(errorList)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            caseDataUpdated.put(hearingScreenErrors, errorList);
-            return caseDataUpdated;
+            caseDataUpdated.put(errorsField, errorList);
+            return true;
         } else {
-            callbackRequest.getCaseDetails().getData().remove(hearingScreenErrors);
+            caseDataUpdated.remove(errorsField);
+            return false;
         }
-        return null;
     }
 }
