@@ -947,7 +947,9 @@ public class DraftAnOrderService {
                                   .hearingsType(caseData.getManageOrders().getHearingsType())
                                   .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                   .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
-                                                      ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
+                                                      ? BOLD_BEGIN + caseData.getManageOrders().getC21OrderOptions()
+                                          .getDisplayedValue()
+                                          + BOLD_END : null)
                                   .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
@@ -1588,14 +1590,15 @@ public class DraftAnOrderService {
             }
         } else {
             ManageOrders manageOrders = caseData.getManageOrders();
+            CaseData caseData1 = caseData.toBuilder().build();
             if (manageOrders.getC21OrderOptions() != null) {
                 manageOrders = manageOrders.toBuilder().typeOfC21Order(BOLD_BEGIN + manageOrders
                                 .getC21OrderOptions().getDisplayedValue() + BOLD_END)
                         .isTheOrderByConsent(Yes)
                         .build();
-                caseData = caseData.toBuilder().manageOrders(manageOrders).build();
+                caseData1 = caseData1.toBuilder().manageOrders(manageOrders).build();
             }
-            caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
+            caseData1 = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData1);
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
@@ -1605,7 +1608,6 @@ public class DraftAnOrderService {
             }
             caseDataUpdated.put("appointedGuardianName", caseData.getAppointedGuardianName());
             caseDataUpdated.put(DATE_ORDER_MADE, caseData.getDateOrderMade());
-            CaseData caseData1 = caseData.toBuilder().build();
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
                 caseData1,
