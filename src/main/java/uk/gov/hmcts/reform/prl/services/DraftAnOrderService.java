@@ -921,7 +921,8 @@ public class DraftAnOrderService {
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
                                   .typeOfC21Order(null != caseData.getManageOrders().getC21OrderOptions()
-                                                      ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
+                                                      ? BOLD_BEGIN + caseData.getManageOrders().getC21OrderOptions()
+                                          .getDisplayedValue() + BOLD_END : null)
                                   .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
         } else {
@@ -945,7 +946,9 @@ public class DraftAnOrderService {
                                   .hearingsType(caseData.getManageOrders().getHearingsType())
                                   .c21OrderOptions(caseData.getManageOrders().getC21OrderOptions())
                                   .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
-                                                      ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null)
+                                                      ? BOLD_BEGIN + caseData.getManageOrders().getC21OrderOptions()
+                                          .getDisplayedValue()
+                                          + BOLD_END : null)
                                   .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                   .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                                   .solicitorOrdersHearingDetails(caseData.getManageOrders().getSolicitorOrdersHearingDetails())
