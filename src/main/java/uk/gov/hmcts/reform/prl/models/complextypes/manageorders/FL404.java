@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonSetter;
 import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DateOrderEndsTimeEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -137,7 +138,7 @@ public class FL404 {
             log.info("inside :: after conversion getFormattedDate {}", date);
         }
         log.info("outside :: after conversion getFormattedDate {}", date);
-        return date;
+        return StringUtils.trim(date);
     }
 
     private boolean isOldDateFormat(String date) {
