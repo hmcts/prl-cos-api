@@ -913,6 +913,7 @@ public class NoticeOfChangePartiesService {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
         FindUserCaseRolesResponse findUserCaseRolesResponse
             = findUserCaseRoles(String.valueOf(caseData.getId()), authorisation);
+        log.info("case user case role response: {}",findUserCaseRolesResponse);
 
         if (findUserCaseRolesResponse != null) {
             solicitorRepresentedParties = getSolicitorRepresentedParties(
@@ -926,6 +927,7 @@ public class NoticeOfChangePartiesService {
     private List<Element<PartyDetails>> getSolicitorRepresentedParties(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
         for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+            log.info("case roles: {}",findUserCaseRolesResponse.getCaseUsers());
             SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
                 x -> {
                     switch (x.getRepresenting()) {
