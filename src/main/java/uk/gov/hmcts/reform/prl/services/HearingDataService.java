@@ -54,6 +54,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_HEARI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CYMRU_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_HEARING_CHANNEL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_LIST;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
@@ -542,7 +543,29 @@ public class HearingDataService {
 
     private String getHearingDuration(LocalDateTime start, LocalDateTime end) {
         long minutes = Duration.between(start.toLocalTime(), end.toLocalTime()).toMinutes();
-        return (minutes / 60) + " hours, " + (minutes % 60) + " minutes";
+        long durationInHours = (minutes / 60);
+        long durationInMinutes = (minutes % 60);
+        StringBuilder durationInText = new StringBuilder();
+        if (durationInHours > 0) {
+            durationInText = durationInText.append(durationInHours);
+            if (durationInHours > 1) {
+                durationInText = durationInText.append(" hours");
+            } else {
+                durationInText = durationInText.append(" hour");
+            }
+        }
+        if (durationInMinutes > 0) {
+            if (durationInHours > 0) {
+                durationInText = durationInText.append(COMMA + " ");
+            }
+            durationInText = durationInText.append(durationInMinutes);
+            if (durationInMinutes > 1) {
+                durationInText = durationInText.append(" minutes");
+            } else {
+                durationInText = durationInText.append(" minute");
+            }
+        }
+        return durationInText.toString();
     }
 
     public Optional<CaseHearing> getHearingFromId(String hearingId, Hearings hearings) {
