@@ -194,10 +194,8 @@ public class ManageOrdersController {
                 CaseData.class
             );
 
-            String caseType = caseData.getCaseTypeOfApplication();
-            log.info("caseType is: {}", caseType);
+            String caseType = CaseUtils.getCaseTypeOfApplication(caseData);
             String selectedOrder = caseData.getCreateSelectOrderOptions().getDisplayedValue();
-            log.info("selectedOrder is {}", selectedOrder);
             List<String> errorList = new ArrayList<>();
 
             if (Objects.equals(caseType, "C100") && (!CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
@@ -207,7 +205,7 @@ public class ManageOrdersController {
                     && !CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue().equals(selectedOrder))) {
+                    && !CreateSelectOrderOptionsEnum.directionOnIssue.getDisplayedValue().equals(selectedOrder))) {
                 errorList.add(ORDER_NOT_AVAILABLE_C100);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             } else if (Objects.equals(caseType, "FL401") && (!CreateSelectOrderOptionsEnum.nonMolestation.getDisplayedValue().equals(selectedOrder)
@@ -216,7 +214,9 @@ public class ManageOrdersController {
                     && !CreateSelectOrderOptionsEnum.blank.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.powerOfArrest.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.noticeOfProceedings.getDisplayedValue().equals(selectedOrder))) {
+                    && !CreateSelectOrderOptionsEnum.noticeOfProceedings.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue().equals(selectedOrder)
+                    && !CreateSelectOrderOptionsEnum.directionOnIssue.getDisplayedValue().equals(selectedOrder))) {
                 errorList.add(ORDER_NOT_AVAILABLE_FL401);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
