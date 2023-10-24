@@ -73,7 +73,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -1556,10 +1555,7 @@ public class DraftAnOrderService {
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
 
         //PRL-4212 - Fetch & populate hearing data only in case order needs
-        final CaseData finalCaseData = caseData;
-        if (isNotEmpty(finalCaseData.getCreateSelectOrderOptions())
-            && Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS).anyMatch(
-                orderId -> orderId.equalsIgnoreCase(String.valueOf(finalCaseData.getCreateSelectOrderOptions())))) {
+        if (ManageOrdersUtils.isHearingPageNeeded(caseData)) {
             log.info("hearing data needed, fetch & populate");
             HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
             log.info("Hearing data {}", hearingData);
@@ -1658,10 +1654,7 @@ public class DraftAnOrderService {
                 ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
 
             //PRL-4212 - Fetch & populate hearing data only in case order needs
-            final CaseData finalCaseData = caseData;
-            if (isNotEmpty(finalCaseData.getCreateSelectOrderOptions())
-                && Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS).anyMatch(
-                    orderId -> orderId.equalsIgnoreCase(String.valueOf(finalCaseData.getCreateSelectOrderOptions())))) {
+            if (ManageOrdersUtils.isHearingPageNeeded(caseData)) {
                 log.info("hearing data needed, fetch & populate");
                 HearingData hearingData = manageOrderService.getHearingData(authorisation, caseData);
                 log.info("Hearing data {}", hearingData);
@@ -1688,9 +1681,7 @@ public class DraftAnOrderService {
         List<String> occupationErrorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
-            Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
-                .filter(id -> id.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions()))).findFirst();
-            if (hearingPageNeeded.isPresent()) {
+            if (ManageOrdersUtils.isHearingPageNeeded(caseData)) {
                 existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
                 //PRL-4335 - hearing screen validations
                 errorList = getHearingScreenValidations(existingOrderHearingDetails,
@@ -1705,13 +1696,11 @@ public class DraftAnOrderService {
             .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()))) {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-            Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
-                .filter(id -> id.equalsIgnoreCase(String.valueOf(draftOrder.getOrderType()))).findFirst();
             if (CreateSelectOrderOptionsEnum.occupation.equals(draftOrder.getOrderType())
                 && null != caseData.getManageOrders().getFl404CustomFields()) {
                 occupationErrorList = getErrorForOccupationScreen(caseData);
             }
-            if (hearingPageNeeded.isPresent()) {
+            if (isHearingPageNeeded(draftOrder)) {
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
                     if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
