@@ -1590,15 +1590,14 @@ public class DraftAnOrderService {
             }
         } else {
             ManageOrders manageOrders = caseData.getManageOrders();
-            CaseData caseData1 = caseData.toBuilder().build();
             if (manageOrders.getC21OrderOptions() != null) {
                 manageOrders = manageOrders.toBuilder().typeOfC21Order(BOLD_BEGIN + manageOrders
                                 .getC21OrderOptions().getDisplayedValue() + BOLD_END)
                         .isTheOrderByConsent(Yes)
                         .build();
-                caseData1 = caseData1.toBuilder().manageOrders(manageOrders).build();
+                caseData = caseData.toBuilder().manageOrders(manageOrders).build();
             }
-            caseData1 = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData1);
+            caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
             if (Objects.nonNull(caseData.getStandardDirectionOrder())) {
                 caseDataUpdated.putAll(caseData.getStandardDirectionOrder().toMap(CcdObjectMapper.getObjectMapper()));
             }
@@ -1608,6 +1607,7 @@ public class DraftAnOrderService {
             }
             caseDataUpdated.put("appointedGuardianName", caseData.getAppointedGuardianName());
             caseDataUpdated.put(DATE_ORDER_MADE, caseData.getDateOrderMade());
+            CaseData caseData1 = caseData.toBuilder().build();
             caseDataUpdated.putAll(manageOrderService.getCaseData(
                 authorisation,
                 caseData1,
