@@ -208,38 +208,40 @@ public class PrlAppsConstants {
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
     public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
-        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
-    public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing, you may ask the court to reconsider this order. "
-        + "You must do that within seven days of receiving the order by writing to the court"
+        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties", "blank"};
+    public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without a hearing,"
+        + " you may ask the court to reconsider this order. "
+        + "You must do that within 7 days of receiving this order by writing to the court"
         + "(and notifying any other party) and asking the court to reconsider."
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively, the court may reconsider the directions at the first hearing.";
+
     public static final String SAFE_GUARDING_LETTER = "The case is adjourned for a case management review and directions in the "
         + "absence of the parties on (date). You should NOT attend court on this date. On this date a judge or legal adviser will "
         + "review the file and the safeguarding letter from Cafcass/ Cafcass Cymru and decide what type of hearing/further directions "
         + "are needed to deal with the issues in the case. A copy of the directions will be sent to the parties following the case "
         + "management review with details of the next hearing and any directions. ";
-    public static final String HEARING_NOT_NEEDED = "A[Judge/justices' legal adviser] has decided that appropriate directions "
-        + "can be given to progress the matter without the need for a hearing";
-    public static final String PARTICIPATION_DIRECTIONS = "If they not already done so, any part who considers that specific "
-        + "measures need to be taken to enable a party or witness to understand the"
-        + "proceedings and their role in them when in court, put their views to the  "
+    public static final String HEARING_NOT_NEEDED = "A (Judge/justices' legal adviser) has decided that appropriate directions "
+        + "can be given to progress the matter without the need for a hearing.";
+    public static final String PARTICIPATION_DIRECTIONS = "If they have not already done so, any party who considers that specific "
+        + "measures need to be taken to enable a party or witness to understand the "
+        + "proceedings and their role in them when in court, put their views to the "
         + "court, instruct their representatives before, during, and after the hearing "
         + "or attend the hearing without significant distress should file an application "
         + "notice and include the following information as far as practicable:"
         + System.lineSeparator() + System.lineSeparator()
         + "a. why the party or witness would benefit from assistance;"
         + System.lineSeparator() + System.lineSeparator()
-        + "b. the measure or measures that would be likely to maximise as fas as practicable the "
+        + "b. the measure or measures that would be likely to maximise as far as practicable the "
         + "quality of their evidence or participation and why;"
         + System.lineSeparator() + System.lineSeparator()
-        + "c. written confirmations from any relevant witness of his/her views.";
+        + "c. written confirmation from any relevant witness of his/her views.";
     public static final String JOINING_INSTRUCTIONS = "Joining instructions";
     public static final String UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or missing from "
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
         + "number at [CafcassCymruCAT@gov.wales/ privatelawapplications@cafcass.gov.uk]"
         + System.lineSeparator() + System.lineSeparator()
-        + "The email must include telephone contact details and email address so that they "
+        + "The email must include telephone contact details and an email address so that they "
         + "may be contacted for safeguarding purposes."
         + System.lineSeparator() + System.lineSeparator()
         + "Alternatively if any party is managing their case using the online dashboard, "
@@ -748,6 +750,8 @@ public class PrlAppsConstants {
     public static final String CAFCASS_ROLE = "caseworker-privatelaw-externaluser-viewonly";
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
+
+    public static final String BULK_SCAN = "Bulk scan";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
     public static final String LONDON_TIME_ZONE = "Europe/London";
 
@@ -786,6 +790,19 @@ public class PrlAppsConstants {
     public static final String CONTENT = "content";
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
+    public static final String MANDATORY_JUDGE =
+            "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+
+    public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+    public static final String AM_LOWER_CASE = "am";
+    public static final String AM_UPPER_CASE = "AM";
+    public static final String PM_LOWER_CASE = "pm";
+    public static final String PM_UPPER_CASE = "PM";
+
+    public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
+            + " Magistrate (JP)";
+    public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
+    public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
 
     public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
     public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
