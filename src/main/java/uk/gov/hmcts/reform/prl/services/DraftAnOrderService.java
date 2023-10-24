@@ -1613,8 +1613,6 @@ public class DraftAnOrderService {
                 caseData1,
                 caseData.getCreateSelectOrderOptions()
             ));
-            log.info("typeOfC21Order", caseDataUpdated.get("typeOfC21Order"));
-            log.info("typeOfC21Order", caseDataUpdated);
         }
 
         return caseDataUpdated;
