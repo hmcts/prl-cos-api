@@ -491,7 +491,10 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder.getOrderType())) {
-            caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
+            String dateOrderEnd = selectedOrder.getFl404CustomFields().getFl404bDateOrderEnd();
+            log.info("date order end after formatting custom {}", dateOrderEnd);
+            caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields().toBuilder()
+                .fl404bDateOrderEnd(dateOrderEnd).build());
             caseDataMap.put("parentName", selectedOrder.getParentName());
             caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
             caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
