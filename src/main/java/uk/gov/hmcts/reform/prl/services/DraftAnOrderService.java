@@ -491,7 +491,11 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder.getOrderType())) {
-            caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
+            String dateOrderEnd = selectedOrder.getFl404CustomFields().getFl404bDateOrderEnd();
+            log.info("formatted date --> {}", dateOrderEnd);
+            FL404 fl404CustomField = selectedOrder.getFl404CustomFields()
+                .toBuilder().fl404bDateOrderEnd(dateOrderEnd).build();
+            caseDataMap.put("fl404CustomFields", fl404CustomField);
             caseDataMap.put("parentName", selectedOrder.getParentName());
             caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
             caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
@@ -959,6 +963,9 @@ public class DraftAnOrderService {
 
     private static FL404 getFl404CustomFields(CaseData caseData) {
         FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+        String dateOrderEnd = fl404CustomFields.getFl404bDateOrderEnd();
+        log.info("formatted date {}", dateOrderEnd);
+        fl404CustomFields = fl404CustomFields.toBuilder().fl404bDateOrderEnd(dateOrderEnd).build();
         if (fl404CustomFields != null) {
             fl404CustomFields = fl404CustomFields.toBuilder().fl404bApplicantName(String.format(
                     PrlAppsConstants.FORMAT,
