@@ -198,6 +198,7 @@ public class DraftAnOrderController {
                     .build();
             }
             //Draft an order
+            log.info("case data updated ::>> {}", caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
