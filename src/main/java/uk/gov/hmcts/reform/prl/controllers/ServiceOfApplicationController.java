@@ -83,6 +83,8 @@ public class ServiceOfApplicationController {
     WelshCourtEmail welshCourtEmail;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
+
+    public static final String PROCEED_TO_SERVING = "proceedToServing";
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";
 
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
@@ -120,9 +122,9 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         log.info("handleAboutToSubmit: Callback for about-to-submit");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        if (ObjectUtils.isEmpty(updatedCaseData.get("proceedToServing"))) {
-            updatedCaseData.put("proceedToServing", Yes);
-            log.info("SOA proceed to serving {}", updatedCaseData.get("proceedToServing"));
+        if (ObjectUtils.isEmpty(updatedCaseData.get(PROCEED_TO_SERVING))) {
+            updatedCaseData.put(PROCEED_TO_SERVING, Yes);
+            log.info("SOA proceed to serving {}", updatedCaseData.get(PROCEED_TO_SERVING));
         }
         return AboutToStartOrSubmitCallbackResponse
             .builder()
