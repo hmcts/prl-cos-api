@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -1636,15 +1635,11 @@ public class DraftAnOrderService {
         }
 
         String caseType =  CaseUtils.getCaseTypeOfApplication(caseData);
-        String selectedOrder =  caseData.getCreateSelectOrderOptions().getDisplayedValue();;
+        String selectedOrder =  caseData.getCreateSelectOrderOptions().getDisplayedValue();
         List<String> errorList = new ArrayList<>();
 
-        if (ChildArrangementOrdersEnum.standardDirectionsOrder.getDisplayedValue().equalsIgnoreCase(selectedOrder)) {
-            errorList.add("This order is not available to be drafted");
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errorList)
-                    .build();
-        } else if (ChildArrangementOrdersEnum.directionOnIssueOrder.getDisplayedValue().equalsIgnoreCase(selectedOrder)) {
+        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue().equals(selectedOrder)
+                || CreateSelectOrderOptionsEnum.directionOnIssue.getDisplayedValue().equals(selectedOrder)) {
             errorList.add("This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
