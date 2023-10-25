@@ -153,6 +153,28 @@ public class TestingSupportControllerTest {
         }, RuntimeException.class, "Invalid Client");
     }
 
+    @Test
+    public void testAboutToSubmitCaseCreationCourtNav() throws Exception {
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        testingSupportController.aboutToSubmitCaseCreationCourtNav(authToken, s2sToken, callbackRequest);
+        verify(testingSupportService, times(1)).initiateCaseCreationForCourtNav(Mockito.anyString(), Mockito.any(CallbackRequest.class));
+    }
+
+    @Test
+    public void testExeptionForaboutToSubmitCaseCreationCourtNav() {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            testingSupportController.aboutToSubmitCaseCreationCourtNav(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testConfirmDummyAwPPayment() {
+        testingSupportController.confirmDummyAwPPayment(authToken, callbackRequest);
+        verify(testingSupportService, times(1)).confirmDummyAwPPayment(Mockito.any(CallbackRequest.class), Mockito.anyString());
+    }
+
+
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
