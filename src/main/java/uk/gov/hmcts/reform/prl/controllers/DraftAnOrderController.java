@@ -191,15 +191,14 @@ public class DraftAnOrderController {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors((List<String>) caseDataUpdated.get(HEARING_SCREEN_ERRORS))
                     .build();
-            }
-            if (ObjectUtils.isNotEmpty(caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))) {
+            } else if (ObjectUtils.isNotEmpty(caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors((List<String>) caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))
                     .build();
+            } else {
+                //Draft an order
+                return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
-            //Draft an order
-            log.info("case data updated ::>> {}", caseDataUpdated);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
