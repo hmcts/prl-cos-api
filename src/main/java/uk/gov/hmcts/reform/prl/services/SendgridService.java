@@ -201,7 +201,7 @@ public class SendgridService {
     }
 
     private void attachFiles(String authorization, Mail mail, Map<String,
-        String> emailProps, List<Document> documents) throws IOException {
+        String> emailProps, List<Document> documents) {
         String s2sToken = authTokenGenerator.generate();
 
         for (Document d : documents) {
