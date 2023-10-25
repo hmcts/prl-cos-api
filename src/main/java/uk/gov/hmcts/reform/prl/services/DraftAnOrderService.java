@@ -490,10 +490,16 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder.getOrderType())) {
-            String dateOrderEnd = selectedOrder.getFl404CustomFields().getFl404bDateOrderEnd();
-            log.info("date order end after formatting custom {}", dateOrderEnd);
-            caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields().toBuilder()
-                .fl404bDateOrderEnd(dateOrderEnd).build());
+            FL404 fl404CustomFields = selectedOrder.getFl404CustomFields();
+            if (null != fl404CustomFields) {
+                String dateOrderEnd = fl404CustomFields.getFl404bDateOrderEnd();
+                String occupationDate1 = fl404CustomFields.getFl404bOccupationDate1();
+                String occupationDate2 = fl404CustomFields.getFl404bOccupationDate2();
+                caseDataMap.put("fl404CustomFields", fl404CustomFields.toBuilder()
+                    .fl404bDateOrderEnd(dateOrderEnd)
+                    .fl404bOccupationDate1(occupationDate1)
+                    .fl404bOccupationDate2(occupationDate2).build());
+            }
             caseDataMap.put("parentName", selectedOrder.getParentName());
             caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
             caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
@@ -876,10 +882,12 @@ public class DraftAnOrderService {
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
         }
         if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            FL404 fl404CustomFields = getFl404CustomFields(caseData).toBuilder()
-                .fl404bDateOrderEnd(caseData.getManageOrders().getFl404CustomFields().getFl404bDateOrderEnd())
-                .build();
-            log.info("Custom fields {}", fl404CustomFields);
+            FL404 fl404CustomFields = getFl404CustomFields(caseData);
+            if (null != fl404CustomFields) {
+                fl404CustomFields.setFl404bDateOrderEnd(fl404CustomFields.getFl404bDateOrderEnd());
+                fl404CustomFields.setFl404bOccupationDate1(fl404CustomFields.getFl404bOccupationDate1());
+                fl404CustomFields.setFl404bOccupationDate2(fl404CustomFields.getFl404bOccupationDate2());
+            }
             caseData = caseData.toBuilder()
                 .standardDirectionOrder(caseData.getStandardDirectionOrder())
                 .manageOrders(caseData.getManageOrders().toBuilder()
@@ -1462,7 +1470,6 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        populateNewDraftOrderCollection(caseDataUpdated, caseData);
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         String eventId = callbackRequest.getEventId();
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
@@ -1540,13 +1547,17 @@ public class DraftAnOrderService {
     private void populateNewDraftOrderCollection(Map<String, Object> caseDataUpdated, CaseData caseData) {
         List<Element> newDraftOrderCollection = new ArrayList<>();
         for (Element<DraftOrder> draftOrderElement: caseData.getDraftOrderCollection()) {
-            FL404 customFields = draftOrderElement.getValue().getFl404CustomFields();
-            customFields.setFl404bDateOrderEnd(draftOrderElement.getValue().getFl404CustomFields().getFl404bDateOrderEnd());
-            draftOrderElement.getValue().setFl404CustomFields(customFields);
-            log.info("customFields {} {}", customFields, draftOrderElement);
+            if (null != draftOrderElement.getValue().getFl404CustomFields()) {
+                FL404 customFields = draftOrderElement.getValue().getFl404CustomFields();
+                customFields.setFl404bDateOrderEnd(draftOrderElement.getValue().getFl404CustomFields().getFl404bDateOrderEnd());
+                customFields.setFl404bOccupationDate1(draftOrderElement.getValue()
+                                                          .getFl404CustomFields().getFl404bOccupationDate1());
+                customFields.setFl404bOccupationDate2(draftOrderElement.getValue()
+                                                          .getFl404CustomFields().getFl404bOccupationDate2());
+                draftOrderElement.getValue().setFl404CustomFields(customFields);
+            }
             newDraftOrderCollection.add(draftOrderElement);
         }
-        log.info("new draft order collection {}", newDraftOrderCollection);
         caseDataUpdated.put("draftOrderCollection", newDraftOrderCollection);
     }
 

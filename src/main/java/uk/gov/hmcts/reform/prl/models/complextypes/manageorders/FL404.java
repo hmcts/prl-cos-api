@@ -89,10 +89,10 @@ public class FL404 {
     private final String fl404bAddAnotherInstructions;
     private final String fl404bIsPowerOfArrest6;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private final String fl404bOccupationDate1;
+    private String fl404bOccupationDate1;
     private final String fl404bOccupationTime1;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private final String fl404bOccupationDate2;
+    private String fl404bOccupationDate2;
     private final String fl404bOccupationTime2;
     private final String fl404bDateOfNextHearing;
     private final String fl404bTimeOfNextHearing;
@@ -113,8 +113,7 @@ public class FL404 {
 
     @JsonGetter("fl404bDateOrderEnd")
     public String getFl404bDateOrderEnd() {
-        this.fl404bDateOrderEnd = getFormattedDate(fl404bDateOrderEnd, fl404bDateOrderEndTime);
-        return this.fl404bDateOrderEnd;
+        return getFormattedDate(fl404bDateOrderEnd, fl404bDateOrderEndTime);
     }
 
     @JsonGetter("fl404bOccupationDate1")
@@ -122,9 +121,19 @@ public class FL404 {
         return getFormattedDate(fl404bOccupationDate1, fl404bOccupationTime1);
     }
 
+    @JsonSetter("fl404bOccupationDate1")
+    public void setFl404bOccupationDate1(String fl404bOccupationDate1) {
+        this.fl404bOccupationDate1 = fl404bOccupationDate1;
+    }
+
     @JsonGetter("fl404bOccupationDate2")
     public String getFl404bOccupationDate2() {
         return getFormattedDate(fl404bOccupationDate2, fl404bOccupationTime2);
+    }
+
+    @JsonSetter("fl404bOccupationDate2")
+    public void setFl404bOccupationDate2(String fl404bOccupationDate2) {
+        this.fl404bOccupationDate2 = fl404bOccupationDate2;
     }
 
     private String getFormattedDate(String date, String time) {
