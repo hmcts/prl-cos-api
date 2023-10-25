@@ -1454,12 +1454,13 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+        populateNewDraftOrderCollection(caseDataUpdated, caseData);
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
@@ -1481,7 +1482,11 @@ public class DraftAnOrderService {
                 );
             }
         } else {
-            caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
+            CaseData modifiedCaseData = objectMapper.convertValue(
+                caseDataUpdated,
+                CaseData.class
+            );
+            caseDataUpdated.putAll(updateDraftOrderCollection(modifiedCaseData, authorisation, eventId));
         }
         return caseDataUpdated;
     }
@@ -1521,7 +1526,7 @@ public class DraftAnOrderService {
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
-            populateNewOrderCollection(caseDataUpdated, caseData);
+            populateNewDraftOrderCollection(caseDataUpdated, caseData);
             log.info("Successfully got order Info");
         } else {
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
@@ -1529,7 +1534,7 @@ public class DraftAnOrderService {
         return caseDataUpdated;
     }
 
-    private void populateNewOrderCollection(Map<String, Object> caseDataUpdated, CaseData caseData) {
+    private void populateNewDraftOrderCollection(Map<String, Object> caseDataUpdated, CaseData caseData) {
         List<Element> newDraftOrderCollection = new ArrayList<>();
         for (Element<DraftOrder> draftOrderElement: caseData.getDraftOrderCollection()) {
             FL404 customFields = draftOrderElement.getValue().getFl404CustomFields();
