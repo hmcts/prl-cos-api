@@ -562,7 +562,7 @@ public class SendAndReplyControllerTest {
                 element.getValue().setStatus(MessageStatus.CLOSED);
                 element.getValue().setUpdatedTime(dateTime.now());
                 return element;
-            }).stream().collect(Collectors.toList());
+            }).stream().collect(Collectors.toList());;
         closedMessage.add(listOfClosedMessages.get(0));
 
         DynamicList dynamicList =  ElementUtils.asDynamicList(messages, null, Message::getLabelForDynamicList);

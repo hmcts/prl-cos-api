@@ -22,7 +22,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -50,7 +49,7 @@ public class CaseDataRespondentDetailsElementsMapper {
         List<RespondentDetails> respondentDetailsList = c100RebuildRespondentDetailsElements.getRespondentDetails();
 
         return respondentDetailsList.stream().map(respondentDetails -> Element.<PartyDetails>builder().value(
-            buildPartyDetails(respondentDetails)).build()).collect(Collectors.toList());
+            buildPartyDetails(respondentDetails)).build()).toList();
 
     }
 

@@ -407,7 +407,7 @@ public class ServiceOfApplicationPostServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
+            .docs(documentList.stream().map(s -> element(s)).toList())
             .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .timeStamp(currentDate).build();
@@ -490,7 +490,7 @@ public class ServiceOfApplicationPostServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .emailAddress("test@email.com")
             .servedParty(SERVED_PARTY_APPLICANT_SOLICITOR)
-            .docs(documentList.stream().map(s -> element(s)).collect(Collectors.toList()))
+            .docs(documentList.stream().map(s -> element(s)).toList())
             .attachedDocs(String.join(",", documentList.stream().map(a -> a.getDocumentFileName()).collect(
                 Collectors.toList())))
             .timeStamp(currentDate).build();

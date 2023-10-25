@@ -65,7 +65,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -513,7 +512,7 @@ public class SendAndReplyServiceTest {
         caseLinkedDataList.add(caseLinkedData);
         List<DynamicListElement> dynamicListElementList = caseLinkedDataList.stream()
             .map(cData -> DynamicListElement.builder()
-                .code(cData.getCaseReference()).label(cData.getCaseReference()).build()).collect(Collectors.toList());
+                .code(cData.getCaseReference()).label(cData.getCaseReference()).build()).toList();
 
         when(hearingDataService.getLinkedCasesDynamicList(anyString(), anyString())).thenReturn(dynamicListElementList);
         DynamicList linkedCasesDynamicList = sendAndReplyService.getLinkedCasesDynamicList(anyString(), anyString());

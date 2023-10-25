@@ -44,7 +44,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_PARTIES_ATTEND_HEARING_IN_THE_SAME_WAY;
@@ -205,7 +204,7 @@ public class HearingDataService {
                     Hearings hearingDetails = hearingService.getHearings(authorisation, caseLinkedData.getCaseReference());
                     if (!ofNullable(hearingDetails).isEmpty() && !ofNullable(hearingDetails.getCaseHearings()).isEmpty()) {
                         List<CaseHearing> caseHearingsList = hearingDetails.getCaseHearings().stream()
-                            .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
+                            .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).toList();
                         if (ofNullable(caseHearingsList).isPresent()) {
                             dynamicListElements.add(DynamicListElement.builder().code(caseLinkedData.getCaseReference())
                                                         .label(caseLinkedData.getCaseName()).build());
@@ -382,7 +381,7 @@ public class HearingDataService {
             applicantList = caseData.getApplicants().stream()
                 .map(Element::getValue)
                 .map(PartyDetails::getLabelForDynamicList)
-                .collect(Collectors.toList());
+                .toList();
         }
 
         return applicantList;
@@ -396,7 +395,7 @@ public class HearingDataService {
             respondentList = caseData.getRespondents().stream()
                 .map(Element::getValue)
                 .map(PartyDetails::getLabelForDynamicList)
-                .collect(Collectors.toList());
+                .toList();
         }
         return respondentList;
 
@@ -409,7 +408,7 @@ public class HearingDataService {
             applicantSolicitorList = caseData.getApplicants().stream()
                 .map(Element::getValue)
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
-                .collect(Collectors.toList());
+                .toList();
         }
         return applicantSolicitorList;
 
@@ -423,7 +422,7 @@ public class HearingDataService {
                 .map(Element::getValue)
                 .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
                 .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
-                .collect(Collectors.toList());
+                .toList();
         }
 
         return respondentSolicitorList;
@@ -441,7 +440,7 @@ public class HearingDataService {
             if (caseLinkedDataList.isPresent()) {
                 return caseLinkedDataList.get().stream()
                     .map(cData -> DynamicListElement.builder()
-                        .code(cData.getCaseReference()).label(cData.getCaseReference()).build()).collect(Collectors.toList());
+                        .code(cData.getCaseReference()).label(cData.getCaseReference()).build()).toList();
             }
         } catch (Exception e) {
             log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
