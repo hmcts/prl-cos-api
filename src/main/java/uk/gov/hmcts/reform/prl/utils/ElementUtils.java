@@ -12,13 +12,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
 @Component
@@ -32,14 +30,14 @@ public class ElementUtils {
         return Stream.of(elements)
             .filter(Objects::nonNull)
             .map(element -> Element.<T>builder().value(element).build())
-            .collect(toList());
+            .toList();
     }
 
     public static <T> List<Element<T>> wrapElements(List<T> elements) {
         return nullSafeCollection(elements).stream()
             .filter(Objects::nonNull)
             .map(element -> Element.<T>builder().value(element).build())
-            .collect(toList());
+            .toList();
     }
 
     public static <T> List<T> unwrapElements(List<Element<T>> elements) {
@@ -47,7 +45,7 @@ public class ElementUtils {
             .stream()
             .map(Element::getValue)
             .filter(Objects::nonNull)
-            .collect(toUnmodifiableList());
+            .toList();
     }
 
     public static <T> Element<T> element(T element) {
@@ -77,13 +75,13 @@ public class ElementUtils {
     public static <T> List<Element<T>> findElements(T elementToFind, List<Element<T>> elements) {
         return nullSafeCollection(elements).stream()
             .filter(element -> Objects.equals(element.getValue(), elementToFind))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     public static <T> List<UUID> findElementsId(T elementToFind, List<Element<T>> elements) {
         return findElements(elementToFind, elements).stream()
             .map(Element::getId)
-            .collect(toList());
+            .toList();
     }
 
     public static <T> Collection<T> nullSafeCollection(Collection<T> collection) {
