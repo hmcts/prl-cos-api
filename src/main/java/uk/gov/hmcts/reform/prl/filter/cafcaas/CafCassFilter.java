@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -60,8 +59,7 @@ public class CafCassFilter {
      */
     public <T> List<Element<T>>  filterNonValueList(List<Element<T>> object) {
         if (object != null && !object.isEmpty()) {
-            return object.stream().filter(element -> element.getValue() != null).collect(
-                Collectors.toList());
+            return object.stream().filter(element -> element.getValue() != null).toList();
         }
 
         return Collections.emptyList();
