@@ -52,7 +52,7 @@ public class BulkPrintService {
                 try {
                     return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new InvalidResourceException("Failed to get document bytes for : " + docInfo.getDocumentFileName(), e);
                 }
             })
             .map(getEncoder()::encodeToString)
