@@ -1452,6 +1452,7 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
+        populateNewDraftOrderCollection(caseDataUpdated, caseData);
         return caseDataUpdated;
     }
 
