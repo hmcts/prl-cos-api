@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
@@ -24,6 +25,7 @@ import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -266,5 +268,16 @@ public class ManageOrdersUtils {
             || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentMustNotEnterAddress())
             || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentObstructOrHarass())
             || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentOtherInstructions());
+    }
+
+    public static boolean isHearingPageNeeded(CaseData caseData) {
+        //C21 blank order
+        if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+            return null != caseData.getManageOrders()
+                && C21OrderOptionsEnum.c21other.equals(caseData.getManageOrders().getC21OrderOptions());
+        }
+
+        return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())));
     }
 }
