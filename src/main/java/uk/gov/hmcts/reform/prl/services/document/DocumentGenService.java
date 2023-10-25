@@ -988,16 +988,16 @@ public class DocumentGenService {
         return childrenConfidentiality;
     }
 
-    private boolean isPartyDetailsConfidential(PartyDetails applicant) {
+    private boolean isPartyDetailsConfidential(PartyDetails partyDetails) {
 
         boolean isPartyInformationConfidential = false;
-        if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential())) {
+        if ((YesOrNo.Yes).equals(partyDetails.getIsAddressConfidential())) {
             isPartyInformationConfidential = true;
         }
-        if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential())) {
+        if ((YesOrNo.Yes).equals(partyDetails.getIsEmailAddressConfidential())) {
             isPartyInformationConfidential = true;
         }
-        if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential())) {
+        if ((YesOrNo.Yes).equals(partyDetails.getIsPhoneNumberConfidential())) {
             isPartyInformationConfidential = true;
         }
         return isPartyInformationConfidential;
