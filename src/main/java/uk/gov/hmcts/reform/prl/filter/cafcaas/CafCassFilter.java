@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
 import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -63,6 +64,6 @@ public class CafCassFilter {
                 Collectors.toList());
         }
 
-        return null;
+        return Collections.emptyList();
     }
 }
