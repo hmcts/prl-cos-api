@@ -43,12 +43,21 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     public static final String CONFIRMATION_HEADER = "# Continue to payment";
     public static final String SERVICE_REQUEST_TAB = "#Service%20Request";
     public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = """
-        ### What happens next \n\n You will receive a confirmation email.
+        ### What happens next
+
+        You will receive a confirmation email.
         If the email does not appear in your inbox, check your junk or spam folder.
-        \n\n The court will review your help with fees application and tell you what happens next.
+
+
+        The court will review your help with fees application and tell you what happens next.
         """;
-    public static final String HWF_NO_EMAIL_CONTENT = "### What happens next \n\n The case will now display as Pending in your case list. "
-        + "You need to visit Service Request tab to make the payment. \n\n";
+    public static final String HWF_NO_EMAIL_CONTENT = """
+        ### What happens next
+
+
+        The case will now display as Pending in your case list. You need to visit Service Request tab to make the payment.
+
+        """;
     public static final String PAY_CONTENT = "\">Pay the application fee.</a>";
     public static final String CASE_DETAILS_URL = "/cases/case-details/";
 
