@@ -57,8 +57,6 @@ public class ApplicationsFeeCalculatorTest {
 
     private C2DocumentBundle c2DocumentBundle;
 
-
-
     @Before
     public void setup() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
@@ -417,7 +415,6 @@ public class ApplicationsFeeCalculatorTest {
         assertEquals(CURRENCY_SIGN_POUND + BigDecimal.TEN, stringObjectMap.get(ADDITIONAL_APPLICATION_FEES_TO_PAY));
     }
 
-
     @Test
     public void testGetFeeTypes() {
         List<DynamicListElement> hearingDropdowns = new ArrayList<>();
@@ -505,8 +502,6 @@ public class ApplicationsFeeCalculatorTest {
         assertTrue(stringObjectMap.containsKey(ADDITIONAL_APPLICATION_FEES_TO_PAY));
         assertEquals(CURRENCY_SIGN_POUND + BigDecimal.TEN, stringObjectMap.get(ADDITIONAL_APPLICATION_FEES_TO_PAY));
     }
-
-
 
     @Test
     public void testExceptionCalculateAdditionalApplicationsFee() {
