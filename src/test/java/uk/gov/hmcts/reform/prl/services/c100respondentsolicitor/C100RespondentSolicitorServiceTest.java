@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -539,112 +540,17 @@ public class C100RespondentSolicitorServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
     }
 
-    @Test
-    public void populateAboutToStartCaseDataResSolConsentingToApplicationTest() {
+    @ParameterizedTest
+    @ValueSource(strings = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivateA",
+        "c100ResSolConfirmOrEditContactDetailsA","c100ResSolAttendingTheCourtA","c100ResSolMiamA","c100ResSolCurrentOrPreviousProceedingsA",
+        "c100ResSolAllegationsOfHarmA","c100ResSolInternationalElementA","c100ResSolAbilityToParticipateA","c100ResSolViewResponseDraftDocument"})
+    void populateAboutToStartCaseDataResSolConsentingToApplicationTest(String event) {
 
-        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
+        callbackRequest.setEventId(event);
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
             callbackRequest
         );
 
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataForResSolKeepDetailsPrivateTest() {
-        callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataForResSolConfirmOrEditContactDetailsTest() {
-
-        callbackRequest.setEventId("c100ResSolConfirmOrEditContactDetailsA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataForResSolAttendingTheCourtTest() {
-
-        callbackRequest.setEventId("c100ResSolAttendingTheCourtA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataForResSolMiamTest() {
-
-        callbackRequest.setEventId("c100ResSolMiamA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataForResSolCurrentOrPreviousProceedingsTest() {
-
-        callbackRequest.setEventId("c100ResSolCurrentOrPreviousProceedingsA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest
-        );
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataForResSolAllegationsOfHarmTest() {
-
-        callbackRequest.setEventId("c100ResSolAllegationsOfHarmA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest
-        );
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataForResSolInternationalElementTest() {
-        callbackRequest.setEventId("c100ResSolInternationalElementA");
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest
-        );
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataForResSolAbilityToParticipateTest() {
-        callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest
-        );
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToStartCaseDataForViewResponseDocumentTest() {
-
-        callbackRequest.setEventId("c100ResSolViewResponseDraftDocument");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
-            callbackRequest
-        );
         assertTrue(response.containsKey("respondents"));
     }
 
@@ -772,8 +678,13 @@ public class C100RespondentSolicitorServiceTest {
         Assertions.assertTrue(response.containsKey("respondentAc8"));
     }
 
-    @Test
-    public void submitC7ResponseForActiveRespondentTestB() throws Exception {
+    @ParameterizedTest
+    @CsvSource({
+        "c100ResSolConsentingToApplicationB, respondentBc8",
+        "c100ResSolConsentingToApplicationC, respondentCc8",
+        "c100ResSolConsentingToApplicationD, respondentDc8",
+    })
+    public void submitC7ResponseForActiveRespondentTestB(String event,String respondent) throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -794,72 +705,12 @@ public class C100RespondentSolicitorServiceTest {
                                                        Mockito.any(HashMap.class))).thenReturn(document);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        callbackRequest.setEventId("c100ResSolConsentingToApplicationB");
+        callbackRequest.setEventId(event);
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
             authToken, callbackRequest
         );
-        Assertions.assertTrue(response.containsKey("respondentBc8"));
-    }
-
-    @Test
-    public void submitC7ResponseForActiveRespondentTestC() throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("c100RespC8Template")
-            .build();
-
-        when(documentGenService.generateSingleDocument(Mockito.anyString(),
-                                                       Mockito.any(CaseData.class),
-                                                       Mockito.anyString(),
-                                                       Mockito.anyBoolean(),
-                                                       Mockito.any(HashMap.class))).thenReturn(document);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        callbackRequest.setEventId("c100ResSolConsentingToApplicationC");
-        List<String> errorList = new ArrayList<>();
-        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            authToken, callbackRequest
-        );
-        Assertions.assertTrue(response.containsKey("respondentCc8"));
-    }
-
-    @Test
-    public void submitC7ResponseForActiveRespondentTestD() throws Exception {
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("c100RespC8Template")
-            .build();
-
-        when(documentGenService.generateSingleDocument(Mockito.anyString(),
-                                                       Mockito.any(CaseData.class),
-                                                       Mockito.anyString(),
-                                                       Mockito.anyBoolean(),
-                                                       Mockito.any(HashMap.class))).thenReturn(document);
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        callbackRequest.setEventId("c100ResSolConsentingToApplicationD");
-        List<String> errorList = new ArrayList<>();
-        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            authToken, callbackRequest
-        );
-        Assertions.assertTrue(response.containsKey("respondentDc8"));
+        Assertions.assertTrue(response.containsKey(respondent));
     }
 
     @Test
@@ -896,26 +747,14 @@ public class C100RespondentSolicitorServiceTest {
         Assertions.assertTrue(response.containsKey("respondentEc8"));
     }
 
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolConsentingToApplicationATest() throws Exception {
+    @ParameterizedTest
+    @ValueSource(strings = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
+        "c100ResSolMiamA","c100ResSolCurrentOrPreviousProceedingsA","c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
+        "c100ResSolAbilityToParticipateA","c100ResSolConsentingToApplicationA"})
+    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest(String event) throws Exception {
 
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-
-        callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
+        callbackRequest.setEventId(event);
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
             callbackRequest
@@ -923,103 +762,6 @@ public class C100RespondentSolicitorServiceTest {
 
         assertTrue(response.containsKey("respondents"));
     }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolConfirmOrEditContactDetailsTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolConfirmOrEditContactDetailsA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolAttendingTheCourtTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolAttendingTheCourtA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForc100ResSolMiamTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolMiamA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolCurrentOrPreviousProceedingsA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolAllegationsOfHarmTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolAllegationsOfHarmA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolInternationalElementTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolInternationalElementA");
-
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
-    @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolAbilityToParticipateTest() throws Exception {
-
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
-        callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
-        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
-            callbackRequest
-        );
-
-        assertTrue(response.containsKey("respondents"));
-
-    }
-
 
     @ParameterizedTest
     @ValueSource(strings = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
