@@ -53,6 +53,7 @@ public class SendgridService {
     public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
     public static final String MAIL_SEND = "mail/send";
     public static final String CASE_NAME = "caseName";
+    public static final String CASE_NUMBER = "caseNumber";
     @Value("${send-grid.api-key}")
     private String apiKey;
 
@@ -108,7 +109,7 @@ public class SendgridService {
         String subject = emailProps.get("subject");
         if (emailProps.containsKey("orderURLLinkNeeded")) {
             subject = emailProps.get("orderSubject");
-            emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get("caseNumber") + "#Orders");
+            emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get(CASE_NUMBER) + "#Orders");
             String title = emailProps.containsKey("finalOrder") ? FINAL_ORDER_TITLE : NEW_ORDER_TITLE;
             String body = emailProps.containsKey("finalOrder")
                     ? RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY : RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
@@ -117,7 +118,7 @@ public class SendgridService {
                    title + EMAIL_START
                             + body + EMAIL_END,
                     emailProps.get(CASE_NAME),
-                    emailProps.get("caseNumber"),
+                    emailProps.get(CASE_NUMBER),
                     emailProps.get("solicitorName"),
                     emailProps.get("orderUrLLink")
             ));
@@ -126,7 +127,7 @@ public class SendgridService {
                     (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
                             .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
                     emailProps.get(CASE_NAME),
-                    emailProps.get("caseNumber"),
+                    emailProps.get(CASE_NUMBER),
                     emailProps.get("solicitorName")
             ));
         }
@@ -171,7 +172,7 @@ public class SendgridService {
         String subject = emailProps.get("subject");
         Content content = new Content("text/html", String.format(
             TransferCaseTemplate.TRANSFER_CASE_EMAIL_BODY,
-            emailProps.get("caseNumber"),
+            emailProps.get(CASE_NUMBER),
             emailProps.get(CASE_NAME),
             emailProps.get("issueDate"),
             emailProps.get("applicationType"),

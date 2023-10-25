@@ -30,6 +30,8 @@ public class LocationRefDataService {
     private final AuthTokenGenerator authTokenGenerator;
     private final LocationRefDataApi locationRefDataApi;
 
+    public static final String SCOTLAND = "Scotland";
+
     @Value("${courts.filter}")
     protected String courtsToFilter;
 
@@ -99,7 +101,7 @@ public class LocationRefDataService {
 
         return (locationRefData == null
             ? new ArrayList<>()
-            : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
+            : locationRefData.getCourtVenues().stream().filter(location -> !SCOTLAND.equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> {
                 if (courtList.length == 1) {
@@ -135,7 +137,7 @@ public class LocationRefDataService {
 
         return (locationRefData == null
             ? new ArrayList<>()
-            : locationRefData.getCourtVenues().stream().filter(location -> !"Scotland".equals(location.getRegion()))
+            : locationRefData.getCourtVenues().stream().filter(location -> !SCOTLAND.equals(location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> {
                 if (courtList.length == 1) {
@@ -160,7 +162,7 @@ public class LocationRefDataService {
             .filter(location -> {
                 List<String> ids = Arrays.stream(filteredCourtArray).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                         .toString()).toList();
-                return !"Scotland".equals(location.getRegion()) && ids.contains(location.getCourtEpimmsId())
+                return !SCOTLAND.equals(location.getRegion()) && ids.contains(location.getCourtEpimmsId())
                     && FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId());
             })
             .map(this::getDisplayEntry).toList());
@@ -192,7 +194,7 @@ public class LocationRefDataService {
         );
         return  (null == courtDetails || null == courtDetails.getCourtVenues())
             ? Optional.empty()
-            : courtDetails.getCourtVenues().stream().filter(location -> !"Scotland".equals(
+            : courtDetails.getCourtVenues().stream().filter(location -> !SCOTLAND.equals(
                 location.getRegion()))
             .filter(location -> FAMILY_COURT_TYPE_ID.equalsIgnoreCase(location.getCourtTypeId()))
             .filter(location -> baseLocationId.equalsIgnoreCase(location.getCourtEpimmsId()))

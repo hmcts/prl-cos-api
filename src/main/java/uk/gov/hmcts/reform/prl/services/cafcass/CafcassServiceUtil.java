@@ -16,6 +16,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 public class CafcassServiceUtil {
 
+    public static final String CAFCASS = "CAFCASS";
+
     public static boolean checkTypeOfDocument(String typeOfDocument, List<String> allowedTypeOfDocs) {
         if (typeOfDocument != null) {
             return allowedTypeOfDocs.stream().anyMatch(s -> s.equalsIgnoreCase(typeOfDocument));
@@ -31,15 +33,15 @@ public class CafcassServiceUtil {
     public static CaseData getCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
                                                  CaseData caseData, Document document) {
         String partyName = caseData.getApplicantCaseName() != null
-            ? caseData.getApplicantCaseName() : "CAFCASS";
+            ? caseData.getApplicantCaseName() : CAFCASS;
         List<Element<UploadedDocuments>> uploadedDocumentsList;
         Element<UploadedDocuments> uploadedDocsElement =
             element(UploadedDocuments.builder().dateCreated(LocalDate.now())
                         .documentType(typeOfDocument)
-                        .uploadedBy("CAFCASS")
+                        .uploadedBy(CAFCASS)
                         .documentDetails(DocumentDetails.builder().documentName(fileName)
                                              .documentUploadedDate(new Date().toString()).build())
-                        .partyName(partyName).isApplicant("CAFCASS")
+                        .partyName(partyName).isApplicant(CAFCASS)
                         .parentDocumentType("Safe_guarding_Letter")
                         .cafcassDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                                              .documentUrl(document.links.self.href)
