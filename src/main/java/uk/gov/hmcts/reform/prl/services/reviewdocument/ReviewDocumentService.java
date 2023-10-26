@@ -406,24 +406,21 @@ public class ReviewDocumentService {
 
     private List<Element<QuarantineLegalDoc>> convertScannedDocumentsToQuarantineDocList(
         List<Element<ScannedDocument>> scannedDocumentElements, UUID uuid) {
-        List<Element<QuarantineLegalDoc>> quarantineLegalDocElementList = scannedDocumentElements.stream().map(
-            scannedDocumentElement -> {
-                ScannedDocument scannedDocument = scannedDocumentElement.getValue();
-                return element(uuid, QuarantineLegalDoc.builder()
-                    .fileName(scannedDocument.getFileName())
-                    .controlNumber(scannedDocument.getControlNumber())
-                    .type(scannedDocument.getType())
-                    .subtype(scannedDocument.getSubtype())
-                    .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
-                    .url(scannedDocument.getUrl())
-                    //.document(scannedDocument.getUrl())
-                    .scannedDate(scannedDocument.getScannedDate())
-                    .deliveryDate(scannedDocument.getDeliveryDate())
-                    .build());
-
-
-            }).collect(Collectors.toList());
-        return quarantineLegalDocElementList;
+        return scannedDocumentElements.stream().map(
+                scannedDocumentElement -> {
+                    ScannedDocument scannedDocument = scannedDocumentElement.getValue();
+                    return element(uuid, QuarantineLegalDoc.builder()
+                            .fileName(scannedDocument.getFileName())
+                            .controlNumber(scannedDocument.getControlNumber())
+                            .type(scannedDocument.getType())
+                            .subtype(scannedDocument.getSubtype())
+                            .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
+                            .url(scannedDocument.getUrl())
+                            //.document(scannedDocument.getUrl())
+                            .scannedDate(scannedDocument.getScannedDate())
+                            .deliveryDate(scannedDocument.getDeliveryDate())
+                            .build());
+                }).collect(Collectors.toList());
     }
 
     private void forReviewDecisionNo(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {

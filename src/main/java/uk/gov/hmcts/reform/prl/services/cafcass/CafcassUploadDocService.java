@@ -119,12 +119,11 @@ public class CafcassUploadDocService {
 
     public CaseDetails checkIfCasePresent(String caseId, String authorisation) {
         try {
-            CaseDetails caseDetails = coreCaseDataApi.getCase(
+            return coreCaseDataApi.getCase(
                 authorisation,
                 authTokenGenerator.generate(),
                 caseId
             );
-            return caseDetails;
         } catch (Exception ex) {
             log.error("Error while getting the case {} {}", caseId, ex.getMessage());
         }
