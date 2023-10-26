@@ -211,18 +211,18 @@ public class FeeService {
 
     private static FeeType fromOtherPartyConsentAndNotice(String otherPartyConsent, String notice) {
 
-        if (otherPartyConsent.equals(YES)) {
+        if (isNotBlank(otherPartyConsent) && otherPartyConsent.equals(YES)) {
             return C2_WITHOUT_NOTICE;
         } else {
-            if (notice.equals(NO)) {
-                return C2_WITHOUT_NOTICE;
-            } else if (notice.equals(YES)) {
-                return C2_WITH_NOTICE;
-            } else {
-                return null;
+            if (isNotBlank(notice)) {
+                if (notice.equals(NO)) {
+                    return C2_WITHOUT_NOTICE;
+                } else if (notice.equals(YES)) {
+                    return C2_WITH_NOTICE;
+                }
             }
+            return null;
         }
-
     }
 
     public FeeResponseForCitizen fetchFeeCode(FeeRequest feeRequest,
