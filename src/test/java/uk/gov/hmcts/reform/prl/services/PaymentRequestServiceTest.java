@@ -878,7 +878,7 @@ public class PaymentRequestServiceTest {
 
         PaymentServiceResponse paymentServiceResponse = paymentRequestService
             .createServiceRequestFromCcdCallack(ccdCallbackRequest, authToken);
-        assertNotNull(paymentServiceResponse);
+        assertEquals("response", paymentServiceResponse.getServiceRequestReference());
     }
 
     @Test
@@ -890,7 +890,7 @@ public class PaymentRequestServiceTest {
             .thenReturn(paymentServiceResponse);
         PaymentServiceResponse paymentResponse = paymentRequestService
             .createServiceRequestForAdditionalApplications(caseData, authToken, feeResponse, "test");
-        assertNotNull(paymentResponse);
+        assertEquals("response", paymentServiceResponse.getServiceRequestReference());
     }
 }
 
