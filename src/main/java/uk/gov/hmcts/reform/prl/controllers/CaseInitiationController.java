@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 
 import java.util.HashMap;
@@ -30,7 +30,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Tag(name = "case-initiation-controller")
 @RestController
 @RequestMapping("/case-initiation")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 @SecurityRequirement(name = "Bearer Authentication")
 public class CaseInitiationController extends AbstractCallbackController {
@@ -43,6 +42,17 @@ public class CaseInitiationController extends AbstractCallbackController {
     private final AuthTokenGenerator authTokenGenerator;
 
     private final AuthorisationService authorisationService;
+
+    public CaseInitiationController(ObjectMapper objectMapper, EventService eventPublisher,
+                                    AssignCaseAccessService assignCaseAccessService,
+                                    CoreCaseDataApi coreCaseDataApi, AuthTokenGenerator authTokenGenerator,
+                                    AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.assignCaseAccessService = assignCaseAccessService;
+        this.coreCaseDataApi = coreCaseDataApi;
+        this.authTokenGenerator = authTokenGenerator;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,

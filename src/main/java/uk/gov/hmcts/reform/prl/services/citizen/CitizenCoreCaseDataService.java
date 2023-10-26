@@ -37,16 +37,16 @@ public class CitizenCoreCaseDataService {
     private static final String CCD_UPDATE_FAILURE_MESSAGE
         = "Failed linking case in CCD store for case id %s on event %s";
 
-    @Autowired
+
     private final IdamClient idamClient;
-    @Autowired
+
     private final CoreCaseDataApi coreCaseDataApi;
-    @Autowired
+
     private final AuthTokenGenerator authTokenGenerator;
-    @Autowired
+
     private final ObjectMapper objectMapper;
 
-    @Autowired
+
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
 
     public CaseDetails linkDefendant(

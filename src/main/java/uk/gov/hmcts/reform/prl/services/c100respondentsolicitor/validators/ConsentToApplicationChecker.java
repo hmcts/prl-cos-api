@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,10 +21,11 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConsentToApplicationChecker implements RespondentEventChecker {
 
-    @Autowired
-    RespondentTaskErrorService respondentTaskErrorService;
+
+    private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
     public boolean isStarted(PartyDetails respondingParty) {

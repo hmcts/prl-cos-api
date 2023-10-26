@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -35,7 +35,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+
 public class CitizenCallbackController extends AbstractCallbackController {
 
     private final AllTabServiceImpl allTabsService;
@@ -59,6 +59,23 @@ public class CitizenCallbackController extends AbstractCallbackController {
 
     @Autowired
     CaseDataMapper caseDataMapper;
+
+    protected CitizenCallbackController(ObjectMapper objectMapper, EventService eventPublisher,
+                                        AllTabServiceImpl allTabsService, CoreCaseDataApi
+        coreCaseDataApi, AuthTokenGenerator authTokenGenerator, ObjectMapper objectMapper1, SystemUserService
+        systemUserService, ConfidentialityTabService confidentialityTabService, CaseSummaryTabService caseSummaryTab,
+                                        DocumentGenService documentGenService, CitizenEmailService citizenEmailService) {
+        super(objectMapper, eventPublisher);
+        this.allTabsService = allTabsService;
+        this.coreCaseDataApi = coreCaseDataApi;
+        this.authTokenGenerator = authTokenGenerator;
+        this.objectMapper = objectMapper1;
+        this.systemUserService = systemUserService;
+        this.confidentialityTabService = confidentialityTabService;
+        this.caseSummaryTab = caseSummaryTab;
+        this.documentGenService = documentGenService;
+        this.citizenEmailService = citizenEmailService;
+    }
 
     @PostMapping("/citizen-case-creation-callback/submitted")
     public void handleSubmitted(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,

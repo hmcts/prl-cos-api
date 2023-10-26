@@ -25,16 +25,16 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CcdCaseApi {
-    @Autowired
-    AuthTokenGenerator authTokenGenerator;
-    @Autowired
-    CaseAccessApi caseAccessApi;
 
-    @Autowired
-    CitizenCoreCaseDataService citizenCoreCaseDataService;
+    private final AuthTokenGenerator authTokenGenerator;
 
-    @Autowired
-    IdamClient idamClient;
+    private final CaseAccessApi caseAccessApi;
+
+
+    private final CitizenCoreCaseDataService citizenCoreCaseDataService;
+
+
+    private final IdamClient idamClient;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 

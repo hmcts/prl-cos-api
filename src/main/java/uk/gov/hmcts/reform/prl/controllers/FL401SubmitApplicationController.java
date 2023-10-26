@@ -45,29 +45,28 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @SecurityRequirement(name = "Bearer Authentication")
 public class FL401SubmitApplicationController {
 
-    @Autowired
-    private UserService userService;
 
-    @Autowired
-    private SolicitorEmailService solicitorEmailService;
+    private final UserService userService;
 
-    @Autowired
+
+    private final SolicitorEmailService solicitorEmailService;
+
+
     private FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
-    @Autowired
+
     private ObjectMapper objectMapper;
 
-    @Autowired
-    LocationRefDataService locationRefDataService;
 
-    @Autowired
+    private final LocationRefDataService locationRefDataService;
+
+
     private final FL401SubmitApplicationService fl401SubmitApplicationService;
 
-    @Autowired
+
     private AuthorisationService authorisationService;
 
-    @Autowired
-    private ConfidentialityTabService confidentialityTabService;
+    private final ConfidentialityTabService confidentialityTabService;
 
     @PostMapping(path = "/fl401-submit-application-validation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to send FL401 application notification. ")

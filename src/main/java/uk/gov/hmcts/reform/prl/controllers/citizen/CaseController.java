@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -40,25 +41,26 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseController {
 
-    @Autowired
-    ObjectMapper objectMapper;
 
-    @Autowired
-    HearingService hearingService;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    CaseService caseService;
 
-    @Autowired
-    AuthorisationService authorisationService;
+    private final HearingService hearingService;
 
-    @Autowired
-    ConfidentialDetailsMapper confidentialDetailsMapper;
 
-    @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    private final CaseService caseService;
+
+
+    private final AuthorisationService authorisationService;
+
+
+    private final ConfidentialDetailsMapper confidentialDetailsMapper;
+
+
+    private final AuthTokenGenerator authTokenGenerator;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)

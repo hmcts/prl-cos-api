@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +25,7 @@ import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 
 import java.util.ArrayList;
@@ -41,14 +41,23 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 public class C100RespondentSolicitorController extends AbstractCallbackController {
 
-    @Autowired
-    C100RespondentSolicitorService respondentSolicitorService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final C100RespondentSolicitorService respondentSolicitorService;
 
-    @Autowired
-    private AuthorisationService authorisationService;
+
+    private final ObjectMapper objectMapper;
+
+
+    private final AuthorisationService authorisationService;
+
+    public C100RespondentSolicitorController(ObjectMapper objectMapper, EventService eventPublisher,
+                                             C100RespondentSolicitorService respondentSolicitorService,
+                                             ObjectMapper objectMapper1, AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.respondentSolicitorService = respondentSolicitorService;
+        this.objectMapper = objectMapper1;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor")

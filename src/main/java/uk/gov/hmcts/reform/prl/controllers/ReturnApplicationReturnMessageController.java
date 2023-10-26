@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -24,7 +23,6 @@ import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.handlers.CaseEventHandler;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -38,7 +36,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RestController
 @Slf4j
-@RequiredArgsConstructor
+
 public class ReturnApplicationReturnMessageController extends AbstractCallbackController {
 
     @Autowired
@@ -47,8 +45,7 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     private ReturnApplicationService returnApplicationService;
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private final CaseWorkerEmailService caseWorkerEmailService;
+
     @Autowired
     private AllTabServiceImpl allTabsService;
     @Autowired
@@ -57,6 +54,10 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     CaseEventHandler caseEventHandler;
     @Autowired
     EventService eventPublisher;
+
+    protected ReturnApplicationReturnMessageController(ObjectMapper objectMapper, EventService eventPublisher) {
+        super(objectMapper, eventPublisher);
+    }
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get return message of the return application ")

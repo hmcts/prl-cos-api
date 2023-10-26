@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,40 +45,41 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingsManagementController {
 
-    @Autowired
-    private CoreCaseDataApi coreCaseDataApi;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final CoreCaseDataApi coreCaseDataApi;
 
-    @Autowired
-    private EmailService emailService;
 
-    @Autowired
-    private CaseService caseService;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private IdamClient idamClient;
 
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final EmailService emailService;
 
-    @Autowired
-    private SystemUserService systemUserService;
 
-    @Autowired
-    private HearingManagementService hearingManagementService;
+    private final CaseService caseService;
 
-    @Autowired
-    HearingService hearingService;
+
+    private final IdamClient idamClient;
+
+
+    private final AuthorisationService authorisationService;
+
+
+    private final SystemUserService systemUserService;
+
+
+    private final HearingManagementService hearingManagementService;
+
+
+    private final HearingService hearingService;
 
     @Value("${citizen.url}")
     private String hearingDetailsUrl;
 
-    @Autowired
-    AllTabServiceImpl allTabsService;
+
+    private final AllTabServiceImpl allTabsService;
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Ways to pay will call this API and send the status of payment with other details")
