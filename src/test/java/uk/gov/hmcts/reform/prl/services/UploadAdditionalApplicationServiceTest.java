@@ -331,10 +331,8 @@ public class UploadAdditionalApplicationServiceTest {
         );
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"[C100APPLICANTSOLICITOR1]", "[C100RESPONDENTSOLICITOR1]", "[APPLICANTSOLICITOR]",
-        "[FL401RESPONDENTSOLICITOR]", "[CREATOR]"})
-    public void testPrePopulateApplicantsForCaApplicant(String input) throws Exception {
+    @Test
+    public void testPrePopulateApplicantsForCaApplicant() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -350,6 +348,8 @@ public class UploadAdditionalApplicationServiceTest {
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
+        String[] roles = {"[C100APPLICANTSOLICITOR1]", "[C100RESPONDENTSOLICITOR1]", "[APPLICANTSOLICITOR]",
+            "[FL401RESPONDENTSOLICITOR]", "[CREATOR]"};
         Map<String, List<DynamicMultiselectListElement>> stringListMap = new HashMap<>();
         stringListMap.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
         stringListMap.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
@@ -360,13 +360,15 @@ public class UploadAdditionalApplicationServiceTest {
         when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
             "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        CaseUser caseUser = CaseUser.builder().caseRole(input).build();
-        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
-        when(userDataStoreService.findUserCaseRoles(
-            anyString(),
-            anyString()
-        )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
+        for (String role : roles) {
+            CaseUser caseUser = CaseUser.builder().caseRole(role).build();
+            findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
+            when(userDataStoreService.findUserCaseRoles(
+                anyString(),
+                anyString()
+            )).thenReturn(findUserCaseRolesResponse);
+            assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
+        }
     }
 
     @Test
