@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.util.Strings.concat;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FAMILY_COURT_TYPE_ID;
@@ -44,7 +45,7 @@ public class LocationRefDataService {
             );
             return onlyEnglandAndWalesLocations(courtDetails).stream()
                 .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
-                .toList();
+                .collect(Collectors.toList());
         } catch (Exception e) {
             log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
@@ -106,10 +107,10 @@ public class LocationRefDataService {
                 }
                 List<String> ids = Arrays.stream(courtList).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                     .toString())
-                    .toList();
+                    .collect(Collectors.toList());
                 return ids.contains(location.getCourtEpimmsId());
             })
-            .map(this::getDaDisplayEntry).toList());
+            .map(this::getDaDisplayEntry).collect(Collectors.toList()));
     }
 
     private DynamicListElement getDaDisplayEntry(CourtVenue location) {
@@ -142,10 +143,10 @@ public class LocationRefDataService {
                 }
                 List<String> ids = Arrays.stream(courtList).map(ele -> Arrays.stream(ele.split(":")).toArray()[0]
                     .toString())
-                    .toList();
+                    .collect(Collectors.toList());
                 return ids.contains(location.getCourtEpimmsId());
             })
-            .map(this::getDisplayEntry).toList());
+            .map(this::getDisplayEntry).collect(Collectors.toList()));
     }
 
     private List<DynamicListElement> filterOnboardedCourtList(String courtList, CourtDetails locationRefData) {

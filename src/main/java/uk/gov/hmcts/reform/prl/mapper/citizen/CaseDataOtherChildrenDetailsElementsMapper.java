@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -34,7 +35,7 @@ public class CaseDataOtherChildrenDetailsElementsMapper {
     private static List<Element<Child>> buildChildDetails(List<ChildDetail> childDetails) {
         return childDetails.stream()
             .map(CaseDataOtherChildrenDetailsElementsMapper::mapToChildDetails)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private static Element<Child> mapToChildDetails(ChildDetail childDetail) {

@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 
@@ -26,7 +27,7 @@ public class OrderAppliedForGenerator implements FieldGenerator {
         }
         List<String> ordersApplyingFor = caseData.getOrdersApplyingFor().stream()
             .map(OrderTypeEnum::getDisplayedValue)
-            .toList();
+            .collect(Collectors.toList());
 
         String typeOfChildArrangementsOrder = "";
         Optional<ChildArrangementOrderTypeEnum> childArrangementCheck = ofNullable(caseData.getTypeOfChildArrangementsOrder());

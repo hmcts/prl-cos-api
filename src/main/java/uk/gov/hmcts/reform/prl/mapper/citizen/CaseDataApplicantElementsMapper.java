@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.isNull;
@@ -64,16 +65,16 @@ public class CaseDataApplicantElementsMapper {
 
         return applicantDtoList.stream()
                 .map(applicantDto -> Element.<PartyDetails>builder().value(buildPartyDetails(applicantDto)).build())
-                .toList();
+                .collect(Collectors.toList());
     }
 
     private static PartyDetails buildPartyDetails(ApplicantDto applicantDto) {
         List<String> contactDetailsPrivateList1 = Arrays.stream(applicantDto.getContactDetailsPrivate())
-                .toList();
+                .collect(Collectors.toList());
         List<String> contactDetailsPrivateList2 = Arrays.stream(applicantDto.getContactDetailsPrivateAlternative())
-                .toList();
+                .collect(Collectors.toList());
         List<String> contactDetailsPrivateList = Stream.concat(contactDetailsPrivateList1.stream(),
-                contactDetailsPrivateList2.stream()).toList();
+                contactDetailsPrivateList2.stream()).collect(Collectors.toList());
         return PartyDetails
                 .builder()
                 .firstName(applicantDto.getApplicantFirstName())
@@ -153,7 +154,8 @@ public class CaseDataApplicantElementsMapper {
         } else {
             return contactDetailsPrivateList.stream().map(c -> TELEPHONE_FIELD.equals(c)
                 ? ConfidentialityListEnum.phoneNumber
-                : ConfidentialityListEnum.getValue(c)).toList();
+                : ConfidentialityListEnum.getValue(c)).collect(
+                Collectors.toList());
         }
     }
 

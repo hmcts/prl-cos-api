@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskEr
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.ALLEGATION_OF_HARM_ERROR;
@@ -156,7 +157,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 .getRespChildAbuseInfo()
                 .stream()
                 .map(Element::getValue)
-                .toList();
+                .collect(Collectors.toList());
             for (Behaviours childAbuse : childAbuseBehaviour) {
                 fields.add(ofNullable(childAbuse.getTypesOfAbuse()));
                 fields.add(ofNullable(childAbuse.getNatureOfBehaviour()));
@@ -179,7 +180,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 .getRespDomesticAbuseInfo()
                 .stream()
                 .map(Element::getValue)
-                .toList();
+                .collect(Collectors.toList());
             for (Behaviours domesticAbuse : domesticAbuseBehaviour) {
                 fields.add(ofNullable(domesticAbuse.getTypesOfAbuse()));
                 fields.add(ofNullable(domesticAbuse.getNatureOfBehaviour()));
