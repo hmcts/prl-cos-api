@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.gatekeeping;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -53,10 +54,14 @@ public class AllocatedJudgeService {
                             .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL))).build());
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
-                    if (null != judgeDetails && judgeDetails.size() > 0) {
-                        allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
-                        allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
+                    if (null != judgeDetails && !judgeDetails.isEmpty()) {
+                        JudicialUsersApiResponse judgeDetail = judgeDetails.get(0);
+                        allocatedJudgeBuilder.judgeName(judgeDetail.getSurname());
+                        allocatedJudgeBuilder.judgeEmail(judgeDetail.getEmailId());
                         allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
+                        allocatedJudgeBuilder.tierOfJudge(CollectionUtils.isNotEmpty(judgeDetail.getAppointments())
+                                                              ? judgeDetail.getAppointments().get(0).getAppointment()
+                                                              : null);
                     }
                 } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);

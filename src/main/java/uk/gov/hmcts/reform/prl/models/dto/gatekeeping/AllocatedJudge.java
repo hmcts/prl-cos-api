@@ -36,4 +36,6 @@ public class AllocatedJudge {
     @JsonProperty("judgePersonalCode")
     private final String judgePersonalCode;
 
+    @JsonProperty("tierOfJudge")
+    private final String tierOfJudge;
 }
