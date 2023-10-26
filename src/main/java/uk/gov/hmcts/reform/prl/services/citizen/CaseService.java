@@ -71,21 +71,21 @@ public class CaseService {
     public static final String LINKED = "Linked";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
-    @Autowired
+
     private final CoreCaseDataApi coreCaseDataApi;
 
-    @Autowired
+
     private final CaseRepository caseRepository;
 
     private final IdamClient idamClient;
 
-    @Autowired
+
     private final ObjectMapper objectMapper;
 
-    @Autowired
+
     private final SystemUserService systemUserService;
 
-    @Autowired
+
     private final CaseDataMapper caseDataMapper;
 
     private final CcdCoreCaseDataService coreCaseDataService;

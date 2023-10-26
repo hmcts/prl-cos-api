@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,36 +51,37 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RestController
 @RequestMapping("/service-of-application")
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ServiceOfApplicationController {
 
-    @Autowired
-    private ServiceOfApplicationService serviceOfApplicationService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ServiceOfApplicationService serviceOfApplicationService;
 
-    @Autowired
-    AllTabServiceImpl allTabService;
 
-    @Autowired
-    DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
+    private final AllTabServiceImpl allTabService;
 
-    private Map<String, Object> caseDataUpdated;
 
-    @Autowired
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+
+
+    private final LaunchDarklyClient launchDarklyClient;
+
+
+    private final CoreCaseDataService coreCaseDataService;
+
+    private final  Map<String, Object> caseDataUpdated;
+
+
     @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
+    private final CaseSummaryTabService caseSummaryTabService;
 
-    @Autowired
-    private AuthorisationService authorisationService;
 
-    @Autowired
+    private final AuthorisationService authorisationService;
+
+
     WelshCourtEmail welshCourtEmail;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";

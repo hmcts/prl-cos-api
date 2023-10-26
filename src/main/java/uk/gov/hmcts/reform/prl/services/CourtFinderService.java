@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CourtFinderService {
 
     public static final String FAMILY_COURT = "Family Courts";
@@ -43,8 +43,8 @@ public class CourtFinderService {
     public static final String FAMILY = "Family";
     public static final String C_100_APPLICATIONS = "C100 applications";
     public static final String CHILD = "child";
-    @Autowired
-    private CourtFinderApi courtFinderApi;
+
+    private final CourtFinderApi courtFinderApi;
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea = null;

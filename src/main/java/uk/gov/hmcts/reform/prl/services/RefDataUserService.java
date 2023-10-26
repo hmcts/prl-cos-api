@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,22 +40,23 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefDataUserService {
 
-    @Autowired
-    AuthTokenGenerator authTokenGenerator;
 
-    @Autowired
-    StaffResponseDetailsApi staffResponseDetailsApi;
+    private final AuthTokenGenerator authTokenGenerator;
 
-    @Autowired
-    JudicialUserDetailsApi judicialUserDetailsApi;
 
-    @Autowired
-    IdamClient idamClient;
+    private final StaffResponseDetailsApi staffResponseDetailsApi;
 
-    @Autowired
-    CommonDataRefApi commonDataRefApi;
+
+    private final JudicialUserDetailsApi judicialUserDetailsApi;
+
+
+    private final IdamClient idamClient;
+
+
+    private final CommonDataRefApi commonDataRefApi;
 
     @Value("${prl.refdata.username}")
     private String refDataIdamUsername;

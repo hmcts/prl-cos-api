@@ -52,15 +52,15 @@ public class ManageDocumentsService {
 
     public static final String UNEXPECTED_USER_ROLE = "Unexpected user role : ";
     public static final String MANAGE_DOCUMENTS_RESTRICTED_FLAG = "manageDocumentsRestrictedFlag";
-    @Autowired
+
     private final CoreCaseDataApi coreCaseDataApi;
 
-    @Autowired
+
     private final AuthTokenGenerator authTokenGenerator;
 
     private final ObjectMapper objectMapper;
 
-    @Autowired
+
     private final UserService userService;
 
     private final Time dateTime;

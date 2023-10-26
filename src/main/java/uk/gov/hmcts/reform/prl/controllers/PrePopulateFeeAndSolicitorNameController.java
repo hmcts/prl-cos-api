@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,37 +50,37 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PrePopulateFeeAndSolicitorNameController {
 
-    @Autowired
+
     private FeeService feeService;
 
-    @Autowired
+
     private UserService userService;
 
-    @Autowired
+
     CourtFinderService courtLocatorService;
 
-    @Autowired
     SubmitAndPayChecker submitAndPayChecker;
 
-    @Autowired
+
     private ObjectMapper objectMapper;
 
-    @Autowired
+
     private DgsService dgsService;
 
-    @Autowired
+
     private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
 
-    @Autowired
+
     private OrganisationService organisationService;
 
-    @Autowired
+
     private DocumentLanguageService documentLanguageService;
 
-    @Autowired
+
     private AuthorisationService authorisationService;
 
     @Value("${document.templates.c100.c100_draft_filename}")

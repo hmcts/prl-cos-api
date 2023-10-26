@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.rpa.mappers;
 
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
@@ -31,10 +32,11 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARATOR;
 
 @Component
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AllegationsOfHarmRevisedMapper {
 
-    @Autowired
-    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     public JsonObject map(CaseData caseData) {
 

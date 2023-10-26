@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -71,36 +72,37 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseDocumentController {
 
-    @Autowired
-    private DocumentGenService documentGenService;
 
-    @Autowired
-    private UploadDocumentService uploadService;
+    private final DocumentGenService documentGenService;
 
-    @Autowired
-    private AuthorisationService authorisationService;
 
-    @Autowired
-    CoreCaseDataApi coreCaseDataApi;
+    private final UploadDocumentService uploadService;
 
-    @Autowired
-    ObjectMapper objectMapper;
 
-    @Autowired
-    private AuthTokenGenerator authTokenGenerator;
+    private final AuthorisationService authorisationService;
 
-    @Autowired
-    private IdamClient idamClient;
 
-    @Autowired
-    CaseService caseService;
+    private final CoreCaseDataApi coreCaseDataApi;
+
+
+    private final ObjectMapper objectMapper;
+
+
+    private final AuthTokenGenerator authTokenGenerator;
+
+
+    private final IdamClient idamClient;
+
+
+    private final CaseService caseService;
 
     Integer fileIndex;
 
-    @Autowired
-    private EmailService emailService;
+
+    private final EmailService emailService;
 
     @Value("${citizen.url}")
     private String dashboardUrl;

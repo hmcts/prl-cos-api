@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +26,16 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PostcodeLookupService {
 
-    @Autowired
-    ObjectMapper objectMapper;
+
+    private ObjectMapper objectMapper;
 
     private RestTemplate restTemplate = new RestTemplate();
 
-    @Autowired
-    PostcodeLookupConfiguration configuration;
+
+    private PostcodeLookupConfiguration configuration;
 
     public boolean isValidNationalPostCode(String postcode, String countryCode) {
         boolean returnValue = true;

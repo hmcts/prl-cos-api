@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -49,104 +50,105 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 
 @Getter
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EventsChecker {
 
-    @Autowired
-    private CaseNameChecker caseNameChecker;
 
-    @Autowired
-    private ApplicationTypeChecker applicationTypeChecker;
+    private final CaseNameChecker caseNameChecker;
 
-    @Autowired
-    private HearingUrgencyChecker hearingUrgencyChecker;
 
-    @Autowired
-    private ApplicantsChecker applicantsChecker;
+    private final ApplicationTypeChecker applicationTypeChecker;
 
-    @Autowired
-    private ChildChecker childChecker;
 
-    @Autowired
-    private ChildDetailsRevisedChecker childDetailsRevisedChecker;
+    private final HearingUrgencyChecker hearingUrgencyChecker;
 
-    @Autowired
-    private RespondentsChecker respondentsChecker;
 
-    @Autowired
-    private RespondentBehaviourChecker respondentBehaviourChecker;
+    private final ApplicantsChecker applicantsChecker;
 
-    @Autowired
-    private MiamChecker miamChecker;
 
-    @Autowired
-    private AllegationsOfHarmChecker allegationsOfHarmChecker;
+    private final ChildChecker childChecker;
 
-    @Autowired
-    private AllegationsOfHarmRevisedChecker allegationsOfHarmRevisedChecker;
 
-    @Autowired
-    private OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
-    @Autowired
-    private OtherPeopleInTheCaseRevisedChecker otherPeopleInTheCaseRevisedChecker;
-    @Autowired
-    private OtherProceedingsChecker otherProceedingsChecker;
+    private final ChildDetailsRevisedChecker childDetailsRevisedChecker;
 
-    @Autowired
-    private AttendingTheHearingChecker attendingTheHearingChecker;
 
-    @Autowired
-    private InternationalElementChecker internationalElementChecker;
+    private final RespondentsChecker respondentsChecker;
 
-    @Autowired
-    private LitigationCapacityChecker litigationCapacityChecker;
 
-    @Autowired
-    private WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
+    private final RespondentBehaviourChecker respondentBehaviourChecker;
 
-    @Autowired
-    private PdfChecker pdfChecker;
 
-    @Autowired
-    private SubmitAndPayChecker submitAndPayChecker;
+    private final MiamChecker miamChecker;
 
-    @Autowired
-    private HomeChecker homeChecker;
 
-    @Autowired
-    private RespondentRelationshipChecker respondentRelationshipChecker;
+    private final AllegationsOfHarmChecker allegationsOfHarmChecker;
 
-    @Autowired
-    private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
 
-    @Autowired
-    private FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
+    private final AllegationsOfHarmRevisedChecker allegationsOfHarmRevisedChecker;
 
-    @Autowired
-    private FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
-    @Autowired
-    private WithoutNoticeOrderChecker withoutNoticeOrderChecker;
+    private final OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
 
-    @Autowired
-    private FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
+    private final OtherPeopleInTheCaseRevisedChecker otherPeopleInTheCaseRevisedChecker;
 
-    @Autowired
-    private SubmitChecker submitChecker;
+    private final OtherProceedingsChecker otherProceedingsChecker;
 
-    @Autowired
-    private FL401ResubmitChecker fl401ResubmitChecker;
 
-    @Autowired
-    private ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
+    private final AttendingTheHearingChecker attendingTheHearingChecker;
 
-    @Autowired
-    private OtherChildrenNotPartOfTheApplicationChecker otherChildrenNotPartOfTheApplicationChecker;
 
-    @Autowired
-    private ChildrenAndRespondentsChecker childrenAndRespondentsChecker;
+    private final InternationalElementChecker internationalElementChecker;
 
-    @Autowired
-    private ChildrenAndOtherPeopleInThisApplicationChecker childrenAndOtherPeopleInThisApplicationChecker;
+
+    private final LitigationCapacityChecker litigationCapacityChecker;
+
+
+    private final WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
+
+
+    private final PdfChecker pdfChecker;
+
+
+    private final SubmitAndPayChecker submitAndPayChecker;
+
+
+    private final HomeChecker homeChecker;
+
+
+    private final RespondentRelationshipChecker respondentRelationshipChecker;
+
+
+    private final FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
+
+
+    private final FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
+
+
+    private final FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
+
+
+    private final WithoutNoticeOrderChecker withoutNoticeOrderChecker;
+
+
+    private final FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
+
+
+    private final SubmitChecker submitChecker;
+
+
+    private final FL401ResubmitChecker fl401ResubmitChecker;
+
+
+    private final ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
+
+
+    private final OtherChildrenNotPartOfTheApplicationChecker otherChildrenNotPartOfTheApplicationChecker;
+
+
+    private final ChildrenAndRespondentsChecker childrenAndRespondentsChecker;
+
+
+    private final ChildrenAndOtherPeopleInThisApplicationChecker childrenAndOtherPeopleInThisApplicationChecker;
 
     private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 

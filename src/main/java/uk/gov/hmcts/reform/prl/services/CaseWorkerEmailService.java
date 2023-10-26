@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseWorkerEmailService {
 
     private final NotificationClient notificationClient;
@@ -51,7 +51,7 @@ public class CaseWorkerEmailService {
     private static final String NO = "No";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
 
-    @Autowired
+
     private EmailService emailService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
