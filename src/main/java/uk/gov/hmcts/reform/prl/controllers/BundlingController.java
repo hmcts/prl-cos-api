@@ -35,7 +35,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -161,7 +160,7 @@ public class BundlingController extends AbstractCallbackController {
                 if (null != bundleNestedSubfolder1.getValue().getDocuments()) {
                     bundleDocumentsPostEmptyRemoval = bundleNestedSubfolder1.getValue().getDocuments().stream()
                         .filter(bundleDocument -> nonNull(bundleDocument.getValue().getSourceDocument()))
-                        .collect(Collectors.toList());
+                        .toList();
                     if (!bundleDocumentsPostEmptyRemoval.isEmpty()) {
                         bundleNestedSubfolder1AfterRemoval.add(BundleNestedSubfolder1.builder()
                             .value(BundleNestedSubfolder1Details.builder().name(bundleNestedSubfolder1.getValue().getName())

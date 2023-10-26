@@ -48,12 +48,12 @@ public class CaseDataTypeOfOrderElementsMapper {
         List<String> prohibitedOrderList = nonNull(c100RebuildCourtOrderElements.getReasonsOfHearingWithoutNotice())
                 ? Arrays.stream(c100RebuildCourtOrderElements.getReasonsOfHearingWithoutNotice())
                 .map(element -> CourtOrderTypeEnum.valueOf(element).getDisplayedValue())
-                        .collect(Collectors.toList()) : Collections.emptyList();
+                        .toList() : Collections.emptyList();
 
         List<String> specificIssueOrderList = nonNull(c100RebuildCourtOrderElements.getResolveSpecificIssueSubField())
                 ? Arrays.stream(c100RebuildCourtOrderElements.getResolveSpecificIssueSubField())
                 .map(element -> CourtOrderTypeEnum.valueOf(element).getDisplayedValue())
-                        .collect(Collectors.toList()) : Collections.emptyList();
+                        .toList() : Collections.emptyList();
 
         String natureOfOrder = Stream.concat(prohibitedOrderList.stream(), specificIssueOrderList.stream())
                 .collect(Collectors.joining(COMMA_SEPARATOR));
