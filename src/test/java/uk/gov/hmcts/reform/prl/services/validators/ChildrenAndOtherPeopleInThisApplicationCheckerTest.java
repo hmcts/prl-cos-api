@@ -132,6 +132,24 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
+    public void whenAllChildDataPresentAndIsTaskCanBeEnabledFalseThenIsFinishedReturnsFalse() {
+        CaseData caseData = CaseData.builder()
+                .relations(Relations.builder().childAndOtherPeopleRelations(null).build())
+                .build();
+
+        assertFalse(childrenAndOtherPeopleInThisApplicationChecker.isFinished(caseData));
+    }
+
+    @Test
+    public void whenAllChildDataPresentAndChildAndOtherPeopleRekationsIsNullThenIsFinishedReturnsFalse() {
+        CaseData caseData = CaseData.builder()
+                .relations(Relations.builder().childAndOtherPeopleRelations(null).build())
+                .build();
+
+        assertFalse(childrenAndOtherPeopleInThisApplicationChecker.isFinished(caseData));
+    }
+
+    @Test
     public void whenNoCaseDataPresentThenHasMandatoryCompletedReturnsTrue() {
         CaseData caseData = CaseData.builder().build();
         assertFalse(childrenAndOtherPeopleInThisApplicationChecker.hasMandatoryCompleted(caseData));
@@ -157,10 +175,18 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void testDefaultTaskStateWhenChildDetailsDoneAndApplicantDetails() {
+    public void testDefaultTaskStateWhenChildDetailsDoneAndOtherPeopleDetails() {
         CaseData caseData = CaseData.builder().build();
         when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
         when(eventsChecker.hasMandatoryCompleted(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)).thenReturn(true);
+        assertEquals(TaskState.NOT_STARTED, childrenAndOtherPeopleInThisApplicationChecker.getDefaultTaskState(caseData));
+    }
+
+    @Test
+    public void testDefaultTaskStateWhenChildDetailsDoneAndOtherDetailsDetailsIsFinished() {
+        CaseData caseData = CaseData.builder().build();
+        when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
+        when(eventsChecker.isFinished(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)).thenReturn(true);
         assertEquals(TaskState.NOT_STARTED, childrenAndOtherPeopleInThisApplicationChecker.getDefaultTaskState(caseData));
     }
 }
