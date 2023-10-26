@@ -343,8 +343,7 @@ public class C100RespondentSolicitorService {
             case ABILITY_TO_PARTICIPATE:
                 buildResponseForRespondent = buildAbilityToParticipateResponse(caseData, buildResponseForRespondent);
                 break;
-            case VIEW_DRAFT_RESPONSE:
-            case SUBMIT:
+            case VIEW_DRAFT_RESPONSE, SUBMIT:
 
             default:
                 break;
