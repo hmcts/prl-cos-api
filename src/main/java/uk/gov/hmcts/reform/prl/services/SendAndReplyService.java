@@ -54,6 +54,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -252,7 +253,7 @@ public class SendAndReplyService {
                 return messageElement;
             })
             .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
-            .toList();
+            .collect(Collectors.toList());
     }
 
 
@@ -325,7 +326,7 @@ public class SendAndReplyService {
                     return element(messageElement.getId(), updatedMessage);
                 }
                 return messageElement;
-            }).toList();
+            }).collect(Collectors.toList());
     }
 
     public Map<String, Object> returnMapOfOpenMessages(List<Element<Message>> messages) {
@@ -420,10 +421,10 @@ public class SendAndReplyService {
                                 .code(concat(hearingId, " - ").concat(hearingType)).build();
                         }
                         return null;
-                    }).filter(Objects::nonNull).toList()).orElse(Collections.emptyList());
+                    }).filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
                 }).map(this::getDynamicListElements)
                 .flatMap(Collection::stream)
-                .toList();
+                .collect(Collectors.toList());
 
             return getDynamicList(hearingDropdowns);
         }
@@ -433,8 +434,8 @@ public class SendAndReplyService {
     }
 
     private List<DynamicListElement> getDynamicListElements(List<CodeAndLabel> dropdowns) {
-        return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown.getCode()).label(dropdown.getLabel()).build())
-            .toList();
+        return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown.getCode()).label(dropdown.getLabel()).build()).collect(
+            Collectors.toList());
     }
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {
@@ -552,7 +553,7 @@ public class SendAndReplyService {
 
         List<Category> parentCategories = categoriesAndDocuments.getCategories().stream()
             .sorted(Comparator.comparing(Category::getCategoryName))
-            .toList();
+            .collect(Collectors.toList());
 
         List<DynamicListElement> dynamicListElementList = new ArrayList<>();
         createDynamicListFromSubCategories(parentCategories, dynamicListElementList, null, null);
@@ -774,7 +775,7 @@ public class SendAndReplyService {
     public static List<Element<Message>> getOpenMessages(List<Element<Message>> messages) {
         return nullSafeCollection(messages).stream()
             .filter(element -> OPEN.equals(element.getValue().getStatus()))
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public CaseData populateMessageReplyFields(CaseData caseData, String authorization) {
@@ -974,7 +975,7 @@ public class SendAndReplyService {
                 return messageElement;
             })
             .sorted(Comparator.comparing(m -> m.getValue().getUpdatedTime(), Comparator.reverseOrder()))
-            .toList();
+            .collect(Collectors.toList());
     }
 
     private MessageHistory buildReplyMessageHistory(Message message) {

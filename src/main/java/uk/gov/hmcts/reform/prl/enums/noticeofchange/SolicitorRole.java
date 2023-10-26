@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 
@@ -59,13 +60,13 @@ public enum SolicitorRole {
     public static List<SolicitorRole> matchingRoles(Representing representing) {
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
             .filter(role -> role.representing == representing)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public static List<SolicitorRole> notMatchingRoles(Representing representing) {
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
             .filter(role -> role.representing != representing)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     public enum Representing {

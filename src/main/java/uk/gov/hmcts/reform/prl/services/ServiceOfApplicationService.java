@@ -239,7 +239,7 @@ public class ServiceOfApplicationService {
                                              C1A_BLANK_DOCUMENT_FILENAME))
                                          .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                                              C7_BLANK_DOCUMENT_FILENAME))
-                                         .toList());
+                                         .collect(Collectors.toList()));
                     log.info("selected Applicants " + selectedApplicants.size());
                     if (selectedApplicants != null
                         && !selectedApplicants.isEmpty()) {
@@ -622,12 +622,12 @@ public class ServiceOfApplicationService {
 
     public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER)).toList();
+            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
     }
 
     private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER)).toList();
+            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
     }
 
     private List<Document> generatePackH(CaseData caseData) {
@@ -745,7 +745,7 @@ public class ServiceOfApplicationService {
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
             List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
-                .toList();
+                .collect(Collectors.toList());
             orderCodes.stream().forEach(orderCode ->
                 caseData.getOrderCollection().stream()
                     .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
@@ -883,7 +883,7 @@ public class ServiceOfApplicationService {
             List<PartyDetails> respondents = respondentsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .toList();
+                .collect(Collectors.toList());
 
             for (PartyDetails respondent : respondents) {
                 if (YesOrNo.Yes.equals(respondent.getIsAddressConfidential())

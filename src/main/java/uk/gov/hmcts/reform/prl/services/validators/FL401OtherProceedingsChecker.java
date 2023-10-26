@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -50,7 +51,7 @@ public class FL401OtherProceedingsChecker implements EventChecker {
             List<FL401Proceedings> allProceedings = proceedingDetails.get()
                 .stream()
                 .map(Element::getValue)
-                .toList();
+                .collect(Collectors.toList());
 
             //if a collection item is added and then removed the collection exists as length 0
             if (allProceedings.isEmpty()) {

@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonValue;
 import javax.json.stream.JsonCollectors;
@@ -28,7 +29,7 @@ public class ChildrenAndApplicantsMapper {
         }
         List<ChildrenAndApplicantRelation> childrenAndApplicantList = childrenAndApplicantRelations.stream()
             .map(Element::getValue)
-            .toList();
+            .collect(Collectors.toList());
         return childrenAndApplicantList.stream().map(relation -> new NullAwareJsonObjectBuilder()
             .add("applicantFullName", relation.getApplicantFullName())
             .add("childFullName", relation.getChildFullName())

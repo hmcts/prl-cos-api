@@ -30,6 +30,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
@@ -158,8 +159,9 @@ public class SendgridService {
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)
             .servedParty(servedParty)
-            .docs(listOfAttachments.stream().map(s -> element(s)).toList())
-            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).toList()))
+            .docs(listOfAttachments.stream().map(s -> element(s)).collect(Collectors.toList()))
+            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
+                Collectors.toList())))
             .timeStamp(currentDate).build();
     }
 
