@@ -59,7 +59,7 @@ public class LocationRefDataService {
                 authTokenGenerator.generate(),
                 SERVICE_ID
             );
-            return daOnlyEnglandAndWalesLocations(courtDetails, "FL401");
+            return daOnlyEnglandAndWalesLocations(courtDetails);
         } catch (Exception e) {
             log.error(LOCATION_REFERENCE_DATA_LOOKUP_FAILED + e.getMessage(), e);
         }
@@ -94,7 +94,7 @@ public class LocationRefDataService {
         return List.of(DynamicListElement.builder().build());
     }
 
-    private List<DynamicListElement> daOnlyEnglandAndWalesLocations(CourtDetails locationRefData, String caseType) {
+    private List<DynamicListElement> daOnlyEnglandAndWalesLocations(CourtDetails locationRefData) {
         String[] courtList = daCourtsToFilter.split(",");
 
         return (locationRefData == null
