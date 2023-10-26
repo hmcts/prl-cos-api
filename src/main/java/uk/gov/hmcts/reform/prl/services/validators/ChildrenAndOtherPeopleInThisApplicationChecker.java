@@ -117,4 +117,8 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
                 || eventsChecker.isFinished(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData));
     }
 
+    public String testingCoverage() {
+        return "test";
+    }
+
 }
