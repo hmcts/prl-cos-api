@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -348,8 +346,6 @@ public class UploadAdditionalApplicationServiceTest {
             callbackRequest.getCaseDetails(),
             objectMapper
         )).thenReturn(caseData);
-        String[] roles = {"[C100APPLICANTSOLICITOR1]", "[C100RESPONDENTSOLICITOR1]", "[APPLICANTSOLICITOR]",
-            "[FL401RESPONDENTSOLICITOR]", "[CREATOR]"};
         Map<String, List<DynamicMultiselectListElement>> stringListMap = new HashMap<>();
         stringListMap.put("applicants", List.of(DynamicMultiselectListElement.EMPTY));
         stringListMap.put("respondents", List.of(DynamicMultiselectListElement.EMPTY));
@@ -360,6 +356,8 @@ public class UploadAdditionalApplicationServiceTest {
         when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
             "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        String[] roles = {"[C100APPLICANTSOLICITOR1]", "[C100RESPONDENTSOLICITOR1]", "[APPLICANTSOLICITOR]",
+            "[FL401RESPONDENTSOLICITOR]", "[CREATOR]"};
         for (String role : roles) {
             CaseUser caseUser = CaseUser.builder().caseRole(role).build();
             findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
