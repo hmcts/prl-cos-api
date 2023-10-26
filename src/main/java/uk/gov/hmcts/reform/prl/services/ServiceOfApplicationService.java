@@ -271,11 +271,14 @@ public class ServiceOfApplicationService {
             emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                 caseData,
                 caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
-                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
+                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
+            ));
         }
     }
 
-    private void sendPackToOtherPeople(CaseData caseData, String authorization, List<Element<BulkPrintDetails>> bulkPrintDetails, List<Document> c100StaticDocs) {
+    private void sendPackToOtherPeople(CaseData caseData, String authorization,
+                                       List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                       List<Document> c100StaticDocs) {
         //serving other people in case
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
@@ -284,7 +287,12 @@ public class ServiceOfApplicationService {
                 .equalsIgnoreCase(PRIVACY_DOCUMENT_FILENAME)).collect(
                 Collectors.toList());
             packNDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.N));
-            bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(caseData, authorization, packNDocs, PrlAppsConstants.SERVED_PARTY_OTHER));
+            bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(
+                caseData,
+                authorization,
+                packNDocs,
+                PrlAppsConstants.SERVED_PARTY_OTHER
+            ));
         }
     }
 
