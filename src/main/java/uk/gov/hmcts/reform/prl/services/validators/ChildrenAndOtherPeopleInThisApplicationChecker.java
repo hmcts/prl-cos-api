@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION;
@@ -46,7 +45,7 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
             List<ChildrenAndOtherPeopleRelation> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                    .toList();
             for (ChildrenAndOtherPeopleRelation c : children) {
                 log.debug("ChildrenAndOtherPeopleInThisApplicationChecker - "
                               + "validateMandatoryFieldsCompleted :{} ",validateMandatoryFieldsCompleted(c));
@@ -115,10 +114,6 @@ public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChec
         return (eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData) || eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData))
                 && (eventsChecker.hasMandatoryCompleted(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData)
                 || eventsChecker.isFinished(OTHER_PEOPLE_IN_THE_CASE_REVISED, caseData));
-    }
-
-    public String testingCoverage() {
-        return "test";
     }
 
 }

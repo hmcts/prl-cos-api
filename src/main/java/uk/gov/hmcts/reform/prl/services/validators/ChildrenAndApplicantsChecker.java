@@ -72,9 +72,4 @@ public class ChildrenAndApplicantsChecker implements EventChecker {
         }
         return TaskState.CANNOT_START_YET;
     }
-
-    public String test() {
-        return "test";
-    }
-
 }
