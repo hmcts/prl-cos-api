@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -254,11 +255,18 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(),CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
+        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
+            .servedParty("ApplicantSolicitor")
+            .build();
+        when(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(Mockito.anyString(),Mockito.any(),
+                                                                                        Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                        Mockito.anyString()))
+            .thenReturn(emailNotificationDetails);
         List<Element<EmailNotificationDetails>> elementList = serviceOfApplicationService
             .sendNotificationToApplicantSolicitor(caseData, authorization,
                                                   dynamicMultiSelectListApplicant.getValue(),
                                                   List.of(Document.builder().build()), "Applicant");
-        assertNotNull(elementList);
+        assertEquals("ApplicantSolicitor",elementList.get(0).getValue().getServedParty());
     }
 
     @Test
