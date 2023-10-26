@@ -12,7 +12,7 @@ import java.util.List;
 
 @FeignClient(name = "judicial-ref-data-api", url = "${judicialUsers.api.url}",configuration = FeignClientProperties.FeignClientConfiguration.class)
 public interface JudicialUserDetailsApi {
-    String CONTENT_TYPE_V2 = "application/vnd.jrd.v2+json";
+    String CONTENT_TYPE_V2 = "application/vnd.jrd.api+json;Version=2.0";
     String CONTENT_TYPE_VAL = "application/json";
     String ACCEPT = "accept";
     @PostMapping(value = "/refdata/judicial/users",
