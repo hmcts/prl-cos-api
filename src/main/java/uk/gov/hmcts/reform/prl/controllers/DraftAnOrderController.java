@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,23 +33,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class DraftAnOrderController {
-
-    private ObjectMapper objectMapper;
-
-
-    private DraftAnOrderService draftAnOrderService;
-
-
+    private final ObjectMapper objectMapper;
+    private final DraftAnOrderService draftAnOrderService;
     private final HearingDataService hearingDataService;
-
     private final HearingService hearingService;
-
     private final ManageOrderService manageOrderService;
-
-
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
