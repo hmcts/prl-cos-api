@@ -75,8 +75,10 @@ public class ReturnApplicationService {
             .append("Case name: " + caseData.getApplicantCaseName() + "\n")
             .append("Reference code: " + caseData.getId() + "\n\n")
             .append("Dear " + getLegalFullName(caseData) + ",\n\n")
-            .append("Thank you for your application."
-                        + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
+            .append("""
+                        Thank you for your application. Your application has been reviewed and is being returned for the following reasons:
+
+                        """);
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
@@ -98,10 +100,16 @@ public class ReturnApplicationService {
     public String getReturnMessageForTaskList(CaseData caseData) {
         StringBuilder returnMsgStr = new StringBuilder();
         returnMsgStr.append("                            \n\n");
-        returnMsgStr.append("<div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!"
-                                + "</span><strong class='govuk-warning-text__text'>Application has been returned</strong></div>" + "\n\n");
+        returnMsgStr.append("""
+                                <div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!</span>
+                                <strong class='govuk-warning-text__text'>Application has been returned</strong></div>
 
-        returnMsgStr.append("Your application has been  returned for the following reasons:" + "\n\n");
+                                """);
+
+        returnMsgStr.append("""
+                                Your application has been returned for the following reasons:
+
+                                """);
 
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
@@ -116,8 +124,9 @@ public class ReturnApplicationService {
             }
         }
 
-        returnMsgStr.append("Resolve these concerns and resend your application."
-                                + "You have been emailed the full details of your application return.");
+        returnMsgStr.append("""
+                                Resolve these concerns and resend your application.
+                                You have been emailed the full details of your application return.""");
 
         return returnMsgStr.toString();
 
