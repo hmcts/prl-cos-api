@@ -103,7 +103,7 @@ public class CafcassUploadDocService {
                        .build())
             .data(caseData).build();
 
-        CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
+        coreCaseDataApi.submitEventForCaseWorker(
             authorisation,
             authTokenGenerator.generate(),
             idamClient.getUserInfo(authorisation).getUid(),
