@@ -690,3 +690,7 @@ bootWithCCD {
     }
   }
 }
+
+test {
+  useJUnitPlatform()
+}
