@@ -47,7 +47,7 @@ public class AttendingTheHearingMapper {
         }
         List<InterpreterNeed> interpreterNeedsList = interpreterNeeds.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return interpreterNeedsList.stream().map(interpreterNeed -> new NullAwareJsonObjectBuilder()
             .add("name", interpreterNeed.getName())
             .add("party", interpreterNeed.getParty().isEmpty() ? null : interpreterNeed.getParty().stream()
@@ -64,7 +64,7 @@ public class AttendingTheHearingMapper {
         }
         List<WelshNeed> welshNeedsList = welshNeeds.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return welshNeedsList.stream().map(welshNeed -> new NullAwareJsonObjectBuilder()
             .add("whoNeedsWelsh", welshNeed.getWhoNeedsWelsh())
             .add(
