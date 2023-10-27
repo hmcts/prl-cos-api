@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.Appointment;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
@@ -113,7 +114,9 @@ public class AllocatedJudgeServiceTest {
         String[] personalCodes = new String[3];
         personalCodes[0] = "123456";
         List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
-        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname").build());
+        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname")
+                                .appointments(List.of(Appointment.builder().appointment("Circuit Judge").build()))
+                                .build());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("isJudgeOrLegalAdviser", AllocatedJudgeTypeEnum.judge);
         stringObjectMap.put("judgeNameAndEmail", JudicialUser.builder().idamId("123").personalCode("123456").build());
@@ -126,6 +129,6 @@ public class AllocatedJudgeServiceTest {
         assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
         assertEquals("test@Email.com",actualResponse.getJudgeEmail());
         assertEquals("testSurname",actualResponse.getJudgeName());
-
+        assertEquals("Circuit Judge", actualResponse.getTierOfJudge());
     }
 }
