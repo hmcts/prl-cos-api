@@ -65,4 +65,17 @@ public class AllocatedJudgeDetailsGeneratorTest {
                 .tierOfJudge(EMPTY_STRING)
                 .build()).build());
     }
+
+    @Test
+    public void testGenerateWhenAllocatedJudgeIsNotProvided() {
+        CaseSummary caseSummary = generator.generate(CaseData.builder().courtName("Test Court").build());
+
+        assertThat(caseSummary).isEqualTo(CaseSummary.builder().allocatedJudgeDetails(
+            AllocatedJudge.builder()
+                .tierOfJudiciaryType(EMPTY_STRING)
+                .emailAddress(" ").lastName(" ")
+                .courtName("Test Court")
+                .tierOfJudge(EMPTY_STRING)
+                .build()).build());
+    }
 }
