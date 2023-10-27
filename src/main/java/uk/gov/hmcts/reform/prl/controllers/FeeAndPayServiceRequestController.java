@@ -45,8 +45,10 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     public static final String CONFIRMATION_BODY_PREFIX_HELP_WITH_FEES = """
         ### What happens next
 
+
         You will receive a confirmation email.
         If the email does not appear in your inbox, check your junk or spam folder.
+
 
         The court will review your help with fees application and tell you what happens next.
         """;
