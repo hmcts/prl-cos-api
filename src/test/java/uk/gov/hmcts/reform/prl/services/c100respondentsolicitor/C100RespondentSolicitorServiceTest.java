@@ -1,16 +1,16 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
@@ -75,7 +74,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DR
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
 public class C100RespondentSolicitorServiceTest {
 
     @InjectMocks
@@ -122,7 +121,7 @@ public class C100RespondentSolicitorServiceTest {
 
     CallbackRequest callbackRequest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
 
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
@@ -519,8 +518,6 @@ public class C100RespondentSolicitorServiceTest {
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
         callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -529,19 +526,11 @@ public class C100RespondentSolicitorServiceTest {
                              .build())
             .eventId("SolicitorA")
             .build();
-        when(confidentialDetailsMapper.mapConfidentialData(
-            Mockito.any(CaseData.class),
-            Mockito.anyBoolean()
-        )).thenReturn(caseData);
-        when(applicationsTabService.getRespondentsTable(caseData)).thenReturn(List.of(Element.<Respondent>builder().build()));
-        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
-            Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
-        when(systemUserService.getSysUserToken()).thenReturn("");
     }
 
     @Test
-    public void populateAboutToStartCaseDataResSolConsentingToApplicationTest() {
-
+    void populateAboutToStartCaseDataResSolConsentingToApplicationTest() {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
             callbackRequest
@@ -551,7 +540,8 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataForResSolKeepDetailsPrivateTest() {
+    void populateAboutToStartCaseDataForResSolKeepDetailsPrivateTest() {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -562,8 +552,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataForResSolConfirmOrEditContactDetailsTest() {
+    void populateAboutToStartCaseDataForResSolConfirmOrEditContactDetailsTest() {
 
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConfirmOrEditContactDetailsA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -574,8 +565,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataForResSolAttendingTheCourtTest() {
+    void populateAboutToStartCaseDataForResSolAttendingTheCourtTest() {
 
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolAttendingTheCourtA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -586,8 +578,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataForResSolMiamTest() {
+    void populateAboutToStartCaseDataForResSolMiamTest() {
 
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolMiamA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -598,8 +591,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataForResSolCurrentOrPreviousProceedingsTest() {
+    void populateAboutToStartCaseDataForResSolCurrentOrPreviousProceedingsTest() {
 
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolCurrentOrPreviousProceedingsA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -609,8 +603,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataForResSolAllegationsOfHarmTest() {
+    void populateAboutToStartCaseDataForResSolAllegationsOfHarmTest() {
 
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolAllegationsOfHarmA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -620,7 +615,8 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataForResSolInternationalElementTest() {
+    void populateAboutToStartCaseDataForResSolInternationalElementTest() {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolInternationalElementA");
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
             callbackRequest
@@ -629,7 +625,8 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataForResSolAbilityToParticipateTest() {
+    void populateAboutToStartCaseDataForResSolAbilityToParticipateTest() {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
         Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
             callbackRequest
@@ -638,7 +635,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToStartCaseDataForViewResponseDocumentTest() {
+    void populateAboutToStartCaseDataForViewResponseDocumentTest() {
 
         callbackRequest.setEventId("c100ResSolViewResponseDraftDocument");
 
@@ -649,7 +646,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataSolCurrentOrPreviousProceedingTest() {
+    void populateAboutToSubmitCaseDataSolCurrentOrPreviousProceedingTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -670,7 +667,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void validateActiveRespondentResponse() throws Exception {
+    void validateActiveRespondentResponse() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -703,7 +700,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void validateActiveRespondentResponseElseCase() throws Exception {
+    void validateActiveRespondentResponseElseCase() throws Exception {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -730,25 +727,14 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentTest() throws Exception {
+    void submitC7ResponseForActiveRespondentTest() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
 
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("c100RespC8Template")
-            .build();
-
-        when(documentGenService.generateSingleDocument(Mockito.anyString(),
-                                                       Mockito.any(CaseData.class),
-                                                       Mockito.anyString(),
-                                                       Mockito.anyBoolean(),
-                                                       Mockito.any(HashMap.class))).thenReturn(document);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         Document document2 = Document.builder()
             .documentUrl(generatedDocumentInfo.getUrl())
@@ -773,7 +759,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentTestB() throws Exception {
+    void submitC7ResponseForActiveRespondentTestB() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -803,7 +789,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentTestC() throws Exception {
+    void submitC7ResponseForActiveRespondentTestC() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -833,7 +819,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentTestD() throws Exception {
+    void submitC7ResponseForActiveRespondentTestD() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -863,7 +849,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void submitC7ResponseForActiveRespondentTestE() throws Exception {
+    void submitC7ResponseForActiveRespondentTestE() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -897,9 +883,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolConsentingToApplicationATest() throws Exception {
+    void populateAboutToSubmitCaseDataForC100ResSolConsentingToApplicationATest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
 
@@ -912,9 +898,13 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
+    void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(confidentialDetailsMapper.mapConfidentialData(
+                Mockito.any(CaseData.class),
+                Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolKeepDetailsPrivateA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -925,9 +915,13 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolConfirmOrEditContactDetailsTest() throws Exception {
+    void populateAboutToSubmitCaseDataForC100ResSolConfirmOrEditContactDetailsTest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(confidentialDetailsMapper.mapConfidentialData(
+                Mockito.any(CaseData.class),
+                Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolConfirmOrEditContactDetailsA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -938,9 +932,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolAttendingTheCourtTest() throws Exception {
+    void populateAboutToSubmitCaseDataForC100ResSolAttendingTheCourtTest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolAttendingTheCourtA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -952,9 +946,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForc100ResSolMiamTest() throws Exception {
+    void populateAboutToSubmitCaseDataForc100ResSolMiamTest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolMiamA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -966,9 +960,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsTest() throws Exception {
+    void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsTest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolCurrentOrPreviousProceedingsA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -980,9 +974,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolAllegationsOfHarmTest() throws Exception {
+    void populateAboutToSubmitCaseDataForC100ResSolAllegationsOfHarmTest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolAllegationsOfHarmA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -994,9 +988,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolInternationalElementTest() throws Exception {
+    void populateAboutToSubmitCaseDataForC100ResSolInternationalElementTest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolInternationalElementA");
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -1008,9 +1002,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataForC100ResSolAbilityToParticipateTest() throws Exception {
+    void populateAboutToSubmitCaseDataForC100ResSolAbilityToParticipateTest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         callbackRequest.setEventId("c100ResSolAbilityToParticipateA");
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
             callbackRequest
@@ -1020,16 +1014,39 @@ public class C100RespondentSolicitorServiceTest {
 
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"c100ResSolConsentingToApplicationA"})
+    void populateAboutToStartCaseDataConsentToApplicationEventAppA(String event) {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        List<String> errorList = new ArrayList<>();
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .eventId(event)
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                        .id(123L)
+                        .data(stringObjectMap)
+                        .build())
+                .build();
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
+                callbackRequest
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
 
     @ParameterizedTest
-    @ValueSource(strings = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
+    @ValueSource(strings = {"c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
         "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
         "c100ResSolInternationalElement", "c100ResSolAbilityToParticipate"})
     void populateAboutToStartCaseDataConsentToApplicationEvent(String event) {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         List<String> errorList = new ArrayList<>();
 
@@ -1050,7 +1067,8 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testC7DraftDocument() throws Exception {
+    void testC7DraftDocument() throws Exception {
+
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1069,10 +1087,10 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(documentGenService.generateSingleDocument(
-            authToken,
-            caseData,
-            SOLICITOR_C7_DRAFT_DOCUMENT,
-            false
+                authToken,
+                caseData,
+                SOLICITOR_C7_DRAFT_DOCUMENT,
+                false
         )).thenReturn(document);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1131,7 +1149,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testC7DraftDocumentNoDxNumber() throws Exception {
+    void testC7DraftDocumentNoDxNumber() throws Exception {
 
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1200,30 +1218,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testPopulateDraftDocumentForElseConditions() throws Exception {
-
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("Draft_C7_response.pdf")
-            .build();
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(documentGenService.generateSingleDocument(
-            authToken,
-            caseData,
-            SOLICITOR_C7_DRAFT_DOCUMENT,
-            false
-        )).thenReturn(document);
+    void testPopulateDraftDocumentForElseConditions() throws Exception {
 
         respondent.setIsPhoneNumberConfidential(No);
         respondent.setIsEmailAddressConfidential(No);
@@ -1242,24 +1237,6 @@ public class C100RespondentSolicitorServiceTest {
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-        document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("Draft_C1A_allegation_of_harm.pdf")
-            .build();
-        when(documentGenService.generateSingleDocument(
-            authToken,
-            caseData,
-            SOLICITOR_C1A_DRAFT_DOCUMENT,
-            false
-        )).thenReturn(document);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1277,8 +1254,9 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testGenerateConfidentialMap() {
+    void testGenerateConfidentialMap() {
 
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> response = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
             callbackRequest
         );
@@ -1288,7 +1266,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testsubmittedC7Response() {
+    void testsubmittedC7Response() {
         SubmittedCallbackResponse response = respondentSolicitorService.submittedC7Response(
             caseData
         );
@@ -1296,7 +1274,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testsubmittedC7ResponseWithCourtName() {
+    void testsubmittedC7ResponseWithCourtName() {
         caseData = caseData.toBuilder().courtName("test").build();
         SubmittedCallbackResponse response = respondentSolicitorService.submittedC7Response(
             caseData
