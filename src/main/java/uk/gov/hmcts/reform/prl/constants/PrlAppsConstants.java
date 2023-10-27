@@ -748,6 +748,8 @@ public class PrlAppsConstants {
     public static final String CAFCASS_ROLE = "caseworker-privatelaw-externaluser-viewonly";
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
+
+    public static final String BULK_SCAN = "Bulk scan";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
     public static final String LONDON_TIME_ZONE = "Europe/London";
 
@@ -793,4 +795,10 @@ public class PrlAppsConstants {
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
 
+
+    public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+    public static final String AM_LOWER_CASE = "am";
+    public static final String AM_UPPER_CASE = "AM";
+    public static final String PM_LOWER_CASE = "pm";
+    public static final String PM_UPPER_CASE = "PM";
 }
