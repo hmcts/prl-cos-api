@@ -630,7 +630,6 @@ public class UploadAdditionalApplicationService {
                 confirmationBody = """
                     ### What happens next
 
-
                     The court will review the document and will be in touch to let you
                     know what happens next.
                     """;
@@ -647,7 +646,6 @@ public class UploadAdditionalApplicationService {
 
 
                 ### What happens next
-
 
                 The court will review your documents and will be in touch to let you know what happens next.
                 """;
