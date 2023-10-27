@@ -75,7 +75,7 @@ public class ManageDocumentsService {
             .build();
 
         DynamicList s = getCategoriesSubcategories(authorization, String.valueOf(caseData.getId()));
-        log.info("DDDDDD  {}",s);
+        log.info("DDDDDDDDDDD  {}",s);
 
         return caseData.toBuilder()
             .manageDocuments(Arrays.asList(element(manageDocuments)))
