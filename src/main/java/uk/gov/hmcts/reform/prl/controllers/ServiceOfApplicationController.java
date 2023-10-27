@@ -51,38 +51,19 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RestController
 @RequestMapping("/service-of-application")
 @Slf4j
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class ServiceOfApplicationController {
-
-
     private final ServiceOfApplicationService serviceOfApplicationService;
-
-
     private final ObjectMapper objectMapper;
-
-
     private final AllTabServiceImpl allTabService;
-
-
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
-
-
     private final LaunchDarklyClient launchDarklyClient;
-
-
     private final CoreCaseDataService coreCaseDataService;
-
-    private final  Map<String, Object> caseDataUpdated;
-
-
+    private Map<String, Object> caseDataUpdated;
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
-
-
     private final AuthorisationService authorisationService;
-
-
-    WelshCourtEmail welshCourtEmail;
+    private final WelshCourtEmail welshCourtEmail;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,18 +30,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @RestController
 @RequestMapping("/update-res-task-list")
-
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 public class C100RespondentSolicitorTaskListController extends AbstractCallbackController {
-
-
     private final AuthorisationService authorisationService;
-
-    protected C100RespondentSolicitorTaskListController(ObjectMapper objectMapper, EventService eventPublisher,
-                                                        AuthorisationService authorisationService) {
-        super(objectMapper, eventPublisher);
-        this.authorisationService = authorisationService;
-    }
 
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(

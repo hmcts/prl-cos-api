@@ -10,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,14 +36,10 @@ import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTe
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class ReviewDocumentsController {
-
-
-    private ObjectMapper objectMapper;
-
-
-    private ReviewDocumentService reviewDocumentService;
+    private final ObjectMapper objectMapper;
+    private final ReviewDocumentService reviewDocumentService;
 
     @PostMapping(path = "/review-documents/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
