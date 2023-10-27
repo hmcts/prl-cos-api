@@ -1335,6 +1335,7 @@ public class ManageOrderService {
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+            log.info("order collection00: {}", orders);
             log.info("order collection id's {}", orders.stream().map(a -> a.getId()).collect(Collectors.toList()));
             log.info("***** selected order Ids******** {}", selectedOrderIds);
             orders.stream()
