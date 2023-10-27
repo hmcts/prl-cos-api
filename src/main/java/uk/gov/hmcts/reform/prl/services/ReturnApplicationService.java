@@ -107,9 +107,9 @@ public class ReturnApplicationService {
                                 """);
 
         returnMsgStr.append("""
-        Your application has been returned for the following reasons:
+                                Your application has been returned for the following reasons:
 
-            """);
+                                """);
 
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
@@ -125,9 +125,8 @@ public class ReturnApplicationService {
         }
 
         returnMsgStr.append("""
-        Resolve these concerns and resend your application.
-        You have been emailed the full details of your application return.
-            """);
+                                Resolve these concerns and resend your application.
+                                You have been emailed the full details of your application return.""");
 
         return returnMsgStr.toString();
 

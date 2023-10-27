@@ -114,8 +114,7 @@ public class C100RespondentSolicitorService {
         ### Your response is now submitted.
 
 
-        You can contact your local court at\s
-        """;
+        You can contact your local court at\s""";
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

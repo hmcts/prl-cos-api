@@ -49,8 +49,7 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         If the email does not appear in your inbox, check your junk or spam folder.
 
 
-        The court will review your help with fees application and tell you what happens next.
-        """;
+        The court will review your help with fees application and tell you what happens next.""";
     public static final String HWF_NO_EMAIL_CONTENT = """
         ### What happens next
 
