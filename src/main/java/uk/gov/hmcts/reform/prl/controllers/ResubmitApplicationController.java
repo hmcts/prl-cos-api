@@ -220,8 +220,6 @@ public class ResubmitApplicationController {
                 ResubmitApplicationController::getPreviousState).findFirst();
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
 
-            UserDetails userDetails = userService.getUserDetails(authorisation);
-
             if (previousStates.isPresent() && (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get()))) {
                 caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
                 caseDataUpdated.put(STATE_FIELD, State.SUBMITTED_PAID);
