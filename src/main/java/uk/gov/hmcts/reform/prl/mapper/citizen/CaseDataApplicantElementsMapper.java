@@ -44,7 +44,7 @@ public class CaseDataApplicantElementsMapper {
     private static final String TELEPHONE_FIELD = "telephone";
     private static final String I_DONT_KNOW = "I dont know";
 
-    public static void updateApplicantElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateApplicantElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                           C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
                                                           C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
 

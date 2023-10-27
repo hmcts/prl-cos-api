@@ -34,7 +34,7 @@ public class CaseDataMiamElementsMapper {
     private CaseDataMiamElementsMapper() {
     }
 
-    public static void updateMiamElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateMiamElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                      C100RebuildMiamElements c100RebuildMiamElements) {
 
         List<MiamPreviousAttendanceChecklistEnum> previousAttendanceChecklistEnums =
