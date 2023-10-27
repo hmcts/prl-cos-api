@@ -48,13 +48,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -187,11 +188,11 @@ public class ManageOrdersController {
                 CaseData.class
             );
 
-            String caseType = CaseUtils.getCaseTypeOfApplication(caseData);
             String selectedOrder = caseData.getCreateSelectOrderOptions().getDisplayedValue();
             List<String> errorList = new ArrayList<>();
 
-            if (Objects.equals(caseType, "C100") && (!CreateSelectOrderOptionsEnum.blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && (!CreateSelectOrderOptionsEnum
+                    .blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equals(selectedOrder)
@@ -201,7 +202,8 @@ public class ManageOrdersController {
                     && !CreateSelectOrderOptionsEnum.directionOnIssue.getDisplayedValue().equals(selectedOrder))) {
                 errorList.add(ORDER_NOT_AVAILABLE_C100);
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-            } else if (Objects.equals(caseType, "FL401") && (!CreateSelectOrderOptionsEnum.nonMolestation.getDisplayedValue().equals(selectedOrder)
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && (!CreateSelectOrderOptionsEnum
+                    .nonMolestation.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.occupation.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.amendDischargedVaried.getDisplayedValue().equals(selectedOrder)
                     && !CreateSelectOrderOptionsEnum.blank.getDisplayedValue().equals(selectedOrder)
