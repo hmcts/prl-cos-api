@@ -23,7 +23,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
@@ -36,7 +35,7 @@ public class CaseDataOtherPersonsElementsMapper {
     private CaseDataOtherPersonsElementsMapper() {
     }
 
-    public static void updateOtherPersonDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateOtherPersonDetailsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                                    C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements,
                                                                    C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         caseDataBuilder
@@ -55,7 +54,7 @@ public class CaseDataOtherPersonsElementsMapper {
 
         return nonNull(otherPersonDetailsList) ? otherPersonDetailsList.stream()
                 .map(otherPersonDetail -> Element.<PartyDetails>builder().value(buildPartyDetails(otherPersonDetail)).build())
-                .collect(Collectors.toList()) : emptyList();
+                .toList() : emptyList();
     }
 
     private static PartyDetails buildPartyDetails(OtherPersonDetail otherPersonDetail) {
