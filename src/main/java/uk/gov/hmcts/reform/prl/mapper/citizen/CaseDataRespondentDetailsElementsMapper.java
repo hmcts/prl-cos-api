@@ -33,7 +33,7 @@ public class CaseDataRespondentDetailsElementsMapper {
     private CaseDataRespondentDetailsElementsMapper() {
     }
 
-    public static void updateRespondentDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateRespondentDetailsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                                   C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements,
                                                                   C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         caseDataBuilder

@@ -23,7 +23,7 @@ public class CaseDataOtherChildrenDetailsElementsMapper {
     private CaseDataOtherChildrenDetailsElementsMapper() {
     }
 
-    public static void updateOtherChildDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateOtherChildDetailsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                                   C100RebuildOtherChildrenDetailsElements c100RebuildOtherChildrenDetailsElements) {
 
         if (PrlAppsConstants.YES.equals(c100RebuildOtherChildrenDetailsElements.getHasOtherChildren())) {
