@@ -60,7 +60,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
     private static final String CLOSE_BRACKET = ")";
     private static final String COLON = ": ";
 
-    public static void updateReasonableAdjustmentsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateReasonableAdjustmentsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                       C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements) {
         List<String> specialArrangementList = Arrays.stream(c100RebuildReasonableAdjustmentsElements.getSpecialArrangements())
                 .collect(Collectors.toList());
@@ -112,7 +112,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                     .party(List.of(applicant)).otherAssistance(needInterpreterInCertainLanguageDetails).build();
             return List.of(Element.<InterpreterNeed>builder().value(interpreterNeed).build());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private static YesOrNo buildInterpreterNeeded(List<String> languageList) {

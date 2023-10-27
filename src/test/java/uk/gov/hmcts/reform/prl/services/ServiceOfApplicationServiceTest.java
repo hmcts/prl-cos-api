@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -25,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfirmRecipients;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -235,10 +236,6 @@ public class ServiceOfApplicationServiceTest {
             .listItems(List.of(dynamicMultiselectListElementApplicant))
             .value(List.of(dynamicMultiselectListElementApplicant))
             .build();
-
-        ConfirmRecipients confirmRecipients = ConfirmRecipients.builder()
-            .build();
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -249,14 +246,6 @@ public class ServiceOfApplicationServiceTest {
             .applicants(List.of(applicant))
             .respondents(List.of(respondent))
             .build();
-
-
-
-        // Map<String,Object> casedata = new HashMap<>();
-        //casedata.put("caseTypeOfApplication","C100");
-
-
-        //when(caseInviteManager.generatePinAndSendNotificationEmail(Mockito.any(CaseData.class))).thenReturn(caseData);
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails
             .builder()
@@ -266,9 +255,18 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(objectMapper.convertValue(caseDetails.getData(),CaseData.class)).thenReturn(caseData);
         when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-
-        //CaseData caseData1 = serviceOfApplicationService.sendNotificationToApplicantSolicitor(caseDetails, authorization);
-        //verify(serviceOfApplicationEmailService, never()).sendEmailC100(Mockito.any(CaseDetails.class));
+        EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
+            .servedParty("ApplicantSolicitor")
+            .build();
+        when(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(Mockito.anyString(),Mockito.any(),
+                                                                                        Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                        Mockito.anyString()))
+            .thenReturn(emailNotificationDetails);
+        List<Element<EmailNotificationDetails>> elementList = serviceOfApplicationService
+            .sendNotificationToApplicantSolicitor(caseData, authorization,
+                                                  dynamicMultiSelectListApplicant.getValue(),
+                                                  List.of(Document.builder().build()), "Applicant");
+        assertEquals("ApplicantSolicitor",elementList.get(0).getValue().getServedParty());
     }
 
     @Test
