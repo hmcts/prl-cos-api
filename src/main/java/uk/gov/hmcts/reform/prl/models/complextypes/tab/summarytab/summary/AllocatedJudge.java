@@ -15,4 +15,5 @@ public class AllocatedJudge {
     private final String courtName;
     private final YesOrNo isSpecificJudgeOrLegalAdviserNeeded;
     private final AllocatedJudgeTypeEnum isJudgeOrLegalAdviser;
+    private final String tierOfJudge;
 }
