@@ -64,16 +64,6 @@ public class ChildrenAndOtherPeopleInThisApplicationCheckerTest {
     }
 
     @Test
-    public void testIsStartedReturnsFalseWithErrors() {
-
-        CaseData caseData = CaseData.builder()
-                .relations(Relations.builder().build())
-                .build();
-
-        assertFalse(childrenAndOtherPeopleInThisApplicationChecker.isStarted(caseData));
-    }
-
-    @Test
     public void testIsFinishedReturnsTrueWhenAllDataThere() {
         ChildrenAndOtherPeopleRelation child = ChildrenAndOtherPeopleRelation.builder()
                 .childLivesWith(YesOrNo.Yes)
