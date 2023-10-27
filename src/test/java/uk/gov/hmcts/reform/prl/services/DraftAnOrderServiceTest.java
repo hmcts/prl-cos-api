@@ -2923,7 +2923,31 @@ public class DraftAnOrderServiceTest {
             caseData,
             "testevent"
         );
-
         assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
+    }
+
+    @Test
+    public void testHandleDocumentGenerationForaDraftOrder() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(HearingData.builder().build())))
+                              .build())
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(hearingService.getHearings(Mockito.anyString(), Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .eventId(Event.DRAFT_AN_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        Map<String, Object> caseDataMap = draftAnOrderService.handleDocumentGenerationForaDraftOrder(
+            "test token", callbackRequest);
+
+        assertTrue(caseDataMap.containsKey("ordersHearingDetails"));
     }
 }
