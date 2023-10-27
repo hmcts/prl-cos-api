@@ -107,7 +107,10 @@ public class UpdatePartyDetailsService {
                 setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
             }
         }
-
+        log.info("CaseData Respondents " + caseData.getRespondents());
+        log.info("CaseData RespondentsFL401 " + caseData.getRespondentsFL401());
+        log.info("Map Respondents " + updatedCaseData.get("respondents"));
+        log.info("Map RespondentsFL401 " + updatedCaseData.get("respondentsFL401"));
         return updatedCaseData;
     }
 
