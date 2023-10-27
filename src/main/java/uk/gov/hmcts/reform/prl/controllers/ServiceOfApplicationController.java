@@ -89,8 +89,7 @@ public class ServiceOfApplicationController {
     public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
         ### What happens next
 
-        The document will be reviewed for confidential details
-        """;
+        The document will be reviewed for confidential details""";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")

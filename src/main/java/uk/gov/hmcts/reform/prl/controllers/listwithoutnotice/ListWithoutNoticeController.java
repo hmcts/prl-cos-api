@@ -85,8 +85,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
 
         <ul><li>Listing directions  have been sent as a task to their local court listing.</li>
-        <li>Listing directions have been saved in the notes tab and are available to view at any time.</li></ul>
-        """;
+        <li>Listing directions have been saved in the notes tab and are available to view at any time.</li></ul>""";
 
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

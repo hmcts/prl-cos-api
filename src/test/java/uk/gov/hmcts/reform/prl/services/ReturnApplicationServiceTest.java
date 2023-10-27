@@ -213,8 +213,7 @@ public class ReturnApplicationServiceTest {
 
         returnMsgStr.append("""
         Resolve these concerns and resend your application.
-        You have been emailed the full details of your application return.
-            """);
+        You have been emailed the full details of your application return.""");
 
 
         assertEquals(returnMsgStr.toString(), returnApplicationService.getReturnMessageForTaskList(casedata));
@@ -251,8 +250,7 @@ public class ReturnApplicationServiceTest {
 
         returnMsgStr.append("""
         Resolve these concerns and resend your application.
-        You have been emailed the full details of your application return.
-            """);
+        You have been emailed the full details of your application return.""");
 
 
         assertEquals(returnMsgStr.toString(), returnApplicationService.getReturnMessageForTaskList(caseDataFl401));
