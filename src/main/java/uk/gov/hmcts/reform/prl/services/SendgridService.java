@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.NEW_ORDER_TITLE
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -53,7 +54,6 @@ public class SendgridService {
     public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
     public static final String MAIL_SEND = "mail/send";
     public static final String CASE_NAME = "caseName";
-    public static final String CASE_NUMBER = "caseNumber";
     @Value("${send-grid.api-key}")
     private String apiKey;
 

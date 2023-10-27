@@ -74,6 +74,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDERS_NEED_TO_BE_SERVED;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
@@ -1370,7 +1371,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get(ORDERS_NEED_TO_BE_SERVED));
     }
 
     @Test
@@ -1421,7 +1422,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get(ORDERS_NEED_TO_BE_SERVED));
     }
 
     @Test
@@ -1472,7 +1473,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(YesOrNo.Yes,aboutToStartOrSubmitCallbackResponse.getData().get(ORDERS_NEED_TO_BE_SERVED));
     }
 
     @Test
@@ -1523,7 +1524,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(YesOrNo.No,aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(YesOrNo.No,aboutToStartOrSubmitCallbackResponse.getData().get(ORDERS_NEED_TO_BE_SERVED));
     }
 
     @Test
