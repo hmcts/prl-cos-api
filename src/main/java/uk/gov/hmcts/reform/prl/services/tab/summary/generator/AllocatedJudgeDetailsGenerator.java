@@ -29,12 +29,14 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
                     .tierOfJudiciaryType(getTierOfJudiciary(allocatedJudge))
                     .judgePersonalCode(allocatedJudge.getJudgePersonalCode()).isJudgeOrLegalAdviser(allocatedJudge.getIsJudgeOrLegalAdviser())
                     .isSpecificJudgeOrLegalAdviserNeeded(allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded())
+                    .tierOfJudge(null != allocatedJudge.getTierOfJudge() ? allocatedJudge.getTierOfJudge() : EMPTY_SPACE_STRING)
                     .build()).build();
         }
 
         return CaseSummary.builder().allocatedJudgeDetails(
             AllocatedJudge.builder().courtName(CommonUtils.getValue(caseData.getCourtName()))
-                .emailAddress(" ").tierOfJudiciaryType(" ").lastName(" ").build()).build();
+                .emailAddress(EMPTY_SPACE_STRING).tierOfJudiciaryType(EMPTY_SPACE_STRING).lastName(EMPTY_SPACE_STRING)
+                .tierOfJudge(EMPTY_SPACE_STRING).build()).build();
     }
 
     private String getTierOfJudiciary(uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge allocatedJudge) {
