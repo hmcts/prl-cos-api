@@ -23,7 +23,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RequestMapping("/callback/case-deletion")
 public class CaseDeletionController {
-
     private final AuthorisationService authorisationService;
 
     @PostMapping("/about-to-submit")
