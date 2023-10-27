@@ -630,7 +630,9 @@ public class UploadAdditionalApplicationService {
             if (Yes.equals(caseData.getHwfRequestedForAdditionalApplications())) {
                 confirmationHeader = "# Help with fees requested";
                 confirmationBody = """
-                    ### What happens next \n\nThe court will review the document and will be in touch to let you
+                    ### What happens next
+
+                    The court will review the document and will be in touch to let you
                     know what happens next.
                     """;
             } else {
@@ -643,7 +645,11 @@ public class UploadAdditionalApplicationService {
             confirmationHeader = "# Application submitted";
             confirmationBody = """
                 You will get updates from the court about the progress of your application.
-                \n\n### What happens next \n\nThe court will review your documents and will be in touch to let you know what happens next.
+
+
+                ### What happens next
+
+                The court will review your documents and will be in touch to let you know what happens next.
                 """;
         }
 
