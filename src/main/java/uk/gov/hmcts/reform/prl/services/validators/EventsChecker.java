@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -50,7 +49,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 
 @Getter
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class EventsChecker {
 
 
@@ -206,7 +205,7 @@ public class EventsChecker {
         return eventStatus.get(event).hasMandatoryCompleted(caseData);
     }
 
-    public TaskState getDefaultState(Event event,CaseData caseData) {
+    public TaskState getDefaultState(Event event, CaseData caseData) {
         return eventStatus.get(event).getDefaultTaskState(caseData);
     }
 
