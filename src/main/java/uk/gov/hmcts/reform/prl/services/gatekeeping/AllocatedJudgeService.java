@@ -48,12 +48,12 @@ public class AllocatedJudgeService {
             if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)) {
                 if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)))
                     && null != caseDataUpdated.get(JUDGE_NAME_EMAIL)) {
+                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
                     String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL));
                     List<JudicialUsersApiResponse> judgeDetails =
                         refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                             .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL))).build());
-                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
-                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
+                    log.info("Judicial user response {}", judgeDetails);
                     if (null != judgeDetails && !judgeDetails.isEmpty()) {
                         JudicialUsersApiResponse judgeDetail = judgeDetails.get(0);
                         allocatedJudgeBuilder.judgeName(judgeDetail.getSurname());
@@ -64,12 +64,13 @@ public class AllocatedJudgeService {
                                                               : null);
                     }
                 } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
-                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.legalAdviser));
                     allocatedJudgeBuilder.legalAdviserList(legalAdviserList);
                 }
+                allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
             }
         }
+        log.info("Allocated judge {}",  allocatedJudgeBuilder.build());
         return allocatedJudgeBuilder.build();
     }
 
