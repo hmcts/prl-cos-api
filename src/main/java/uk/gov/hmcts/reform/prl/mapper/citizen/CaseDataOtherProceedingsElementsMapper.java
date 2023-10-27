@@ -33,7 +33,7 @@ public class CaseDataOtherProceedingsElementsMapper {
     private CaseDataOtherProceedingsElementsMapper() {
     }
 
-    public static void updateOtherProceedingsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateOtherProceedingsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                                  C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements) {
         caseDataBuilder
                 .previousOrOngoingProceedingsForChildren(buildPreviousOrOngoingProceedingsForChildren(c100RebuildOtherProceedingsElements))

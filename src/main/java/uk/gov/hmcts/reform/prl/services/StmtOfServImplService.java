@@ -39,7 +39,7 @@ public class StmtOfServImplService {
         );
 
         Map<String, Object> caseDataUpdated = caseDetails.getData();
-        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient = new ArrayList();
+        List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient = new ArrayList<>();
         stmtOfServiceAddRecipient.add(element(StmtOfServiceAddRecipient.builder()
                                                   .respondentDynamicList(DynamicList.builder()
                                                                              .listItems(getRespondentsList(caseData))
