@@ -36,7 +36,7 @@ public class CaseDataOtherPersonsElementsMapper {
     private CaseDataOtherPersonsElementsMapper() {
     }
 
-    public static void updateOtherPersonDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateOtherPersonDetailsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                                    C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements,
                                                                    C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         caseDataBuilder
