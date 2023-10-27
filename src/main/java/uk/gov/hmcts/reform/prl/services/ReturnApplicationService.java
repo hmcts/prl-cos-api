@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
@@ -32,7 +31,7 @@ public class ReturnApplicationService {
                 List<PartyDetails> applicants = applicantsWrapped.get()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
 
                 String legalFirstName = applicants.get(0).getRepresentativeFirstName();
                 String legalLastName = applicants.get(0).getRepresentativeLastName();

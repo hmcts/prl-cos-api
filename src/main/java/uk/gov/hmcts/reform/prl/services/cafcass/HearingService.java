@@ -12,7 +12,6 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 
 @Service("cafcassHearingService")
@@ -57,15 +56,14 @@ public class HearingService {
 
                 final List<CaseHearing> caseHearings = hearingDetailsFromList.getCaseHearings();
 
-                final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).collect(Collectors.toList());
+                final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).toList();
 
                 final List<CaseHearing> hearings = caseHearings.stream()
                     .filter(hearing ->
                                 hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
                                     hearing.getHmcStatus()))
                     )
-                    .collect(
-                        Collectors.toList());
+                    .toList();
 
                 // if we find any hearing after filteration, change hmc status to null as it's not required in response.
                 if (hearings != null && !hearings.isEmpty()) {
@@ -82,15 +80,14 @@ public class HearingService {
 
             final List<CaseHearing> caseHearings = hearingDetails.getCaseHearings();
 
-            final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).collect(Collectors.toList());
+            final List<String> hearingStatuses = hearingStatusList.stream().map(String::trim).toList();
 
             final List<CaseHearing> hearings = caseHearings.stream()
                     .filter(hearing ->
                         hearingStatuses.stream().anyMatch(hearingStatus -> hearingStatus.equals(
                             hearing.getHmcStatus()))
                     )
-                .collect(
-                    Collectors.toList());
+                .toList();
 
 
             // if we find any hearing after filteration, change hmc status to null as it's not required in response.
