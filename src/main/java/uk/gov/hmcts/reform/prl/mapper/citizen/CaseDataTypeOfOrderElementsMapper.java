@@ -35,7 +35,7 @@ public class CaseDataTypeOfOrderElementsMapper {
     private static final String STOP_OTHER_DOING_SOMETHING = "stopOtherPeopleDoingSomething";
     private static final String RESOLVE_SPECIFIC_ISSUE = "resolveSpecificIssue";
 
-    public static void updateTypeOfOrderElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateTypeOfOrderElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                       C100RebuildCourtOrderElements c100RebuildCourtOrderElements) {
         caseDataBuilder
                 .ordersApplyingFor(buildOrdersApplyingFor(c100RebuildCourtOrderElements))

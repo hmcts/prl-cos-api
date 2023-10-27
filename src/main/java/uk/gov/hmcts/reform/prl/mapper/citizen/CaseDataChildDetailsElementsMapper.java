@@ -46,7 +46,7 @@ public class CaseDataChildDetailsElementsMapper {
     private static final String RELOCATE_CHILDREN_DIFFERENT_AREAA = "relocateChildrenDifferentUkAreaA";
     private static final String RELOCATE_CHILDREN_OUTSIDE_UKA = "relocateChildrenOutsideUkA";
 
-    public static void updateChildDetailsElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateChildDetailsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                              C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
         caseDataBuilder
             .newChildDetails(buildChildDetails(c100RebuildChildDetailsElements.getChildDetails()))
