@@ -535,6 +535,8 @@ public class ManageOrderEmailService {
                 ? caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList() : Collections.singletonList("");
 
+        log.info("selectedOrderIds: {}", selectedOrderIds);
+
         log.info("orderCollections: {}", orderCollection);
         orderCollection.stream().filter(orderDetailsElement ->
                         selectedOrderIds.contains(orderDetailsElement.getId().toString()))
