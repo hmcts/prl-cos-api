@@ -422,6 +422,7 @@ public class ManageOrderEmailService {
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            log.info("inside c100 order");
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
                     || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
                 log.info("** CA case email notifications***");
@@ -534,12 +535,15 @@ public class ManageOrderEmailService {
                 ? caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList() : Collections.singletonList("");
 
+        log.info("orderCollections: {}", orderCollection);
         orderCollection.stream().filter(orderDetailsElement ->
                         selectedOrderIds.contains(orderDetailsElement.getId().toString()))
                 .forEach(orderDetailsElement -> {
+                    log.info("inside order collection");
                     if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
                             && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
                             && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation()))) {
+                        log.info("inside first if statement");
                         List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue()
                                 .getServeOrderDetails().getPostalInformation();
                         postalInformation.forEach(organisationPostalInfo -> {
