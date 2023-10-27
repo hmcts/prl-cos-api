@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.prl.utils.TestResourceUtil;
 
 import java.io.IOException;
 
+import static org.junit.Assert.assertEquals;
+
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CafCassFilterTest {
     @Mock
@@ -30,5 +32,6 @@ public class CafCassFilterTest {
             CafCassResponse.class
         );
         cafCassFilter.filter(cafCassResponse);
+        assertEquals(cafCassResponse.getTotal(), cafCassResponse.getCases().size());
     }
 }
