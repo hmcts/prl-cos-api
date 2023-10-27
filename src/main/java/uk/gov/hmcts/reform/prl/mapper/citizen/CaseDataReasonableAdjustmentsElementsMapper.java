@@ -112,7 +112,7 @@ public class CaseDataReasonableAdjustmentsElementsMapper {
                     .party(List.of(applicant)).otherAssistance(needInterpreterInCertainLanguageDetails).build();
             return List.of(Element.<InterpreterNeed>builder().value(interpreterNeed).build());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private static YesOrNo buildInterpreterNeeded(List<String> languageList) {
