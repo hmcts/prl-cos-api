@@ -52,15 +52,11 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_C100;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
@@ -69,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.cleanUpSelectedManageOrderOptions;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
@@ -188,33 +185,11 @@ public class ManageOrdersController {
                 CaseData.class
             );
 
-            String selectedOrder = caseData.getCreateSelectOrderOptions().getDisplayedValue();
             List<String> errorList = new ArrayList<>();
-
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && (!CreateSelectOrderOptionsEnum
-                    .blankOrderOrDirections.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.specialGuardianShip.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.directionOnIssue.getDisplayedValue().equals(selectedOrder))) {
-                errorList.add(ORDER_NOT_AVAILABLE_C100);
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
-            } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)) && (!CreateSelectOrderOptionsEnum
-                    .nonMolestation.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.occupation.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.amendDischargedVaried.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.blank.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.powerOfArrest.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.generalForm.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.noticeOfProceedings.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.standardDirectionsOrder.getDisplayedValue().equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.directionOnIssue.getDisplayedValue().equals(selectedOrder))) {
-                errorList.add(ORDER_NOT_AVAILABLE_FL401);
+            if (getErrorsForOrdersProhibitedForC100FL401(caseData, caseData.getCreateSelectOrderOptions(), errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest))
                 .build();
