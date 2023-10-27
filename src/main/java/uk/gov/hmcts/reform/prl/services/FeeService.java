@@ -216,7 +216,7 @@ public class FeeService {
         } else {
             if (NO.equals(notice)) {
                 return C2_WITHOUT_NOTICE;
-            } else  if (YES.equals(notice)) {
+            } else if (YES.equals(notice)) {
                 return C2_WITH_NOTICE;
             } else {
                 return null;
