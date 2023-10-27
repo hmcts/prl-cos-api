@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.prl.controllers.cafcass;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.exception.cafcass.exceptionhandlers.ApiError;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CaseDataService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -31,23 +30,12 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 
 @Slf4j
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/cases")
 public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
-
-
     private  final CaseDataService caseDataService;
-
-
     private final AuthorisationService authorisationService;
-
-    public CafCassController(ObjectMapper objectMapper, EventService eventPublisher,
-                             CaseDataService caseDataService, AuthorisationService authorisationService) {
-        super(objectMapper, eventPublisher);
-        this.caseDataService = caseDataService;
-        this.authorisationService = authorisationService;
-
-    }
 
     @GetMapping(path = "/searchCases", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "search case data")

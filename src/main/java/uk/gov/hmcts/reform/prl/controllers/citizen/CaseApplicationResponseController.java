@@ -52,26 +52,13 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseApplicationResponseController {
-
-
     private final DocumentGenService documentGenService;
-
-
     private final CoreCaseDataApi coreCaseDataApi;
-
-
     private final ObjectMapper objectMapper;
-
-
     private final CaseService caseService;
-
-
     private final CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
-
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
-
     private final IdamClient idamClient;
-
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
     @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")

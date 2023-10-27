@@ -28,19 +28,13 @@ import static org.springframework.http.ResponseEntity.status;
 import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATION;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFCASS_USER_ROLE;
 
-
 @Slf4j
 @RestController
 @RequestMapping("/cases")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassDocumentManagementController {
-
     private final CafcassCdamService cafcassCdamService;
-
-
     private final AuthorisationService authorisationService;
-
-
     private final SystemUserService systemUserService;
 
     @GetMapping(path = "/documents/{documentId}/binary")

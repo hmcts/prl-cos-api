@@ -73,35 +73,16 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseDocumentController {
-
-
     private final DocumentGenService documentGenService;
-
-
     private final UploadDocumentService uploadService;
-
-
     private final AuthorisationService authorisationService;
-
-
     private final CoreCaseDataApi coreCaseDataApi;
-
-
     private final ObjectMapper objectMapper;
-
-
     private final AuthTokenGenerator authTokenGenerator;
-
-
     private final IdamClient idamClient;
-
-
     private final CaseService caseService;
-
-    Integer fileIndex;
-
-
     private final EmailService emailService;
+    Integer fileIndex;
 
     @Value("${citizen.url}")
     private String dashboardUrl;
