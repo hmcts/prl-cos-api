@@ -18,6 +18,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.LINK_CITIZEN;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -67,9 +68,16 @@ public class CcdCaseRepositoryTest {
 
     @Test
     public void testUpdateCase() {
-        when(ccdCaseApi.updateCase(authToken, caseId, caseData, null)).thenReturn(CaseDetails.builder().build());
-        CaseDetails caseDetails = ccdCaseRepository.updateCase(authToken, caseId, caseData, null);
+        when(ccdCaseApi.updateCase(authToken, caseId, caseData, CITIZEN_CASE_UPDATE)).thenReturn(CaseDetails.builder().build());
+        CaseDetails caseDetails = ccdCaseRepository.updateCase(authToken, caseId, caseData, CITIZEN_CASE_UPDATE);
         assertEquals(emptyCaseDetails, caseDetails);
+    }
+
+    @Test
+    public void testUpdateCaseCaseEventNull() {
+        when(ccdCaseApi.updateCase(authToken, caseId, caseData, null)).thenReturn(null);
+        CaseDetails caseDetails = ccdCaseRepository.updateCase(authToken, caseId, caseData, null);
+        assertEquals(null, caseDetails);
     }
 
     @Test
