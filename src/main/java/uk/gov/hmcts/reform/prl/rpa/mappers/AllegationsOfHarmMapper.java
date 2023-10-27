@@ -194,7 +194,7 @@ public class AllegationsOfHarmMapper {
         }
         List<Behaviours> behavioursList = behaviours.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         return behavioursList.stream().map(behaviour -> new NullAwareJsonObjectBuilder()
             .add("behavioursNature", behaviour.getBehavioursNature())
             .add("abuseNatureDescription", behaviour.getAbuseNatureDescription())

@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -197,7 +196,7 @@ public class CourtFinderService {
         return c.getPersonWhoLivesWithChild()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList())
+            .toList()
             .get(0);
 
     }

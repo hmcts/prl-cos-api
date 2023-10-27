@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
@@ -83,7 +82,7 @@ public class TaskListService {
                 .event(event)
                 .state(getTaskState(caseData, event))
                 .build())
-            .collect(toList());
+            .toList();
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty) {
@@ -92,7 +91,7 @@ public class TaskListService {
                 .event(event)
                 .state(getRespondentTaskState(event, respondingParty))
                 .build())
-            .collect(toList());
+            .toList();
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {

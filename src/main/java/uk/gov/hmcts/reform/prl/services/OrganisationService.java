@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import javax.ws.rs.NotFoundException;
 
 import static java.util.Optional.ofNullable;
@@ -44,7 +43,7 @@ public class OrganisationService {
                 .map(eachItem -> Element.<PartyDetails>builder()
                     .value(getApplicantWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
-                .collect(Collectors.toList());
+                .toList();
             caseData = caseData.toBuilder()
                 .applicants(applicants)
                 .build();
@@ -63,7 +62,7 @@ public class OrganisationService {
                 .map(eachItem -> Element.<PartyDetails>builder()
                     .value(getRespondentWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
-                .collect(Collectors.toList());
+                .toList();
 
             caseData = caseData.toBuilder().respondents(respondents).build();
         }

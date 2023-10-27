@@ -34,7 +34,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -75,7 +74,7 @@ public class FL401SubmitApplicationController {
             caseDataUpdated.put("submitCountyCourtSelection", DynamicList.builder()
                 .listItems(locationRefDataService.getDaCourtLocations(authorisation).stream()
                                .sorted(Comparator.comparing(m -> m.getLabel(), Comparator.naturalOrder()))
-                               .collect(Collectors.toList()))
+                               .toList())
                 .build());
 
             return AboutToStartOrSubmitCallbackResponse.builder()
