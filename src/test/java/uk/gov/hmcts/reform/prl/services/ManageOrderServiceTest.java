@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -63,6 +64,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
@@ -102,10 +104,8 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrderServiceTest {
-
 
     @InjectMocks
     private ManageOrderService manageOrderService;
@@ -146,7 +146,11 @@ public class ManageOrderServiceTest {
     private LocalDateTime now;
     @Mock
     private HearingService hearingService;
+    @Mock
+    private HearingDataService hearingDataService;
 
+    @Mock
+    private RefDataUserService refDataUserService;
     public static final String authToken = "Bearer TestAuthToken";
 
     @Before
@@ -3274,5 +3278,190 @@ public class ManageOrderServiceTest {
 
         //Then
         assertNull(caseDataUpdated.get("additionalOrderDocuments"));
+    }
+
+
+    @Test
+    public void testAddOrderDetailsAndReturnReverseSortedListUploadOrder() throws Exception {
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        when(userService.getUserDetails(Mockito.anyString()))
+            .thenReturn(UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build());
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+        ReflectionTestUtils.setField(manageOrderService, "c21WelshTemplate", "c21-WEL-template");
+        manageOrders = manageOrders.toBuilder()
+            .ordersNeedToBeServed(YesOrNo.Yes)
+            .serveOrderDynamicList(DynamicMultiSelectList.builder()
+                                       .value(List.of(DynamicMultiselectListElement
+                                                          .builder().code(TEST_UUID).build()))
+                                       .build())
+            .build();
+        Element<OrderDetails> orderDetails = element(UUID.fromString("00000000-0000-0000-0000-000000000001"),
+                                                     OrderDetails.builder().dateCreated(LocalDateTime.now()).build());
+        List<Element<OrderDetails>> orderCollection = new ArrayList<>();
+        orderCollection.add(orderDetails);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .orderCollection(orderCollection)
+            .build();
+        Map<String,Object> dataMap = manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData);
+        List<Element<OrderDetails>> orderCollection1 = (List<Element<OrderDetails>>) dataMap.get("orderCollection");
+        assertNotNull(orderCollection1);
+        assertEquals(2, orderCollection1.size());
+    }
+
+
+    @Test
+    public void testHandlePreviewOrderUploadOrder() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+        List<DynamicListElement> dynamicList = List.of(DynamicListElement.builder().build());
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(dynamicList);
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(Event.MANAGE_ORDERS.getId())
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> stringObjectMap = manageOrderService.handlePreviewOrder(callbackRequest, authToken);
+        Assert.assertTrue(stringObjectMap.containsKey("nameOfLaToReviewOrder"));
+    }
+
+    @Test
+    public void testHandlePreviewOrderCreateOrderWithNoHearingDetails() throws Exception {
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(orderList)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        when(hearingService.getHearings(Mockito.anyString(), Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(), Mockito.anyString(),Mockito.any(),Mockito.any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
+        when(hearingDataService.getHearingDataForSelectedHearing(Mockito.any(), Mockito.any()))
+            .thenReturn(hearingDataList);
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(Event.MANAGE_ORDERS.getName())
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> stringObjectMap = manageOrderService.handlePreviewOrder(callbackRequest, authToken);
+        Assert.assertTrue(!stringObjectMap.isEmpty());
+    }
+
+    @Test
+    public void testHandlePreviewOrderCreateOrderWithHearingDetails() throws Exception {
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+        manageOrders = manageOrders.toBuilder()
+            .ordersHearingDetails(List.of(element(HearingData.builder().build())))
+            .build();
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        hearingDataList.add(element(HearingData.builder().build()));
+        when(hearingService.getHearings(Mockito.anyString(), Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(), Mockito.anyString(),Mockito.any(),Mockito.any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
+        when(hearingDataService.getHearingDataForSelectedHearing(Mockito.any(), Mockito.any()))
+            .thenReturn(hearingDataList);
+        when(hearingDataService.getHearingData(Mockito.any(), Mockito.any(),Mockito.any()))
+            .thenReturn(hearingDataList);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(orderList)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId(Event.MANAGE_ORDERS.getName())
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        Map<String, Object> stringObjectMap = manageOrderService.handlePreviewOrder(callbackRequest, authToken);
+        Assert.assertEquals(hearingDataList, stringObjectMap.get("ordersHearingDetails"));
     }
 }
