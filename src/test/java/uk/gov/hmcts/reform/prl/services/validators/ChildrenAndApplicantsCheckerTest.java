@@ -11,13 +11,17 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.Collections;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.testng.AssertJUnit.assertNotNull;
+import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
+import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChildrenAndApplicantsCheckerTest {
@@ -148,7 +152,29 @@ public class ChildrenAndApplicantsCheckerTest {
 
 
     @Test
-    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
-        assertNotNull(childrenAndApplicantsChecker.getDefaultTaskState(CaseData.builder().build()));
+    public void testDefaultTaskStateWhenCannotStart() {
+        assertEquals(TaskState.CANNOT_START_YET, childrenAndApplicantsChecker.getDefaultTaskState(CaseData.builder().build()));
+    }
+
+    @Test
+    public void testDefaultTaskStateWhenChildDetailsDone() {
+        CaseData caseData = CaseData.builder().build();
+        when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
+        assertEquals(TaskState.CANNOT_START_YET, childrenAndApplicantsChecker.getDefaultTaskState(caseData));
+    }
+
+    @Test
+    public void testDefaultTaskStateWhenChildDetailsDoneIsFinished() {
+        CaseData caseData = CaseData.builder().build();
+        when(eventsChecker.isFinished(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
+        assertEquals(TaskState.CANNOT_START_YET, childrenAndApplicantsChecker.getDefaultTaskState(caseData));
+    }
+
+    @Test
+    public void testDefaultTaskStateWhenChildDetailsDoneAndApplicantDetails() {
+        CaseData caseData = CaseData.builder().build();
+        when(eventsChecker.hasMandatoryCompleted(CHILD_DETAILS_REVISED, caseData)).thenReturn(true);
+        when(eventsChecker.hasMandatoryCompleted(APPLICANT_DETAILS, caseData)).thenReturn(true);
+        assertEquals(TaskState.NOT_STARTED, childrenAndApplicantsChecker.getDefaultTaskState(caseData));
     }
 }
