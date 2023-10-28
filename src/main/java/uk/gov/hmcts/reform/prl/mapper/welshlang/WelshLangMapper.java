@@ -75,7 +75,7 @@ public class WelshLangMapper {
     public static Object applyWelshTranslation(Object key, Object obj, boolean isCA) {
         if (obj instanceof String) {
             obj = getValueFromMap(key, obj, isCA);
-        } else if (obj instanceof List) {
+        } else if (obj instanceof List<? extends Object>) {
             List<Object> list = (List) obj;
             for (int i = 0; i < list.size(); i++) {
                 Object eachObj = list.get(i);
