@@ -47,39 +47,19 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingsManagementController {
-
-
     private final CoreCaseDataApi coreCaseDataApi;
-
-
     private final ObjectMapper objectMapper;
-
-
     private final EmailService emailService;
-
-
     private final CaseService caseService;
-
-
     private final IdamClient idamClient;
-
-
     private final AuthorisationService authorisationService;
-
-
     private final SystemUserService systemUserService;
-
-
     private final HearingManagementService hearingManagementService;
-
-
     private final HearingService hearingService;
+    private final AllTabServiceImpl allTabsService;
 
     @Value("${citizen.url}")
     private String hearingDetailsUrl;
-
-
-    private final AllTabServiceImpl allTabsService;
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Ways to pay will call this API and send the status of payment with other details")

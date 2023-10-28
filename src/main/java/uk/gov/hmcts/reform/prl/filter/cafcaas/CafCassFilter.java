@@ -16,8 +16,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafCassFilter {
-
-
     private final PostcodeLookupService postcodeLookupService;
 
     public void filter(CafCassResponse cafCassResponse) {

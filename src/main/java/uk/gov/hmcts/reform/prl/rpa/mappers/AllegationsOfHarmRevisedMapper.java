@@ -34,12 +34,9 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.COMMA_SEPARA
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AllegationsOfHarmRevisedMapper {
-
-
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     public JsonObject map(CaseData caseData) {
-
 
         AllegationOfHarmRevised allegationOfHarmRevised = caseData.getAllegationOfHarmRevised();
 

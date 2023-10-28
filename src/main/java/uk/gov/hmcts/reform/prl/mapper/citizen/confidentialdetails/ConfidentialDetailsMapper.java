@@ -27,10 +27,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialDetailsMapper {
-
-
     private final ObjectMapper objectMapper;
-
     private final AllTabServiceImpl allTabsService;
 
     public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {

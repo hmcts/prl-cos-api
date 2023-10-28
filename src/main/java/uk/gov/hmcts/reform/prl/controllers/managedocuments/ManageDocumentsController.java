@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -8,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
@@ -23,37 +23,24 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 
-
 @Slf4j
 @RestController
-
+@RequiredArgsConstructor
 @RequestMapping("/manage-documents")
 @SecurityRequirement(name = "Bearer Authentication")
 public class ManageDocumentsController extends AbstractCallbackController {
-
-
     private final ManageDocumentsService manageDocumentsService;
-
-
     @Qualifier("allTabsService")
     private final AllTabServiceImpl tabService;
 
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
-
-    protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
-                                        ManageDocumentsService manageDocumentsService, AllTabServiceImpl tabService) {
-        super(objectMapper, eventPublisher);
-        this.manageDocumentsService = manageDocumentsService;
-        this.tabService = tabService;
-    }
 
     @PostMapping("/about-to-start")
     public CallbackResponse handleAboutToStart(

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -38,20 +39,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RestController
 @RequestMapping("/respondent-solicitor")
+@RequiredArgsConstructor
 @Slf4j
 public class C100RespondentSolicitorController extends AbstractCallbackController {
     private final C100RespondentSolicitorService respondentSolicitorService;
     private final ObjectMapper objectMapper;
     private final AuthorisationService authorisationService;
-
-    public C100RespondentSolicitorController(ObjectMapper objectMapper, EventService eventPublisher,
-                                             C100RespondentSolicitorService respondentSolicitorService,
-                                             ObjectMapper objectMapper1, AuthorisationService authorisationService) {
-        super(objectMapper, eventPublisher);
-        this.respondentSolicitorService = respondentSolicitorService;
-        this.objectMapper = objectMapper1;
-        this.authorisationService = authorisationService;
-    }
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Respondent Solicitor")
