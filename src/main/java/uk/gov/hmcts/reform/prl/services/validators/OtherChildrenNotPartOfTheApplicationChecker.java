@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION;
@@ -51,7 +50,7 @@ public class OtherChildrenNotPartOfTheApplicationChecker implements EventChecker
             List<OtherChildrenNotInTheCase> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
             for (OtherChildrenNotInTheCase c : children) {
                 log.debug("validateOtherChildrenNotInTheCase - validateMandatoryFieldsCompleted :{} ",validateMandatoryFieldsCompleted(c));
                 if (!(validateMandatoryFieldsCompleted(c))) {

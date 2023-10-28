@@ -86,7 +86,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -301,8 +300,7 @@ public class CallbackController {
                             caseData.getApplicants().stream()
                                 .map(
                                     Element::getValue)
-                                .collect(
-                                    Collectors.toList())))
+                                .toList()))
                 .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
                 caseData)).state(
                     State.SUBMITTED_NOT_PAID)
@@ -679,7 +677,7 @@ public class CallbackController {
                                .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
-                                      .collect(Collectors.toList()));
+                                      .toList());
             log.info("*** test evidences *** {}", quarantineDocs);
         }
         if (correspondenceList != null) {
@@ -691,7 +689,7 @@ public class CallbackController {
                                .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
-                                      .collect(Collectors.toList()));
+                                      .toList());
         }
         List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         if (otherDocumentsList != null) {
@@ -704,7 +702,7 @@ public class CallbackController {
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
                                .build())
                     .id(element.getId()).build())
-                                      .collect(Collectors.toList()));
+                                      .toList());
         }
         caseData.setLegalProfQuarantineDocsList(quarantineDocs);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
