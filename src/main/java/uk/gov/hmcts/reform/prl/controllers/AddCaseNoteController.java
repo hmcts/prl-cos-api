@@ -33,9 +33,16 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AddCaseNoteController {
+
+
     private final AddCaseNoteService addCaseNoteService;
+
+
     private final ObjectMapper objectMapper;
+
+
     private final UserService userService;
+
     private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/submit-case-note", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

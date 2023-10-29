@@ -6,10 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -29,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleSubfolderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
 import java.time.ZoneId;
@@ -45,11 +43,20 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@RequiredArgsConstructor
+
 @RequestMapping("/bundle")
 public class BundlingController extends AbstractCallbackController {
+
     private final BundlingService bundlingService;
+
     private final AuthorisationService authorisationService;
+
+    protected BundlingController(ObjectMapper objectMapper, EventService eventPublisher,
+                                 BundlingService bundlingService, AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.bundlingService = bundlingService;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/createBundle", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Creating bundle. ")
@@ -93,6 +100,7 @@ public class BundlingController extends AbstractCallbackController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
 
     private List<Bundle> removeEmptyFolders(List<Bundle> caseBundles) {
         List<Bundle> caseBundlesPostEmptyfoldersRemoval = new ArrayList<>();
