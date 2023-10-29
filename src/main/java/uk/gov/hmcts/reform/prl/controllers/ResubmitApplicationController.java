@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -61,21 +62,45 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 public class ResubmitApplicationController {
-    private final CourtFinderService courtFinderService;
-    private final UserService userService;
+
+
+    private CourtFinderService courtFinderService;
+
+
+    private UserService userService;
+
+
     private final SolicitorEmailService solicitorEmailService;
+
+
     private final CaseWorkerEmailService caseWorkerEmailService;
-    private final ObjectMapper objectMapper;
-    private final CaseEventService caseEventService;
-    private final DocumentGenService documentGenService;
-    private final OrganisationService organisationService;
-    private final AllTabServiceImpl allTabService;
-    private final ConfidentialityTabService confidentialityTabService;
-    private final AuthorisationService authorisationService;
-    private final EventService eventPublisher;
+
+
+    private ObjectMapper objectMapper;
+
+
+    private CaseEventService caseEventService;
+
+
+    private DocumentGenService documentGenService;
+
+
+    OrganisationService organisationService;
+
+
+    AllTabServiceImpl allTabService;
+
+
+    private ConfidentialityTabService confidentialityTabService;
+
+
+    private AuthorisationService authorisationService;
+
+
+    private EventService eventPublisher;
 
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to change the state and document generation and submit application. ")

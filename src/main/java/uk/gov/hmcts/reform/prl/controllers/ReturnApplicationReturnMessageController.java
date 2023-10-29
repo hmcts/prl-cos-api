@@ -7,8 +7,8 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,15 +36,28 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RestController
 @Slf4j
-@RequiredArgsConstructor
+
 public class ReturnApplicationReturnMessageController extends AbstractCallbackController {
-    private final UserService userService;
-    private final ReturnApplicationService returnApplicationService;
-    private final ObjectMapper objectMapper;
-    private final AllTabServiceImpl allTabsService;
-    private final AuthorisationService authorisationService;
-    private final CaseEventHandler caseEventHandler;
-    private final EventService eventPublisher;
+
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private ReturnApplicationService returnApplicationService;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private AllTabServiceImpl allTabsService;
+    @Autowired
+    private AuthorisationService authorisationService;
+    @Autowired
+    CaseEventHandler caseEventHandler;
+    @Autowired
+    EventService eventPublisher;
+
+    protected ReturnApplicationReturnMessageController(ObjectMapper objectMapper, EventService eventPublisher) {
+        super(objectMapper, eventPublisher);
+    }
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get return message of the return application ")
@@ -57,7 +70,7 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             UserDetails userDetails = userService.getUserDetails(authorisation);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -80,7 +93,7 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             CaseWorkerNotificationEmailEvent returnApplicationNotificationEvent = CaseWorkerNotificationEmailEvent.builder()
                 .typeOfEvent(CaseWorkerEmailNotificationEventEnum.returnEmailNotification.getDisplayedValue())

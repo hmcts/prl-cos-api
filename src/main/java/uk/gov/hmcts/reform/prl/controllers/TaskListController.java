@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,18 +30,37 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 
+
 @Tag(name = "task-list-controller")
 @Slf4j
 @RestController
 @RequestMapping("/update-task-list")
 @SecurityRequirement(name = "Bearer Authentication")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 public class TaskListController extends AbstractCallbackController {
+
+
     @Qualifier("allTabsService")
-    private final AllTabServiceImpl tabService;
-    private final UserService userService;
-    private final DocumentGenService dgsService;
+    private  final AllTabServiceImpl tabService;
+
+
+    private  final UserService userService;
+
+
+    private  final DocumentGenService dgsService;
+
+
     private final ObjectMapper objectMapper;
+
+    public TaskListController(ObjectMapper objectMapper, EventService eventPublisher,
+                              AllTabServiceImpl tabService,
+                              UserService userService, DocumentGenService dgsService) {
+        super(objectMapper, eventPublisher);
+        this.tabService = tabService;
+        this.userService = userService;
+        this.dgsService = dgsService;
+        this.objectMapper = objectMapper;
+    }
 
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,

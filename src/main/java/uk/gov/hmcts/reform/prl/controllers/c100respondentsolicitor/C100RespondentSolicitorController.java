@@ -42,8 +42,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequiredArgsConstructor
 @Slf4j
 public class C100RespondentSolicitorController extends AbstractCallbackController {
+
+
     private final C100RespondentSolicitorService respondentSolicitorService;
+
+
     private final ObjectMapper objectMapper;
+
+
     private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

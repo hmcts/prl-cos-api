@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -52,18 +51,38 @@ import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.getOpenMessag
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/send-and-reply-to-messages")
 @SecurityRequirement(name = "Bearer Authentication")
 public class SendAndReplyController extends AbstractCallbackController {
+
+
     private final SendAndReplyService sendAndReplyService;
+
+
     private final ObjectMapper objectMapper;
+
+
     private  final ElementUtils elementUtils;
+
+
     private  final AllTabServiceImpl allTabService;
-    private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
+
+    @Autowired
+    UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
     public static final String MESSAGES = "messages";
+
+    public SendAndReplyController(ObjectMapper objectMapper, EventService eventPublisher,
+                                  SendAndReplyService sendAndReplyService, ObjectMapper objectMapper1,
+                                  ElementUtils elementUtils, AllTabServiceImpl allTabService) {
+        super(objectMapper, eventPublisher);
+        this.sendAndReplyService = sendAndReplyService;
+        this.objectMapper = objectMapper1;
+        this.elementUtils = elementUtils;
+        this.allTabService = allTabService;
+    }
+
 
     @PostMapping("/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")
