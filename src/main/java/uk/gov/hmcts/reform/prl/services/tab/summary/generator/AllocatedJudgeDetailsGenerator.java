@@ -21,6 +21,7 @@ public class AllocatedJudgeDetailsGenerator implements FieldGenerator {
     public CaseSummary generate(CaseData caseData) {
         uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge allocatedJudge = caseData.getAllocatedJudge();
         if (null != allocatedJudge) {
+            log.info("AllocatedJudgeDetailsGenerator::AllocatedJudge {}", allocatedJudge);
             String[] judgeOrLegalAdvisorDetails = splitLastNameAndEmailAddress(caseData.getAllocatedJudge());
             boolean isLastNameAndEmailAvailable = isLastNameAndEmailAvailable(judgeOrLegalAdvisorDetails);
             return CaseSummary.builder().allocatedJudgeDetails(
