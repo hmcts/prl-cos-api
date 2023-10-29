@@ -108,7 +108,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S6204"})
 public class DocumentGenService {
 
@@ -291,29 +291,29 @@ public class DocumentGenService {
     protected String daListOnNoticeFl404bFile;
 
 
-    @Autowired
-    private DgsService dgsService;
 
-    @Autowired
-    DocumentLanguageService documentLanguageService;
+    private final DgsService dgsService;
 
-    @Autowired
-    OrganisationService organisationService;
 
-    @Autowired
-    UploadDocumentService uploadService;
+    private final DocumentLanguageService documentLanguageService;
 
-    @Autowired
-    CaseDocumentClient caseDocumentClient;
 
-    @Autowired
-    IdamClient idamClient;
+    private final OrganisationService organisationService;
 
-    @Autowired
-    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
 
-    @Autowired
-    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final UploadDocumentService uploadService;
+
+
+    private final CaseDocumentClient caseDocumentClient;
+
+
+    private final IdamClient idamClient;
+
+
+    private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+
+
+    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
 
     public CaseData fillOrgDetails(CaseData caseData) {

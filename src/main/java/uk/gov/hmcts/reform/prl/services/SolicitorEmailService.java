@@ -25,7 +25,7 @@ import java.util.List;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SolicitorEmailService {
 
     private final NotificationClient notificationClient;
@@ -34,7 +34,7 @@ public class SolicitorEmailService {
     private final UserService userService;
     private static final String DATE_FORMAT = "dd-MM-yyyy";
 
-    @Autowired
+
     private EmailService emailService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
@@ -46,8 +46,8 @@ public class SolicitorEmailService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    @Autowired
-    private CourtFinderService courtLocatorService;
+
+    private  CourtFinderService courtLocatorService;
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails, boolean isC100PendingPaymentSolEmail) {
         try {

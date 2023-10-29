@@ -70,8 +70,8 @@ public class SendgridService {
 
     private final LaunchDarklyClient launchDarklyClient;
 
-    @Autowired
-    ResourceLoader resourceLoader;
+
+    private final ResourceLoader resourceLoader;
 
     public void sendEmail(JsonObject caseData) throws IOException {
 

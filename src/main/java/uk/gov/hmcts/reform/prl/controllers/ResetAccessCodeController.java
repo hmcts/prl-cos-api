@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -15,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -28,14 +28,24 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 public class ResetAccessCodeController extends AbstractCallbackController {
 
-    @Autowired
-    private CaseInviteManager caseInviteManager;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final CaseInviteManager caseInviteManager;
 
-    @Autowired
-    private AuthorisationService authorisationService;
+
+
+    private final ObjectMapper objectMapper;
+
+
+    private final AuthorisationService authorisationService;
+
+    public ResetAccessCodeController(ObjectMapper objectMapper, EventService eventPublisher, CaseInviteManager caseInviteManager,
+                                     AuthorisationService authorisationService) {
+
+        super(objectMapper, eventPublisher);
+        this.caseInviteManager = caseInviteManager;
+        this.objectMapper = objectMapper;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/regenerate-access-code", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {

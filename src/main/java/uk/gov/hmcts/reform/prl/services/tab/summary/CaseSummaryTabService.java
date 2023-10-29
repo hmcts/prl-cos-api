@@ -36,42 +36,42 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 @Qualifier("caseSummaryTab")
 public class CaseSummaryTabService implements TabService {
 
-    @Autowired
-    AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
 
-    @Autowired
-    CaseStatusGenerator caseStatusGenerator;
-
-    @Autowired
-    ConfidentialDetailsGenerator confidentialDetailsGenerator;
-
-    @Autowired
-    OrderAppliedForGenerator orderAppliedForGenerator;
-
-    @Autowired
-    OtherProceedingsGenerator otherProceedingsGenerator;
-
-    @Autowired
-    SpecialArrangementsGenerator specialArrangementsGenerator;
-
-    @Autowired
-    UrgencyGenerator urgencyGenerator;
-
-    @Autowired
-    AllegationOfHarmGenerator allegationOfHarmGenerator;
-
-    @Autowired
-    AllegationOfHarmRevisedGenerator allegationOfHarmRevisedGenerator;
+    private final AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
 
 
-    @Autowired
-    DateOfSubmissionGenerator dateOfSubmissionGenerator;
+    private final CaseStatusGenerator caseStatusGenerator;
 
-    @Autowired
-    ObjectMapper objectMapper;
 
-    @Autowired
-    TypeOfApplicationGenerator typeOfApplicationGenerator;
+    private final ConfidentialDetailsGenerator confidentialDetailsGenerator;
+
+
+    private final OrderAppliedForGenerator orderAppliedForGenerator;
+
+
+    private final OtherProceedingsGenerator otherProceedingsGenerator;
+
+
+    private final SpecialArrangementsGenerator specialArrangementsGenerator;
+
+
+    private final UrgencyGenerator urgencyGenerator;
+
+
+    private final AllegationOfHarmGenerator allegationOfHarmGenerator;
+
+
+    private final AllegationOfHarmRevisedGenerator allegationOfHarmRevisedGenerator;
+
+
+
+    private final DateOfSubmissionGenerator dateOfSubmissionGenerator;
+
+
+    private final ObjectMapper objectMapper;
+
+
+    private final TypeOfApplicationGenerator typeOfApplicationGenerator;
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {

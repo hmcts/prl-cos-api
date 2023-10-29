@@ -124,17 +124,17 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsTabService implements TabService {
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
 
-    @Autowired
-    ObjectMapper objectMapper;
+    private final CoreCaseDataService coreCaseDataService;
 
-    @Autowired
-    ApplicationsTabServiceHelper applicationsTabServiceHelper;
 
-    @Autowired
-    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final ObjectMapper objectMapper;
+
+
+    private final ApplicationsTabServiceHelper applicationsTabServiceHelper;
+
+
+    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {

@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -33,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicList
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
@@ -54,30 +54,30 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTI
 @SecurityRequirement(name = "Bearer Authentication")
 public class ListWithoutNoticeController extends AbstractCallbackController {
 
-    @Autowired
-    private ObjectMapper objectMapper;
 
-    @Autowired
-    HearingDataService hearingDataService;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    LocationRefDataService locationRefDataService;
 
-    @Autowired
-    RefDataUserService refDataUserService;
+    private final HearingDataService hearingDataService;
 
-    @Autowired
-    AllocatedJudgeService allocatedJudgeService;
 
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final LocationRefDataService locationRefDataService;
 
-    @Autowired
-    private HearingService hearingService;
 
-    @Autowired
+    private final RefDataUserService refDataUserService;
+
+
+    private final AllocatedJudgeService allocatedJudgeService;
+
+
+    private final AuthorisationService authorisationService;
+
+
+    private final HearingService hearingService;
+
+
     @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
+    private final CaseSummaryTabService caseSummaryTabService;
     public static final String CONFIRMATION_HEADER = "# Listing directions sent";
 
     public static final String CONFIRMATION_BODY_PREFIX = """
@@ -86,6 +86,23 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
         <ul><li>Listing directions  have been sent as a task to their local court listing.</li>
         <li>Listing directions have been saved in the notes tab and are available to view at any time.</li></ul>""";
+
+    public ListWithoutNoticeController(ObjectMapper objectMapper, EventService eventPublisher,
+                                       ObjectMapper objectMapper1, HearingDataService
+        hearingDataService, LocationRefDataService locationRefDataService, RefDataUserService refDataUserService,
+                                       AllocatedJudgeService allocatedJudgeService, AuthorisationService
+                                           authorisationService, HearingService hearingService,
+                                       CaseSummaryTabService caseSummaryTabService) {
+        super(objectMapper, eventPublisher);
+        this.objectMapper = objectMapper1;
+        this.hearingDataService = hearingDataService;
+        this.locationRefDataService = locationRefDataService;
+        this.refDataUserService = refDataUserService;
+        this.allocatedJudgeService = allocatedJudgeService;
+        this.authorisationService = authorisationService;
+        this.hearingService = hearingService;
+        this.caseSummaryTabService = caseSummaryTabService;
+    }
 
 
     @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

@@ -66,40 +66,40 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 @SecurityRequirement(name = "Bearer Authentication")
 public class ResubmitApplicationController {
 
-    @Autowired
+
     private CourtFinderService courtFinderService;
 
-    @Autowired
+
     private UserService userService;
 
-    @Autowired
-    private SolicitorEmailService solicitorEmailService;
 
-    @Autowired
-    private CaseWorkerEmailService caseWorkerEmailService;
+    private final SolicitorEmailService solicitorEmailService;
 
-    @Autowired
+
+    private final CaseWorkerEmailService caseWorkerEmailService;
+
+
     private ObjectMapper objectMapper;
 
-    @Autowired
+
     private CaseEventService caseEventService;
 
-    @Autowired
+
     private DocumentGenService documentGenService;
 
-    @Autowired
+
     OrganisationService organisationService;
 
-    @Autowired
+
     AllTabServiceImpl allTabService;
 
-    @Autowired
+
     private ConfidentialityTabService confidentialityTabService;
 
-    @Autowired
+
     private AuthorisationService authorisationService;
 
-    @Autowired
+
     private EventService eventPublisher;
 
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

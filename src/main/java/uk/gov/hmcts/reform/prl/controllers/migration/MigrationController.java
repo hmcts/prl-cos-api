@@ -1,11 +1,10 @@
 package uk.gov.hmcts.reform.prl.controllers.migration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,19 +15,24 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 @Tag(name = "migration-controller")
 @Slf4j
 @RestController
 @RequestMapping("/migrate-data")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 public class MigrationController extends AbstractCallbackController {
 
-    @Autowired
+
     @Qualifier("allTabsService")
-    AllTabServiceImpl tabService;
+    private final AllTabServiceImpl tabService;
+
+    public MigrationController(ObjectMapper objectMapper, EventService eventPublisher, AllTabServiceImpl tabService) {
+        super(objectMapper, eventPublisher);
+        this.tabService = tabService;
+    }
 
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,

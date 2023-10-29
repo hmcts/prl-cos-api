@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
@@ -38,11 +38,11 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SubmitAndPayChecker implements EventChecker {
 
-    @Autowired
     @Lazy
-    EventsChecker eventsChecker;
+    private EventsChecker eventsChecker;
 
     @Override
     public boolean isFinished(CaseData caseData) {
