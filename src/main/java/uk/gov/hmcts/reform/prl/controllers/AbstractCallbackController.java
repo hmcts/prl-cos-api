@@ -10,12 +10,8 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class AbstractCallbackController {
-
-
-    private final ObjectMapper objectMapper;
-
-
-    private final EventService eventPublisher;
+    protected final ObjectMapper objectMapper;
+    protected final EventService eventPublisher;
 
     protected AbstractCallbackController(ObjectMapper objectMapper, EventService eventPublisher) {
         this.objectMapper = objectMapper;
