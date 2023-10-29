@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.cafcass.PostcodeResponse;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -56,7 +55,7 @@ public class PostcodeLookupService {
                     .filter(eachObj -> null != eachObj.getDpa()
                         && eachObj.getDpa().getCountryCode().equalsIgnoreCase(countryCode))
                     .map(eachObj -> eachObj.getDpa().getBuildingNumber())
-                    .collect(Collectors.toList()).isEmpty();
+                    .toList().isEmpty();
             }
         }
         return returnValue;

@@ -29,7 +29,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
@@ -73,11 +72,11 @@ public class CaseWorkerEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> applicantNamesList = applicants.stream()
             .map(element -> element.getFirstName() + " " + element.getLastName())
-            .collect(Collectors.toList());
+            .toList();
 
         final String applicantNames = String.join(", ", applicantNamesList);
 
@@ -85,11 +84,11 @@ public class CaseWorkerEmailService {
             .getRespondents()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> respondentsList = respondents.stream()
             .map(PartyDetails::getLastName)
-            .collect(Collectors.toList());
+            .toList();
 
         final String respondentNames = String.join(", ", respondentsList);
 
@@ -178,11 +177,11 @@ public class CaseWorkerEmailService {
                 .getApplicants()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             List<String> applicantEmailList = applicants.stream()
                 .map(PartyDetails::getSolicitorEmail)
-                .collect(Collectors.toList());
+                .toList();
 
             email = applicantEmailList.get(0);
 
@@ -231,11 +230,11 @@ public class CaseWorkerEmailService {
             .getGatekeeper()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> emailList = gatekeeperEmails.stream()
             .map(GatekeeperEmail::getEmail)
-            .collect(Collectors.toList());
+            .toList();
 
         emailList.forEach(email ->   emailService.send(
             email,
@@ -280,11 +279,11 @@ public class CaseWorkerEmailService {
             .getLocalCourtAdmin()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> emailList = localCourtAdminEmails.stream()
             .map(LocalCourtAdminEmail::getEmail)
-            .collect(Collectors.toList());
+            .toList();
         emailList.forEach(email -> {
             if (null != email) {
                 emailService.send(
@@ -305,13 +304,13 @@ public class CaseWorkerEmailService {
             .getApplicants()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<YesOrNo> emailAddressInfo = applicants.stream()
             .filter(eachParty -> null != eachParty.getIsEmailAddressConfidential()
                 && YesOrNo.Yes.equals(eachParty.getIsEmailAddressConfidential()))
             .map(PartyDetails::getIsEmailAddressConfidential)
-            .collect(Collectors.toList());
+            .toList();
 
         String isConfidential = NO;
         if (emailAddressInfo.contains(YesOrNo.Yes)
