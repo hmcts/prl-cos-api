@@ -36,27 +36,27 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @RestController
 @Slf4j
-
 public class ReturnApplicationReturnMessageController extends AbstractCallbackController {
+    private final UserService userService;
+    private final ReturnApplicationService returnApplicationService;
+    private final AllTabServiceImpl allTabsService;
+    private final AuthorisationService authorisationService;
+    private final CaseEventHandler caseEventHandler;
 
     @Autowired
-    private UserService userService;
-    @Autowired
-    private ReturnApplicationService returnApplicationService;
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private AllTabServiceImpl allTabsService;
-    @Autowired
-    private AuthorisationService authorisationService;
-    @Autowired
-    CaseEventHandler caseEventHandler;
-    @Autowired
-    EventService eventPublisher;
-
-    protected ReturnApplicationReturnMessageController(ObjectMapper objectMapper, EventService eventPublisher) {
+    public ReturnApplicationReturnMessageController(ObjectMapper objectMapper,
+                                                    EventService eventPublisher,
+                                                    UserService userService,
+                                                    ReturnApplicationService returnApplicationService,
+                                                    AllTabServiceImpl allTabsService,
+                                                    AuthorisationService authorisationService,
+                                                    CaseEventHandler caseEventHandler) {
         super(objectMapper, eventPublisher);
+        this.userService = userService;
+        this.returnApplicationService = returnApplicationService;
+        this.allTabsService = allTabsService;
+        this.authorisationService = authorisationService;
+        this.caseEventHandler = caseEventHandler;
     }
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -32,13 +33,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 
 public class CaseWithdrawnRequestController extends AbstractCallbackController {
-
     private final CaseWithdrawnRequestService caseWithdrawnRequestService;
     private final AuthorisationService authorisationService;
 
-    protected CaseWithdrawnRequestController(ObjectMapper objectMapper, EventService eventPublisher,
-                                             CaseWithdrawnRequestService
-        caseWithdrawnRequestService, AuthorisationService authorisationService) {
+    @Autowired
+    protected CaseWithdrawnRequestController(ObjectMapper objectMapper,
+                                             EventService eventPublisher,
+                                             CaseWithdrawnRequestService caseWithdrawnRequestService,
+                                             AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.caseWithdrawnRequestService = caseWithdrawnRequestService;
         this.authorisationService = authorisationService;
@@ -58,9 +60,9 @@ public class CaseWithdrawnRequestController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return ok(caseWithdrawnRequestService.caseWithdrawnEmailNotification(callbackRequest, authorisation));
-        } else  {
+        } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }

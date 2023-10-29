@@ -52,36 +52,16 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PrePopulateFeeAndSolicitorNameController {
-
-
-    private FeeService feeService;
-
-
-    private UserService userService;
-
-
-    CourtFinderService courtLocatorService;
-
-    SubmitAndPayChecker submitAndPayChecker;
-
-
-    private ObjectMapper objectMapper;
-
-
-    private DgsService dgsService;
-
-
-    private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
-
-
-
-    private OrganisationService organisationService;
-
-
-    private DocumentLanguageService documentLanguageService;
-
-
-    private AuthorisationService authorisationService;
+    private final FeeService feeService;
+    private final UserService userService;
+    private final CourtFinderService courtLocatorService;
+    private final SubmitAndPayChecker submitAndPayChecker;
+    private final ObjectMapper objectMapper;
+    private final DgsService dgsService;
+    private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+    private final OrganisationService organisationService;
+    private final DocumentLanguageService documentLanguageService;
+    private final AuthorisationService authorisationService;
 
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;

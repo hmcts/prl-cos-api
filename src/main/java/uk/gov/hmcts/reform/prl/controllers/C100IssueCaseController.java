@@ -29,11 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 public class C100IssueCaseController {
-
-
     private final C100IssueCaseService c100IssueCaseService;
-
-
     private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/issue-and-send-to-local-court", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

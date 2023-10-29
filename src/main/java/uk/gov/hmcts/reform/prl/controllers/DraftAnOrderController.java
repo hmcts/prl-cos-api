@@ -36,21 +36,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DraftAnOrderController {
-
-    private ObjectMapper objectMapper;
-
-
-    private DraftAnOrderService draftAnOrderService;
-
-
+    private final ObjectMapper objectMapper;
+    private final DraftAnOrderService draftAnOrderService;
     private final HearingDataService hearingDataService;
-
     private final HearingService hearingService;
-
     private final ManageOrderService manageOrderService;
-
-
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")

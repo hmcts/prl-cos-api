@@ -28,27 +28,24 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
-
 public class ServiceRequestUpdateCallbackController extends AbstractCallbackController {
-
-    private final RequestUpdateCallbackService requestUpdateCallbackService;
     private static final String BEARER = "Bearer ";
-
-    @Autowired
+    private final RequestUpdateCallbackService requestUpdateCallbackService;
     @Qualifier("allTabsService")
-    AllTabsService tabService;
-
-
+    private final AllTabsService tabService;
     private final AuthorisationService authorisationService;
-
-
     private final LaunchDarklyClient launchDarklyClient;
 
-    protected ServiceRequestUpdateCallbackController(ObjectMapper objectMapper, EventService eventPublisher,
-                                                     RequestUpdateCallbackService
-        requestUpdateCallbackService, AuthorisationService authorisationService, LaunchDarklyClient launchDarklyClient) {
+    @Autowired
+    protected ServiceRequestUpdateCallbackController(ObjectMapper objectMapper,
+                                                     EventService eventPublisher,
+                                                     RequestUpdateCallbackService requestUpdateCallbackService,
+                                                     AllTabsService tabService,
+                                                     AuthorisationService authorisationService,
+                                                     LaunchDarklyClient launchDarklyClient) {
         super(objectMapper, eventPublisher);
         this.requestUpdateCallbackService = requestUpdateCallbackService;
+        this.tabService = tabService;
         this.authorisationService = authorisationService;
         this.launchDarklyClient = launchDarklyClient;
 
@@ -61,12 +58,13 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             schema = @Schema(implementation = CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
     public void serviceRequestUpdate(
-            @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthToken,
-            @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String serviceAuthToken,
+        @RequestBody ServiceRequestUpdateDto serviceRequestUpdateDto
     ) throws WorkflowException {
         try {
             if (launchDarklyClient.isFeatureEnabled("payment-app-s2sToken")) {
-                serviceAuthToken = serviceAuthToken.startsWith(BEARER) ? serviceAuthToken : BEARER.concat(serviceAuthToken);
+                serviceAuthToken = serviceAuthToken.startsWith(BEARER) ? serviceAuthToken : BEARER.concat(
+                    serviceAuthToken);
                 if (Boolean.FALSE.equals(authorisationService.authoriseService(serviceAuthToken))) {
                     log.info("s2s token from payment service validation is unsuccessful");
                     throw (new RuntimeException(INVALID_CLIENT));
@@ -75,8 +73,8 @@ public class ServiceRequestUpdateCallbackController extends AbstractCallbackCont
             requestUpdateCallbackService.processCallback(serviceRequestUpdateDto);
         } catch (Exception ex) {
             log.error(
-                    "Payment callback is unsuccessful for the CaseID: {}",
-                    serviceRequestUpdateDto.getCcdCaseNumber()
+                "Payment callback is unsuccessful for the CaseID: {}",
+                serviceRequestUpdateDto.getCcdCaseNumber()
             );
             throw new WorkflowException(ex.getMessage(), ex);
         }

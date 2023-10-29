@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -43,16 +44,16 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-
 @RequestMapping("/bundle")
 public class BundlingController extends AbstractCallbackController {
-
     private final BundlingService bundlingService;
-
     private final AuthorisationService authorisationService;
 
-    protected BundlingController(ObjectMapper objectMapper, EventService eventPublisher,
-                                 BundlingService bundlingService, AuthorisationService authorisationService) {
+    @Autowired
+    protected BundlingController(ObjectMapper objectMapper,
+                                 EventService eventPublisher,
+                                 BundlingService bundlingService,
+                                 AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.bundlingService = bundlingService;
         this.authorisationService = authorisationService;

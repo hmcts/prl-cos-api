@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,19 +34,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @SecurityRequirement(name = "Bearer Authentication")
 public class CaseInitiationController extends AbstractCallbackController {
-
-
     private  final AssignCaseAccessService assignCaseAccessService;
-
     private final CoreCaseDataApi coreCaseDataApi;
-
     private final AuthTokenGenerator authTokenGenerator;
-
     private final AuthorisationService authorisationService;
 
-    public CaseInitiationController(ObjectMapper objectMapper, EventService eventPublisher,
+    @Autowired
+    public CaseInitiationController(ObjectMapper objectMapper,
+                                    EventService eventPublisher,
                                     AssignCaseAccessService assignCaseAccessService,
-                                    CoreCaseDataApi coreCaseDataApi, AuthTokenGenerator authTokenGenerator,
+                                    CoreCaseDataApi coreCaseDataApi,
+                                    AuthTokenGenerator authTokenGenerator,
                                     AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.assignCaseAccessService = assignCaseAccessService;

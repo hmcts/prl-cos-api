@@ -78,48 +78,22 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ManageOrdersController {
-
-
-    private ObjectMapper objectMapper;
-
-
-    private ManageOrderService manageOrderService;
-
-    private DocumentLanguageService documentLanguageService;
-
-
-    private ManageOrderEmailService manageOrderEmailService;
-
-
-    private AmendOrderService amendOrderService;
-
-
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
-
-
-    private  RefDataUserService refDataUserService;
-
-
-    private HearingDataService hearingDataService;
-
-
-    private AuthorisationService authorisationService;
-
-
-    private CoreCaseDataService coreCaseDataService;
-
+    private final ObjectMapper objectMapper;
+    private final ManageOrderService manageOrderService;
+    private final DocumentLanguageService documentLanguageService;
+    private final ManageOrderEmailService manageOrderEmailService;
+    private final AmendOrderService amendOrderService;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final RefDataUserService refDataUserService;
+    private final HearingDataService hearingDataService;
+    private final AuthorisationService authorisationService;
+    private final CoreCaseDataService coreCaseDataService;
     private final HearingService hearingService;
-
-    private DynamicList retrievedHearingTypes;
-
-    private DynamicList retrievedHearingDates;
-
-    private DynamicList retrievedHearingChannels;
-
-    private DynamicList retrievedHearingSubChannels;
-
+    private final DynamicList retrievedHearingTypes;
+    private final DynamicList retrievedHearingDates;
+    private final DynamicList retrievedHearingChannels;
+    private final DynamicList retrievedHearingSubChannels;
     private final AllTabServiceImpl allTabsService;
-
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

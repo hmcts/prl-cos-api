@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,35 +56,27 @@ import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.getOpenMessag
 @RequestMapping("/send-and-reply-to-messages")
 @SecurityRequirement(name = "Bearer Authentication")
 public class SendAndReplyController extends AbstractCallbackController {
-
-
     private final SendAndReplyService sendAndReplyService;
-
-
-    private final ObjectMapper objectMapper;
-
-
-    private  final ElementUtils elementUtils;
-
-
-    private  final AllTabServiceImpl allTabService;
-
-    @Autowired
-    UploadAdditionalApplicationService uploadAdditionalApplicationService;
+    private final ElementUtils elementUtils;
+    private final AllTabServiceImpl allTabService;
+    private final UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
     public static final String MESSAGES = "messages";
 
-    public SendAndReplyController(ObjectMapper objectMapper, EventService eventPublisher,
-                                  SendAndReplyService sendAndReplyService, ObjectMapper objectMapper1,
-                                  ElementUtils elementUtils, AllTabServiceImpl allTabService) {
+    @Autowired
+    public SendAndReplyController(ObjectMapper objectMapper,
+                                  EventService eventPublisher,
+                                  SendAndReplyService sendAndReplyService,
+                                  ElementUtils elementUtils,
+                                  AllTabServiceImpl allTabService,
+                                  UploadAdditionalApplicationService uploadAdditionalApplicationService) {
         super(objectMapper, eventPublisher);
         this.sendAndReplyService = sendAndReplyService;
-        this.objectMapper = objectMapper1;
         this.elementUtils = elementUtils;
         this.allTabService = allTabService;
+        this.uploadAdditionalApplicationService = uploadAdditionalApplicationService;
     }
-
 
     @PostMapping("/about-to-start")
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(@RequestHeader("Authorization")

@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -27,23 +28,16 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RestController
 @Slf4j
 public class ResetAccessCodeController extends AbstractCallbackController {
-
-
     private final CaseInviteManager caseInviteManager;
-
-
-
-    private final ObjectMapper objectMapper;
-
-
     private final AuthorisationService authorisationService;
 
-    public ResetAccessCodeController(ObjectMapper objectMapper, EventService eventPublisher, CaseInviteManager caseInviteManager,
+    @Autowired
+    public ResetAccessCodeController(ObjectMapper objectMapper,
+                                     EventService eventPublisher,
+                                     CaseInviteManager caseInviteManager,
                                      AuthorisationService authorisationService) {
-
         super(objectMapper, eventPublisher);
         this.caseInviteManager = caseInviteManager;
-        this.objectMapper = objectMapper;
         this.authorisationService = authorisationService;
     }
 

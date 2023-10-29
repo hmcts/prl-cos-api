@@ -39,12 +39,8 @@ import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTe
 @RestController
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReviewDocumentsController {
-
-
-    private ObjectMapper objectMapper;
-
-
-    private ReviewDocumentService reviewDocumentService;
+    private final ObjectMapper objectMapper;
+    private final ReviewDocumentService reviewDocumentService;
 
     @PostMapping(path = "/review-documents/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
