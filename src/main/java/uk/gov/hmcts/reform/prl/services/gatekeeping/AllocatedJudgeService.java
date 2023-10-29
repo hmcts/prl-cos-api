@@ -53,6 +53,7 @@ public class AllocatedJudgeService {
                     List<JudicialUsersApiResponse> judgeDetails =
                         refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                             .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL))).build());
+                    log.info("judgeDetails {}", judgeDetails);
                     if (null != judgeDetails && !judgeDetails.isEmpty()) {
                         JudicialUsersApiResponse judgeDetail = judgeDetails.get(0);
                         allocatedJudgeBuilder.judgeName(judgeDetail.getSurname());
@@ -69,6 +70,7 @@ public class AllocatedJudgeService {
                 allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
             }
         }
+        log.info("AllocatedJudge {}", allocatedJudgeBuilder.build());
         return allocatedJudgeBuilder.build();
     }
 
