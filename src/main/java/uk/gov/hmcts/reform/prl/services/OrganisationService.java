@@ -27,7 +27,7 @@ import static java.util.Optional.ofNullable;
 public class OrganisationService {
 
     public static final String ACTIVE = "Active";
-    @Autowired
+
     private final OrganisationApi organisationApi;
 
     private Organisations organisations;

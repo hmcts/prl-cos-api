@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SendAndReplyService;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -53,28 +52,37 @@ import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.getOpenMessag
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/send-and-reply-to-messages")
 @SecurityRequirement(name = "Bearer Authentication")
 public class SendAndReplyController extends AbstractCallbackController {
 
-    @Autowired
-    SendAndReplyService sendAndReplyService;
 
-    @Autowired
-    ObjectMapper objectMapper;
+    private final SendAndReplyService sendAndReplyService;
 
-    @Autowired
-    ElementUtils elementUtils;
 
-    @Autowired
-    AllTabServiceImpl allTabService;
+    private final ObjectMapper objectMapper;
+
+
+    private  final ElementUtils elementUtils;
+
+
+    private  final AllTabServiceImpl allTabService;
 
     @Autowired
     UploadAdditionalApplicationService uploadAdditionalApplicationService;
 
     public static final String REPLY_AND_CLOSE_MESSAGE = "### What happens next \n\n A judge will review your message and advise.";
     public static final String MESSAGES = "messages";
+
+    public SendAndReplyController(ObjectMapper objectMapper, EventService eventPublisher,
+                                  SendAndReplyService sendAndReplyService, ObjectMapper objectMapper1,
+                                  ElementUtils elementUtils, AllTabServiceImpl allTabService) {
+        super(objectMapper, eventPublisher);
+        this.sendAndReplyService = sendAndReplyService;
+        this.objectMapper = objectMapper1;
+        this.elementUtils = elementUtils;
+        this.allTabService = allTabService;
+    }
 
 
     @PostMapping("/about-to-start")

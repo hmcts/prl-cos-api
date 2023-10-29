@@ -76,38 +76,37 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ManageOrdersController {
 
-    @Autowired
+
     private ObjectMapper objectMapper;
 
-    @Autowired
+
     private ManageOrderService manageOrderService;
 
-    @Autowired
-    private final DocumentLanguageService documentLanguageService;
+    private DocumentLanguageService documentLanguageService;
 
-    @Autowired
+
     private ManageOrderEmailService manageOrderEmailService;
 
-    @Autowired
+
     private AmendOrderService amendOrderService;
 
-    @Autowired
+
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
-    @Autowired
-    RefDataUserService refDataUserService;
 
-    @Autowired
+    private  RefDataUserService refDataUserService;
+
+
     private HearingDataService hearingDataService;
 
-    @Autowired
+
     private AuthorisationService authorisationService;
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
+
+    private CoreCaseDataService coreCaseDataService;
 
     private final HearingService hearingService;
 

@@ -41,13 +41,13 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ServiceOfApplicationEmailService {
 
-    @Autowired
+
     private final LaunchDarklyClient launchDarklyClient;
 
-    @Autowired
+
     private final EmailService emailService;
 
     @Value("${xui.url}")
@@ -56,7 +56,7 @@ public class ServiceOfApplicationEmailService {
     @Value("${citizen.url}")
     private String citizenUrl;
 
-    @Autowired
+
     private final ObjectMapper objectMapper;
     private final SendgridService sendgridService;
     private final C100JsonMapper c100JsonMapper;

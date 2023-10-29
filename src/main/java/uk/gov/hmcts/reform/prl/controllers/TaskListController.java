@@ -5,9 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -37,23 +36,32 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 @Slf4j
 @RestController
 @RequestMapping("/update-task-list")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 
 public class TaskListController extends AbstractCallbackController {
 
-    @Autowired
+
     @Qualifier("allTabsService")
-    AllTabServiceImpl tabService;
+    private  final AllTabServiceImpl tabService;
 
-    @Autowired
-    UserService userService;
 
-    @Autowired
-    DocumentGenService dgsService;
+    private  final UserService userService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+
+    private  final DocumentGenService dgsService;
+
+
+    private final ObjectMapper objectMapper;
+
+    public TaskListController(ObjectMapper objectMapper, EventService eventPublisher,
+                              AllTabServiceImpl tabService,
+                              UserService userService, DocumentGenService dgsService) {
+        super(objectMapper, eventPublisher);
+        this.tabService = tabService;
+        this.userService = userService;
+        this.dgsService = dgsService;
+        this.objectMapper = objectMapper;
+    }
 
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
