@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -75,23 +76,48 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ManageOrdersController {
-    private final ObjectMapper objectMapper;
-    private final ManageOrderService manageOrderService;
-    private final DocumentLanguageService documentLanguageService;
-    private final ManageOrderEmailService manageOrderEmailService;
-    private final AmendOrderService amendOrderService;
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
-    private final RefDataUserService refDataUserService;
-    private final HearingDataService hearingDataService;
-    private final AuthorisationService authorisationService;
-    private final CoreCaseDataService coreCaseDataService;
+
+
+    private ObjectMapper objectMapper;
+
+
+    private ManageOrderService manageOrderService;
+
+    private DocumentLanguageService documentLanguageService;
+
+
+    private ManageOrderEmailService manageOrderEmailService;
+
+
+    private AmendOrderService amendOrderService;
+
+
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+
+    private  RefDataUserService refDataUserService;
+
+
+    private HearingDataService hearingDataService;
+
+
+    private AuthorisationService authorisationService;
+
+
+    private CoreCaseDataService coreCaseDataService;
+
     private final HearingService hearingService;
-    private final DynamicList retrievedHearingTypes;
-    private final DynamicList retrievedHearingDates;
-    private final DynamicList retrievedHearingChannels;
-    private final DynamicList retrievedHearingSubChannels;
+
+    private DynamicList retrievedHearingTypes;
+
+    private DynamicList retrievedHearingDates;
+
+    private DynamicList retrievedHearingChannels;
+
+    private DynamicList retrievedHearingSubChannels;
+
     private final AllTabServiceImpl allTabsService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
@@ -106,8 +132,7 @@ public class ManageOrdersController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
-                authorisation
-            )).build();
+                authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -124,7 +149,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -152,7 +177,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             CaseData caseData = objectMapper.convertValue(
@@ -212,7 +237,7 @@ public class ManageOrdersController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -258,7 +283,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
@@ -301,7 +326,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             String performingUser = null;
             String performingAction = null;
             String judgeLaReviewRequired = null;
@@ -319,10 +344,7 @@ public class ManageOrdersController {
                 if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(
-                                                                               caseData,
-                                                                               hearings
-                                                                           ));
+                                                                           .getHearingDataForSelectedHearing(caseData, hearings));
                 }
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
@@ -358,6 +380,7 @@ public class ManageOrdersController {
     }
 
 
+
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
             caseDataUpdated.put("isWithdrawRequestSent", "DisApproved");
@@ -373,7 +396,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
@@ -387,12 +410,7 @@ public class ManageOrdersController {
                 );
                 Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
                 HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                    hearingDataService.populateHearingDynamicLists(
-                        authorisation,
-                        caseReferenceNumber,
-                        caseData,
-                        hearings
-                    );
+                    hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
                 caseData.setAppointedGuardianName(namesList);
                 if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                     caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
@@ -419,7 +437,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -445,7 +463,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -482,7 +500,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
@@ -501,7 +519,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
                 callbackRequest)).build();
         } else {
@@ -516,7 +534,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Manage order Before calling ref data for LA users list {}", System.currentTimeMillis());
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -7,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -36,8 +36,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@RequiredArgsConstructor
+
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
+
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
     public static final String CONFIRMATION_HEADER = "# Continue to payment";
     public static final String SERVICE_REQUEST_TAB = "#Service%20Request";
@@ -63,6 +64,16 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
     private final EventService eventPublisher;
     private final AuthorisationService authorisationService;
+
+    protected FeeAndPayServiceRequestController(ObjectMapper objectMapper, SolicitorEmailService solicitorEmailService,
+                                                FeeAndPayServiceRequestService feeAndPayServiceRequestService,
+                                                EventService eventPublisher, AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.solicitorEmailService = solicitorEmailService;
+        this.feeAndPayServiceRequestService = feeAndPayServiceRequestService;
+        this.eventPublisher = eventPublisher;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "
