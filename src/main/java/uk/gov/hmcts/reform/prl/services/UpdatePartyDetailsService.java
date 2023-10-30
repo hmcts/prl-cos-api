@@ -132,8 +132,8 @@ public class UpdatePartyDetailsService {
                 updatedCaseData.put(FL401_RESPONDENTS, updatedRespondent);
             }
             if (isNotEmpty(caseData.getApplicantsFL401())) {
-                PartyDetails updatedRespondent = resetApplicant(caseData.getRespondentsFL401());
-                updatedCaseData.put(FL401_APPLICANTS, updatedRespondent);
+                PartyDetails updatedApplicant = resetApplicant(caseData.getApplicantsFL401());
+                updatedCaseData.put(FL401_APPLICANTS, updatedApplicant);
             }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
@@ -148,13 +148,17 @@ public class UpdatePartyDetailsService {
             }
             if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
                 List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
-                caseData.getRespondents().forEach(eachRespondent -> {
+                caseData.getApplicants().forEach(eachApplicant -> {
                     updatedApplicants.add(element(
-                        eachRespondent.getId(),
-                        resetRespondent(eachRespondent.getValue())
+                        eachApplicant.getId(),
+                        resetApplicant(eachApplicant.getValue())
                     ));
                 });
                 updatedCaseData.put(APPLICANTS, updatedApplicants);
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getChildren())
+                && YesNoDontKnow.no.equals(caseData.getChildrenKnownToLocalAuthority())) {
+                updatedCaseData.put("childrenKnownToLocalAuthorityTextArea", null);
             }
         }
     }
