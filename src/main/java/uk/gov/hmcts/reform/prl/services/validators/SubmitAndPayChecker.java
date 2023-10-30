@@ -43,7 +43,8 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 public class SubmitAndPayChecker implements EventChecker {
 
     @Lazy
-    private final EventsChecker eventsChecker;
+    private EventsChecker eventsChecker;
+
 
     @Override
     public boolean isFinished(CaseData caseData) {

@@ -32,7 +32,7 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
     @Lazy
-    private final EventsChecker eventsChecker;
+    private EventsChecker eventsChecker;
 
     @Override
     public boolean isFinished(CaseData caseData) {
