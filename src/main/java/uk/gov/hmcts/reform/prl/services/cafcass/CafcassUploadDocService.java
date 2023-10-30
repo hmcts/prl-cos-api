@@ -103,17 +103,6 @@ public class CafcassUploadDocService {
                        .build())
             .data(caseData).build();
 
-        CaseDetails caseDetails = coreCaseDataApi.submitEventForCaseWorker(
-            authorisation,
-            authTokenGenerator.generate(),
-            idamClient.getUserInfo(authorisation).getUid(),
-            PrlAppsConstants.JURISDICTION,
-            PrlAppsConstants.CASE_TYPE,
-            caseId,
-            true,
-            caseDataContent
-        );
-
         log.info("Document has been saved in CCD {}", document.getOriginalFilename());
     }
 
