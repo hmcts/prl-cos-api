@@ -55,7 +55,7 @@ public class ConsentToApplicationChecker implements RespondentEventChecker {
                 isFinished = addErrorAndReturn();
             }
         } else {
-           isFinished = addErrorAndReturn();
+            isFinished = addErrorAndReturn();
         }
         return isFinished;
     }

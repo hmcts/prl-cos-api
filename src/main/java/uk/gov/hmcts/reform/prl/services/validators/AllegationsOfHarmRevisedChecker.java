@@ -139,7 +139,7 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
                 || !validateChildPsychologicalAbuse(allegationOfHarmRevised.get())
                 || !validateChildEmotionalAbuse(allegationOfHarmRevised.get()) || !validateChildSexualAbuse(allegationOfHarmRevised.get())
                 || !validateChildFinancialAbuse(allegationOfHarmRevised.get()))) {
-           isValidChildAbuse = false;
+            isValidChildAbuse = false;
         }
         return isValidChildAbuse;
     }
