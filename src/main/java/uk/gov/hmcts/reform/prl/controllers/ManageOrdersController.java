@@ -289,7 +289,7 @@ public class ManageOrdersController {
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            log.info("send email notifications submitted request  {}",caseData);
+            log.info("send email notifications submitted request  {}",caseData.getOrderCollection());
 
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
@@ -335,7 +335,7 @@ public class ManageOrdersController {
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            log.info("about to submit case data {}",caseData);
+            log.info("about to submit case data {}" ,objectMapper.writeValueAsString(caseData.getOrderCollection());
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
