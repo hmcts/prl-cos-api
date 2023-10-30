@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskEr
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.ATTENDING_THE_COURT_ERROR;
@@ -125,7 +124,7 @@ public class AttendToCourtChecker implements RespondentEventChecker {
                     .getRespondentInterpreterNeeds()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
                 for (RespondentInterpreterNeeds interpreterNeeds : respondentInterpreterNeeds) {
                     fields.add(ofNullable(interpreterNeeds.getParty()));
                     fields.add(ofNullable(interpreterNeeds.getRelationName()));
