@@ -747,6 +747,64 @@ public class HearingDataServiceTest {
                                       .build())).build();
         assertNotNull(hearingDataService.getHearingStartDate("123", hearings));
     }
+
+
+    @Test
+    public void testHearingDataForSelectedHearingDaySolicitor() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .solicitorOrdersHearingDetails(List.of(Element.<HearingData>builder()
+                                                                .id(UUID.fromString(TEST_UUID))
+                                                                .value(HearingData.builder()
+                                                                           .confirmedHearingDates(DynamicList.builder()
+                                                                                                      .value(
+                                                                                                          DynamicListElement.builder()
+                                                                                                              .code(
+                                                                                                                  "123")
+                                                                                                              .build())
+                                                                                                      .build())
+                                                                           .hearingDateConfirmOptionEnum(
+                                                                               HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                                                                           .build())
+                                                                .build()))
+                              .build())
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingStartDateTime(LocalDateTime.of(
+                                                                          2023,
+                                                                          10,
+                                                                          17,
+                                                                          9,
+                                                                          0,
+                                                                          0
+                                                                      ))
+                                                                      .hearingEndDateTime(LocalDateTime.of(
+                                                                          2023,
+                                                                          10,
+                                                                          17,
+                                                                          10,
+                                                                          0,
+                                                                          0
+                                                                      ))
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        List<Element<HearingData>> hearingDataForSelectedHearing = hearingDataService.getHearingDataForSelectedHearing(
+            caseData,
+            hearings
+        );
+        assertNotNull(hearingDataForSelectedHearing);
+        assert (hearingDataForSelectedHearing.get(0).getValue().getHearingdataFromHearingTab().get(0).getValue().getHearingTime().equals(
+            "10:00 AM"));
+    }
 }
 
 

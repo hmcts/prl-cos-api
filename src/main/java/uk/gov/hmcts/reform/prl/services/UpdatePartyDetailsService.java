@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -93,7 +92,7 @@ public class UpdatePartyDetailsService {
                 List<PartyDetails> applicants = applicantsWrapped.get()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
                     updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
@@ -147,7 +146,7 @@ public class UpdatePartyDetailsService {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
@@ -167,7 +166,7 @@ public class UpdatePartyDetailsService {
             List<PartyDetails> respondents = respondentsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
