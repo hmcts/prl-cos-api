@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,16 +41,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequestMapping("/respondent-solicitor")
 @Slf4j
 public class C100RespondentSolicitorController extends AbstractCallbackController {
-
-
     private final C100RespondentSolicitorService respondentSolicitorService;
-
-
     private final ObjectMapper objectMapper;
-
-
     private final AuthorisationService authorisationService;
 
+    @Autowired
     public C100RespondentSolicitorController(ObjectMapper objectMapper, EventService eventPublisher,
                                              C100RespondentSolicitorService respondentSolicitorService,
                                              ObjectMapper objectMapper1, AuthorisationService authorisationService) {

@@ -87,29 +87,15 @@ public class C100RespondentSolicitorService {
     public static final String EMAIL = "email";
     public static final String PHONE = "phone";
     public static final String ADDRESS = "address";
-
-
     private final RespondentSolicitorMiamService miamService;
-
-
     private final ObjectMapper objectMapper;
-
-
     private final DocumentGenService documentGenService;
-
-
     private final ResponseSubmitChecker responseSubmitChecker;
-
     private final ApplicationsTabService applicationsTabService;
-
     private final SystemUserService systemUserService;
-
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
-
     private final OrganisationService organisationService;
-
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
-
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
 

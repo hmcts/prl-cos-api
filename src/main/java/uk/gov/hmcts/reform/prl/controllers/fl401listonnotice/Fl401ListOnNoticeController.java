@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -28,16 +29,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class Fl401ListOnNoticeController extends AbstractCallbackController {
-
-
     private final ObjectMapper objectMapper;
-
-
     private final Fl401ListOnNoticeService fl401ListOnNoticeService;
-
-
     private final AuthorisationService authorisationService;
 
+    @Autowired
     public Fl401ListOnNoticeController(ObjectMapper objectMapper, EventService eventPublisher,
                                        Fl401ListOnNoticeService fl401ListOnNoticeService,
                                        AuthorisationService authorisationService) {

@@ -19,12 +19,10 @@ import uk.gov.hmcts.reform.prl.services.EmailService;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseInviteEmailService {
 
-
     private final EmailService emailService;
 
     @Value("${xui.url}")
     private String manageCaseUrl;
-
     @Value("${citizen.url}")
     private String citizenSignUpLink;
 

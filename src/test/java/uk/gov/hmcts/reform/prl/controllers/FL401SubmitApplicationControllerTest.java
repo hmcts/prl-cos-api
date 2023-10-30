@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+//import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -148,7 +148,7 @@ public class FL401SubmitApplicationControllerTest {
     @Before
     public void setUp() {
 
-        MockitoAnnotations.openMocks(this);
+        // MockitoAnnotations.openMocks(this);
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -427,7 +427,7 @@ public class FL401SubmitApplicationControllerTest {
         when(fl401SubmitApplicationService.fl401SendApplicationNotification(
             Mockito.anyString(),
             Mockito.any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)
-        )).thenReturn(caseData);
+        )).thenReturn(null);
 
         assertNull(fl401SubmitApplicationController.fl401SendApplicationNotification(
             authToken,

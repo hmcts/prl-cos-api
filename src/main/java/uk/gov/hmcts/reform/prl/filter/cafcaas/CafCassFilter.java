@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.CafCassResponse;
 import uk.gov.hmcts.reform.prl.models.dto.cafcass.Element;
-import uk.gov.hmcts.reform.prl.services.cafcass.PostcodeLookupService;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,9 +15,6 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafCassFilter {
-
-
-    private final PostcodeLookupService postcodeLookupService;
 
     public void filter(CafCassResponse cafCassResponse) {
         setNonNullEmptyElementList(cafCassResponse);

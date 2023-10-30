@@ -19,8 +19,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class LitigationCapacityChecker implements EventChecker {
-
-
     private final TaskErrorService taskErrorService;
 
     @Override

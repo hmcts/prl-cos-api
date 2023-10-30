@@ -61,46 +61,23 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class ManageOrderEmailService {
-
-
-    private EmailService emailService;
-
-
-    private CourtFinderService courtLocatorService;
-
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
-
     @Value("${xui.url}")
     private String manageCaseUrl;
-
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
     private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
-
-
-    private final ServiceOfApplicationService serviceOfApplicationService;
-
-    private ServiceOfApplicationPostService serviceOfApplicationPostService;
-
-
-    private BulkPrintService bulkPrintService;
-
     private static final String ORDER_TYPE = "OrderPack";
 
-
-    private final OrganisationService organisationService;
-
-    private final SystemUserService systemUserService;
-
+    private final EmailService emailService;
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final BulkPrintService bulkPrintService;
     private final SendgridService sendgridService;
-
-
-    private Time dateTime;
-
+    private final Time dateTime;
 
     public void sendEmail(CaseDetails caseDetails) {
         List<String> emailList = new ArrayList<>();

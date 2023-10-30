@@ -19,22 +19,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.exception.HearingManagementValidationException;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingRequest;
 import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.NextHearingDateRequest;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.EmailService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearingmanagement.HearingManagementService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -47,39 +41,13 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingsManagementController {
-
-
-    private final CoreCaseDataApi coreCaseDataApi;
-
-
     private final ObjectMapper objectMapper;
-
-
-    private final EmailService emailService;
-
-
-    private final CaseService caseService;
-
-
-    private final IdamClient idamClient;
-
-
     private final AuthorisationService authorisationService;
-
-
-    private final SystemUserService systemUserService;
-
-
     private final HearingManagementService hearingManagementService;
-
-
-    private final HearingService hearingService;
+    private final AllTabServiceImpl allTabsService;
 
     @Value("${citizen.url}")
     private String hearingDetailsUrl;
-
-
-    private final AllTabServiceImpl allTabsService;
 
     @PutMapping(path = "/hearing-management-state-update/{caseState}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Ways to pay will call this API and send the status of payment with other details")

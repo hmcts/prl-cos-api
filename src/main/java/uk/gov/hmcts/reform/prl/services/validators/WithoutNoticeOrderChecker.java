@@ -26,7 +26,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class WithoutNoticeOrderChecker implements EventChecker {
 
-
     private final TaskErrorService taskErrorService;
 
     @Override

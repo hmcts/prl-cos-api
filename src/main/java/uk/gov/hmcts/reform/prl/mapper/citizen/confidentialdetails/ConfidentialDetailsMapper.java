@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -27,10 +26,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialDetailsMapper {
-
-
-    private final ObjectMapper objectMapper;
-
     private final AllTabServiceImpl allTabsService;
 
     public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {

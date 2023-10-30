@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401ResubmitChecker implements EventChecker {
 
-
     private final FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
     @Override

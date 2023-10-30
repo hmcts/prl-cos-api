@@ -47,30 +47,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ListOnNoticeController {
-
-
     private final ObjectMapper objectMapper;
-
-
     private final ListOnNoticeService listOnNoticeService;
-
-
     private final AddCaseNoteService addCaseNoteService;
-
-
     private final RefDataUserService refDataUserService;
-
-
     private final AllocatedJudgeService allocatedJudgeService;
-
-
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
-
-
     private final UserService userService;
-
-
     private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/listOnNotice/reasonUpdation/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

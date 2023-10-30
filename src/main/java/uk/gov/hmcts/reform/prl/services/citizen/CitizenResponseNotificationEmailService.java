@@ -27,18 +27,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenResponseNotificationEmailService {
-
-
-
     private final EmailService emailService;
-
     @Value("${xui.url}")
     private String manageCaseUrl;
-
     @Value("${citizen.url}")
     private String dashboardUrl;
-
-
     private final ObjectMapper objectMapper;
 
     public void sendC100ApplicantSolicitorNotification(CaseDetails caseDetails) {

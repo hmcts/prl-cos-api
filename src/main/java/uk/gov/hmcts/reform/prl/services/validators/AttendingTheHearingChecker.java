@@ -17,9 +17,7 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AttendingTheHearingChecker implements EventChecker {
 
-
     private final TaskErrorService taskErrorService;
-
 
     @Override
     public boolean isFinished(CaseData caseData) {

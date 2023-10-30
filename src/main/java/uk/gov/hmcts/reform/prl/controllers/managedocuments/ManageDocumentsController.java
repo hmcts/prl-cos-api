@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -33,21 +34,16 @@ import static org.springframework.http.ResponseEntity.ok;
 
 @Slf4j
 @RestController
-
 @RequestMapping("/manage-documents")
 @SecurityRequirement(name = "Bearer Authentication")
 public class ManageDocumentsController extends AbstractCallbackController {
-
-
     private final ManageDocumentsService manageDocumentsService;
-
-
     @Qualifier("allTabsService")
     private final AllTabServiceImpl tabService;
-
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
 
+    @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
                                         ManageDocumentsService manageDocumentsService, AllTabServiceImpl tabService) {
         super(objectMapper, eventPublisher);

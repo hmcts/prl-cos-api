@@ -35,16 +35,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
-
 @RequestMapping("/noc")
 public class NoticeOfChangeController extends AbstractCallbackController {
-
-    @Autowired
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
-
-    @Autowired
     private final AuthorisationService authorisationService;
 
+    @Autowired
     protected NoticeOfChangeController(ObjectMapper objectMapper, EventService eventPublisher,
                                        NoticeOfChangePartiesService
         noticeOfChangePartiesService, AuthorisationService authorisationService) {

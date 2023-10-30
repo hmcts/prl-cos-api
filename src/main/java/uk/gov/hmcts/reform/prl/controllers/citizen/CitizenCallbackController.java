@@ -17,15 +17,11 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
-import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenEmailService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.HashMap;
@@ -35,45 +31,29 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
 @Slf4j
 @RestController
-
 public class CitizenCallbackController extends AbstractCallbackController {
-
     private final AllTabServiceImpl allTabsService;
-
     private final CoreCaseDataApi coreCaseDataApi;
-
     private final AuthTokenGenerator authTokenGenerator;
-
-    private final ObjectMapper objectMapper;
-
+    //private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
-
-    private final ConfidentialityTabService confidentialityTabService;
-
-    private final CaseSummaryTabService caseSummaryTab;
-
-    @Autowired
-    private DocumentGenService documentGenService;
-
     private final CitizenEmailService citizenEmailService;
 
     @Autowired
-    CaseDataMapper caseDataMapper;
-
-    protected CitizenCallbackController(ObjectMapper objectMapper, EventService eventPublisher,
-                                        AllTabServiceImpl allTabsService, CoreCaseDataApi
-        coreCaseDataApi, AuthTokenGenerator authTokenGenerator, ObjectMapper objectMapper1, SystemUserService
-        systemUserService, ConfidentialityTabService confidentialityTabService, CaseSummaryTabService caseSummaryTab,
-                                        DocumentGenService documentGenService, CitizenEmailService citizenEmailService) {
+    protected CitizenCallbackController(ObjectMapper objectMapper,
+                                        EventService eventPublisher,
+                                        AllTabServiceImpl allTabsService,
+                                        CoreCaseDataApi coreCaseDataApi,
+                                        AuthTokenGenerator authTokenGenerator,
+                                        //ObjectMapper objectMapper1,
+                                        SystemUserService systemUserService,
+                                        CitizenEmailService citizenEmailService) {
         super(objectMapper, eventPublisher);
         this.allTabsService = allTabsService;
         this.coreCaseDataApi = coreCaseDataApi;
         this.authTokenGenerator = authTokenGenerator;
-        this.objectMapper = objectMapper1;
+        //this.objectMapper = objectMapper1;
         this.systemUserService = systemUserService;
-        this.confidentialityTabService = confidentialityTabService;
-        this.caseSummaryTab = caseSummaryTab;
-        this.documentGenService = documentGenService;
         this.citizenEmailService = citizenEmailService;
     }
 

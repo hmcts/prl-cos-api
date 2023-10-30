@@ -33,20 +33,12 @@ import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_CREATE;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenCoreCaseDataService {
-
     private static final String CCD_UPDATE_FAILURE_MESSAGE
         = "Failed linking case in CCD store for case id %s on event %s";
-
-
     private final IdamClient idamClient;
-
     private final CoreCaseDataApi coreCaseDataApi;
-
     private final AuthTokenGenerator authTokenGenerator;
-
     private final ObjectMapper objectMapper;
-
-
     private final CcdCoreCaseDataService ccdCoreCaseDataService;
 
     public CaseDetails linkDefendant(

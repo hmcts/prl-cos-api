@@ -21,16 +21,9 @@ import static uk.gov.hmcts.reform.prl.enums.State.DECISION_OUTCOME;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class BundlingService {
-
     private final BundleApiClient bundleApiClient;
-
-
     private final BundleCreateRequestMapper bundleCreateRequestMapper;
-
-
     private final AuthTokenGenerator authTokenGenerator;
-
-
     private final HearingService hearingService;
 
     @Value("${bundle.english.config}")

@@ -42,21 +42,11 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 public class AllTabServiceImpl implements AllTabsService {
 
     private final ApplicationsTabService applicationsTabService;
-
-
     private final CoreCaseDataService coreCaseDataService;
-
-
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
-
-
     private final ConfidentialityTabService confidentialityTabService;
-
-
     private final ObjectMapper objectMapper;
-
-
     private final CcdCoreCaseDataService coreCaseDataServiceCcdClient;
 
     @Override

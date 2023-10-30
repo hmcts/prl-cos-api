@@ -27,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -73,34 +72,14 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseDocumentController {
-
-
     private final DocumentGenService documentGenService;
-
-
     private final UploadDocumentService uploadService;
-
-
     private final AuthorisationService authorisationService;
-
-
     private final CoreCaseDataApi coreCaseDataApi;
-
-
     private final ObjectMapper objectMapper;
-
-
-    private final AuthTokenGenerator authTokenGenerator;
-
-
     private final IdamClient idamClient;
-
-
     private final CaseService caseService;
-
     Integer fileIndex;
-
-
     private final EmailService emailService;
 
     @Value("${citizen.url}")

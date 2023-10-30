@@ -26,7 +26,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401OtherProceedingsChecker implements EventChecker {
 
-
     private final TaskErrorService taskErrorService;
 
     @Override

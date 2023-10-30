@@ -26,13 +26,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -55,15 +52,11 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class ServiceOfApplicationController {
     private final ServiceOfApplicationService serviceOfApplicationService;
     private final ObjectMapper objectMapper;
-    private final AllTabServiceImpl allTabService;
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final LaunchDarklyClient launchDarklyClient;
     private final CoreCaseDataService coreCaseDataService;
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
     private final AuthorisationService authorisationService;
-    private final WelshCourtEmail welshCourtEmail;
-    private Map<String, Object> caseDataUpdated;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";

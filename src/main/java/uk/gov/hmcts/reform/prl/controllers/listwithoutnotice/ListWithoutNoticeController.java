@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
-import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -53,33 +52,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTI
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class ListWithoutNoticeController extends AbstractCallbackController {
-
-
     private final ObjectMapper objectMapper;
-
-
     private final HearingDataService hearingDataService;
-
-
-    private final LocationRefDataService locationRefDataService;
-
-
     private final RefDataUserService refDataUserService;
-
-
     private final AllocatedJudgeService allocatedJudgeService;
-
-
     private final AuthorisationService authorisationService;
-
-
     private final HearingService hearingService;
-
-
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
     public static final String CONFIRMATION_HEADER = "# Listing directions sent";
-
     public static final String CONFIRMATION_BODY_PREFIX = """
         ### What happens next
 
@@ -89,14 +70,13 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
 
     public ListWithoutNoticeController(ObjectMapper objectMapper, EventService eventPublisher,
                                        ObjectMapper objectMapper1, HearingDataService
-        hearingDataService, LocationRefDataService locationRefDataService, RefDataUserService refDataUserService,
+        hearingDataService, RefDataUserService refDataUserService,
                                        AllocatedJudgeService allocatedJudgeService, AuthorisationService
                                            authorisationService, HearingService hearingService,
                                        CaseSummaryTabService caseSummaryTabService) {
         super(objectMapper, eventPublisher);
         this.objectMapper = objectMapper1;
         this.hearingDataService = hearingDataService;
-        this.locationRefDataService = locationRefDataService;
         this.refDataUserService = refDataUserService;
         this.allocatedJudgeService = allocatedJudgeService;
         this.authorisationService = authorisationService;

@@ -28,10 +28,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class C100CaseInviteService implements CaseInviteService {
 
-
     private final CaseInviteEmailService caseInviteEmailService;
-
-
     private final LaunchDarklyClient launchDarklyClient;
 
     public CaseInvite generateCaseInvite(Element<PartyDetails> partyDetails, YesOrNo isApplicant) {

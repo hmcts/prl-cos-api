@@ -21,8 +21,6 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AbilityToParticipateChecker implements RespondentEventChecker {
-
-
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override

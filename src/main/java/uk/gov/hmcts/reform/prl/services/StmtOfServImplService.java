@@ -28,8 +28,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StmtOfServImplService {
-
-
     private final ObjectMapper objectMapper;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {

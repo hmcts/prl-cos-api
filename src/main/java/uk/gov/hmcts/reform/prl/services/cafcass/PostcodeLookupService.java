@@ -27,14 +27,9 @@ import java.util.Map;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class PostcodeLookupService {
-
-
-    private ObjectMapper objectMapper;
-
-    private RestTemplate restTemplate = new RestTemplate();
-
-
-    private PostcodeLookupConfiguration configuration;
+    private final ObjectMapper objectMapper;
+    private final RestTemplate restTemplate;
+    private final PostcodeLookupConfiguration configuration;
 
     public boolean isValidNationalPostCode(String postcode, String countryCode) {
         boolean returnValue = true;

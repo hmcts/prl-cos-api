@@ -9,8 +9,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassCcdDataStoreService {
-
-
     private final CoreCaseDataApi coreCaseDataApi;
 
     /**

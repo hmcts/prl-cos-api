@@ -30,7 +30,6 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class MiamChecker implements EventChecker {
 
-
     private final TaskErrorService taskErrorService;
 
     @Override

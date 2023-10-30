@@ -20,13 +20,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOA
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenEmailService {
-
-
-    private EmailService emailService;
-
-
-    private UserService userService;
-
+    private final EmailService emailService;
+    private final UserService userService;
     @Value("${citizen.url}")
     private String citizenSignUpLink;
 

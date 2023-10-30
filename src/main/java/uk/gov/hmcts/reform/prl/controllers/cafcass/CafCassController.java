@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -34,13 +35,10 @@ import static uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi.SERVICE_AUTHORIZATI
 @RequestMapping("/cases")
 public class CafCassController extends AbstractCallbackController {
     private static final String BEARER = "Bearer ";
-
-
     private  final CaseDataService caseDataService;
-
-
     private final AuthorisationService authorisationService;
 
+    @Autowired
     public CafCassController(ObjectMapper objectMapper, EventService eventPublisher,
                              CaseDataService caseDataService, AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);

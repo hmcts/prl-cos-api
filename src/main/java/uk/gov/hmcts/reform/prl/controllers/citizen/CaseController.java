@@ -42,23 +42,11 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @SecurityRequirement(name = "Bearer Authentication")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseController {
-
-
     private final ObjectMapper objectMapper;
-
-
     private final HearingService hearingService;
-
-
     private final CaseService caseService;
-
-
     private final AuthorisationService authorisationService;
-
-
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
-
-
     private final AuthTokenGenerator authTokenGenerator;
     private static final String INVALID_CLIENT = "Invalid Client";
 
