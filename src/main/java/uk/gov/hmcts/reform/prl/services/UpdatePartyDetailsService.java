@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -33,7 +34,9 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
@@ -128,32 +131,54 @@ public class UpdatePartyDetailsService {
                 PartyDetails updatedRespondent = resetRespondent(caseData.getRespondentsFL401());
                 updatedCaseData.put(FL401_RESPONDENTS, updatedRespondent);
             }
+            if (isNotEmpty(caseData.getApplicantsFL401())) {
+                PartyDetails updatedRespondent = resetApplicant(caseData.getRespondentsFL401());
+                updatedCaseData.put(FL401_APPLICANTS, updatedRespondent);
+            }
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
                 List<Element<PartyDetails>> updatedRespondents = new ArrayList<>();
                 caseData.getRespondents().forEach(eachRespondent -> {
-                    if (YesNoDontKnow.no.equals(eachRespondent.getValue().getDoTheyHaveLegalRepresentation())) {
-                        updatedRespondents.add(element(
-                            eachRespondent.getId(),
-                            resetRespondent(eachRespondent.getValue())
-                        ));
-                    }
+                    updatedRespondents.add(element(
+                        eachRespondent.getId(),
+                        resetRespondent(eachRespondent.getValue())
+                    ));
                 });
                 updatedCaseData.put(RESPONDENTS, updatedRespondents);
             }
+            if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+                List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+                caseData.getRespondents().forEach(eachRespondent -> {
+                    updatedApplicants.add(element(
+                        eachRespondent.getId(),
+                        resetRespondent(eachRespondent.getValue())
+                    ));
+                });
+                updatedCaseData.put(APPLICANTS, updatedApplicants);
+            }
         }
+    }
+
+    private PartyDetails resetApplicant(PartyDetails partyDetails) {
+        partyDetails = partyDetails.toBuilder()
+            .addressLivedLessThan5YearsDetails(YesOrNo.Yes.equals(partyDetails.getIsAtAddressLessThan5Years())
+                                                   ? partyDetails.getAddressLivedLessThan5YearsDetails() : null)
+            .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
+            .build();
+
+        return partyDetails;
     }
 
     private PartyDetails resetRespondent(PartyDetails partyDetails) {
         boolean isRepresented = YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
         partyDetails = partyDetails.toBuilder()
-            .dateOfBirth(YesNoDontKnow.yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
-            .placeOfBirth(YesNoDontKnow.yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
-            .address(YesNoDontKnow.yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
-            .addressLivedLessThan5YearsDetails(YesNoDontKnow.yes.equals(partyDetails.getIsAtAddressLessThan5Years())
+            .dateOfBirth(YesOrNo.Yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
+            .placeOfBirth(YesOrNo.Yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
+            .address(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
+            .addressLivedLessThan5YearsDetails(YesOrNo.Yes.equals(partyDetails.getIsAtAddressLessThan5Years())
                                                    ? partyDetails.getAddressLivedLessThan5YearsDetails() : null)
-            .email(YesNoDontKnow.yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
-            .phoneNumber(YesNoDontKnow.yes.equals(partyDetails.getCanYouProvidePhoneNumber()) ? partyDetails.getPhoneNumber() : null)
+            .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
+            .phoneNumber(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber()) ? partyDetails.getPhoneNumber() : null)
             .representativeFirstName(isRepresented ? partyDetails.getRepresentativeFirstName() : null)
             .representativeLastName(isRepresented ? partyDetails.getRepresentativeLastName() : null)
             .solicitorEmail(isRepresented ? partyDetails.getSolicitorEmail() : null)
