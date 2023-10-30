@@ -53,7 +53,7 @@ public class AllocatedJudgeService {
                             .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL))).build());
                     allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
-                    if (null != judgeDetails && judgeDetails.size() > 0) {
+                    if (null != judgeDetails && !judgeDetails.isEmpty()) {
                         allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
                         allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
                         allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
