@@ -289,6 +289,9 @@ public class ManageOrdersController {
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            log.info("cafcass cymru options {}",caseData.getManageOrders().getCafcassCymruServedOptions());
+            log.info("cafcass cymru email {}",caseData.getManageOrders().getCafcassCymruEmail());
+            log.info("another Organisation email {}",caseData.getManageOrders().getEmailInformationCA());
             log.info("send email notifications submitted request  {}",caseData.getOrderCollection());
 
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
@@ -335,6 +338,9 @@ public class ManageOrdersController {
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            log.info("cafcass cymru options {}",caseData.getManageOrders().getCafcassCymruServedOptions());
+            log.info("cafcass cymru email {}",caseData.getManageOrders().getCafcassCymruEmail());
+            log.info("another Organisation email {}",caseData.getManageOrders().getEmailInformationCA());
             log.info("about to submit case data {}",objectMapper.writeValueAsString(caseData.getOrderCollection()));
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
