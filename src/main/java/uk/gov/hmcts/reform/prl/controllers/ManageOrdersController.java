@@ -289,6 +289,7 @@ public class ManageOrdersController {
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            log.info("send email notifications submitted request  {}",caseData);
 
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
@@ -334,6 +335,7 @@ public class ManageOrdersController {
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            log.info("about to submit case data {}",caseData);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
@@ -520,6 +522,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
+        log.info("data after call back request in page 27 midevent {}",callbackRequest.getCaseDetails());
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
                 callbackRequest)).build();
