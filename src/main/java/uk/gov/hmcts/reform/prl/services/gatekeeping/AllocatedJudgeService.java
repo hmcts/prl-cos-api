@@ -23,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIRCUIT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISTRICT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HIGHCOURT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_SPECIFIC_JUDGE_OR_LA_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
@@ -41,10 +42,12 @@ public class AllocatedJudgeService {
     private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                              RefDataUserService refDataUserService) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
-        log.info("### Tier of judiciary {}", caseDataUpdated.get(TIER_OF_JUDICIARY));
-        log.info("### Is judge or legal advisor {}", caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR));
-        log.info("### Judge name details {}", caseDataUpdated.get(JUDGE_NAME_EMAIL));
-        if (null != caseDataUpdated.get(TIER_OF_JUDICIARY)) {
+        log.info("### Tier of judiciary -> {}", caseDataUpdated.get(TIER_OF_JUDICIARY));
+        log.info("### Is specific judge or LA -> {}", caseDataUpdated.get(IS_SPECIFIC_JUDGE_OR_LA_NEEDED));
+        log.info("### Is judge or legal advisor -> {}", caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR));
+        log.info("### Judge name details -> {}", caseDataUpdated.get(JUDGE_NAME_EMAIL));
+        if (YesOrNo.No.getDisplayedValue().equals(caseDataUpdated.get(IS_SPECIFIC_JUDGE_OR_LA_NEEDED))
+            && null != caseDataUpdated.get(TIER_OF_JUDICIARY)) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
             allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get(TIER_OF_JUDICIARY))));
         } else {
