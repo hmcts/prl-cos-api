@@ -140,7 +140,7 @@ public class HearingService {
 
         return isInFutureHearingStatusList && hearing.getHmcStatus().equals(LISTED)
             && hearing.getHearingDaySchedule() != null
-            && hearing.getHearingDaySchedule().stream()
+            && !hearing.getHearingDaySchedule().stream()
             .filter(
                 hearDaySche ->
                     hearDaySche
@@ -155,7 +155,7 @@ public class HearingService {
                                 urgencyLimitDate)
             )
             .toList()
-            .size() > 0;
+            .isEmpty();
 
     }
 
