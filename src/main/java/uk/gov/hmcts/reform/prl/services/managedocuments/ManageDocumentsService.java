@@ -90,6 +90,12 @@ public class ManageDocumentsService {
                 caseReference
             );
             log.info("22222222 {}",categoriesAndDocuments.getCategories());
+
+            categoriesAndDocuments.getCategories().forEach(s->{
+                log.info("NAMEEE -->",s.getCategoryName());
+                log.info("IDDDDD -->",s.getCategoryId());
+            });
+
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
