@@ -134,14 +134,14 @@ public class AllegationsOfHarmRevisedChecker implements EventChecker {
     public boolean validateChildAbuse(CaseData caseData) {
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised =
                 ofNullable(caseData.getAllegationOfHarmRevised());
-
+        boolean isValidChildAbuse = true;
         if (allegationOfHarmRevised.isPresent() && (!validateChildPhysicalAbuse(allegationOfHarmRevised.get())
                 || !validateChildPsychologicalAbuse(allegationOfHarmRevised.get())
                 || !validateChildEmotionalAbuse(allegationOfHarmRevised.get()) || !validateChildSexualAbuse(allegationOfHarmRevised.get())
                 || !validateChildFinancialAbuse(allegationOfHarmRevised.get()))) {
-            return Boolean.FALSE;
+           isValidChildAbuse = false;
         }
-        return Boolean.TRUE;
+        return isValidChildAbuse;
     }
 
     private boolean validateChildPhysicalAbuse(AllegationOfHarmRevised allegationOfHarmRevised) {
