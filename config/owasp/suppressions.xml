@@ -61,5 +61,7 @@
     <cve>CVE-2023-5072</cve>
     <cve>CVE-2023-4586</cve>
     <cve>CVE-2023-34462</cve>
+    <cve>CVE-2022-41881</cve>
+    <cve>CVE-2022-41915</cve>
   </suppress>
 </suppressions>
