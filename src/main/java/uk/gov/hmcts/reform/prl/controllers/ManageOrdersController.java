@@ -335,7 +335,7 @@ public class ManageOrdersController {
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            log.info("about to submit case data {}" ,objectMapper.writeValueAsString(caseData.getOrderCollection()));
+            log.info("about to submit case data {}",objectMapper.writeValueAsString(caseData.getOrderCollection()));
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
