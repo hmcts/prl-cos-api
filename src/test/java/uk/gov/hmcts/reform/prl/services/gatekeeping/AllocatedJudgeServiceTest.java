@@ -28,6 +28,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_SPECIFIC_JUDGE_OR_LA_NEEDED;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AllocatedJudgeServiceTest {
@@ -48,6 +49,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","circuitJudge");
+        stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.CIRCUIT_JUDGE.getDisplayedValue());
@@ -61,6 +63,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","districtJudge");
+        stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.DISTRICT_JUDGE.getDisplayedValue());
@@ -74,6 +77,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","highCourtJudge");
+        stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.HIGHCOURT_JUDGE.getDisplayedValue());
@@ -87,6 +91,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","magistrates");
+        stringObjectMap.put(IS_SPECIFIC_JUDGE_OR_LA_NEEDED,"No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.MAGISTRATES.getDisplayedValue());
