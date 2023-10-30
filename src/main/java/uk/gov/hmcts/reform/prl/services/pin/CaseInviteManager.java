@@ -26,11 +26,8 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseInviteManager {
-
     private final LaunchDarklyClient launchDarklyClient;
-
     private final C100CaseInviteService c100CaseInviteService;
-
     private final FL401CaseInviteService fl401CaseInviteService;
 
     public CaseData generatePinAndSendNotificationEmail(CaseData caseData) {

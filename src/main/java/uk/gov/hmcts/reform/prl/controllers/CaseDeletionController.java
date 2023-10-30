@@ -30,7 +30,7 @@ public class CaseDeletionController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest request) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = request.getCaseDetails();
             caseDetails.getData().clear();
 

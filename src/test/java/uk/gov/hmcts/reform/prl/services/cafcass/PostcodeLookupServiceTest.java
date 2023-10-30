@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.ENGLAND_POSTCODE_NATIONALCODE;
 import static uk.gov.hmcts.reform.prl.utils.TestConstants.WALES_POSTCODE_NATIONALCODE;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class PostcodeLookupServiceTest {
 
     @InjectMocks

@@ -22,7 +22,6 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RESPONDENT_BEHAVIOUR
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentBehaviourChecker implements EventChecker {
 
-
     private final TaskErrorService taskErrorService;
 
     @Override

@@ -29,7 +29,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OtherPeopleInTheCaseRevisedChecker implements EventChecker {
 
-
     public final TaskErrorService taskErrorService;
 
     @Override

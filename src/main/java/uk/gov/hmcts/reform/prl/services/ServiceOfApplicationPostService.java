@@ -54,30 +54,14 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S6204"})
 public class ServiceOfApplicationPostService {
-
-
     private final BulkPrintService bulkPrintService;
-
-
     private final DocumentGenService documentGenService;
-
-
     private final DocumentLanguageService documentLanguageService;
-
-
     private final DgsService dgsService;
-
-
     private final CaseDocumentClient caseDocumentClient;
-
-
     private final AuthTokenGenerator authTokenGenerator;
-
-
     private final LaunchDarklyClient launchDarklyClient;
-
     private static final String LETTER_TYPE = "ApplicationPack";
-
 
     public BulkPrintDetails sendPostNotificationToParty(CaseData caseData,
                                                         String authorisation,

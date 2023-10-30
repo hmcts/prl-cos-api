@@ -36,41 +36,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 @Qualifier("caseSummaryTab")
 public class CaseSummaryTabService implements TabService {
 
-
     private final AllocatedJudgeDetailsGenerator allocatedJudgeDetailsGenerator;
-
-
     private final CaseStatusGenerator caseStatusGenerator;
-
-
     private final ConfidentialDetailsGenerator confidentialDetailsGenerator;
-
-
     private final OrderAppliedForGenerator orderAppliedForGenerator;
-
-
     private final OtherProceedingsGenerator otherProceedingsGenerator;
-
-
     private final SpecialArrangementsGenerator specialArrangementsGenerator;
-
-
     private final UrgencyGenerator urgencyGenerator;
-
-
     private final AllegationOfHarmGenerator allegationOfHarmGenerator;
-
-
     private final AllegationOfHarmRevisedGenerator allegationOfHarmRevisedGenerator;
-
-
-
     private final DateOfSubmissionGenerator dateOfSubmissionGenerator;
-
-
     private final ObjectMapper objectMapper;
-
-
     private final TypeOfApplicationGenerator typeOfApplicationGenerator;
 
     @Override

@@ -29,7 +29,6 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.all
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OtherPeopleInTheCaseChecker implements EventChecker {
 
-
     public final TaskErrorService taskErrorService;
 
     @Override

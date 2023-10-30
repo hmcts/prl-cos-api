@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class  SubmitChecker implements EventChecker {
 
-
     private final SubmitAndPayChecker submitAndPayChecker;
 
     @Override

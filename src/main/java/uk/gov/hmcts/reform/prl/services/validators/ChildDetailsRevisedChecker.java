@@ -27,7 +27,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChildDetailsRevisedChecker implements EventChecker {
 
-
     private final TaskErrorService taskErrorService;
 
     @Override

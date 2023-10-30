@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+//import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -85,7 +85,7 @@ public class ReturnApplicationReturnMessageControllerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
+        //MockitoAnnotations.openMocks(this);
 
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
         Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();

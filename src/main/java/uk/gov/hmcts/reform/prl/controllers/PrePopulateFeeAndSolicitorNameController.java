@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -56,7 +55,6 @@ public class PrePopulateFeeAndSolicitorNameController {
     private final UserService userService;
     private final CourtFinderService courtLocatorService;
     private final SubmitAndPayChecker submitAndPayChecker;
-    private final ObjectMapper objectMapper;
     private final DgsService dgsService;
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     private final OrganisationService organisationService;
@@ -81,7 +79,7 @@ public class PrePopulateFeeAndSolicitorNameController {
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             List<String> errorList = new ArrayList<>();
             CaseData caseData = null;
             boolean mandatoryEventStatus = submitAndPayChecker.hasMandatoryCompleted(callbackRequest
@@ -145,7 +143,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails,false)
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, false)
             );
 
             caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
@@ -160,7 +158,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 callbackRequest.getCaseDetails(),
-                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails,true)
+                c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails, true)
             );
 
             caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())

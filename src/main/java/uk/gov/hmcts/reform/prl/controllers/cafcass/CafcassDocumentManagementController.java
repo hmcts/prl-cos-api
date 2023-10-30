@@ -34,13 +34,8 @@ import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFC
 @RequestMapping("/cases")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassDocumentManagementController {
-
     private final CafcassCdamService cafcassCdamService;
-
-
     private final AuthorisationService authorisationService;
-
-
     private final SystemUserService systemUserService;
 
     @GetMapping(path = "/documents/{documentId}/binary")
@@ -52,14 +47,18 @@ public class CafcassDocumentManagementController {
         @ApiResponse(responseCode = "500", description = "Internal Server Error")
     })
     public ResponseEntity<?> downloadDocument(@RequestHeader(AUTHORIZATION) String authorisation,
-                                                     @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
-                                                     @PathVariable UUID documentId) {
+                                              @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorisation,
+                                              @PathVariable UUID documentId) {
         try {
             if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
                 authorisationService.authoriseService(serviceAuthorisation))
                 && authorisationService.getUserInfo().getRoles().contains(CAFCASS_USER_ROLE)) {
                 log.info("processing  request after authorization");
-                return cafcassCdamService.getDocument(systemUserService.getSysUserToken(), serviceAuthorisation, documentId);
+                return cafcassCdamService.getDocument(
+                    systemUserService.getSysUserToken(),
+                    serviceAuthorisation,
+                    documentId
+                );
 
             } else {
                 throw new ResponseStatusException(UNAUTHORIZED);

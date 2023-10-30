@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,11 +25,10 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 @RequestMapping("/migrate-data")
 @SecurityRequirement(name = "Bearer Authentication")
 public class MigrationController extends AbstractCallbackController {
-
-
     @Qualifier("allTabsService")
     private final AllTabServiceImpl tabService;
 
+    @Autowired
     public MigrationController(ObjectMapper objectMapper, EventService eventPublisher, AllTabServiceImpl tabService) {
         super(objectMapper, eventPublisher);
         this.tabService = tabService;

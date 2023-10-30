@@ -42,28 +42,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefDataUserService {
-
-
     private final AuthTokenGenerator authTokenGenerator;
-
-
     private final StaffResponseDetailsApi staffResponseDetailsApi;
-
-
     private final JudicialUserDetailsApi judicialUserDetailsApi;
-
-
     private final IdamClient idamClient;
-
-
     private final CommonDataRefApi commonDataRefApi;
-
     @Value("${prl.refdata.username}")
     private String refDataIdamUsername;
-
     @Value("${prl.refdata.password}")
     private String refDataIdamPassword;
-
     private  List<DynamicListElement> listOfCategoryValues;
     private CommonDataResponse commonDataResponse;
 

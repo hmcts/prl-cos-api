@@ -11,11 +11,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DeleteDocumentService {
-
-
     private final AuthTokenGenerator authTokenGenerator;
-
-
     private final CaseDocumentClient caseDocumentClient;
 
     public void deleteDocument(String authorizationToken, String documentId) {

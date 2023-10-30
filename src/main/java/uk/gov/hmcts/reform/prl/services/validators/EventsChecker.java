@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.validators;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -49,106 +50,42 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 
 @Getter
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EventsChecker {
 
-
     private final CaseNameChecker caseNameChecker;
-
-
     private final ApplicationTypeChecker applicationTypeChecker;
-
-
     private final HearingUrgencyChecker hearingUrgencyChecker;
-
-
     private final ApplicantsChecker applicantsChecker;
-
-
     private final ChildChecker childChecker;
-
-
     private final ChildDetailsRevisedChecker childDetailsRevisedChecker;
-
-
     private final RespondentsChecker respondentsChecker;
-
-
     private final RespondentBehaviourChecker respondentBehaviourChecker;
-
-
     private final MiamChecker miamChecker;
-
-
     private final AllegationsOfHarmChecker allegationsOfHarmChecker;
-
-
     private final AllegationsOfHarmRevisedChecker allegationsOfHarmRevisedChecker;
-
-
     private final OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
-
     private final OtherPeopleInTheCaseRevisedChecker otherPeopleInTheCaseRevisedChecker;
-
     private final OtherProceedingsChecker otherProceedingsChecker;
-
-
     private final AttendingTheHearingChecker attendingTheHearingChecker;
-
-
     private final InternationalElementChecker internationalElementChecker;
-
-
     private final LitigationCapacityChecker litigationCapacityChecker;
-
-
     private final WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
-
-
     private final PdfChecker pdfChecker;
-
-
     private final SubmitAndPayChecker submitAndPayChecker;
-
-
     private final HomeChecker homeChecker;
-
-
     private final RespondentRelationshipChecker respondentRelationshipChecker;
-
-
     private final FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
-
-
     private final FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
-
-
     private final FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
-
-
     private final WithoutNoticeOrderChecker withoutNoticeOrderChecker;
-
-
     private final FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
-
-
     private final SubmitChecker submitChecker;
-
-
     private final FL401ResubmitChecker fl401ResubmitChecker;
-
-
     private final ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
-
-
     private final OtherChildrenNotPartOfTheApplicationChecker otherChildrenNotPartOfTheApplicationChecker;
-
-
     private final ChildrenAndRespondentsChecker childrenAndRespondentsChecker;
-
-
     private final ChildrenAndOtherPeopleInThisApplicationChecker childrenAndOtherPeopleInThisApplicationChecker;
-
     private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct

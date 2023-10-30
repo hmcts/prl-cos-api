@@ -27,38 +27,16 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentEventsChecker {
-
-
     private final ConsentToApplicationChecker consentToApplicationChecker;
-
-
     private final KeepDetailsPrivateChecker keepDetailsPrivateChecker;
-
-
     private final RespondentMiamChecker respondentMiamChecker;
-
-
     private final AbilityToParticipateChecker abilityToParticipateChecker;
-
-
     private final AttendToCourtChecker attendToCourtChecker;
-
-
     private final CurrentOrPastProceedingsChecker currentOrPastProceedingsChecker;
-
-
     private final InternationalElementsChecker internationalElementsChecker;
-
-
     private final RespondentContactDetailsChecker respondentContactDetailsChecker;
-
-
     private final RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
-
-
     private final ViewDraftResponseChecker viewDraftResponseChecker;
-
-
     private final ResponseSubmitChecker responseSubmitChecker;
 
     private Map<RespondentSolicitorEvents, RespondentEventChecker> eventStatus = new EnumMap<>(RespondentSolicitorEvents.class);

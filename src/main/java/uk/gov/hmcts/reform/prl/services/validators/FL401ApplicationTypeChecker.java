@@ -23,8 +23,6 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401ApplicationTypeChecker implements EventChecker {
-
-
     private final TaskErrorService taskErrorService;
 
     public boolean isStarted(CaseData caseData) {

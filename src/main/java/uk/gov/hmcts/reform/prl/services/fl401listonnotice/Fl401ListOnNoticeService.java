@@ -44,25 +44,12 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Fl401ListOnNoticeService {
 
-
     private final ObjectMapper objectMapper;
-
-
     private final HearingDataService hearingDataService;
-
-
     private final RefDataUserService refDataUserService;
-
-
     private final AllocatedJudgeService allocatedJudgeService;
-
-
     private final DocumentGenService documentGenService;
-
-
     private final HearingService hearingService;
-
-
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
 

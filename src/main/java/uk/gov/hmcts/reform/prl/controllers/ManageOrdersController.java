@@ -38,14 +38,12 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -80,7 +78,6 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 public class ManageOrdersController {
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
-    private final DocumentLanguageService documentLanguageService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AmendOrderService amendOrderService;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
@@ -89,11 +86,6 @@ public class ManageOrdersController {
     private final AuthorisationService authorisationService;
     private final CoreCaseDataService coreCaseDataService;
     private final HearingService hearingService;
-    private final DynamicList retrievedHearingTypes;
-    private final DynamicList retrievedHearingDates;
-    private final DynamicList retrievedHearingChannels;
-    private final DynamicList retrievedHearingSubChannels;
-    private final AllTabServiceImpl allTabsService;
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

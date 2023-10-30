@@ -36,8 +36,6 @@ import static uk.gov.hmcts.reform.prl.enums.Gender.other;
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsTabServiceHelper {
-
-
     private final ObjectMapper objectMapper;
 
     public List<Element<OtherPersonInTheCaseRevised>> getOtherPeopleInTheCaseRevisedTable(CaseData caseData) {

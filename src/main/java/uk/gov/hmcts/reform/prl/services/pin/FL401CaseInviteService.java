@@ -24,13 +24,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401CaseInviteService implements CaseInviteService {
-
-
     private final CaseInviteEmailService caseInviteEmailService;
-
-
     private final LaunchDarklyClient launchDarklyClient;
-
 
     public CaseInvite generateCaseInvite(PartyDetails partyDetails, YesOrNo isApplicant) {
         //no party id required as fl401 cases have only a single respondent

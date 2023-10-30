@@ -111,208 +111,133 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S6204"})
 public class DocumentGenService {
-
     public static final String GENERATED_THE_DOCUMENT_FOR_CASE_ID = "Generated the {} document for case id {} ";
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
-
     @Value("${document.templates.c100.c100_final_filename}")
     protected String c100FinalFilename;
-
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;
-
     @Value("${document.templates.c100.c100_c8_filename}")
     protected String c100C8Filename;
-
     @Value("${document.templates.c100.c100_c8_draft_filename}")
     protected String c100C8DraftFilename;
-
     @Value("${document.templates.c100.c100_resp_c8_template}")
     protected String c100RespC8Template;
-
     @Value("${document.templates.c100.c100_resp_c8_draft_template}")
     protected String c100RespC8DraftTemplate;
-
     @Value("${document.templates.c100.c100_resp_c8_filename}")
     protected String c100RespC8Filename;
-
     @Value("${document.templates.c100.c100_resp_c8_draft_filename}")
     protected String c100RespC8DraftFilename;
-
     @Value("${document.templates.c100.c100_c1a_template}")
     protected String c100C1aTemplate;
-
     @Value("${document.templates.c100.c100_c1a_draft_template}")
     protected String c100C1aDraftTemplate;
-
     @Value("${document.templates.c100.c100_c1a_filename}")
     protected String c100C1aFilename;
-
     @Value("${document.templates.c100.c100_c1a_draft_filename}")
     protected String c100C1aDraftFilename;
-
     @Value("${document.templates.c100.c100_final_welsh_filename}")
     protected String c100FinalWelshFilename;
-
     @Value("${document.templates.c100.c100_draft_welsh_filename}")
     protected String c100DraftWelshFilename;
-
     @Value("${document.templates.c100.c100_c8_welsh_filename}")
     protected String c100C8WelshFilename;
-
     @Value("${document.templates.c100.c100_c8_draft_welsh_filename}")
     protected String c100C8DraftWelshFilename;
-
     @Value("${document.templates.c100.c100_c1a_welsh_filename}")
     protected String c100C1aWelshFilename;
-
     @Value("${document.templates.c100.c100_c1a_draft_welsh_filename}")
     protected String c100C1aDraftWelshFilename;
-
     @Value("${document.templates.fl401.fl401_draft_filename}")
     protected String fl401DraftFilename;
-
     @Value("${document.templates.fl401.fl401_draft_template}")
     protected String fl401DraftTemplate;
-
     @Value("${document.templates.fl401.fl401_draft_welsh_template}")
     protected String fl401DraftWelshTemplate;
-
     @Value("${document.templates.fl401.fl401_draft_welsh_filename}")
     protected String fl401DraftWelshFileName;
-
     @Value("${document.templates.fl401.fl401_final_template}")
     protected String fl401FinalTemplate;
-
     @Value("${document.templates.fl401.fl401_final_filename}")
     protected String fl401FinalFilename;
-
     @Value("${document.templates.fl401.fl401_final_welsh_template}")
     protected String fl401FinalWelshTemplate;
-
     @Value("${document.templates.fl401.fl401_final_welsh_filename}")
     protected String fl401FinalWelshFilename;
-
     @Value("${document.templates.fl401.fl401_c8_template}")
     protected String fl401C8Template;
-
     @Value("${document.templates.fl401.fl401_c8_filename}")
     protected String fl401C8Filename;
-
     @Value("${document.templates.fl401.fl401_c8_welsh_template}")
     protected String fl401C8WelshTemplate;
-
     @Value("${document.templates.fl401.fl401_c8_welsh_filename}")
     protected String fl401C8WelshFilename;
-
     @Value("${document.templates.common.doc_cover_sheet_template}")
     protected String docCoverSheetTemplate;
-
     @Value("${document.templates.common.doc_cover_sheet_welsh_template}")
     protected String docCoverSheetWelshTemplate;
-
     @Value("${document.templates.common.doc_cover_sheet_filename}")
     protected String docCoverSheetFilename;
-
     @Value("${document.templates.common.doc_cover_sheet_welsh_filename}")
     protected String docCoverSheetWelshFilename;
-
     @Value("${document.templates.common.prl_c7_draft_template}")
     protected String docC7DraftTemplate;
-
     @Value("${document.templates.common.prl_c7_final_template_eng}")
     protected String docC7FinalEngTemplate;
-
     @Value("${document.templates.common.prl_c7_final_template_wel}")
     protected String docC7FinalWelshTemplate;
-
     @Value("${document.templates.common.prl_c7_draft_filename}")
     protected String docC7DraftFilename;
-
     @Value("${document.templates.common.prl_c7_final_filename_eng}")
     protected String docC7FinalEngFilename;
-
     @Value("${document.templates.common.prl_c7_final_filename_wel}")
     protected String docC7FinalWelshFilename;
-
     @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
     protected String solicitorC7DraftTemplate;
-
     @Value("${document.templates.common.prl_solicitor_c7_draft_filename}")
     protected String solicitorC7DraftFilename;
-
     @Value("${document.templates.common.prl_solicitor_c7_final_template}")
     protected String solicitorC7FinalTemplate;
-
     @Value("${document.templates.common.prl_solicitor_c7_final_filename}")
     protected String solicitorC7FinalFilename;
-
     @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
     protected String solicitorC1ADraftTemplate;
-
     @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
     protected String solicitorC1ADraftFilename;
-
     @Value("${document.templates.common.prl_solicitor_c1a_final_template}")
     protected String solicitorC1AFinalTemplate;
-
     @Value("${document.templates.common.prl_solicitor_c1a_final_filename}")
     protected String solicitorC1AFinalFilename;
-
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
-
     @Value("${document.templates.common.prl_c1a_blank_filename}")
     protected String docC1aBlankFilename;
-
     @Value("${document.templates.common.prl_c8_blank_template}")
     protected String docC8BlankTemplate;
-
     @Value("${document.templates.common.prl_c8_blank_filename}")
     protected String docC8BlankFilename;
-
     @Value("${document.templates.common.prl_privacy_notice_template}")
     protected String privacyNoticeTemplate;
-
     @Value("${document.templates.common.prl_privacy_notice_filename}")
     protected String privacyNoticeFilename;
-
     @Value("${document.templates.citizen.prl_citizen_upload_template}")
     protected String prlCitizenUploadTemplate;
-
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
-
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_template}")
     protected String daListOnNoticeFl404bTemplate;
-
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_filename}")
     protected String daListOnNoticeFl404bFile;
 
-
-
     private final DgsService dgsService;
-
-
     private final DocumentLanguageService documentLanguageService;
-
-
     private final OrganisationService organisationService;
-
-
     private final UploadDocumentService uploadService;
-
-
     private final CaseDocumentClient caseDocumentClient;
-
-
     private final IdamClient idamClient;
-
-
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
-
-
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
 
