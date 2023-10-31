@@ -52,143 +52,178 @@ import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 public class EventsChecker {
 
     @Autowired
-    private CaseNameChecker caseNameChecker;
+    private CommonChecker commonChecker;
 
     @Autowired
-    private ApplicationTypeChecker applicationTypeChecker;
+    private PartyChecker partyChecker;
 
     @Autowired
-    private HearingUrgencyChecker hearingUrgencyChecker;
+    private C100CaseChecker c100CaseChecker;
 
     @Autowired
-    private ApplicantsChecker applicantsChecker;
+    private FL401CaseChecker fl401CaseChecker;
 
-    @Autowired
-    private ChildChecker childChecker;
+    @Getter
+    public class CommonChecker {
+        @Autowired
+        private CaseNameChecker caseNameChecker;
 
-    @Autowired
-    private ChildDetailsRevisedChecker childDetailsRevisedChecker;
+        @Autowired
+        private ApplicationTypeChecker applicationTypeChecker;
 
-    @Autowired
-    private RespondentsChecker respondentsChecker;
 
-    @Autowired
-    private RespondentBehaviourChecker respondentBehaviourChecker;
+        @Autowired
+        private OtherProceedingsChecker otherProceedingsChecker;
 
-    @Autowired
-    private MiamChecker miamChecker;
+        @Autowired
+        private AttendingTheHearingChecker attendingTheHearingChecker;
 
-    @Autowired
-    private AllegationsOfHarmChecker allegationsOfHarmChecker;
+        @Autowired
+        private WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
 
-    @Autowired
-    private AllegationsOfHarmRevisedChecker allegationsOfHarmRevisedChecker;
+        @Autowired
+        private PdfChecker pdfChecker;
 
-    @Autowired
-    private OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
-    @Autowired
-    private OtherPeopleInTheCaseRevisedChecker otherPeopleInTheCaseRevisedChecker;
-    @Autowired
-    private OtherProceedingsChecker otherProceedingsChecker;
+    }
 
-    @Autowired
-    private AttendingTheHearingChecker attendingTheHearingChecker;
+    @Getter
+    public class C100CaseChecker {
+        @Autowired
+        private HearingUrgencyChecker hearingUrgencyChecker;
 
-    @Autowired
-    private InternationalElementChecker internationalElementChecker;
+        @Autowired
+        private MiamChecker miamChecker;
 
-    @Autowired
-    private LitigationCapacityChecker litigationCapacityChecker;
+        @Autowired
+        private AllegationsOfHarmChecker allegationsOfHarmChecker;
 
-    @Autowired
-    private WelshLanguageRequirementsChecker welshLanguageRequirementsChecker;
+        @Autowired
+        private AllegationsOfHarmRevisedChecker allegationsOfHarmRevisedChecker;
 
-    @Autowired
-    private PdfChecker pdfChecker;
+        @Autowired
+        private InternationalElementChecker internationalElementChecker;
 
-    @Autowired
-    private SubmitAndPayChecker submitAndPayChecker;
+        @Autowired
+        private LitigationCapacityChecker litigationCapacityChecker;
 
-    @Autowired
-    private HomeChecker homeChecker;
+        @Autowired
+        private SubmitAndPayChecker submitAndPayChecker;
+    }
 
-    @Autowired
-    private RespondentRelationshipChecker respondentRelationshipChecker;
+    @Getter
+    public class FL401CaseChecker {
+        @Autowired
+        private HomeChecker homeChecker;
 
-    @Autowired
-    private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
+        @Autowired
+        private FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
 
-    @Autowired
-    private FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
+        @Autowired
+        private FL401ApplicantFamilyChecker fl401ApplicantFamilyChecker;
 
-    @Autowired
-    private FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
+        @Autowired
+        private FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
-    @Autowired
-    private WithoutNoticeOrderChecker withoutNoticeOrderChecker;
+        @Autowired
+        private WithoutNoticeOrderChecker withoutNoticeOrderChecker;
 
-    @Autowired
-    private FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
+        @Autowired
+        private FL401OtherProceedingsChecker fl401OtherProceedingsChecker;
 
-    @Autowired
-    private SubmitChecker submitChecker;
+        @Autowired
+        private SubmitChecker submitChecker;
 
-    @Autowired
-    private FL401ResubmitChecker fl401ResubmitChecker;
+        @Autowired
+        private FL401ResubmitChecker fl401ResubmitChecker;
+    }
 
-    @Autowired
-    private ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
+    @Getter
+    public class PartyChecker {
 
-    @Autowired
-    private OtherChildrenNotPartOfTheApplicationChecker otherChildrenNotPartOfTheApplicationChecker;
+        @Autowired
+        private ApplicantsChecker applicantsChecker;
 
-    @Autowired
-    private ChildrenAndRespondentsChecker childrenAndRespondentsChecker;
+        @Autowired
+        private ChildChecker childChecker;
 
-    @Autowired
-    private ChildrenAndOtherPeopleInThisApplicationChecker childrenAndOtherPeopleInThisApplicationChecker;
+        @Autowired
+        private ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
+
+        @Autowired
+        private OtherChildrenNotPartOfTheApplicationChecker otherChildrenNotPartOfTheApplicationChecker;
+
+        @Autowired
+        private ChildrenAndRespondentsChecker childrenAndRespondentsChecker;
+
+        @Autowired
+        private ChildrenAndOtherPeopleInThisApplicationChecker childrenAndOtherPeopleInThisApplicationChecker;
+
+        @Autowired
+        private ChildDetailsRevisedChecker childDetailsRevisedChecker;
+
+        @Autowired
+        private RespondentsChecker respondentsChecker;
+
+        @Autowired
+        private RespondentBehaviourChecker respondentBehaviourChecker;
+
+        @Autowired
+        private OtherPeopleInTheCaseChecker otherPeopleInTheCaseChecker;
+        @Autowired
+        private OtherPeopleInTheCaseRevisedChecker otherPeopleInTheCaseRevisedChecker;
+
+        @Autowired
+        private RespondentRelationshipChecker respondentRelationshipChecker;
+
+    }
 
     private Map<Event, EventChecker> eventStatus = new EnumMap<>(Event.class);
 
     @PostConstruct
     public void init() {
-        eventStatus.put(CASE_NAME, caseNameChecker);
-        eventStatus.put(TYPE_OF_APPLICATION, applicationTypeChecker);
-        eventStatus.put(HEARING_URGENCY, hearingUrgencyChecker);
-        eventStatus.put(APPLICANT_DETAILS, applicantsChecker);
-        eventStatus.put(CHILD_DETAILS, childChecker);
-        eventStatus.put(CHILD_DETAILS_REVISED, childDetailsRevisedChecker);
-        eventStatus.put(RESPONDENT_DETAILS, respondentsChecker);
-        eventStatus.put(MIAM, miamChecker);
-        eventStatus.put(ALLEGATIONS_OF_HARM, allegationsOfHarmChecker);
-        eventStatus.put(ALLEGATIONS_OF_HARM_REVISED, allegationsOfHarmRevisedChecker);
-        eventStatus.put(OTHER_PEOPLE_IN_THE_CASE, otherPeopleInTheCaseChecker);
-        eventStatus.put(OTHER_PEOPLE_IN_THE_CASE_REVISED, otherPeopleInTheCaseRevisedChecker);
-        eventStatus.put(OTHER_PROCEEDINGS, otherProceedingsChecker);
-        eventStatus.put(ATTENDING_THE_HEARING, attendingTheHearingChecker);
-        eventStatus.put(INTERNATIONAL_ELEMENT, internationalElementChecker);
-        eventStatus.put(LITIGATION_CAPACITY, litigationCapacityChecker);
-        eventStatus.put(WELSH_LANGUAGE_REQUIREMENTS, welshLanguageRequirementsChecker);
-        eventStatus.put(VIEW_PDF_DOCUMENT, pdfChecker);
-        eventStatus.put(SUBMIT_AND_PAY, submitAndPayChecker);
-        eventStatus.put(SUBMIT, submitChecker);
+        eventStatus.put(CASE_NAME, commonChecker.getCaseNameChecker());
+        eventStatus.put(TYPE_OF_APPLICATION, commonChecker.getApplicationTypeChecker());
+        eventStatus.put(HEARING_URGENCY, c100CaseChecker.getHearingUrgencyChecker());
+        eventStatus.put(APPLICANT_DETAILS, partyChecker.getApplicantsChecker());
+        eventStatus.put(CHILD_DETAILS, partyChecker.getChildChecker());
+        eventStatus.put(CHILD_DETAILS_REVISED, partyChecker.getChildDetailsRevisedChecker());
+        eventStatus.put(RESPONDENT_DETAILS, partyChecker.getRespondentsChecker());
+        eventStatus.put(MIAM, c100CaseChecker.getMiamChecker());
+        eventStatus.put(ALLEGATIONS_OF_HARM, c100CaseChecker.getAllegationsOfHarmChecker());
+        eventStatus.put(ALLEGATIONS_OF_HARM_REVISED, c100CaseChecker.getAllegationsOfHarmRevisedChecker());
+        eventStatus.put(OTHER_PEOPLE_IN_THE_CASE, partyChecker.getOtherPeopleInTheCaseChecker());
+        eventStatus.put(OTHER_PEOPLE_IN_THE_CASE_REVISED, partyChecker.getOtherPeopleInTheCaseRevisedChecker());
+        eventStatus.put(OTHER_PROCEEDINGS, commonChecker.getOtherProceedingsChecker());
+        eventStatus.put(ATTENDING_THE_HEARING, commonChecker.getAttendingTheHearingChecker());
+        eventStatus.put(INTERNATIONAL_ELEMENT, c100CaseChecker.getInternationalElementChecker());
+        eventStatus.put(LITIGATION_CAPACITY, c100CaseChecker.getLitigationCapacityChecker());
+        eventStatus.put(WELSH_LANGUAGE_REQUIREMENTS, commonChecker.getWelshLanguageRequirementsChecker());
+        eventStatus.put(VIEW_PDF_DOCUMENT, commonChecker.getPdfChecker());
+        eventStatus.put(SUBMIT_AND_PAY, c100CaseChecker.getSubmitAndPayChecker());
+        eventStatus.put(SUBMIT, fl401CaseChecker.getSubmitChecker());
 
-        eventStatus.put(OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION, otherChildrenNotPartOfTheApplicationChecker);
-        eventStatus.put(CHILDREN_AND_APPLICANTS, childrenAndApplicantsChecker);
-        eventStatus.put(CHILDREN_AND_RESPONDENTS, childrenAndRespondentsChecker);
-        eventStatus.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, childrenAndOtherPeopleInThisApplicationChecker);
+        eventStatus.put(
+            OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+            partyChecker.getOtherChildrenNotPartOfTheApplicationChecker()
+        );
+        eventStatus.put(CHILDREN_AND_APPLICANTS, partyChecker.getChildrenAndApplicantsChecker());
+        eventStatus.put(CHILDREN_AND_RESPONDENTS, partyChecker.getChildrenAndRespondentsChecker());
+        eventStatus.put(
+            CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
+            partyChecker.getChildrenAndOtherPeopleInThisApplicationChecker()
+        );
 
-        eventStatus.put(FL401_CASE_NAME, caseNameChecker);
-        eventStatus.put(FL401_HOME, homeChecker);
-        eventStatus.put(RELATIONSHIP_TO_RESPONDENT, respondentRelationshipChecker);
-        eventStatus.put(FL401_TYPE_OF_APPLICATION, fl401ApplicationTypeChecker);
-        eventStatus.put(RESPONDENT_BEHAVIOUR, respondentBehaviourChecker);
-        eventStatus.put(WITHOUT_NOTICE_ORDER, withoutNoticeOrderChecker);
-        eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401ApplicantFamilyChecker);
-        eventStatus.put(FL401_UPLOAD_DOCUMENTS, pdfChecker);
-        eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401OtherProceedingsChecker);
-        eventStatus.put(FL401_SOT_AND_SUBMIT, fl401StatementOfTruthAndSubmitChecker);
-        eventStatus.put(FL401_RESUBMIT, fl401ResubmitChecker);
+        eventStatus.put(FL401_CASE_NAME, commonChecker.getCaseNameChecker());
+        eventStatus.put(FL401_HOME, fl401CaseChecker.getHomeChecker());
+        eventStatus.put(RELATIONSHIP_TO_RESPONDENT, partyChecker.getRespondentRelationshipChecker());
+        eventStatus.put(FL401_TYPE_OF_APPLICATION, fl401CaseChecker.getFl401ApplicationTypeChecker());
+        eventStatus.put(RESPONDENT_BEHAVIOUR, partyChecker.getRespondentBehaviourChecker());
+        eventStatus.put(WITHOUT_NOTICE_ORDER, fl401CaseChecker.getWithoutNoticeOrderChecker());
+        eventStatus.put(FL401_APPLICANT_FAMILY_DETAILS, fl401CaseChecker.getFl401ApplicantFamilyChecker());
+        eventStatus.put(FL401_UPLOAD_DOCUMENTS, commonChecker.getPdfChecker());
+        eventStatus.put(FL401_OTHER_PROCEEDINGS, fl401CaseChecker.getFl401OtherProceedingsChecker());
+        eventStatus.put(FL401_SOT_AND_SUBMIT, fl401CaseChecker.getFl401StatementOfTruthAndSubmitChecker());
+        eventStatus.put(FL401_RESUBMIT, fl401CaseChecker.getFl401ResubmitChecker());
 
     }
 
@@ -204,11 +239,13 @@ public class EventsChecker {
         return eventStatus.get(event).hasMandatoryCompleted(caseData);
     }
 
-    public TaskState getDefaultState(Event event,CaseData caseData) {
+    public TaskState getDefaultState(Event event, CaseData caseData) {
         return eventStatus.get(event).getDefaultTaskState(caseData);
     }
 
     public Map<Event, EventChecker> getEventStatus() {
         return eventStatus;
     }
+
+
 }
