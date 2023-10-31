@@ -723,7 +723,7 @@ public class PrlAppsConstants {
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 
-    public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
+    public static final String ENG_STATIC_DOCS_PATH = "staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";

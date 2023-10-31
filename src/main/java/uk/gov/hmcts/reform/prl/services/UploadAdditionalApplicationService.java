@@ -63,7 +63,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
@@ -521,7 +520,7 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
-        if (isNotEmpty(uploadAdditionalApplicationData) && isEmpty(uploadAdditionalApplicationData.getRepresentedPartyType())) {
+        if (isNotEmpty(uploadAdditionalApplicationData) && StringUtils.isEmpty(uploadAdditionalApplicationData.getRepresentedPartyType())) {
             caseData.setUploadAdditionalApplicationData(uploadAdditionalApplicationData.toBuilder().representedPartyType(
                 populateSolicitorRepresentingPartyType(authorisation, caseData)).build());
         }
@@ -631,7 +630,9 @@ public class UploadAdditionalApplicationService {
             if (Yes.equals(caseData.getHwfRequestedForAdditionalApplications())) {
                 confirmationHeader = "# Help with fees requested";
                 confirmationBody = """
-                    ### What happens next \n\nThe court will review the document and will be in touch to let you
+                    ### What happens next
+
+                    The court will review the document and will be in touch to let you
                     know what happens next.
                     """;
             } else {
@@ -644,7 +645,11 @@ public class UploadAdditionalApplicationService {
             confirmationHeader = "# Application submitted";
             confirmationBody = """
                 You will get updates from the court about the progress of your application.
-                \n\n### What happens next \n\nThe court will review your documents and will be in touch to let you know what happens next.
+
+
+                ### What happens next
+
+                The court will review your documents and will be in touch to let you know what happens next.
                 """;
         }
 
