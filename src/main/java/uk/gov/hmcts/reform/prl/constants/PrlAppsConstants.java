@@ -810,4 +810,7 @@ public class PrlAppsConstants {
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
 
+    public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
+    public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
+
 }
