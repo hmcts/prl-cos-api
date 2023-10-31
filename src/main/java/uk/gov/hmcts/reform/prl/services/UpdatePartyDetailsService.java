@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -103,7 +102,7 @@ public class UpdatePartyDetailsService {
                 List<PartyDetails> applicants = applicantsWrapped.get()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
                     updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
@@ -207,15 +206,11 @@ public class UpdatePartyDetailsService {
         if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
             applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
             organisationNotExists = true;
-        } else if (isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isEmpty(
-            applicantOrganisationPolicy.getOrganisation())) {
-            if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
-                roleNotExists = true;
-            }
-            organisationNotExists = true;
-        } else if (isNotEmpty(applicantOrganisationPolicy) && isNotEmpty(
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && (ObjectUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation()) || (ObjectUtils.isNotEmpty(
             applicantOrganisationPolicy.getOrganisation()) && StringUtils.isEmpty(
-            applicantOrganisationPolicy.getOrganisation().getOrganisationID())) {
+            applicantOrganisationPolicy.getOrganisation().getOrganisationID())))
+        ) {
             if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
                 roleNotExists = true;
             }
@@ -238,7 +233,7 @@ public class UpdatePartyDetailsService {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
@@ -258,7 +253,7 @@ public class UpdatePartyDetailsService {
             List<PartyDetails> respondents = respondentsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
