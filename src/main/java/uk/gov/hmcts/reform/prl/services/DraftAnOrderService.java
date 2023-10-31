@@ -1493,6 +1493,7 @@ public class DraftAnOrderService {
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
                                                      List<Element<HearingData>> ordersHearingDetails,
                                                      boolean isSolicitorOrdersHearings) throws Exception {
+        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1509,17 +1510,17 @@ public class DraftAnOrderService {
             List<Element<HearingData>> hearingData = hearingDataService.getHearingData(ordersHearingDetails,
                                                                                        hearingDataPrePopulatedDynamicLists,
                                                                                        caseData);
+            log.info("DraftOrderService::hearingData -> {}", hearingData);
             //PRL-4260 - hearing screen changes
             caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
             caseData.getManageOrders().setOrdersHearingDetails(hearingData);
-            caseData.getManageOrders().setOrdersHearingDetails(
-                hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-
             //PRL-4335 - solicitor draft order edit by judge/admin, persist into solicitor orders hearings
             if (isSolicitorOrdersHearings) {
                 caseDataUpdated.put(SOLICITOR_ORDERS_HEARING_DETAILS, hearingData);
                 caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingData);
             }
+            caseData.getManageOrders().setOrdersHearingDetails(
+                hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
