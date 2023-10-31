@@ -126,6 +126,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
@@ -1636,13 +1637,15 @@ public class DraftAnOrderService {
                 .build();
         }
 
+        List<String> errorList = new ArrayList<>();
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
-            List<String> errorList = new ArrayList<>();
+                || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
             errorList.add("This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
+                    .errors(errorList)
+                    .build();
+        } else if (getErrorsForOrdersProhibitedForC100FL401(caseData, caseData.getCreateSelectOrderOptions(), errorList)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));

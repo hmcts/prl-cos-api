@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.cleanUpSelectedManageOrderOptions;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
@@ -95,6 +97,8 @@ public class ManageOrdersController {
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
+
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private final HearingService hearingService;
 
@@ -176,6 +180,16 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+
+            List<String> errorList = new ArrayList<>();
+            if (getErrorsForOrdersProhibitedForC100FL401(caseData, caseData.getCreateSelectOrderOptions(), errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest))
                 .build();
