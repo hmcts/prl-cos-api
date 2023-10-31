@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -154,10 +153,10 @@ public class ServiceOfApplicationPostService {
         return coverLetterDocs;
     }
 
-    public List<Document> getStaticDocs(String auth, CaseData caseData) {
+    public List<Document> getStaticDocs(String auth, String caseType) {
         List<Document> generatedDocList = new ArrayList<>();
         UploadResponse uploadResponse = null;
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
             uploadResponse = caseDocumentClient.uploadDocuments(
                 auth,
                 authTokenGenerator.generate(),
