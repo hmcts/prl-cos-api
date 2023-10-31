@@ -349,6 +349,7 @@ public class UpdatePartyDetailsServiceTest {
             .applicantsFL401(applicant1)
             .respondentsFL401(respondent1)
             .children(listOfChildren)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.no)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -407,14 +408,17 @@ public class UpdatePartyDetailsServiceTest {
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+
             .build();
 
         PartyDetails applicant1 = PartyDetails.builder()
             .firstName("applicant2")
             .lastName("lastname")
-            .canYouProvideEmailAddress(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
             .build();
 
         Element<PartyDetails> wrappedApplicant1 = Element.<PartyDetails>builder().value(applicant).build();
@@ -427,9 +431,14 @@ public class UpdatePartyDetailsServiceTest {
         PartyDetails respondent = PartyDetails.builder()
             .firstName("test1")
             .lastName("test22")
-            .canYouProvideEmailAddress(YesOrNo.No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .build();
 
@@ -439,6 +448,10 @@ public class UpdatePartyDetailsServiceTest {
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
+            .isCurrentAddressKnown(YesOrNo.No)
+            .isAtAddressLessThan5Years(YesOrNo.No)
+            .isDateOfBirthKnown(YesOrNo.No)
+            .isPlaceOfBirthKnown(YesOrNo.No)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
             .build();
 
@@ -530,9 +543,26 @@ public class UpdatePartyDetailsServiceTest {
         List<Element<ApplicantConfidentialityDetails>> applicantConfidentialList = Collections.singletonList(
             applicantConfidential);
 
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .respondents(respondentList)
+            .children(listOfChildren)
+            .childrenKnownToLocalAuthority(YesNoDontKnow.no)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
