@@ -8,7 +8,6 @@ public abstract class CafcassAppConstants {
     public static final String CAFCASS_USER_ROLE = "caseworker-privatelaw-cafcass";
     public static final String INVALID_DOCUMENT_TYPE = "Un acceptable format/type of document %s";
 
-    CafcassAppConstants() {
-
+    private CafcassAppConstants() {
     }
 }

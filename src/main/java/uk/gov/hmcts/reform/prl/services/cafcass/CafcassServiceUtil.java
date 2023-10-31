@@ -56,7 +56,6 @@ public class CafcassServiceUtil {
         return CaseData.builder().id(Long.parseLong(caseId)).cafcassUploadedDocs(uploadedDocumentsList).build();
     }
 
-    CafcassServiceUtil() {
-
+    private CafcassServiceUtil() {
     }
 }
