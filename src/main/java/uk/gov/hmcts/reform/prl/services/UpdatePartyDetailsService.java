@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -21,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +32,18 @@ import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -106,8 +116,85 @@ public class UpdatePartyDetailsService {
                 setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
             }
         }
-
+        cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
+    }
+
+    private void cleanUpCaseDataBasedOnYesNoSelection(Map<String, Object> updatedCaseData, CaseData caseData) {
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            if (isNotEmpty(caseData.getRespondentsFL401())) {
+                PartyDetails updatedRespondent = resetRespondent(caseData.getRespondentsFL401());
+                updatedCaseData.put(FL401_RESPONDENTS, updatedRespondent);
+            }
+            if (isNotEmpty(caseData.getApplicantsFL401())) {
+                PartyDetails updatedApplicant = resetApplicant(caseData.getApplicantsFL401());
+                updatedCaseData.put(FL401_APPLICANTS, updatedApplicant);
+            }
+        } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+                List<Element<PartyDetails>> updatedRespondents = new ArrayList<>();
+                caseData.getRespondents().forEach(eachRespondent -> {
+                    updatedRespondents.add(element(
+                        eachRespondent.getId(),
+                        resetRespondent(eachRespondent.getValue())
+                    ));
+                });
+                updatedCaseData.put(RESPONDENTS, updatedRespondents);
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+                List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+                caseData.getApplicants().forEach(eachApplicant -> {
+                    updatedApplicants.add(element(
+                        eachApplicant.getId(),
+                        resetApplicant(eachApplicant.getValue())
+                    ));
+                });
+                updatedCaseData.put(APPLICANTS, updatedApplicants);
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getChildren())
+                && YesNoDontKnow.no.equals(caseData.getChildrenKnownToLocalAuthority())) {
+                updatedCaseData.put("childrenKnownToLocalAuthorityTextArea", null);
+            }
+        }
+    }
+
+    private PartyDetails resetApplicant(PartyDetails partyDetails) {
+        partyDetails = partyDetails.toBuilder()
+            .addressLivedLessThan5YearsDetails(YesOrNo.Yes.equals(partyDetails.getIsAtAddressLessThan5Years())
+                                                   ? partyDetails.getAddressLivedLessThan5YearsDetails() : null)
+            .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
+            .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
+                                            ? partyDetails.getIsEmailAddressConfidential() : null)
+            .build();
+
+        return partyDetails;
+    }
+
+    private PartyDetails resetRespondent(PartyDetails partyDetails) {
+        boolean isRepresented = YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+        partyDetails = partyDetails.toBuilder()
+            .dateOfBirth(YesOrNo.Yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
+            .placeOfBirth(YesOrNo.Yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
+            .address(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
+            .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
+                                       ? partyDetails.getIsAddressConfidential() : null)
+            .addressLivedLessThan5YearsDetails(YesOrNo.Yes.equals(partyDetails.getIsAtAddressLessThan5Years())
+                                                   ? partyDetails.getAddressLivedLessThan5YearsDetails() : null)
+            .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
+            .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
+                                            ? partyDetails.getIsEmailAddressConfidential() : null)
+            .phoneNumber(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber()) ? partyDetails.getPhoneNumber() : null)
+            .isPhoneNumberConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber())
+                                           ? partyDetails.getIsPhoneNumberConfidential() : null)
+            .representativeFirstName(isRepresented ? partyDetails.getRepresentativeFirstName() : null)
+            .representativeLastName(isRepresented ? partyDetails.getRepresentativeLastName() : null)
+            .solicitorEmail(isRepresented ? partyDetails.getSolicitorEmail() : null)
+            .dxNumber(isRepresented ? partyDetails.getDxNumber() : null)
+            .solicitorAddress(isRepresented ? partyDetails.getSolicitorAddress() : null)
+            .solicitorOrg(isRepresented ? partyDetails.getSolicitorOrg() : null)
+            .build();
+
+        return partyDetails;
     }
 
     private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
@@ -119,15 +206,11 @@ public class UpdatePartyDetailsService {
         if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
             applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
             organisationNotExists = true;
-        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isEmpty(
-            applicantOrganisationPolicy.getOrganisation())) {
-            if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
-                roleNotExists = true;
-            }
-            organisationNotExists = true;
-        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isNotEmpty(
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && (ObjectUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation()) || (ObjectUtils.isNotEmpty(
             applicantOrganisationPolicy.getOrganisation()) && StringUtils.isEmpty(
-            applicantOrganisationPolicy.getOrganisation().getOrganisationID())) {
+            applicantOrganisationPolicy.getOrganisation().getOrganisationID())))
+        ) {
             if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
                 roleNotExists = true;
             }
