@@ -92,8 +92,8 @@ public class ManageDocumentsService {
             log.info("22222222 {}",categoriesAndDocuments.getCategories());
 
             categoriesAndDocuments.getCategories().forEach(s -> {
-                log.info("NAMEEE -->",s.getCategoryName());
-                log.info("IDDDDD -->",s.getCategoryId());
+                log.info("NAMEEE -->{}",s.getCategoryName());
+                log.info("IDDDDD -->{}",s.getCategoryId());
             });
 
             if (null != categoriesAndDocuments) {
