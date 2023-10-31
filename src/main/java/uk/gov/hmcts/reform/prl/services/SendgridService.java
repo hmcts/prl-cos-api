@@ -113,14 +113,19 @@ public class SendgridService {
             String body = emailProps.containsKey("finalOrder")
                     ? RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY : RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 
-            content = new Content("text/html", String.format(
-                   title + EMAIL_START
-                            + body + EMAIL_END,
-                    emailProps.get(CASE_NAME),
-                    emailProps.get(CASE_NUMBER),
-                    emailProps.get("solicitorName"),
-                    emailProps.get("orderUrLLink")
-            ));
+            String emailStart = String.format(
+                EMAIL_START,
+                emailProps.get(CASE_NAME),
+                emailProps.get("caseNumber"),
+                emailProps.get("solicitorName")
+            );
+
+            String emailEnd = String.format(
+                EMAIL_END,
+                emailProps.get("orderUrLLink")
+            );
+
+            content = new Content("text/html", String.format("%s%s%s", title, emailStart, emailEnd));
         } else {
             content = new Content("text/plain", String.format(
                     (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
