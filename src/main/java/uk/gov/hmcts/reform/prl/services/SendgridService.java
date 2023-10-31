@@ -104,7 +104,7 @@ public class SendgridService {
                                                              String toEmailAddress, List<Document> listOfAttachments, String servedParty)
         throws IOException {
 
-        Content content = new Content();
+        Content content;
         String subject = emailProps.get("subject");
         if (emailProps.containsKey("orderURLLinkNeeded")) {
             subject = emailProps.get("orderSubject");
