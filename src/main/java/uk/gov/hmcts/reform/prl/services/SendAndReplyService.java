@@ -441,8 +441,7 @@ public class SendAndReplyService {
     }
 
     private List<DynamicListElement> getDynamicListElements(List<CodeAndLabel> dropdowns) {
-        return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown.getCode()).label(dropdown.getLabel()).build())
-            .toList();
+        return dropdowns.stream().map(dropdown -> DynamicListElement.builder().code(dropdown.getCode()).label(dropdown.getLabel()).build()).toList();
     }
 
     private Map<String, String> getRefDataMap(String authorization, String s2sToken, String serviceCode, String hearingTypeCategoryId) {
@@ -604,13 +603,11 @@ public class SendAndReplyService {
         categoryList.forEach(category -> {
             if (parentLabelString == null) {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().forEach(document -> {
-                        dynamicListElementList.add(
-                            DynamicListElement.builder().code(category.getCategoryId() + ARROW_SEPARATOR
-                                                                  + fetchDocumentIdFromUrl(document.getDocumentURL()))
-                                .label(category.getCategoryName() + " -> " + document.getDocumentFilename()).build()
-                        );
-                    });
+                    category.getDocuments().forEach(document -> dynamicListElementList.add(
+                        DynamicListElement.builder().code(category.getCategoryId() + ARROW_SEPARATOR
+                                                              + fetchDocumentIdFromUrl(document.getDocumentURL()))
+                            .label(category.getCategoryName() + " -> " + document.getDocumentFilename()).build()
+                    ));
                 }
                 if (category.getSubCategories() != null) {
                     createDynamicListFromSubCategories(
@@ -622,15 +619,13 @@ public class SendAndReplyService {
                 }
             } else {
                 if (category.getDocuments() != null) {
-                    category.getDocuments().forEach(document -> {
-                        dynamicListElementList.add(
-                            DynamicListElement.builder()
-                                .code(parentCodeString + " -> " + category.getCategoryId() + ARROW_SEPARATOR
-                                          + fetchDocumentIdFromUrl(document.getDocumentURL()))
-                                .label(parentLabelString + " -> " + category.getCategoryName() + " -> "
-                                           + document.getDocumentFilename()).build()
-                        );
-                    });
+                    category.getDocuments().forEach(document -> dynamicListElementList.add(
+                        DynamicListElement.builder()
+                            .code(parentCodeString + " -> " + category.getCategoryId() + ARROW_SEPARATOR
+                                      + fetchDocumentIdFromUrl(document.getDocumentURL()))
+                            .label(parentLabelString + " -> " + category.getCategoryName() + " -> "
+                                       + document.getDocumentFilename()).build()
+                    ));
                 }
                 if (category.getSubCategories() != null) {
                     createDynamicListFromSubCategories(category.getSubCategories(), dynamicListElementList,
