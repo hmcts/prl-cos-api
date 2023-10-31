@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
@@ -219,8 +218,6 @@ public class ResubmitApplicationController {
             Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
                 ResubmitApplicationController::getPreviousState).findFirst();
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
-
-            UserDetails userDetails = userService.getUserDetails(authorisation);
 
             if (previousStates.isPresent() && (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get()))) {
                 caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();

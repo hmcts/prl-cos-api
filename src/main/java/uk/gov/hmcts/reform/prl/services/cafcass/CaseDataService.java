@@ -290,14 +290,12 @@ public class CaseDataService {
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
                     filteredHearing.getCaseHearings().stream().forEach(
-                        caseHearing -> {
-                            caseHearing.getHearingDaySchedule().stream().forEach(
-                                hearingDaySchedule -> {
-                                    hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
-                                    hearingDaySchedule.setHearingVenueId(null);
-                                }
-                            );
-                        }
+                        caseHearing -> caseHearing.getHearingDaySchedule().stream().forEach(
+                            hearingDaySchedule -> {
+                                hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
+                                hearingDaySchedule.setHearingVenueId(null);
+                            }
+                        )
                     );
                 }
             }
