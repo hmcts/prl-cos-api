@@ -91,14 +91,17 @@ public class EventCheckerTest {
     public void init() {
         when(commonChecker.getPdfChecker()).thenReturn(pdfChecker);
         when(commonChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(partyChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(c100CaseChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(fl401CaseChecker.getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
         eventsChecker.init();
-        when(commonChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
     }
 
 
     @Test
     public void whenEventIsFinished_thenEventCheckerFinishedReturnsTrue() {
         when(applicantsChecker.isFinished(caseData)).thenReturn(true);
+        assertTrue(eventsChecker.getEventStatus().containsKey(Event.APPLICANT_DETAILS));
         assertTrue(eventsChecker.isFinished(Event.APPLICANT_DETAILS, caseData));
 
     }

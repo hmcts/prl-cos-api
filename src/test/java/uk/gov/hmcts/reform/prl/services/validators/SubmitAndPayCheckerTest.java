@@ -6,6 +6,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -44,11 +45,20 @@ public class SubmitAndPayCheckerTest {
     @InjectMocks
     SubmitAndPayChecker submitAndPayChecker;
 
-    @Mock
+    @InjectMocks
     EventsChecker eventsChecker;
 
     @Mock
+    EventsChecker.C100CaseChecker c100CaseChecker;
+
+    @Mock
+    EventsChecker.CommonChecker commonChecker;
+
+    @Mock
     CaseNameChecker caseNameChecker;
+
+    @Mock
+    EventsChecker.PartyChecker partyChecker;
 
     @Mock
     ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
@@ -131,7 +141,7 @@ public class SubmitAndPayCheckerTest {
 
     @Before
     public void setUp() {
-
+        ReflectionTestUtils.setField(submitAndPayChecker, "eventsChecker", eventsChecker);
         address = Address.builder()
             .addressLine1("Test")
             .addressLine2("Test")

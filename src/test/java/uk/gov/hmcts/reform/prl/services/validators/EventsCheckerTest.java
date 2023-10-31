@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,24 @@ public class EventsCheckerTest {
     @Mock
     CaseNameChecker caseNameChecker;
 
+    @Mock
+    private EventsChecker.CommonChecker commonChecker;
+
+    @Mock
+    private EventsChecker.C100CaseChecker c100CaseChecker;
+
+    @Mock
+    private EventsChecker.PartyChecker partyChecker;
+
+    @Mock
+    private EventsChecker.FL401CaseChecker fl401CaseChecker;
+
+
+    @Before
+    public void init() {
+        when(commonChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        eventsChecker.init();
+    }
 
     @Test
     public void testIsFinished() {
