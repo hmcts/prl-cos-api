@@ -48,10 +48,12 @@ public class AllocateJudgeController extends AbstractCallbackController {
     private final AuthorisationService authorisationService;
 
     @Autowired
-    protected AllocateJudgeController(ObjectMapper objectMapper, EventService eventPublisher,
+    protected AllocateJudgeController(ObjectMapper objectMapper,
+                                      EventService eventPublisher,
                                       CaseSummaryTabService caseSummaryTabService,
-                                      RefDataUserService refDataUserService, AllocatedJudgeService
-                                          allocatedJudgeService, AuthorisationService authorisationService) {
+                                      RefDataUserService refDataUserService,
+                                      AllocatedJudgeService allocatedJudgeService,
+                                      AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.caseSummaryTabService = caseSummaryTabService;
         this.refDataUserService = refDataUserService;
