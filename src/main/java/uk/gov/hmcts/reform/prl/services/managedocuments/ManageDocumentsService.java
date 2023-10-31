@@ -89,19 +89,6 @@ public class ManageDocumentsService {
                 authTokenGenerator.generate(),
                 caseReference
             );
-            log.info("22222222 {}",categoriesAndDocuments.getCategories());
-
-            categoriesAndDocuments.getCategories().forEach(s -> {
-                log.info("NAMEEE -->{}",s.getCategoryName());
-                log.info("IDDDDD -->{}",s.getCategoryId());
-            });
-
-            categoriesAndDocuments.getCategories().removeIf(x -> x.getCategoryId().equals("confidential"));
-
-            categoriesAndDocuments.getCategories().forEach(s -> {
-                log.info("NAMEEE1111 -->{}",s.getCategoryName());
-                log.info("IDDDDD1111 -->{}",s.getCategoryId());
-            });
 
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
