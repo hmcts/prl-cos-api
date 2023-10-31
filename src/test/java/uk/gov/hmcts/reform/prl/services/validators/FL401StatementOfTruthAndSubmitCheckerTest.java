@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipOptionsEnum;
@@ -53,11 +54,20 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
     @InjectMocks
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
-    @Mock
+    @InjectMocks
     EventsChecker eventsChecker;
 
     @Mock
     CaseNameChecker caseNameChecker;
+
+    @Mock
+    EventsChecker.CommonChecker commonChecker;
+
+    @Mock
+    EventsChecker.FL401CaseChecker fl401CaseChecker;
+
+    @Mock
+    EventsChecker.PartyChecker partyChecker;
 
     @Mock
     FL401ApplicationTypeChecker fl401ApplicationTypeChecker;
@@ -107,6 +117,7 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
 
     @Before
     public void setUp() {
+        ReflectionTestUtils.setField(fl401StatementOfTruthAndSubmitChecker, "eventsChecker", eventsChecker);
         MockitoAnnotations.openMocks(this);
 
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
