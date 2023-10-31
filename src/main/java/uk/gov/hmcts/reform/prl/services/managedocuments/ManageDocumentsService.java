@@ -96,6 +96,13 @@ public class ManageDocumentsService {
                 log.info("IDDDDD -->{}",s.getCategoryId());
             });
 
+            categoriesAndDocuments.getCategories().removeIf(x -> x.getCategoryId().equals("confidential"));
+
+            categoriesAndDocuments.getCategories().forEach(s -> {
+                log.info("NAMEEE1111 -->{}",s.getCategoryName());
+                log.info("IDDDDD1111 -->{}",s.getCategoryId());
+            });
+
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
