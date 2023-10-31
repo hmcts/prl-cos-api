@@ -65,8 +65,6 @@ import java.util.Optional;
 
 import static com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_C2_APPLICATION_SNR_CODE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWP_OTHER_APPLICATION_SNR_CODE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CA_APPLICANT;
@@ -75,7 +73,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
@@ -669,42 +666,5 @@ public class UploadAdditionalApplicationService {
             caseDataUpdated.put(TEMPORARY_C_2_DOCUMENT, c2DocumentBundle);
         }
         return caseDataUpdated;
-    }
-
-    public List<Element<AdditionalApplicationsBundle>> updateAwpApplicationStatus(
-        String awpApplicationSelectedFromSnR,
-        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle,
-        String applicationStatus) {
-        String[] awpSelectedApplicationDetails = awpApplicationSelectedFromSnR.split(UNDERSCORE);
-
-        if (awpSelectedApplicationDetails[0].equals(AWP_OTHER_APPLICATION_SNR_CODE)) {
-            additionalApplicationsBundle.stream()
-                .filter(
-                    t -> t.getValue().getOtherApplicationsBundle() != null
-                        && t.getValue().getOtherApplicationsBundle().getUploadedDateTime().equals(
-                        awpSelectedApplicationDetails[1])
-                )
-                .map(Element::getValue)
-                .forEach(additionalApplicationsBundle1 -> {
-                    additionalApplicationsBundle1.setOtherApplicationsBundle(additionalApplicationsBundle1.getOtherApplicationsBundle()
-                                                                          .toBuilder()
-                                                                          .applicationStatus(applicationStatus)
-                                                                          .build());
-                });
-        } else if (awpSelectedApplicationDetails[0].equals(AWP_C2_APPLICATION_SNR_CODE)) {
-            additionalApplicationsBundle.stream()
-                .filter(
-                    t -> t.getValue().getC2DocumentBundle() != null
-                        && t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(awpSelectedApplicationDetails[1])
-                )
-                .map(Element::getValue)
-                .forEach(additionalApplicationsBundle1 -> {
-                    additionalApplicationsBundle1.setC2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
-                                                                          .toBuilder()
-                                                                          .applicationStatus(applicationStatus)
-                                                                          .build());
-                });
-        }
-        return additionalApplicationsBundle;
     }
 }
