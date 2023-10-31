@@ -30,7 +30,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
@@ -159,9 +158,8 @@ public class SendgridService {
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)
             .servedParty(servedParty)
-            .docs(listOfAttachments.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(listOfAttachments.stream().map(s -> element(s)).toList())
+            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).toList()))
             .timeStamp(currentDate).build();
     }
 
@@ -201,7 +199,7 @@ public class SendgridService {
     }
 
     private void attachFiles(String authorization, Mail mail, Map<String,
-        String> emailProps, List<Document> documents) throws IOException {
+        String> emailProps, List<Document> documents) {
         String s2sToken = authTokenGenerator.generate();
 
         for (Document d : documents) {

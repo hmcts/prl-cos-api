@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
@@ -35,7 +34,7 @@ public class ApplicantsMapper {
         }
         List<PartyDetails> applicantList = applicants.stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         AtomicInteger counter = new AtomicInteger(1);
         return applicantList.stream().map(applicant -> getApplicant(counter, applicant, applicantSolicitorMap)).collect(
             JsonCollectors.toJsonArray());
