@@ -157,43 +157,14 @@ public class ReviewDocumentService {
                     uuid
                 );
             }
-            Optional<Element<UploadedDocuments>> quarantineCitizenDocElement = Optional.empty();
-            if (null != caseData.getCitizenUploadQuarantineDocsList()) {
-                quarantineCitizenDocElement = caseData.getCitizenUploadQuarantineDocsList().stream()
-                    .filter(element -> element.getId().equals(uuid)).findFirst();
-            }
-
-            if (quarantineLegalDocElement.isPresent()) {
-                updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                    caseDataUpdated,
-                    quarantineLegalDocElement,
-                    LEGAL_PROFESSIONAL
-                );
-            } else if (cafcassQuarantineDocElement.isPresent()) {
-                updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                    caseDataUpdated,
-                    cafcassQuarantineDocElement,
-                    CAFCASS
-                );
-            } else if (courtStaffQuarantineDocElement.isPresent()) {
-                updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                    caseDataUpdated,
-                    courtStaffQuarantineDocElement,
-                    COURT_STAFF
-                );
-            } else if (quarantineCitizenDocElement.isPresent()) {
-                UploadedDocuments document = quarantineCitizenDocElement.get().getValue();
-                log.info("** citizen document ** {}", document);
-
-                String docTobeReviewed = formatDocumentTobeReviewed(
-                    document.getPartyName(),
-                    document.getDocumentType(),
-                    ""
-                );
-
-                caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
-                caseDataUpdated.put(REVIEW_DOC, document.getCitizenDocument());
-            }
+            updateReviewdocs(
+                caseData,
+                caseDataUpdated,
+                uuid,
+                quarantineLegalDocElement,
+                cafcassQuarantineDocElement,
+                courtStaffQuarantineDocElement
+            );
             if (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())) {
                 Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement = Optional.empty();
                 quarantineBulkscanDocElement = Optional.of(
@@ -201,14 +172,55 @@ public class ReviewDocumentService {
                                 .url(caseData.getScannedDocuments().stream()
                                          .filter(element -> element.getId().equals(uuid))
                                          .toList().get(0).getValue().getUrl()).build()));
-                if (quarantineBulkscanDocElement.isPresent()) {
-                    updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                        caseDataUpdated,
-                        quarantineBulkscanDocElement,
-                        BULK_SCAN
-                    );
-                }
+                updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
+                    caseDataUpdated,
+                    quarantineBulkscanDocElement,
+                    BULK_SCAN
+                );
             }
+        }
+    }
+
+    private void updateReviewdocs(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid,
+                                  Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement,
+                                  Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement,
+                                  Optional<Element<QuarantineLegalDoc>> courtStaffQuarantineDocElement) {
+        Optional<Element<UploadedDocuments>> quarantineCitizenDocElement = Optional.empty();
+        if (null != caseData.getCitizenUploadQuarantineDocsList()) {
+            quarantineCitizenDocElement = caseData.getCitizenUploadQuarantineDocsList().stream()
+                .filter(element -> element.getId().equals(uuid)).findFirst();
+        }
+
+        if (quarantineLegalDocElement.isPresent()) {
+            updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
+                caseDataUpdated,
+                quarantineLegalDocElement,
+                LEGAL_PROFESSIONAL
+            );
+        } else if (cafcassQuarantineDocElement.isPresent()) {
+            updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
+                caseDataUpdated,
+                cafcassQuarantineDocElement,
+                CAFCASS
+            );
+        } else if (courtStaffQuarantineDocElement.isPresent()) {
+            updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
+                caseDataUpdated,
+                courtStaffQuarantineDocElement,
+                COURT_STAFF
+            );
+        } else if (quarantineCitizenDocElement.isPresent()) {
+            UploadedDocuments document = quarantineCitizenDocElement.get().getValue();
+            log.info("** citizen document ** {}", document);
+
+            String docTobeReviewed = formatDocumentTobeReviewed(
+                document.getPartyName(),
+                document.getDocumentType(),
+                ""
+            );
+
+            caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
+            caseDataUpdated.put(REVIEW_DOC, document.getCitizenDocument());
         }
     }
 
@@ -406,7 +418,7 @@ public class ReviewDocumentService {
 
     private List<Element<QuarantineLegalDoc>> convertScannedDocumentsToQuarantineDocList(
         List<Element<ScannedDocument>> scannedDocumentElements, UUID uuid) {
-        List<Element<QuarantineLegalDoc>> quarantineLegalDocElementList = scannedDocumentElements.stream().map(
+        return scannedDocumentElements.stream().map(
             scannedDocumentElement -> {
                 ScannedDocument scannedDocument = scannedDocumentElement.getValue();
                 return element(uuid, QuarantineLegalDoc.builder()
@@ -423,7 +435,6 @@ public class ReviewDocumentService {
 
 
             }).collect(Collectors.toList());
-        return quarantineLegalDocElementList;
     }
 
     private void forReviewDecisionNo(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
