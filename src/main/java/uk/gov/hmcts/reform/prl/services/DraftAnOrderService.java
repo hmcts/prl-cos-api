@@ -394,6 +394,8 @@ public class DraftAnOrderService {
                 log.info("inside filterEmptyHearingDetails");
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
             }
+            log.info("**** DraftOrderService::OrdersHearingDetails after filter **** -> {}", caseData.getManageOrders().getOrdersHearingDetails());
+
             log.info("before creating final order caseId ==> " + caseData.getId());
             log.info("before creating final order getJudgeOrMagistratesLastName ==> " + caseData.getJudgeOrMagistratesLastName());
             log.info("before creating final order getJudgeOrMagistrateTitle ==> " + caseData.getManageOrders().getJudgeOrMagistrateTitle());
