@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-//import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
@@ -107,7 +106,6 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
 
     @Before
     public void setUp() {
-        //MockitoAnnotations.openMocks(this);
 
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
         orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
