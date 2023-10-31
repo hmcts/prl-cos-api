@@ -251,7 +251,7 @@ public class CaseDataService {
 
     private CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
         CafCassResponse filteredCafcassResponse = CafCassResponse.builder()
-            .cases(new ArrayList<CafCassCaseDetail>())
+            .cases(new ArrayList<>())
             .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (CafCassCaseDetail caseDetails : cafCassResponse.getCases()) {
