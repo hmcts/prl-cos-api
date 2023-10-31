@@ -70,8 +70,6 @@ public class ServiceOfApplicationController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    private Map<String, Object> caseDataUpdated;
-
     @Autowired
     @Qualifier("caseSummaryTab")
     private CaseSummaryTabService caseSummaryTabService;
