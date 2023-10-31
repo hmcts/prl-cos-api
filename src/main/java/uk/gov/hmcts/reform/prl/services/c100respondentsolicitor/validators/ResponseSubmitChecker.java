@@ -26,7 +26,7 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ResponseSubmitChecker implements RespondentEventChecker {
     @Lazy
-    RespondentEventsChecker respondentEventsChecker;
+    private RespondentEventsChecker respondentEventsChecker;
 
     @Override
     public boolean isStarted(PartyDetails respondingParty) {

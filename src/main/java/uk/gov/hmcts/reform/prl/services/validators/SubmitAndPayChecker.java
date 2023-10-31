@@ -42,8 +42,9 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SubmitAndPayChecker implements EventChecker {
 
+    @Autowired
     @Lazy
-    EventsChecker eventsChecker;
+    private EventsChecker eventsChecker;
 
 
     @Override
