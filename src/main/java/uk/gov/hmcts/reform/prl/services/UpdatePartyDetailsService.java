@@ -119,15 +119,11 @@ public class UpdatePartyDetailsService {
         if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
             applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
             organisationNotExists = true;
-        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isEmpty(
-            applicantOrganisationPolicy.getOrganisation())) {
-            if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
-                roleNotExists = true;
-            }
-            organisationNotExists = true;
-        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isNotEmpty(
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && (ObjectUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation()) || (ObjectUtils.isNotEmpty(
             applicantOrganisationPolicy.getOrganisation()) && StringUtils.isEmpty(
-            applicantOrganisationPolicy.getOrganisation().getOrganisationID())) {
+            applicantOrganisationPolicy.getOrganisation().getOrganisationID())))
+        ) {
             if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
                 roleNotExists = true;
             }
