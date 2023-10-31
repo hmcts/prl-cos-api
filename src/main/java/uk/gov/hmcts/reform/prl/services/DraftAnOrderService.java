@@ -1431,6 +1431,7 @@ public class DraftAnOrderService {
     }
 
     private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum orderType) throws Exception {
+        log.info("DraftOrderService::OrderType -> {}", orderType);
         return manageOrderService.getCaseData(
             authorisation,
             caseData,
