@@ -118,10 +118,6 @@ public class UpdatePartyDetailsService {
             }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
-        log.info("CaseData Respondents " + caseData.getRespondents());
-        log.info("CaseData RespondentsFL401 " + caseData.getRespondentsFL401());
-        log.info("Map Respondents " + updatedCaseData.get("respondents"));
-        log.info("Map RespondentsFL401 " + updatedCaseData.get("respondentsFL401"));
         return updatedCaseData;
     }
 
