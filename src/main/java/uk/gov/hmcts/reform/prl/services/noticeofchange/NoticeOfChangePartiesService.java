@@ -68,7 +68,6 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
@@ -530,49 +529,63 @@ public class NoticeOfChangePartiesService {
             = findUserCaseRoles(String.valueOf(caseDetails.getId()), authorisation);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
 
-        for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-            SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
-                x -> {
-                    switch (x.getRepresenting()) {
-                        case CAAPPLICANT:
-                            findMatchingParty(
-                                caseData,
-                                caseData.getApplicants().get(x.getIndex()),
-                                selectedPartyDetailsMap,
-                                x
-                            );
-                            break;
-                        case CARESPONDENT:
-                            findMatchingParty(
-                                caseData,
-                                caseData.getRespondents().get(x.getIndex()),
-                                selectedPartyDetailsMap,
-                                x
-                            );
-                            break;
-                        case DAAPPLICANT:
-                            selectedPartyDetailsMap.put(
-                                Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR),
-                                element(
-                                    caseData.getApplicantsFL401().getPartyId(),
-                                    caseData.getApplicantsFL401()
-                                )
-                            );
-                            break;
-                        case DARESPONDENT:
-                            selectedPartyDetailsMap.put(
-                                Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR),
-                                element(
-                                    caseData.getRespondentsFL401().getPartyId(),
-                                    caseData.getRespondentsFL401()
-                                )
-                            );
-                            break;
-                        default:
-                            break;
-                    }
-                });
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+
+            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                SolicitorRole.fromCaseRoleLabelAndCaseType(caseUser.getCaseRole(),CaseUtils.getCaseTypeOfApplication(caseData)).ifPresent(
+                    x -> {
+                        switch (x.getRepresenting()) {
+                            case CAAPPLICANT:
+                                findMatchingParties(
+                                    caseData,
+                                    caseData.getApplicants(),
+                                    selectedPartyDetailsMap,
+                                    x
+                                );
+                                break;
+                            case CARESPONDENT:
+                                findMatchingParties(
+                                    caseData,
+                                    caseData.getRespondents(),
+                                    selectedPartyDetailsMap,
+                                    x
+                                );
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+            }
+        } else {
+            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                SolicitorRole.fromCaseRoleLabelAndCaseType(caseUser.getCaseRole(),CaseUtils.getCaseTypeOfApplication(caseData)).ifPresent(
+                    x -> {
+                        switch (x.getRepresenting()) {
+                            case DAAPPLICANT:
+                                selectedPartyDetailsMap.put(
+                                    Optional.of(SolicitorRole.FL401APPLICANTSOLICITOR),
+                                    element(
+                                        caseData.getApplicantsFL401().getPartyId(),
+                                        caseData.getApplicantsFL401()
+                                    )
+                                );
+                                break;
+                            case DARESPONDENT:
+                                selectedPartyDetailsMap.put(
+                                    Optional.of(SolicitorRole.FL401RESPONDENTSOLICITOR),
+                                    element(
+                                        caseData.getRespondentsFL401().getPartyId(),
+                                        caseData.getRespondentsFL401()
+                                    )
+                                );
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+            }
         }
+
         caseDataUpdated = createChangeOrgReqAndRemoveRepresentative(
             authorisation,
             caseDetails,
@@ -802,19 +815,16 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    private void findMatchingParty(CaseData caseData,
-                                   Element<PartyDetails> partyDetailsElement,
-                                   Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap,
-                                   SolicitorRole role) {
-        Optional<DynamicMultiselectListElement> match = caseData.getSolStopRepChooseParties()
-            .getValue()
-            .stream()
-            .filter(value ->
-                        partyDetailsElement.getId().toString().equalsIgnoreCase(value.getCode()))
-            .findFirst();
+    private void findMatchingParties(CaseData caseData,
+                                     List<Element<PartyDetails>> partyDetailsElementList,
+                                     Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap,
+                                     SolicitorRole role) {
+        if (partyDetailsElementList.size() > 0) {
+            partyDetailsElementList.forEach(partyDetailsElement -> selectedPartyDetailsMap.put(
+                Optional.of(role),
+                partyDetailsElement
+            ));
 
-        if (match.isPresent()) {
-            selectedPartyDetailsMap.put(Optional.of(role), partyDetailsElement);
         }
     }
 
@@ -929,14 +939,14 @@ public class NoticeOfChangePartiesService {
 
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-                SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
+                SolicitorRole.fromCaseRoleLabelAndCaseType(caseUser.getCaseRole(),CaseUtils.getCaseTypeOfApplication(caseData)).ifPresent(
                     x -> {
                         switch (x.getRepresenting()) {
                             case CAAPPLICANT:
-                                solicitorRepresentedParties.add(caseData.getApplicants().get(x.getIndex()));
+                                solicitorRepresentedParties.addAll(caseData.getApplicants());
                                 break;
                             case CARESPONDENT:
-                                solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex()));
+                                solicitorRepresentedParties.addAll(caseData.getRespondents());
                                 break;
                             default:
                                 break;
@@ -946,7 +956,7 @@ public class NoticeOfChangePartiesService {
             }
         } else {
             for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-                SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
+                SolicitorRole.fromCaseRoleLabelAndCaseType(caseUser.getCaseRole(),CaseUtils.getCaseTypeOfApplication(caseData)).ifPresent(
                     x -> {
                         switch (x.getRepresenting()) {
                             case DAAPPLICANT:

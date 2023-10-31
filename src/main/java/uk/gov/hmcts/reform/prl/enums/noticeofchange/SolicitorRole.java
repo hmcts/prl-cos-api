@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.enums.noticeofchange;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -17,12 +18,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 @RequiredArgsConstructor
 @Getter
 public enum SolicitorRole {
-    C100APPLICANTSOLICITOR("[APPLICANTSOLICITOR]", 1, Representing.CAAPPLICANT, BLANK_STRING),
-    C100APPLICANTSOLICITOR1("[C100APPLICANTSOLICITOR1]", 2, Representing.CAAPPLICANT, BLANK_STRING),
-    C100APPLICANTSOLICITOR2("[C100APPLICANTSOLICITOR2]", 3, Representing.CAAPPLICANT, BLANK_STRING),
-    C100APPLICANTSOLICITOR3("[C100APPLICANTSOLICITOR3]", 4, Representing.CAAPPLICANT, BLANK_STRING),
-    C100APPLICANTSOLICITOR4("[C100APPLICANTSOLICITOR4]", 5, Representing.CAAPPLICANT, BLANK_STRING),
-    C100APPLICANTSOLICITOR5("[C100APPLICANTSOLICITOR5]", 6, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR1("[C100APPLICANTSOLICITOR1]", 1, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR2("[C100APPLICANTSOLICITOR2]", 2, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR3("[C100APPLICANTSOLICITOR3]", 3, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR4("[C100APPLICANTSOLICITOR4]", 4, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR5("[C100APPLICANTSOLICITOR5]", 5, Representing.CAAPPLICANT, BLANK_STRING),
+    C100APPLICANTSOLICITOR("[APPLICANTSOLICITOR]", 6, Representing.CAAPPLICANT, BLANK_STRING),
     C100RESPONDENTSOLICITOR1("[C100RESPONDENTSOLICITOR1]", 1, Representing.CARESPONDENT, "A"),
     C100RESPONDENTSOLICITOR2("[C100RESPONDENTSOLICITOR2]", 2, Representing.CARESPONDENT, "B"),
     C100RESPONDENTSOLICITOR3("[C100RESPONDENTSOLICITOR3]", 3, Representing.CARESPONDENT, "C"),
@@ -57,6 +58,15 @@ public enum SolicitorRole {
             .filter(role -> role.caseRoleLabel.equals(caseRoleLabel))
             .findFirst();
     }
+
+    public static Optional<SolicitorRole> fromCaseRoleLabelAndCaseType(String caseRoleLabel, String caseType) {
+        return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
+            .filter(role -> role.caseRoleLabel.equals(caseRoleLabel) && StringUtils.contains(role.name(), caseType.toUpperCase()))
+            .findFirst();
+    }
+
+
+
 
     public static List<SolicitorRole> matchingRoles(Representing representing) {
         return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
