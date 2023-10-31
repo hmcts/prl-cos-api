@@ -9,7 +9,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-//import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
@@ -148,7 +147,6 @@ public class FL401SubmitApplicationControllerTest {
     @Before
     public void setUp() {
 
-        // MockitoAnnotations.openMocks(this);
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")

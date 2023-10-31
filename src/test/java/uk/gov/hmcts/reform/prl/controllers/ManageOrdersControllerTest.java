@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-//import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
@@ -153,7 +152,6 @@ public class ManageOrdersControllerTest {
 
     @Before
     public void setUp() {
-        //MockitoAnnotations.openMocks(this);
         List<String> roles = new ArrayList();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder()

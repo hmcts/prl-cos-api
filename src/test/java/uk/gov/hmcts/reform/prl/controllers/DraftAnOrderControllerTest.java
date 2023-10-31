@@ -105,7 +105,6 @@ public class DraftAnOrderControllerTest {
 
     @Before
     public void setUp() {
-        //MockitoAnnotations.openMocks(this);
 
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
