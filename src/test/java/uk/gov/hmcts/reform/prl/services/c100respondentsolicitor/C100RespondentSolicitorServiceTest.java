@@ -1068,8 +1068,6 @@ public class C100RespondentSolicitorServiceTest {
 
     @Test
     void testC7DraftDocument() throws Exception {
-
-
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1111,7 +1109,6 @@ public class C100RespondentSolicitorServiceTest {
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1151,16 +1148,16 @@ public class C100RespondentSolicitorServiceTest {
     @Test
     void testC7DraftDocumentNoDxNumber() throws Exception {
 
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        GeneratedDocumentInfo generatedC7DocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
 
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
+        Document c7Document = Document.builder()
+            .documentUrl(generatedC7DocumentInfo.getUrl())
+            .documentBinaryUrl(generatedC7DocumentInfo.getBinaryUrl())
+            .documentHash(generatedC7DocumentInfo.getHashToken())
             .documentFileName("Draft_C7_response.pdf")
             .build();
 
@@ -1171,8 +1168,9 @@ public class C100RespondentSolicitorServiceTest {
             authToken,
             caseData,
             SOLICITOR_C7_DRAFT_DOCUMENT,
-            false
-        )).thenReturn(document);
+            false,
+            Mockito.any(HashMap.class)
+        )).thenReturn(c7Document);
 
         caseData = caseData.toBuilder()
             .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
@@ -1182,23 +1180,24 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
-        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+        GeneratedDocumentInfo generatedC1ADocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
+        Document c1ADocument = Document.builder()
+            .documentUrl(generatedC1ADocumentInfo.getUrl())
+            .documentBinaryUrl(generatedC1ADocumentInfo.getBinaryUrl())
+            .documentHash(generatedC1ADocumentInfo.getHashToken())
             .documentFileName("Draft_C1A_allegation_of_harm.pdf")
             .build();
         when(documentGenService.generateSingleDocument(
             authToken,
             caseData,
             SOLICITOR_C1A_DRAFT_DOCUMENT,
-            false
-        )).thenReturn(document);
+            false,
+            Mockito.any(HashMap.class)
+        )).thenReturn(c1ADocument);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
