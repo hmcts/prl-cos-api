@@ -341,10 +341,8 @@ class UploadAdditionalApplicationServiceTest {
         );
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"[C100APPLICANTSOLICITOR1]", "[C100RESPONDENTSOLICITOR1]", "[APPLICANTSOLICITOR]",
-        "[FL401RESPONDENTSOLICITOR]", "[CREATOR]"})
-    void testPrePopulateApplicantsForCaApplicant(String input) throws Exception {
+    @Test
+    public void testPrePopulateApplicantsForCaApplicant() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
             .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
@@ -370,13 +368,17 @@ class UploadAdditionalApplicationServiceTest {
         when(idamClient.getUserDetails("testAuth")).thenReturn(UserDetails.builder().roles(List.of(
             "caseworker-privatelaw-solicitor")).build());
         FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
-        CaseUser caseUser = CaseUser.builder().caseRole(input).build();
-        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
-        when(userDataStoreService.findUserCaseRoles(
-            anyString(),
-            anyString()
-        )).thenReturn(findUserCaseRolesResponse);
-        assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
+        String[] roles = {"[C100APPLICANTSOLICITOR1]", "[C100RESPONDENTSOLICITOR1]", "[APPLICANTSOLICITOR]",
+            "[FL401RESPONDENTSOLICITOR]", "[CREATOR]"};
+        for (String role : roles) {
+            CaseUser caseUser = CaseUser.builder().caseRole(role).build();
+            findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
+            when(userDataStoreService.findUserCaseRoles(
+                anyString(),
+                anyString()
+            )).thenReturn(findUserCaseRolesResponse);
+            assertEquals(objectMap, uploadAdditionalApplicationService.prePopulateApplicants(callbackRequest, "testAuth"));
+        }
     }
 
     @Test
