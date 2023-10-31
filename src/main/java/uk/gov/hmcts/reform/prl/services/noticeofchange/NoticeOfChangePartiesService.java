@@ -68,6 +68,7 @@ import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
@@ -925,34 +926,50 @@ public class NoticeOfChangePartiesService {
 
     private List<Element<PartyDetails>> getSolicitorRepresentedParties(CaseData caseData, FindUserCaseRolesResponse findUserCaseRolesResponse) {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
-        for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
-            SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
-                x -> {
-                    switch (x.getRepresenting()) {
-                        case CAAPPLICANT:
-                            solicitorRepresentedParties.add(caseData.getApplicants().get(x.getIndex()));
-                            break;
-                        case CARESPONDENT:
-                            solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex()));
-                            break;
-                        case DAAPPLICANT:
-                            solicitorRepresentedParties.add(ElementUtils.element(
-                                caseData.getApplicantsFL401().getPartyId(),
-                                caseData.getApplicantsFL401()
-                            ));
-                            break;
-                        case DARESPONDENT:
-                            solicitorRepresentedParties.add(ElementUtils.element(
-                                caseData.getRespondentsFL401().getPartyId(),
-                                caseData.getRespondentsFL401()
-                            ));
-                            break;
-                        default:
-                            break;
+
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
+                    x -> {
+                        switch (x.getRepresenting()) {
+                            case CAAPPLICANT:
+                                solicitorRepresentedParties.add(caseData.getApplicants().get(x.getIndex()));
+                                break;
+                            case CARESPONDENT:
+                                solicitorRepresentedParties.add(caseData.getRespondents().get(x.getIndex()));
+                                break;
+                            default:
+                                break;
+                        }
                     }
-                }
-            );
+                );
+            }
+        } else {
+            for (CaseUser caseUser : findUserCaseRolesResponse.getCaseUsers()) {
+                SolicitorRole.fromCaseRoleLabel(caseUser.getCaseRole()).ifPresent(
+                    x -> {
+                        switch (x.getRepresenting()) {
+                            case DAAPPLICANT:
+                                solicitorRepresentedParties.add(ElementUtils.element(
+                                    caseData.getApplicantsFL401().getPartyId(),
+                                    caseData.getApplicantsFL401()
+                                ));
+                                break;
+                            case DARESPONDENT:
+                                solicitorRepresentedParties.add(ElementUtils.element(
+                                    caseData.getRespondentsFL401().getPartyId(),
+                                    caseData.getRespondentsFL401()
+                                ));
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                );
+            }
+
         }
+
         return solicitorRepresentedParties;
     }
 
