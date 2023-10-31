@@ -1952,6 +1952,7 @@ public class ManageOrderService {
         }
         log.info("*** Court seal {}", caseData.getCourtSeal());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("FinalDocument::OrdersHearingDetails -> {}", caseData.getManageOrders().getOrdersHearingDetails());
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
@@ -1970,6 +1971,7 @@ public class ManageOrderService {
                                    .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME))
                                    .build())
                 .build();
+            log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
         }
         if (documentLanguage.isGenWelsh()) {
             log.info("*** Generating Final order in Welsh ***");
@@ -1989,6 +1991,7 @@ public class ManageOrderService {
                                                                                .documentFileName(fieldMap.get(
                                                                                    PrlAppsConstants.WELSH_FILE_NAME)).build()).build();
             }
+            log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
         }
         log.info("inside getOrderDetailsElement ==> " + caseData.getManageOrders().getCurrentOrderCreatedDateTime());
         return element(orderDetails.toBuilder()

@@ -372,6 +372,7 @@ public class DraftAnOrderService {
             .childOption(draftOrder.getChildOption())
             .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .build();
+        log.info("DraftOrderService::ManageOrderHearingDetails -> {}", draftOrder.getManageOrderHearingDetails());
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(draftOrder.getOrderDocument())
@@ -387,6 +388,7 @@ public class DraftAnOrderService {
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
                     .build()
             ).build();
+            log.info("DraftOrderService::OrdersHearingDetails -> {}", caseData.getManageOrders().getOrdersHearingDetails());
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 log.info("inside filterEmptyHearingDetails");
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
@@ -426,6 +428,8 @@ public class DraftAnOrderService {
                         fieldMap
                     ))
                     .build();
+                log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
+                log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
             } catch (Exception e) {
                 log.error(
                     "Error while generating the final document for case {} and  order {}",
