@@ -85,7 +85,95 @@ public enum ManageOrderFieldsEnum {
     isRespondent2SolicitorPresent("isRespondent2SolicitorPresent"),
     isRespondent3SolicitorPresent("isRespondent3SolicitorPresent"),
     isRespondent4SolicitorPresent("isRespondent4SolicitorPresent"),
-    isRespondent5SolicitorPresent("isRespondent5SolicitorPresent");
+    isRespondent5SolicitorPresent("isRespondent5SolicitorPresent"),
+
+    //clear all missing fields
+    selectedOrder("selectedOrder"),
+    isTheOrderUploadedByConsent("isTheOrderUploadedByConsent"),
+    selectedC21Order("selectedC21Order"),
+    withdrawnOrRefusedOrder("withdrawnOrRefusedOrder"),
+    isCaseWithdrawn("isCaseWithdrawn"),
+    isTheOrderByConsent("isTheOrderByConsent"),
+    hearingType("hearingType"),
+    judgeOrMagistrateTitle("judgeOrMagistrateTitle"),
+    isTheOrderAboutAllChildren("isTheOrderAboutAllChildren"),
+    isTheOrderAboutChildren("isTheOrderAboutChildren"),
+    recitalsOrPreamble("recitalsOrPreamble"),
+    orderDirections("orderDirections"),
+    furtherDirectionsIfRequired("furtherDirectionsIfRequired"),
+    furtherInformationIfRequired("furtherInformationIfRequired"),
+
+    manageOrdersCourtName("manageOrdersCourtName"),
+    manageOrdersCourtAddress("manageOrdersCourtAddress"),
+    manageOrdersCaseNo("manageOrdersCaseNo"),
+    manageOrdersApplicant("manageOrdersApplicant"),
+    manageOrdersApplicantReference("manageOrdersApplicantReference"),
+    manageOrdersRespondent("manageOrdersRespondent"),
+    manageOrdersRespondentReference("manageOrdersRespondentReference"),
+    manageOrdersRespondentDob("manageOrdersRespondentDob"),
+    manageOrdersRespondentAddress("manageOrdersRespondentAddress"),
+    manageOrdersUnderTakingRepr("manageOrdersUnderTakingRepr"),
+    underTakingSolicitorCounsel("underTakingSolicitorCounsel"),
+    manageOrdersUnderTakingPerson("manageOrdersUnderTakingPerson"),
+    manageOrdersUnderTakingAddress("manageOrdersUnderTakingAddress"),
+    manageOrdersUnderTakingTerms("manageOrdersUnderTakingTerms"),
+    manageOrdersDateOfUnderTaking("manageOrdersDateOfUnderTaking"),
+    underTakingExpiryDateTime("underTakingExpiryDateTime"),
+    underTakingDateExpiry("underTakingDateExpiry"),
+    underTakingExpiryTime("underTakingExpiryTime"),
+    underTakingFormSign("underTakingFormSign"),
+
+    manageOrdersFl402CourtName("manageOrdersFl402CourtName"),
+    manageOrdersFl402CourtAddress("manageOrdersFl402CourtAddress"),
+    manageOrdersFl402CaseNo("manageOrdersFl402CaseNo"),
+    manageOrdersFl402Applicant("manageOrdersFl402Applicant"),
+    manageOrdersFl402ApplicantRef("manageOrdersFl402ApplicantRef"),
+    manageOrdersDateOfhearing("manageOrdersDateOfhearing"),
+    dateOfHearingTime("dateOfHearingTime"),
+    dateOfHearingTimeEstimate("dateOfHearingTimeEstimate"),
+    fl402HearingCourtname("fl402HearingCourtname"),
+    fl402HearingCourtAddress("fl402HearingCourtAddress"),
+
+    parentalResponsibility("parentalResponsibility"),
+    parentName("parentName"),
+
+    caseTransferOptions("caseTransferOptions"),
+    courtName("courtName"),
+    reasonsForTransfer("reasonsForTransfer"),
+    giveDetails("giveDetails"),
+
+    guardianTextBox("guardianTextBox"),
+
+    fl404CustomFields("fl404CustomFields"),
+
+    fl404bCustomFields("fl404bCustomFields"),
+
+    caffcassOfficeName("caffcassOfficeName"),
+    cafcassOfficeDetails("cafcassOfficeDetails"),
+
+    sdoPreamblesList("sdoPreamblesList"),
+    sdoHearingsAndNextStepsList("sdoHearingsAndNextStepsList"),
+    sdoCafcassOrCymruList("sdoCafcassOrCymruList"),
+    sdoLocalAuthorityList("sdoLocalAuthorityList,"),
+    sdoCourtList("sdoCourtList"),
+    sdoDocumentationAndEvidenceList("sdoDocumentationAndEvidenceList"),
+    sdoFurtherList("sdoFurtherList"),
+    sdoOtherList("sdoOtherList"),
+
+    dioPreamblesList("dioPreamblesList"),
+    dioHearingsAndNextStepsList("dioHearingsAndNextStepsList"),
+    dioCafcassOrCymruList("dioCafcassOrCymruList"),
+    dioLocalAuthorityList("dioLocalAuthorityList"),
+    dioCourtList("dioCourtList"),
+    dioOtherList("dioOtherList"),
+    dioFurtherList("dioFurtherList"),
+
+    manageOrdersAmendedOrder("manageOrdersAmendedOrder"),
+    amendOrderSelectJudgeOrLa("amendOrderSelectJudgeOrLa"),
+    nameOfJudgeAmendOrder("nameOfJudgeAmendOrder"),
+    nameOfLaAmendOrder("nameOfLaAmendOrder"),
+    nameOfJudgeToReviewOrder("nameOfJudgeToReviewOrder"),
+    nameOfLaToReviewOrder("nameOfLaToReviewOrder");
 
     private final String value;
 
