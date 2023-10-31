@@ -34,7 +34,8 @@ public class C100RespondentSolicitorTaskListController extends AbstractCallbackC
     private final AuthorisationService authorisationService;
 
     @Autowired
-    protected C100RespondentSolicitorTaskListController(ObjectMapper objectMapper, EventService eventPublisher,
+    protected C100RespondentSolicitorTaskListController(ObjectMapper objectMapper,
+                                                        EventService eventPublisher,
                                                         AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.authorisationService = authorisationService;
