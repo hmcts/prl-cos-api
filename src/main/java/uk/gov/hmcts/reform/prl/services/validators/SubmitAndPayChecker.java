@@ -65,28 +65,43 @@ public class SubmitAndPayChecker implements EventChecker {
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             optionalEvents.put(
-                    OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
-                    eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()
+                OTHER_CHILDREN_NOT_PART_OF_THE_APPLICATION,
+                eventsChecker.getPartyChecker().getOtherChildrenNotPartOfTheApplicationChecker()
             );
-            optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE_REVISED, eventsChecker.getOtherPeopleInTheCaseRevisedChecker());
-            if (eventsChecker.getOtherPeopleInTheCaseRevisedChecker().hasMandatoryCompleted(caseData)
-                    || eventsChecker.getOtherPeopleInTheCaseRevisedChecker().isFinished(caseData)) {
-                mandatoryEvents.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker());
+            optionalEvents.put(
+                OTHER_PEOPLE_IN_THE_CASE_REVISED,
+                eventsChecker.getPartyChecker().getOtherPeopleInTheCaseRevisedChecker()
+            );
+            if (eventsChecker.getPartyChecker().getOtherPeopleInTheCaseRevisedChecker().hasMandatoryCompleted(caseData)
+                || eventsChecker.getPartyChecker().getOtherPeopleInTheCaseRevisedChecker().isFinished(caseData)) {
+                mandatoryEvents.put(
+                    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
+                    eventsChecker.getPartyChecker().getChildrenAndOtherPeopleInThisApplicationChecker()
+                );
 
             } else {
-                optionalEvents.put(CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION, eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker());
+                optionalEvents.put(
+                    CHILDREN_AND_OTHER_PEOPLE_IN_THIS_APPLICATION,
+                    eventsChecker.getPartyChecker().getChildrenAndOtherPeopleInThisApplicationChecker()
+                );
 
             }
         } else {
-            optionalEvents.put(OTHER_PEOPLE_IN_THE_CASE, eventsChecker.getOtherPeopleInTheCaseChecker());
+            optionalEvents.put(
+                OTHER_PEOPLE_IN_THE_CASE,
+                eventsChecker.getPartyChecker().getOtherPeopleInTheCaseChecker()
+            );
         }
-        optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.getOtherProceedingsChecker());
-        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getAttendingTheHearingChecker());
-        optionalEvents.put(INTERNATIONAL_ELEMENT, eventsChecker.getInternationalElementChecker());
-        optionalEvents.put(LITIGATION_CAPACITY, eventsChecker.getLitigationCapacityChecker());
-        optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.getWelshLanguageRequirementsChecker());
+        optionalEvents.put(OTHER_PROCEEDINGS, eventsChecker.getCommonChecker().getOtherProceedingsChecker());
+        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getCommonChecker().getAttendingTheHearingChecker());
+        optionalEvents.put(INTERNATIONAL_ELEMENT, eventsChecker.getC100CaseChecker().getInternationalElementChecker());
+        optionalEvents.put(LITIGATION_CAPACITY, eventsChecker.getC100CaseChecker().getLitigationCapacityChecker());
+        optionalEvents.put(
+            WELSH_LANGUAGE_REQUIREMENTS,
+            eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker()
+        );
         if (YesOrNo.Yes.equals(caseData.getConsentOrder())) {
-            optionalEvents.put(MIAM, eventsChecker.getMiamChecker());
+            optionalEvents.put(MIAM, eventsChecker.getC100CaseChecker().getMiamChecker());
         }
         boolean optionalFinished;
         for (Map.Entry<Event, EventChecker> e : mandatoryEvents.entrySet()) {
@@ -108,23 +123,32 @@ public class SubmitAndPayChecker implements EventChecker {
     private EnumMap<Event, EventChecker> getMandatoryEvents(CaseData caseData) {
         EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<>(Event.class);
 
-        mandatoryEvents.put(CASE_NAME, eventsChecker.getCaseNameChecker());
-        mandatoryEvents.put(TYPE_OF_APPLICATION, eventsChecker.getApplicationTypeChecker());
-        mandatoryEvents.put(HEARING_URGENCY, eventsChecker.getHearingUrgencyChecker());
-        mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());
+        mandatoryEvents.put(CASE_NAME, eventsChecker.getCommonChecker().getCaseNameChecker());
+        mandatoryEvents.put(TYPE_OF_APPLICATION, eventsChecker.getCommonChecker().getApplicationTypeChecker());
+        mandatoryEvents.put(HEARING_URGENCY, eventsChecker.getC100CaseChecker().getHearingUrgencyChecker());
+        mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getPartyChecker().getApplicantsChecker());
         log.info("TASK_LIST_VERSION" + caseData.getTaskListVersion());
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
-            mandatoryEvents.put(CHILD_DETAILS_REVISED, eventsChecker.getChildDetailsRevisedChecker());
-            mandatoryEvents.put(CHILDREN_AND_APPLICANTS, eventsChecker.getChildrenAndApplicantsChecker());
-            mandatoryEvents.put(CHILDREN_AND_RESPONDENTS, eventsChecker.getChildrenAndRespondentsChecker());
-            mandatoryEvents.put(ALLEGATIONS_OF_HARM_REVISED, eventsChecker.getAllegationsOfHarmRevisedChecker());
+            mandatoryEvents.put(CHILD_DETAILS_REVISED, eventsChecker.getPartyChecker().getChildDetailsRevisedChecker());
+            mandatoryEvents.put(
+                CHILDREN_AND_APPLICANTS,
+                eventsChecker.getPartyChecker().getChildrenAndApplicantsChecker()
+            );
+            mandatoryEvents.put(
+                CHILDREN_AND_RESPONDENTS,
+                eventsChecker.getPartyChecker().getChildrenAndRespondentsChecker()
+            );
+            mandatoryEvents.put(
+                ALLEGATIONS_OF_HARM_REVISED,
+                eventsChecker.getC100CaseChecker().getAllegationsOfHarmRevisedChecker()
+            );
         } else {
-            mandatoryEvents.put(CHILD_DETAILS, eventsChecker.getChildChecker());
-            mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.getAllegationsOfHarmChecker());
+            mandatoryEvents.put(CHILD_DETAILS, eventsChecker.getPartyChecker().getChildChecker());
+            mandatoryEvents.put(ALLEGATIONS_OF_HARM, eventsChecker.getC100CaseChecker().getAllegationsOfHarmChecker());
         }
-        mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getRespondentsChecker());
+        mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getPartyChecker().getRespondentsChecker());
         if (YesOrNo.No.equals(caseData.getConsentOrder()) || caseData.getConsentOrder() == null) {
-            mandatoryEvents.put(MIAM, eventsChecker.getMiamChecker());
+            mandatoryEvents.put(MIAM, eventsChecker.getC100CaseChecker().getMiamChecker());
         }
         return mandatoryEvents;
     }

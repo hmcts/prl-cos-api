@@ -232,14 +232,14 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
         when(respondentBehaviourChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
         when(respondentBehaviourChecker.isFinished(caseData)).thenReturn(false);
 
-        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getFl401ApplicationTypeChecker()).thenReturn(fl401ApplicationTypeChecker);
-        when(eventsChecker.getWithoutNoticeOrderChecker()).thenReturn(withoutNoticeOrderChecker);
-        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
-        when(eventsChecker.getRespondentRelationshipChecker()).thenReturn(respondentRelationshipChecker);
-        when(eventsChecker.getRespondentBehaviourChecker()).thenReturn(respondentBehaviourChecker);
+        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401ApplicationTypeChecker()).thenReturn(fl401ApplicationTypeChecker);
+        when(eventsChecker.getFl401CaseChecker().getWithoutNoticeOrderChecker()).thenReturn(withoutNoticeOrderChecker);
+        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
+        when(eventsChecker.getPartyChecker().getRespondentRelationshipChecker()).thenReturn(respondentRelationshipChecker);
+        when(eventsChecker.getPartyChecker().getRespondentBehaviourChecker()).thenReturn(respondentBehaviourChecker);
 
         assertFalse(fl401StatementOfTruthAndSubmitChecker.isFinished(caseData));
     }
@@ -286,17 +286,17 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
         when(welshLanguageRequirementsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(true);
 
-        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getFl401ApplicationTypeChecker()).thenReturn(fl401ApplicationTypeChecker);
-        when(eventsChecker.getWithoutNoticeOrderChecker()).thenReturn(withoutNoticeOrderChecker);
-        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
-        when(eventsChecker.getRespondentRelationshipChecker()).thenReturn(respondentRelationshipChecker);
-        when(eventsChecker.getRespondentBehaviourChecker()).thenReturn(respondentBehaviourChecker);
-        when(eventsChecker.getFl401OtherProceedingsChecker()).thenReturn(fl401OtherProceedingsChecker);
-        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
-        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
+        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401ApplicationTypeChecker()).thenReturn(fl401ApplicationTypeChecker);
+        when(eventsChecker.getFl401CaseChecker().getWithoutNoticeOrderChecker()).thenReturn(withoutNoticeOrderChecker);
+        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
+        when(eventsChecker.getPartyChecker().getRespondentRelationshipChecker()).thenReturn(respondentRelationshipChecker);
+        when(eventsChecker.getPartyChecker().getRespondentBehaviourChecker()).thenReturn(respondentBehaviourChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401OtherProceedingsChecker()).thenReturn(fl401OtherProceedingsChecker);
+        when(eventsChecker.getCommonChecker().getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
 
         assertTrue(fl401StatementOfTruthAndSubmitChecker.isFinished(caseData));
     }
@@ -322,14 +322,14 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
         when(respondentBehaviourChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
         when(respondentBehaviourChecker.isFinished(caseData)).thenReturn(false);
 
-        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getFl401ApplicationTypeChecker()).thenReturn(fl401ApplicationTypeChecker);
-        when(eventsChecker.getWithoutNoticeOrderChecker()).thenReturn(withoutNoticeOrderChecker);
-        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
-        when(eventsChecker.getRespondentRelationshipChecker()).thenReturn(respondentRelationshipChecker);
-        when(eventsChecker.getRespondentBehaviourChecker()).thenReturn(respondentBehaviourChecker);
+        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401ApplicationTypeChecker()).thenReturn(fl401ApplicationTypeChecker);
+        when(eventsChecker.getFl401CaseChecker().getWithoutNoticeOrderChecker()).thenReturn(withoutNoticeOrderChecker);
+        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
+        when(eventsChecker.getPartyChecker().getRespondentRelationshipChecker()).thenReturn(respondentRelationshipChecker);
+        when(eventsChecker.getPartyChecker().getRespondentBehaviourChecker()).thenReturn(respondentBehaviourChecker);
 
         assertFalse(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData));
     }
@@ -384,17 +384,17 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
         when(welshLanguageRequirementsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(true);
 
-        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getFl401ApplicationTypeChecker()).thenReturn(fl401ApplicationTypeChecker);
-        when(eventsChecker.getWithoutNoticeOrderChecker()).thenReturn(withoutNoticeOrderChecker);
-        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
-        when(eventsChecker.getRespondentRelationshipChecker()).thenReturn(respondentRelationshipChecker);
-        when(eventsChecker.getRespondentBehaviourChecker()).thenReturn(respondentBehaviourChecker);
-        when(eventsChecker.getFl401OtherProceedingsChecker()).thenReturn(fl401OtherProceedingsChecker);
-        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
-        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
+        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401ApplicationTypeChecker()).thenReturn(fl401ApplicationTypeChecker);
+        when(eventsChecker.getFl401CaseChecker().getWithoutNoticeOrderChecker()).thenReturn(withoutNoticeOrderChecker);
+        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
+        when(eventsChecker.getPartyChecker().getRespondentRelationshipChecker()).thenReturn(respondentRelationshipChecker);
+        when(eventsChecker.getPartyChecker().getRespondentBehaviourChecker()).thenReturn(respondentBehaviourChecker);
+        when(eventsChecker.getFl401CaseChecker().getFl401OtherProceedingsChecker()).thenReturn(fl401OtherProceedingsChecker);
+        when(eventsChecker.getCommonChecker().getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
 
         assertTrue(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData));
     }

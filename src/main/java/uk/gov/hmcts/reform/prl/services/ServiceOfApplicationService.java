@@ -296,7 +296,11 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private List<Document> sendPackToApplicantsAndRespondents(CaseData caseData, String authorization, List<Element<EmailNotificationDetails>> emailNotificationDetails, List<Element<BulkPrintDetails>> bulkPrintDetails, List<Document> c100StaticDocs) {
+    private List<Document> sendPackToApplicantsAndRespondents(CaseData caseData,
+                                                              String authorization,
+                                                              List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                              List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                              List<Document> c100StaticDocs) {
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
@@ -360,7 +364,11 @@ public class ServiceOfApplicationService {
         return c100StaticDocs;
     }
 
-    private String sendPackToApplicantSolicitor(CaseData caseData, String authorization, List<Element<EmailNotificationDetails>> emailNotificationDetails, String whoIsResponsibleForServing, List<Document> c100StaticDocs) throws Exception {
+    private String sendPackToApplicantSolicitor(CaseData caseData,
+                                                String authorization,
+                                                List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                String whoIsResponsibleForServing,
+                                                List<Document> c100StaticDocs) throws Exception {
         if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
             && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
