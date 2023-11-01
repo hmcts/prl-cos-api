@@ -11,306 +11,306 @@ import java.util.Collections;
 @Slf4j
 @Component
 public class PartyLevelCaseFlagsGenerator {
-    public Flags generateExternalPartyFlags(String partyName, String caseDataField, String roleOnCase) {
+    public Flags generateExternalPartyFlags(String partyName, String roleOnCase, String groupId) {
         return Flags
             .builder()
             .partyName(partyName)
             .roleOnCase(roleOnCase)
             .visibility("External")
-            .groupId(caseDataField)
+            .groupId(groupId)
             .details(Collections.emptyList())
             .build();
     }
 
-    public Flags generateInternalPartyFlags(String partyName, String caseDataField, String roleOnCase) {
+    public Flags generateInternalPartyFlags(String partyName, String roleOnCase, String groupId) {
         return Flags
             .builder()
             .partyName(partyName)
             .roleOnCase(roleOnCase)
             .visibility("Internal")
-            .groupId(caseDataField)
+            .groupId(groupId)
             .details(Collections.emptyList())
             .build();
     }
 
-    public CaseData generatePartyFlags(CaseData caseData, String partyName, String caseDataField, String roleOnCase, boolean internalFlag) {
+    public CaseData generatePartyFlags(CaseData caseData, String partyName, String caseDataField, String roleOnCase, boolean internalFlag, String groupId) {
         if (caseData.getAllPartyFlags() == null) {
             AllPartyFlags allPartyFlags = AllPartyFlags.builder().build();
             caseData = caseData.toBuilder().allPartyFlags(allPartyFlags).build();
         }
         if (internalFlag) {
-            Flags partyInternalFlag = generateInternalPartyFlags(partyName, caseDataField, roleOnCase);
+            Flags partyInternalFlag = generateInternalPartyFlags(partyName, roleOnCase, groupId);
             switch (caseDataField) {
-                case "caApplicant1InternalFlags" -> {
+                case "caApplicant1InternalFlags": {
                     caseData = caseData.toBuilder()
                         .allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant1InternalFlags(
                             partyInternalFlag).build())
                         .build();
                     break;
                 }
-                case "caApplicant2InternalFlags" -> {
+                case "caApplicant2InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant2InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caApplicant3InternalFlags" -> {
+                case "caApplicant3InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant3InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caApplicant4InternalFlags" -> {
+                case "caApplicant4InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant4InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caApplicant5InternalFlags" -> {
+                case "caApplicant5InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant5InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
 
-                case "caApplicantSolicitor1InternalFlags" -> {
+                case "caApplicantSolicitor1InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor1InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caApplicantSolicitor2InternalFlags" -> {
+                case "caApplicantSolicitor2InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor2InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caApplicantSolicitor3InternalFlags" -> {
+                case "caApplicantSolicitor3InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor3InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caApplicantSolicitor4InternalFlags" -> {
+                case "caApplicantSolicitor4InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor4InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caApplicantSolicitor5InternalFlags" -> {
+                case "caApplicantSolicitor5InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor5InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
 
-                case "caRespondent1InternalFlags" -> {
+                case "caRespondent1InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent1InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caRespondent2InternalFlags" -> {
+                case "caRespondent2InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent2InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caRespondent3InternalFlags" -> {
+                case "caRespondent3InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent3InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caRespondent4InternalFlags" -> {
+                case "caRespondent4InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent4InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caRespondent5InternalFlags" -> {
+                case "caRespondent5InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent5InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
 
-                case "caRespondentSolicitor1InternalFlags" -> {
+                case "caRespondentSolicitor1InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor1InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caRespondentSolicitor2InternalFlags" -> {
+                case "caRespondentSolicitor2InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor2InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caRespondentSolicitor3InternalFlags" -> {
+                case "caRespondentSolicitor3InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor3InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caRespondentSolicitor4InternalFlags" -> {
+                case "caRespondentSolicitor4InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor4InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caRespondentSolicitor5InternalFlags" -> {
+                case "caRespondentSolicitor5InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor5InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
 
-                case "caOtherParty1InternalFlags" -> {
+                case "caOtherParty1InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty1InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caOtherParty2InternalFlags" -> {
+                case "caOtherParty2InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty2InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caOtherParty3InternalFlags" -> {
+                case "caOtherParty3InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty3InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caOtherParty4InternalFlags" -> {
+                case "caOtherParty4InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty4InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                case "caOtherParty5InternalFlags" -> {
+                case "caOtherParty5InternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty5InternalFlags(
                         partyInternalFlag).build()).build();
                     break;
                 }
-                default -> {
+                default: {
                     break;
                 }
             }
         } else {
-            Flags partyExternalFlag = generateExternalPartyFlags(partyName, caseDataField, roleOnCase);
+            Flags partyExternalFlag = generateExternalPartyFlags(partyName, roleOnCase, groupId);
             switch (caseDataField) {
-                case "caApplicant1ExternalFlags" -> {
+                case "caApplicant1ExternalFlags": {
                     caseData = caseData.toBuilder()
                         .allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant1ExternalFlags(
                             partyExternalFlag).build())
                         .build();
                     break;
                 }
-                case "caApplicant2ExternalFlags" -> {
+                case "caApplicant2ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant2ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caApplicant3ExternalFlags" -> {
+                case "caApplicant3ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant3ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caApplicant4ExternalFlags" -> {
+                case "caApplicant4ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant4ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caApplicant5ExternalFlags" -> {
+                case "caApplicant5ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicant5ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
 
-                case "caApplicantSolicitor1ExternalFlags" -> {
+                case "caApplicantSolicitor1ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor1ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caApplicantSolicitor2ExternalFlags" -> {
+                case "caApplicantSolicitor2ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor2ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caApplicantSolicitor3ExternalFlags" -> {
+                case "caApplicantSolicitor3ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor3ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caApplicantSolicitor4ExternalFlags" -> {
+                case "caApplicantSolicitor4ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor4ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caApplicantSolicitor5ExternalFlags" -> {
+                case "caApplicantSolicitor5ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caApplicantSolicitor5ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
 
-                case "caRespondent1ExternalFlags" -> {
+                case "caRespondent1ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent1ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caRespondent2ExternalFlags" -> {
+                case "caRespondent2ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent2ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caRespondent3ExternalFlags" -> {
+                case "caRespondent3ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent3ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caRespondent4ExternalFlags" -> {
+                case "caRespondent4ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent4ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caRespondent5ExternalFlags" -> {
+                case "caRespondent5ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent5ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
 
-                case "caRespondentSolicitor1ExternalFlags" -> {
+                case "caRespondentSolicitor1ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor1ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caRespondentSolicitor2ExternalFlags" -> {
+                case "caRespondentSolicitor2ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor2ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caRespondentSolicitor3ExternalFlags" -> {
+                case "caRespondentSolicitor3ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor3ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caRespondentSolicitor4ExternalFlags" -> {
+                case "caRespondentSolicitor4ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor4ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caRespondentSolicitor5ExternalFlags" -> {
+                case "caRespondentSolicitor5ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor5ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
 
-                case "caOtherParty1ExternalFlags" -> {
+                case "caOtherParty1ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty1ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caOtherParty2ExternalFlags" -> {
+                case "caOtherParty2ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty2ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caOtherParty3ExternalFlags" -> {
+                case "caOtherParty3ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty3ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caOtherParty4ExternalFlags" -> {
+                case "caOtherParty4ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty4ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                case "caOtherParty5ExternalFlags" -> {
+                case "caOtherParty5ExternalFlags": {
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caOtherParty5ExternalFlags(
                         partyExternalFlag).build()).build();
                     break;
                 }
-                default -> {
+                default: {
                     break;
                 }
             }
