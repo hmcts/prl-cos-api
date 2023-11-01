@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -19,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -45,20 +45,11 @@ public class SubmitAndPayCheckerTest {
     @InjectMocks
     SubmitAndPayChecker submitAndPayChecker;
 
-    @InjectMocks
+    @Mock
     EventsChecker eventsChecker;
 
     @Mock
-    EventsChecker.C100CaseChecker c100CaseChecker;
-
-    @Mock
-    EventsChecker.CommonChecker commonChecker;
-
-    @Mock
     CaseNameChecker caseNameChecker;
-
-    @Mock
-    EventsChecker.PartyChecker partyChecker;
 
     @Mock
     ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
@@ -141,7 +132,7 @@ public class SubmitAndPayCheckerTest {
 
     @Before
     public void setUp() {
-        ReflectionTestUtils.setField(submitAndPayChecker, "eventsChecker", eventsChecker);
+
         address = Address.builder()
             .addressLine1("Test")
             .addressLine2("Test")
@@ -265,22 +256,20 @@ public class SubmitAndPayCheckerTest {
         when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(false);
 
 
-        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getCommonChecker().getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
-        when(eventsChecker.getC100CaseChecker().getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
-        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getPartyChecker().getChildChecker()).thenReturn(childChecker);
-        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getC100CaseChecker().getMiamChecker()).thenReturn(miamChecker);
-        when(eventsChecker.getC100CaseChecker().getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(eventsChecker.getPartyChecker().getOtherPeopleInTheCaseRevisedChecker()).thenReturn(
-            otherPeopleInTheCaseRevisedChecker);
-        when(eventsChecker.getCommonChecker().getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
-        when(eventsChecker.getCommonChecker().getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
-        when(eventsChecker.getC100CaseChecker().getInternationalElementChecker()).thenReturn(internationalElementChecker);
-        when(eventsChecker.getC100CaseChecker().getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
-        when(eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker()).thenReturn(
-            welshLanguageRequirementsChecker);
+        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
+        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
+        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getChildChecker()).thenReturn(childChecker);
+        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseRevisedChecker()).thenReturn(otherPeopleInTheCaseRevisedChecker);
+        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
+        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
+        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
+        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
 
 
         assertFalse(submitAndPayChecker.isFinished(caseData));
@@ -326,21 +315,20 @@ public class SubmitAndPayCheckerTest {
         when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(false);
 
 
-        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getCommonChecker().getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
-        when(eventsChecker.getC100CaseChecker().getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
-        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getPartyChecker().getChildChecker()).thenReturn(childChecker);
-        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getC100CaseChecker().getMiamChecker()).thenReturn(miamChecker);
-        when(eventsChecker.getC100CaseChecker().getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(eventsChecker.getPartyChecker().getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
-        when(eventsChecker.getCommonChecker().getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
-        when(eventsChecker.getCommonChecker().getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
-        when(eventsChecker.getC100CaseChecker().getInternationalElementChecker()).thenReturn(internationalElementChecker);
-        when(eventsChecker.getC100CaseChecker().getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
-        when(eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker()).thenReturn(
-            welshLanguageRequirementsChecker);
+        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
+        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
+        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getChildChecker()).thenReturn(childChecker);
+        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
+        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
+        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
+        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
 
         assertFalse(submitAndPayChecker.isFinished(caseData));
     }
@@ -415,24 +403,22 @@ public class SubmitAndPayCheckerTest {
         when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(true);
 
 
-        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getCommonChecker().getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
-        when(eventsChecker.getC100CaseChecker().getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
-        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getPartyChecker().getChildChecker()).thenReturn(childChecker);
-        when(eventsChecker.getPartyChecker().getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
-        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getC100CaseChecker().getMiamChecker()).thenReturn(miamChecker);
-        when(eventsChecker.getC100CaseChecker().getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(eventsChecker.getPartyChecker().getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(
-            otherChildrenNotPartOfTheApplicationChecker);
-        when(eventsChecker.getPartyChecker().getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
-        when(eventsChecker.getCommonChecker().getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
-        when(eventsChecker.getCommonChecker().getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
-        when(eventsChecker.getC100CaseChecker().getInternationalElementChecker()).thenReturn(internationalElementChecker);
-        when(eventsChecker.getC100CaseChecker().getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
-        when(eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker()).thenReturn(
-            welshLanguageRequirementsChecker);
+        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
+        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
+        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getChildChecker()).thenReturn(childChecker);
+        when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
+        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
+        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
+        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
+        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
 
         assertTrue(submitAndPayChecker.isFinished(caseData));
     }
@@ -471,21 +457,20 @@ public class SubmitAndPayCheckerTest {
         when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(false);
 
 
-        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getCommonChecker().getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
-        when(eventsChecker.getC100CaseChecker().getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
-        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getPartyChecker().getChildChecker()).thenReturn(childChecker);
-        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getC100CaseChecker().getMiamChecker()).thenReturn(miamChecker);
-        when(eventsChecker.getC100CaseChecker().getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(eventsChecker.getPartyChecker().getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
-        when(eventsChecker.getCommonChecker().getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
-        when(eventsChecker.getCommonChecker().getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
-        when(eventsChecker.getC100CaseChecker().getInternationalElementChecker()).thenReturn(internationalElementChecker);
-        when(eventsChecker.getC100CaseChecker().getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
-        when(eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker()).thenReturn(
-            welshLanguageRequirementsChecker);
+        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
+        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
+        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getChildChecker()).thenReturn(childChecker);
+        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
+        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
+        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
+        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
 
 
         assertFalse(submitAndPayChecker.hasMandatoryCompleted(caseData));
@@ -560,24 +545,22 @@ public class SubmitAndPayCheckerTest {
         when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(true);
 
 
-        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getCommonChecker().getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
-        when(eventsChecker.getC100CaseChecker().getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
-        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getPartyChecker().getChildChecker()).thenReturn(childChecker);
-        when(eventsChecker.getPartyChecker().getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
-        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getC100CaseChecker().getMiamChecker()).thenReturn(miamChecker);
-        when(eventsChecker.getC100CaseChecker().getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(eventsChecker.getPartyChecker().getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(
-            otherChildrenNotPartOfTheApplicationChecker);
-        when(eventsChecker.getPartyChecker().getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
-        when(eventsChecker.getCommonChecker().getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
-        when(eventsChecker.getCommonChecker().getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
-        when(eventsChecker.getC100CaseChecker().getInternationalElementChecker()).thenReturn(internationalElementChecker);
-        when(eventsChecker.getC100CaseChecker().getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
-        when(eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker()).thenReturn(
-            welshLanguageRequirementsChecker);
+        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
+        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
+        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getChildChecker()).thenReturn(childChecker);
+        when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
+        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
+        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
+        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
+        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
 
         assertTrue(submitAndPayChecker.hasMandatoryCompleted(caseData));
     }
@@ -617,7 +600,7 @@ public class SubmitAndPayCheckerTest {
                              .miamCertificationDocumentUpload(Document.builder().build())
                              .build())
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                                  .newAllegationsOfHarmYesNo(No).build())
+                                         .newAllegationsOfHarmYesNo(No).build())
             .build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
@@ -661,33 +644,27 @@ public class SubmitAndPayCheckerTest {
         when(litigationCapacityChecker.isFinished(caseData)).thenReturn(true);
         when(welshLanguageRequirementsChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
         when(welshLanguageRequirementsChecker.isFinished(caseData)).thenReturn(true);
-        when(eventsChecker.getPartyChecker().getChildrenAndApplicantsChecker()).thenReturn(childrenAndApplicantsChecker);
-        when(eventsChecker.getPartyChecker().getChildrenAndRespondentsChecker()).thenReturn(
-            childrenAndRespondentsChecker);
-        when(eventsChecker.getPartyChecker().getChildrenAndOtherPeopleInThisApplicationChecker()).thenReturn(
-            childrenAndOtherPeopleInThisApplicationChecker);
-        when(eventsChecker.getCommonChecker().getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(eventsChecker.getCommonChecker().getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
-        when(eventsChecker.getC100CaseChecker().getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
-        when(eventsChecker.getPartyChecker().getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(eventsChecker.getPartyChecker().getChildChecker()).thenReturn(childChecker);
-        when(eventsChecker.getPartyChecker().getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
-        when(eventsChecker.getPartyChecker().getRespondentsChecker()).thenReturn(respondentsChecker);
-        when(eventsChecker.getC100CaseChecker().getMiamChecker()).thenReturn(miamChecker);
-        when(eventsChecker.getC100CaseChecker().getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(eventsChecker.getPartyChecker().getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(
-            otherChildrenNotPartOfTheApplicationChecker);
-        when(eventsChecker.getPartyChecker().getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
-        when(eventsChecker.getPartyChecker().getOtherPeopleInTheCaseRevisedChecker()).thenReturn(
-            otherPeopleInTheCaseRevisedChecker);
-        when(eventsChecker.getCommonChecker().getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
-        when(eventsChecker.getCommonChecker().getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
-        when(eventsChecker.getC100CaseChecker().getInternationalElementChecker()).thenReturn(internationalElementChecker);
-        when(eventsChecker.getC100CaseChecker().getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
-        when(eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker()).thenReturn(
-            welshLanguageRequirementsChecker);
-        when(eventsChecker.getC100CaseChecker().getAllegationsOfHarmRevisedChecker()).thenReturn(
-            allegationsOfHarmRevisedChecker);
+        when(eventsChecker.getChildrenAndApplicantsChecker()).thenReturn(childrenAndApplicantsChecker);
+        when(eventsChecker.getChildrenAndRespondentsChecker()).thenReturn(childrenAndRespondentsChecker);
+        when(eventsChecker.getChildrenAndOtherPeopleInThisApplicationChecker()).thenReturn(childrenAndOtherPeopleInThisApplicationChecker);
+        when(eventsChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
+        when(eventsChecker.getApplicationTypeChecker()).thenReturn(applicationTypeChecker);
+        when(eventsChecker.getHearingUrgencyChecker()).thenReturn(hearingUrgencyChecker);
+        when(eventsChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
+        when(eventsChecker.getChildChecker()).thenReturn(childChecker);
+        when(eventsChecker.getChildDetailsRevisedChecker()).thenReturn(childDetailsRevisedChecker);
+        when(eventsChecker.getRespondentsChecker()).thenReturn(respondentsChecker);
+        when(eventsChecker.getMiamChecker()).thenReturn(miamChecker);
+        when(eventsChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
+        when(eventsChecker.getOtherChildrenNotPartOfTheApplicationChecker()).thenReturn(otherChildrenNotPartOfTheApplicationChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseChecker()).thenReturn(otherPeopleInTheCaseChecker);
+        when(eventsChecker.getOtherPeopleInTheCaseRevisedChecker()).thenReturn(otherPeopleInTheCaseRevisedChecker);
+        when(eventsChecker.getOtherProceedingsChecker()).thenReturn(otherProceedingsChecker);
+        when(eventsChecker.getAttendingTheHearingChecker()).thenReturn(attendingTheHearingChecker);
+        when(eventsChecker.getInternationalElementChecker()).thenReturn(internationalElementChecker);
+        when(eventsChecker.getLitigationCapacityChecker()).thenReturn(litigationCapacityChecker);
+        when(eventsChecker.getWelshLanguageRequirementsChecker()).thenReturn(welshLanguageRequirementsChecker);
+        when(eventsChecker.getAllegationsOfHarmRevisedChecker()).thenReturn(allegationsOfHarmRevisedChecker);
 
         assertTrue(submitAndPayChecker.hasMandatoryCompleted(caseData));
     }

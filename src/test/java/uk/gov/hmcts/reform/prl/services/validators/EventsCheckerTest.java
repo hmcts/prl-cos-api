@@ -9,6 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -24,22 +25,10 @@ public class EventsCheckerTest {
     @Mock
     CaseNameChecker caseNameChecker;
 
-    @Mock
-    private EventsChecker.CommonChecker commonChecker;
-
-    @Mock
-    private EventsChecker.C100CaseChecker c100CaseChecker;
-
-    @Mock
-    private EventsChecker.PartyChecker partyChecker;
-
-    @Mock
-    private EventsChecker.FL401CaseChecker fl401CaseChecker;
 
 
     @Before
     public void init() {
-        when(commonChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
         eventsChecker.init();
     }
 

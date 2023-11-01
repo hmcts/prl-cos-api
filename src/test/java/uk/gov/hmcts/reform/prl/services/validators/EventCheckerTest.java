@@ -8,7 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.validators.EventsChecker.CommonChecker;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -70,18 +70,6 @@ public class EventCheckerTest {
     @Mock
     FL401StatementOfTruthAndSubmitChecker fl401StatementOfTruthAndSubmitChecker;
 
-    @Mock
-    private CommonChecker commonChecker;
-
-    @Mock
-    private EventsChecker.PartyChecker partyChecker;
-
-    @Mock
-    private EventsChecker.C100CaseChecker c100CaseChecker;
-
-    @Mock
-    private EventsChecker.FL401CaseChecker fl401CaseChecker;
-
     @InjectMocks
     private EventsChecker eventsChecker;
 
@@ -89,11 +77,6 @@ public class EventCheckerTest {
 
     @Before
     public void init() {
-        when(commonChecker.getPdfChecker()).thenReturn(pdfChecker);
-        when(commonChecker.getCaseNameChecker()).thenReturn(caseNameChecker);
-        when(partyChecker.getApplicantsChecker()).thenReturn(applicantsChecker);
-        when(c100CaseChecker.getAllegationsOfHarmChecker()).thenReturn(allegationsOfHarmChecker);
-        when(fl401CaseChecker.getFl401ApplicantFamilyChecker()).thenReturn(fl401ApplicantFamilyChecker);
         eventsChecker.init();
     }
 
