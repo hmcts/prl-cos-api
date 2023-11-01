@@ -107,11 +107,15 @@ public class PartyLevelCaseFlagsService {
         return data;
     }
 
-    private void findAndGeneratePartyFlags(PartyRole.Representing representing, int i, Optional<Element<PartyDetails>> partyDetails, Map<String, Object> data, PartyRole partyRole) {
+    private void findAndGeneratePartyFlags(PartyRole.Representing representing,
+                                           int partyIndex,
+                                           Optional<Element<PartyDetails>> partyDetails,
+                                           Map<String, Object> data,
+                                           PartyRole partyRole) {
         log.info("party details is present");
-        String caseDataExternalField = String.format(representing.getCaseDataExternalField(), i + 1);
-        String caseDataInternalField = String.format(representing.getCaseDataInternalField(), i + 1);
-        String groupId = String.format(representing.getGroupId(), i + 1);
+        String caseDataExternalField = String.format(representing.getCaseDataExternalField(), partyIndex + 1);
+        String caseDataInternalField = String.format(representing.getCaseDataInternalField(), partyIndex + 1);
+        String groupId = String.format(representing.getGroupId(), partyIndex + 1);
         log.info("groupId is::" + groupId);
         log.info("caseDataExternalField is::" + caseDataExternalField);
         log.info("caseDataInternalField is::" + caseDataInternalField);
@@ -382,20 +386,24 @@ public class PartyLevelCaseFlagsService {
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetails = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
                 if (partyDetails.isPresent()) {
-                    caseData = generateC100PartyCaseFlags(caseData, representing, i, partyDetails, partyRole);
+                    caseData = generateC100OnlyPartyCaseFlags(caseData, representing, i, partyDetails, partyRole);
                 }
             }
         }
         return caseData;
     }
 
-    private CaseData generateC100PartyCaseFlags(CaseData caseData, PartyRole.Representing representing, int i, Optional<Element<PartyDetails>> partyDetails, PartyRole partyRole) {
+    private CaseData generateC100OnlyPartyCaseFlags(CaseData caseData,
+                                                PartyRole.Representing representing,
+                                                int partyIndex,
+                                                Optional<Element<PartyDetails>> partyDetails,
+                                                PartyRole partyRole) {
         log.info("party details is present");
-        String caseDataExternalField = String.format(representing.getCaseDataExternalField(), i + 1);
+        String caseDataExternalField = String.format(representing.getCaseDataExternalField(), partyIndex + 1);
         log.info("caseDataExternalField is::" + caseDataExternalField);
-        String caseDataInternalField = String.format(representing.getCaseDataInternalField(), i + 1);
+        String caseDataInternalField = String.format(representing.getCaseDataInternalField(), partyIndex + 1);
         log.info("caseDataInternalField is::" + caseDataInternalField);
-        String groupId = String.format(representing.getGroupId(), i + 1);
+        String groupId = String.format(representing.getGroupId(), partyIndex + 1);
         log.info("groupId is::" + groupId);
         switch (representing) {
             case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY: {
