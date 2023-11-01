@@ -35,7 +35,6 @@ public class CitizenCallbackController extends AbstractCallbackController {
     private final AllTabServiceImpl allTabsService;
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
-    //private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
     private final CitizenEmailService citizenEmailService;
 
@@ -45,14 +44,12 @@ public class CitizenCallbackController extends AbstractCallbackController {
                                         AllTabServiceImpl allTabsService,
                                         CoreCaseDataApi coreCaseDataApi,
                                         AuthTokenGenerator authTokenGenerator,
-                                        //ObjectMapper objectMapper1,
                                         SystemUserService systemUserService,
                                         CitizenEmailService citizenEmailService) {
         super(objectMapper, eventPublisher);
         this.allTabsService = allTabsService;
         this.coreCaseDataApi = coreCaseDataApi;
         this.authTokenGenerator = authTokenGenerator;
-        //this.objectMapper = objectMapper1;
         this.systemUserService = systemUserService;
         this.citizenEmailService = citizenEmailService;
     }

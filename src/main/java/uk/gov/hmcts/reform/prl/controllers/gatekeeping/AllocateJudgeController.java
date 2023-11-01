@@ -42,7 +42,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RequestMapping("/allocateJudge")
 public class AllocateJudgeController extends AbstractCallbackController {
     @Qualifier("caseSummaryTab")
-    private  final CaseSummaryTabService caseSummaryTabService;
+    private final CaseSummaryTabService caseSummaryTabService;
     private final RefDataUserService refDataUserService;
     private final AllocatedJudgeService allocatedJudgeService;
     private final AuthorisationService authorisationService;

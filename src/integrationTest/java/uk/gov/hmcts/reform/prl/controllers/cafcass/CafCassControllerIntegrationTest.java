@@ -57,7 +57,6 @@ public class CafCassControllerIntegrationTest {
     @MockBean
     private AuthTokenGenerator authTokenGenerator;
 
-
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
