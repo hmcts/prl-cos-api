@@ -172,21 +172,7 @@ public class ManageOrdersController {
             );
             log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
 
-            C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
-                ? caseData.getManageOrders().getC21OrderOptions() : null;
-            caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
-
-            caseDataUpdated.put("c21OrderOptions", c21OrderType);
-            caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
-                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-            caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
-
-            if (null != caseData.getCreateSelectOrderOptions()
-                && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-                caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
-                    ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
-
-            }
+            populateOrderTypeAndCourtName(authorisation, caseDataUpdated, caseData);
 
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
@@ -196,6 +182,24 @@ public class ManageOrdersController {
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void populateOrderTypeAndCourtName(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
+        C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null;
+        caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
+
+        caseDataUpdated.put("c21OrderOptions", c21OrderType);
+        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
+        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+
+        if (null != caseData.getCreateSelectOrderOptions()
+            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+            caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
+                ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
+
         }
     }
 
@@ -299,9 +303,6 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            String performingUser = null;
-            String performingAction = null;
-            String judgeLaReviewRequired = null;
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -328,29 +329,40 @@ public class ManageOrdersController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             //Added below fields for WA purpose
-            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
-                || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-                performingUser = manageOrderService.getLoggedInUserType(authorisation);
-                performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
-                if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
-                    judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
-                        .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
-                }
-            }
-            log.info("***performingUser***{}", performingUser);
-            log.info("***performingAction***{}", performingAction);
-            log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
-            caseDataUpdated.put("performingUser", performingUser);
-            caseDataUpdated.put("performingAction", performingAction);
-            caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            populateFieldsForWa(
+                authorisation,
+                caseData,
+                caseDataUpdated
+            );
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+
     }
 
+    private void populateFieldsForWa(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+        String performingUser = null;
+        String performingAction = null;
+        String judgeLaReviewRequired = null;
+        if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
+            || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+            performingUser = manageOrderService.getLoggedInUserType(authorisation);
+            performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
+            if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
+                judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
+                    .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
+            }
+        }
+        log.info("***performingUser***{}", performingUser);
+        log.info("***performingAction***{}", performingAction);
+        log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
+        caseDataUpdated.put("performingUser", performingUser);
+        caseDataUpdated.put("performingAction", performingAction);
+        caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+    }
 
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
