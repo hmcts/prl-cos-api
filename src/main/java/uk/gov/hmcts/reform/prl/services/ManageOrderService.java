@@ -1773,11 +1773,11 @@ public class ManageOrderService {
     private CaseData getN117FormData(CaseData caseData) {
         log.info("*** casedata manage orders : {}", caseData.getManageOrders());
         log.info("**** Court name : {}", caseData.getCourtName());
-        String undertakingExpiryDateTime = "";
+        LocalDateTime undertakingExpiryDateTime = null;
         log.info("*** Undertaking expiry date time {}", caseData.getManageOrders().getUnderTakingExpiryDateTime());
         if (null != caseData.getManageOrders().getUnderTakingExpiryDateTime()) {
-            undertakingExpiryDateTime = org.springframework.util.StringUtils
-                .trimAllWhitespace(caseData.getManageOrders().getUnderTakingExpiryDateTime().toString());
+            undertakingExpiryDateTime = LocalDateTime.parse(org.springframework.util.StringUtils
+                .trimAllWhitespace(caseData.getManageOrders().getUnderTakingExpiryDateTime().toString()));
         }
         log.info("*** Undertaking expiry date time {}", undertakingExpiryDateTime);
         ManageOrders orderData = caseData.getManageOrders().toBuilder()
@@ -1786,7 +1786,7 @@ public class ManageOrderService {
             .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
-            .underTakingExpiryDateTime(LocalDateTime.parse(undertakingExpiryDateTime))
+            .underTakingExpiryDateTime(undertakingExpiryDateTime)
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
