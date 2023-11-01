@@ -509,8 +509,11 @@ public class NoticeOfChangePartiesService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<PartyDetails>> partyElementList = findSolicitorRepresentedParties(caseData, authorisation);
+        log.info("party element list {}", partyElementList);
         DynamicMultiSelectList solicitorRepresentedParties
             = dynamicMultiSelectListService.getSolicitorRepresentedParties(partyElementList);
+
+        log.info("party element list {}", solicitorRepresentedParties);
 
         if (solicitorRepresentedParties.getListItems().isEmpty()) {
             errorList.add(NO_REPRESENTATION_FOUND_ERROR);

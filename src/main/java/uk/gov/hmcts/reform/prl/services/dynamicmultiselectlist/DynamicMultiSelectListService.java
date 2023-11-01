@@ -297,12 +297,14 @@ public class DynamicMultiSelectListService {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         partyElementList.stream().forEach(x -> {
             if (x.getId() != null) {
+                log.info("party id not successful list {}", x);
                 listItems.add(DynamicMultiselectListElement
                                   .builder()
                                   .code(String.valueOf(x.getId()))
                                   .label(x.getValue().getLabelForDynamicList())
                                   .build());
             } else {
+                log.info("party id in else block list {}", x);
                 listItems.add(DynamicMultiselectListElement
                                   .builder()
                                   .code(String.valueOf(x.getValue().getPartyId()))
@@ -310,6 +312,7 @@ public class DynamicMultiSelectListService {
                                   .build());
             }
         });
+        log.info("party list items {}", listItems);
         return DynamicMultiSelectList.builder().listItems(listItems).build();
     }
 
