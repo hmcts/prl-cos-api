@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -51,8 +52,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTI
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@SuppressWarnings({"java:S107"})
 public class ListWithoutNoticeController extends AbstractCallbackController {
-    private final ObjectMapper objectMapper;
     private final HearingDataService hearingDataService;
     private final RefDataUserService refDataUserService;
     private final AllocatedJudgeService allocatedJudgeService;
@@ -68,14 +69,16 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         <ul><li>Listing directions  have been sent as a task to their local court listing.</li>
         <li>Listing directions have been saved in the notes tab and are available to view at any time.</li></ul>""";
 
-    public ListWithoutNoticeController(ObjectMapper objectMapper, EventService eventPublisher,
-                                       ObjectMapper objectMapper1, HearingDataService
-        hearingDataService, RefDataUserService refDataUserService,
-                                       AllocatedJudgeService allocatedJudgeService, AuthorisationService
-                                           authorisationService, HearingService hearingService,
+    @Autowired
+    public ListWithoutNoticeController(ObjectMapper objectMapper,
+                                       EventService eventPublisher,
+                                       HearingDataService hearingDataService,
+                                       RefDataUserService refDataUserService,
+                                       AllocatedJudgeService allocatedJudgeService,
+                                       AuthorisationService authorisationService,
+                                       HearingService hearingService,
                                        CaseSummaryTabService caseSummaryTabService) {
         super(objectMapper, eventPublisher);
-        this.objectMapper = objectMapper1;
         this.hearingDataService = hearingDataService;
         this.refDataUserService = refDataUserService;
         this.allocatedJudgeService = allocatedJudgeService;
