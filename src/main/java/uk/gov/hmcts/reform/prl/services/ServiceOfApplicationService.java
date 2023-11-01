@@ -151,7 +151,7 @@ public class ServiceOfApplicationService {
                                                                        List<Document> packN, String servedParty) {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
-            ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
+                                                            ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
         List<DynamicMultiselectListElement> othersToNotify = caseData.getServiceOfApplication().getSoaOtherParties().getValue();
         othersToNotify.forEach(other -> {
             Optional<Element<PartyDetails>> party = getParty(other.getCode(), otherPeopleInCase);
@@ -165,7 +165,7 @@ public class ServiceOfApplicationService {
                 if (null != party.get().getValue().getAddress()
                     && null != party.get().getValue().getAddress().getAddressLine1()) {
                     docs.add(getCoverLetter(authorization, caseData, party.get().getValue().getAddress(),
-                                            party.get().getValue().getLabelForDynamicList()
+                                                party.get().getValue().getLabelForDynamicList()
 
                     ));
                     bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
@@ -310,7 +310,7 @@ public class ServiceOfApplicationService {
                 whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
                 log.info("Fl401 case journey for caseId {}", caseData.getId());
                 if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
-                                                                                               .getSoaServingRespondentsOptionsDA())) {
+                                                                                   .getSoaServingRespondentsOptionsDA())) {
                     emailNotificationDetails.addAll(sendEmailToFl404Parties(
                         caseData,
                         authorization,
@@ -747,10 +747,10 @@ public class ServiceOfApplicationService {
                 .getValue().stream().map(DynamicMultiselectListElement::getCode)
                 .collect(Collectors.toList());
             orderCodes.stream().forEach(orderCode ->
-                                            caseData.getOrderCollection().stream()
-                                                .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
-                                                .findFirst()
-                                                .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument())));
+                caseData.getOrderCollection().stream()
+                    .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
+                    .findFirst()
+                    .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument())));
             return selectedOrders;
         }
         return Collections.emptyList();
