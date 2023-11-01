@@ -145,11 +145,7 @@ public class ManageDocumentsService {
                 }
             }
             //if any restricted docs
-            if (isRestrictedFlag) {
-                caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
-            } else {
-                caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
-            }
+            updateRestrictedFlag(caseDataUpdated, isRestrictedFlag);
 
             log.info("quarantineDocs List ---> after {}", quarantineDocs);
             log.info("legalProfUploadDocListDocTab List ---> after {}", tabDocuments);
@@ -165,6 +161,14 @@ public class ManageDocumentsService {
         caseDataUpdated.remove("manageDocuments");
 
         return caseDataUpdated;
+    }
+
+    private void updateRestrictedFlag(Map<String, Object> caseDataUpdated, boolean isRestrictedFlag) {
+        if (isRestrictedFlag) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+        } else {
+            caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
+        }
     }
 
     private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {

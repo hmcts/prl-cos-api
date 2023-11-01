@@ -278,6 +278,11 @@ public class CaseDataService {
             caseIdWithRegionIdMap
         );
 
+        updateHearingDataCafcass(filteredCafcassResponse, listOfHearingDetails);
+        return filteredCafcassResponse;
+    }
+
+    private void updateHearingDataCafcass(CafCassResponse filteredCafcassResponse, List<Hearings> listOfHearingDetails) {
         if (null != listOfHearingDetails && !listOfHearingDetails.isEmpty()) {
             for (CafCassCaseDetail cafCassCaseDetail : filteredCafcassResponse.getCases()) {
                 Hearings filteredHearing =
@@ -289,18 +294,17 @@ public class CaseDataService {
                     cafCassCaseDetail.getCaseData().setCourtTypeId(filteredHearing.getCourtTypeId());
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
-                    filteredHearing.getCaseHearings().stream().forEach(
-                        caseHearing -> caseHearing.getHearingDaySchedule().stream().forEach(
-                            hearingDaySchedule -> {
-                                hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
-                                hearingDaySchedule.setHearingVenueId(null);
-                            }
-                        )
+                    filteredHearing.getCaseHearings().forEach(
+                        caseHearing -> caseHearing.getHearingDaySchedule().forEach(
+                                hearingDaySchedule -> {
+                                    hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
+                                    hearingDaySchedule.setHearingVenueId(null);
+                                }
+                            )
                     );
                 }
             }
         }
-        return filteredCafcassResponse;
     }
 
     private void updateHearingResponse(String authorisation, String s2sToken, CafCassResponse cafCassResponse) {
