@@ -38,7 +38,7 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
-     json-20230227.jar ]]></notes>11
+     json-20230227.jar ]]></notes>
     <cve>CVE-2023-5072</cve>
   </suppress>
 
