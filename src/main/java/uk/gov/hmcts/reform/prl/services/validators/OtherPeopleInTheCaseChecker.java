@@ -16,7 +16,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.OTHER_PEOPLE_IN_THE_CASE;
@@ -39,7 +38,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         if (othersToNotify.isPresent()) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             if (others.isEmpty()) {
                 return false;
@@ -66,7 +65,7 @@ public class OtherPeopleInTheCaseChecker implements EventChecker {
         if (othersToNotify.isPresent()) {
             List<PartyDetails> others = caseData.getOthersToNotify()
                 .stream().map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             boolean started = others.stream().anyMatch(Objects::nonNull);
             if (started) {

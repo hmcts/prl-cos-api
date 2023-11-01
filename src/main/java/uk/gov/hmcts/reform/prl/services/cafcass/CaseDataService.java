@@ -85,7 +85,7 @@ public class CaseDataService {
 
         try {
             if (caseTypeList != null && !caseTypeList.isEmpty()) {
-                caseTypeList = caseTypeList.stream().map(String::trim).collect(Collectors.toList());
+                caseTypeList = caseTypeList.stream().map(String::trim).toList();
 
                 ObjectMapper objectMapper = CcdObjectMapper.getObjectMapper();
                 objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -229,7 +229,7 @@ public class CaseDataService {
     }
 
     private List<Should> populateStatesForQuery() {
-        caseStateList = caseStateList.stream().map(String::trim).collect(Collectors.toList());
+        caseStateList = caseStateList.stream().map(String::trim).toList();
 
         List<Should> shoulds = new ArrayList<>();
         if (caseStateList != null && !caseStateList.isEmpty()) {
@@ -251,7 +251,7 @@ public class CaseDataService {
 
     private CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
         CafCassResponse filteredCafcassResponse = CafCassResponse.builder()
-            .cases(new ArrayList<CafCassCaseDetail>())
+            .cases(new ArrayList<>())
             .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (CafCassCaseDetail caseDetails : cafCassResponse.getCases()) {
@@ -290,14 +290,12 @@ public class CaseDataService {
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
                     filteredHearing.getCaseHearings().stream().forEach(
-                        caseHearing -> {
-                            caseHearing.getHearingDaySchedule().stream().forEach(
-                                hearingDaySchedule -> {
-                                    hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
-                                    hearingDaySchedule.setHearingVenueId(null);
-                                }
-                            );
-                        }
+                        caseHearing -> caseHearing.getHearingDaySchedule().stream().forEach(
+                            hearingDaySchedule -> {
+                                hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
+                                hearingDaySchedule.setHearingVenueId(null);
+                            }
+                        )
                     );
                 }
             }
