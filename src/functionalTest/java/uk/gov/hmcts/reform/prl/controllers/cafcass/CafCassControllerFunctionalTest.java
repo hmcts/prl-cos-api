@@ -71,7 +71,6 @@ public class CafCassControllerFunctionalTest {
     @MockBean
     private CoreCaseDataApi coreCaseDataApi;
 
-
     @MockBean
     private AuthorisationService authorisationService;
 
