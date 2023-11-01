@@ -138,63 +138,6 @@ public class ManageOrdersController {
         }
     }
 
-    //todo: API not required
-    @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to fetch case data and custom order fields")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Child details are fetched"),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse fetchOrderDetails(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                caseData = manageOrderService.populateCustomOrderFields(caseData);
-            }
-            return CallbackResponse.builder()
-                .data(caseData)
-                .build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    private void fetchOrderDetails(String authorisation, CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated, CaseData caseData) {
-        if (callbackRequest
-            .getCaseDetailsBefore() != null && callbackRequest
-            .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
-            caseDataUpdated.put("courtName", callbackRequest
-                .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
-        }
-        log.info(
-            "Print CreateSelectOrderOptions after court name set:: {}",
-            caseData.getCreateSelectOrderOptions()
-        );
-        log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
-
-        C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
-            ? caseData.getManageOrders().getC21OrderOptions() : null;
-        caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
-
-        caseDataUpdated.put("c21OrderOptions", c21OrderType);
-        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
-            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
-
-        if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
-                ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
-
-        }
-    }
-
     @PostMapping(path = "/fetch-order-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to fetch case data and custom order fields")
     @ApiResponses(value = {
@@ -217,7 +160,19 @@ public class ManageOrdersController {
                 && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
             caseDataUpdated.put("manageOrdersOptions", caseData.getManageOrdersOptions());
-            fetchOrderDetails(authorisation, callbackRequest, caseDataUpdated, caseData);
+            if (callbackRequest
+                .getCaseDetailsBefore() != null && callbackRequest
+                .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
+                caseDataUpdated.put("courtName", callbackRequest
+                    .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+            }
+            log.info(
+                "Print CreateSelectOrderOptions after court name set:: {}",
+                caseData.getCreateSelectOrderOptions()
+            );
+            log.info("Print manageOrdersOptions after court name set:: {}", caseData.getManageOrdersOptions());
+
+            populateOrderTypeAndCourtName(authorisation, caseDataUpdated, caseData);
 
             //PRL-3254 - Populate hearing details dropdown for create order
             DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
@@ -227,6 +182,24 @@ public class ManageOrdersController {
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void populateOrderTypeAndCourtName(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
+        C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
+            ? caseData.getManageOrders().getC21OrderOptions() : null;
+        caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
+
+        caseDataUpdated.put("c21OrderOptions", c21OrderType);
+        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
+        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
+
+        if (null != caseData.getCreateSelectOrderOptions()
+            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
+            caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
+                ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
+
         }
     }
 
