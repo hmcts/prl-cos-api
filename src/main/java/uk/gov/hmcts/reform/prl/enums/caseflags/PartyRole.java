@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Getter
@@ -61,86 +60,103 @@ public enum PartyRole {
 
     public static Optional<PartyRole> fromRepresentingAndIndex(Representing representing, int index) {
         return Arrays.stream(PartyRole.values())
-            .filter(role -> role.representing.equals(representing) && role.index == index)
-            .findFirst();
+                .filter(role -> role.representing.equals(representing) && role.index == index)
+                .findFirst();
     }
 
     public static Optional<PartyRole> fromCaseRoleLabel(String caseRoleLabel) {
         return Arrays.stream(PartyRole.values())
-            .filter(role -> role.caseRoleLabel.equals(caseRoleLabel))
-            .findFirst();
+                .filter(role -> role.caseRoleLabel.equals(caseRoleLabel))
+                .findFirst();
     }
 
     public static List<PartyRole> matchingRoles(Representing representing) {
         return Arrays.stream(PartyRole.values())
-            .filter(role -> role.representing == representing)
-            .collect(Collectors.toList());
+                .filter(role -> role.representing == representing)
+                .toList();
     }
 
     public static List<PartyRole> notMatchingRoles(Representing representing) {
         return Arrays.stream(PartyRole.values())
-            .filter(role -> role.representing != representing)
-            .collect(Collectors.toList());
+                .filter(role -> role.representing != representing)
+                .toList();
     }
 
     public enum Representing {
         CAAPPLICANT(
-            CaseData::getApplicants,
-            CaseData::getApplicantsFL401,
-            Constants.CA_APPLICANT
-        ),
+                CaseData::getApplicants,
+                CaseData::getApplicantsFL401,
+                Constants.CA_APPLICANT_EXTERNAL,
+                Constants.CA_APPLICANT_INTERNAL,
+                Constants.CA_APPLICANT_GROUP_ID),
         CAAPPLICANTSOLICITOR(
-            CaseData::getApplicants,
-            CaseData::getApplicantsFL401,
-            Constants.CA_APPLICANT_SOLICITOR
-        ),
+                CaseData::getApplicants,
+                CaseData::getApplicantsFL401,
+                Constants.CA_APPLICANT_SOLICITOR_EXTERNAL,
+                Constants.CA_APPLICANT_SOLICITOR_INTERNAL,
+                Constants.CA_APPLICANT_SOLICITOR_GROUP_ID),
         CARESPONDENT(
-            CaseData::getRespondents,
-            CaseData::getRespondentsFL401,
-            Constants.CA_RESPONDENT
-        ),
+                CaseData::getRespondents,
+                CaseData::getRespondentsFL401,
+                Constants.CA_RESPONDENT_EXTERNAL,
+                Constants.CA_RESPONDENT_INTERNAL,
+                Constants.CA_RESPONDENT_GROUP_ID),
         CARESPONDENTSOLCIITOR(
-            CaseData::getRespondents,
-            CaseData::getRespondentsFL401,
-            Constants.CA_RESPONDENT_SOLICITOR
-        ),
+                CaseData::getRespondents,
+                CaseData::getRespondentsFL401,
+                Constants.CA_RESPONDENT_SOLICITOR_EXTERNAL,
+                Constants.CA_RESPONDENT_SOLICITOR_INTERNAL,
+                Constants.CA_RESPONDENT_SOLICITOR_GROUP_ID),
         CAOTHERPARTY(
-            CaseData::getOtherPartyInTheCaseRevised,
-            null,
-            Constants.CA_OTHER_PARTY
-        ),
+                CaseData::getOtherPartyInTheCaseRevised,
+                null,
+                Constants.CA_OTHER_PARTY_EXTERNAL,
+                Constants.CA_OTHER_PARTY_INTERNAL,
+                Constants.CA_OTHER_PARTY_GROUP_ID),
         DAAPPLICANT(
-            CaseData::getApplicants,
-            CaseData::getApplicantsFL401,
-            Constants.DA_APPLICANT
-        ),
+                CaseData::getApplicants,
+                CaseData::getApplicantsFL401,
+                Constants.DA_APPLICANT_EXTERNAL,
+                Constants.DA_APPLICANT_INTERNAL,
+                Constants.DA_APPLICANT_GROUP_ID),
         DAAPPLICANTSOLICITOR(
-            CaseData::getApplicants,
-            CaseData::getApplicantsFL401,
-            Constants.DA_APPLICANT_SOLICITOR
-        ),
+                CaseData::getApplicants,
+                CaseData::getApplicantsFL401,
+                Constants.DA_APPLICANT_SOLICITOR_EXTERNAL,
+                Constants.DA_APPLICANT_SOLICITOR_INTERNAL,
+                Constants.DA_APPLICANT_SOLICITOR_GROUP_ID),
         DARESPONDENT(
-            CaseData::getRespondents,
-            CaseData::getRespondentsFL401,
-            Constants.DA_RESPONDENT
-        ),
+                CaseData::getRespondents,
+                CaseData::getRespondentsFL401,
+                Constants.DA_RESPONDENT_EXTERNAL,
+                Constants.DA_RESPONDENT_INTERNAL,
+                Constants.DA_RESPONDENT_GROUP_ID),
         DARESPONDENTSOLCIITOR(
-            CaseData::getRespondents,
-            CaseData::getRespondentsFL401,
-            Constants.DA_RESPONDENT_SOLICITOR
-        );
+                CaseData::getRespondents,
+                CaseData::getRespondentsFL401,
+                Constants.DA_RESPONDENT_SOLICITOR_EXTERNAL,
+                Constants.DA_RESPONDENT_SOLICITOR_INTERNAL,
+                Constants.DA_RESPONDENT_SOLICITOR_GROUP_ID);
 
         private final Function<CaseData, List<Element<PartyDetails>>> caTarget;
         private final Function<CaseData, PartyDetails> daTarget;
         @Getter
-        private final String caseDataField;
+        private final String caseDataExternalField;
+        @Getter
+        private final String caseDataInternalField;
+        @Getter
+        private final String groupId;
 
         Representing(Function<CaseData, List<Element<PartyDetails>>> caTarget,
                      Function<CaseData, PartyDetails> daTarget,
-                     String caseDataField) {
+                     String caseDataExternalField,
+                     String caseDataInternalField,
+                     String groupId) {
             this.caTarget = caTarget;
             this.daTarget = daTarget;
-            this.caseDataField = caseDataField;
+            this.caseDataExternalField = caseDataExternalField;
+            this.caseDataInternalField = caseDataInternalField;
+            this.groupId = groupId;
         }
 
         public Function<CaseData, List<Element<PartyDetails>>> getCaTarget() {
@@ -151,20 +167,46 @@ public enum PartyRole {
             return daTarget;
         }
 
-        public String getCaseDataField() {
-            return caseDataField;
+        public String getCaseDataExternalField() {
+            return caseDataExternalField;
+        }
+
+        public String getCaseDataInternalField() {
+            return caseDataInternalField;
+        }
+
+        public String getGroupId() {
+            return groupId;
         }
 
         private static class Constants {
-            public static final String CA_APPLICANT = "caApplicant%dFlags";
-            public static final String CA_APPLICANT_SOLICITOR = "caApplicantSolicitor%dFlags";
-            public static final String CA_RESPONDENT = "caRespondent%dFlags";
-            public static final String CA_RESPONDENT_SOLICITOR = "caRespondentSolicitor%dFlags";
-            public static final String CA_OTHER_PARTY = "caOtherParty%dFlags";
-            public static final String DA_APPLICANT = "daApplicantFlags";
-            public static final String DA_APPLICANT_SOLICITOR = "daApplicantSolicitorFlags";
-            public static final String DA_RESPONDENT = "daRespondentFlags";
-            public static final String DA_RESPONDENT_SOLICITOR = "daRespondentSolicitorFlags";
+            public static final String CA_APPLICANT_EXTERNAL = "caApplicant%dExternalFlags";
+            public static final String CA_APPLICANT_SOLICITOR_EXTERNAL = "caApplicantSolicitor%dExternalFlags";
+            public static final String CA_RESPONDENT_EXTERNAL = "caRespondent%dExternalFlags";
+            public static final String CA_RESPONDENT_SOLICITOR_EXTERNAL = "caRespondentSolicitor%dExternalFlags";
+            public static final String CA_OTHER_PARTY_EXTERNAL = "caOtherParty%dExternalFlags";
+            public static final String DA_APPLICANT_EXTERNAL = "daApplicantExternalFlags";
+            public static final String DA_APPLICANT_SOLICITOR_EXTERNAL = "daApplicantSolicitorExternalFlags";
+            public static final String DA_RESPONDENT_EXTERNAL = "daRespondentExternalFlags";
+            public static final String DA_RESPONDENT_SOLICITOR_EXTERNAL = "daRespondentSolicitorExternalFlags";
+            public static final String CA_APPLICANT_INTERNAL = "caApplicant%dInternalFlags";
+            public static final String CA_APPLICANT_SOLICITOR_INTERNAL = "caApplicantSolicitor%dInternalFlags";
+            public static final String CA_RESPONDENT_INTERNAL = "caRespondent%dInternalFlags";
+            public static final String CA_RESPONDENT_SOLICITOR_INTERNAL = "caRespondentSolicitor%dInternalFlags";
+            public static final String CA_OTHER_PARTY_INTERNAL = "caOtherParty%dInternalFlags";
+            public static final String DA_APPLICANT_INTERNAL = "daApplicantInternalFlags";
+            public static final String DA_APPLICANT_SOLICITOR_INTERNAL = "daApplicantSolicitorInternalFlags";
+            public static final String DA_RESPONDENT_INTERNAL = "daRespondentInternalFlags";
+            public static final String DA_RESPONDENT_SOLICITOR_INTERNAL = "daRespondentSolicitorInternalFlags";
+            public static final String CA_APPLICANT_GROUP_ID = "caApplicant%d";
+            public static final String CA_APPLICANT_SOLICITOR_GROUP_ID = "caApplicantSolicitor%d";
+            public static final String CA_RESPONDENT_GROUP_ID = "caRespondent%d";
+            public static final String CA_RESPONDENT_SOLICITOR_GROUP_ID = "caRespondentSolicitor%d";
+            public static final String CA_OTHER_PARTY_GROUP_ID = "caOtherParty%d";
+            public static final String DA_APPLICANT_GROUP_ID = "daApplicant";
+            public static final String DA_APPLICANT_SOLICITOR_GROUP_ID = "daApplicantSolicitor";
+            public static final String DA_RESPONDENT_GROUP_ID = "daRespondent";
+            public static final String DA_RESPONDENT_SOLICITOR_GROUP_ID = "daRespondentSolicitor";
         }
     }
 }
