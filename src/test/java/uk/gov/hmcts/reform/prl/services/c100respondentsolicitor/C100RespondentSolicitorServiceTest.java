@@ -69,8 +69,6 @@ import java.util.UUID;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -1083,12 +1081,13 @@ public class C100RespondentSolicitorServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(Mockito.anyMap(), Mockito.eq(CaseData.class))).thenReturn(caseData);
         when(documentGenService.generateSingleDocument(
-                authToken,
-                caseData,
-                SOLICITOR_C7_DRAFT_DOCUMENT,
-                false
+            Mockito.anyString(),
+            Mockito.any(CaseData.class),
+            Mockito.anyString(),
+            Mockito.anyBoolean(),
+            Mockito.anyMap()
         )).thenReturn(document);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1108,7 +1107,7 @@ public class C100RespondentSolicitorServiceTest {
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(Mockito.anyMap(), Mockito.eq(CaseData.class))).thenReturn(caseData);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1121,10 +1120,11 @@ public class C100RespondentSolicitorServiceTest {
             .documentFileName("Draft_C1A_allegation_of_harm.pdf")
             .build();
         when(documentGenService.generateSingleDocument(
-            authToken,
-            caseData,
-            SOLICITOR_C1A_DRAFT_DOCUMENT,
-            false
+            Mockito.anyString(),
+            Mockito.any(CaseData.class),
+            Mockito.anyString(),
+            Mockito.anyBoolean(),
+            Mockito.anyMap()
         )).thenReturn(document);
 
         callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -1163,23 +1163,13 @@ public class C100RespondentSolicitorServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(documentGenService.generateSingleDocument(
-            authToken,
-            caseData,
-            SOLICITOR_C7_DRAFT_DOCUMENT,
-            false,
-            Mockito.any(HashMap.class)
-        )).thenReturn(c7Document);
-
         caseData = caseData.toBuilder()
             .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
             .build();
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        when(objectMapper.convertValue(Mockito.anyMap(), Mockito.eq(CaseData.class))).thenReturn(caseData);
         GeneratedDocumentInfo generatedC1ADocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -1192,11 +1182,11 @@ public class C100RespondentSolicitorServiceTest {
             .documentFileName("Draft_C1A_allegation_of_harm.pdf")
             .build();
         when(documentGenService.generateSingleDocument(
-            authToken,
-            caseData,
-            SOLICITOR_C1A_DRAFT_DOCUMENT,
-            false,
-            Mockito.any(HashMap.class)
+            Mockito.anyString(),
+            Mockito.any(CaseData.class),
+            Mockito.anyString(),
+            Mockito.anyBoolean(),
+            Mockito.anyMap()
         )).thenReturn(c1ADocument);
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
