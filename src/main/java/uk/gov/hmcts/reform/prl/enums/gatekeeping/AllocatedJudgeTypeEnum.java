@@ -13,7 +13,7 @@ public enum AllocatedJudgeTypeEnum {
     @JsonProperty("judge")
     judge("judge", "Judge"),
     @JsonProperty("legalAdviser")
-    legalAdviser("legalAdviser", "Legal Adviser");
+    legalAdviser("legalAdviser", "Legal adviser");
 
     private final String id;
     private final String displayedValue;
