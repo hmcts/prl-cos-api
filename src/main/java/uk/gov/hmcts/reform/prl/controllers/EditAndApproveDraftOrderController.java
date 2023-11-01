@@ -111,7 +111,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            Map<String, Object> caseDataUpdated = draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(
+            Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
                 authorisation,
                 callbackRequest
             );
@@ -133,21 +133,31 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
-            caseDataUpdated.putAll(draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
-                authorisation,
-                callbackRequest
-            ));
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
-            //PRL-4216 - save server order additional documents if any
-            manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
+            if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                caseDataUpdated.putAll(draftAnOrderService.adminEditAndServeAboutToSubmit(
+                    authorisation,
+                    callbackRequest
+                ));
+                manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
+                //PRL-4216 - save server order additional documents if any
+                manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
+            } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
+                    caseData,
+                    authorisation,
+                    callbackRequest.getEventId()
+                ));
+            }
 
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
 

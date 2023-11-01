@@ -1439,25 +1439,20 @@ public class DraftAnOrderService {
         );
     }
 
-    public Map<String, Object> judgeOrAdminEditApproveDraftOrderMidEvent(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> getEligibleServeOrderDetails(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
-            .equals(caseData.getServeOrderData().getWhatDoWithOrder())
-            || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
-            caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(authorisation, caseData, eventId));
-            CaseData modifiedCaseData = objectMapper.convertValue(
-                caseDataUpdated,
-                CaseData.class
-            );
-            manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
-        }
+        caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(authorisation, caseData, eventId));
+        CaseData modifiedCaseData = objectMapper.convertValue(
+            caseDataUpdated,
+            CaseData.class
+        );
+        manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         return caseDataUpdated;
     }
 
-    public Map<String, Object> judgeOrAdminEditApproveDraftOrderAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
+    public Map<String, Object> adminEditAndServeAboutToSubmit(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
@@ -1465,10 +1460,9 @@ public class DraftAnOrderService {
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && (WhatToDoWithOrderEnum.finalizeSaveToServeLater
+        if (WhatToDoWithOrderEnum.finalizeSaveToServeLater
             .equals(caseData.getServeOrderData().getWhatDoWithOrder())
-            || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+            || YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
             caseDataUpdated.putAll(removeDraftOrderAndAddToFinalOrder(
                 authorisation,
                 caseData, eventId
@@ -1484,7 +1478,7 @@ public class DraftAnOrderService {
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
             }
-        } else {
+        } else if (WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
         }
         return caseDataUpdated;

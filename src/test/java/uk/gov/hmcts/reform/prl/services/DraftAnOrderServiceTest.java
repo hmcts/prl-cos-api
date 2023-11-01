@@ -2432,7 +2432,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        stringObjectMap = draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(authToken, callbackRequest);
+        stringObjectMap = draftAnOrderService.getEligibleServeOrderDetails(authToken, callbackRequest);
         assertNotNull(stringObjectMap);
     }
 
@@ -2482,7 +2482,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        stringObjectMap = draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+        stringObjectMap = draftAnOrderService.adminEditAndServeAboutToSubmit(
             authToken,
             callbackRequest
         );
@@ -2532,7 +2532,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        stringObjectMap = draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+        stringObjectMap = draftAnOrderService.adminEditAndServeAboutToSubmit(
             authToken,
             callbackRequest
         );

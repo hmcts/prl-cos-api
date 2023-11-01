@@ -572,10 +572,15 @@ public class ManageOrderService {
     }
 
     public void populateServeOrderDetails(CaseData caseData, Map<String, Object> headerMap) {
-        headerMap.put(
-            "serveOrderDynamicList",
-            dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData)
-        );
+
+        DynamicMultiSelectList orderList = dynamicMultiSelectListService.getOrdersAsDynamicMultiSelectList(caseData);
+        if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
+            //this is when we are trying to serve the order, auto selecting the chosen order
+            List<DynamicMultiselectListElement> values = new ArrayList<>();
+            values.add(orderList.getListItems().get(orderList.getListItems().size() - 1));
+            orderList = orderList.toBuilder().value(values).build();
+        }
+        headerMap.put("serveOrderDynamicList", orderList);
         populateOtherServeOrderDetails(caseData, headerMap);
     }
 
