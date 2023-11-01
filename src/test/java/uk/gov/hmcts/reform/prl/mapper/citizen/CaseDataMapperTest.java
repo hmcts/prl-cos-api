@@ -31,7 +31,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
 @RunWith(MockitoJUnitRunner.class)
-class CaseDataMapperTest {
+public class CaseDataMapperTest {
 
     private static final String CASE_TYPE = "C100";
     private final ObjectMapper mapper = new ObjectMapper();
@@ -420,7 +420,7 @@ class CaseDataMapperTest {
     @ParameterizedTest
     @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
         "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
-    void testCaseDataMapperForSafetyConcerns(String resourcePath) throws IOException {
+    public void testCaseDataMapperForSafetyConcerns(String resourcePath) throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
