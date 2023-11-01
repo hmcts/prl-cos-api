@@ -1698,9 +1698,12 @@ public class DraftAnOrderService {
             if (ManageOrdersUtils.isHearingPageNeeded(caseData)) {
                 existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
                 //PRL-4335 - hearing screen validations
-                errorList = getHearingScreenValidations(existingOrderHearingDetails,
-                                                        caseData.getCreateSelectOrderOptions(),
-                                                        true);
+                //PRL-4589 - fix, validate only when hearings are available
+                if (Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())) {
+                    errorList = getHearingScreenValidations(existingOrderHearingDetails,
+                                                            caseData.getCreateSelectOrderOptions(),
+                                                            true);
+                }
             }
             if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
                 && null != caseData.getManageOrders().getFl404CustomFields()) {
