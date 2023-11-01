@@ -61,7 +61,6 @@ import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -627,7 +626,7 @@ public class DraftAnOrderService {
             if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType())) {
                 return C21OrderOptionsEnum.c21other.equals(selectedOrder.getC21OrderOptions());
             }
-            return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
+            return HEARING_PAGE_NEEDED_ORDER_IDS.stream()
                 .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(selectedOrder.getOrderType())));
         }
         return false;
@@ -1483,7 +1482,7 @@ public class DraftAnOrderService {
         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
                 && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
-            Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
+            Optional<String> hearingPageNeeded = PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS.stream()
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions()))).findFirst();
             if (hearingPageNeeded.isPresent()) {
                 existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
@@ -1492,7 +1491,7 @@ public class DraftAnOrderService {
             .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()))) {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-            Optional<String> hearingPageNeeded = Arrays.stream(PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS)
+            Optional<String> hearingPageNeeded = PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS.stream()
                 .filter(id -> id.equalsIgnoreCase(String.valueOf(draftOrder.getOrderType()))).findFirst();
             if (hearingPageNeeded.isPresent()) {
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {

@@ -166,7 +166,7 @@ public class ReviewDocumentService {
                 courtStaffQuarantineDocElement
             );
             if (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())) {
-                Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement = Optional.empty();
+                Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement;
                 quarantineBulkscanDocElement = Optional.of(
                     element(QuarantineLegalDoc.builder()
                                 .url(caseData.getScannedDocuments().stream()
