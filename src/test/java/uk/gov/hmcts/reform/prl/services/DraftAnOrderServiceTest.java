@@ -3783,7 +3783,8 @@ public class DraftAnOrderServiceTest {
         CaseData caseData = CaseData.builder()
             .createSelectOrderOptions(noticeOfProceedingsParties)
             .manageOrders(ManageOrders.builder()
-                              .ordersHearingDetails(List.of(element(hearingData))).build())
+                              .ordersHearingDetails(List.of(element(hearingData)))
+                              .hasJudgeProvidedHearingDetails(Yes).build())
             .draftOrderCollection(List.of(element(uuid, draftOrder)))
             .doYouWantToEditTheOrder(Yes)
             .build();
