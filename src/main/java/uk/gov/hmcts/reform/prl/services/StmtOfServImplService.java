@@ -123,13 +123,10 @@ public class StmtOfServImplService {
         List<DynamicListElement> respondentListItems = new ArrayList<>();
         IncrementalInteger i = new IncrementalInteger(1);
         if (respondents != null) {
-            respondents.forEach(respondent -> {
-                respondentListItems.add(DynamicListElement.builder().code(respondent.getId().toString())
-                                  .label(respondent.getValue().getFirstName() + " "
-                                             + respondent.getValue().getLastName()
-                                             + " (Respondent " + i.getAndIncrement() + ")").build());
-
-            });
+            respondents.forEach(respondent -> respondentListItems.add(DynamicListElement.builder().code(respondent.getId().toString())
+                              .label(respondent.getValue().getFirstName() + " "
+                                         + respondent.getValue().getLastName()
+                                         + " (Respondent " + i.getAndIncrement() + ")").build()));
             respondentListItems.add(DynamicListElement.builder().code(ALL_RESPONDENTS).label(ALL_RESPONDENTS).build());
         } else if (caseData.getRespondentsFL401() != null) {
             String name = caseData.getRespondentsFL401().getFirstName() + " "

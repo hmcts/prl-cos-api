@@ -39,6 +39,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.NEW_ORDER_TITLE
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -96,29 +97,34 @@ public class SendgridService {
                                                              String toEmailAddress, List<Document> listOfAttachments, String servedParty)
         throws IOException {
 
-        Content content = new Content();
+        Content content;
         String subject = emailProps.get("subject");
         if (emailProps.containsKey("orderURLLinkNeeded")) {
             subject = emailProps.get("orderSubject");
-            emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get("caseNumber") + "#Orders");
+            emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get(CASE_NUMBER) + "#Orders");
             String title = emailProps.containsKey("finalOrder") ? FINAL_ORDER_TITLE : NEW_ORDER_TITLE;
             String body = emailProps.containsKey("finalOrder")
                     ? RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY : RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 
-            content = new Content("text/html", String.format(
-                   title + EMAIL_START
-                            + body + EMAIL_END,
-                    emailProps.get(CASE_NAME),
-                    emailProps.get("caseNumber"),
-                    emailProps.get("solicitorName"),
-                    emailProps.get("orderUrLLink")
-            ));
+            String emailStart = String.format(
+                EMAIL_START,
+                emailProps.get(CASE_NAME),
+                emailProps.get("caseNumber"),
+                emailProps.get("solicitorName")
+            );
+
+            String emailEnd = String.format(
+                EMAIL_END,
+                emailProps.get("orderUrLLink")
+            );
+
+            content = new Content("text/html", String.format("%s%s%s", title, emailStart, emailEnd));
         } else {
             content = new Content("text/plain", String.format(
                     (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
                             .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
                     emailProps.get(CASE_NAME),
-                    emailProps.get("caseNumber"),
+                    emailProps.get(CASE_NUMBER),
                     emailProps.get("solicitorName")
             ));
         }
@@ -162,7 +168,7 @@ public class SendgridService {
         String subject = emailProps.get("subject");
         Content content = new Content("text/html", String.format(
             TransferCaseTemplate.TRANSFER_CASE_EMAIL_BODY,
-            emailProps.get("caseNumber"),
+            emailProps.get(CASE_NUMBER),
             emailProps.get(CASE_NAME),
             emailProps.get("issueDate"),
             emailProps.get("applicationType"),
