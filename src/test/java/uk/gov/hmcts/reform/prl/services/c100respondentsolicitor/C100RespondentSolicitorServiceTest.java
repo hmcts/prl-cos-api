@@ -837,13 +837,52 @@ public class C100RespondentSolicitorServiceTest {
                                                        Mockito.anyBoolean(),
                                                        Mockito.any(HashMap.class))).thenReturn(document);
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        callbackRequest.setEventId("c100ResSolConsentingToApplicationD");
-        List<String> errorList = new ArrayList<>();
-        Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
-            authToken, callbackRequest
-        );
-        Assertions.assertTrue(response.containsKey("respondentDc8"));
+        String[] eventsAndRespts = {"c100ResSolConsentingToApplicationB - respondentBc8",
+            "c100ResSolConsentingToApplicationC - respondentCc8",
+            "c100ResSolConsentingToApplicationD - respondentDc8"};
+
+        for (String eventsAndResp : eventsAndRespts) {
+
+            Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+                .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+                .value(respondent).build();
+            Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
+                .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+                .value(respondent2).build();
+            List<Element<PartyDetails>> respondentList = new ArrayList<>();
+            respondentList.add(wrappedRespondents);
+            respondentList.add(wrappedRespondents2);
+            respondentList.add(wrappedRespondents);
+            respondentList.add(wrappedRespondents2);
+
+            CaseData caseData = CaseData.builder().respondents(respondentList).id(1)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .respondentSolicitorData(RespondentSolicitorData.builder()
+                                             .respondentAllegationsOfHarm(RespondentAllegationsOfHarm
+                                                                              .builder()
+                                                                              .build())
+                                             .build())
+                .build();
+
+            stringObjectMap = caseData.toMap(new ObjectMapper());
+
+            when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+            CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                 .id(123L)
+                                 .data(stringObjectMap)
+                                 .build())
+                .build();
+            String event = eventsAndResp.split(HYPHEN_SEPARATOR)[0];
+            String respondent = eventsAndResp.split(HYPHEN_SEPARATOR)[1];
+            callbackRequest.setEventId(event);
+            Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+                authToken, callbackRequest
+            );
+            Assertions.assertTrue(response.containsKey(respondent));
+        }
     }
 
     @Test
@@ -969,6 +1008,17 @@ public class C100RespondentSolicitorServiceTest {
 
         assertTrue(response.containsKey("respondents"));
 
+        String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
+            "c100ResSolMiamA","c100ResSolCurrentOrPreviousProceedingsA","c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
+            "c100ResSolAbilityToParticipateA","c100ResSolConsentingToApplicationA"};
+        for (String event : events) {
+            callbackRequest.setEventId(event);
+            Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+                callbackRequest
+            );
+
+            assertTrue(response.containsKey("respondents"));
+        }
     }
 
     @Test

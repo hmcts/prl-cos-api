@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.runner.RunWith;
@@ -80,8 +79,7 @@ public class CaseDataServiceTest {
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
     }
 
-    @Ignore
-    @org.junit.Test
+    @Test
     public void getCaseData() throws IOException {
 
         final List<CaseHearing> caseHearings = new ArrayList();
@@ -117,6 +115,16 @@ public class CaseDataServiceTest {
         when(hearingService.getHearings(anyString(),anyString())).thenReturn(hearings);
         when(hearingService.getHearingsForAllCases(anyString(),anyMap())).thenReturn(listOfHearings);
         when(systemUserService.getSysUserToken()).thenReturn(userToken);
+        when(organisationService.getOrganisationDetails(anyString(),anyString()))
+            .thenReturn(Organisations.builder()
+                            .name("test 1")
+                            .organisationIdentifier("EJK3DHI")
+                            .contactInformation(List.of(ContactInformation.builder()
+                                                            .addressLine1("Physio In The City")
+                                                            .addressLine2("1 Kingdom Street")
+                                                            .postCode("W2 6BD")
+                                                            .build()))
+                            .build());
         List<String> caseStateList = new LinkedList<>();
         caseStateList.add("DECISION_OUTCOME");
         ReflectionTestUtils.setField(caseDataService, "caseStateList", caseStateList);
@@ -223,7 +231,7 @@ public class CaseDataServiceTest {
         );
         assertEquals(cafCassResponse, realCafCassResponse);
 
-        assertEquals(realCafCassResponse.getTotal(), 0);
+        assertEquals(0, realCafCassResponse.getTotal());
 
     }
 

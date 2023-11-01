@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -66,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDERS_NEED_TO_BE_SERVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -121,7 +121,6 @@ public class ManageOrdersController {
 
     private final AllTabServiceImpl allTabsService;
 
-    public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -134,34 +133,6 @@ public class ManageOrdersController {
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
                 authorisation)).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    //todo: API not required
-    @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to fetch case data and custom order fields")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Child details are fetched"),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse fetchOrderDetails(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                caseData = manageOrderService.populateCustomOrderFields(caseData);
-            }
-            return CallbackResponse.builder()
-                .data(caseData)
-                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -464,7 +435,7 @@ public class ManageOrdersController {
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
-                caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.Yes);
+                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
                 if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
                     caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
                 } else {
@@ -479,7 +450,7 @@ public class ManageOrdersController {
                 );
                 manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
             } else {
-                caseDataUpdated.put("ordersNeedToBeServed", YesOrNo.No);
+                caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.No);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
