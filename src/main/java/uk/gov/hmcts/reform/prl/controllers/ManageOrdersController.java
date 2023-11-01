@@ -126,7 +126,9 @@ public class ManageOrdersController {
                 && null != caseData.getManageOrders().getFl404CustomFields()) {
                 errorList = getErrorForOccupationScreen(caseData);
             }
-
+            log.info("*** Manage order undertaking date time : {}", callbackRequest.getCaseDetails().getData()
+                .get("underTakingExpiryDateTime"));
+            log.info("*** Manage order undertaking date time : {}", caseData.getManageOrders());
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)

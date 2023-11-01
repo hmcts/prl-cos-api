@@ -1777,6 +1777,7 @@ public class ManageOrderService {
 
     private CaseData getN117FormData(CaseData caseData) {
         log.info("*** casedata manage orders : {}", caseData.getManageOrders());
+        log.info("**** Court name : {}", caseData.getCourtName());
         ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
@@ -2127,7 +2128,7 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
-            log.info("*****");
+            log.info("*****court name --- {}", caseData.getCourtName());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
             if (caseData.getCreateSelectOrderOptions() != null
                 && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
