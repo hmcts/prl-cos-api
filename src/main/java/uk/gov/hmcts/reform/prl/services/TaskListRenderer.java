@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
-import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.util.Collections;
 import java.util.LinkedList;

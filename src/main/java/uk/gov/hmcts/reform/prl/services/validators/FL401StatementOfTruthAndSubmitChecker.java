@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.util.EnumMap;
 import java.util.Map;
@@ -48,13 +49,13 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
     public boolean hasMandatoryCompleted(CaseData caseData) {
         EnumMap<Event, EventChecker> mandatoryEvents = new EnumMap<>(Event.class);
 
-        mandatoryEvents.put(FL401_CASE_NAME, eventsChecker.getCommonChecker().getCaseNameChecker());
-        mandatoryEvents.put(FL401_TYPE_OF_APPLICATION, eventsChecker.getFl401CaseChecker().getFl401ApplicationTypeChecker());
-        mandatoryEvents.put(WITHOUT_NOTICE_ORDER, eventsChecker.getFl401CaseChecker().getWithoutNoticeOrderChecker());
-        mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getPartyChecker().getApplicantsChecker());
-        mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getPartyChecker().getRespondentsChecker());
-        mandatoryEvents.put(RELATIONSHIP_TO_RESPONDENT, eventsChecker.getPartyChecker().getRespondentRelationshipChecker());
-        mandatoryEvents.put(FL401_APPLICANT_FAMILY_DETAILS, eventsChecker.getFl401CaseChecker().getFl401ApplicantFamilyChecker());
+        mandatoryEvents.put(FL401_CASE_NAME, eventsChecker.getCaseNameChecker());
+        mandatoryEvents.put(FL401_TYPE_OF_APPLICATION, eventsChecker.getFl401ApplicationTypeChecker());
+        mandatoryEvents.put(WITHOUT_NOTICE_ORDER, eventsChecker.getWithoutNoticeOrderChecker());
+        mandatoryEvents.put(APPLICANT_DETAILS, eventsChecker.getApplicantsChecker());
+        mandatoryEvents.put(RESPONDENT_DETAILS, eventsChecker.getRespondentsChecker());
+        mandatoryEvents.put(RELATIONSHIP_TO_RESPONDENT, eventsChecker.getRespondentRelationshipChecker());
+        mandatoryEvents.put(FL401_APPLICANT_FAMILY_DETAILS, eventsChecker.getFl401ApplicantFamilyChecker());
 
         populateManadatoryEvents(caseData, mandatoryEvents);
 
@@ -69,9 +70,9 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
 
         EnumMap<Event, EventChecker> optionalEvents = new EnumMap<>(Event.class);
 
-        optionalEvents.put(FL401_OTHER_PROCEEDINGS, eventsChecker.getFl401CaseChecker().getFl401OtherProceedingsChecker());
-        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getCommonChecker().getAttendingTheHearingChecker());
-        optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.getCommonChecker().getWelshLanguageRequirementsChecker());
+        optionalEvents.put(FL401_OTHER_PROCEEDINGS, eventsChecker.getFl401OtherProceedingsChecker());
+        optionalEvents.put(ATTENDING_THE_HEARING, eventsChecker.getAttendingTheHearingChecker());
+        optionalEvents.put(WELSH_LANGUAGE_REQUIREMENTS, eventsChecker.getWelshLanguageRequirementsChecker());
 
         boolean optionalFinished;
 
@@ -90,14 +91,14 @@ public class FL401StatementOfTruthAndSubmitChecker implements EventChecker {
 
         if (ordersOptional.isEmpty() || (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)
             && ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder))) {
-            mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getPartyChecker().getRespondentBehaviourChecker());
-            mandatoryEvents.put(FL401_HOME, eventsChecker.getFl401CaseChecker().getHomeChecker());
+            mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getRespondentBehaviourChecker());
+            mandatoryEvents.put(FL401_HOME, eventsChecker.getHomeChecker());
         } else {
             if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.nonMolestationOrder)) {
-                mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getPartyChecker().getRespondentBehaviourChecker());
+                mandatoryEvents.put(RESPONDENT_BEHAVIOUR, eventsChecker.getRespondentBehaviourChecker());
             }
             if (ordersOptional.get().getOrderType().contains(FL401OrderTypeEnum.occupationOrder)) {
-                mandatoryEvents.put(FL401_HOME, eventsChecker.getFl401CaseChecker().getHomeChecker());
+                mandatoryEvents.put(FL401_HOME, eventsChecker.getHomeChecker());
             }
         }
     }
