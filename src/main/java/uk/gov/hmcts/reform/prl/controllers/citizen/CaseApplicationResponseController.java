@@ -132,7 +132,7 @@ public class CaseApplicationResponseController {
                     .equalsIgnoreCase(partyId))
                 .map(Element::getValue)
                 .findFirst()
-                .map(partyDetails -> partyDetails.getLabelForDynamicList())
+                .map(PartyDetails::getLabelForDynamicList)
                 .orElse("");
 
             UserDetails userDetails = idamClient.getUserDetails(authorisation);

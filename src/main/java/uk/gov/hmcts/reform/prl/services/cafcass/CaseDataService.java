@@ -251,7 +251,7 @@ public class CaseDataService {
 
     private CafCassResponse getHearingDetailsForAllCases(String authorisation, CafCassResponse cafCassResponse) {
         CafCassResponse filteredCafcassResponse = CafCassResponse.builder()
-            .cases(new ArrayList<CafCassCaseDetail>())
+            .cases(new ArrayList<>())
             .build();
         Map<String, String> caseIdWithRegionIdMap = new HashMap<>();
         for (CafCassCaseDetail caseDetails : cafCassResponse.getCases()) {
@@ -290,14 +290,12 @@ public class CaseDataService {
                     filteredHearing.setCourtName(null);
                     filteredHearing.setCourtTypeId(null);
                     filteredHearing.getCaseHearings().stream().forEach(
-                        caseHearing -> {
-                            caseHearing.getHearingDaySchedule().stream().forEach(
-                                hearingDaySchedule -> {
-                                    hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
-                                    hearingDaySchedule.setHearingVenueId(null);
-                                }
-                            );
-                        }
+                        caseHearing -> caseHearing.getHearingDaySchedule().stream().forEach(
+                            hearingDaySchedule -> {
+                                hearingDaySchedule.setEpimsId(hearingDaySchedule.getHearingVenueId());
+                                hearingDaySchedule.setHearingVenueId(null);
+                            }
+                        )
                     );
                 }
             }
