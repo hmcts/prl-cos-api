@@ -69,6 +69,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -1011,9 +1012,10 @@ public class C100RespondentSolicitorServiceTest {
         String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
             "c100ResSolMiamA","c100ResSolCurrentOrPreviousProceedingsA","c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
             "c100ResSolAbilityToParticipateA","c100ResSolConsentingToApplicationA"};
+        when(confidentialDetailsMapper.mapConfidentialData(caseData, false)).thenReturn(caseData);
         for (String event : events) {
             callbackRequest.setEventId(event);
-            Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+            response = respondentSolicitorService.populateAboutToSubmitCaseData(
                 callbackRequest
             );
 
