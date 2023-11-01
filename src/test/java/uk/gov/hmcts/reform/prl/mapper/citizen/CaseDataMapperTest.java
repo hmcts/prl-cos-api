@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -185,44 +187,13 @@ public class CaseDataMapperTest {
         assertNull(updatedCaseData.getOtherChildren());
     }
 
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields1() throws IOException {
-        CaseData caseData1 = caseData
-                .toBuilder()
-                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                        .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra1.json"))
-                        .build())
-                .build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
-        //Then
-        assertNotNull(updatedCaseData);
-    }
-
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields2() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/ra1.json", "classpath:c100-rebuild/ra2.json", "classpath:c100-rebuild/ra3.json"})
+    void testCaseDataMapperReasonableAdjustmentsExtraFields1(String resourcePath) throws IOException {
         CaseData caseData1 = caseData
             .toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                                 .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra2.json"))
-                                 .build())
-            .build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
-        //Then
-        assertNotNull(updatedCaseData);
-    }
-
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields3() throws IOException {
-        CaseData caseData1 = caseData
-            .toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                                 .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra3.json"))
+                                 .c100RebuildReasonableAdjustments(TestUtil.readFileFrom(resourcePath))
                                  .build())
             .build();
 
@@ -434,13 +405,15 @@ public class CaseDataMapperTest {
         assertNotNull(updatedCaseData.getDraftConsentOrderFile());
     }
 
-    @Test
-    public void testCaseDataMapperForSafetyConcerns() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
+        "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
+    public void testCaseDataMapperForSafetyConcerns(String resourcePath) throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
                                  .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
-                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrns.json"))
+                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom(resourcePath))
                                  .build()).build();
 
         //When
@@ -460,40 +433,6 @@ public class CaseDataMapperTest {
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
                                  .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
                                  .c100RebuildSafetyConcerns(whenHaveSafetyConcernsIsNo)
-                                 .build()).build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-        //Then
-        assertNotNull(updatedCaseData);
-
-    }
-
-    @Test
-    public void testCaseWithoutDomesticAbuses() throws IOException {
-
-        //Given
-        CaseData caseData1 = caseData.toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
-                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json"))
-                                 .build()).build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-        //Then
-        assertNotNull(updatedCaseData);
-
-    }
-
-    @Test
-    public void testCaseDataMapperForSafetyConcernsWithoutChildAbuses() throws IOException {
-
-        //Given
-        CaseData caseData1 = caseData.toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
-                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"))
                                  .build()).build();
 
         //When
