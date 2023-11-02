@@ -21,14 +21,23 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+
+import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 
 
 @Slf4j
@@ -91,5 +100,20 @@ public class ManageDocumentsController extends AbstractCallbackController {
                       .confirmationHeader(CONFIRMATION_HEADER)
                       .confirmationBody(CONFIRMATION_BODY)
                       .build());
+    }
+
+    @PostMapping(path = "/validate-court-user", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "show error if eny other user except Admin/Judge select 'court' from party dropdown ")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        if(!manageDocumentsService.checkIfUserIsCourtStaff(authorisation)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of"))
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(callbackRequest.getCaseDetails().getData()).build();
     }
 }
