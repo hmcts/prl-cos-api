@@ -579,7 +579,7 @@ public class ManageOrderService {
         if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
             //this is when we are trying to serve the order, auto selecting the chosen order
             List<DynamicMultiselectListElement> values = new ArrayList<>();
-            values.add(orderList.getListItems().get(orderList.getListItems().size() - 1));
+            values.add(orderList.getListItems().get(0));
             orderList = orderList.toBuilder().value(values).build();
         }
         headerMap.put("serveOrderDynamicList", orderList);
