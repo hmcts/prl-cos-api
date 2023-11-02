@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
@@ -30,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -126,6 +128,9 @@ public class HearingDataService {
     @Autowired
     HearingRequestDataMapper hearingRequestDataMapper;
 
+    @Autowired
+    CaseService caseService;
+
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     DateTimeFormatter customDateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
 
@@ -133,7 +138,8 @@ public class HearingDataService {
     public HearingDataPrePopulatedDynamicLists populateHearingDynamicLists(String authorisation, String caseReferenceNumber,
                                                                            CaseData caseData, Hearings hearings) {
         Map<String, List<DynamicListElement>> hearingChannelsDetails = prePopulateHearingChannel(authorisation);
-        return HearingDataPrePopulatedDynamicLists.builder().retrievedHearingTypes(getDynamicList(prePopulateHearingType(authorisation)))
+        return HearingDataPrePopulatedDynamicLists.builder().retrievedHearingTypes(getDynamicList(prePopulateHearingType(
+                authorisation)))
             .retrievedHearingDates(getDynamicList(getHearingStartDate(caseReferenceNumber, hearings)))
             .retrievedHearingChannels(getDynamicList(hearingChannelsDetails.get(HEARINGCHANNEL)))
             .retrievedVideoSubChannels(getDynamicList(hearingChannelsDetails.get(VIDEOSUBCHANNELS)))
@@ -215,12 +221,14 @@ public class HearingDataService {
                 Map<String, String> caseIds = new HashMap<>();
                 caseLinkedDataList.get().forEach(caseLinkedData -> {
                     caseIdNameMap.put(caseLinkedData.getCaseReference(), caseLinkedData.getCaseName());
-                    setupRegionAndBaseLocationForCase(caseData.getCaseManagementLocation());
+
+
                     //PRL-4594 - setting some dummy regionId to fix Map.get null issue
                     caseIds.put(
                         caseLinkedData.getCaseReference(),
-                        setupRegionAndBaseLocationForCase(caseData.getCaseManagementLocation())
+                        setupRegionAndBaseLocationForCase(authorisation, caseLinkedData.getCaseReference())
                     );
+
                 });
                 log.info("Linked caseIdNameMap {}", caseIdNameMap);
                 log.info("Linked caseIds to hearings {}", caseIds);
@@ -248,21 +256,28 @@ public class HearingDataService {
         return dynamicListElements;
     }
 
-    private String setupRegionAndBaseLocationForCase(CaseManagementLocation caseManagementLocation) {
+    private String setupRegionAndBaseLocationForCase(String authorisation, String caseId) {
         String regionIdBaseLocation = null;
-        if (caseManagementLocation != null) {
-            if (caseManagementLocation.getBaseLocation() != null
-                && caseManagementLocation.getRegion() != null) {
-                regionIdBaseLocation = caseManagementLocation.getRegion()
-                    + PrlAppsConstants.HYPHEN_SEPARATOR
-                    + caseManagementLocation.getBaseLocation();
-            } else if (caseManagementLocation.getBaseLocationId() != null
-                && caseManagementLocation.getRegionId() != null) {
-                regionIdBaseLocation = caseManagementLocation.getRegionId()
-                    + PrlAppsConstants.HYPHEN_SEPARATOR
-                    + caseManagementLocation.getBaseLocationId();
+        CaseDetails caseDetails = caseService.getCase(authorisation, caseId);
+        if (caseDetails != null) {
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            CaseManagementLocation caseManagementLocation = caseData.getCaseManagementLocation();
+
+            if (caseManagementLocation != null) {
+                if (caseManagementLocation.getBaseLocation() != null
+                    && caseManagementLocation.getRegion() != null) {
+                    regionIdBaseLocation = caseManagementLocation.getRegion()
+                        + PrlAppsConstants.HYPHEN_SEPARATOR
+                        + caseManagementLocation.getBaseLocation();
+                } else if (caseManagementLocation.getBaseLocationId() != null
+                    && caseManagementLocation.getRegionId() != null) {
+                    regionIdBaseLocation = caseManagementLocation.getRegionId()
+                        + PrlAppsConstants.HYPHEN_SEPARATOR
+                        + caseManagementLocation.getBaseLocationId();
+                }
             }
         }
+
         return regionIdBaseLocation;
     }
 
