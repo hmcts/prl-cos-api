@@ -2424,7 +2424,7 @@ public class ManageOrderService {
                                      Map<String, Object> caseDataUpdated) {
         log.info("Inside populateHearingData for {}", caseData.getCreateSelectOrderOptions());
         //Set only in case order needs hearing details
-        if (isHearingPageNeeded(caseData)) {
+        if (isHearingPageNeeded(caseData.getCreateSelectOrderOptions(), caseData.getManageOrders().getC21OrderOptions())) {
             log.info("order needs hearing data, fetch & populate");
             HearingData hearingData = getHearingData(authorisation, caseData);
             log.info("Hearing data {}", hearingData);

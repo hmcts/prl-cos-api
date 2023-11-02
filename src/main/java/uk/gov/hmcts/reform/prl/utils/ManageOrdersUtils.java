@@ -273,16 +273,16 @@ public class ManageOrdersUtils {
             || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentOtherInstructions());
     }
 
-    public static boolean isHearingPageNeeded(CaseData caseData) {
+    public static boolean isHearingPageNeeded(CreateSelectOrderOptionsEnum createSelectOrderOptions, C21OrderOptionsEnum c21OrderOptions) {
         //C21 blank order
-        if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            return null != caseData.getManageOrders()
-                && C21OrderOptionsEnum.c21other.equals(caseData.getManageOrders().getC21OrderOptions());
+        if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(createSelectOrderOptions)) {
+            return C21OrderOptionsEnum.c21other.equals(c21OrderOptions);
         }
 
         return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
-            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())));
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(createSelectOrderOptions)));
     }
+
 
     public static boolean getErrorsForOrdersProhibitedForC100FL401(CaseData caseData,
                                                                    CreateSelectOrderOptionsEnum selectedOrder,
