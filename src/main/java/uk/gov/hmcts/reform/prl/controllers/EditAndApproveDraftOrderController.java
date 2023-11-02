@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -293,6 +294,9 @@ public class EditAndApproveDraftOrderController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             caseDataUpdated.put(STATE, caseData.getState());
+            if(!CollectionUtils.isEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())){
+                caseDataUpdated.put("serveOrderAdditionalDocuments", null);
+            }
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
