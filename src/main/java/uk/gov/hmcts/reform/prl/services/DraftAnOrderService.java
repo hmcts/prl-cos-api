@@ -263,10 +263,6 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
-                    log.info("removeDraftOrderAndAddToFinalOrder caseId ==> " + caseData.getId());
-                    log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistratesLastName ==> " + caseData.getJudgeOrMagistratesLastName());
-                    log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistrateTitle ==> "
-                                 + caseData.getManageOrders().getJudgeOrMagistrateTitle());
                     caseData = caseData.toBuilder()
                         .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
                         .dateOrderMade(draftOrder.getDateOrderMade())
@@ -1481,6 +1477,9 @@ public class DraftAnOrderService {
         } else if (WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
         }
+        manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
+        //PRL-4216 - save server order additional documents if any
+        manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
         return caseDataUpdated;
     }
 

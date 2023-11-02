@@ -147,9 +147,6 @@ public class EditAndApproveDraftOrderController {
                     authorisation,
                     callbackRequest
                 ));
-                manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
-                //PRL-4216 - save server order additional documents if any
-                manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
@@ -158,9 +155,7 @@ public class EditAndApproveDraftOrderController {
                     callbackRequest.getEventId()
                 ));
             }
-
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
@@ -241,7 +236,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            log.info("/judge-or-admin-edit-approve/serve-order/mid-event callbackRequest {}", callbackRequest);
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
                 callbackRequest)).build();
         } else {
@@ -292,27 +286,20 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId())) {
-                CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
-                if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                    manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
-                }
-
-                caseDataUpdated.put(STATE, caseData.getState());
-
-                coreCaseDataService.triggerEvent(
-                        JURISDICTION,
-                        CASE_TYPE,
-                        caseData.getId(),
-                        "internal-update-all-tabs",
-                        caseDataUpdated
-                );
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
+                manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-
+            caseDataUpdated.put(STATE, caseData.getState());
+            coreCaseDataService.triggerEvent(
+                JURISDICTION,
+                CASE_TYPE,
+                caseData.getId(),
+                "internal-update-all-tabs",
+                caseDataUpdated
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
