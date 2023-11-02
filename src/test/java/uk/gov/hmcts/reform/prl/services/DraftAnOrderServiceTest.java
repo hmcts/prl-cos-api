@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -2162,14 +2161,6 @@ public class DraftAnOrderServiceTest {
 
         assertEquals(caseData, draftAnOrderService.populateCustomFields(caseData));
 
-    }
-
-    @Test
-    public void testGetGeneratedDocument() {
-        GeneratedDocumentInfo generatedDocumentInfo1 = GeneratedDocumentInfo.builder().build();
-        assertNotNull(ReflectionTestUtils.invokeMethod(draftAnOrderService, "getGeneratedDocument",
-                                                       generatedDocumentInfo1, true, new HashMap<>()
-        ));
     }
 
     @Test

@@ -3301,4 +3301,12 @@ public class ManageOrderServiceTest {
         //Then
         assertNull(caseDataUpdated.get("additionalOrderDocuments"));
     }
+
+    @Test
+    public void testGetGeneratedDocument() {
+        GeneratedDocumentInfo generatedDocumentInfo1 = GeneratedDocumentInfo.builder().build();
+        assertNotNull(manageOrderService.getGeneratedDocument(
+                                                       generatedDocumentInfo1, true, new HashMap<>())
+        );
+    }
 }

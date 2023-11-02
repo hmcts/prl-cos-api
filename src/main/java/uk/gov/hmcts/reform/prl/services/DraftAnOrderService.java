@@ -383,8 +383,8 @@ public class DraftAnOrderService {
                     );
                 }
                 orderDetails = orderDetails.toBuilder()
-                    .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
-                    .orderDocumentWelsh(getGeneratedDocument(
+                    .orderDocument(manageOrderService.getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
+                    .orderDocumentWelsh(manageOrderService.getGeneratedDocument(
                         generatedDocumentInfoWelsh,
                         documentLanguage.isGenWelsh(),
                         fieldMap
@@ -454,18 +454,6 @@ public class DraftAnOrderService {
             .childOption(draftOrder.getChildOption())
             .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .build();
-    }
-
-    private Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,
-                                          boolean isWelsh, Map<String, String> fieldMap) {
-        if (generatedDocumentInfo != null) {
-            return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
-                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentHash(generatedDocumentInfo.getHashToken())
-                .documentFileName(!isWelsh ? fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)
-                                      : fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build();
-        }
-        return null;
     }
 
     public CaseData populateCustomFields(CaseData caseData) {

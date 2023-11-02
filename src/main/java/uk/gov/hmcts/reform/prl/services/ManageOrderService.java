@@ -1320,9 +1320,8 @@ public class ManageOrderService {
 
     private YesOrNo getIsUploadedFlag(ManageOrdersOptionsEnum manageOrdersOptions, String loggedInUserType) {
         YesOrNo isUploaded = No;
-        if (UserRoles.SOLICITOR.name().equals(loggedInUserType)) {
-            isUploaded = Yes;
-        } else if (null != manageOrdersOptions && uploadAnOrder.equals(manageOrdersOptions)) {
+        if (UserRoles.SOLICITOR.name().equals(loggedInUserType) || (null != manageOrdersOptions && uploadAnOrder.equals(
+            manageOrdersOptions))) {
             isUploaded = Yes;
         }
         return isUploaded;
@@ -1369,7 +1368,7 @@ public class ManageOrderService {
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-            log.info("order collection id's {}", orders.stream().map(a -> a.getId()).collect(Collectors.toList()));
+            log.info("order collection id's {}", orders.stream().map(Element::getId).collect(Collectors.toList()));
             log.info("***** selected order Ids******** {}", selectedOrderIds);
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
@@ -1821,11 +1820,7 @@ public class ManageOrderService {
         CreateSelectOrderOptionsEnum order = caseData.getCreateSelectOrderOptions();
 
         switch (order) {
-            case amendDischargedVaried:
-            case occupation:
-            case nonMolestation:
-            case powerOfArrest:
-            case blank:
+            case amendDischargedVaried, occupation, nonMolestation, powerOfArrest, blank:
                 return getFl404bFields(caseData);
             case generalForm:
                 return getN117FormData(caseData);
@@ -1971,12 +1966,7 @@ public class ManageOrderService {
             );
             orderDetails = orderDetails
                 .toBuilder()
-                .orderDocument(Document.builder()
-                                   .documentUrl(generatedDocumentInfo.getUrl())
-                                   .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                   .documentHash(generatedDocumentInfo.getHashToken())
-                                   .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME))
-                                   .build())
+                .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
                 .build();
             log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
         }
@@ -1990,13 +1980,11 @@ public class ManageOrderService {
                     CaseDetails.builder().caseData(caseData).build(),
                     welshTemplate
                 );
-                orderDetails = orderDetails.toBuilder().orderDocumentWelsh(Document.builder()
-                                                                               .documentUrl(generatedDocumentInfoWelsh.getUrl())
-                                                                               .documentBinaryUrl(
-                                                                                   generatedDocumentInfoWelsh.getBinaryUrl())
-                                                                               .documentHash(generatedDocumentInfoWelsh.getHashToken())
-                                                                               .documentFileName(fieldMap.get(
-                                                                                   PrlAppsConstants.WELSH_FILE_NAME)).build()).build();
+                orderDetails = orderDetails.toBuilder().orderDocumentWelsh(getGeneratedDocument(
+                    generatedDocumentInfoWelsh,
+                    false,
+                    fieldMap
+                )).build();
             }
             log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
         }
@@ -2386,7 +2374,7 @@ public class ManageOrderService {
                     .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
                     .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
                     .magistrateLastName(draftOrder.getMagistrateLastName())
-                    .dateOrderMade(draftOrder.getDateOrderMade() != null ? draftOrder.getDateOrderMade() : draftOrder.getDateOrderMade())
+                    .dateOrderMade(draftOrder.getDateOrderMade() != null ? draftOrder.getDateOrderMade() : null)
             .build();
 
         }
@@ -2515,5 +2503,17 @@ public class ManageOrderService {
         caseDataUpdated.put("isTheOrderByConsent", Yes);
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
             ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
+    }
+
+    public Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,
+                                          boolean isWelsh, Map<String, String> fieldMap) {
+        if (generatedDocumentInfo != null) {
+            return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(!isWelsh ? fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME)
+                                      : fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build();
+        }
+        return null;
     }
 }
