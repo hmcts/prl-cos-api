@@ -71,11 +71,10 @@ public class ManageOrdersUtils {
                     || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue())) {
                     errorList.add("HearingType cannot be empty, please select a hearingType");
                 }
-            } else {
-                if (isEmpty(ordersHearingDetails)
-                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
-                    errorList.add("Please provide at least one hearing details");
-                }
+            } else if (isEmpty(ordersHearingDetails)
+                || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
+                errorList.add("Please provide at least one hearing details");
+
             }
             if (isNotEmpty(ordersHearingDetails) && ordersHearingDetails.size() > 1) {
                 errorList.add("Only one hearing can be created");

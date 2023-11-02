@@ -294,7 +294,7 @@ public class EditAndApproveDraftOrderController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             caseDataUpdated.put(STATE, caseData.getState());
-            if(!CollectionUtils.isEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())){
+            if (!CollectionUtils.isEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
                 caseDataUpdated.put("serveOrderAdditionalDocuments", null);
             }
             coreCaseDataService.triggerEvent(
