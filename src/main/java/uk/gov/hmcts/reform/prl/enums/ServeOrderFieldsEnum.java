@@ -21,7 +21,17 @@ public enum ServeOrderFieldsEnum {
     emailInformationCA("emailInformationCA"),
     servingRespondentsOptionsDA("servingRespondentsOptionsDA"),
     serveOtherPartiesDA("serveOtherPartiesDA"),
-    deliveryByOptionsDA("deliveryByOptionsDA");
+    deliveryByOptionsDA("deliveryByOptionsDA"),
+    postalInformationDA("postalInformationDA"),
+    emailInformationDA("emailInformationDA"),
+    serveToRespondentOptionsOnlyC47a("serveToRespondentOptionsOnlyC47a"),
+    servingRespondentsOptionsCaOnlyC47a("servingRespondentsOptionsCaOnlyC47a"),
+    recipientsOptionsOnlyC47a("recipientsOptionsOnlyC47a"),
+    otherPartiesOnlyC47a("otherPartiesOnlyC47a"),
+    serveOtherPartiesCaOnlyC47a("serveOtherPartiesCaOnlyC47a"),
+    deliveryByOptionsCaOnlyC47a("deliveryByOptionsCaOnlyC47a"),
+    postalInformationCaOnlyC47a("postalInformationCaOnlyC47a"),
+    emailInformationCaOnlyC47a("emailInformationCaOnlyC47a");
 
     private final String value;
 
