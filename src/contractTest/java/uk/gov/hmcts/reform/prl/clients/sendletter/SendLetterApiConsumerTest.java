@@ -71,8 +71,7 @@ public class SendLetterApiConsumerTest {
     private static final String CASE_REFERENCE_NUMBER_KEY = "caseReferenceNumber";
     private static final String RECIPIENTS = "recipients";
     private static final String CASE_IDENTIFIER_KEY = "caseIdentifier";
-    private static final String SERVICE_AUTHORIZATION_HEADER =
-        "Bearer eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJwcmxfY";
+    private static final String SERVICE_AUTHORIZATION_HEADER = "test";
 
     private static final String VALID_REQUEST_BODY_DOC = "requests/send-letter-request-body.json";
 
