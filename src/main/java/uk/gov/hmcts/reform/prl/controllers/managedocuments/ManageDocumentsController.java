@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -99,12 +100,16 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        if (!manageDocumentsService.checkIfUserIsCourtStaff(authorisation)) {
+        log.info("inside validate-court-user");
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        if (!manageDocumentsService.checkIfUserIsCourtStaff(authorisation, callbackRequest)) {
+            log.info("returning error");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of"))
                 .build();
         }
+        log.info("continuing flow");
         return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(callbackRequest.getCaseDetails().getData()).build();
+            .data(updatedCaseData).build();
     }
 }

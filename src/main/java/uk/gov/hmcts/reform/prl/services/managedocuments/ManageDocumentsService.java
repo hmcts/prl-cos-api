@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -31,6 +32,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -169,8 +171,13 @@ public class ManageDocumentsService {
         return caseDataUpdated;
     }
 
-    public boolean checkIfUserIsCourtStaff(String authorisation) {
-        return userService.getUserDetails(authorisation).getRoles().stream().anyMatch(ROLES::contains);
+    public boolean checkIfUserIsCourtStaff(String authorisation, CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Optional<Element<ManageDocuments>> courtUserSelected = caseData.getManageDocuments().stream()
+            .filter(element -> DocumentPartyEnum.COURT.equals(element.getValue().getDocumentParty())).findFirst();
+        log.info("list with court dropdown selection {}", courtUserSelected.isPresent());
+        return userService.getUserDetails(authorisation).getRoles().stream().anyMatch(ROLES::contains)
+            && courtUserSelected.isPresent();
     }
 
     private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {

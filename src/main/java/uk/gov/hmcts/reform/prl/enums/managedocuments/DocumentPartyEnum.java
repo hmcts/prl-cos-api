@@ -20,7 +20,9 @@ public enum DocumentPartyEnum {
     @JsonProperty("cafcassCymru")
     CAFCASS_CYMRU("Cafcass Cymru"),
     @JsonProperty("localAuthority")
-    LOCAL_AUTHORITY("Local authority");
+    LOCAL_AUTHORITY("Local authority"),
+    @JsonProperty("Court")
+    COURT("Court");
 
     private final String displayedValue;
 
