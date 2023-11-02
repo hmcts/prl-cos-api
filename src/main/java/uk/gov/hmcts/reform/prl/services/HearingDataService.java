@@ -213,7 +213,8 @@ public class HearingDataService {
                 Map<String, String> caseIds = new HashMap<>();
                 caseLinkedDataList.get().forEach(caseLinkedData -> {
                     caseIdNameMap.put(caseLinkedData.getCaseReference(), caseLinkedData.getCaseName());
-                    caseIds.put(caseLinkedData.getCaseReference(), null);
+                    //PRL-4594 - setting some dummy regionId to fix Map.get null issue
+                    caseIds.put(caseLinkedData.getCaseReference(), "dummy_region_id");
                 });
                 log.info("Linked caseIdNameMap {}", caseIdNameMap);
                 log.info("Linked caseIds to hearings {}", caseIds);
