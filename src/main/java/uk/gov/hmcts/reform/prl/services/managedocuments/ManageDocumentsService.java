@@ -175,7 +175,6 @@ public class ManageDocumentsService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Optional<Element<ManageDocuments>> courtUserSelected = caseData.getManageDocuments().stream()
             .filter(element -> DocumentPartyEnum.COURT.equals(element.getValue().getDocumentParty())).findFirst();
-        log.info("list with court dropdown selection {}", courtUserSelected.isPresent());
         return userService.getUserDetails(authorisation).getRoles().stream().anyMatch(ROLES::contains)
             && courtUserSelected.isPresent();
     }
@@ -206,7 +205,10 @@ public class ManageDocumentsService {
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
         } else {
-            final String categoryId = manageDocument.getDocumentCategories().getValueCode();
+            String categoryId = manageDocument.getDocumentCategories().getValueCode();
+            if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
+                categoryId = "Internal correspondence";
+            }
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
                 .getQuarantineUploadDocument(
                     categoryId,

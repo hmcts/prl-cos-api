@@ -100,15 +100,12 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("inside validate-court-user");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         if (!manageDocumentsService.checkIfUserIsCourtStaff(authorisation, callbackRequest)) {
-            log.info("returning error");
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of"))
+                .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
                 .build();
         }
-        log.info("continuing flow");
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(updatedCaseData).build();
     }
