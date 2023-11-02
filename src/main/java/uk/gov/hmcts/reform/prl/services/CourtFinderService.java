@@ -99,19 +99,25 @@ public class CourtFinderService {
         List<Element<ChildrenAndApplicantRelation>> childAndApplicantRelations = caseData.getRelations().getChildAndApplicantRelations();
         List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations = caseData.getRelations().getChildAndRespondentRelations();
         List<Element<ChildrenAndOtherPeopleRelation>> childAndOtherPeopleRelations = caseData.getRelations().getChildAndOtherPeopleRelations();
-        Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = childAndApplicantRelations
-                .stream()
-                .map(Element::getValue)
-                .findFirst();
 
-        Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation = childAndRespondentRelations
+
+        Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = Optional.ofNullable(childAndApplicantRelations)
+                .isPresent() ? childAndApplicantRelations
                 .stream()
                 .map(Element::getValue)
-                .findFirst();
-        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = childAndOtherPeopleRelations
+                .findFirst() : null;
+
+        Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation = Optional.ofNullable(childAndRespondentRelations)
+                .isPresent() ? childAndRespondentRelations
                 .stream()
                 .map(Element::getValue)
-                .findFirst();
+                .findFirst() : null;
+
+        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = Optional.ofNullable(childAndOtherPeopleRelations)
+                .isPresent() ? childAndOtherPeopleRelations
+                .stream()
+                .map(Element::getValue)
+                .findFirst() : null;
 
         if (!childrenAndApplicantRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndApplicantRelation.get().getChildLivesWith())) {
             return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
