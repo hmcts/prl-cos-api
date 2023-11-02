@@ -54,7 +54,6 @@ public enum ManageOrderFieldsEnum {
     isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
     servingRespondentsOptionsCA("servingRespondentsOptionsCA"),
     otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
-    serveOrderAdditionalDocuments("serveOrderAdditionalDocuments"),
     isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
