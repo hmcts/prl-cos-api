@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -121,7 +122,7 @@ public class AmendOrderService {
             } else {
                 updatedOrders = orders;
             }
-            orderMap.put("orderCollection", updatedOrders);
+            orderMap.put(ORDER_COLLECTION, updatedOrders);
             return orderMap;
         } else {
             return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType);

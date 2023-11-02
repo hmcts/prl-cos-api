@@ -101,6 +101,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
@@ -273,7 +274,7 @@ public class DraftAnOrderService {
                 }
 
                 updatedCaseData.put(
-                    "orderCollection",
+                    ORDER_COLLECTION,
                     getFinalOrderCollection(authorisation, caseData, draftOrder, eventId)
                 );
                 draftOrderCollection.remove(
@@ -316,12 +317,96 @@ public class DraftAnOrderService {
     }
 
     private Element<OrderDetails> convertDraftOrderToFinal(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
+        String loggedInUserType = manageOrderService.getLoggedInUserType(auth);
+        OrderDetails orderDetails = getOrderDetails(
+            caseData,
+            draftOrder,
+            eventId,
+            loggedInUserType
+        );
+        log.info("DraftOrderService::ManageOrderHearingDetails -> {}", draftOrder.getManageOrderHearingDetails());
+        orderDetails = generateFinalOrderDocument(
+            auth,
+            caseData,
+            draftOrder,
+            orderDetails
+        );
+        return element(orderDetails);
+
+    }
+
+    private OrderDetails generateFinalOrderDocument(String auth, CaseData caseData, DraftOrder draftOrder, OrderDetails orderDetails) {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         GeneratedDocumentInfo generatedDocumentInfoWelsh = null;
-        String loggedInUserType = manageOrderService.getLoggedInUserType(auth);
+        if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
+            orderDetails = orderDetails.toBuilder()
+                .orderDocument(draftOrder.getOrderDocument())
+                .build();
+        } else {
+            manageOrderService.populateChildrenListForDocmosis(caseData);
+            if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
+                && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
+                caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
+            }
+            caseData = caseData.toBuilder().manageOrders(
+                caseData.getManageOrders().toBuilder()
+                    .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
+                    .build()
+            ).build();
+            log.info("DraftOrderService::OrdersHearingDetails -> {}", caseData.getManageOrders().getOrdersHearingDetails());
+            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
+                log.info("inside filterEmptyHearingDetails");
+                caseData = manageOrderService.filterEmptyHearingDetails(caseData);
+            }
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
+            if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                FL404 fl404CustomFields = getFl404CustomFields(caseData);
+                caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().fl404CustomFields(
+                    fl404CustomFields).build()).build();
+            }
+            try {
+                if (documentLanguage.isGenEng()) {
+                    log.info("before generating english document");
+                    generatedDocumentInfo = dgsService.generateDocument(
+                        auth,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
+                    );
+                }
+                if (documentLanguage.isGenWelsh() && fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH) != null) {
+                    log.info("before generating welsh document");
+                    generatedDocumentInfoWelsh = dgsService.generateDocument(
+                        auth,
+                        CaseDetails.builder().caseData(caseData).build(),
+                        fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
+                    );
+                }
+                orderDetails = orderDetails.toBuilder()
+                    .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
+                    .orderDocumentWelsh(getGeneratedDocument(
+                        generatedDocumentInfoWelsh,
+                        documentLanguage.isGenWelsh(),
+                        fieldMap
+                    ))
+                    .build();
+                log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
+                log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
+            } catch (Exception e) {
+                log.error(
+                    "Error while generating the final document for case {} and  order {}",
+                    caseData.getId(),
+                    draftOrder.getOrderType()
+                );
+            }
+        }
+        return orderDetails;
+    }
+
+    private OrderDetails getOrderDetails(CaseData caseData, DraftOrder draftOrder, String eventId, String loggedInUserType) {
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
-        OrderDetails orderDetails = OrderDetails.builder()
+        return OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .orderTypeId(draftOrder.getOrderTypeId())
             .typeOfOrder(typeOfOrder != null
@@ -369,76 +454,6 @@ public class DraftAnOrderService {
             .childOption(draftOrder.getChildOption())
             .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .build();
-        log.info("DraftOrderService::ManageOrderHearingDetails -> {}", draftOrder.getManageOrderHearingDetails());
-        if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
-            orderDetails = orderDetails.toBuilder()
-                .orderDocument(draftOrder.getOrderDocument())
-                .build();
-        } else {
-            manageOrderService.populateChildrenListForDocmosis(caseData);
-            if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
-                && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
-                caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
-            }
-            caseData = caseData.toBuilder().manageOrders(
-                caseData.getManageOrders().toBuilder()
-                    .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
-                    .build()
-            ).build();
-            log.info("DraftOrderService::OrdersHearingDetails -> {}", caseData.getManageOrders().getOrdersHearingDetails());
-            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                log.info("inside filterEmptyHearingDetails");
-                caseData = manageOrderService.filterEmptyHearingDetails(caseData);
-            }
-            log.info("**** DraftOrderService::OrdersHearingDetails after filter **** -> {}", caseData.getManageOrders().getOrdersHearingDetails());
-
-            log.info("before creating final order caseId ==> " + caseData.getId());
-            log.info("before creating final order getJudgeOrMagistratesLastName ==> " + caseData.getJudgeOrMagistratesLastName());
-            log.info("before creating final order getJudgeOrMagistrateTitle ==> " + caseData.getManageOrders().getJudgeOrMagistrateTitle());
-            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-            Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
-            if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                FL404 fl404CustomFields = getFl404CustomFields(caseData);
-                caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().fl404CustomFields(
-                    fl404CustomFields).build()).build();
-            }
-            try {
-                if (documentLanguage.isGenEng()) {
-                    log.info("before generating english document");
-                    generatedDocumentInfo = dgsService.generateDocument(
-                        auth,
-                        CaseDetails.builder().caseData(caseData).build(),
-                        fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME)
-                    );
-                }
-                if (documentLanguage.isGenWelsh() && fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH) != null) {
-                    log.info("before generating welsh document");
-                    generatedDocumentInfoWelsh = dgsService.generateDocument(
-                        auth,
-                        CaseDetails.builder().caseData(caseData).build(),
-                        fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
-                    );
-                }
-                orderDetails = orderDetails.toBuilder()
-                    .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
-                    .orderDocumentWelsh(getGeneratedDocument(
-                        generatedDocumentInfoWelsh,
-                        documentLanguage.isGenWelsh(),
-                        fieldMap
-                    ))
-                    .build();
-                log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
-                log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
-            } catch (Exception e) {
-                log.error(
-                    "Error while generating the final document for case {} and  order {}",
-                    caseData.getId(),
-                    draftOrder.getOrderType()
-                );
-            }
-        }
-        return element(orderDetails);
-
     }
 
     private Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,
@@ -1470,7 +1485,7 @@ public class DraftAnOrderService {
                 );
                 List<Element<OrderDetails>> orderCollection = modifiedCaseData.getOrderCollection();
                 caseDataUpdated.put(
-                    "orderCollection",
+                    ORDER_COLLECTION,
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
                 );
             }
