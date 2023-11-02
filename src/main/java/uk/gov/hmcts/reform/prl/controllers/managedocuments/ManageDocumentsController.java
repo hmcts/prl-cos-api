@@ -101,7 +101,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        if(!manageDocumentsService.checkIfUserIsCourtStaff(authorisation)) {
+        if (!manageDocumentsService.checkIfUserIsCourtStaff(authorisation)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of"))
                 .build();
