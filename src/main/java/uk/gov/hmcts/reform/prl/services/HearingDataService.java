@@ -256,7 +256,7 @@ public class HearingDataService {
     }
 
     private String setupRegionAndBaseLocationForCase(String authorisation, String caseId) {
-        String HYPHEN_SEPARATOR = "-";
+        String hyphenSeparater = "-";
         String regionIdBaseLocation = null;
         CaseDetails caseDetails = caseService.getCase(authorisation, caseId);
         log.info("case details pulled from db for linked case {}", caseDetails.getId());
@@ -268,12 +268,12 @@ public class HearingDataService {
                 if (caseManagementLocation.getBaseLocation() != null
                     && caseManagementLocation.getRegion() != null) {
                     regionIdBaseLocation = caseManagementLocation.getRegion()
-                        + HYPHEN_SEPARATOR
+                        + hyphenSeparater
                         + caseManagementLocation.getBaseLocation();
                 } else if (caseManagementLocation.getBaseLocationId() != null
                     && caseManagementLocation.getRegionId() != null) {
                     regionIdBaseLocation = caseManagementLocation.getRegionId()
-                        + HYPHEN_SEPARATOR
+                        + hyphenSeparater
                         + caseManagementLocation.getBaseLocationId();
                 }
             }
