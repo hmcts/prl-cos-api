@@ -719,8 +719,8 @@ public class ManageOrderEmailService {
                     if (isNotEmpty(order.getValue().getOrderDocumentWelsh())) {
                         orderDocuments.add(order.getValue().getOrderDocumentWelsh());
                     }
-                    if (CollectionUtils.isNotEmpty(order.getValue().getServeOrderDetails().getAdditionalDocuments())) {
-                        order.getValue().getServeOrderDetails().getAdditionalDocuments().forEach(
+                    if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
+                        caseData.getManageOrders().getServeOrderAdditionalDocuments().forEach(
                             additionalDocumentEl -> orderDocuments.add(additionalDocumentEl.getValue()));
                     }
                 });

@@ -1412,8 +1412,7 @@ public class ManageOrderService {
             orders,
             order,
             postalInformation,
-            emailInformation,
-            caseData.getManageOrders().getServeOrderAdditionalDocuments()
+            emailInformation
         );
     }
 
@@ -1467,8 +1466,7 @@ public class ManageOrderService {
             orders,
             order,
             postalInformation,
-            emailInformation,
-            caseData.getManageOrders().getServeOrderAdditionalDocuments()
+            emailInformation
         );
     }
 
@@ -1580,7 +1578,7 @@ public class ManageOrderService {
 
     private static void updateServedOrderDetails(Map<String, Object> servedOrderDetails, String cafcassCymruEmail, List<Element<OrderDetails>> orders,
                                                  Element<OrderDetails> order, List<Element<PostalInformation>> postalInformation,
-                                                 List<Element<EmailInformation>> emailInformation, List<Element<Document>> additionalDocuments) {
+                                                 List<Element<EmailInformation>> emailInformation) {
         log.info("***** inside updateServedOrderDetails********");
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
@@ -1637,7 +1635,6 @@ public class ManageOrderService {
             .otherPartiesServed(otherPartiesServed)
             .postalInformation(postalInformation)
             .emailInformation(emailInformation)
-            .additionalDocuments(additionalDocuments)
             .servedParties(servedParties)
             .build();
 
