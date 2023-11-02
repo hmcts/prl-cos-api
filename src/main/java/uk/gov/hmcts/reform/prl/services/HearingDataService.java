@@ -259,10 +259,11 @@ public class HearingDataService {
     private String setupRegionAndBaseLocationForCase(String authorisation, String caseId) {
         String regionIdBaseLocation = null;
         CaseDetails caseDetails = caseService.getCase(authorisation, caseId);
+        log.info("case details pulled from db for linked case {}", caseDetails.getId());
         if (caseDetails != null) {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             CaseManagementLocation caseManagementLocation = caseData.getCaseManagementLocation();
-
+            log.info("casemanagemnt location for linked case {}", caseManagementLocation);
             if (caseManagementLocation != null) {
                 if (caseManagementLocation.getBaseLocation() != null
                     && caseManagementLocation.getRegion() != null) {
