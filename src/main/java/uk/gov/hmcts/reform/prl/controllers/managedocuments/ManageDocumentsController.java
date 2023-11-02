@@ -95,11 +95,9 @@ public class ManageDocumentsController extends AbstractCallbackController {
                       .build());
     }
 
-    @PostMapping(path = "/validate-court-user", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "show error if eny other user except Admin/Judge select 'court' from party dropdown ")
-    @SecurityRequirement(name = "Bearer Authentication")
+    @PostMapping("/validate-court-user")
     public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
-        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         if (!manageDocumentsService.checkIfUserIsCourtStaff(authorisation)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
