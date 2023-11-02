@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
+import uk.gov.hmcts.reform.prl.enums.ServeOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -2159,10 +2160,6 @@ public class ManageOrderService {
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
-        log.info(" serve order dynamic select listoo {}", caseDataUpdated.get("serveOrderDynamicList"));
-        log.info("end OrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         return caseDataUpdated;
     }
 
@@ -2512,5 +2509,13 @@ public class ManageOrderService {
                                       : fieldMap.get(PrlAppsConstants.WELSH_FILE_NAME)).build();
         }
         return null;
+    }
+
+    public static void cleanUpServeOrderOptions(Map<String, Object> caseDataUpdated) {
+        for (ServeOrderFieldsEnum field : ServeOrderFieldsEnum.values()) {
+            if (caseDataUpdated.containsKey(field.getValue())) {
+                caseDataUpdated.put(field.getValue(), null);
+            }
+        }
     }
 }

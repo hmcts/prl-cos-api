@@ -117,9 +117,6 @@ public class ManageOrdersController {
 
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
             errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
-            log.info("*** Manage order undertaking date time : {}", callbackRequest.getCaseDetails().getData()
-                .get("underTakingExpiryDateTime"));
-            log.info("*** Manage order undertaking date time : {}", caseData.getManageOrders());
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -246,6 +243,7 @@ public class ManageOrdersController {
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
+            ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             caseDataUpdated.put(STATE, caseData.getState());
             coreCaseDataService.triggerEvent(
                 JURISDICTION,

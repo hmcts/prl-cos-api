@@ -3309,4 +3309,12 @@ public class ManageOrderServiceTest {
                                                        generatedDocumentInfo1, true, new HashMap<>())
         );
     }
+
+    @Test
+    public void testCleanUpServeOrderOptions() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("serveOrderAdditionalDocuments","serveOrderAdditionalDocuments");
+        manageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+        Assert.assertNull(caseDataUpdated.get("serveOrderAdditionalDocuments"));
+    }
 }
