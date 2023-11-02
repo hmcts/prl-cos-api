@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -257,6 +256,7 @@ public class HearingDataService {
     }
 
     private String setupRegionAndBaseLocationForCase(String authorisation, String caseId) {
+        String HYPHEN_SEPARATOR = "-";
         String regionIdBaseLocation = null;
         CaseDetails caseDetails = caseService.getCase(authorisation, caseId);
         log.info("case details pulled from db for linked case {}", caseDetails.getId());
@@ -268,12 +268,12 @@ public class HearingDataService {
                 if (caseManagementLocation.getBaseLocation() != null
                     && caseManagementLocation.getRegion() != null) {
                     regionIdBaseLocation = caseManagementLocation.getRegion()
-                        + PrlAppsConstants.HYPHEN_SEPARATOR
+                        + HYPHEN_SEPARATOR
                         + caseManagementLocation.getBaseLocation();
                 } else if (caseManagementLocation.getBaseLocationId() != null
                     && caseManagementLocation.getRegionId() != null) {
                     regionIdBaseLocation = caseManagementLocation.getRegionId()
-                        + PrlAppsConstants.HYPHEN_SEPARATOR
+                        + HYPHEN_SEPARATOR
                         + caseManagementLocation.getBaseLocationId();
                 }
             }
