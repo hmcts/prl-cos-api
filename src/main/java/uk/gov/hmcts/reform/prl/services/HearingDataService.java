@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
+import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -213,8 +215,12 @@ public class HearingDataService {
                 Map<String, String> caseIds = new HashMap<>();
                 caseLinkedDataList.get().forEach(caseLinkedData -> {
                     caseIdNameMap.put(caseLinkedData.getCaseReference(), caseLinkedData.getCaseName());
+                    setupRegionAndBaseLocationForCase(caseData.getCaseManagementLocation());
                     //PRL-4594 - setting some dummy regionId to fix Map.get null issue
-                    caseIds.put(caseLinkedData.getCaseReference(), "dummy_region_id");
+                    caseIds.put(
+                        caseLinkedData.getCaseReference(),
+                        setupRegionAndBaseLocationForCase(caseData.getCaseManagementLocation())
+                    );
                 });
                 log.info("Linked caseIdNameMap {}", caseIdNameMap);
                 log.info("Linked caseIds to hearings {}", caseIds);
@@ -242,6 +248,24 @@ public class HearingDataService {
         return dynamicListElements;
     }
 
+    private String setupRegionAndBaseLocationForCase(CaseManagementLocation caseManagementLocation) {
+        String regionIdBaseLocation = null;
+        if (caseManagementLocation != null) {
+            if (caseManagementLocation.getBaseLocation() != null
+                && caseManagementLocation.getRegion() != null) {
+                regionIdBaseLocation = caseManagementLocation.getRegion()
+                    + PrlAppsConstants.HYPHEN_SEPARATOR
+                    + caseManagementLocation.getBaseLocation();
+            } else if (caseManagementLocation.getBaseLocationId() != null
+                && caseManagementLocation.getRegionId() != null) {
+                regionIdBaseLocation = caseManagementLocation.getRegionId()
+                    + PrlAppsConstants.HYPHEN_SEPARATOR
+                    + caseManagementLocation.getBaseLocationId();
+            }
+        }
+        return regionIdBaseLocation;
+    }
+
     private boolean ifListedHearings(List<CaseHearing> caseHearings) {
         return nullSafeCollection(caseHearings).stream()
             .anyMatch(caseHearing -> LISTED.equalsIgnoreCase(
@@ -249,15 +273,15 @@ public class HearingDataService {
     }
 
 
-    public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
-        List<String> applicantNames  = getPartyNameList(caseData.getApplicants());
+    public HearingData generateHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
+        List<String> applicantNames = getPartyNameList(caseData.getApplicants());
         List<String> respondentNames = getPartyNameList(caseData.getRespondents());
         List<String> applicantSolicitorNames = getApplicantSolicitorNameList(caseData.getApplicants());
         List<String> respondentSolicitorNames = getRespondentSolicitorNameList(caseData.getRespondents());
         int numberOfApplicant = applicantNames.size();
         int numberOfRespondents = respondentNames.size();
         int numberOfApplicantSolicitors = applicantSolicitorNames.size();
-        int numberOfRespondentSolicitors  = respondentSolicitorNames.size();
+        int numberOfRespondentSolicitors = respondentSolicitorNames.size();
         //default to CAFCASS England if CaseManagementLocation is null
         boolean isCafcassCymru = null == caseData.getCaseManagementLocation()
             || YesOrNo.No.equals(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()));
