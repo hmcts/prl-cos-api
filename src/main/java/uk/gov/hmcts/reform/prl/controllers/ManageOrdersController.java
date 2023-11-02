@@ -116,16 +116,7 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
-            if (isNotEmpty(errorList)) {
-                return AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errorList)
-                    .build();
-            }
-
-            if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
-                && null != caseData.getManageOrders().getFl404CustomFields()) {
-                errorList = getErrorForOccupationScreen(caseData);
-            }
+            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
             log.info("*** Manage order undertaking date time : {}", callbackRequest.getCaseDetails().getData()
                 .get("underTakingExpiryDateTime"));
             log.info("*** Manage order undertaking date time : {}", caseData.getManageOrders());
@@ -136,7 +127,8 @@ public class ManageOrdersController {
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
-                authorisation)).build();
+                authorisation
+            )).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

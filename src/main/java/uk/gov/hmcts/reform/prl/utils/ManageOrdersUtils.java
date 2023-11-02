@@ -243,13 +243,12 @@ public class ManageOrdersUtils {
         return errorList;
     }
 
-    public static List<String> getErrorForOccupationScreen(CaseData casedata) {
+    public static List<String> getErrorForOccupationScreen(CaseData caseData, CreateSelectOrderOptionsEnum orderType) {
         List<String> errorList = new ArrayList<>();
-        FL404 fl404CustomFields = casedata.getManageOrders().getFl404CustomFields();
-        if (isApplicantSectionFilled(fl404CustomFields)
-            || isRespondentSectionFilled(fl404CustomFields)) {
-            return errorList;
-        } else {
+        FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+        if (CreateSelectOrderOptionsEnum.occupation.equals(orderType)
+            && ObjectUtils.isNotEmpty(fl404CustomFields)
+            && !(isApplicantSectionFilled(fl404CustomFields) || isRespondentSectionFilled(fl404CustomFields))) {
             errorList.add("Please enter either applicant or respondent section");
         }
         return errorList;
