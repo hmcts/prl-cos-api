@@ -2465,7 +2465,7 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        Map<String, Object> stringObjectMap = manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest);
+        Map<String, Object> stringObjectMap = manageOrderService.serveOrderMidEvent(callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
@@ -2536,7 +2536,7 @@ public class ManageOrderServiceTest {
         String courtEmail = "test1@test.com";
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(Mockito.any())).thenReturn(courtEmail);
 
-        Map<String, Object> stringObjectMap = manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest);
+        Map<String, Object> stringObjectMap = manageOrderService.serveOrderMidEvent(callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 

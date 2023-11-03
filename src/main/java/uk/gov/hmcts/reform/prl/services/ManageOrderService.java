@@ -1067,65 +1067,50 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData)
-        throws Exception {
-        List<Element<OrderDetails>> orderCollection;
+    public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
         String loggedInUserType = getLoggedInUserType(authorisation);
-        Map<String, Object> orderMap = new HashMap<>();
-
-        if (!servedSavedOrders.equals(caseData.getManageOrdersOptions())) {
-            if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
-                && (UserRoles.COURT_ADMIN.name().equals(
-                loggedInUserType) && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()))) {
-                log.info("Admin uploading and sending it for approval");
-                return setDraftOrderCollection(caseData, loggedInUserType);
-            }
-            if (uploadAnOrder.equals(caseData.getManageOrdersOptions())
-                && (UserRoles.JUDGE.name().equals(
-                loggedInUserType) || (No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-                && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))) {
-                log.info("First");
+        boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
+            && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
+        if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
+            return setDraftOrderCollection(caseData, loggedInUserType);
+        } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
+            if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                || saveAsDraft) {
                 return setDraftOrderCollection(caseData, loggedInUserType);
             } else {
-                if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                    && ((caseData.getServeOrderData() != null
-                    && (YesOrNo.No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-                    && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))
-                    || (caseData.getManageOrders() != null
-                    && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())))) {
-                    log.info("Second");
-                    return setDraftOrderCollection(caseData, loggedInUserType);
-                } else {
-                    log.info("*** Court seal 1 {}", caseData.getCourtSeal());
-                    orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-                    List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
-                    log.info("*** OrdersNeedToBeServed " + caseData.getManageOrders().getOrdersNeedToBeServed());
-                    if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
-                        && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
-                        && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-                        log.info("*** inside updateCurrentOrderId ");
-                        updateCurrentOrderId(
-                            caseData.getManageOrders().getServeOrderDynamicList(),
-                            orderCollection,
-                            newOrderDetails
-                        );
-                    }
-                    log.info("orderDetails ==> " + newOrderDetails);
-                    orderCollection.addAll(newOrderDetails);
-                    orderCollection.sort(Comparator.comparing(
-                        m -> m.getValue().getDateCreated(),
-                        Comparator.reverseOrder()
-                    ));
-                    if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-                        orderCollection = serveOrder(caseData, orderCollection);
-                    }
-                    LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
-                    orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
-                }
+                return setFinalOrderCollection(authorisation, caseData);
             }
-        } else {
-            orderCollection = serveOrder(caseData, caseData.getOrderCollection());
         }
+        return new HashMap<>();
+    }
+
+    private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData) throws Exception {
+        List<Element<OrderDetails>> orderCollection;
+        log.info("*** Court seal 1 {}", caseData.getCourtSeal());
+        orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
+        List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
+        if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
+            && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
+            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            log.info("*** inside updateCurrentOrderId ");
+            updateCurrentOrderId(
+                caseData.getManageOrders().getServeOrderDynamicList(),
+                orderCollection,
+                newOrderDetails
+            );
+        }
+        log.info("orderDetails ==> " + newOrderDetails);
+        orderCollection.addAll(newOrderDetails);
+        orderCollection.sort(Comparator.comparing(
+            m -> m.getValue().getDateCreated(),
+            Comparator.reverseOrder()
+        ));
+        if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            orderCollection = serveOrder(caseData, orderCollection);
+        }
+        LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
+        Map<String, Object> orderMap = new HashMap<>();
+        orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
         orderMap.put(ORDER_COLLECTION, orderCollection);
         return orderMap;
     }
@@ -2151,7 +2136,7 @@ public class ManageOrderService {
         return caseData.getAppointedGuardianName();
     }
 
-    public Map<String, Object> checkOnlyC47aOrderSelectedToServe(CallbackRequest callbackRequest) {
+    public Map<String, Object> serveOrderMidEvent(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         log.info("start OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())

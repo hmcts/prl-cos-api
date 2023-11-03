@@ -1810,7 +1810,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.whenToServeOrder(
             authToken,
             s2sToken,
             callbackRequest
@@ -1861,7 +1861,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.whenToServeOrder(
             authToken,
             s2sToken,
             callbackRequest
@@ -1912,7 +1912,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.addUploadOrder(
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.whenToServeOrder(
             authToken,
             s2sToken,
             callbackRequest
@@ -2049,7 +2049,7 @@ public class ManageOrdersControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            manageOrdersController.addUploadOrder(authToken, s2sToken, callbackRequest);
+            manageOrdersController.whenToServeOrder(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 

@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -290,18 +291,22 @@ public class ManageOrdersController {
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
-                || caseData.getManageOrdersOptions().equals(uploadAnOrder)
-                || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+                || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
                 if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(caseData, hearings));
+                                                                           .getHearingDataForSelectedHearing(
+                                                                               caseData,
+                                                                               hearings
+                                                                           ));
                 }
                 log.info("*** Court seal 0 {}", caseData.getCourtSeal());
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
                     caseData
                 ));
+            } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+                caseDataUpdated.put(ORDER_COLLECTION, manageOrderService.serveOrder(caseData, caseData.getOrderCollection()));
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
@@ -408,13 +413,13 @@ public class ManageOrdersController {
         }
     }
 
-    @PostMapping(path = "/manage-orders/add-upload-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/manage-orders/when-to-serve/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse addUploadOrder(
+    public AboutToStartOrSubmitCallbackResponse whenToServeOrder(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
@@ -479,7 +484,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.checkOnlyC47aOrderSelectedToServe(
+            return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.serveOrderMidEvent(
                 callbackRequest)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
