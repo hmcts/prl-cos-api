@@ -119,7 +119,8 @@ public class PartyLevelCaseFlagsService {
         log.info("caseDataInternalField is::" + caseDataInternalField);
         switch (representing) {
             case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY: {
-                if (!StringUtils.isEmpty(partyDetails.get().getValue().getLabelForDynamicList())) {
+                if (partyDetails.isPresent()
+                && !StringUtils.isEmpty(partyDetails.get().getValue().getLabelForDynamicList())) {
                     data.put(
                             caseDataExternalField,
                             partyLevelCaseFlagsGenerator.generateExternalPartyFlags(
@@ -149,7 +150,8 @@ public class PartyLevelCaseFlagsService {
                 break;
             }
             case CAAPPLICANTSOLICITOR, CARESPONDENTSOLCIITOR: {
-                if (!StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
+                if (partyDetails.isPresent()
+                    && !StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
                     data.put(
                             caseDataExternalField,
                             partyLevelCaseFlagsGenerator.generateExternalPartyFlags(
