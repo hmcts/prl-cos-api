@@ -2513,4 +2513,31 @@ public class ManageOrderService {
             }
         }
     }
+
+    public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData) {
+        String judgeLaReviewRequired = null;
+        String performingUser = null;
+        String performingAction = null;
+        String orderNameForWA = null;
+        Map<String, Object> waFieldsMap = new HashMap<>();
+        if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
+            || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+                orderNameForWA = caseData.getCreateSelectOrderOptions() != null
+                    ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "Test";
+            }
+            performingUser = getLoggedInUserType(authorisation);
+            performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
+            if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
+                judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
+                    .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
+            }
+        }
+        waFieldsMap.put("performingUser", performingUser);
+        waFieldsMap.put("performingAction", performingAction);
+        waFieldsMap.put("judgeLaReviewRequired", judgeLaReviewRequired);
+        waFieldsMap.put("orderNameForWA", orderNameForWA);
+
+        return waFieldsMap;
+    }
 }

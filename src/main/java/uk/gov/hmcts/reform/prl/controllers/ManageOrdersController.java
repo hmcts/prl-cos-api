@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -31,7 +30,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
-import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
@@ -276,10 +274,6 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            String performingUser = null;
-            String performingAction = null;
-            String judgeLaReviewRequired = null;
-            String orderNameForWA = null;
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -313,26 +307,7 @@ public class ManageOrdersController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             //Added below fields for WA purpose
-            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
-                || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-                if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-                    orderNameForWA = caseData.getCreateSelectOrderOptions() != null
-                        ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "Test";
-                }
-                performingUser = manageOrderService.getLoggedInUserType(authorisation);
-                performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
-                if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
-                    judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
-                        .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
-                }
-            }
-            log.info("***performingUser***{}", performingUser);
-            log.info("***performingAction***{}", performingAction);
-            log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
-            caseDataUpdated.put("performingUser", performingUser);
-            caseDataUpdated.put("performingAction", performingAction);
-            caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
-            caseDataUpdated.put("orderNameForWA", orderNameForWA);
+            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -340,8 +315,6 @@ public class ManageOrdersController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-
-
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
