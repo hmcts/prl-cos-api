@@ -215,9 +215,41 @@ public class DraftAnOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("DraftAnOrderController::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-            Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest);
+            Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGenerationNew(
+                authorisation,
+                callbackRequest
+            );
+            if (caseDataUpdated.containsKey("errorList")) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors((List<String>) caseDataUpdated.get("errorList"))
+                    .build();
+            } else {
+                //Draft an order
+                return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/generate-doc-legacy", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to populate the header")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse generateDoclegacy(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) throws Exception {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("DraftAnOrderController::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
+            Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGenerationForaDraftOrder(
+                authorisation,
+                callbackRequest
+            );
             //PRL-4260 - hearing screen validations
             if (ObjectUtils.isNotEmpty(caseDataUpdated.get(HEARING_SCREEN_ERRORS))) {
                 return AboutToStartOrSubmitCallbackResponse.builder()

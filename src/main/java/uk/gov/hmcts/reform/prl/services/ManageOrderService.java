@@ -1692,6 +1692,62 @@ public class ManageOrderService {
         });
     }
 
+
+    public Map<String, Object> getCaseDataNew(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
+        throws Exception {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        try {
+            GeneratedDocumentInfo generatedDocumentInfo;
+            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
+            populateChildrenListForDocmosis(caseData);
+
+            if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
+                log.info("*** Manage orders 12 {} :", caseData.getManageOrders().getOrdersHearingDetails());
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+            }
+
+            log.info("*** Manage orders: {}", caseData.getManageOrders());
+            updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
+        } catch (Exception ex) {
+            log.info("Error occured while generating Draft document ==> " + ex.getMessage());
+        }
+        return caseDataUpdated;
+    }
+
+    private void updateDocmosisAttributes(String authorisation,
+                                          CaseData caseData,
+                                          Map<String, Object> caseDataUpdated,
+                                          Map<String, String> fieldsMap) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo;
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (documentLanguage.isGenEng()) {
+            caseDataUpdated.put("isEngDocGen", Yes.toString());
+            generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldsMap.get(PrlAppsConstants.TEMPLATE)
+            );
+            caseDataUpdated.put("previewOrderDoc", Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+        }
+        if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
+            caseDataUpdated.put("isWelshDocGen", Yes.toString());
+            generatedDocumentInfo = dgsService.generateWelshDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
+            );
+            caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
+        }
+    }
+
     public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();

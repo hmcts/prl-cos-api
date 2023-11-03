@@ -518,6 +518,42 @@ public class HearingDataService {
         }).toList();
     }
 
+    public List<Element<HearingData>> getHearingDataForSelectedHearing(String authorisation, CaseData caseData) {
+        boolean[] hearingFetchedOnce = {false};
+
+        List<Element<HearingData>> hearingDetails = new ArrayList<>();
+        if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+        } else if (isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
+            hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
+        }
+        return hearingDetails.stream().parallel().map(hearingDataElement -> {
+            HearingData hearingData = hearingDataElement.getValue();
+            if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
+                && null != hearingData.getConfirmedHearingDates().getValue()) {
+                Hearings hearings = null;
+                if (!hearingFetchedOnce[0]) {
+                    hearingFetchedOnce[0] = true;
+                    hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                }
+
+                Optional<CaseHearing> caseHearing = getHearingFromId(
+                    hearingData.getConfirmedHearingDates().getValue().getCode(),
+                    hearings
+                );
+                if (caseHearing.isPresent()) {
+                    List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
+                    hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
+                    hearingData = hearingData.toBuilder()
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
+                        .build();
+                }
+            }
+            return Element.<HearingData>builder().id(hearingDataElement.getId())
+                .value(hearingData).build();
+        }).toList();
+    }
+
     private List<Element<HearingDataFromTabToDocmosis>> populateHearingScheduleForDocmosis(List<HearingDaySchedule> hearingDaySchedules,
                                                                                            CaseData caseData) {
         return hearingDaySchedules.stream().map(hearingDaySchedule -> {

@@ -1432,7 +1432,7 @@ public class DraftAnOrderService {
 
     private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum orderType) throws Exception {
         log.info("DraftOrderService::OrderType -> {}", orderType);
-        return manageOrderService.getCaseData(
+        return manageOrderService.getCaseDataNew(
             authorisation,
             caseData,
             orderType
@@ -1490,6 +1490,45 @@ public class DraftAnOrderService {
         return caseDataUpdated;
     }
 
+
+    public Map<String, Object> generateOrderDocumentIfOrderIsEdited(String authorisation, CallbackRequest callbackRequest,
+                                                                    List<Element<HearingData>> ordersHearingDetails) throws Exception {
+        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        updateOrderSpecificFields(authorisation, caseData, callbackRequest);
+
+        caseData.getManageOrders().setOrdersHearingDetails(
+            hearingDataService.getHearingDataForSelectedHearing(authorisation, caseData));
+
+        caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
+
+        return caseDataUpdated;
+    }
+
+    public Map<String, Object> generateOrderDocumentNew(String authorisation,
+                                                        CallbackRequest callbackRequest,
+                                                        List<Element<HearingData>> ordersHearingDetails,
+                                                        boolean isOrderEdited) throws Exception {
+        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        updateOrderSpecificFields(authorisation, caseData, callbackRequest);
+
+        caseData.getManageOrders().setOrdersHearingDetails(
+            hearingDataService.getHearingDataForSelectedHearing(authorisation, caseData));
+
+        if (isOrderEdited) {
+            caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
+        } else {
+            caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+        }
+
+
+        return caseDataUpdated;
+    }
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
                                                      List<Element<HearingData>> ordersHearingDetails,
@@ -1726,24 +1765,15 @@ public class DraftAnOrderService {
     }
 
 
-    private void updateOrderSpecificFields(CaseData caseData, CallbackRequest callbackRequest) {
+    private void updateOrderSpecificFields(String authorisation, CaseData caseData, CallbackRequest callbackRequest) {
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
+        } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+            caseData = manageOrderService.populateJudgeName(authorisation, caseData);
         }
-    }
-
-    public Map<String, Object> generateOrderDocumentIfOrderIsEdited(String authorisation, CallbackRequest callbackRequest,
-                                                                    List<Element<HearingData>> ordersHearingDetails) throws Exception {
-        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        updateOrderSpecificFields(caseData, callbackRequest);
-
-        return caseDataUpdated;
     }
 
     public Map<String, Object> handleDocumentGenerationNew(String authorisation, CallbackRequest callbackRequest) throws Exception {
@@ -1756,15 +1786,35 @@ public class DraftAnOrderService {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
             errorList = validateDraftOrderDetails(caseData);
+            if (errorList.size() > 0) {
+                return Map.of("errorList", errorList);
+            }
+            return generateOrderDocumentNew(
+                authorisation,
+                callbackRequest,
+                caseData.getManageOrders().getOrdersHearingDetails(),
+                false
+            );
         } else {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
             if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                 errorList = validateEditedOrderDetails(caseData, draftOrder);
-
-                generateOrderDocumentIfOrderIsEdited(
+                if (errorList.size() > 0) {
+                    return Map.of("errorList", errorList);
+                }
+                return generateOrderDocumentNew(
                     authorisation,
                     callbackRequest,
-                    draftOrder.getManageOrderHearingDetails()
+                    draftOrder.getManageOrderHearingDetails(),
+                    true
+                );
+
+            } else {
+                return generateOrderDocumentNew(
+                    authorisation,
+                    callbackRequest,
+                    draftOrder.getManageOrderHearingDetails(),
+                    false
                 );
 
             }
