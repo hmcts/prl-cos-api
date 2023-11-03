@@ -33,6 +33,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_C100;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VALID_ORDER_IDS_FOR_C100;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VALID_ORDER_IDS_FOR_FL401;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
@@ -288,27 +290,14 @@ public class ManageOrdersUtils {
                                                                    CreateSelectOrderOptionsEnum selectedOrder,
                                                                    List<String> errorList) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
-                || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                    && (!CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.parentalResponsibility.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.specialGuardianShip.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder))) {
+                && !Arrays.stream(VALID_ORDER_IDS_FOR_C100)
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.getId()))) {
                 errorList.add(ORDER_NOT_AVAILABLE_C100);
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                    && (!CreateSelectOrderOptionsEnum.nonMolestation.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.occupation.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.blank.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.powerOfArrest.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.generalForm.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder)
-                    && !CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder))) {
+                && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.getId()))) {
                 errorList.add(ORDER_NOT_AVAILABLE_FL401);
             }
         }
