@@ -64,6 +64,8 @@ public class CcdDataStoreService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String userId = userDetails.getId();
 
+        log.info("user details {}",userDetails);
+
         return caseRoleClient.findUserCaseRoles(
             authorisation,
             authTokenGenerator.generate(),

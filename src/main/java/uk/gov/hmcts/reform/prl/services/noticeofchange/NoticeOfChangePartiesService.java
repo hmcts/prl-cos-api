@@ -927,6 +927,7 @@ public class NoticeOfChangePartiesService {
         List<Element<PartyDetails>> solicitorRepresentedParties = new ArrayList<>();
         FindUserCaseRolesResponse findUserCaseRolesResponse
             = findUserCaseRoles(String.valueOf(caseData.getId()), authorisation);
+        log.info("solicitor reprasented parties {}",findUserCaseRolesResponse);
 
         if (findUserCaseRolesResponse != null) {
             solicitorRepresentedParties = getSolicitorRepresentedParties(
