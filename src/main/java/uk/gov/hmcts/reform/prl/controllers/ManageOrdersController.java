@@ -276,8 +276,8 @@ public class ManageOrdersController {
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            log.info("*** PostalInformationCA {}", caseData.getManageOrders().getPostalInformationCA());
             log.info("*** recipientsOptions {}", caseData.getManageOrders().getRecipientsOptions());
+            log.info("*** ServeOrderAdditionalDocuments {}", caseData.getManageOrders().getServeOrderAdditionalDocuments());
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);

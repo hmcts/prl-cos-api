@@ -1099,9 +1099,11 @@ public class ManageOrderService {
                     log.info("*** Court seal 1 {}", caseData.getCourtSeal());
                     orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
                     List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
+                    log.info("*** OrdersNeedToBeServed " + caseData.getManageOrders().getOrdersNeedToBeServed());
                     if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
                         && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
                         && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                        log.info("*** inside updateCurrentOrderId ");
                         updateCurrentOrderId(
                             caseData.getManageOrders().getServeOrderDynamicList(),
                             orderCollection,
