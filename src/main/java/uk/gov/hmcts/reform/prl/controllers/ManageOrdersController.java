@@ -177,7 +177,12 @@ public class ManageOrdersController {
             );
 
             List<String> errorList = new ArrayList<>();
-            if (getErrorsForOrdersProhibitedForC100FL401(caseData, caseData.getCreateSelectOrderOptions(), errorList)) {
+            if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
+                && getErrorsForOrdersProhibitedForC100FL401(
+                caseData,
+                caseData.getCreateSelectOrderOptions(),
+                errorList
+            )) {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
             }
 
