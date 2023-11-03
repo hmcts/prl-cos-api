@@ -137,7 +137,6 @@ public enum ManageOrderFieldsEnum {
     parentName("parentName"),
 
     caseTransferOptions("caseTransferOptions"),
-    courtName("courtName"),
     reasonsForTransfer("reasonsForTransfer"),
     giveDetails("giveDetails"),
 
