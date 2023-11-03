@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Test;
@@ -9,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.HearingApiClient;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
@@ -35,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
+import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
@@ -74,6 +77,15 @@ public class HearingDataServiceTest {
 
     @Mock
     HearingService hearingService;
+
+    @Mock
+    CaseService caseService;
+
+    @Mock
+    CaseDetails caseDetails;
+
+    @Mock
+    ObjectMapper objectMapper;
 
     @Mock
     HearingRequestDataMapper hearingRequestDataMapper;
@@ -551,8 +563,9 @@ public class HearingDataServiceTest {
         assertNotNull(expectedResponse);
     }
 
+
     @Test()
-    public void testGetLinkedCases() {
+    public void testGetLinkedCasesWithBaseLocationAndRegion() {
         List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
         CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
             .caseName("CaseName-Test10")
@@ -573,7 +586,59 @@ public class HearingDataServiceTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .baseLocation("7")
+                                        .region("1111")
+                                        .build()).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1677767515750127L).data(stringObjectMap).build();
+
+        when(caseService.getCase(any(),any())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
+        assertEquals("1677767515750127",expectedResponse.get(0).getCode());
+        assertEquals("CaseName-Test10",expectedResponse.get(0).getLabel());
+    }
+
+    @Test()
+    public void testGetLinkedCasesWithBaseLocationIdAndRegionId() {
+        List<CaseLinkedData> caseLinkedDataList = new ArrayList<>();
+        CaseLinkedData caseLinkedData = CaseLinkedData.caseLinkedDataWith()
+            .caseName("CaseName-Test10")
+            .caseReference("1677767515750127")
             .build();
+        caseLinkedDataList.add(caseLinkedData);
+        when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
+        CaseHearing caseHearing = CaseHearing.caseHearingWith()
+            .hmcStatus("LISTED").build();
+        List<CaseHearing> caseHearings =  new ArrayList<>();
+        caseHearings.add(caseHearing);
+        Hearings hearings = Hearings.hearingsWith()
+            .caseRef("1677767515750127")
+            .caseHearings(caseHearings)
+            .build();
+
+        when(hearingService.getHearingsByListOfCaseIds(any(), anyMap())).thenReturn(List.of(hearings));
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .caseManagementLocation(CaseManagementLocation.builder()
+                                        .baseLocationId("123")
+                                        .regionId("1111")
+                                        .build()).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1677767515750127L).data(stringObjectMap).build();
+
+        when(caseService.getCase(any(),any())).thenReturn(caseDetails);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
         assertEquals("1677767515750127",expectedResponse.get(0).getCode());
         assertEquals("CaseName-Test10",expectedResponse.get(0).getLabel());
