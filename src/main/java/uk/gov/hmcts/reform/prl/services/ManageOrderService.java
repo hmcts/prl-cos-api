@@ -1102,7 +1102,7 @@ public class ManageOrderService {
                     log.info("*** OrdersNeedToBeServed " + caseData.getManageOrders().getOrdersNeedToBeServed());
                     if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
                         && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
-                        && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                        && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                         log.info("*** inside updateCurrentOrderId ");
                         updateCurrentOrderId(
                             caseData.getManageOrders().getServeOrderDynamicList(),
@@ -1116,7 +1116,7 @@ public class ManageOrderService {
                         m -> m.getValue().getDateCreated(),
                         Comparator.reverseOrder()
                     ));
-                    if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                    if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                         orderCollection = serveOrder(caseData, orderCollection);
                     }
                     LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
