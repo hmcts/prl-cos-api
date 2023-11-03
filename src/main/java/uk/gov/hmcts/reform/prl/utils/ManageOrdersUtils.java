@@ -293,11 +293,11 @@ public class ManageOrdersUtils {
             || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && !Arrays.stream(VALID_ORDER_IDS_FOR_C100)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.getId()))) {
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
                 errorList.add(ORDER_NOT_AVAILABLE_C100);
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.getId()))) {
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
                 errorList.add(ORDER_NOT_AVAILABLE_FL401);
             }
         }
