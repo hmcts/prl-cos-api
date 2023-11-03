@@ -81,4 +81,9 @@ public enum CreateSelectOrderOptionsEnum {
             .map(i -> i.displayedValue)
             .findFirst().orElse("");
     }
+
+    @JsonValue
+    public String getId() {
+        return id;
+    }
 }
