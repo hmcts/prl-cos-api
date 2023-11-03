@@ -208,8 +208,10 @@ public class CaseService {
                                                    Map<String, String> searchCriteria) {
 
         UserDetails userDetails = idamClient.getUserDetails(authToken);
+        log.info("userDetails is :: " + userDetails.getEmail());
         List<CaseDetails> caseDetails = new ArrayList<>();
         caseDetails.addAll(performSearch(authToken, userDetails, searchCriteria, s2sToken));
+        log.info("caseDetails count :: " + caseDetails.size());
         return caseDetails
             .stream()
             .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
@@ -228,7 +230,7 @@ public class CaseService {
             CASE_TYPE,
             searchCriteria
         );
-
+        log.info("result size is: " + result.size());
         return result;
     }
 
