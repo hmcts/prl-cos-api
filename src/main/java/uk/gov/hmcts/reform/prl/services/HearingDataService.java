@@ -551,7 +551,7 @@ public class HearingDataService {
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
-                                                                                      caseHearing.get().getHearingType()))
+                                                                                      caseHearing.get().getHearingTypeValue()))
                         .build();
                 }
             }
