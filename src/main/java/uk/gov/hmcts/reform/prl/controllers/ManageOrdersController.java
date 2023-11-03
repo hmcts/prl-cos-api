@@ -273,6 +273,7 @@ public class ManageOrdersController {
             String performingUser = null;
             String performingAction = null;
             String judgeLaReviewRequired = null;
+            String orderNameForWA = null;
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -304,6 +305,10 @@ public class ManageOrdersController {
             //Added below fields for WA purpose
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
                 || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+                if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+                    orderNameForWA = caseData.getCreateSelectOrderOptions() != null
+                        ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "Test";
+                }
                 performingUser = manageOrderService.getLoggedInUserType(authorisation);
                 performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
                 if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
@@ -317,6 +322,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingUser", performingUser);
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            caseDataUpdated.put("orderNameForWA", orderNameForWA);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
