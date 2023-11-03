@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -99,9 +100,7 @@ public class PartyLevelCaseFlagsService {
             log.info("Representing is now::" + partyRole.getCaseRoleLabel());
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetails = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
-                if (partyDetails.isPresent()) {
-                    findAndGeneratePartyFlags(representing, i, partyDetails, data, partyRole);
-                }
+                findAndGeneratePartyFlags(representing, i, partyDetails, data, partyRole);
             }
         }
         return data;
@@ -138,6 +137,15 @@ public class PartyLevelCaseFlagsService {
                                     groupId
                             )
                     );
+                } else {
+                    data.put(
+                        caseDataExternalField,
+                        Optional.empty()
+                    );
+                    data.put(
+                        caseDataInternalField,
+                        Optional.empty()
+                    );
                 }
                 break;
             }
@@ -158,6 +166,15 @@ public class PartyLevelCaseFlagsService {
                                     partyRole.getCaseRoleLabel(),
                                     groupId
                             )
+                    );
+                } else {
+                    data.put(
+                        caseDataExternalField,
+                        Optional.empty()
+                    );
+                    data.put(
+                        caseDataInternalField,
+                        Optional.empty()
                     );
                 }
                 break;
