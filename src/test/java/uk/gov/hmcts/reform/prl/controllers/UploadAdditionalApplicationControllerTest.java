@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,8 +38,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -149,6 +152,25 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
+    public void testExceptionForPrePopulateApplicants() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            uploadAdditionalApplicationController.prePopulateApplicants(authToken,callbackRequest, s2sToken);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
     public void testPrePopulateApplicantsNotFound() throws NotFoundException {
         CaseData caseData = CaseData.builder().build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -203,6 +225,26 @@ public class UploadAdditionalApplicationControllerTest {
     }
 
     @Test
+    public void testExceptionForUploadAdditionalApplicationBundle() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(authToken,callbackRequest, s2sToken);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+
+    @Test
     public void testcreateUploadAdditionalApplicationBundleWithCaseDataMap() throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
@@ -234,6 +276,25 @@ public class UploadAdditionalApplicationControllerTest {
             "test",
             callbackRequest, s2sToken
         ));
+    }
+
+    @Test
+    public void testExceptionForUploadAdditionalApplicationBundleWithCaseDataMap() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            uploadAdditionalApplicationController.createUploadAdditionalApplicationBundle(authToken,callbackRequest, s2sToken);
+        }, RuntimeException.class, "Invalid Client");
     }
 
     @Test
@@ -269,4 +330,134 @@ public class UploadAdditionalApplicationControllerTest {
             callbackRequest, s2sToken
         ));
     }
+
+    @Test
+    public void testExceptionForCalculateAdditionalApplicationsFee() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            uploadAdditionalApplicationController.calculateAdditionalApplicationsFee(authToken,callbackRequest, s2sToken);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testUploadAdditionalApplicationSubmitted() throws Exception {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
+        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements(
+            "test",
+            "test",
+            caseData,
+            additionalApplicationsBundle
+        );
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+
+        assertNotNull(uploadAdditionalApplicationController.uploadAdditionalApplicationSubmittedEvent(
+            "test",
+            callbackRequest, s2sToken
+        ));
+    }
+
+    @Test
+    public void testExceptionForUploadAdditionalApplicationSubmitted() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            uploadAdditionalApplicationController.uploadAdditionalApplicationSubmittedEvent(authToken,callbackRequest, s2sToken);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testUploadAdditionalApplicationMidEvent() throws Exception {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle.builder().build()));
+        Mockito.doNothing().when(uploadAdditionalApplicationService).getAdditionalApplicationElements(
+            "test",
+            "test",
+            caseData,
+            additionalApplicationsBundle
+        );
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+
+        assertNotNull(uploadAdditionalApplicationController.populateHearingList(
+            "test",
+            callbackRequest, s2sToken
+        ));
+    }
+
+    @Test
+    public void testExceptionForUploadAdditionalApplicationMidEvent() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("temporaryOtherApplicationsBundle", "test");
+        caseDataUpdated.put("temporaryC2Document", "test");
+        caseDataUpdated.put("additionalApplicantsList", "test");
+        caseDataUpdated.put("typeOfC2Application", "test");
+        caseDataUpdated.put("additionalApplicationsApplyingFor", "test");
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(caseDataUpdated).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            uploadAdditionalApplicationController.populateHearingList(authToken,callbackRequest, s2sToken);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
 }

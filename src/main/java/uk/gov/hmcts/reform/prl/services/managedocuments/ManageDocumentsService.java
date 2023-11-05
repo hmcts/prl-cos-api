@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.core.instrument.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -32,7 +32,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -90,7 +89,7 @@ public class ManageDocumentsService {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
                     .sorted(Comparator.comparing(Category::getCategoryName))
-                    .collect(Collectors.toList());
+                    .toList();
 
                 List<DynamicListElement> dynamicListElementList = new ArrayList<>();
                 CaseUtils.createCategorySubCategoryDynamicList(
@@ -146,11 +145,7 @@ public class ManageDocumentsService {
                 }
             }
             //if any restricted docs
-            if (isRestrictedFlag) {
-                caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
-            } else {
-                caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
-            }
+            updateRestrictedFlag(caseDataUpdated, isRestrictedFlag);
 
             log.info("quarantineDocs List ---> after {}", quarantineDocs);
             log.info("legalProfUploadDocListDocTab List ---> after {}", tabDocuments);
@@ -166,6 +161,14 @@ public class ManageDocumentsService {
         caseDataUpdated.remove("manageDocuments");
 
         return caseDataUpdated;
+    }
+
+    private void updateRestrictedFlag(Map<String, Object> caseDataUpdated, boolean isRestrictedFlag) {
+        if (isRestrictedFlag) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+        } else {
+            caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
+        }
     }
 
     private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {

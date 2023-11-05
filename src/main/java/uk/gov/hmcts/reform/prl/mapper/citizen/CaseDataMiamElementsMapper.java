@@ -34,7 +34,7 @@ public class CaseDataMiamElementsMapper {
     private CaseDataMiamElementsMapper() {
     }
 
-    public static void updateMiamElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateMiamElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                      C100RebuildMiamElements c100RebuildMiamElements) {
 
         List<MiamPreviousAttendanceChecklistEnum> previousAttendanceChecklistEnums =
@@ -81,10 +81,10 @@ public class CaseDataMiamElementsMapper {
         miamNotAttendingReasons.remove("canNotAccessMediator");
 
         List<String> mediatorList = Stream.of(miamNotAttendingReasons, noMediatorAccessSubfields)
-                .flatMap(Collection::stream).collect(Collectors.toList());
+                .flatMap(Collection::stream).toList();
 
         return mediatorList.stream().map(value -> MiamNotAttendingReasonsMapperEnum.valueOf(value).getValue())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static List<MiamPreviousAttendanceChecklistEnum> buildMiamPreviousAttendanceChecklist(C100RebuildMiamElements c100RebuildMiamElements) {
@@ -95,7 +95,7 @@ public class CaseDataMiamElementsMapper {
             return Collections.emptyList();
         }
         return previousAttendance.stream().map(value -> MiamPreviousAttendanceMapperEnum.valueOf(value).getValue())
-                .collect(Collectors.toList()).stream().distinct().collect(Collectors.toList());
+                .toList().stream().distinct().toList();
 
     }
 
@@ -107,7 +107,7 @@ public class CaseDataMiamElementsMapper {
             return Collections.emptyList();
         }
         return miamUrgencies.stream().map(value -> MiamUrgencyMapperEnum.valueOf(value).getValue())
-                .collect(Collectors.toList()).stream().distinct().collect(Collectors.toList());
+                .toList().stream().distinct().toList();
     }
 
     private static List<MiamChildProtectionConcernChecklistEnum>
@@ -119,7 +119,7 @@ public class CaseDataMiamElementsMapper {
             return Collections.emptyList();
         }
         return childProtectionEvidences.stream().map(value -> ChildProtectionMapperEnum.valueOf(value).getValue())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static List<MiamDomesticViolenceChecklistEnum> buildMiamDomesticViolenceChecklist(C100RebuildMiamElements
@@ -158,7 +158,7 @@ public class CaseDataMiamElementsMapper {
         }
 
         return domesticAbusesList.stream().map(value -> DomesticAbuseMapperEnum.valueOf(value).getValue())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static List<MiamExemptionsChecklistEnum> buildMiamExemptionsCheckList(C100RebuildMiamElements c100RebuildMiamElements) {
@@ -169,7 +169,7 @@ public class CaseDataMiamElementsMapper {
             return Collections.emptyList();
         }
         return nonAttendanceReasons.stream().map(value -> MiamExemptionMapperEnum.valueOf(value).getValue())
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private static Document buildDocument(uk.gov.hmcts.reform.prl.models.c100rebuild.Document maimDocument) {

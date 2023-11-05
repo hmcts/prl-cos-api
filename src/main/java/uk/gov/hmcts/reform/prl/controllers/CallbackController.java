@@ -86,7 +86,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -301,8 +300,7 @@ public class CallbackController {
                             caseData.getApplicants().stream()
                                 .map(
                                     Element::getValue)
-                                .collect(
-                                    Collectors.toList())))
+                                .toList()))
                 .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
                 caseData)).state(
                     State.SUBMITTED_NOT_PAID)
@@ -457,27 +455,32 @@ public class CallbackController {
             WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
             Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-                if (previousState.isPresent() && !stateList.contains(previousState.get())) {
-                    caseDataUpdated.put("isWithdrawRequestSent", "Pending");
-                    log.info("Case is updated as WithdrawRequestSent");
-                } else {
-                    if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                        // Refreshing the page in the same event. Hence no external event call needed.
-                        // Getting the tab fields and add it to the casedetails..
-                        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-                        caseDataUpdated.putAll(allTabsFields);
-                    }
-                    if (!State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
-                        caseDataUpdated.put("state", WITHDRAWN_STATE);
-                        caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-                        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-                    }
-                }
-            }
+            updateTabsOrWithdrawFlag(caseData, previousState, stateList, withdrawApplication, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void updateTabsOrWithdrawFlag(CaseData caseData, Optional<String> previousState, List<String> stateList,
+                                          Optional<YesOrNo> withdrawApplication, Map<String, Object> caseDataUpdated) {
+        if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
+            if (previousState.isPresent() && !stateList.contains(previousState.get())) {
+                caseDataUpdated.put("isWithdrawRequestSent", "Pending");
+                log.info("Case is updated as WithdrawRequestSent");
+            } else {
+                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                    // Refreshing the page in the same event. Hence no external event call needed.
+                    // Getting the tab fields and add it to the casedetails..
+                    Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+                    caseDataUpdated.putAll(allTabsFields);
+                }
+                if (!State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
+                    caseDataUpdated.put("state", WITHDRAWN_STATE);
+                    caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+                    caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                }
+            }
         }
     }
 
@@ -593,10 +596,9 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
-                if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
-                    if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
-                        caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
-                    }
+                if (launchDarklyClient.isFeatureEnabled("task-list-v2")
+                    && C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
+                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
                 }
             }
 
@@ -680,7 +682,7 @@ public class CallbackController {
                                .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
-                                      .collect(Collectors.toList()));
+                                      .toList());
             log.info("*** test evidences *** {}", quarantineDocs);
         }
         if (correspondenceList != null) {
@@ -692,7 +694,7 @@ public class CallbackController {
                                .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
-                                      .collect(Collectors.toList()));
+                                      .toList());
         }
         List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         if (otherDocumentsList != null) {
@@ -705,7 +707,7 @@ public class CallbackController {
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
                                .build())
                     .id(element.getId()).build())
-                                      .collect(Collectors.toList()));
+                                      .toList());
         }
         caseData.setLegalProfQuarantineDocsList(quarantineDocs);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
