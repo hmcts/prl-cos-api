@@ -153,34 +153,6 @@ public class CafCassCaseData {
 
     private List<OrderTypeEnum> ordersApplyingFor;
 
-    public List<Element<Child>> getChildren() {
-        List<Element<Child>> childrenReturned = new ArrayList<>();
-        if (this.children != null) {
-            childrenReturned.addAll(this.children);
-        }
-        if (this.newChildDetails != null) {
-            this.newChildDetails.stream().forEach(
-                newChildDetail -> {
-                    ChildDetailsCafcass childDetailsRevised = newChildDetail.getValue();
-                    childrenReturned.add(Element.<Child>builder()
-                                             .id(newChildDetail.getId())
-                                             .value(Child.builder()
-                                                        .firstName(childDetailsRevised.getFirstName())
-                                                        .lastName(childDetailsRevised.getLastName())
-                                                        .gender(childDetailsRevised.getGender())
-                                                        .dateOfBirth(childDetailsRevised.getDateOfBirth())
-                                                        .otherGender(childDetailsRevised.getOtherGender())
-                                                        .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
-                                                        .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
-                                                        .build())
-                                             .build());
-
-                }
-            );
-        }
-        return childrenReturned;
-    }
-
     private List<Element<Child>> children;
 
     public void setMiamCertificationDocumentUpload1(CafCassDocument miamCertificationDocumentUpload1) throws MalformedURLException {
@@ -248,50 +220,6 @@ public class CafCassCaseData {
 
     private String courtName;
 
-    public List<Element<OtherPersonInTheCase>> getOtherPeopleInTheCaseTable() {
-        List<Element<OtherPersonInTheCase>> otherPersonInTheCaseReturned = new ArrayList<>();
-        if (this.otherPeopleInTheCaseTable != null) {
-            otherPersonInTheCaseReturned.addAll(this.otherPeopleInTheCaseTable);
-        }
-        if (this.otherPartyInTheCaseRevised != null) {
-            this.otherPartyInTheCaseRevised.stream().forEach(
-                otherPartyInTheCase -> {
-                    ApplicantDetails partyDetails = otherPartyInTheCase.getValue();
-                    otherPersonInTheCaseReturned.add(Element.<OtherPersonInTheCase>builder()
-                                                         .id(otherPartyInTheCase.getId())
-                                                         .value(OtherPersonInTheCase.builder()
-                                                                    .firstName(partyDetails.getFirstName())
-                                                                    .lastName(partyDetails.getLastName())
-                                                                    .previousName(partyDetails.getPreviousName())
-                                                                    .isDateOfBirthKnown(partyDetails.getIsDateOfBirthKnown())
-                                                                    .dateOfBirth(partyDetails.getDateOfBirth())
-                                                                    .gender(partyDetails.getGender().getDisplayedValue())
-                                                                    .otherGender(partyDetails.getOtherGender())
-                                                                    .isPlaceOfBirthKnown(partyDetails.getIsPlaceOfBirthKnown())
-                                                                    .isCurrentAddressKnown(partyDetails.getIsCurrentAddressKnown())
-                                                                    .address(
-                                                                        Address.builder()
-                                                                            .addressLine1(partyDetails.getAddress().getAddressLine1())
-                                                                            .addressLine2(partyDetails.getAddress().getAddressLine2())
-                                                                            .addressLine3(partyDetails.getAddress().getAddressLine3())
-                                                                            .country(partyDetails.getAddress().getCountry())
-                                                                            .county(partyDetails.getAddress().getCounty())
-                                                                            .postCode(partyDetails.getAddress().getPostCode())
-                                                                            .postTown(partyDetails.getAddress().getPostTown())
-                                                                            .build()
-                                                                    )
-                                                                    .canYouProvideEmailAddress(partyDetails.getCanYouProvideEmailAddress())
-                                                                    .email(partyDetails.getEmail())
-                                                                    .canYouProvidePhoneNumber(partyDetails.getCanYouProvidePhoneNumber())
-                                                                    .phoneNumber(partyDetails.getPhoneNumber())
-                                                                    .build())
-                                                         .build());
-                }
-            );
-        }
-        return otherPersonInTheCaseReturned;
-    }
-
     private List<Element<OtherPersonInTheCase>> otherPeopleInTheCaseTable;
 
     public void setOrdersNonMolestationDocument(CafCassDocument ordersNonMolestationDocument) throws MalformedURLException {
@@ -322,7 +250,6 @@ public class CafCassCaseData {
 
     private List<Element<ManageOrderCollection>> manageOrderCollection;
 
-    //private List<Element<HearingData>> hearingData;
     private Hearings hearingData;
 
     @Setter(AccessLevel.NONE)
@@ -334,8 +261,81 @@ public class CafCassCaseData {
     @Getter(AccessLevel.NONE)
     private List<Element<ChildDetailsCafcass>> newChildDetails;
 
+    public void setNewChildDetails(List<Element<ChildDetailsCafcass>> newChildDetails) {
+        if (this.children == null) {
+            this.children = new ArrayList<>();
+        }
+        if (newChildDetails != null) {
+            newChildDetails.stream().forEach(
+                newChildDetail -> {
+                    ChildDetailsCafcass childDetailsRevised = newChildDetail.getValue();
+                    this.children.add(Element.<Child>builder()
+                                          .id(newChildDetail.getId())
+                                          .value(Child.builder()
+                                                     .firstName(childDetailsRevised.getFirstName())
+                                                     .lastName(childDetailsRevised.getLastName())
+                                                     .gender(childDetailsRevised.getGender())
+                                                     .dateOfBirth(childDetailsRevised.getDateOfBirth())
+                                                     .otherGender(childDetailsRevised.getOtherGender())
+                                                     .orderAppliedFor(childDetailsRevised.getOrderAppliedFor())
+                                                     .parentalResponsibilityDetails(childDetailsRevised.getParentalResponsibilityDetails())
+                                                     .build())
+                                          .build());
+
+                }
+            );
+        }
+
+        this.newChildDetails = newChildDetails;
+    }
+
     @Getter(AccessLevel.NONE)
     private List<Element<ApplicantDetails>> otherPartyInTheCaseRevised;
+
+    public void setOtherPartyInTheCaseRevised(List<Element<ApplicantDetails>> otherPartyInTheCaseRevised) {
+        if (this.otherPeopleInTheCaseTable == null) {
+            this.otherPeopleInTheCaseTable = new ArrayList<>();
+        }
+
+        if (otherPartyInTheCaseRevised != null) {
+            otherPartyInTheCaseRevised.stream().forEach(
+                otherPartyInTheCase -> {
+                    ApplicantDetails partyDetails = otherPartyInTheCase.getValue();
+                    this.otherPeopleInTheCaseTable.add(Element.<OtherPersonInTheCase>builder()
+                                                           .id(otherPartyInTheCase.getId())
+                                                           .value(OtherPersonInTheCase.builder()
+                                                                      .firstName(partyDetails.getFirstName())
+                                                                      .lastName(partyDetails.getLastName())
+                                                                      .previousName(partyDetails.getPreviousName())
+                                                                      .isDateOfBirthKnown(partyDetails.getIsDateOfBirthKnown())
+                                                                      .dateOfBirth(partyDetails.getDateOfBirth())
+                                                                      .gender(partyDetails.getGender().getDisplayedValue())
+                                                                      .otherGender(partyDetails.getOtherGender())
+                                                                      .isPlaceOfBirthKnown(partyDetails.getIsPlaceOfBirthKnown())
+                                                                      .isCurrentAddressKnown(partyDetails.getIsCurrentAddressKnown())
+                                                                      .address(
+                                                                          partyDetails.getAddress() != null
+                                                                              ? Address.builder()
+                                                                              .addressLine1(partyDetails.getAddress().getAddressLine1())
+                                                                              .addressLine2(partyDetails.getAddress().getAddressLine2())
+                                                                              .addressLine3(partyDetails.getAddress().getAddressLine3())
+                                                                              .country(partyDetails.getAddress().getCountry())
+                                                                              .county(partyDetails.getAddress().getCounty())
+                                                                              .postCode(partyDetails.getAddress().getPostCode())
+                                                                              .postTown(partyDetails.getAddress().getPostTown())
+                                                                              .build() : null
+                                                                      )
+                                                                      .canYouProvideEmailAddress(partyDetails.getCanYouProvideEmailAddress())
+                                                                      .email(partyDetails.getEmail())
+                                                                      .canYouProvidePhoneNumber(partyDetails.getCanYouProvidePhoneNumber())
+                                                                      .phoneNumber(partyDetails.getPhoneNumber())
+                                                                      .build())
+                                                           .build());
+                }
+            );
+        }
+        this.otherPartyInTheCaseRevised = otherPartyInTheCaseRevised;
+    }
 
     public List<Element<RelationshipToPartiesCafcass>> getChildAndApplicantRelations() {
         List<Element<RelationshipToPartiesCafcass>> updatedRelationshipToParties = new ArrayList<>();

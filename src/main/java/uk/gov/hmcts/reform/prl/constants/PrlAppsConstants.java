@@ -207,7 +207,7 @@ public class PrlAppsConstants {
 
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
-    public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","powerOfArrest","childArrangementsSpecificProhibitedOrder",
+    public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
         "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing, you may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
@@ -681,6 +681,13 @@ public class PrlAppsConstants {
     public static final String CITIZEN_HOME = "/citizen-home";
 
     public static final String VERIFY_CASE_NUMBER_ADDED = "isAddCaseNumberAdded";
+
+    public static final String CURRENCY_SIGN_POUND = "£";
+
+    public static final String ADDITIONAL_APPLICATION_FEES_TO_PAY = "additionalApplicationFeesToPay";
+
+    public static final String ADDITIONAL_APPLICATIONS_HELP_WITH_FEES = "additionalApplicationsHelpWithFees";
+
     public static final String Q = "Q";
 
     public static final String S = "S";
@@ -713,7 +720,9 @@ public class PrlAppsConstants {
     public static final String CASE_CREATED_BY = "caseCreatedBy";
     public static final String SOA_CONFIDENTIAL_DETAILS_PRESENT = "isConfidential";
     public static final String COURT_CODE_FROM_FACT = "courtCodeFromFact";
+
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
+
     public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
@@ -739,9 +748,15 @@ public class PrlAppsConstants {
     public static final String CAFCASS_ROLE = "caseworker-privatelaw-externaluser-viewonly";
     public static final String SOLICITOR = "Solicitor";
     public static final String COURT_STAFF = "Staff";
+
+    public static final String BULK_SCAN = "Bulk scan";
     public static final String LEGAL_PROFESSIONAL = "Legal professional";
     public static final String LONDON_TIME_ZONE = "Europe/London";
 
+    public static final String CA_APPLICANT = "CAAPPLICANT";
+    public static final String DA_APPLICANT = "DAAPPLICANT";
+    public static final String CA_RESPONDENT = "CARESPONDENT";
+    public static final String DA_RESPONDENT = "DARESPONDENT";
     public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
     public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
         + System.lineSeparator()
@@ -763,6 +778,14 @@ public class PrlAppsConstants {
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
     public static final String OTHER_PERSON = "otherPerson";
+    public static final String UNDERSCORE = "_";
+    public static final String AWP_STATUS_SUBMITTED = "Submitted";
+    public static final String AWP_STATUS_IN_REVIEW = "In review";
+    public static final String AWP_STATUS_CLOSED = "Closed";
+    public static final String AWP_ADDTIONAL_APPLICATION_BUNDLE = "additionalApplicationsBundle";
+    public static final String AWP_OTHER_APPLICATION_SNR_CODE = "OT";
+    public static final String AWP_C2_APPLICATION_SNR_CODE = "C2";
+    public static final String D_MMM_YYYY_HH_MM = "d MMM yyyy, hh:mm a";
 
     public static final String CASE_NUMBER = "caseNumber";
     public static final String CASE_NAME = "caseName";
@@ -771,4 +794,11 @@ public class PrlAppsConstants {
     public static final String CONTENT = "content";
     public static final String ATTACHMENT_TYPE = "attachmentType";
     public static final String DISPOSITION = "disposition";
+
+
+    public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
+    public static final String AM_LOWER_CASE = "am";
+    public static final String AM_UPPER_CASE = "AM";
+    public static final String PM_LOWER_CASE = "pm";
+    public static final String PM_UPPER_CASE = "PM";
 }
