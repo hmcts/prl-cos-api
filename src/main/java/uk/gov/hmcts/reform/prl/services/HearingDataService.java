@@ -518,7 +518,7 @@ public class HearingDataService {
         }).toList();
     }
 
-    public List<Element<HearingData>> getHearingDataForSelectedHearing(String authorisation, CaseData caseData) {
+    public List<Element<HearingData>> getHearingDataForSelectedHearingNew(String authorisation, CaseData caseData) {
         boolean[] hearingFetchedOnce = {false};
 
         List<Element<HearingData>> hearingDetails = new ArrayList<>();

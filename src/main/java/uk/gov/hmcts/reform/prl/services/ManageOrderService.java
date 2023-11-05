@@ -1698,7 +1698,6 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
             GeneratedDocumentInfo generatedDocumentInfo;
-            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
 
             if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
@@ -1707,6 +1706,7 @@ public class ManageOrderService {
             }
 
             log.info("*** Manage orders: {}", caseData.getManageOrders());
+            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
         } catch (Exception ex) {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
