@@ -813,4 +813,11 @@ public class PrlAppsConstants {
     public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
     public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
 
+    public static final String[] VALID_ORDER_IDS_FOR_C100 = {"blankOrderOrDirections", "childArrangementsSpecificProhibitedOrder",
+        "parentalResponsibility", "specialGuardianShip", "noticeOfProceedingsParties", "noticeOfProceedingsNonParties",
+        "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder"};
+
+    public static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
+        "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
+
 }
