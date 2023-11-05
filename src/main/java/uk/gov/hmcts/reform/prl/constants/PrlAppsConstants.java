@@ -207,8 +207,8 @@ public class PrlAppsConstants {
 
     public static final String SERVICE_ID = "ABA5";
     public static final String FAMILY_COURT_TYPE_ID = "18";
-    public static final String[] HEARING_PAGE_NEEDED_ORDER_IDS = {"noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
-        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties"};
+    public static final List<String> HEARING_PAGE_NEEDED_ORDER_IDS = List.of("noticeOfProceedings","childArrangementsSpecificProhibitedOrder",
+        "occupation","nonMolestation","amendDischargedVaried","noticeOfProceedingsNonParties","noticeOfProceedingsParties");
     public static final String RIGHT_TO_ASK_COURT = "As the direction has been made without hearing, you may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
         + "(and notifying any other party) and asking the court to reconsider."
@@ -723,7 +723,7 @@ public class PrlAppsConstants {
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 
-    public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
+    public static final String ENG_STATIC_DOCS_PATH = "staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
@@ -801,4 +801,8 @@ public class PrlAppsConstants {
     public static final String AM_UPPER_CASE = "AM";
     public static final String PM_LOWER_CASE = "pm";
     public static final String PM_UPPER_CASE = "PM";
+
+    public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
+
+    public static final String CAFCASS_PARTY = "CAFCASS";
 }
