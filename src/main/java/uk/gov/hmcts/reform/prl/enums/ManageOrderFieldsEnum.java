@@ -9,7 +9,6 @@ public enum ManageOrderFieldsEnum {
     fcOrders("fcOrders"),
     otherOrdersOption("otherOrdersOption"),
     amendOrderDynamicList("amendOrderDynamicList"),
-    serveOrderDynamicList("serveOrderDynamicList"),
     ordersNeedToBeServed("ordersNeedToBeServed"),
     loggedInUserType("loggedInUserType"),
     doYouWantToServeOrder("doYouWantToServeOrder"),
@@ -41,7 +40,25 @@ public enum ManageOrderFieldsEnum {
     instructionsFromJudge("instructionsFromJudge"),
     courtAdminNotes("courtAdminNotes"),
     nameOfOrder("nameOfOrder"),
-    appointedGuardianName("appointedGuardianName");
+    appointedGuardianName("appointedGuardianName"),
+    orderName("orderName"),
+    orderType("orderType"),
+    previewDraftOrder("previewDraftOrder"),
+    isHearingPageNeeded("isHearingPageNeeded"),
+    postalInformationCA("postalInformationCA"),
+    cafcassCymruDocuments("cafcassCymruDocuments"),
+    draftOrdersDynamicList("draftOrdersDynamicList"),
+    previewDraftOrderWelsh("previewDraftOrderWelsh"),
+    whenReportsMustBeFiled("whenReportsMustBeFiled"),
+    doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
+    isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
+    servingRespondentsOptionsCA("servingRespondentsOptionsCA"),
+    otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
+    serveOrderAdditionalDocuments("serveOrderAdditionalDocuments"),
+    isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
+    cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
+    orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
+    selectTypeOfOrder("selectTypeOfOrder");
 
     private final String value;
 
