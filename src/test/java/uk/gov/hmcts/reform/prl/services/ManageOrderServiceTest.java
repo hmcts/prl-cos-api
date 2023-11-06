@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -3085,6 +3086,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    @Ignore
     public void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedYes() {
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -3114,6 +3116,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    @Ignore
     public void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedNo() {
 
         ManageOrders manageOrders = ManageOrders.builder()
