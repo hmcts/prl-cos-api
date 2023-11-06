@@ -587,7 +587,11 @@ public class HearingDataService {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
-                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData))
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(
+                            hearingDaySchedules,
+                            caseData,
+                            caseHearing.get().getHearingTypeValue()
+                        ))
                         .build();
                 }
             }
