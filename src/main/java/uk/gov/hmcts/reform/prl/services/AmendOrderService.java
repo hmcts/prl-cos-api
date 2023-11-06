@@ -51,8 +51,10 @@ public class AmendOrderService {
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
-        log.info("Uploaded document" + eventData.getManageOrdersAmendedOrder());
-        log.info("Old document" + eventData.getManageOrdersDocumentToAmend());
+        log.info("Uploaded document {}", eventData.getManageOrdersAmendedOrder());
+        log.info("Uploaded document " + eventData.getManageOrdersAmendedOrder());
+        log.info("Old document {} ", eventData.getManageOrdersDocumentToAmend());
+        log.info("Old document " + eventData.getManageOrdersDocumentToAmend());
         byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersAmendedOrder(), authorisation);
         String amendedFileName = updateFileName(eventData.getManageOrdersDocumentToAmend());
         Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
