@@ -1517,8 +1517,10 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         updateOrderSpecificFields(authorisation, caseData, callbackRequest);
 
-        caseData.getManageOrders().setOrdersHearingDetails(
-            hearingDataService.getHearingDataForSelectedHearingNew(authorisation, caseData));
+        if (ManageOrdersUtils.isHearingPageNeeded(caseData)) {
+            caseData.getManageOrders().setOrdersHearingDetails(
+                hearingDataService.getHearingDataForSelectedHearingNew(authorisation, caseData));
+        }
 
         if (isOrderEdited) {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
