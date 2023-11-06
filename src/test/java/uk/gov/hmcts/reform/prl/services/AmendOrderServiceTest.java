@@ -74,6 +74,7 @@ public class AmendOrderServiceTest {
         caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .manageOrdersDocumentToAmend(originalOrder)
+                              .manageOrdersAmendedOrder(originalOrder)
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .amendOrderDynamicList(DynamicList.builder()
                                                          .value(DynamicListElement.builder()

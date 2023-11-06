@@ -284,7 +284,8 @@ public class ManageOrdersController {
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-                if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
+                if (null != caseData.getManageOrders().getOrdersHearingDetails()
+                    && caseData.getManageOrdersOptions().equals(createAnOrder)) {
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                            .getHearingDataForSelectedHearing(

@@ -171,7 +171,8 @@ public enum ManageOrderFieldsEnum {
     nameOfJudgeAmendOrder("nameOfJudgeAmendOrder"),
     nameOfLaAmendOrder("nameOfLaAmendOrder"),
     nameOfJudgeToReviewOrder("nameOfJudgeToReviewOrder"),
-    nameOfLaToReviewOrder("nameOfLaToReviewOrder");
+    nameOfLaToReviewOrder("nameOfLaToReviewOrder"),
+    manageOrdersDocumentToAmend("manageOrdersDocumentToAmend");
 
     private final String value;
 
