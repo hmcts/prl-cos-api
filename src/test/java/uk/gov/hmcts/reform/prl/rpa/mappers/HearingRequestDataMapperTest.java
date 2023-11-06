@@ -282,6 +282,7 @@ public class HearingRequestDataMapperTest {
             .applicantName("Test")
             .applicantHearingChannel1(DynamicList.builder().value(DynamicListElement.builder().build()).build())
             .build();
+
         PartyDetails partyDetails = PartyDetails.builder()
             .representativeFirstName("testF")
             .representativeLastName("testL")
