@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
@@ -64,6 +65,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.cleanUpSelectedManageOrderOptions;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
@@ -96,6 +98,8 @@ public class ManageOrdersController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+
     private final HearingService hearingService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
@@ -121,7 +125,9 @@ public class ManageOrdersController {
                 && null != caseData.getManageOrders().getFl404CustomFields()) {
                 errorList = getErrorForOccupationScreen(caseData);
             }
-
+            log.info("*** Manage order undertaking date time : {}", callbackRequest.getCaseDetails().getData()
+                .get("underTakingExpiryDateTime"));
+            log.info("*** Manage order undertaking date time : {}", caseData.getManageOrders());
             if (isNotEmpty(errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
@@ -175,6 +181,16 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+
+            List<String> errorList = new ArrayList<>();
+            if (getErrorsForOrdersProhibitedForC100FL401(caseData, caseData.getCreateSelectOrderOptions(), errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+            }
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handleFetchOrderDetails(authorisation, callbackRequest))
                 .build();
@@ -266,6 +282,7 @@ public class ManageOrdersController {
             String performingUser = null;
             String performingAction = null;
             String judgeLaReviewRequired = null;
+            String orderNameForWA = null;
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -297,6 +314,10 @@ public class ManageOrdersController {
             //Added below fields for WA purpose
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
                 || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+                if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+                    orderNameForWA = caseData.getCreateSelectOrderOptions() != null
+                        ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "Test";
+                }
                 performingUser = manageOrderService.getLoggedInUserType(authorisation);
                 performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
                 if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
@@ -310,6 +331,7 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingUser", performingUser);
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            caseDataUpdated.put("orderNameForWA", orderNameForWA);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

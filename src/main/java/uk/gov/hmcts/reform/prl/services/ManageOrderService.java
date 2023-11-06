@@ -1830,12 +1830,21 @@ public class ManageOrderService {
 
     private CaseData getN117FormData(CaseData caseData) {
         log.info("*** casedata manage orders : {}", caseData.getManageOrders());
+        log.info("**** Court name : {}", caseData.getCourtName());
+        LocalDateTime undertakingExpiryDateTime = null;
+        log.info("*** Undertaking expiry date time {}", caseData.getManageOrders().getUnderTakingExpiryDateTime());
+        if (null != caseData.getManageOrders().getUnderTakingExpiryDateTime()) {
+            undertakingExpiryDateTime = LocalDateTime.parse(org.springframework.util.StringUtils
+                .trimAllWhitespace(caseData.getManageOrders().getUnderTakingExpiryDateTime().toString()));
+        }
+        log.info("*** Undertaking expiry date time {}", undertakingExpiryDateTime);
         ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
             .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
+            .underTakingExpiryDateTime(undertakingExpiryDateTime)
             .orderDirections(caseData.getManageOrders().getOrderDirections())
             .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
             .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
@@ -2010,6 +2019,7 @@ public class ManageOrderService {
         }
         log.info("*** Court seal {}", caseData.getCourtSeal());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("FinalDocument::OrdersHearingDetails -> {}", caseData.getManageOrders().getOrdersHearingDetails());
         if (documentLanguage.isGenEng()) {
             log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
@@ -2028,6 +2038,7 @@ public class ManageOrderService {
                                    .documentFileName(fieldMap.get(PrlAppsConstants.GENERATE_FILE_NAME))
                                    .build())
                 .build();
+            log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
         }
         if (documentLanguage.isGenWelsh()) {
             log.info("*** Generating Final order in Welsh ***");
@@ -2047,6 +2058,7 @@ public class ManageOrderService {
                                                                                .documentFileName(fieldMap.get(
                                                                                    PrlAppsConstants.WELSH_FILE_NAME)).build()).build();
             }
+            log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
         }
         log.info("inside getOrderDetailsElement ==> " + caseData.getManageOrders().getCurrentOrderCreatedDateTime());
         return element(orderDetails.toBuilder()
@@ -2177,7 +2189,7 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData);
             }
-            log.info("*****");
+            log.info("*****court name --- {}", caseData.getCourtName());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
             if (caseData.getCreateSelectOrderOptions() != null
                 && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
@@ -2590,7 +2602,7 @@ public class ManageOrderService {
                                     Map<String, Object> caseDataUpdated) {
         caseDataUpdated.put("selectedC21Order", (null != caseData.getManageOrders()
             && caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder)
-            ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
+            ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : " ");
 
         C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
             ? caseData.getManageOrders().getC21OrderOptions() : null;

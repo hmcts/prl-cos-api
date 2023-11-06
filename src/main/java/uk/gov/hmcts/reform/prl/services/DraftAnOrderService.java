@@ -134,6 +134,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 
@@ -381,6 +382,7 @@ public class DraftAnOrderService {
             .childOption(draftOrder.getChildOption())
             .isOrderUploaded(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .build();
+        log.info("DraftOrderService::ManageOrderHearingDetails -> {}", draftOrder.getManageOrderHearingDetails());
         if (Yes.equals(draftOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             orderDetails = orderDetails.toBuilder()
                 .orderDocument(draftOrder.getOrderDocument())
@@ -396,10 +398,16 @@ public class DraftAnOrderService {
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
                     .build()
             ).build();
+            log.info("DraftOrderService::OrdersHearingDetails -> {}", caseData.getManageOrders().getOrdersHearingDetails());
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                 log.info("inside filterEmptyHearingDetails");
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
             }
+            log.info("**** DraftOrderService::OrdersHearingDetails after filter **** -> {}", caseData.getManageOrders().getOrdersHearingDetails());
+
+            log.info("before creating final order caseId ==> " + caseData.getId());
+            log.info("before creating final order getJudgeOrMagistratesLastName ==> " + caseData.getJudgeOrMagistratesLastName());
+            log.info("before creating final order getJudgeOrMagistrateTitle ==> " + caseData.getManageOrders().getJudgeOrMagistrateTitle());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -432,6 +440,8 @@ public class DraftAnOrderService {
                         fieldMap
                     ))
                     .build();
+                log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
+                log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
             } catch (Exception e) {
                 log.error(
                     "Error while generating the final document for case {} and  order {}",
@@ -1511,6 +1521,7 @@ public class DraftAnOrderService {
     }
 
     private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum orderType) throws Exception {
+        log.info("DraftOrderService::OrderType -> {}", orderType);
         return manageOrderService.getCaseData(
             authorisation,
             caseData,
@@ -1576,6 +1587,7 @@ public class DraftAnOrderService {
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
                                                      List<Element<HearingData>> ordersHearingDetails,
                                                      boolean isSolicitorOrdersHearings) throws Exception {
+        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1592,17 +1604,17 @@ public class DraftAnOrderService {
             List<Element<HearingData>> hearingData = hearingDataService.getHearingData(ordersHearingDetails,
                                                                                        hearingDataPrePopulatedDynamicLists,
                                                                                        caseData);
+            log.info("DraftOrderService::hearingData -> {}", hearingData);
             //PRL-4260 - hearing screen changes
             caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
             caseData.getManageOrders().setOrdersHearingDetails(hearingData);
-            caseData.getManageOrders().setOrdersHearingDetails(
-                hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
-
             //PRL-4335 - solicitor draft order edit by judge/admin, persist into solicitor orders hearings
             if (isSolicitorOrdersHearings) {
                 caseDataUpdated.put(SOLICITOR_ORDERS_HEARING_DETAILS, hearingData);
                 caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingData);
             }
+            caseData.getManageOrders().setOrdersHearingDetails(
+                hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
             caseData = manageOrderService.setHearingDataForSdo(caseData, hearings);
         }
@@ -1724,13 +1736,15 @@ public class DraftAnOrderService {
                 .build();
         }
 
+        List<String> errorList = new ArrayList<>();
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
-            List<String> errorList = new ArrayList<>();
+                || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
             errorList.add("This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
+                    .errors(errorList)
+                    .build();
+        } else if (getErrorsForOrdersProhibitedForC100FL401(caseData, caseData.getCreateSelectOrderOptions(), errorList)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
             caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
@@ -1779,9 +1793,12 @@ public class DraftAnOrderService {
             if (ManageOrdersUtils.isHearingPageNeeded(caseData)) {
                 existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
                 //PRL-4335 - hearing screen validations
-                errorList = getHearingScreenValidations(existingOrderHearingDetails,
-                                                        caseData.getCreateSelectOrderOptions(),
-                                                        true);
+                //PRL-4589 - fix, validate only when hearings are available
+                if (Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())) {
+                    errorList = getHearingScreenValidations(existingOrderHearingDetails,
+                                                            caseData.getCreateSelectOrderOptions(),
+                                                            true);
+                }
             }
             if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
                 && null != caseData.getManageOrders().getFl404CustomFields()) {
