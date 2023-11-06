@@ -263,10 +263,14 @@ public class ReviewDocumentService {
             quarantineDocsList.remove(quarantineLegalDocElement);
 
             QuarantineLegalDoc uploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                isReviewDecisionYes ? CONFIDENTIAL_CATEGORY_ID : quarantineLegalDocElement.getValue().getCategoryId(),
+                quarantineLegalDocElement.getValue().getCategoryId(),
                 getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
             );
 
+            if (isReviewDecisionYes) {
+                quarantineLegalDocElement.getValue().toBuilder()
+                    .fileName(quarantineLegalDocElement.getValue().getFileName() + "-confidential");
+            }
             uploadDoc = addQuarantineDocumentFields(
                 uploadDoc,
                 quarantineLegalDocElement.getValue()
