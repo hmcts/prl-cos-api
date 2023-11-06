@@ -111,7 +111,6 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -295,10 +294,12 @@ public class ManageOrdersController {
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+                Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                 if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
-                    Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                            .getHearingDataForSelectedHearing(caseData, hearings));
+                } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                    caseData = manageOrderService.setHearingDataForSdo(caseData, hearings);
                 }
                 log.info("*** Court seal 0 {}", caseData.getCourtSeal());
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(

@@ -16,7 +16,7 @@ public enum SdoTransferApplicationReasonEnum {
     @JsonProperty("ongoingProceedings")
     ongoingProceedings("ongoingProceedings", "There are ongoing procedings in another court"),
     @JsonProperty("other")
-    other("other", "other");
+    other("other", "Other");
 
     private final String id;
     private final String displayedValue;
