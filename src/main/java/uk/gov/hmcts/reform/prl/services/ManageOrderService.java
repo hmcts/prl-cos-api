@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -1376,11 +1377,9 @@ public class ManageOrderService {
     private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
-        YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
         if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
-            otherPartiesServed = Yes;
             if (caseData.getManageOrders().getEmailInformationDA() != null) {
                 emailInformation = caseData.getManageOrders().getEmailInformationDA();
             }
@@ -1390,7 +1389,6 @@ public class ManageOrderService {
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
-        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
@@ -1419,9 +1417,14 @@ public class ManageOrderService {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
+        if ((ObjectUtils.isNotEmpty(caseData.getManageOrders().getOtherParties())
+            && isNotEmpty(caseData.getManageOrders().getOtherParties().getValue()))
+            || (ObjectUtils.isNotEmpty(caseData.getManageOrders().getOtherPartiesOnlyC47a())
+            && isNotEmpty(caseData.getManageOrders().getOtherPartiesOnlyC47a().getValue()))) {
+            otherPartiesServed = Yes;
+        }
         if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())
             || isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCaOnlyC47a())) {
-            otherPartiesServed = Yes;
             emailInformation = getEmailInformationCA(caseData);
             postalInformation = getPostalInformationCA(caseData);
         }
