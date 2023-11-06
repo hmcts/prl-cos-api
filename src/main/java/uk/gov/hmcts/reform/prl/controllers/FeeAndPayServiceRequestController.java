@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -7,8 +8,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,9 +37,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@RequiredArgsConstructor
 public class FeeAndPayServiceRequestController extends AbstractCallbackController {
-
     public static final String CONFIRMATION_HEADER_HELP_WITH_FEES = "# Help with fees requested";
     public static final String CONFIRMATION_HEADER = "# Continue to payment";
     public static final String SERVICE_REQUEST_TAB = "#Service%20Request";
@@ -49,7 +48,6 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         If the email does not appear in your inbox, check your junk or spam folder.
 
         The court will review your help with fees application and tell you what happens next.""";
-      
     public static final String HWF_NO_EMAIL_CONTENT = """
         ### What happens next
 
@@ -64,6 +62,19 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
     private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
     private final EventService eventPublisher;
     private final AuthorisationService authorisationService;
+
+    @Autowired
+    protected FeeAndPayServiceRequestController(ObjectMapper objectMapper,
+                                                EventService eventPublisher,
+                                                SolicitorEmailService solicitorEmailService,
+                                                FeeAndPayServiceRequestService feeAndPayServiceRequestService,
+                                                AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.solicitorEmailService = solicitorEmailService;
+        this.feeAndPayServiceRequestService = feeAndPayServiceRequestService;
+        this.eventPublisher = eventPublisher;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/payment-confirmation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create Fee and Pay service request . Returns service request reference if "

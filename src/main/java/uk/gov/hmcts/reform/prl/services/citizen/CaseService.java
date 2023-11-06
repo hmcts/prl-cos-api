@@ -63,32 +63,19 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
-
     public static final String LINK_CASE = "linkCase";
     public static final String INVALID = "Invalid";
     public static final String VALID = "Valid";
     public static final String LINKED = "Linked";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
-    @Autowired
     private final CoreCaseDataApi coreCaseDataApi;
-
-    @Autowired
     private final CaseRepository caseRepository;
-
     private final IdamClient idamClient;
-
-    @Autowired
     private final ObjectMapper objectMapper;
-
-    @Autowired
     private final SystemUserService systemUserService;
-
-    @Autowired
     private final CaseDataMapper caseDataMapper;
-
     private final CcdCoreCaseDataService coreCaseDataService;
-
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
