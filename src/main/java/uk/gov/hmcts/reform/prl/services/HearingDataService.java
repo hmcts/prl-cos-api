@@ -551,7 +551,8 @@ public class HearingDataService {
                 log.info("caseHearing " + caseHearing.get());
                 List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                 hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
-                List<Element<HearingDataFromTabToDocmosis>> elementList = populateHearingScheduleForDocmosis(hearingDaySchedules, caseData);
+                List<Element<HearingDataFromTabToDocmosis>> elementList = populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
+                                                                                                             caseHearing.get().getHearingTypeValue());
                 log.info("populateHearingScheduleForDocmosis " + elementList);
                 hearingData = hearingData.toBuilder()
                     .hearingdataFromHearingTab(elementList)
