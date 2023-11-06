@@ -199,7 +199,8 @@ public class ManageDocumentsService {
                 .getQuarantineUploadDocument(
                     categoryId,
                     manageDocument.getDocument().toBuilder()
-                        .documentCreatedOn(localZoneDate).build()
+                        .documentCreatedOn(localZoneDate).build(),
+                    false
                 );
             quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument);
 

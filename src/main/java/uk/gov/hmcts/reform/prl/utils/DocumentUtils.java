@@ -121,71 +121,78 @@ public class DocumentUtils {
     }
 
     public static QuarantineLegalDoc getQuarantineUploadDocument(String categoryId,
-                                                                 Document document) {
+                                                                 Document document, Boolean isReviewDecisionYes) {
 
         return QuarantineLegalDoc.builder()
-            .applicantApplicationDocument(getDocumentByCategoryId(APPLICANT_APPLICATION, categoryId, document))
-            .applicantC1AApplicationDocument(getDocumentByCategoryId(APPLICANT_C1A_APPLICATION, categoryId, document))
-            .applicantC1AResponseDocument(getDocumentByCategoryId(APPLICANT_C1A_RESPONSE, categoryId, document))
-            .applicationsWithinProceedingsDocument(getDocumentByCategoryId(APPLICATIONS_WITHIN_PROCEEDINGS, categoryId, document))
-            .miamCertificateDocument(getDocumentByCategoryId(MIAM_CERTIFICATE, categoryId, document))
+            .applicantApplicationDocument(getDocumentByCategoryId(APPLICANT_APPLICATION, categoryId, document, isReviewDecisionYes))
+            .applicantC1AApplicationDocument(getDocumentByCategoryId(APPLICANT_C1A_APPLICATION, categoryId, document, isReviewDecisionYes))
+            .applicantC1AResponseDocument(getDocumentByCategoryId(APPLICANT_C1A_RESPONSE, categoryId, document, isReviewDecisionYes))
+            .applicationsWithinProceedingsDocument(
+                getDocumentByCategoryId(APPLICATIONS_WITHIN_PROCEEDINGS, categoryId, document, isReviewDecisionYes))
+            .miamCertificateDocument(getDocumentByCategoryId(MIAM_CERTIFICATE, categoryId, document, isReviewDecisionYes))
             .previousOrdersSubmittedWithApplicationDocument(
-                getDocumentByCategoryId(PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION, categoryId, document))
-            .respondentApplicationDocument(getDocumentByCategoryId(RESPONDENT_APPLICATION, categoryId, document))
-            .respondentC1AApplicationDocument(getDocumentByCategoryId(RESPONDENT_C1A_APPLICATION, categoryId, document))
-            .respondentC1AResponseDocument(getDocumentByCategoryId(RESPONDENT_C1A_RESPONSE, categoryId, document))
-            .applicationsFromOtherProceedingsDocument(getDocumentByCategoryId(APPLICATIONS_FROM_OTHER_PROCEEDINGS, categoryId, document))
-            .noticeOfHearingDocument(getDocumentByCategoryId(NOTICE_OF_HEARING, categoryId, document))
-            .courtBundleDocument(getDocumentByCategoryId(COURT_BUNDLE, categoryId, document))
-            .safeguardingLetterDocument(getDocumentByCategoryId(SAFEGUARDING_LETTER, categoryId, document))
-            .section7ReportDocument(getDocumentByCategoryId(SECTION7_REPORT, categoryId, document))
-            .section37ReportDocument(getDocumentByCategoryId(SECTION_37_REPORT, categoryId, document))
-            .sixteenARiskAssessmentDocument(getDocumentByCategoryId(SIXTEEN_A_RISK_ASSESSMENT, categoryId, document))
-            .guardianReportDocument(getDocumentByCategoryId(GUARDIAN_REPORT, categoryId, document))
-            .specialGuardianshipReportDocument(getDocumentByCategoryId(SPECIAL_GUARDIANSHIP_REPORT, categoryId, document))
-            .otherDocsDocument(getDocumentByCategoryId(OTHER_DOCS, categoryId, document))
-            .confidentialDocument(getDocumentByCategoryId(CONFIDENTIAL, categoryId, document))
+                getDocumentByCategoryId(PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION, categoryId, document, isReviewDecisionYes))
+            .respondentApplicationDocument(getDocumentByCategoryId(RESPONDENT_APPLICATION, categoryId, document, isReviewDecisionYes))
+            .respondentC1AApplicationDocument(getDocumentByCategoryId(RESPONDENT_C1A_APPLICATION, categoryId, document, isReviewDecisionYes))
+            .respondentC1AResponseDocument(getDocumentByCategoryId(RESPONDENT_C1A_RESPONSE, categoryId, document, isReviewDecisionYes))
+            .applicationsFromOtherProceedingsDocument(
+                getDocumentByCategoryId(APPLICATIONS_FROM_OTHER_PROCEEDINGS, categoryId, document, isReviewDecisionYes))
+            .noticeOfHearingDocument(getDocumentByCategoryId(NOTICE_OF_HEARING, categoryId, document, isReviewDecisionYes))
+            .courtBundleDocument(getDocumentByCategoryId(COURT_BUNDLE, categoryId, document, isReviewDecisionYes))
+            .safeguardingLetterDocument(getDocumentByCategoryId(SAFEGUARDING_LETTER, categoryId, document, isReviewDecisionYes))
+            .section7ReportDocument(getDocumentByCategoryId(SECTION7_REPORT, categoryId, document, isReviewDecisionYes))
+            .section37ReportDocument(getDocumentByCategoryId(SECTION_37_REPORT, categoryId, document, isReviewDecisionYes))
+            .sixteenARiskAssessmentDocument(getDocumentByCategoryId(SIXTEEN_A_RISK_ASSESSMENT, categoryId, document, isReviewDecisionYes))
+            .guardianReportDocument(getDocumentByCategoryId(GUARDIAN_REPORT, categoryId, document, isReviewDecisionYes))
+            .specialGuardianshipReportDocument(getDocumentByCategoryId(SPECIAL_GUARDIANSHIP_REPORT, categoryId, document, isReviewDecisionYes))
+            .otherDocsDocument(getDocumentByCategoryId(OTHER_DOCS, categoryId, document, isReviewDecisionYes))
+            .confidentialDocument(getDocumentByCategoryId(CONFIDENTIAL, categoryId, document, isReviewDecisionYes))
             .emailsToCourtToRequestHearingsAdjournedDocument(
-                getDocumentByCategoryId(EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED, categoryId, document))
-            .publicFundingCertificatesDocument(getDocumentByCategoryId(PUBLIC_FUNDING_CERTIFICATES, categoryId, document))
-            .noticesOfActingDischargeDocument(getDocumentByCategoryId(NOTICES_OF_ACTING_DISCHARGE, categoryId, document))
-            .requestForFasFormsToBeChangedDocument(getDocumentByCategoryId(REQUEST_FOR_FAS_FORMS_TO_BE_CHANGED, categoryId, document))
-            .witnessAvailabilityDocument(getDocumentByCategoryId(WITNESS_AVAILABILITY, categoryId, document))
-            .lettersOfComplaintDocument(getDocumentByCategoryId(LETTERS_OF_COMPLAINTS, categoryId, document))
-            .spipReferralRequestsDocument(getDocumentByCategoryId(SPIP_REFERRAL_REQUESTS, categoryId, document))
-            .homeOfficeDwpResponsesDocument(getDocumentByCategoryId(HOME_OFFICE_DWP_RESPONSES, categoryId, document))
-            .medicalReportsDocument(getDocumentByCategoryId(MEDICAL_REPORTS, categoryId, document))
-            .dnaReportsExpertReportDocument(getDocumentByCategoryId(DNA_REPORTS_EXPERT_REPORT, categoryId, document))
-            .resultsOfHairStrandBloodTestsDocument(getDocumentByCategoryId(RESULTS_OF_HAIR_STRAND_BLOOD_TESTS, categoryId, document))
-            .policeDisclosuresDocument(getDocumentByCategoryId(POLICE_DISCLOSURES, categoryId, document))
-            .medicalRecordsDocument(getDocumentByCategoryId(MEDICAL_RECORDS, categoryId, document))
-            .drugAndAlcoholTestDocument(getDocumentByCategoryId(DRUG_AND_ALCOHOL_TEST, categoryId, document))
-            .policeReportDocument(getDocumentByCategoryId(POLICE_REPORT, categoryId, document))
-            .sec37ReportDocument(getDocumentByCategoryId(SEC37_REPORT, categoryId, document))
-            .ordersSubmittedWithApplicationDocument(getDocumentByCategoryId(ORDERS_SUBMITTED_WITH_APPLICATION, categoryId, document))
-            .approvedOrdersDocument(getDocumentByCategoryId(APPROVED_ORDERS, categoryId, document))
-            .standardDirectionsOrderDocument(getDocumentByCategoryId(STANDARD_DIRECTIONS_ORDER, categoryId, document))
-            .transcriptsOfJudgementsDocument(getDocumentByCategoryId(TRANSCRIPTS_OF_JUDGEMENTS, categoryId, document))
+                getDocumentByCategoryId(EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED, categoryId, document, isReviewDecisionYes))
+            .publicFundingCertificatesDocument(getDocumentByCategoryId(PUBLIC_FUNDING_CERTIFICATES, categoryId, document, isReviewDecisionYes))
+            .noticesOfActingDischargeDocument(getDocumentByCategoryId(NOTICES_OF_ACTING_DISCHARGE, categoryId, document, isReviewDecisionYes))
+            .requestForFasFormsToBeChangedDocument(
+                getDocumentByCategoryId(REQUEST_FOR_FAS_FORMS_TO_BE_CHANGED, categoryId, document, isReviewDecisionYes))
+            .witnessAvailabilityDocument(getDocumentByCategoryId(WITNESS_AVAILABILITY, categoryId, document, isReviewDecisionYes))
+            .lettersOfComplaintDocument(getDocumentByCategoryId(LETTERS_OF_COMPLAINTS, categoryId, document, isReviewDecisionYes))
+            .spipReferralRequestsDocument(getDocumentByCategoryId(SPIP_REFERRAL_REQUESTS, categoryId, document, isReviewDecisionYes))
+            .homeOfficeDwpResponsesDocument(getDocumentByCategoryId(HOME_OFFICE_DWP_RESPONSES, categoryId, document, isReviewDecisionYes))
+            .medicalReportsDocument(getDocumentByCategoryId(MEDICAL_REPORTS, categoryId, document, isReviewDecisionYes))
+            .dnaReportsExpertReportDocument(getDocumentByCategoryId(DNA_REPORTS_EXPERT_REPORT, categoryId, document, isReviewDecisionYes))
+            .resultsOfHairStrandBloodTestsDocument(
+                getDocumentByCategoryId(RESULTS_OF_HAIR_STRAND_BLOOD_TESTS, categoryId, document, isReviewDecisionYes))
+            .policeDisclosuresDocument(getDocumentByCategoryId(POLICE_DISCLOSURES, categoryId, document, isReviewDecisionYes))
+            .medicalRecordsDocument(getDocumentByCategoryId(MEDICAL_RECORDS, categoryId, document, isReviewDecisionYes))
+            .drugAndAlcoholTestDocument(getDocumentByCategoryId(DRUG_AND_ALCOHOL_TEST, categoryId, document, isReviewDecisionYes))
+            .policeReportDocument(getDocumentByCategoryId(POLICE_REPORT, categoryId, document, isReviewDecisionYes))
+            .sec37ReportDocument(getDocumentByCategoryId(SEC37_REPORT, categoryId, document, isReviewDecisionYes))
+            .ordersSubmittedWithApplicationDocument(
+                getDocumentByCategoryId(ORDERS_SUBMITTED_WITH_APPLICATION, categoryId, document, isReviewDecisionYes))
+            .approvedOrdersDocument(getDocumentByCategoryId(APPROVED_ORDERS, categoryId, document, isReviewDecisionYes))
+            .standardDirectionsOrderDocument(getDocumentByCategoryId(STANDARD_DIRECTIONS_ORDER, categoryId, document, isReviewDecisionYes))
+            .transcriptsOfJudgementsDocument(getDocumentByCategoryId(TRANSCRIPTS_OF_JUDGEMENTS, categoryId, document, isReviewDecisionYes))
             .magistratesFactsAndReasonsDocument(
-                getDocumentByCategoryId(MAGISTRATES_FACTS_AND_REASONS, categoryId, document))
-            .judgeNotesFromHearingDocument(getDocumentByCategoryId(JUDGE_NOTES_FROM_HEARING, categoryId, document))
+                getDocumentByCategoryId(MAGISTRATES_FACTS_AND_REASONS, categoryId, document, isReviewDecisionYes))
+            .judgeNotesFromHearingDocument(getDocumentByCategoryId(JUDGE_NOTES_FROM_HEARING, categoryId, document, isReviewDecisionYes))
             .importantInfoAboutAddressAndContactDocument(
-                getDocumentByCategoryId(IMPORTANT_INFO_ABOUT_ADDRESS_AND_CONTACT, categoryId, document))
-            .dnaReportsOtherDocsDocument(getDocumentByCategoryId(DNA_REPORTS_OTHER_DOCS, categoryId, document))
-            .privacyNoticeDocument(getDocumentByCategoryId(PRIVACY_NOTICE, categoryId, document))
-            .specialMeasuresDocument(getDocumentByCategoryId(SPECIAL_MEASURES, categoryId, document))
-            .anyOtherDocDocument(getDocumentByCategoryId(ANY_OTHER_DOC, categoryId, document))
-            .positionStatementsDocument(getDocumentByCategoryId(POSITION_STATEMENTS, categoryId, document))
-            .applicantStatementsDocument(getDocumentByCategoryId(APPLICANT_STATEMENTS, categoryId, document))
-            .respondentStatementsDocument(getDocumentByCategoryId(RESPONDENT_STATEMENTS, categoryId, document))
-            .otherWitnessStatementsDocument(getDocumentByCategoryId(OTHER_WITNESS_STATEMENTS, categoryId, document))
-            .caseSummaryDocument(getDocumentByCategoryId(CASE_SUMMARY, categoryId, document))
+                getDocumentByCategoryId(IMPORTANT_INFO_ABOUT_ADDRESS_AND_CONTACT, categoryId, document, isReviewDecisionYes))
+            .dnaReportsOtherDocsDocument(getDocumentByCategoryId(DNA_REPORTS_OTHER_DOCS, categoryId, document, isReviewDecisionYes))
+            .privacyNoticeDocument(getDocumentByCategoryId(PRIVACY_NOTICE, categoryId, document, isReviewDecisionYes))
+            .specialMeasuresDocument(getDocumentByCategoryId(SPECIAL_MEASURES, categoryId, document, isReviewDecisionYes))
+            .anyOtherDocDocument(getDocumentByCategoryId(ANY_OTHER_DOC, categoryId, document, isReviewDecisionYes))
+            .positionStatementsDocument(getDocumentByCategoryId(POSITION_STATEMENTS, categoryId, document, isReviewDecisionYes))
+            .applicantStatementsDocument(getDocumentByCategoryId(APPLICANT_STATEMENTS, categoryId, document, isReviewDecisionYes))
+            .respondentStatementsDocument(getDocumentByCategoryId(RESPONDENT_STATEMENTS, categoryId, document, isReviewDecisionYes))
+            .otherWitnessStatementsDocument(getDocumentByCategoryId(OTHER_WITNESS_STATEMENTS, categoryId, document, isReviewDecisionYes))
+            .caseSummaryDocument(getDocumentByCategoryId(CASE_SUMMARY, categoryId, document, isReviewDecisionYes))
             .build();
     }
 
     private static Document getDocumentByCategoryId(String categoryConstant,
                                                     String categoryId,
-                                                    Document document) {
+                                                    Document document, boolean isReviewDecisionYes) {
+        document = isReviewDecisionYes && null != document
+            ? document.toBuilder().documentFileName("Conf-" + document.getDocumentFileName()).build() : document;
         return categoryConstant.equalsIgnoreCase(categoryId) ? document : null;
     }
 
