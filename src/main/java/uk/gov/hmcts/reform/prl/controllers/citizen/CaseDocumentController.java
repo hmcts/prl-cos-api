@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +27,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -70,36 +70,17 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseDocumentController {
-
-    @Autowired
-    private DocumentGenService documentGenService;
-
-    @Autowired
-    private UploadDocumentService uploadService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
-
-    @Autowired
-    CoreCaseDataApi coreCaseDataApi;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    private AuthTokenGenerator authTokenGenerator;
-
-    @Autowired
-    private IdamClient idamClient;
-
-    @Autowired
-    CaseService caseService;
-
+    private final DocumentGenService documentGenService;
+    private final UploadDocumentService uploadService;
+    private final AuthorisationService authorisationService;
+    private final CoreCaseDataApi coreCaseDataApi;
+    private final ObjectMapper objectMapper;
+    private final IdamClient idamClient;
+    private final CaseService caseService;
     Integer fileIndex;
-
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     @Value("${citizen.url}")
     private String dashboardUrl;

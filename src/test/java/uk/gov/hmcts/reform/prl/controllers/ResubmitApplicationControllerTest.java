@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -116,7 +115,6 @@ public class ResubmitApplicationControllerTest {
 
     @Before
     public void init() throws Exception {
-        MockitoAnnotations.openMocks(this);
 
         allegationOfHarm = AllegationOfHarm.builder()
             .allegationsOfHarmYesNo(Yes).build();
