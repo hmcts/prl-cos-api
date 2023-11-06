@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -10,8 +11,6 @@ import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
 import org.apache.pdfbox.util.Matrix;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
@@ -21,15 +20,15 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
-import java.util.Optional;
 
-import static java.util.Optional.ofNullable;
 import static org.apache.commons.io.FilenameUtils.getExtension;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.utils.DocumentsHelper.hasExtension;
 import static uk.gov.hmcts.reform.prl.utils.ResourceReader.readBytes;
 
@@ -55,13 +54,16 @@ public class AmendedOrderStamper {
             );
         }
 
-        ResponseEntity<Resource> downloadedDocument = caseDocumentClient.getDocumentBinary(authorisation,
+        /*ResponseEntity<Resource> downloadedDocument = caseDocumentClient.getDocumentBinary(authorisation,
                                                                                            authTokenGenerator.generate(),
                                                                                            original.getDocumentUrl());
 
-        Optional<Resource> documentResponse = ofNullable(downloadedDocument.getBody());
-        if (documentResponse.isPresent()) {
-            byte[] documentContents = documentResponse.get().getInputStream().readAllBytes();
+        Optional<Resource> documentResponse = ofNullable(downloadedDocument.getBody());*/
+        File file = new File(original.getDocumentBinaryUrl());  // assume args[0] is the path to file
+
+        if (isNotEmpty(file)) {
+            //byte[] documentContents = documentResponse.get().getInputStream().readAllBytes();
+            byte[] documentContents = FileUtils.readFileToByteArray(file);
             try {
                 return amendDocument(documentContents);
             } catch (IOException e) {
