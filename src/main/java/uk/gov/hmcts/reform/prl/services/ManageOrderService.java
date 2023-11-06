@@ -2213,8 +2213,10 @@ public class ManageOrderService {
     }
 
     public void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        log.info("doYouWantToServeOrder {}", caseData.getServeOrderData().getDoYouWantToServeOrder());
         if ((null != caseData.getManageOrders() && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed()))
             || (null != caseData.getServeOrderData() && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+            log.info("inside Mark to serve email notification");
             caseDataUpdated.put("markedToServeEmailNotification", Yes);
         } else {
             caseDataUpdated.put("markedToServeEmailNotification", No);

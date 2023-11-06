@@ -420,6 +420,7 @@ public class ManageOrderEmailService {
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
+        log.info("inside SendEmailWhenOrderIsServed**");
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
