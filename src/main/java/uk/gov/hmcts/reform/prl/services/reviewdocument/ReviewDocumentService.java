@@ -267,13 +267,15 @@ public class ReviewDocumentService {
                 getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
             );
 
+            log.info("Qarantine doc value uploadDoc {}", uploadDoc);
+            log.info("element value {}",  quarantineLegalDocElement.getValue());
+            QuarantineLegalDoc reviewDocument = quarantineLegalDocElement.getValue();
             if (isReviewDecisionYes) {
-                quarantineLegalDocElement.getValue().toBuilder()
-                    .fileName(quarantineLegalDocElement.getValue().getFileName() + "-confidential");
+                reviewDocument.toBuilder().fileName("Conf-" + quarantineLegalDocElement.getValue().getFileName());
             }
             uploadDoc = addQuarantineDocumentFields(
                 uploadDoc,
-                quarantineLegalDocElement.getValue()
+                reviewDocument
             );
 
             if (null != uploadDocListConfOrDocTab) {
