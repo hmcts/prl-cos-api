@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -49,26 +50,15 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseApplicationResponseController {
-
-    @Autowired
-    private DocumentGenService documentGenService;
-
-    @Autowired
-    CoreCaseDataApi coreCaseDataApi;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    CaseService caseService;
-
-    @Autowired
-    CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
-    @Autowired
-    C100RespondentSolicitorService c100RespondentSolicitorService;
-    @Autowired
-    IdamClient idamClient;
+    private final DocumentGenService documentGenService;
+    private final CoreCaseDataApi coreCaseDataApi;
+    private final ObjectMapper objectMapper;
+    private final CaseService caseService;
+    private final CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
+    private final C100RespondentSolicitorService c100RespondentSolicitorService;
+    private final IdamClient idamClient;
 
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)

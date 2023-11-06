@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -49,7 +48,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendgridService {
-
     public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
     public static final String MAIL_SEND = "mail/send";
     public static final String CASE_NAME = "caseName";
@@ -66,13 +64,8 @@ public class SendgridService {
     private String fromEmail;
 
     private final DocumentGenService documentGenService;
-
     private final AuthTokenGenerator authTokenGenerator;
-
     private final LaunchDarklyClient launchDarklyClient;
-
-    @Autowired
-    ResourceLoader resourceLoader;
 
     public void sendEmail(JsonObject caseData) throws IOException {
 

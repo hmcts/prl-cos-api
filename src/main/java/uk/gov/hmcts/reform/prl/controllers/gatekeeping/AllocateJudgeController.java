@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -38,22 +39,27 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RequestMapping("/allocateJudge")
 public class AllocateJudgeController extends AbstractCallbackController {
-
-    @Autowired
     @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
+    private final CaseSummaryTabService caseSummaryTabService;
+    private final RefDataUserService refDataUserService;
+    private final AllocatedJudgeService allocatedJudgeService;
+    private final AuthorisationService authorisationService;
 
     @Autowired
-    RefDataUserService refDataUserService;
-
-    @Autowired
-    private AllocatedJudgeService allocatedJudgeService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
+    protected AllocateJudgeController(ObjectMapper objectMapper,
+                                      EventService eventPublisher,
+                                      CaseSummaryTabService caseSummaryTabService,
+                                      RefDataUserService refDataUserService,
+                                      AllocatedJudgeService allocatedJudgeService,
+                                      AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.caseSummaryTabService = caseSummaryTabService;
+        this.refDataUserService = refDataUserService;
+        this.allocatedJudgeService = allocatedJudgeService;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to retrieve legal advisor details")
