@@ -562,8 +562,9 @@ public class ReviewDocumentService {
 
     private QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
                                                            QuarantineLegalDoc quarantineLegalDoc) {
-
+        log.info("File name {}", quarantineLegalDoc.getFileName());
         return legalProfUploadDoc.toBuilder()
+            .fileName(quarantineLegalDoc.getFileName())
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
             .notes(quarantineLegalDoc.getNotes())
