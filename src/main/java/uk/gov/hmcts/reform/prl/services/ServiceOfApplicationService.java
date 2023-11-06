@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -31,9 +30,7 @@ import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
-import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
@@ -77,43 +74,18 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S3776","java:S6204","java:S112","java:S4144"})
 public class ServiceOfApplicationService {
-    private final LaunchDarklyClient launchDarklyClient;
-
-    public static final String FAMILY_MAN_ID = "Family Man ID: ";
     public static final String EMAIL = "email";
-
-    @Autowired
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
-
-    @Autowired
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
-
-    @Autowired
-    private final CaseInviteManager caseInviteManager;
-
-    @Autowired
     private final ObjectMapper objectMapper;
-
-    @Autowired
     private final UserService userService;
-
-    @Autowired
     private final C100CaseInviteService c100CaseInviteService;
-
-    @Autowired
     private final FL401CaseInviteService fl401CaseInviteService;
-
-    @Autowired
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Autowired
     private final WelshCourtEmail welshCourtEmail;
-
-    @Autowired
-    ConfidentialDetailsGenerator confidentialDetailsGenerator;
 
     public String getCollapsableOfSentDocuments() {
         final List<String> collapsible = new ArrayList<>();

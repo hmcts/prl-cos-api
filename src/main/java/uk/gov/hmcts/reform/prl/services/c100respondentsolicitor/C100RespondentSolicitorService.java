@@ -76,7 +76,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class C100RespondentSolicitorService {
     public static final String RESPONDENTS = "respondents";
     public static final String RESPONDENT_NAME_FOR_RESPONSE = "respondentNameForResponse";
@@ -89,29 +89,15 @@ public class C100RespondentSolicitorService {
     public static final String EMAIL = "email";
     public static final String PHONE = "phone";
     public static final String ADDRESS = "address";
-
-    @Autowired
     private final RespondentSolicitorMiamService miamService;
-
-    @Autowired
     private final ObjectMapper objectMapper;
-
-    @Autowired
     private final DocumentGenService documentGenService;
-
-    @Autowired
     private final ResponseSubmitChecker responseSubmitChecker;
-
     private final ApplicationsTabService applicationsTabService;
-
     private final SystemUserService systemUserService;
-
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
-
     private final OrganisationService organisationService;
-
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
-
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
 

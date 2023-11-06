@@ -25,11 +25,8 @@ import static java.util.Optional.ofNullable;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrganisationService {
-
     public static final String ACTIVE = "Active";
-    @Autowired
     private final OrganisationApi organisationApi;
-
     private Organisations organisations;
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
