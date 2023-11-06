@@ -69,8 +69,10 @@ public class EditAndApproveDraftOrderController {
             );
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
+                Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+                caseDataUpdated.putAll(draftAnOrderService.getDraftOrderDynamicList(caseData, callbackRequest.getEventId()));
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.getDraftOrderDynamicList(caseData, callbackRequest.getEventId())).build();
+                    .data(caseDataUpdated).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
             }
