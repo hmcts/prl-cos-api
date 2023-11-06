@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -19,35 +18,20 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.SolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.service.notify.NotificationClient;
 
 import java.util.List;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SolicitorEmailService {
-
-    private final NotificationClient notificationClient;
-    private final EmailTemplatesConfig emailTemplatesConfig;
     private final ObjectMapper objectMapper;
-    private final UserService userService;
-    private static final String DATE_FORMAT = "dd-MM-yyyy";
-
-    @Autowired
-    private EmailService emailService;
-
+    private final EmailService emailService;
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
-
-    @Value("${uk.gov.notify.email.application.court-name}")
-    private String courtName;
-
     @Value("${xui.url}")
     private String manageCaseUrl;
-
-    @Autowired
-    private CourtFinderService courtLocatorService;
+    private  final CourtFinderService courtLocatorService;
 
     public EmailTemplateVars buildEmail(CaseDetails caseDetails, boolean isC100PendingPaymentSolEmail) {
         try {

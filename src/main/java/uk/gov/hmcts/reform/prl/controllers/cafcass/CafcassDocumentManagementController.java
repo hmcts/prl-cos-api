@@ -4,6 +4,7 @@ import feign.FeignException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,15 +32,11 @@ import static uk.gov.hmcts.reform.prl.constants.cafcass.CafcassAppConstants.CAFC
 @Slf4j
 @RestController
 @RequestMapping("/cases")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassDocumentManagementController {
-    @Autowired
-    CafcassCdamService cafcassCdamService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
-
-    @Autowired
-    private SystemUserService systemUserService;
+    private final CafcassCdamService cafcassCdamService;
+    private final AuthorisationService authorisationService;
+    private final SystemUserService systemUserService;
 
     @GetMapping(path = "/documents/{documentId}/binary")
     @Operation(description = "Call CDAM to download document")

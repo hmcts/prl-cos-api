@@ -29,12 +29,10 @@ import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
-import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -64,42 +62,16 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
 public class ResubmitApplicationController {
-
-    @Autowired
-    private CourtFinderService courtFinderService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private SolicitorEmailService solicitorEmailService;
-
-    @Autowired
-    private CaseWorkerEmailService caseWorkerEmailService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private CaseEventService caseEventService;
-
-    @Autowired
-    private DocumentGenService documentGenService;
-
-    @Autowired
-    OrganisationService organisationService;
-
-    @Autowired
-    AllTabServiceImpl allTabService;
-
-    @Autowired
-    private ConfidentialityTabService confidentialityTabService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
-
-    @Autowired
-    private EventService eventPublisher;
+    private final CourtFinderService courtFinderService;
+    private final UserService userService;
+    private final ObjectMapper objectMapper;
+    private final CaseEventService caseEventService;
+    private final DocumentGenService documentGenService;
+    private final OrganisationService organisationService;
+    private final AllTabServiceImpl allTabService;
+    private final ConfidentialityTabService confidentialityTabService;
+    private final AuthorisationService authorisationService;
+    private final EventService eventPublisher;
 
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to change the state and document generation and submit application. ")
@@ -111,7 +83,7 @@ public class ResubmitApplicationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
 
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -125,8 +97,14 @@ public class ResubmitApplicationController {
                     .courtId(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()))
                     .build();
                 caseDataUpdated.put(COURT_NAME_FIELD, closestChildArrangementsCourt.getCourtName());
-                caseDataUpdated.put(COURT_ID_FIELD, String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
-                caseDataUpdated.put(COURT_CODE_FROM_FACT, String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
+                caseDataUpdated.put(
+                    COURT_ID_FIELD,
+                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+                );
+                caseDataUpdated.put(
+                    COURT_CODE_FROM_FACT,
+                    String.valueOf(closestChildArrangementsCourt.getCountyLocationCode())
+                );
             }
 
 
@@ -209,7 +187,7 @@ public class ResubmitApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
 
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);

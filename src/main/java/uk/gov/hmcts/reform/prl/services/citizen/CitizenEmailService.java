@@ -18,15 +18,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOA
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CitizenEmailService {
-
-    @Autowired
-    EmailService emailService;
-
-    @Autowired
-    UserService userService;
-
+    private final EmailService emailService;
+    private final UserService userService;
     @Value("${citizen.url}")
     private String citizenSignUpLink;
 

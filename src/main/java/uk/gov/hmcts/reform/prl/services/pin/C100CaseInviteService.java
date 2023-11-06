@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.pin;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,11 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class C100CaseInviteService implements CaseInviteService {
 
-    @Autowired
-    CaseInviteEmailService caseInviteEmailService;
-
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
+    private final CaseInviteEmailService caseInviteEmailService;
+    private final LaunchDarklyClient launchDarklyClient;
 
     public CaseInvite generateCaseInvite(Element<PartyDetails> partyDetails, YesOrNo isApplicant) {
         return new CaseInvite().generateAccessCode(partyDetails.getValue().getEmail(), partyDetails.getId(), isApplicant);
