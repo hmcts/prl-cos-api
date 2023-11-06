@@ -562,6 +562,7 @@ public class HearingDataService {
 
     public List<Element<HearingData>> getHearingDataForSelectedHearingNew(String authorisation, CaseData caseData) {
         boolean[] hearingFetchedOnce = {false};
+        log.info("manage order printed specially - {}", caseData.getManageOrders());
 
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
