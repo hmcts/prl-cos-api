@@ -40,7 +40,6 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -531,9 +530,8 @@ public class ManageOrderEmailService {
     private void serveOrdersToOtherOrganisation(CaseData caseData, String authorisation,
                                                 List<Document> orderDocuments, List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
         List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
-        List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList() != null
-                ? caseData.getManageOrders().getServeOrderDynamicList().getValue()
-                .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList()) : Collections.singletonList("");
+        List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
         log.info("selectedOrderIds:", selectedOrderIds);
         log.info("orderCollectionIds:", orderCollection);
         orderCollection.stream().filter(orderDetailsElement ->
