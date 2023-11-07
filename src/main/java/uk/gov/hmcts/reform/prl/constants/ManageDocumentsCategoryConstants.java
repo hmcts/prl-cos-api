@@ -34,6 +34,7 @@ public class ManageDocumentsCategoryConstants {
     public static final String LETTERS_OF_COMPLAINTS = "lettersOfComplaint";
     public static final String SPIP_REFERRAL_REQUESTS = "SPIPReferralRequests";
     public static final String HOME_OFFICE_DWP_RESPONSES = "homeOfficeDWPResponses";
+    public static final String INTERNAL_CORRESPONDENCE = "internalCorrespondence";
     public static final String MEDICAL_REPORTS = "medicalReports";
     public static final String DNA_REPORTS_EXPERT_REPORT = "DNAReports_expertReport";
     public static final String RESULTS_OF_HAIR_STRAND_BLOOD_TESTS = "resultsOfHairStrandBloodTests";
