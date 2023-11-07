@@ -35,14 +35,20 @@ import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
+import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.DioApplicationToApplyPermission;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.AddNewPreamble;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoFurtherDirections;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoNameOfApplicant;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoNameOfRespondent;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -76,9 +82,10 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AFTER_SECOND_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CYMRU_NEXT_STEPS_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_NEXT_STEPS_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
@@ -116,6 +123,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_URGENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_DA_OCCURED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_EDIT_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_INTERIM_ORDERS_FACTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_DA_OCCURED_EDIT_CONTENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_FACTS_EDIT_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
@@ -137,6 +146,9 @@ public class DraftAnOrderService {
 
     private static final String SOLICITOR_ORDERS_HEARING_DETAILS = "solicitorOrdersHearingDetails";
     private static final String ORDERS_HEARING_DETAILS = "ordersHearingDetails";
+    public static final String SDO_INSTRUCTIONS_FILING_PARTIES_DYNAMIC_LIST = "sdoInstructionsFilingPartiesDynamicList";
+    public static final String SDO_NEW_PARTNER_PARTIES_CAFCASS = "sdoNewPartnerPartiesCafcass";
+    public static final String SDO_NEW_PARTNER_PARTIES_CAFCASS_CYMRU = "sdoNewPartnerPartiesCafcassCymru";
     private static final String DATE_ORDER_MADE = "dateOrderMade";
     private static final String SELECTED_ORDER = "selectedOrder";
     private final Time dateTime;
@@ -253,19 +265,17 @@ public class DraftAnOrderService {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
+                    Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                         && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                                .getHearingDataForSelectedHearing(caseData, hearings));
+                    } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                        caseData = manageOrderService.setHearingDataForSdo(caseData, hearings);
                     }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
-                    log.info("removeDraftOrderAndAddToFinalOrder caseId ==> " + caseData.getId());
-                    log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistratesLastName ==> " + caseData.getJudgeOrMagistratesLastName());
-                    log.info("removeDraftOrderAndAddToFinalOrder getJudgeOrMagistrateTitle ==> "
-                                 + caseData.getManageOrders().getJudgeOrMagistrateTitle());
                     caseData = caseData.toBuilder()
                         .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
                         .dateOrderMade(draftOrder.getDateOrderMade())
@@ -728,15 +738,18 @@ public class DraftAnOrderService {
             if (e.getId().equals(selectedOrderId)) {
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
+                    Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                         && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                                .getHearingDataForSelectedHearing(
                                                                                    caseData,
                                                                                    hearings
                                                                                ));
                         log.info("Updated order hearing details for docmosis");
+                    } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                        caseData = manageOrderService.setHearingDataForSdo(caseData, hearings);
+                        log.info("Updated sdo order hearing details for docmosis");
                     }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
@@ -1006,7 +1019,7 @@ public class DraftAnOrderService {
     }
 
     public void populateStandardDirectionOrderDefaultFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
-        populateRightToAskCourt(caseData, caseDataUpdated);
+        populatePreambles(caseData, caseDataUpdated);
         populateHearingAndNextStepsText(caseData, caseDataUpdated);
         populateCafcassNextSteps(caseData, caseDataUpdated);
         populateCafcassCymruNextSteps(caseData, caseDataUpdated);
@@ -1021,21 +1034,78 @@ public class DraftAnOrderService {
         populateSdoDioProvideOtherDetails(caseData, caseDataUpdated);
         populateSdoInterpreterDialectRequired(caseData, caseDataUpdated);
         populateSdoPartiesRaisedAbuseCollection(caseData, caseDataUpdated);
+        populateSdoSection7FactsEditContent(caseData, caseDataUpdated);
+        populateSdoSection7daOccuredEditContent(caseData, caseDataUpdated);
+        populateSdoLsApplicantRespondentNameCollection(caseData, caseDataUpdated);
+        populateSdoMiamAttendingPerson(caseData, caseDataUpdated);
+        populateSdoFurtherDirectionDetails(caseData, caseDataUpdated);
 
         if (caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList() == null
             || CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInstructionsFilingPartiesDynamicList().getListItems())) {
             DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
-            caseDataUpdated.put("sdoInstructionsFilingPartiesDynamicList", partiesList);
+            caseDataUpdated.put(SDO_INSTRUCTIONS_FILING_PARTIES_DYNAMIC_LIST, partiesList);
         }
         populateHearingDetails(authorisation, caseData, caseDataUpdated);
+        List<DynamicMultiselectListElement> applicantRespondentList = manageOrderService.getPartyDynamicMultiselectList(caseData);
+        if (isEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass())) {
+            caseDataUpdated.put(
+                SDO_NEW_PARTNER_PARTIES_CAFCASS,
+                DynamicMultiSelectList.builder()
+                    .listItems(applicantRespondentList)
+                    .build());
+        }
+        if (isEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcassCymru())) {
+            caseDataUpdated.put(
+                SDO_NEW_PARTNER_PARTIES_CAFCASS_CYMRU,
+                DynamicMultiSelectList.builder()
+                    .listItems(applicantRespondentList)
+                    .build());
+        }
     }
 
-    private final List<Element<PartyNameDA>> sdoPartiesRaisedAbuseCollection;
+    private static void populateSdoSection7FactsEditContent(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7FactsEditContent())) {
+            caseDataUpdated.put("sdoSection7FactsEditContent", SECTION_7_FACTS_EDIT_CONTENT);
+        }
+    }
+
+    private static void populateSdoSection7daOccuredEditContent(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7daOccuredEditContent())) {
+            caseDataUpdated.put("sdoSection7daOccuredEditContent", SECTION_7_DA_OCCURED_EDIT_CONTENT);
+        }
+    }
+
+    private static void populateSdoLsApplicantRespondentNameCollection(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<SdoNameOfApplicant>> sdoApplicantName = new ArrayList<>();
+        sdoApplicantName.add(element(SdoNameOfApplicant.builder().build()));
+        List<Element<SdoNameOfRespondent>> sdoRespondentName = new ArrayList<>();
+        sdoRespondentName.add(element(SdoNameOfRespondent.builder().build()));
+
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLsApplicantName())) {
+            caseDataUpdated.put("sdoLsApplicantName", sdoApplicantName);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoMedicalDiscApplicantName())) {
+            caseDataUpdated.put("sdoMedicalDiscApplicantName", sdoApplicantName);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoGpApplicantName())) {
+            caseDataUpdated.put("sdoGpApplicantName", sdoApplicantName);
+        }
+
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoLsRespondentName())) {
+            caseDataUpdated.put("sdoLsRespondentName", sdoRespondentName);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoMedicalDiscRespondentName())) {
+            caseDataUpdated.put("sdoMedicalDiscRespondentName", sdoRespondentName);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoGpRespondentName())) {
+            caseDataUpdated.put("sdoGpRespondentName", sdoRespondentName);
+        }
+    }
 
     private static void populateSdoPartiesRaisedAbuseCollection(CaseData caseData, Map<String, Object> caseDataUpdated) {
         List<Element<PartyNameDA>> sdoPartiesRaisedAbuseCollection = new ArrayList<>();
         sdoPartiesRaisedAbuseCollection.add(element(PartyNameDA.builder().build()));
-        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterDialectRequired())) {
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoPartiesRaisedAbuseCollection())) {
             caseDataUpdated.put("sdoPartiesRaisedAbuseCollection", sdoPartiesRaisedAbuseCollection);
         }
     }
@@ -1045,6 +1115,22 @@ public class DraftAnOrderService {
         sdoInterpreterDialectRequiredList.add(element(SdoLanguageDialect.builder().build()));
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoInterpreterDialectRequired())) {
             caseDataUpdated.put("sdoInterpreterDialectRequired", sdoInterpreterDialectRequiredList);
+        }
+    }
+
+    private static void populateSdoMiamAttendingPerson(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<MiamAttendingPersonName>> sdoMiamAttendingPersons = new ArrayList<>();
+        sdoMiamAttendingPersons.add(element(MiamAttendingPersonName.builder().build()));
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoMiamAttendingPerson())) {
+            caseDataUpdated.put("sdoMiamAttendingPerson", sdoMiamAttendingPersons);
+        }
+    }
+
+    private static void populateSdoFurtherDirectionDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<SdoFurtherDirections>> sdoFurtherDirectionDetails = new ArrayList<>();
+        sdoFurtherDirectionDetails.add(element(SdoFurtherDirections.builder().build()));
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoFurtherDirectionDetails())) {
+            caseDataUpdated.put("sdoFurtherDirectionDetails", sdoFurtherDirectionDetails);
         }
     }
 
@@ -1165,12 +1251,12 @@ public class DraftAnOrderService {
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoCafcassCymruNextStepEditContent())) {
             caseDataUpdated.put(
                 "sdoCafcassCymruNextStepEditContent",
-                CAFCASS_CYMRU_NEXT_STEPS_CONTENT
+                CAFCASS_NEXT_STEPS_CONTENT
             );
         }
     }
 
-    private static void populateRightToAskCourt(CaseData caseData, Map<String, Object> caseDataUpdated) {
+    private static void populatePreambles(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoRightToAskCourt())) {
             caseDataUpdated.put(
                 "sdoRightToAskCourt",
@@ -1182,6 +1268,11 @@ public class DraftAnOrderService {
                 "sdoAfterSecondGatekeeping",
                 AFTER_SECOND_GATEKEEPING
             );
+        }
+        List<Element<AddNewPreamble>> sdoAddNewPreambleCollection = new ArrayList<>();
+        sdoAddNewPreambleCollection.add(element(AddNewPreamble.builder().build()));
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoAddNewPreambleCollection())) {
+            caseDataUpdated.put("sdoAddNewPreambleCollection", sdoAddNewPreambleCollection);
         }
     }
 
@@ -1247,7 +1338,7 @@ public class DraftAnOrderService {
             || existingHearingData.getHearingDateConfirmOptionEnum() == null) {
             caseDataUpdated.put(hearingKey, hearingData);
         } else {
-            caseDataUpdated.put(SDO_PERMISSION_HEARING_DETAILS, existingHearingData);
+            caseDataUpdated.put(hearingKey, existingHearingData);
         }
     }
 
@@ -1440,6 +1531,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> judgeOrAdminEditApproveDraftOrderMidEvent(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
@@ -1453,6 +1545,7 @@ public class DraftAnOrderService {
             );
             manageOrderService.populateServeOrderDetails(modifiedCaseData, caseDataUpdated);
         }
+
         return caseDataUpdated;
     }
 
@@ -1461,6 +1554,7 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
@@ -1546,8 +1640,8 @@ public class DraftAnOrderService {
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
         }
+        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         if (ordersHearingDetails != null) {
-            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData, hearings);
             List<Element<HearingData>> hearingData = hearingDataService.getHearingData(ordersHearingDetails,
@@ -1564,6 +1658,8 @@ public class DraftAnOrderService {
             }
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+        } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+            caseData = manageOrderService.setHearingDataForSdo(caseData, hearings);
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
