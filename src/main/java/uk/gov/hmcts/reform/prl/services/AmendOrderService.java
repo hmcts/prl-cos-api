@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -49,18 +50,17 @@ public class AmendOrderService {
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
-        //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
-        // Hence needs to revisit the logic, once XUI issue is resolved
-        //byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersDocumentToAmend(), authorisation);
+
+        byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersDocumentToAmend(), authorisation);
         String amendedFileName = updateFileName(eventData.getManageOrdersDocumentToAmend());
-        //Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
+        Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
 
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
 
         uk.gov.hmcts.reform.prl.models.documents.Document updatedDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-            .documentFileName(amendedFileName)
-            .documentUrl(eventData.getManageOrdersDocumentToAmend().getDocumentUrl())
-            .documentBinaryUrl(eventData.getManageOrdersDocumentToAmend().getDocumentBinaryUrl())
+            .documentFileName(stampedDocument.originalDocumentName)
+            .documentUrl(stampedDocument.links.self.href)
+            .documentBinaryUrl(stampedDocument.links.binary.href)
             .build();
 
         return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType);
