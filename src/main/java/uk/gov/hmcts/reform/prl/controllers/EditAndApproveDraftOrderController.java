@@ -64,14 +64,14 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse generateDraftOrderDropDown(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestParam(PrlAppsConstants.WA_PARAMS) String waParam,
+        @RequestParam(value = PrlAppsConstants.WA_PARAMS, required = false) String waOrderName,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            log.info("waParam {}", waParam);
+            log.info("waOrderName {}", waOrderName);
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
