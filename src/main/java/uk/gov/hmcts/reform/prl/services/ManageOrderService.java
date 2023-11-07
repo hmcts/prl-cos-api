@@ -1812,7 +1812,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    private CaseData populateJudgeNames(CaseData caseData) {
+    public CaseData populateJudgeNames(CaseData caseData) {
         if (isNotEmpty(caseData.getStandardDirectionOrder())
             && (isNotEmpty(caseData.getStandardDirectionOrder().getSdoAllocateOrReserveJudgeName())
             || isNotEmpty(caseData.getStandardDirectionOrder().getSdoNextStepJudgeName()))) {

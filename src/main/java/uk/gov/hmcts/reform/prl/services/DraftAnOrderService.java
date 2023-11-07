@@ -1871,7 +1871,7 @@ public class DraftAnOrderService {
             manageOrderService.updateCaseDataWithAppointedGuardianNames(callbackRequest.getCaseDetails(), namesList);
             caseData.setAppointedGuardianName(namesList);
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-            caseData = manageOrderService.populateJudgeName(authorisation, caseData);
+            caseData = manageOrderService.populateJudgeNames(caseData);
         }
     }
 

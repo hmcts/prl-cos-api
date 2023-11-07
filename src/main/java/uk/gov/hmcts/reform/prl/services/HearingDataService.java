@@ -580,7 +580,7 @@ public class HearingDataService {
             return Element.<HearingData>builder().id(hearingDataElement.getId())
                 .value(hearingData).build();
         }).toList();
-  }
+    }
 
     public HearingData getHearingDataForSelectedHearingForSdo(HearingData hearingData, Hearings hearings, CaseData caseData) {
         log.info("inside getHearingDataForSelectedHearingForSdo");
