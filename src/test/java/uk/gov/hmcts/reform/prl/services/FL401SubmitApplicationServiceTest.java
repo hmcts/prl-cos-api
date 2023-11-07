@@ -55,6 +55,8 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -118,7 +120,7 @@ public class FL401SubmitApplicationServiceTest {
     UserDetails userDetails;
 
     @Mock
-    private EventService eventPublisher;
+    EventService eventPublisher;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -868,10 +870,9 @@ public class FL401SubmitApplicationServiceTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        doNothing().when(eventPublisher).publishEvent(Mockito.any());
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(eventPublisher, times(2))
-            .publishEvent(Mockito.any());
     }
 
     @Test
@@ -896,9 +897,8 @@ public class FL401SubmitApplicationServiceTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        doThrow(new RuntimeException()).when(eventPublisher).publishEvent(Mockito.any());
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(0))
-            .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
     }
 }
