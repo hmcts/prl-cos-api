@@ -214,12 +214,6 @@ public class SendgridService {
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
             attachments.setContent(documentAsString);
-            /*attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
-                                                                      .getDocumentBytes(
-                                                                          d.getDocumentUrl(),
-                                                                          authorization,
-                                                                          s2sToken
-                                                                      )));*/
             mail.addAttachments(attachments);
 
         }
