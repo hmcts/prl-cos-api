@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
@@ -41,6 +43,16 @@ public class CaseDataMapperTest {
 
     @Before
     public void setUp() throws IOException {
+        setValue();
+    }
+
+    @BeforeEach
+    public void beforeEach() throws IOException {
+        setValue();
+    }
+
+    private void setValue() throws IOException {
+        MockitoAnnotations.openMocks(this);
         mapper.registerModule(new JSR310Module());
         caseData = CaseData.builder()
                 .id(1234567891234567L)
