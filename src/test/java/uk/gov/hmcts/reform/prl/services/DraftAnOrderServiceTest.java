@@ -11,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -2166,14 +2165,6 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testGetGeneratedDocument() {
-        GeneratedDocumentInfo generatedDocumentInfo1 = GeneratedDocumentInfo.builder().build();
-        assertNotNull(ReflectionTestUtils.invokeMethod(draftAnOrderService, "getGeneratedDocument",
-                                                       generatedDocumentInfo1, true, new HashMap<>()
-        ));
-    }
-
-    @Test
     public void testRemoveDraftOrderAndAddToFinalOrderDaForApplicantSolicitor() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc-welsh.pdf").build())
@@ -2433,7 +2424,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        stringObjectMap = draftAnOrderService.judgeOrAdminEditApproveDraftOrderMidEvent(authToken, callbackRequest);
+        stringObjectMap = draftAnOrderService.getEligibleServeOrderDetails(authToken, callbackRequest);
         assertNotNull(stringObjectMap);
     }
 
@@ -2483,7 +2474,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        stringObjectMap = draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+        stringObjectMap = draftAnOrderService.adminEditAndServeAboutToSubmit(
             authToken,
             callbackRequest
         );
@@ -2533,7 +2524,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
 
-        stringObjectMap = draftAnOrderService.judgeOrAdminEditApproveDraftOrderAboutToSubmit(
+        stringObjectMap = draftAnOrderService.adminEditAndServeAboutToSubmit(
             authToken,
             callbackRequest
         );
