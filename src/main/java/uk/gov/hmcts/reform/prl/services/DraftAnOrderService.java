@@ -1520,7 +1520,7 @@ public class DraftAnOrderService {
 
         log.info("caseData.getManageOrders() new change    ------ {}", caseData.getManageOrders());
         log.info("ordersHearingDetails new change    ------ {}", ordersHearingDetails);
-        if (isEmpty(ordersHearingDetails)) {
+        if (isNotEmpty(ordersHearingDetails)) {
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.getHearingDataForSelectedHearingNew(authorisation, caseData));
         }
