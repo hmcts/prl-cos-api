@@ -1,13 +1,11 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.config.EmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.FL401RejectReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
@@ -23,7 +21,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.CaseWorkerEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
-import uk.gov.service.notify.NotificationClient;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -34,13 +31,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseWorkerEmailService {
-
-    private final NotificationClient notificationClient;
-    private final EmailTemplatesConfig emailTemplatesConfig;
-    private final ObjectMapper objectMapper;
-
     private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String WITHOUT_NOTICE = "Without notice";
@@ -49,9 +41,7 @@ public class CaseWorkerEmailService {
     private static final String YES = "Yes";
     private static final String NO = "No";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
-
-    @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;

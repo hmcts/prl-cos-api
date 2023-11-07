@@ -34,23 +34,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class DraftAnOrderController {
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private DraftAnOrderService draftAnOrderService;
-
-    @Autowired
-    private HearingDataService hearingDataService;
-
+    private final ObjectMapper objectMapper;
+    private final DraftAnOrderService draftAnOrderService;
+    private final HearingDataService hearingDataService;
     private final HearingService hearingService;
-
     private final ManageOrderService manageOrderService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")

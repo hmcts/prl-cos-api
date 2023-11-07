@@ -37,14 +37,12 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -76,51 +74,19 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ManageOrdersController {
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ManageOrderService manageOrderService;
-
-    @Autowired
-    private final DocumentLanguageService documentLanguageService;
-
-    @Autowired
-    private ManageOrderEmailService manageOrderEmailService;
-
-    @Autowired
-    private AmendOrderService amendOrderService;
-
-    @Autowired
-    private DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Autowired
-    RefDataUserService refDataUserService;
-
-    @Autowired
-    private HearingDataService hearingDataService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
-
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
-
+    private final ObjectMapper objectMapper;
+    private final ManageOrderService manageOrderService;
+    private final ManageOrderEmailService manageOrderEmailService;
+    private final AmendOrderService amendOrderService;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final RefDataUserService refDataUserService;
+    private final HearingDataService hearingDataService;
+    private final AuthorisationService authorisationService;
+    private final CoreCaseDataService coreCaseDataService;
     private final HearingService hearingService;
-
-    private DynamicList retrievedHearingTypes;
-
-    private DynamicList retrievedHearingDates;
-
-    private DynamicList retrievedHearingChannels;
-
-    private DynamicList retrievedHearingSubChannels;
-
-    private final AllTabServiceImpl allTabsService;
-
+    public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")

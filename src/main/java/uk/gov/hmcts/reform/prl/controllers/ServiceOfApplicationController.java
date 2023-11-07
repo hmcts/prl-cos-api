@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +26,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -50,35 +48,15 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RestController
 @RequestMapping("/service-of-application")
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ServiceOfApplicationController {
-
-    @Autowired
-    private ServiceOfApplicationService serviceOfApplicationService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    AllTabServiceImpl allTabService;
-
-    @Autowired
-    DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
-
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
-
-    @Autowired
+    private final ServiceOfApplicationService serviceOfApplicationService;
+    private final ObjectMapper objectMapper;
+    private final LaunchDarklyClient launchDarklyClient;
+    private final CoreCaseDataService coreCaseDataService;
     @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
-
-    @Autowired
-    WelshCourtEmail welshCourtEmail;
+    private final CaseSummaryTabService caseSummaryTabService;
+    private final AuthorisationService authorisationService;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
 

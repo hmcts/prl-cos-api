@@ -37,14 +37,10 @@ import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTe
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReviewDocumentsController {
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ReviewDocumentService reviewDocumentService;
+    private final ObjectMapper objectMapper;
+    private final ReviewDocumentService reviewDocumentService;
 
     @PostMapping(path = "/review-documents/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {

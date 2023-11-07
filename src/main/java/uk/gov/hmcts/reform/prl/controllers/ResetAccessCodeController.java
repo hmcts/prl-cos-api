@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -27,15 +28,18 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RestController
 @Slf4j
 public class ResetAccessCodeController extends AbstractCallbackController {
+    private final CaseInviteManager caseInviteManager;
+    private final AuthorisationService authorisationService;
 
     @Autowired
-    private CaseInviteManager caseInviteManager;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private AuthorisationService authorisationService;
+    public ResetAccessCodeController(ObjectMapper objectMapper,
+                                     EventService eventPublisher,
+                                     CaseInviteManager caseInviteManager,
+                                     AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.caseInviteManager = caseInviteManager;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/regenerate-access-code", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {

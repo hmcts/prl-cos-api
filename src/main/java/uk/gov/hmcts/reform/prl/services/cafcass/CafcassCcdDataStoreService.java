@@ -1,15 +1,15 @@
 package uk.gov.hmcts.reform.prl.services.cafcass;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.SearchResult;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CafcassCcdDataStoreService {
-
-    @Autowired
-    private CoreCaseDataApi coreCaseDataApi;
+    private final CoreCaseDataApi coreCaseDataApi;
 
     /**
      *  This method will call CCD searchCases API
