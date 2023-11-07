@@ -7,6 +7,12 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+      jackson-databind-2.13.3.jar ]]></notes>
+    <cve>CVE-2023-35116</cve>
+    <cve>CVE-2022-45688</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
      json-20230227.jar ]]></notes>
     <cve>CVE-2023-5072</cve>
   </suppress>
