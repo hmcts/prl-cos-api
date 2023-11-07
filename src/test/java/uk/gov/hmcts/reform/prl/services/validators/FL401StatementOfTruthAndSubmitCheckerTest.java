@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -188,8 +189,8 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
             .applicantRelationship(ApplicantRelationshipEnum.noneOfTheAbove)
             .build();
         respondentRelationOptionsInfo = RespondentRelationOptionsInfo.builder()
-                                           .applicantRelationshipOptions(ApplicantRelationshipOptionsEnum.aunt)
-                                           .build();
+            .applicantRelationshipOptions(ApplicantRelationshipOptionsEnum.aunt)
+            .build();
 
         //Respondentbehaviour
         respondentBehaviour = RespondentBehaviour.builder()

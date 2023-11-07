@@ -15,7 +15,7 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
-import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
