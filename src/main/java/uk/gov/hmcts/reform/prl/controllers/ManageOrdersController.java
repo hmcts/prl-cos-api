@@ -235,11 +235,6 @@ public class ManageOrdersController {
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-            // The following can be removed or utilised based on requirement
-            /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
-            manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
-            manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
