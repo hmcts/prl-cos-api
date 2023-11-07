@@ -113,15 +113,13 @@ public class HearingService {
     private LocalDateTime getNextHearingDateWithInHearing(CaseHearing hearing) {
 
         LocalDateTime nextHearingDate = null;
-        LocalDateTime tempNextDateListed = null;
         if (hearing.getHmcStatus().equals(LISTED)) {
             Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule()).stream()
                 .filter(u -> u.getHearingStartDateTime().isAfter(LocalDateTime.now()))
                 .map(u -> u.getHearingStartDateTime())
                 .min(LocalDateTime::compareTo);
-            if (minDateOfHearingDaySche.isPresent() && (tempNextDateListed == null || tempNextDateListed.isAfter(minDateOfHearingDaySche.get()))) {
-                tempNextDateListed = minDateOfHearingDaySche.get();
-                nextHearingDate = tempNextDateListed;
+            if (minDateOfHearingDaySche.isPresent()) {
+                nextHearingDate = minDateOfHearingDaySche.get();
             }
         }
         return nextHearingDate;

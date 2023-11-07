@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -599,7 +600,7 @@ public class SubmitAndPayCheckerTest {
                              .miamCertificationDocumentUpload(Document.builder().build())
                              .build())
             .allegationOfHarmRevised(AllegationOfHarmRevised.builder()
-                                  .newAllegationsOfHarmYesNo(No).build())
+                                         .newAllegationsOfHarmYesNo(No).build())
             .build();
 
         when(caseNameChecker.hasMandatoryCompleted(caseData)).thenReturn(true);
