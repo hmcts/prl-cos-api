@@ -551,19 +551,20 @@ public class HearingDataService {
         } else if (isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         }
+        final Hearings[] hearings = {null};
         return hearingDetails.stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
                 && null != hearingData.getConfirmedHearingDates().getValue()) {
-                Hearings hearings = null;
+
                 if (!hearingFetchedOnce[0]) {
                     hearingFetchedOnce[0] = true;
-                    hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                    hearings[0] = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                 }
 
                 Optional<CaseHearing> caseHearing = getHearingFromId(
                     hearingData.getConfirmedHearingDates().getValue().getCode(),
-                    hearings
+                    hearings[0]
                 );
                 if (caseHearing.isPresent()) {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
