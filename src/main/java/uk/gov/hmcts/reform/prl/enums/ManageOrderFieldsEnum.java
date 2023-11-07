@@ -54,7 +54,6 @@ public enum ManageOrderFieldsEnum {
     isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
     servingRespondentsOptionsCA("servingRespondentsOptionsCA"),
     otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
-    serveOrderAdditionalDocuments("serveOrderAdditionalDocuments"),
     isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
@@ -172,7 +171,8 @@ public enum ManageOrderFieldsEnum {
     nameOfJudgeAmendOrder("nameOfJudgeAmendOrder"),
     nameOfLaAmendOrder("nameOfLaAmendOrder"),
     nameOfJudgeToReviewOrder("nameOfJudgeToReviewOrder"),
-    nameOfLaToReviewOrder("nameOfLaToReviewOrder");
+    nameOfLaToReviewOrder("nameOfLaToReviewOrder"),
+    manageOrdersDocumentToAmend("manageOrdersDocumentToAmend");
 
     private final String value;
 

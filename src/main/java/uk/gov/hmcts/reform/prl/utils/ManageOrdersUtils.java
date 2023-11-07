@@ -75,11 +75,10 @@ public class ManageOrdersUtils {
                     || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue())) {
                     errorList.add("HearingType cannot be empty, please select a hearingType");
                 }
-            } else {
-                if (isEmpty(ordersHearingDetails)
-                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
-                    errorList.add("Please provide at least one hearing details");
-                }
+            } else if (isEmpty(ordersHearingDetails)
+                || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
+                errorList.add("Please provide at least one hearing details");
+
             }
             if (isNotEmpty(ordersHearingDetails) && ordersHearingDetails.size() > 1) {
                 errorList.add("Only one hearing can be created");
@@ -247,13 +246,12 @@ public class ManageOrdersUtils {
         return errorList;
     }
 
-    public static List<String> getErrorForOccupationScreen(CaseData casedata) {
+    public static List<String> getErrorForOccupationScreen(CaseData caseData, CreateSelectOrderOptionsEnum orderType) {
         List<String> errorList = new ArrayList<>();
-        FL404 fl404CustomFields = casedata.getManageOrders().getFl404CustomFields();
-        if (isApplicantSectionFilled(fl404CustomFields)
-            || isRespondentSectionFilled(fl404CustomFields)) {
-            return errorList;
-        } else {
+        FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+        if (CreateSelectOrderOptionsEnum.occupation.equals(orderType)
+            && ObjectUtils.isNotEmpty(fl404CustomFields)
+            && !(isApplicantSectionFilled(fl404CustomFields) || isRespondentSectionFilled(fl404CustomFields))) {
             errorList.add("Please enter either applicant or respondent section");
         }
         return errorList;
@@ -277,16 +275,16 @@ public class ManageOrdersUtils {
             || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentOtherInstructions());
     }
 
-    public static boolean isHearingPageNeeded(CaseData caseData) {
+    public static boolean isHearingPageNeeded(CreateSelectOrderOptionsEnum createSelectOrderOptions, C21OrderOptionsEnum c21OrderOptions) {
         //C21 blank order
-        if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            return null != caseData.getManageOrders()
-                && C21OrderOptionsEnum.c21other.equals(caseData.getManageOrders().getC21OrderOptions());
+        if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(createSelectOrderOptions)) {
+            return C21OrderOptionsEnum.c21other.equals(c21OrderOptions);
         }
 
         return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
-            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())));
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(createSelectOrderOptions)));
     }
+
 
     public static boolean getErrorsForOrdersProhibitedForC100FL401(CaseData caseData,
                                                                    CreateSelectOrderOptionsEnum selectedOrder,

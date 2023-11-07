@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -32,6 +31,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -50,17 +50,18 @@ public class AmendOrderService {
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
-
-        byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersDocumentToAmend(), authorisation);
+        //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
+        // Hence needs to revisit the logic, once XUI issue is resolved
+        //byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersAmendedOrder(), authorisation);
         String amendedFileName = updateFileName(eventData.getManageOrdersDocumentToAmend());
-        Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
+        //Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
 
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
 
         uk.gov.hmcts.reform.prl.models.documents.Document updatedDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-            .documentFileName(stampedDocument.originalDocumentName)
-            .documentUrl(stampedDocument.links.self.href)
-            .documentBinaryUrl(stampedDocument.links.binary.href)
+            .documentFileName(amendedFileName)
+            .documentUrl(eventData.getManageOrdersAmendedOrder().getDocumentUrl())
+            .documentBinaryUrl(eventData.getManageOrdersAmendedOrder().getDocumentBinaryUrl())
             .build();
 
         return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType);
@@ -121,7 +122,7 @@ public class AmendOrderService {
             } else {
                 updatedOrders = orders;
             }
-            orderMap.put("orderCollection", updatedOrders);
+            orderMap.put(ORDER_COLLECTION, updatedOrders);
             return orderMap;
         } else {
             return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType);
