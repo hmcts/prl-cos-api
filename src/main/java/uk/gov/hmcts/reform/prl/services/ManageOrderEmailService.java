@@ -411,16 +411,23 @@ public class ManageOrderEmailService {
     public void sendEmailWhenOrderIsServed(String authorisation,
                                            CaseData caseData,
                                            Map<String, Object> caseDataMap) {
+        log.info("1111111");
         List<String> listOfOtherAndCafcassEmails = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
-        String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
-
+        log.info("manageOrders===>{}",manageOrders);
+        log.info("============================================================");
+        log.info("manageOrders.getServeToRespondentOptions()===>{}",manageOrders.getServeToRespondentOptions());
+        log.info("manageOrders.getServeToRespondentOptionsOnlyC47a()===>{}",manageOrders.getServeToRespondentOptionsOnlyC47a());
+        String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
+            log.info("22222");
             List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
                 || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
+                log.info("33333");
                 log.info("** CA case email notifications***");
                 DynamicMultiSelectList recipientsOptions = isNotEmpty(manageOrders.getRecipientsOptions()) && CollectionUtils.isNotEmpty(
                     manageOrders.getRecipientsOptions().getValue())
@@ -621,10 +628,13 @@ public class ManageOrderEmailService {
                                              CaseData caseData, String authorisation,
                                              List<Document> orderDocuments,
                                              List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
+
+        log.info("55555");
         value.forEach(element -> {
             Optional<Element<PartyDetails>> partyDataOptional = partyDetails.stream()
                     .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
             if (partyDataOptional.isPresent()) {
+                log.info("666666");
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
                     try {
@@ -656,6 +666,7 @@ public class ManageOrderEmailService {
                             caseData
                     );
                 } else {
+                    log.info("77777");
                     try {
                         if (isNotEmpty(partyData.getAddress()) && isNotEmpty(partyData.getAddress().getAddressLine1())) {
                             UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData, authorisation, orderDocuments);
