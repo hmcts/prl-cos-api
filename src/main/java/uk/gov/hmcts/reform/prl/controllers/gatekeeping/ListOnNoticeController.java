@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,32 +45,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ListOnNoticeController {
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private ListOnNoticeService listOnNoticeService;
-
-    @Autowired
-    private AddCaseNoteService addCaseNoteService;
-
-    @Autowired
-    RefDataUserService refDataUserService;
-
-    @Autowired
-    AllocatedJudgeService allocatedJudgeService;
-
-    @Autowired
+    private final ObjectMapper objectMapper;
+    private final ListOnNoticeService listOnNoticeService;
+    private final AddCaseNoteService addCaseNoteService;
+    private final RefDataUserService refDataUserService;
+    private final AllocatedJudgeService allocatedJudgeService;
     @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
-
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final CaseSummaryTabService caseSummaryTabService;
+    private final UserService userService;
+    private final AuthorisationService authorisationService;
 
     @PostMapping(path = "/listOnNotice/reasonUpdation/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = " mid-event for updating the reason")

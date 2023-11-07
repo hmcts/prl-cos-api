@@ -50,33 +50,17 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S6204"})
 public class ServiceOfApplicationPostService {
-
-    @Autowired
     private final BulkPrintService bulkPrintService;
-
-    @Autowired
     private final DocumentGenService documentGenService;
-
-    @Autowired
     private final DocumentLanguageService documentLanguageService;
-
-    @Autowired
     private final DgsService dgsService;
-
-    @Autowired
     private final CaseDocumentClient caseDocumentClient;
-
-    @Autowired
     private final AuthTokenGenerator authTokenGenerator;
-
-    @Autowired
     private final LaunchDarklyClient launchDarklyClient;
-
     private static final String LETTER_TYPE = "ApplicationPack";
-
 
     public BulkPrintDetails sendPostNotificationToParty(CaseData caseData,
                                                         String authorisation,
