@@ -71,6 +71,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -92,7 +94,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -153,6 +154,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private HearingDataService hearingDataService;
+
+    @Mock
+    private RefDataUserService refDataUserService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -2956,7 +2960,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateJudgeName() {
+    public void testGetJudgeFullName() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("1234").personalCode("ABC").build())
             .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
@@ -2966,10 +2970,17 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .standardDirectionOrder(standardDirectionOrder)
             .build();
-        when(userService.getUserByUserId(any(), any())).thenReturn(UserDetails.builder().surname("Judge").forename(
-            "Test").build());
-        CaseData actualCaseData = manageOrderService.populateJudgeName("Bearer test", caseData);
-        assertEquals("Test Judge", actualCaseData.getStandardDirectionOrder().getSdoNamedJudgeFullName());
+        List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
+        JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
+            .fullName("Test")
+            .personalCode("test")
+            .build();
+        judicialUsersApiResponses.add(judicialUsersApiResponse);
+        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
+            .personalCode(new String[]{"test"}).build();
+        when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
+        String name = manageOrderService.getJudgeFullName(JudicialUser.builder().idamId("1234").personalCode("test").build());
+        assertEquals("Test", name);
     }
 
 
