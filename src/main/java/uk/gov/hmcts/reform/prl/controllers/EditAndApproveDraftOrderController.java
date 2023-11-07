@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -56,7 +57,7 @@ public class EditAndApproveDraftOrderController {
     private final HearingService hearingService;
     private final CoreCaseDataService coreCaseDataService;
 
-    @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @GetMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback to populate draft order dropdown"),
@@ -64,7 +65,7 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse generateDraftOrderDropDown(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestParam(value = PrlAppsConstants.WA_PARAMS, required = false) String waOrderName,
+        @RequestParam(value = "waOrderName", required = false) String waOrderName,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
