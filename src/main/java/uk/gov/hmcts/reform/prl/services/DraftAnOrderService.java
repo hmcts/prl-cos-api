@@ -76,6 +76,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AFTER_SECOND_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -1518,7 +1519,8 @@ public class DraftAnOrderService {
         updateOrderSpecificFields(authorisation, caseData, callbackRequest);
 
         log.info("caseData.getManageOrders() new change    ------ {}", caseData.getManageOrders());
-        if (ManageOrdersUtils.isHearingPageNeeded(caseData)) {
+        log.info("ordersHearingDetails new change    ------ {}", ordersHearingDetails);
+        if (isEmpty(ordersHearingDetails)) {
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.getHearingDataForSelectedHearingNew(authorisation, caseData));
         }
