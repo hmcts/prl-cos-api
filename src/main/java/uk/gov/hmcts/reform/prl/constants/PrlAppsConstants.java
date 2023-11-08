@@ -223,19 +223,28 @@ public class PrlAppsConstants {
         + "management review with details of the next hearing and any directions. ";
     public static final String HEARING_NOT_NEEDED = "A (Judge/justices' legal adviser) has decided that appropriate directions "
         + "can be given to progress the matter without the need for a hearing.";
-    public static final String PARTICIPATION_DIRECTIONS = "If they have not already done so, any party who considers that specific "
-        + "measures need to be taken to enable a party or witness to understand the "
-        + "proceedings and their role in them when in court, put their views to the "
-        + "court, instruct their representatives before, during, and after the hearing "
-        + "or attend the hearing without significant distress should file an application "
-        + "notice and include the following information as far as practicable:"
+    public static final String PARTICIPATION_DIRECTIONS = "If they have not already done so, any party who considers special "
+        + "measures need to be taken should file an application notice."
         + System.lineSeparator() + System.lineSeparator()
-        + "a. why the party or witness would benefit from assistance;"
+        + "Special measures may need to be taken to enable a party or witness to:"
         + System.lineSeparator() + System.lineSeparator()
-        + "b. the measure or measures that would be likely to maximise as far as practicable the "
-        + "quality of their evidence or participation and why;"
+        + "a) understand the proceedings, and their role in them when in court"
+        + System.lineSeparator()
+        + "b) put their views to the court"
+        + System.lineSeparator()
+        + "c) instruct their representatives before, during, and after the hearing"
+        + System.lineSeparator()
+        + "d) attend the hearing without significant distress"
         + System.lineSeparator() + System.lineSeparator()
-        + "c. written confirmation from any relevant witness of his/her views.";
+        + "The application notice should include:"
+        + System.lineSeparator() + System.lineSeparator()
+        + "a) details of why the party or witness would benefit from assistance"
+        + System.lineSeparator()
+        + "b) the measure or measures that would be likely to maximise (as far as practicable) "
+        + "the quality of their evidence or participation"
+        + System.lineSeparator()
+        + "c) written confirmation from any relevant witness of his or her views";
+
     public static final String JOINING_INSTRUCTIONS = "Joining instructions";
     public static final String UPDATE_CONTACT_DETAILS = "The parties must, if their contact details have changed or missing from "
         + "the applications, contact Cafcass or Cafcass Cymru quoting the case "
@@ -251,11 +260,11 @@ public class PrlAppsConstants {
         + " it appears to the court that the quality of "
         + "the party's evidence on cross-examination is likely to be diminished if:"
         + System.lineSeparator()
-        + "a) the cross examination is conducted in person, or"
+        + "a) the cross-examination is conducted in person, or"
         + "b) if the conduct of cross-examination "
         + "in person would cause significant distress to a party and it would not be "
         + "contrary of justice to make the direction."
-        + System.lineSeparator()
+        + System.lineSeparator() + System.lineSeparator()
         + "It is ordered that:"
         + System.lineSeparator() + System.lineSeparator()
         + "a. The ((applicant / respondent / both)) must notify the court by "
@@ -268,25 +277,29 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "The court has considered whether it necessary in the interest of justice for the "
         + "witness(es) to be cross-examined by a qualified legal representative(s) and concluded "
-        + "that it is neccessary to appoint such a qualified legal representative(s) to conduct "
-        + "the cross examination."
+        + "that it is necessary to appoint such a qualified legal representative(s) to conduct "
+        + "the cross-examination."
         + System.lineSeparator() + System.lineSeparator()
-        + "The court is to appoint a qualified leagal representaive on behalf of [name/s] "
+        + "The court is to appoint a qualified legal representative on behalf of [name/s] "
         + "for the hearing listed on [date] at [time] at [name of court].";
-    public static final String SPECIFIED_DOCUMENTS = "No document other than a document specified in an order or filled in accordance "
-        + "with the Rules or any Practice Direction shall be filled without the court's permission.";
-    public static final String SPIP_ATTENDANCE = "Both parents must attend the following programme at dates and at times to be confirmed "
+    public static final String SPECIFIED_DOCUMENTS = "No document other than a document specified in an order or filed in accordance "
+        + "with the Rules or any Practice Direction shall be filed without the court's permission.";
+    public static final String SPIP_ATTENDANCE = "Both parents must attend the following programme, at dates and at times to be confirmed "
         + "by the activity provider."
         + System.lineSeparator() + System.lineSeparator()
-        + "a. The required activity is a Planning Together for Children/Working Together for Children (WT4C)"
+        + "Note that:"
         + System.lineSeparator() + System.lineSeparator()
-        + "b. The Court shall send this order to Cafcass/Cafcass Cymru with parties contact details"
+        + "a) the required activity is a Separated Parent Information Programme (SPIP)"
         + System.lineSeparator() + System.lineSeparator()
-        + "c. The activity provider must notify the Court whether the course was completed at the conclusion of the activity directed";
-    public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at [place]."
+        + "b ) a working together for children course (WT4C) - name for SPIP in Wales."
         + System.lineSeparator() + System.lineSeparator()
-        + "The reason for transfer is another court is in the the area where the child usually lives / there "
-        + "are on-going proceedings in another court / free-text box reason.";
+        + "c) the court shall send this order to Cafcass or Cafcass Cymru with the parties’ contact details"
+        + System.lineSeparator() + System.lineSeparator()
+        + "d) the activity provider must notify the Court whether the course was at the conclusion of the activity directed";
+    public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at (place)."
+        + System.lineSeparator() + System.lineSeparator()
+        + "The reason for transfer is another court is in the area where the child  lives in this court’s area / there are on-going proceedings "
+        + "in another court / free-text box reason";
 
     public static final String DIO_RIGHT_TO_ASK =   "As the direction has been made without hearing, you may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
@@ -399,7 +412,7 @@ public class PrlAppsConstants {
         + "b) if the application is not dismissed, any further directions "
         + System.lineSeparator()
         + "c) whether an order under section 91 (14) of the Children Act 1989 should be made. "
-        + " Such orders prevent the making of further applications without the court’s permission";
+        + "Such orders prevent the making of further applications without the court’s permission";
 
     public static final String SDO_CROSS_EXAMINATION_EX741 = "Under Section 31U of the MFPA, it appears to the court "
         + "that the quality of the party’s evidence on cross-examination is likely to be diminished if the "
@@ -421,7 +434,7 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "b)  enhanced checks in respect of ((party’s / parties’ names separated by commas))"
         + System.lineSeparator()
-        + "c)  a risk assessment in respect of  ((party’s / parties’ names separated by commas))";
+        + "c)  a risk assessment in respect of ((party’s / parties’ names separated by commas))";
 
     public static final String CAFCASS_CYMRU_NEXT_STEPS_CONTENT = "CAFCASS Cymru must send a safeguarding enquiries report "
         + "to the court and to the parties [and their solicitors if details are available], unless considered inappropriate by "
@@ -484,7 +497,7 @@ public class PrlAppsConstants {
         + "with a view to a final order if possible";
 
 
-    public static final String CROSS_EXAMINATION_PROHIBITION = "a)  Section 31R The vulnerable party is the victim of a"
+    public static final String CROSS_EXAMINATION_PROHIBITION = "a)  Section 31R the vulnerable party is the victim of a"
         + " specified domestic abuse offence perpetrated by the other party"
         + System.lineSeparator()
         + "b)  Section 31S the vulnerable party is protected by an on-notice protective injunction against the other party"
@@ -495,6 +508,34 @@ public class PrlAppsConstants {
     public static final String AFTER_SECOND_GATEKEEPING = "The court has considered the safeguarding letter from Cafcass or Cafcass "
         + System.lineSeparator()
         + "Cymru and made a decision on how to progress your case.";
+
+    public static final String SECTION_7_FACTS_EDIT_CONTENT = "a) the impact on the ((child or children)) and on the care given by the "
+        + "((parent OR guardian)) making the allegation of domestic abuse, if a contact order is made"
+        + System.lineSeparator()
+        + "b) the risk of harm if a contact order is made - whether physical, emotional or psychological"
+        + System.lineSeparator()
+        + "c) whether contact between the ((child or children)) and the ((mother or father)) can take place safely (physically,"
+        + " emotionally and psychologically) for the child and the parent with whom the child is living"
+        + System.lineSeparator()
+        + "d) whether contact should be supervised or supported and, if so, where and by whom and the availability of resources for that purpose"
+        + System.lineSeparator()
+        + "e) if direct contact is not appropriate, whether there should be indirect contact and, if so, in what form";
+
+    public static final String SECTION_7_DA_OCCURED_EDIT_CONTENT = "With regard to the findings of fact made as set out in the schedule to "
+        + "((this order / the order made on)) ((date that the order was made)):"
+        + System.lineSeparator() + System.lineSeparator()
+        + "a) any harm suffered by the ((child or children)) and the parent with whom the ((child or children)) are living as a consequence "
+        + "of the domestic abuse found"
+        + System.lineSeparator()
+        + "b) any harm which the ((child or children)) and the parent with whom the ((child or children)) "
+        + "are living is at risk of suffering if a contact order is made"
+        + System.lineSeparator()
+        + "c) information about the facilities available locally (including domestic abuse support services) to assist any party "
+        + "or the ((child or children))"
+        + System.lineSeparator()
+        + "d) recommendations in respect of arrangements for the ((child or children)) including stepped arrangements with a view "
+        + "to a final order if possible";
+
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
@@ -780,7 +821,13 @@ public class PrlAppsConstants {
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
     public static final String OTHER_PERSON = "otherPerson";
-
+    public static final String UNDERSCORE = "_";
+    public static final String AWP_STATUS_SUBMITTED = "Submitted";
+    public static final String AWP_STATUS_IN_REVIEW = "In review";
+    public static final String AWP_STATUS_CLOSED = "Closed";
+    public static final String AWP_ADDTIONAL_APPLICATION_BUNDLE = "additionalApplicationsBundle";
+    public static final String AWP_OTHER_APPLICATION_SNR_CODE = "OT";
+    public static final String AWP_C2_APPLICATION_SNR_CODE = "C2";
     public static final String D_MMM_YYYY_HH_MM = "d MMM yyyy, hh:mm a";
 
     public static final String CASE_NUMBER = "caseNumber";
@@ -803,5 +850,17 @@ public class PrlAppsConstants {
             + " Magistrate (JP)";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
     public static final String OCCUPATIONAL_SCREEN_ERRORS = "occupationalScreenErrors";
+
+    public static final String ORDER_NOT_AVAILABLE_C100 = "This order is not available to be created for C100 cases";
+    public static final String ORDER_NOT_AVAILABLE_FL401 = "This order is not available to be created for FL401 cases";
+
+    public static final String ORDER_COLLECTION = "orderCollection";
+
+    public static final String[] VALID_ORDER_IDS_FOR_C100 = {"blankOrderOrDirections", "childArrangementsSpecificProhibitedOrder",
+        "parentalResponsibility", "specialGuardianShip", "noticeOfProceedingsParties", "noticeOfProceedingsNonParties",
+        "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder"};
+
+    public static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
+        "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
 
 }
