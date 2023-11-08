@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -207,7 +208,7 @@ public class ManageDocumentsService {
         } else {
             String categoryId = manageDocument.getDocumentCategories().getValueCode();
             if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
-                categoryId = "Internal correspondence";
+                categoryId = ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE;
             }
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
                 .getQuarantineUploadDocument(

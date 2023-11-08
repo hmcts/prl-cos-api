@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.HOME_OFFICE_DWP_RESPONSES;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.IMPORTANT_INFO_ABOUT_ADDRESS_AND_CONTACT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.JUDGE_NOTES_FROM_HEARING;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LETTERS_OF_COMPLAINTS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MAGISTRATES_FACTS_AND_REASONS;
@@ -180,6 +181,7 @@ public class DocumentUtils {
             .respondentStatementsDocument(getDocumentByCategoryId(RESPONDENT_STATEMENTS, categoryId, document))
             .otherWitnessStatementsDocument(getDocumentByCategoryId(OTHER_WITNESS_STATEMENTS, categoryId, document))
             .caseSummaryDocument(getDocumentByCategoryId(CASE_SUMMARY, categoryId, document))
+            .internalCorrespondenceDocument(getDocumentByCategoryId(INTERNAL_CORRESPONDENCE, categoryId, document))
             .build();
     }
 
