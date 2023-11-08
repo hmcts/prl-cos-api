@@ -54,7 +54,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
@@ -598,7 +597,11 @@ public class HearingDataServiceTest {
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
-            .hmcStatus("LISTED").build();
+            .hmcStatus("LISTED")
+            .nextHearingDate(LocalDateTime.of(2023, 11, 8, 9, 0))
+            .hearingID(123L)
+            .hearingTypeValue("test")
+            .build();
         List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(caseHearing);
         Hearings hearings = Hearings.hearingsWith()
@@ -606,7 +609,7 @@ public class HearingDataServiceTest {
             .caseHearings(caseHearings)
             .build();
 
-        when(hearingService.getHearingsByListOfCaseIds(any(), anyMap())).thenReturn(List.of(hearings));
+        when(hearingService.getHearings(any(), any())).thenReturn(hearings);
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -624,8 +627,8 @@ public class HearingDataServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals("1677767515750127",expectedResponse.get(0).getCode());
-        assertEquals("CaseName-Test10",expectedResponse.get(0).getLabel());
+        assertEquals("1677767515750127_123",expectedResponse.get(0).getCode());
+        assertEquals("1677767515750127_test - 08 Nov 2023",expectedResponse.get(0).getLabel());
     }
 
     @Test()
@@ -638,15 +641,20 @@ public class HearingDataServiceTest {
         caseLinkedDataList.add(caseLinkedData);
         when(hearingService.getCaseLinkedData(any(), any())).thenReturn(caseLinkedDataList);
         CaseHearing caseHearing = CaseHearing.caseHearingWith()
-            .hmcStatus("LISTED").build();
-        List<CaseHearing> caseHearings =  new ArrayList<>();
+            .hmcStatus("LISTED")
+            .nextHearingDate(LocalDateTime.of(2023, 11, 8, 9, 0))
+            .hearingID(123L)
+            .hearingTypeValue("test")
+            .build();
+
+        List<CaseHearing> caseHearings = new ArrayList<>();
         caseHearings.add(caseHearing);
         Hearings hearings = Hearings.hearingsWith()
             .caseRef("1677767515750127")
             .caseHearings(caseHearings)
             .build();
 
-        when(hearingService.getHearingsByListOfCaseIds(any(), anyMap())).thenReturn(List.of(hearings));
+        when(hearingService.getHearings(any(), any())).thenReturn(hearings);
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
@@ -660,12 +668,12 @@ public class HearingDataServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(
             1677767515750127L).data(stringObjectMap).build();
 
-        when(caseService.getCase(any(),any())).thenReturn(caseDetails);
+        when(caseService.getCase(any(), any())).thenReturn(caseDetails);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         List<DynamicListElement> expectedResponse = hearingDataService.getLinkedCases(authToken, caseData);
-        assertEquals("1677767515750127", expectedResponse.get(0).getCode());
-        assertEquals("CaseName-Test10", expectedResponse.get(0).getLabel());
+        assertEquals("1677767515750127_123", expectedResponse.get(0).getCode());
+        assertEquals("1677767515750127_test - 08 Nov 2023", expectedResponse.get(0).getLabel());
     }
 
     @Test()

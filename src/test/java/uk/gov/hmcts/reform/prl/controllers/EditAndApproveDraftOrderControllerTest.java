@@ -1080,7 +1080,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest)).thenReturn(stringObjectMap);
+        when(manageOrderService.serveOrderMidEvent(callbackRequest)).thenReturn(stringObjectMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
 
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController

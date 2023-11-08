@@ -2469,7 +2469,7 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        Map<String, Object> stringObjectMap = manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest);
+        Map<String, Object> stringObjectMap = manageOrderService.serveOrderMidEvent(callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
@@ -2540,7 +2540,7 @@ public class ManageOrderServiceTest {
         String courtEmail = "test1@test.com";
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(Mockito.any())).thenReturn(courtEmail);
 
-        Map<String, Object> stringObjectMap = manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest);
+        Map<String, Object> stringObjectMap = manageOrderService.serveOrderMidEvent(callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
@@ -2671,6 +2671,7 @@ public class ManageOrderServiceTest {
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
 
         ReflectionTestUtils.setField(manageOrderService, "c21WelshTemplate", "c21-WEL-template");
@@ -2952,6 +2953,7 @@ public class ManageOrderServiceTest {
             .doesOrderClosesCase(YesOrNo.Yes)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
             .manageOrders(manageOrders)
             .build();
 
@@ -3243,6 +3245,7 @@ public class ManageOrderServiceTest {
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .manageOrders(manageOrders)
             .build();
 
@@ -3311,5 +3314,67 @@ public class ManageOrderServiceTest {
 
         //Then
         assertNull(caseDataUpdated.get("additionalOrderDocuments"));
+    }
+
+    @Test
+    public void testGetGeneratedDocument() {
+        GeneratedDocumentInfo generatedDocumentInfo1 = GeneratedDocumentInfo.builder().build();
+        assertNotNull(manageOrderService.getGeneratedDocument(
+                                                       generatedDocumentInfo1, true, new HashMap<>())
+        );
+    }
+
+    @Test
+    public void testCleanUpServeOrderOptions() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("serveOrderAdditionalDocuments","serveOrderAdditionalDocuments");
+        manageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+        Assert.assertNull(caseDataUpdated.get("serveOrderAdditionalDocuments"));
+    }
+
+    @Test
+    public void testSetFieldsForWaTaskForCreateOrder() {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .build();
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        assertNotNull(response);
+        assertTrue(response.containsKey("orderNameForWA"));
+        assertNotNull(response.get("orderNameForWA"));
+    }
+
+    @Test
+    public void testSetFieldsForWaTaskForUploadOrder() {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .build();
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        assertNotNull(response);
+        assertTrue(response.containsKey("orderNameForWA"));
+        assertNull(response.get("orderNameForWA"));
     }
 }
