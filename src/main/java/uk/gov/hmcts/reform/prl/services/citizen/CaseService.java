@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -30,8 +31,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -400,34 +401,42 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
-    public Flags getPartyCaseFlags(String userToken, String caseId, String partyId) {
+    public Optional<Flags> getPartyCaseFlags(String userToken, String caseId, String partyId) {
+        Optional<Flags> flags = Optional.empty();
         CaseDetails caseDetails = getCase(userToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String caseType = caseData.getCaseTypeOfApplication();
-        boolean isCaCase = C100_CASE_TYPE.equalsIgnoreCase(caseType);
-        String partyExternalCaseFlagField = null;
-        PartyDetailsMeta partyDetailsMeta = getPartyDetailsMeta(partyId, caseType, caseData);
-        PartyEnum partyType = partyDetailsMeta.getPartyType();
+        boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
 
-        if (PartyEnum.applicant == partyType) {
-            partyExternalCaseFlagField = partyLevelCaseFlagsService.getPartyCaseDataExternalField(
-                isCaCase ? PartyRole.Representing.CAAPPLICANT : PartyRole.Representing.DAAPPLICANT,
-                partyDetailsMeta.getPartyIndex(),
-                partyDetailsMeta.getPartyDetails()
-            );
-        } else if (PartyEnum.respondent == partyType) {
-            partyExternalCaseFlagField = partyLevelCaseFlagsService.getPartyCaseDataExternalField(
-                isCaCase ? PartyRole.Representing.CARESPONDENT : PartyRole.Representing.DARESPONDENT,
-                partyDetailsMeta.getPartyIndex(),
-                partyDetailsMeta.getPartyDetails()
-            );
+        Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
+            partyId,
+            caseData.getCaseTypeOfApplication(),
+            caseData
+        );
+
+        if (partyDetailsMeta.isPresent()
+            && partyDetailsMeta.get().getPartyDetails() != null
+            && !StringUtils.isEmpty(partyDetailsMeta.get().getPartyDetails().getLabelForDynamicList())) {
+            PartyEnum partyType = partyDetailsMeta.get().getPartyType();
+            Optional<String> partyExternalCaseFlagField = Optional.empty();
+            if (PartyEnum.applicant == partyType) {
+                partyExternalCaseFlagField
+                    = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                    isC100Case ? PartyRole.Representing.CAAPPLICANT : PartyRole.Representing.DAAPPLICANT,
+                    partyDetailsMeta.get().getPartyIndex()
+                ));
+            } else if (PartyEnum.respondent == partyType) {
+                partyExternalCaseFlagField
+                    = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                    isC100Case ? PartyRole.Representing.CARESPONDENT : PartyRole.Representing.DARESPONDENT,
+                    partyDetailsMeta.get().getPartyIndex()
+                ));
+            }
+
+            if (partyExternalCaseFlagField.isPresent()) {
+                flags = (Optional<Flags>) caseDetails.getData().get(partyExternalCaseFlagField.get());
+            }
         }
-
-        if (null != partyExternalCaseFlagField) {
-            return (Flags) caseDetails.getData().get(partyExternalCaseFlagField);
-        }
-
-        return null;
+        return flags;
     }
 
 }
