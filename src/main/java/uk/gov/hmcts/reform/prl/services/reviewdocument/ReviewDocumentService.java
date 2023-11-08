@@ -32,8 +32,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -278,20 +276,10 @@ public class ReviewDocumentService {
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElement);
 
-            QuarantineLegalDoc uploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                quarantineLegalDocElement.getValue().getCategoryId(),
-                getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue()),
-                isReviewDecisionYes
-            );
-
-            Document document  = getQuarantineDocument(uploadedBy, uploadDoc);
-            Pattern pairRegex = Pattern.compile(DOCUMENT_UUID_REGEX);
-            Matcher matcher = pairRegex.matcher(document != null
-                                                    && document.getDocumentUrl() != null ? document.getDocumentUrl() : "");
-            UUID documentId = null;
-            if (matcher.find() && isReviewDecisionYes) {
-                documentId = UUID.fromString(matcher.group(0));
-                log.info(" DocumentId found {}", documentId);
+            QuarantineLegalDoc uploadDoc = null;
+            Document document  = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
+            if (isReviewDecisionYes) {
+                log.info(" DocumentId found {}", uuid);
                 UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                     authorisation,
                     authTokenGenerator.generate(),
@@ -300,13 +288,20 @@ public class ReviewDocumentService {
                     List.of(
                         new InMemoryMultipartFile(
                             SOA_MULTIPART_FILE,
-                            document.getDocumentFileName(),
+                            "Conf-" + document.getDocumentFileName(),
                             APPLICATION_PDF_VALUE,
                             DocumentUtils.readBytes(document.getDocumentBinaryUrl())
                         )));
+                log.info("Document uploaded");
                 Document document1 = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+                uploadDoc = DocumentUtils.getQuarantineUploadDocument(
+                    quarantineLegalDocElement.getValue().getCategoryId(),
+                    document1,
+                    isReviewDecisionYes
+                );
                 log.info("document uploaded {}", document1);
-                caseDocumentClient.deleteDocument(authorisation, authTokenGenerator.generate(),documentId,true);
+                caseDocumentClient.deleteDocument(authorisation, authTokenGenerator.generate(),uuid,true);
+                log.info("deleted document");
             }
 
             uploadDoc = addQuarantineDocumentFields(
