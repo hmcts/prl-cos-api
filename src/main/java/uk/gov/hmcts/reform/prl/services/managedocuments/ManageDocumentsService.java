@@ -210,6 +210,7 @@ public class ManageDocumentsService {
             if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
                 categoryId = ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE;
             }
+            log.info("CategoryId {}", categoryId);
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
                 .getQuarantineUploadDocument(
                     categoryId,

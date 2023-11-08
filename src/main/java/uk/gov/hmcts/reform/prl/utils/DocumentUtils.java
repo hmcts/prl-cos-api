@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -198,7 +200,9 @@ public class DocumentUtils {
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
             .notes(manageDocument.getDocumentDetails())
-            .categoryId(manageDocument.getDocumentCategories().getValueCode())
+            .categoryId(DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
+                            ? ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE
+                            : manageDocument.getDocumentCategories().getValueCode())
             .categoryName(manageDocument.getDocumentCategories().getValueLabel())
             .build();
     }
