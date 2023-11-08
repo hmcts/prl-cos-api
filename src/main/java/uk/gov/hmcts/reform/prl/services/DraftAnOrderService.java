@@ -868,6 +868,7 @@ public class DraftAnOrderService {
             .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
             .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
             .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
+            .adminNotes(!StringUtils.isEmpty(draftOrder.getAdminNotes()) ? draftOrder.getAdminNotes() : caseData.getCourtAdminNotes())
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .parentName(caseData.getManageOrders().getParentName())
             .dateOrderMade(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade() : draftOrder.getDateOrderMade())
