@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -16,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.HearingDateTimeOption;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
-import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -47,7 +45,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -82,6 +79,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PRIORIT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SPECIFIC_DATES_OPTIONS_ENUM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_TELEPHONE_CHANNELS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_VIDEO_CHANNELS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_Y;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LATEST_HEARING_DATE;
@@ -91,6 +89,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_HEAR
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONEPLATFORM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TELEPHONESUBCHANNELS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOSUBCHANNELS;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
@@ -98,7 +97,6 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
 @Service
@@ -213,79 +211,42 @@ public class HearingDataService {
             log.info("Fetched linked cases for hearing {}", caseData.getId());
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
                 .caseReference(String.valueOf(caseData.getId())).build();
-            Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
+            Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(
+                authorisation,
+                caseLinkedRequest
+            ));
             log.info("Linked cases {}", caseLinkedDataList);
+
             if (caseLinkedDataList.isPresent() && isNotEmpty(caseLinkedDataList.get())) {
-                Map<String, String> caseIdNameMap = new HashMap<>();
-                Map<String, String> caseIds = new HashMap<>();
                 caseLinkedDataList.get().forEach(caseLinkedData -> {
-                    caseIdNameMap.put(caseLinkedData.getCaseReference(), caseLinkedData.getCaseName());
-
-
-                    //PRL-4594 - setting some dummy regionId to fix Map.get null issue
-                    caseIds.put(
-                        caseLinkedData.getCaseReference(),
-                        setupRegionAndBaseLocationForCase(authorisation, caseLinkedData.getCaseReference())
+                    Hearings hearingsList = hearingService.getHearings(
+                        authorisation,
+                        caseLinkedData.getCaseReference()
                     );
 
-                });
-                log.info("Linked caseIdNameMap {}", caseIdNameMap);
-                log.info("Linked caseIds to hearings {}", caseIds);
-                if (!caseIds.isEmpty()) {
-                    List<Hearings> hearingsList = hearingService.getHearingsByListOfCaseIds(authorisation, caseIds);
-                    log.info("Hearings list for linked caseIds {}", hearingsList);
-
-                    if (isNotEmpty(hearingsList)) {
-                        Map<String, List<CaseHearing>> caseHearingsByCaseIdMap = hearingsList.stream()
-                            .filter(caseHearing -> ifListedHearings(caseHearing.getCaseHearings()))
-                            .collect(Collectors.toMap(Hearings::getCaseRef, Hearings::getCaseHearings));
-
-                        for (Map.Entry<String, List<CaseHearing>> entry : caseHearingsByCaseIdMap.entrySet()) {
-                            dynamicListElements.add(DynamicListElement.builder()
-                                                        .code(entry.getKey())
-                                                        .label(caseIdNameMap.get(entry.getKey()))
-                                                        .build());
-                        }
+                    if (hearingsList != null) {
+                        hearingsList.getCaseHearings().stream()
+                            .filter(caseHearing -> LISTED.equalsIgnoreCase(
+                                caseHearing.getHmcStatus()))
+                            .forEach(
+                                hearingFromHmc ->
+                                    dynamicListElements.add(
+                                        DynamicListElement
+                                            .builder()
+                                            .code(caseLinkedData.getCaseReference() + UNDERSCORE + hearingFromHmc.getHearingID())
+                                            .label(caseLinkedData.getCaseReference() + UNDERSCORE + hearingFromHmc.getHearingTypeValue()
+                                                       + HYPHEN_SEPARATOR
+                                                       + hearingFromHmc.getNextHearingDate().format(
+                                                customDateTimeFormatter))
+                                            .build()));
                     }
-                }
+                });
+
             }
         } catch (Exception e) {
             log.error("Exception occurred in Linked case method for hmc api calls ", e);
         }
         return dynamicListElements;
-    }
-
-    private String setupRegionAndBaseLocationForCase(String authorisation, String caseId) {
-        String hyphenSeparater = "-";
-        String regionIdBaseLocation = null;
-        CaseDetails caseDetails = caseService.getCase(authorisation, caseId);
-        log.info("case details pulled from db for linked case {}", caseDetails.getId());
-        if (caseDetails != null) {
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            CaseManagementLocation caseManagementLocation = caseData.getCaseManagementLocation();
-            log.info("casemanagemnt location for linked case {}", caseManagementLocation);
-            if (caseManagementLocation != null) {
-                if (caseManagementLocation.getBaseLocation() != null
-                    && caseManagementLocation.getRegion() != null) {
-                    regionIdBaseLocation = caseManagementLocation.getRegion()
-                        + hyphenSeparater
-                        + caseManagementLocation.getBaseLocation();
-                } else if (caseManagementLocation.getBaseLocationId() != null
-                    && caseManagementLocation.getRegionId() != null) {
-                    regionIdBaseLocation = caseManagementLocation.getRegionId()
-                        + hyphenSeparater
-                        + caseManagementLocation.getBaseLocationId();
-                }
-            }
-        }
-
-        return regionIdBaseLocation;
-    }
-
-    private boolean ifListedHearings(List<CaseHearing> caseHearings) {
-        return nullSafeCollection(caseHearings).stream()
-            .anyMatch(caseHearing -> LISTED.equalsIgnoreCase(
-                caseHearing.getHmcStatus()));
     }
 
 
