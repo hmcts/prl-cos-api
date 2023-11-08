@@ -417,7 +417,7 @@ public class CaseUtils {
 
     private static int findPartyIndex(String partyId, List<Element<PartyDetails>> parties) {
         return IntStream.range(0, parties.size())
-            .filter(index -> parties.get(index).getValue().getPartyId().toString().equals(partyId))
+            .filter(index -> parties.get(index).getValue().getUser().getIdamId().toString().equals(partyId))
             .findFirst()
             .orElse(-1);
     }

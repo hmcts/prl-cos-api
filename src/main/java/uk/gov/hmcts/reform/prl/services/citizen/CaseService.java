@@ -421,12 +421,14 @@ public class CaseService {
             if (PartyEnum.applicant == partyType) {
                 partyExternalCaseFlagField
                     = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                    caseData.getCaseTypeOfApplication(),
                     isC100Case ? PartyRole.Representing.CAAPPLICANT : PartyRole.Representing.DAAPPLICANT,
                     partyDetailsMeta.get().getPartyIndex()
                 ));
             } else if (PartyEnum.respondent == partyType) {
                 partyExternalCaseFlagField
                     = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                    caseData.getCaseTypeOfApplication(),
                     isC100Case ? PartyRole.Representing.CARESPONDENT : PartyRole.Representing.DARESPONDENT,
                     partyDetailsMeta.get().getPartyIndex()
                 ));
