@@ -203,7 +203,9 @@ public class DocumentUtils {
             .categoryId(DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                             ? ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE
                             : manageDocument.getDocumentCategories().getValueCode())
-            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            .categoryName(DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
+                              ? "Internal correspondence"
+                              : manageDocument.getDocumentCategories().getValueLabel())
             .build();
     }
 
