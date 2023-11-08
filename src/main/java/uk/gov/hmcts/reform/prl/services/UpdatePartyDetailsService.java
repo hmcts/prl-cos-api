@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
-import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -58,9 +57,6 @@ public class UpdatePartyDetailsService {
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
-        final Flags caseFlags = Flags.builder().build();
-
-        updatedCaseData.put("caseFlags", caseFlags);
         try {
             log.info(objectMapper.writeValueAsString(updatedCaseData));
         } catch (JsonProcessingException e) {
@@ -92,6 +88,7 @@ public class UpdatePartyDetailsService {
                 );
             }
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
+
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
