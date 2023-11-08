@@ -2611,7 +2611,6 @@ public class ManageOrderService {
         //PRL-3254 - Populate hearing details dropdown for create order
         caseDataUpdated.put("hearingsType", populateHearingsDropdown(authorisation, caseData));
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
-        caseDataUpdated.put("isTheOrderByConsent", Yes);
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
             ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
     }
