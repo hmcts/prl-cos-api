@@ -1863,7 +1863,10 @@ public class DraftAnOrderService {
 
     private List<String> validateDraftOrderDetails(CaseData caseData) {
         List<String> errorList = new ArrayList<>();
-        if (ManageOrdersUtils.isHearingPageNeeded(caseData)) {
+        if (ManageOrdersUtils.isHearingPageNeeded(
+            caseData.getCreateSelectOrderOptions(),
+            caseData.getManageOrders().getC21OrderOptions()
+        )) {
             //PRL-4335 - hearing screen validations
             //PRL-4589 - fix, validate only when hearings are available
             if (Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())) {
@@ -1876,7 +1879,7 @@ public class DraftAnOrderService {
         }
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getManageOrders().getFl404CustomFields()) {
-            errorList = getErrorForOccupationScreen(caseData);
+            errorList = getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions());
         }
         return errorList;
     }
@@ -1885,7 +1888,7 @@ public class DraftAnOrderService {
         List<String> errorList = new ArrayList<>();
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getManageOrders().getFl404CustomFields()) {
-            errorList = getErrorForOccupationScreen(caseData);
+            errorList = getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions());
         } else {
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
             boolean isSolicitorOrdersHearings = false;
