@@ -690,12 +690,12 @@ public class UploadAdditionalApplicationService {
                         awpSelectedApplicationDetails[1])
                 )
                 .map(Element::getValue)
-                .forEach(additionalApplicationsBundle1 -> {
+                .forEach(additionalApplicationsBundle1 ->
                     additionalApplicationsBundle1.setOtherApplicationsBundle(additionalApplicationsBundle1.getOtherApplicationsBundle()
                                                                           .toBuilder()
                                                                           .applicationStatus(applicationStatus)
-                                                                          .build());
-                });
+                                                                          .build())
+                );
         } else if (awpSelectedApplicationDetails[0].equals(AWP_C2_APPLICATION_SNR_CODE)) {
             additionalApplicationsBundle.stream()
                 .filter(
@@ -703,12 +703,12 @@ public class UploadAdditionalApplicationService {
                         && t.getValue().getC2DocumentBundle().getUploadedDateTime().equals(awpSelectedApplicationDetails[1])
                 )
                 .map(Element::getValue)
-                .forEach(additionalApplicationsBundle1 -> {
+                .forEach(additionalApplicationsBundle1 ->
                     additionalApplicationsBundle1.setC2DocumentBundle(additionalApplicationsBundle1.getC2DocumentBundle()
                                                                           .toBuilder()
                                                                           .applicationStatus(applicationStatus)
-                                                                          .build());
-                });
+                                                                          .build())
+                );
         }
         return additionalApplicationsBundle;
     }

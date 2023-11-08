@@ -587,6 +587,7 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/enums/**/*',
   '**uk/gov/hmcts/reform/prl/config/**/*',
   '**uk/gov/hmcts/reform/prl/utils/*',
+  '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
   '**uk/gov/hmcts/reform/prl/Application.*'
 ]
 

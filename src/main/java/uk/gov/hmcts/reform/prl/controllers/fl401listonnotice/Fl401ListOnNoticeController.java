@@ -29,7 +29,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
 public class Fl401ListOnNoticeController extends AbstractCallbackController {
-    private final ObjectMapper objectMapper;
     private final Fl401ListOnNoticeService fl401ListOnNoticeService;
     private final AuthorisationService authorisationService;
 
@@ -38,7 +37,6 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
                                        Fl401ListOnNoticeService fl401ListOnNoticeService,
                                        AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
-        this.objectMapper = objectMapper;
         this.fl401ListOnNoticeService = fl401ListOnNoticeService;
         this.authorisationService = authorisationService;
     }
