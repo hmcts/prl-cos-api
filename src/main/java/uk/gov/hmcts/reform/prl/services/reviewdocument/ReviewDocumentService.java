@@ -280,41 +280,50 @@ public class ReviewDocumentService {
             Element<QuarantineLegalDoc> quarantineLegalDocElement = quarantineLegalDocElementOptional.get();
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElement);
+            QuarantineLegalDoc uploadDoc;
+            if (isReviewDecisionYes) {
+                Document document = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
+                log.info("Document {}", document);
+                UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
+                log.info(" DocumentId found {}", documentId);
+                Resource resource = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(),
+                                                                         documentId
+                ).getBody();
+                byte[] docData = null;
+                try {
+                    docData = IOUtils.toByteArray(resource.getInputStream());
+                } catch (IOException ex) {
+                    log.error("Failed to get document binary");
+                }
+                UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
+                    authorisation,
+                    authTokenGenerator.generate(),
+                    PrlAppsConstants.CASE_TYPE,
+                    PrlAppsConstants.JURISDICTION,
+                    List.of(
+                        new InMemoryMultipartFile(
+                            SOA_MULTIPART_FILE,
+                            "Conf-" + document.getDocumentFileName(),
+                            APPLICATION_PDF_VALUE,
+                            docData
+                        ))
+                );
+                Document document1 = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
 
-            Document document  = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
-            log.info("Document {}", document);
-            UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
-            log.info(" DocumentId found {}", documentId);
-            Resource resource = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(),
-                                                                         documentId).getBody();
-            byte[] docData = null;
-            try {
-                docData = IOUtils.toByteArray(resource.getInputStream());
-            } catch (IOException ex) {
-                log.error("Failed to get document binary");
+                log.info("document uploaded {}", document1);
+                caseDocumentClient.deleteDocument(authorisation, authTokenGenerator.generate(), documentId, true);
+                log.info("deleted document {}", documentId);
+
+                uploadDoc = DocumentUtils.getQuarantineUploadDocument(
+                    quarantineLegalDocElement.getValue().getCategoryId(),
+                    document1
+                );
+            } else {
+                uploadDoc = DocumentUtils.getQuarantineUploadDocument(
+                    quarantineLegalDocElement.getValue().getCategoryId(),
+                    getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
+                );
             }
-            UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
-                authorisation,
-                authTokenGenerator.generate(),
-                PrlAppsConstants.CASE_TYPE,
-                PrlAppsConstants.JURISDICTION,
-                List.of(
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
-                        "Conf-" + document.getDocumentFileName(),
-                        APPLICATION_PDF_VALUE,
-                        docData
-                        )));
-            Document document1 = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
-
-            log.info("document uploaded {}", document1);
-            caseDocumentClient.deleteDocument(authorisation, authTokenGenerator.generate(),documentId,true);
-            log.info("deleted document {}", documentId);
-
-            QuarantineLegalDoc uploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                quarantineLegalDocElement.getValue().getCategoryId(),
-                document1
-            );
 
             uploadDoc = addQuarantineDocumentFields(
                 uploadDoc,
