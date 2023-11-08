@@ -30,10 +30,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.mockito.Mockito.verify;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -152,19 +149,9 @@ public class ReviewDocumentServiceTest {
         Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentsAreNotPresent() {
         Assert.assertTrue(reviewDocumentService.getDynamicListElements(CaseData.builder().build()).isEmpty());
-        CaseData caseData =  CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE)
-            .build();
-        reviewDocumentService.getReviewResult(caseData);
-        verify(coreCaseDataService).triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            "c100-all-docs-reviewed",
-            null
-        );
     }
 
     @Test

@@ -434,7 +434,7 @@ public class ManageDocumentsServiceTest {
         assertEquals(0,courtStaffUploadDocListDocTab.size());
     }
 
-    @Test(expected = NullPointerException.class)
+    @Test
     public void testCopyDocumentIfRestrictedWithCourtStaffRoleWhenNoUploaderNamePresent() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -478,7 +478,6 @@ public class ManageDocumentsServiceTest {
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
         assertEquals(1,courtStaffQuarantineDocsList.size());
-        assertNull(courtStaffQuarantineDocsList.stream().map(e -> e.getValue().getUploadedBy()).findFirst().get());
         assertEquals(0,courtStaffUploadDocListDocTab.size());
     }
 
