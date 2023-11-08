@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -417,7 +418,9 @@ public class CaseUtils {
 
     private static int findPartyIndex(String partyId, List<Element<PartyDetails>> parties) {
         return IntStream.range(0, parties.size())
-            .filter(index -> parties.get(index).getValue().getUser().getIdamId().toString().equals(partyId))
+            .filter(index -> (ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser())
+                && parties.get(index).getValue().getUser().getIdamId().toString().equals(
+                partyId)))
             .findFirst()
             .orElse(-1);
     }
