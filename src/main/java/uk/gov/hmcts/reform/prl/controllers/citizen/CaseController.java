@@ -179,8 +179,11 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         List<CaseData> caseDataList;
+        log.info("Inside get call :: ");
         if (isAuthorized(authorisation, s2sToken)) {
+            log.info("Authorised :: ");
             caseDataList = caseService.retrieveCases(authorisation, authTokenGenerator.generate());
+            log.info("caseDataList count :: " + caseDataList.size());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
