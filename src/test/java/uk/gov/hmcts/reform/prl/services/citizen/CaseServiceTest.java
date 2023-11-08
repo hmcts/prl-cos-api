@@ -30,7 +30,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
-import uk.gov.hmcts.reform.prl.models.caseflags.PartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -671,11 +670,10 @@ public class CaseServiceTest {
         User user2 = User.builder().idamId("123").build();
         PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
         PartyDetails respondent2 = PartyDetails.builder().user(user2).email("test@hmcts.net").firstName("test").build();
-        PartyFlags partyFlags = PartyFlags.builder().partyExternalFlags(Flags.builder().build())
-            .partyInternalFlags(Flags.builder().build()).build();
+        Flags partyFlags = Flags.builder().build();
         caseData = CaseData.builder()
             .respondents(Arrays.asList(element(respondent1), element(respondent2)))
-            .allPartyFlags(AllPartyFlags.builder().caRespondent2Flags(partyFlags).build())
+            .allPartyFlags(AllPartyFlags.builder().caRespondent2ExternalFlags(partyFlags).build())
             .build();
         caseDataMap = new HashMap<>();
         caseDataMap.put("caRespondent2Flags", partyFlags);
@@ -718,7 +716,7 @@ public class CaseServiceTest {
             startEventResponse);
 
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class))).thenReturn(caseData);
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(PartyFlags.class))).thenReturn(partyFlags);
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(partyFlags);
 
         CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
             .partyType(PartyEnum.respondent)
@@ -743,11 +741,10 @@ public class CaseServiceTest {
         User user2 = User.builder().idamId("123").build();
         PartyDetails applicant1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
         PartyDetails applicant2 = PartyDetails.builder().user(user2).email("test@hmcts.net").firstName("test").build();
-        PartyFlags partyFlags = PartyFlags.builder().partyExternalFlags(Flags.builder().build())
-            .partyInternalFlags(Flags.builder().build()).build();
+        Flags partyFlags = Flags.builder().build();
         caseData = CaseData.builder()
             .applicants(Arrays.asList(element(applicant1), element(applicant2)))
-            .allPartyFlags(AllPartyFlags.builder().caRespondent2Flags(partyFlags).build())
+            .allPartyFlags(AllPartyFlags.builder().caRespondent2ExternalFlags(partyFlags).build())
             .build();
         caseDataMap = new HashMap<>();
         caseDataMap.put("caApplicant2Flags", partyFlags);
@@ -791,7 +788,7 @@ public class CaseServiceTest {
             startEventResponse);
 
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class))).thenReturn(caseData);
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(PartyFlags.class))).thenReturn(partyFlags);
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Flags.class))).thenReturn(partyFlags);
 
         CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
             .partyType(PartyEnum.applicant)
