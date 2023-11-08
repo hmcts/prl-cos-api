@@ -906,11 +906,13 @@ public class DraftAnOrderService {
 
     public CaseData updateCustomFieldsWithApplicantRespondentDetails(@RequestBody CallbackRequest callbackRequest, CaseData caseData) {
 
+        log.info("***Court name before set {}", caseData.getCourtName());
         if (callbackRequest
             .getCaseDetailsBefore() != null && callbackRequest
             .getCaseDetailsBefore().getData().get(COURT_NAME) != null) {
             caseData.setCourtName(callbackRequest
                                       .getCaseDetailsBefore().getData().get(COURT_NAME).toString());
+            log.info("***Court name after set {}", caseData.getCourtName());
         }
         if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             FL404 fl404CustomFields = getFl404CustomFields(caseData);
@@ -1825,7 +1827,7 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("Case data updated : {}", callbackRequest.getCaseDetails().getData());
+        log.info("*** CourtName 1 {}", caseData.getCourtName());
         List<Element<HearingData>> existingOrderHearingDetails = null;
         List<String> errorList = null;
         boolean isSolicitorOrdersHearings = false;
@@ -1877,11 +1879,12 @@ public class DraftAnOrderService {
             }
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("*** CourtName 2 {}", caseDataUpdated.get("courtName"));
         if (populateAndReturnIfErrors(errorList, caseDataUpdated, HEARING_SCREEN_ERRORS)
             || populateAndReturnIfErrors(occupationErrorList, caseDataUpdated, OCCUPATIONAL_SCREEN_ERRORS)) {
             return caseDataUpdated;
         }
-
+        log.info("*** CourtName {}", caseData.getCourtName());
         return generateOrderDocument(
             authorisation,
             callbackRequest,
