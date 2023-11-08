@@ -14,17 +14,24 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.models.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.caseflags.PartyFlags;
+import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -39,6 +46,8 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -120,6 +129,8 @@ public class CaseServiceTest {
     private Map<String, Object> caseDataMap;
     private PartyDetails partyDetails;
     private UpdateCaseData updateCaseData;
+    private final String systemUserId = "systemUserID";
+    private final String eventToken = "eventToken";
 
     @Before
     public void setup() {
@@ -651,5 +662,151 @@ public class CaseServiceTest {
         String isValid = caseService.validateAccessCode(authToken,s2sToken,caseId,accessCode);
 
         assertEquals(INVALID, isValid);
+    }
+
+    @Test
+    public void testUpdatePartyFlagsAsCitizenOnCaRespondent() {
+
+        User user1 = User.builder().idamId("231").build();
+        User user2 = User.builder().idamId("123").build();
+        PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
+        PartyDetails respondent2 = PartyDetails.builder().user(user2).email("test@hmcts.net").firstName("test").build();
+        PartyFlags partyFlags = PartyFlags.builder().partyExternalFlags(Flags.builder().build())
+            .partyInternalFlags(Flags.builder().build()).build();
+        caseData = CaseData.builder()
+            .respondents(Arrays.asList(element(respondent1), element(respondent2)))
+            .allPartyFlags(AllPartyFlags.builder().caRespondent2Flags(partyFlags).build())
+            .build();
+        caseDataMap = new HashMap<>();
+        caseDataMap.put("caRespondent2Flags", partyFlags);
+        caseDataMap.put("respondents", Arrays.asList(element(respondent1), element(respondent2)));
+
+        caseDetails = caseDetails.toBuilder()
+            .data(caseDataMap)
+            .id(123L)
+            .state("SUBMITTED_PAID")
+            .build();
+
+        FlagDetail flagDetail = FlagDetail.builder()
+            .name("Mobility support")
+            .dateTimeCreated(LocalDateTime.now())
+            .dateTimeModified(LocalDateTime.now())
+            .hearingRelevant(YesOrNo.Yes)
+            .flagCode("RA0008")
+            .status("Requested")
+            .availableExternally(YesOrNo.Yes)
+            .build();
+
+        List<Element<FlagDetail>> flagDetails = new ArrayList<>();
+        flagDetails.add(element(flagDetail));
+        userDetails = UserDetails.builder().build();
+        when(systemUserService.getUserId(Mockito.anyString())).thenReturn(systemUserId);
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
+        when(coreCaseDataService.eventRequest(CaseEvent.PAYMENT_SUCCESS_CALLBACK, systemUserId)).thenReturn(
+            EventRequestData.builder().build());
+        caseDetails = CaseDetails.builder().id(Long.valueOf("123")).data(caseDataMap).build();
+
+        StartEventResponse startEventResponse = StartEventResponse.builder().eventId(CITIZEN_CASE_UPDATE.getValue())
+            .caseDetails(caseDetails)
+            .token(eventToken).build();
+        when(coreCaseDataService.startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(
+            startEventResponse);
+
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class))).thenReturn(caseData);
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(PartyFlags.class))).thenReturn(partyFlags);
+
+        CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
+            .partyType(PartyEnum.respondent)
+            .partyIdamId("123")
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyExternalFlags(Flags.builder().details(flagDetails).build())
+            .build();
+
+        CaseData updatedCaseData = caseService.updatePartyFlagsAsCitizen(
+            authToken,
+            "123",
+            CITIZEN_CASE_UPDATE.getValue(),
+            citizenPartyFlagsRequest
+        );
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testUpdatePartyFlagsAsCitizenOnCaApplicants() {
+
+        User user1 = User.builder().idamId("231").build();
+        User user2 = User.builder().idamId("123").build();
+        PartyDetails applicant1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
+        PartyDetails applicant2 = PartyDetails.builder().user(user2).email("test@hmcts.net").firstName("test").build();
+        PartyFlags partyFlags = PartyFlags.builder().partyExternalFlags(Flags.builder().build())
+            .partyInternalFlags(Flags.builder().build()).build();
+        caseData = CaseData.builder()
+            .applicants(Arrays.asList(element(applicant1), element(applicant2)))
+            .allPartyFlags(AllPartyFlags.builder().caRespondent2Flags(partyFlags).build())
+            .build();
+        caseDataMap = new HashMap<>();
+        caseDataMap.put("caApplicant2Flags", partyFlags);
+        caseDataMap.put("applicants", Arrays.asList(element(applicant1), element(applicant2)));
+
+        caseDetails = caseDetails.toBuilder()
+            .data(caseDataMap)
+            .id(123L)
+            .state("SUBMITTED_PAID")
+            .build();
+
+        FlagDetail flagDetail = FlagDetail.builder()
+            .name("Mobility support")
+            .dateTimeCreated(LocalDateTime.now())
+            .dateTimeModified(LocalDateTime.now())
+            .hearingRelevant(YesOrNo.Yes)
+            .flagCode("RA0008")
+            .status("Requested")
+            .availableExternally(YesOrNo.Yes)
+            .build();
+
+        List<Element<FlagDetail>> flagDetails = new ArrayList<>();
+        flagDetails.add(element(flagDetail));
+
+        userDetails = UserDetails.builder().build();
+        when(systemUserService.getUserId(Mockito.anyString())).thenReturn(systemUserId);
+        when(systemUserService.getSysUserToken()).thenReturn(authToken);
+        when(coreCaseDataService.eventRequest(CaseEvent.PAYMENT_SUCCESS_CALLBACK, systemUserId)).thenReturn(
+            EventRequestData.builder().build());
+        caseDetails = CaseDetails.builder().id(Long.valueOf("123")).data(caseDataMap).build();
+
+        StartEventResponse startEventResponse = StartEventResponse.builder().eventId(CITIZEN_CASE_UPDATE.getValue())
+            .caseDetails(caseDetails)
+            .token(eventToken).build();
+        when(coreCaseDataService.startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(
+            startEventResponse);
+
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class))).thenReturn(caseData);
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(PartyFlags.class))).thenReturn(partyFlags);
+
+        CitizenPartyFlagsRequest citizenPartyFlagsRequest = CitizenPartyFlagsRequest.builder()
+            .partyType(PartyEnum.applicant)
+            .partyIdamId("123")
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyExternalFlags(Flags.builder().details(flagDetails).build())
+            .build();
+
+        CaseData updatedCaseData = caseService.updatePartyFlagsAsCitizen(
+            authToken,
+            "123",
+            CITIZEN_CASE_UPDATE.getValue(),
+            citizenPartyFlagsRequest
+        );
+
+        assertNotNull(updatedCaseData);
     }
 }
