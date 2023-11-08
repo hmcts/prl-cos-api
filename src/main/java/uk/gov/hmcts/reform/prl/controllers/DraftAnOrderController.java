@@ -198,8 +198,10 @@ public class DraftAnOrderController {
                     .errors((List<String>) caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))
                     .build();
             } else {
-                caseDataUpdated = draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest);
-                return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+                return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.handleDocumentGenerationForaDraftOrder(
+                    authorisation,
+                    callbackRequest
+                )).build();
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
