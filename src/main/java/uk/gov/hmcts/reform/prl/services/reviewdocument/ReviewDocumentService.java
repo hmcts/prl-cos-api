@@ -4,7 +4,9 @@ package uk.gov.hmcts.reform.prl.services.reviewdocument;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -25,6 +27,7 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -64,7 +67,6 @@ public class ReviewDocumentService {
     private final AuthTokenGenerator authTokenGenerator;
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
-    public static final String DOCUMENT_UUID_REGEX = "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
         + System.lineSeparator()
@@ -280,6 +282,13 @@ public class ReviewDocumentService {
             Document document  = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
             if (isReviewDecisionYes) {
                 log.info(" DocumentId found {}", uuid);
+                Resource resource = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(), uuid).getBody();
+                byte[] docData = null;
+                try {
+                    docData = IOUtils.toByteArray(resource.getInputStream());
+                } catch (IOException ex) {
+                    log.error("Failed to get document binary");
+                }
                 UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                     authorisation,
                     authTokenGenerator.generate(),
@@ -290,7 +299,7 @@ public class ReviewDocumentService {
                             SOA_MULTIPART_FILE,
                             "Conf-" + document.getDocumentFileName(),
                             APPLICATION_PDF_VALUE,
-                            DocumentUtils.readBytes(document.getDocumentBinaryUrl())
+                            docData
                         )));
                 log.info("Document uploaded");
                 Document document1 = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
