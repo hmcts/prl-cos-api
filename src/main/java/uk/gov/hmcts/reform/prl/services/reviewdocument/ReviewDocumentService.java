@@ -35,6 +35,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -66,6 +68,7 @@ public class ReviewDocumentService {
     @Autowired
     private final AuthTokenGenerator authTokenGenerator;
 
+    public static final String SWAGGER_BASE_UUID_REGEX = "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}";
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -280,9 +283,12 @@ public class ReviewDocumentService {
 
             QuarantineLegalDoc uploadDoc = null;
             Document document  = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
+            log.info("Document {}", document);
+            UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
             if (isReviewDecisionYes) {
-                log.info(" DocumentId found {}", uuid);
-                Resource resource = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(), uuid).getBody();
+                log.info(" DocumentId found {}", documentId);
+                Resource resource = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(),
+                                                                         documentId).getBody();
                 byte[] docData = null;
                 try {
                     docData = IOUtils.toByteArray(resource.getInputStream());
@@ -309,7 +315,7 @@ public class ReviewDocumentService {
                     isReviewDecisionYes
                 );
                 log.info("document uploaded {}", document1);
-                caseDocumentClient.deleteDocument(authorisation, authTokenGenerator.generate(),uuid,true);
+                caseDocumentClient.deleteDocument(authorisation, authTokenGenerator.generate(),documentId,true);
                 log.info("deleted document");
             }
 
@@ -328,6 +334,17 @@ public class ReviewDocumentService {
                 caseDataUpdated.put(uploadDocListConfOrDocTabKey, List.of(element(uploadDoc)));
             }
         }
+    }
+
+    private String getDocumentId(String url) {
+        Pattern pairRegex = Pattern.compile(SWAGGER_BASE_UUID_REGEX);
+        Matcher matcher = pairRegex.matcher(url);
+        String documentId = null;
+        if (matcher.find()) {
+            documentId  = matcher.group(0);
+        }
+        log.info("document id {}", documentId);
+        return documentId;
     }
 
     private Document getQuarantineDocument(String uploadedBy,
