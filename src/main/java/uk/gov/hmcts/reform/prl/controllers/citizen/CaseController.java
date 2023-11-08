@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -74,6 +75,22 @@ public class CaseController {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @GetMapping(path = "/{caseId}/retrieve-ra-flags/{partyId}", produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch RA flags")
+    public Flags getCaseFlags(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("caseId") String partyId,
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (isAuthorized(userToken, s2sToken)) {
+            CaseDetails caseDetails = caseService.getCase(userToken, caseId);
+            return caseService.getPartyCaseFlags(caseDetails, partyId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

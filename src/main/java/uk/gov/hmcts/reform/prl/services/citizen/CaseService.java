@@ -16,11 +16,14 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -28,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -56,9 +60,9 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyDetailsMeta;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
-
 
 @Slf4j
 @Service
@@ -92,6 +96,8 @@ public class CaseService {
 
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private static final String INVALID_CLIENT = "Invalid Client";
+
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
@@ -392,6 +398,35 @@ public class CaseService {
         }
 
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
+    }
+
+    public Flags getPartyCaseFlags(CaseDetails caseDetails, String partyId) {
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        String caseType = caseData.getCaseTypeOfApplication();
+        boolean isCaCase = C100_CASE_TYPE.equalsIgnoreCase(caseType);
+        String partyExternalCaseFlagField = null;
+        PartyDetailsMeta partyDetailsMeta = getPartyDetailsMeta(partyId, caseType, caseData);
+        PartyEnum partyType = partyDetailsMeta.getPartyType();
+
+        if (PartyEnum.applicant == partyType) {
+            partyExternalCaseFlagField = partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                isCaCase ? PartyRole.Representing.CAAPPLICANT : PartyRole.Representing.DAAPPLICANT,
+                partyDetailsMeta.getPartyIndex(),
+                partyDetailsMeta.getPartyDetails()
+            );
+        } else if (PartyEnum.respondent == partyType) {
+            partyExternalCaseFlagField = partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                isCaCase ? PartyRole.Representing.CARESPONDENT : PartyRole.Representing.DARESPONDENT,
+                partyDetailsMeta.getPartyIndex(),
+                partyDetailsMeta.getPartyDetails()
+            );
+        }
+
+        if (null != partyExternalCaseFlagField) {
+            return objectMapper.convertValue(caseDetails.getData().get(partyExternalCaseFlagField), Flags.class);
+        }
+
+        return null;
     }
 
 }
