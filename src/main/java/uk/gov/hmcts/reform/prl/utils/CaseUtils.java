@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -36,6 +38,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -53,6 +56,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
+import org.apache.commons.collections.CollectionUtils;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 public class CaseUtils {
@@ -402,5 +407,51 @@ public class CaseUtils {
             log.info("Sate " + state.getLabel());
             caseDataUpdated.put("caseStatus", CaseStatus.builder().state(state.getLabel()).build());
         }
+    }
+
+    public static PartyDetailsMeta getPartyDetailsMeta(String partyId, String caseType, CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(caseType) ? getCAPartyDetailsMeta(partyId,caseData) : getDAPartyDetailsMeta(partyId,caseData);
+    }
+
+    private static PartyDetailsMeta getCAPartyDetailsMeta(String partyId, CaseData caseData){
+
+        if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+            List<Element<PartyDetails>> applicants = caseData.getApplicants();
+            int partyIndex = getPartyIndex(partyId, applicants);
+
+            if(0 >= partyIndex) {
+                return PartyDetailsMeta.builder().partyType(PartyEnum.applicant).partyIndex(partyIndex).partyDetails(applicants.get(partyIndex).getValue()).build();
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+            List<Element<PartyDetails>> respondents = caseData.getRespondents();
+                int partyIndex = getPartyIndex(partyId, respondents);
+
+            if(0 >= partyIndex) {
+                return PartyDetailsMeta.builder().partyType(PartyEnum.respondent).partyIndex(partyIndex).partyDetails(respondents.get(partyIndex).getValue()).build();
+            }
+        }
+
+        return null;
+    }
+
+    private static int getPartyIndex(String partyId, List<Element<PartyDetails>> parties){
+       return IntStream.range(0, parties.size())
+            .filter(index -> parties.get(index).getValue().getPartyId().toString().equals(partyId))
+            .findFirst()
+            .orElse(-1);
+    }
+
+    private static PartyDetailsMeta getDAPartyDetailsMeta(String partyId, CaseData caseData){
+        if (isNotEmpty(caseData.getApplicantsFL401()) && caseData.getApplicantsFL401().getPartyId().toString().equals(partyId)){
+            return PartyDetailsMeta.builder().partyType(PartyEnum.applicant).partyIndex(0).partyDetails(caseData.getApplicantsFL401()).build();
+        }
+
+        if (isNotEmpty(caseData.getRespondentsFL401()) && caseData.getRespondentsFL401().getPartyId().toString().equals(partyId)){
+            return PartyDetailsMeta.builder().partyType(PartyEnum.respondent).partyIndex(0).partyDetails(caseData.getRespondentsFL401()).build();
+        }
+
+        return null;
     }
 }
