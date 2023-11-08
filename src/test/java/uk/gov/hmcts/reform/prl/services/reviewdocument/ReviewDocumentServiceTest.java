@@ -31,7 +31,10 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.mockito.Mockito.verify;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ReviewDocumentServiceTest {

@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -434,6 +433,7 @@ public class ManageDocumentsServiceTest {
         assertEquals(1,courtStaffQuarantineDocsList.size());
         assertEquals(0,courtStaffUploadDocListDocTab.size());
     }
+
     @Test(expected = NullPointerException.class)
     public void testCopyDocumentIfRestrictedWithCourtStaffRoleWhenNoUploaderNamePresent() {
 
