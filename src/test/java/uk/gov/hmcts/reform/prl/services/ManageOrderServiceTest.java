@@ -71,6 +71,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
+import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -92,7 +94,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -153,6 +154,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private HearingDataService hearingDataService;
+
+    @Mock
+    private RefDataUserService refDataUserService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -2465,7 +2469,7 @@ public class ManageOrderServiceTest {
             .caseDetails(caseDetails)
             .build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        Map<String, Object> stringObjectMap = manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest);
+        Map<String, Object> stringObjectMap = manageOrderService.serveOrderMidEvent(callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
@@ -2536,7 +2540,7 @@ public class ManageOrderServiceTest {
         String courtEmail = "test1@test.com";
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(Mockito.any())).thenReturn(courtEmail);
 
-        Map<String, Object> stringObjectMap = manageOrderService.checkOnlyC47aOrderSelectedToServe(callbackRequest);
+        Map<String, Object> stringObjectMap = manageOrderService.serveOrderMidEvent(callbackRequest);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }
 
@@ -2667,6 +2671,7 @@ public class ManageOrderServiceTest {
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
 
         ReflectionTestUtils.setField(manageOrderService, "c21WelshTemplate", "c21-WEL-template");
@@ -2948,6 +2953,7 @@ public class ManageOrderServiceTest {
             .doesOrderClosesCase(YesOrNo.Yes)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
             .manageOrders(manageOrders)
             .build();
 
@@ -2956,7 +2962,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateJudgeName() {
+    public void testGetJudgeFullName() {
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("1234").personalCode("ABC").build())
             .sdoLocalAuthorityList(List.of(SdoLocalAuthorityEnum.localAuthorityLetter))
@@ -2966,10 +2972,17 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .standardDirectionOrder(standardDirectionOrder)
             .build();
-        when(userService.getUserByUserId(any(), any())).thenReturn(UserDetails.builder().surname("Judge").forename(
-            "Test").build());
-        CaseData actualCaseData = manageOrderService.populateJudgeName("Bearer test", caseData);
-        assertEquals("Test Judge", actualCaseData.getStandardDirectionOrder().getSdoNamedJudgeFullName());
+        List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
+        JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
+            .fullName("Test")
+            .personalCode("test")
+            .build();
+        judicialUsersApiResponses.add(judicialUsersApiResponse);
+        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
+            .personalCode(new String[]{"test"}).build();
+        when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
+        String name = manageOrderService.getJudgeFullName(JudicialUser.builder().idamId("1234").personalCode("test").build());
+        assertEquals("Test", name);
     }
 
 
@@ -3232,6 +3245,7 @@ public class ManageOrderServiceTest {
             .dateOrderMade(LocalDate.now())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .manageOrders(manageOrders)
             .build();
 
@@ -3300,5 +3314,67 @@ public class ManageOrderServiceTest {
 
         //Then
         assertNull(caseDataUpdated.get("additionalOrderDocuments"));
+    }
+
+    @Test
+    public void testGetGeneratedDocument() {
+        GeneratedDocumentInfo generatedDocumentInfo1 = GeneratedDocumentInfo.builder().build();
+        assertNotNull(manageOrderService.getGeneratedDocument(
+                                                       generatedDocumentInfo1, true, new HashMap<>())
+        );
+    }
+
+    @Test
+    public void testCleanUpServeOrderOptions() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("serveOrderAdditionalDocuments","serveOrderAdditionalDocuments");
+        manageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+        Assert.assertNull(caseDataUpdated.get("serveOrderAdditionalDocuments"));
+    }
+
+    @Test
+    public void testSetFieldsForWaTaskForCreateOrder() {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .build();
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        assertNotNull(response);
+        assertTrue(response.containsKey("orderNameForWA"));
+        assertNotNull(response.get("orderNameForWA"));
+    }
+
+    @Test
+    public void testSetFieldsForWaTaskForUploadOrder() {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .build();
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        assertNotNull(response);
+        assertTrue(response.containsKey("orderNameForWA"));
+        assertNull(response.get("orderNameForWA"));
     }
 }
