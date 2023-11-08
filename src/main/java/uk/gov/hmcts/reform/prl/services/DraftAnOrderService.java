@@ -678,6 +678,7 @@ public class DraftAnOrderService {
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         caseDataMap.put("recitalsOrPreamble", selectedOrder.getRecitalsOrPreamble());
         caseDataMap.put("orderDirections", selectedOrder.getOrderDirections());
+        caseDataMap.put("c21OrderOptions", selectedOrder.getC21OrderOptions());
         caseDataMap.put("furtherDirectionsIfRequired", selectedOrder.getFurtherDirectionsIfRequired());
         caseDataMap.put("furtherInformationIfRequired", selectedOrder.getFurtherInformationIfRequired());
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
