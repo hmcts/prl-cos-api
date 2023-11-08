@@ -8,7 +8,9 @@ import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
@@ -31,6 +33,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_C100;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VALID_ORDER_IDS_FOR_C100;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VALID_ORDER_IDS_FOR_FL401;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameList;
@@ -71,11 +75,10 @@ public class ManageOrdersUtils {
                     || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue())) {
                     errorList.add("HearingType cannot be empty, please select a hearingType");
                 }
-            } else {
-                if (isEmpty(ordersHearingDetails)
-                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
-                    errorList.add("Please provide at least one hearing details");
-                }
+            } else if (isEmpty(ordersHearingDetails)
+                || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
+                errorList.add("Please provide at least one hearing details");
+
             }
             if (isNotEmpty(ordersHearingDetails) && ordersHearingDetails.size() > 1) {
                 errorList.add("Only one hearing can be created");
@@ -243,13 +246,12 @@ public class ManageOrdersUtils {
         return errorList;
     }
 
-    public static List<String> getErrorForOccupationScreen(CaseData casedata) {
+    public static List<String> getErrorForOccupationScreen(CaseData caseData, CreateSelectOrderOptionsEnum orderType) {
         List<String> errorList = new ArrayList<>();
-        FL404 fl404CustomFields = casedata.getManageOrders().getFl404CustomFields();
-        if (isApplicantSectionFilled(fl404CustomFields)
-            || isRespondentSectionFilled(fl404CustomFields)) {
-            return errorList;
-        } else {
+        FL404 fl404CustomFields = caseData.getManageOrders().getFl404CustomFields();
+        if (CreateSelectOrderOptionsEnum.occupation.equals(orderType)
+            && ObjectUtils.isNotEmpty(fl404CustomFields)
+            && !(isApplicantSectionFilled(fl404CustomFields) || isRespondentSectionFilled(fl404CustomFields))) {
             errorList.add("Please enter either applicant or respondent section");
         }
         return errorList;
@@ -273,41 +275,31 @@ public class ManageOrdersUtils {
             || CollectionUtils.isNotEmpty(fl404CustomFields.getFl404bRespondentOtherInstructions());
     }
 
-    public static boolean isHearingPageNeeded(CaseData caseData) {
+    public static boolean isHearingPageNeeded(CreateSelectOrderOptionsEnum createSelectOrderOptions, C21OrderOptionsEnum c21OrderOptions) {
         //C21 blank order
-        if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            return null != caseData.getManageOrders()
-                && C21OrderOptionsEnum.c21other.equals(caseData.getManageOrders().getC21OrderOptions());
+        if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(createSelectOrderOptions)) {
+            return C21OrderOptionsEnum.c21other.equals(c21OrderOptions);
         }
 
         return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
-            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(caseData.getCreateSelectOrderOptions())));
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(createSelectOrderOptions)));
     }
+
 
     public static boolean getErrorsForOrdersProhibitedForC100FL401(CaseData caseData,
                                                                    CreateSelectOrderOptionsEnum selectedOrder,
                                                                    List<String> errorList) {
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && (!CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.parentalResponsibility.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.specialGuardianShip.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder))) {
-            errorList.add(ORDER_NOT_AVAILABLE_C100);
-        } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && (!CreateSelectOrderOptionsEnum.nonMolestation.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.occupation.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.amendDischargedVaried.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.blank.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.powerOfArrest.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.generalForm.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder)
-            && !CreateSelectOrderOptionsEnum.directionOnIssue.equals(selectedOrder))) {
-            errorList.add(ORDER_NOT_AVAILABLE_FL401);
+        if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
+            || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && !Arrays.stream(VALID_ORDER_IDS_FOR_C100)
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
+                errorList.add(ORDER_NOT_AVAILABLE_C100);
+            } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
+                errorList.add(ORDER_NOT_AVAILABLE_FL401);
+            }
         }
 
         return !errorList.isEmpty();

@@ -74,6 +74,7 @@ public class AmendOrderServiceTest {
         caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .manageOrdersDocumentToAmend(originalOrder)
+                              .manageOrdersAmendedOrder(originalOrder)
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .amendOrderDynamicList(DynamicList.builder()
                                                          .value(DynamicListElement.builder()
@@ -84,13 +85,13 @@ public class AmendOrderServiceTest {
             .build();
 
         byte[] stampedBinaries = new byte[]{1, 2, 3, 4, 5};
-        when(stamper.amendDocument(originalOrder, validAuth)).thenReturn(stampedBinaries);
-        when(uploadDocumentService.uploadDocument(
+        /* when(stamper.amendDocument(originalOrder, validAuth)).thenReturn(stampedBinaries);
+           when(uploadDocumentService.uploadDocument(
             stampedBinaries,
             "amended_filename.pdf",
             "application/pdf",
             validAuth
-        )).thenReturn(stampedDocument);
+        )).thenReturn(stampedDocument);*/
         when(time.now()).thenReturn(LocalDateTime.now());
         when(manageOrderService.getLoggedInUserType(Mockito.anyString())).thenReturn("");
     }
