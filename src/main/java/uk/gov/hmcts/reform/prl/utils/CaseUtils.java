@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -11,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
+import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -19,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -36,7 +39,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -402,5 +407,78 @@ public class CaseUtils {
             log.info("Sate " + state.getLabel());
             caseDataUpdated.put("caseStatus", CaseStatus.builder().state(state.getLabel()).build());
         }
+    }
+
+    public static Optional<PartyDetailsMeta> getPartyDetailsMeta(String partyId, String caseType, CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(caseType)
+            ? getC100PartyDetailsMeta(partyId, caseData)
+            : getFL401PartyDetailsMeta(partyId, caseData);
+    }
+
+    private static int findPartyIndex(String partyId, List<Element<PartyDetails>> parties) {
+        return IntStream.range(0, parties.size())
+            .filter(index -> parties.get(index).getValue().getUser().getIdamId().toString().equals(partyId))
+            .findFirst()
+            .orElse(-1);
+    }
+
+    private static Optional<PartyDetailsMeta> getC100PartyDetailsMeta(String partyId, CaseData caseData) {
+        Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
+        if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+            int partyIndex = findPartyIndex(partyId, caseData.getApplicants());
+
+            if (partyIndex > -1) {
+                partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                           .builder()
+                                                           .partyType(PartyEnum.applicant)
+                                                           .partyIndex(partyIndex)
+                                                           .partyDetails(caseData.getApplicants().get(partyIndex).getValue())
+                                                           .build());
+
+                return partyDetailsMeta;
+            }
+        }
+
+        if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+            int partyIndex = findPartyIndex(partyId, caseData.getRespondents());
+
+            if (partyIndex > -1) {
+                partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                           .builder()
+                                                           .partyType(PartyEnum.respondent)
+                                                           .partyIndex(partyIndex)
+                                                           .partyDetails(caseData.getRespondents().get(partyIndex).getValue())
+                                                           .build());
+                return partyDetailsMeta;
+            }
+        }
+        return partyDetailsMeta;
+    }
+
+    private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
+        Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
+        if (isNotEmpty(caseData.getApplicantsFL401())
+            && caseData.getApplicantsFL401().getPartyId().toString().equals(partyId)) {
+            partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                       .builder()
+                                                       .partyType(PartyEnum.applicant)
+                                                       .partyIndex(0)
+                                                       .partyDetails(caseData.getApplicantsFL401())
+                                                       .build());
+            return partyDetailsMeta;
+        }
+
+        if (isNotEmpty(caseData.getRespondentsFL401())
+            && caseData.getRespondentsFL401().getPartyId().toString().equals(partyId)) {
+            partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                       .builder()
+                                                       .partyType(PartyEnum.respondent)
+                                                       .partyIndex(0)
+                                                       .partyDetails(caseData.getRespondentsFL401())
+                                                       .build());
+            return partyDetailsMeta;
+        }
+
+        return partyDetailsMeta;
     }
 }
