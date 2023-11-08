@@ -474,4 +474,11 @@ public class PartyLevelCaseFlagsService {
         }
         return caseData;
     }
+
+    public String getPartyCaseDataExternalField(String caseType, PartyRole.Representing representing, int partyIndex) {
+        return C100_CASE_TYPE.equalsIgnoreCase(caseType) ? String.format(
+            representing.getCaseDataExternalField(),
+            partyIndex + 1
+        ) : representing.getCaseDataExternalField();
+    }
 }
