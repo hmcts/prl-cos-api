@@ -81,16 +81,15 @@ public class CaseController {
     }
 
     @GetMapping(path = "/{caseId}/retrieve-ra-flags/{partyId}", produces = APPLICATION_JSON)
-    @Operation(description = "Frontend to fetch RA flags")
+    @Operation(description = "Frontend to fetch RA flags for the given party")
     public Flags getCaseFlags(
         @PathVariable("caseId") String caseId,
-        @PathVariable("caseId") String partyId,
+        @PathVariable("partyId") String partyId,
         @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (isAuthorized(userToken, s2sToken)) {
-            CaseDetails caseDetails = caseService.getCase(userToken, caseId);
-            return caseService.getPartyCaseFlags(caseDetails, partyId);
+            return caseService.getPartyCaseFlags(userToken, caseId, partyId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
