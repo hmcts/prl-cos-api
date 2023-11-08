@@ -1726,7 +1726,6 @@ public class DraftAnOrderService {
             if (manageOrders.getC21OrderOptions() != null) {
                 manageOrders = manageOrders.toBuilder().typeOfC21Order(BOLD_BEGIN + manageOrders
                         .getC21OrderOptions().getDisplayedValue() + BOLD_END)
-                    .isTheOrderByConsent(Yes)
                     .build();
                 caseData = caseData.toBuilder().manageOrders(manageOrders).build();
             }
@@ -1795,7 +1794,6 @@ public class DraftAnOrderService {
             caseDataUpdated.put(SELECTED_ORDER, null != caseData.getCreateSelectOrderOptions()
                 ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : "");
             caseDataUpdated.put(DATE_ORDER_MADE, LocalDate.now());
-            caseDataUpdated.put("isTheOrderByConsent", Yes);
             caseDataUpdated.put("magistrateLastName", CollectionUtils.isNotEmpty(caseData.getMagistrateLastName())
                 ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
 
