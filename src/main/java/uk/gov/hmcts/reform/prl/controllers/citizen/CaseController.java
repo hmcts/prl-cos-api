@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -75,21 +76,6 @@ public class CaseController {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 CaseUtils.getRemainingDaysSubmitCase(caseData)).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @GetMapping(path = "/{caseId}/retrieve-ra-flags/{partyId}", produces = APPLICATION_JSON)
-    @Operation(description = "Frontend to fetch RA flags for the given party")
-    public Flags getCaseFlags(
-        @PathVariable("caseId") String caseId,
-        @PathVariable("partyId") String partyId,
-        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        if (isAuthorized(userToken, s2sToken)) {
-            return caseService.getPartyCaseFlags(userToken, caseId, partyId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -270,6 +256,21 @@ public class CaseController {
         @PathVariable("caseId") String caseId) {
         if (isAuthorized(authorisation, s2sToken)) {
             return hearingService.getHearings(authorisation, caseId);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @GetMapping(path = "/{caseId}/retrieve-ra-flags/{partyId}", produces = APPLICATION_JSON)
+    @Operation(description = "Frontend to fetch RA flags for the given party")
+    public Optional<Flags> getCaseFlags(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("partyId") String partyId,
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (isAuthorized(userToken, s2sToken)) {
+            return caseService.getPartyCaseFlags(userToken, caseId, partyId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

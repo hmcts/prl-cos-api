@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -40,6 +41,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -56,8 +58,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
-import org.apache.commons.collections.CollectionUtils;
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 public class CaseUtils {
@@ -409,49 +409,76 @@ public class CaseUtils {
         }
     }
 
-    public static PartyDetailsMeta getPartyDetailsMeta(String partyId, String caseType, CaseData caseData) {
-        return C100_CASE_TYPE.equalsIgnoreCase(caseType) ? getCAPartyDetailsMeta(partyId,caseData) : getDAPartyDetailsMeta(partyId,caseData);
+    public static Optional<PartyDetailsMeta> getPartyDetailsMeta(String partyId, String caseType, CaseData caseData) {
+        return C100_CASE_TYPE.equalsIgnoreCase(caseType)
+            ? getC100PartyDetailsMeta(partyId, caseData)
+            : getFL401PartyDetailsMeta(partyId, caseData);
     }
 
-    private static PartyDetailsMeta getCAPartyDetailsMeta(String partyId, CaseData caseData){
-
-        if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
-            List<Element<PartyDetails>> applicants = caseData.getApplicants();
-            int partyIndex = getPartyIndex(partyId, applicants);
-
-            if(0 >= partyIndex) {
-                return PartyDetailsMeta.builder().partyType(PartyEnum.applicant).partyIndex(partyIndex).partyDetails(applicants.get(partyIndex).getValue()).build();
-            }
-        }
-
-        if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
-            List<Element<PartyDetails>> respondents = caseData.getRespondents();
-                int partyIndex = getPartyIndex(partyId, respondents);
-
-            if(0 >= partyIndex) {
-                return PartyDetailsMeta.builder().partyType(PartyEnum.respondent).partyIndex(partyIndex).partyDetails(respondents.get(partyIndex).getValue()).build();
-            }
-        }
-
-        return null;
-    }
-
-    private static int getPartyIndex(String partyId, List<Element<PartyDetails>> parties){
-       return IntStream.range(0, parties.size())
+    private static int findPartyIndex(String partyId, List<Element<PartyDetails>> parties) {
+        return IntStream.range(0, parties.size())
             .filter(index -> parties.get(index).getValue().getPartyId().toString().equals(partyId))
             .findFirst()
             .orElse(-1);
     }
 
-    private static PartyDetailsMeta getDAPartyDetailsMeta(String partyId, CaseData caseData){
-        if (isNotEmpty(caseData.getApplicantsFL401()) && caseData.getApplicantsFL401().getPartyId().toString().equals(partyId)){
-            return PartyDetailsMeta.builder().partyType(PartyEnum.applicant).partyIndex(0).partyDetails(caseData.getApplicantsFL401()).build();
+    private static Optional<PartyDetailsMeta> getC100PartyDetailsMeta(String partyId, CaseData caseData) {
+        Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
+        if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+            int partyIndex = findPartyIndex(partyId, caseData.getApplicants());
+
+            if (partyIndex > -1) {
+                partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                           .builder()
+                                                           .partyType(PartyEnum.applicant)
+                                                           .partyIndex(partyIndex)
+                                                           .partyDetails(caseData.getApplicants().get(partyIndex).getValue())
+                                                           .build());
+
+                return partyDetailsMeta;
+            }
         }
 
-        if (isNotEmpty(caseData.getRespondentsFL401()) && caseData.getRespondentsFL401().getPartyId().toString().equals(partyId)){
-            return PartyDetailsMeta.builder().partyType(PartyEnum.respondent).partyIndex(0).partyDetails(caseData.getRespondentsFL401()).build();
+        if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+            int partyIndex = findPartyIndex(partyId, caseData.getRespondents());
+
+            if (partyIndex > -1) {
+                partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                           .builder()
+                                                           .partyType(PartyEnum.respondent)
+                                                           .partyIndex(partyIndex)
+                                                           .partyDetails(caseData.getRespondents().get(partyIndex).getValue())
+                                                           .build());
+                return partyDetailsMeta;
+            }
+        }
+        return partyDetailsMeta;
+    }
+
+    private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
+        Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
+        if (isNotEmpty(caseData.getApplicantsFL401())
+            && caseData.getApplicantsFL401().getPartyId().toString().equals(partyId)) {
+            partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                       .builder()
+                                                       .partyType(PartyEnum.applicant)
+                                                       .partyIndex(0)
+                                                       .partyDetails(caseData.getApplicantsFL401())
+                                                       .build());
+            return partyDetailsMeta;
         }
 
-        return null;
+        if (isNotEmpty(caseData.getRespondentsFL401())
+            && caseData.getRespondentsFL401().getPartyId().toString().equals(partyId)) {
+            partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
+                                                       .builder()
+                                                       .partyType(PartyEnum.respondent)
+                                                       .partyIndex(0)
+                                                       .partyDetails(caseData.getRespondentsFL401())
+                                                       .build());
+            return partyDetailsMeta;
+        }
+
+        return partyDetailsMeta;
     }
 }

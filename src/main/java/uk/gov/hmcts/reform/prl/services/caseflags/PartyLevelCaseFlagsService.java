@@ -475,12 +475,7 @@ public class PartyLevelCaseFlagsService {
         return caseData;
     }
 
-    public String getPartyCaseDataExternalField(PartyRole.Representing representing, int partyIndex, PartyDetails partyDetails) {
-
-        if (0 < partyIndex || null == partyDetails || StringUtils.isEmpty(partyDetails.getLabelForDynamicList())) {
-            return null;
-        }
-
+    public String getPartyCaseDataExternalField(PartyRole.Representing representing, int partyIndex) {
         return String.format(representing.getCaseDataExternalField(), partyIndex + 1);
     }
 }
