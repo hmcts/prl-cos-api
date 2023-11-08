@@ -417,8 +417,15 @@ public class CaseUtils {
     }
 
     private static int findPartyIndex(String partyId, List<Element<PartyDetails>> parties) {
+        log.info("findPartyIndex partyId:: " + partyId);
+        log.info("findPartyIndex parties:: " + parties);
+        log.info("findPartyIndex parties size:: " + parties.size());
+
         return IntStream.range(0, parties.size())
-            .filter(index -> (ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser())
+            .filter(index -> (ObjectUtils.isNotEmpty(parties.get(index))
+                && ObjectUtils.isNotEmpty(parties.get(index).getValue())
+                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser())
+                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser().getIdamId())
                 && parties.get(index).getValue().getUser().getIdamId().toString().equals(
                 partyId)))
             .findFirst()
