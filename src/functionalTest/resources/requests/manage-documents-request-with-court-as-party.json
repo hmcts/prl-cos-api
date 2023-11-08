@@ -6,7 +6,7 @@
       "manageDocuments": [{
         "id": "559c3c44-a2fc-475d-9822-42747c29469c",
         "value": {
-          "documentParty": "Court",
+          "documentParty": "COURT",
           "document": {
             "documentCreatedOn": null
           },
