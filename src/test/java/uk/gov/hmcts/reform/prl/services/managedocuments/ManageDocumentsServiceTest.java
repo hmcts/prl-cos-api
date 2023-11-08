@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -110,6 +111,7 @@ public class ManageDocumentsServiceTest {
     UserDetails userDetailsCafcassRole;
 
     UserDetails userDetailsCourtStaffRole;
+    UserDetails userDetailsCourtStaffRole2;
 
     List<String> categoriesToExclude;
 
@@ -155,6 +157,10 @@ public class ManageDocumentsServiceTest {
             .surname("test")
             .roles(Collections.singletonList(COURT_ADMIN_ROLE))
             .build();
+        userDetailsCourtStaffRole2 = UserDetails.builder()
+            .roles(Collections.singletonList(COURT_ADMIN_ROLE))
+            .build();
+
 
 
 
@@ -231,6 +237,8 @@ public class ManageDocumentsServiceTest {
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
         assertEquals(1,legalProfQuarantineDocsList.size());
+        String uploadedBy = legalProfQuarantineDocsList.stream().map(e -> e.getValue().getUploadedBy()).findFirst().get();
+        assertEquals("test test",uploadedBy);
         assertEquals(0,legalProfUploadDocListDocTab.size());
     }
 
@@ -424,6 +432,53 @@ public class ManageDocumentsServiceTest {
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
         assertEquals(1,courtStaffQuarantineDocsList.size());
+        assertEquals(0,courtStaffUploadDocListDocTab.size());
+    }
+    @Test(expected = NullPointerException.class)
+    public void testCopyDocumentIfRestrictedWithCourtStaffRoleWhenNoUploaderNamePresent() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("courtStaffQuarantineDocsList",courtStaffQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("courtStaffUploadDocListDocTab",courtStaffUploadDocListDocTabInitial);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        quarantineLegalDocElement = element(quarantineLegalDoc);
+
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole2);
+
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+
+        courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
+
+        courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
+
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
+        assertEquals(1,courtStaffQuarantineDocsList.size());
+        assertNull(courtStaffQuarantineDocsList.stream().map(e -> e.getValue().getUploadedBy()).findFirst().get());
         assertEquals(0,courtStaffUploadDocListDocTab.size());
     }
 

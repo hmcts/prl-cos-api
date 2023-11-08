@@ -30,7 +30,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ReviewDocumentServiceTest {
@@ -148,9 +149,19 @@ public class ReviewDocumentServiceTest {
         Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
     }
 
-    @Test
+    @Test(expected = NullPointerException.class)
     public void testReviewDocumentListIsNotEmptyWhenDocumentsAreNotPresent() {
         Assert.assertTrue(reviewDocumentService.getDynamicListElements(CaseData.builder().build()).isEmpty());
+        CaseData caseData =  CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        reviewDocumentService.getReviewResult(caseData);
+        verify(coreCaseDataService).triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            caseData.getId(),
+            "c100-all-docs-reviewed",
+            null
+        );
     }
 
     @Test
@@ -258,7 +269,14 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testReviewProcessOfDocumentToConfidentialTabForLegalProfQuarantineDocsWhenYesIsSelected() {
-
+        element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(QuarantineLegalDoc.builder()
+                       .categoryId("test")
+                       .notes("test")
+                       .uploadedBy("test test")
+                       .documentUploadedDate(LocalDateTime.now())
+                       .document(Document.builder().build())
+                       .build()).build();
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
         documentList.add(element);
         CaseData caseData =  CaseData.builder()
@@ -278,6 +296,8 @@ public class ReviewDocumentServiceTest {
                             listQuarantineLegalDoc.get(0).getValue().getCategoryId());
         Assert.assertEquals(caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().get(0).getValue().getNotes(),
                             listQuarantineLegalDoc.get(0).getValue().getNotes());
+        Assert.assertEquals(caseData.getReviewDocuments().getLegalProfUploadDocListConfTab().get(0).getValue().getUploadedBy(),
+                            listQuarantineLegalDoc.get(0).getValue().getUploadedBy());
     }
 
     @Test
