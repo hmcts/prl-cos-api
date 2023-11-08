@@ -400,7 +400,8 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
-    public Flags getPartyCaseFlags(CaseDetails caseDetails, String partyId) {
+    public Flags getPartyCaseFlags(String userToken, String caseId, String partyId) {
+        CaseDetails caseDetails = getCase(userToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         String caseType = caseData.getCaseTypeOfApplication();
         boolean isCaCase = C100_CASE_TYPE.equalsIgnoreCase(caseType);
@@ -423,7 +424,7 @@ public class CaseService {
         }
 
         if (null != partyExternalCaseFlagField) {
-            return objectMapper.convertValue(caseDetails.getData().get(partyExternalCaseFlagField), Flags.class);
+            return (Flags) caseDetails.getData().get(partyExternalCaseFlagField);
         }
 
         return null;
