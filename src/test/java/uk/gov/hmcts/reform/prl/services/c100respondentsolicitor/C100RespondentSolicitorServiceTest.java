@@ -801,6 +801,71 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateAWithConfidentialityIsNoTest() {
+
+        respondent = PartyDetails.builder()
+            .response(Response.builder()
+                          .keepDetailsPrivate(KeepDetailsPrivate
+                                                  .builder()
+                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .confidentiality(Yes)
+                                                  .build())
+                          .build())
+            .build();
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+
+        Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent).build();
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondents);
+
+        CaseData caseData1 = CaseData.builder().respondents(respondentList).id(1)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                                                        .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                                        .confidentiality(No)
+                                                                        .build())
+                                         .build())
+            .build();
+
+
+        Map<String, Object> stringObjectMap1 = caseData1.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap1, CaseData.class)).thenReturn(caseData1);
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap1)
+                             .build())
+            .eventId("SolicitorA")
+            .build();
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData1);
+        when(applicationsTabService.getRespondentsTable(caseData1)).thenReturn(List.of(Element.<Respondent>builder().build()));
+        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
+            Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
+        when(systemUserService.getSysUserToken()).thenReturn("");
+
+
+        String[] events = {"c100ResSolKeepDetailsPrivateA"};
+        for (String event : events) {
+            callbackRequest.setEventId(event);
+            Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+                callbackRequest
+            );
+
+            assertTrue(response.containsKey("respondents"));
+        }
+    }
+
+    @Test
     public void populateAboutToStartCaseDataConsentToApplicationEvent() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
