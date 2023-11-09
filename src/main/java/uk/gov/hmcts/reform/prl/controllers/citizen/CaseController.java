@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -210,9 +209,9 @@ public class CaseController {
     public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                      @RequestHeader(value = "caseId", required = true)
-                                         String caseId,
+                                     String caseId,
                                      @RequestHeader(value = "accessCode", required = true)
-                                         String accessCode) {
+                                     String accessCode) {
         if (isAuthorized(authorisation, s2sToken)) {
             String cosApis2sToken = authTokenGenerator.generate();
             return caseService.validateAccessCode(authorisation, cosApis2sToken, caseId, accessCode);
@@ -285,7 +284,7 @@ public class CaseController {
 
     @GetMapping(path = "/{caseId}/retrieve-ra-flags/{partyId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch RA flags for the given party")
-    public Optional<Flags> getCaseFlags(
+    public Flags getCaseFlags(
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
         @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
