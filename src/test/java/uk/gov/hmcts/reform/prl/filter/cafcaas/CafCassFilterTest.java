@@ -42,4 +42,20 @@ public class CafCassFilterTest {
         List<Element<InterpreterNeed>> elementList = new ArrayList<>();
         assertNotNull(cafCassFilter.filterNonValueList(elementList));
     }
+
+    @Test
+    public void filterNonValueListTest1() {
+        List<Element<InterpreterNeed>> elementList = new ArrayList<>();
+        Element element = Element.builder().build();
+        elementList.add(element);
+        assertNotNull(cafCassFilter.filterNonValueList(elementList));
+    }
+
+    @Test
+    public void filterNonValueListTest2() {
+        List<Element<InterpreterNeed>> elementList = new ArrayList<>();
+        Element element = Element.builder().value(InterpreterNeed.builder().build()).build();
+        elementList.add(element);
+        assertNotNull(cafCassFilter.filterNonValueList(elementList));
+    }
 }
