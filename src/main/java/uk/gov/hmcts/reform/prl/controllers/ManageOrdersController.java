@@ -286,9 +286,9 @@ public class ManageOrdersController {
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                 if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(caseData, hearings));
+                                                                           .getHearingDataForSelectedHearing(caseData, hearings, authorisation));
                 } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                    caseData = manageOrderService.setHearingDataForSdo(caseData, hearings);
+                    caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                 }
                 log.info("*** Court seal 0 {}", caseData.getCourtSeal());
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(

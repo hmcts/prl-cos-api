@@ -99,6 +99,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
@@ -333,7 +334,7 @@ public class DraftAnOrderServiceTest {
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(hearingService.getHearings(Mockito.anyString(), Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
-        when(hearingDataService.getHearingDataForSelectedHearing(any(), any()))
+        when(hearingDataService.getHearingDataForSelectedHearing(any(), any(), anyString()))
             .thenReturn(List.of(element(HearingData.builder().build())));
         uuid = UUID.fromString(TEST_UUID);
     }
@@ -3866,7 +3867,7 @@ public class DraftAnOrderServiceTest {
         Hearings hearings = Hearings.hearingsWith().build();
         when(hearingService.getHearings(Mockito.anyString(),
                                         Mockito.anyString())).thenReturn(hearings);
-        when(manageOrderService.setHearingDataForSdo(caseData, hearings)).thenReturn(caseData);
+        when(manageOrderService.setHearingDataForSdo(caseData, hearings, "test token")).thenReturn(caseData);
         Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
@@ -3918,7 +3919,7 @@ public class DraftAnOrderServiceTest {
         Hearings hearings = Hearings.hearingsWith().build();
         when(hearingService.getHearings(Mockito.anyString(),
                                         Mockito.anyString())).thenReturn(hearings);
-        when(manageOrderService.setHearingDataForSdo(caseData, hearings)).thenReturn(caseData);
+        when(manageOrderService.setHearingDataForSdo(caseData, hearings, "test-auth")).thenReturn(caseData);
         Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
             caseData,
             "test-auth",
@@ -3978,7 +3979,7 @@ public class DraftAnOrderServiceTest {
         Hearings hearings = Hearings.hearingsWith().build();
         when(hearingService.getHearings(Mockito.anyString(),
                                         Mockito.anyString())).thenReturn(hearings);
-        when(manageOrderService.setHearingDataForSdo(any(), any())).thenReturn(caseData);
+        when(manageOrderService.setHearingDataForSdo(any(), any(), anyString())).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
             .eventId("adminEditAndApproveAnOrder")

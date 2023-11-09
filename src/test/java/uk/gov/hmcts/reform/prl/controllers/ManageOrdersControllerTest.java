@@ -2402,7 +2402,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(hearingDataService.getHearingDataForSelectedHearing(Mockito.any(),Mockito.any()))
+        when(hearingDataService.getHearingDataForSelectedHearing(Mockito.any(),Mockito.any(),Mockito.anyString()))
             .thenReturn(hearingElementList);
 
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
@@ -2518,7 +2518,7 @@ public class ManageOrdersControllerTest {
                              .build())
             .build();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(manageOrderService.setHearingDataForSdo(any(),any()))
+        when(manageOrderService.setHearingDataForSdo(any(),any(), anyString()))
             .thenReturn(caseData);
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = manageOrdersController.saveOrderDetails(
