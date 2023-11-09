@@ -83,7 +83,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_Y;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LATEST_HEARING_DATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR_HEARING_CHANNEL;
@@ -167,7 +166,7 @@ public class HearingDataService {
                 List<DynamicListElement> dynamicListElements = new ArrayList<>();
                 for (CaseHearing caseHearing: hearingDetails.getCaseHearings()) {
                     log.info("** Status {}", caseHearing.getHmcStatus());
-                    if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
+                    if (!caseHearing.getHmcStatus().isEmpty()) {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(String.valueOf(caseHearing.getHearingID()))
                                                     .label(caseHearing.getHearingTypeValue() + " - "
@@ -226,8 +225,7 @@ public class HearingDataService {
 
                     if (hearingsList != null) {
                         hearingsList.getCaseHearings().stream()
-                            .filter(caseHearing -> LISTED.equalsIgnoreCase(
-                                caseHearing.getHmcStatus()))
+                            .filter(caseHearing -> !caseHearing.getHmcStatus().isEmpty())
                             .forEach(
                                 hearingFromHmc ->
                                     dynamicListElements.add(
