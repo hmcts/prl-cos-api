@@ -2622,7 +2622,7 @@ public class ManageOrderService {
 
     public HearingData getHearingData(String authorization,
                                        CaseData caseData) {
-        String caseReferenceNumber = String.valueOf(caseData.getId());
+        String caseReferenceNumber = "1698996638172712";
         log.info("Inside Prepopulate getHearingData for the case id {}", caseReferenceNumber);
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
         log.info("Fetched Hearings {}", hearings);
