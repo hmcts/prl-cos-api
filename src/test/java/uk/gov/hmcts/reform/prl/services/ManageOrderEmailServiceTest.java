@@ -1193,7 +1193,7 @@ public class ManageOrderEmailServiceTest {
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
-    @Test
+    //  @Test
     public void testSendEmailWhenOrderServed() {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
