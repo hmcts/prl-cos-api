@@ -121,6 +121,7 @@ public class FL401SubmitApplicationService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         try {
+            log.trace("Trying out async solution - this is the main method");
             SolicitorNotificationEmailEvent event = prepareFl401SolNotificationEvent(callbackRequest, userDetails);
             eventPublisher.publishEvent(event);
             if (null != caseData.getCourtEmailAddress()) {
@@ -131,6 +132,7 @@ public class FL401SubmitApplicationService {
                 .isNotificationSent("Yes")
                 .build();
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
+            log.trace("Trying out async solution - closing the api call");
         } catch (Exception e) {
             log.error("Notification could not be sent due to {} ", e.getMessage());
             caseData = caseData.toBuilder()
