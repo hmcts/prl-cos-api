@@ -342,6 +342,34 @@ public class HearingServiceTest {
         Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
         assertEquals(false,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
     }
+
+    @Test
+    @DisplayName("test case for Hearing service when hearing contain schedule before current date.")
+    public void getHearingWhenScheduledHearingHasBeforeCurrentDate() {
+        LocalDateTime hearingStartDate = LocalDateTime.now().minusDays(5);
+        hearingDaySchedule =
+            HearingDaySchedule.hearingDayScheduleWith()
+                .hearingStartDateTime(hearingStartDate)
+                .build();
+        caseHearing = CaseHearing.caseHearingWith().hmcStatus("UNKNOWN")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(null)
+            .hearingID(2030006118L).build();
+
+        hearings = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber)
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Collections.singletonList(caseHearing))
+            .build();
+        when(hearingApiClient.getHearingDetails(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(hearings);
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
+        assertEquals(false,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
+    }
 }
 
 
