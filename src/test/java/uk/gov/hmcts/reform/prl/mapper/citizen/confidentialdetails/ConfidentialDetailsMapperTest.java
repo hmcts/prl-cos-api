@@ -40,8 +40,12 @@ public class ConfidentialDetailsMapperTest {
     Address address;
     PartyDetails partyDetails1;
     PartyDetails partyDetails2;
+    PartyDetails partyDetails3;
+    PartyDetails partyDetails4;
     PartyDetails partyDetailsCheck1;
     PartyDetails partyDetailsCheck2;
+    PartyDetails partyDetailsCheck3;
+    PartyDetails partyDetailsCheck4;
 
     @Test
     public void testChildAndPartyConfidentialDetails() {
@@ -80,15 +84,56 @@ public class ConfidentialDetailsMapperTest {
             .lastName("XYZ 2")
             .dateOfBirth(LocalDate.of(2000, 01, 01))
             .gender(Gender.male)
-            .address(address)
             .canYouProvideEmailAddress(YesOrNo.No)
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.No)
-            .phoneNumber("12345678900")
-            .email("abc2@xyz.com")
             .currentRespondent(YesOrNo.Yes)
             .build();
+
+        partyDetails4 = PartyDetails.builder()
+            .response(Response.builder()
+                          .citizenDetails(CitizenDetails
+                                              .builder()
+                                              .build())
+                          .build())
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .currentRespondent(YesOrNo.Yes)
+            .build();
+
+        partyDetails3 = PartyDetails.builder()
+            .response(Response.builder()
+                          .citizenDetails(CitizenDetails
+                                              .builder()
+                                              .contact(Contact
+                                                           .builder()
+                                                           .build())
+                                              .build())
+                          .build())
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc1@xyz.com")
+            .phoneNumber("09876543211")
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .currentRespondent(YesOrNo.Yes)
+            .build();
+
 
         partyDetailsCheck1 = PartyDetails.builder()
             .firstName("ABC 1")
@@ -124,18 +169,30 @@ public class ConfidentialDetailsMapperTest {
             partyDetails1).build();
         Element<PartyDetails> partyDetailsSecondRec = Element.<PartyDetails>builder().value(
             partyDetails2).build();
+        Element<PartyDetails> partyDetailsThirdRec = Element.<PartyDetails>builder().value(
+            partyDetails3).build();
+        Element<PartyDetails> partyDetailsFourthRec = Element.<PartyDetails>builder().value(
+            partyDetails4).build();
         List<Element<PartyDetails>> listOfPartyDetails = List.of(
             partyDetailsFirstRec,
-            partyDetailsSecondRec
+            partyDetailsSecondRec,
+            partyDetailsThirdRec,
+            partyDetailsFourthRec
         );
 
         Element<PartyDetails> partyDetailsFirstRecCheck = Element.<PartyDetails>builder().value(
             partyDetailsCheck1).build();
         Element<PartyDetails> partyDetailsSecondRecCheck = Element.<PartyDetails>builder().value(
             partyDetailsCheck2).build();
+        Element<PartyDetails> partyDetailsThirdRecCheck = Element.<PartyDetails>builder().value(
+            partyDetailsCheck3).build();
+        Element<PartyDetails> partyDetailsFourthRecCheck = Element.<PartyDetails>builder().value(
+            partyDetailsCheck4).build();
         List<Element<PartyDetails>> listOfPartyDetailsCheck = List.of(
             partyDetailsFirstRecCheck,
-            partyDetailsSecondRecCheck
+            partyDetailsSecondRecCheck,
+            partyDetailsThirdRecCheck,
+            partyDetailsFourthRec
         );
 
         CaseData caseData = CaseData.builder().respondents(listOfPartyDetails).caseTypeOfApplication(C100_CASE_TYPE).build();
@@ -145,6 +202,13 @@ public class ConfidentialDetailsMapperTest {
         );
         assertEquals(partyDetails1.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
 
+    }
+
+    @Test
+    public void testChildAndPartyConfidentialDetailsWhenRespondentsNotPresent() {
+        CaseData caseData = CaseData.builder().respondents(null).caseTypeOfApplication(C100_CASE_TYPE).build();
+        CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+        assertTrue(caseDataCheck.getRespondentConfidentialDetails().isEmpty());
     }
 
     @Test
@@ -172,5 +236,14 @@ public class ConfidentialDetailsMapperTest {
         );
         assertEquals(partyDetails.getFirstName(),caseDataCheck.getRespondentConfidentialDetails().get(0).getValue().getFirstName());
 
+    }
+
+    @Test
+    public void testChildAndPartyConfidentialDetailsF401WhenRespondentNotPresent() {
+        CaseData caseData = CaseData.builder().respondentsFL401(null).caseTypeOfApplication(FL401_CASE_TYPE).build();
+        CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
+        assertTrue(
+            caseDataCheck.getRespondentConfidentialDetails().isEmpty()
+        );
     }
 }
