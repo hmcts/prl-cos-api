@@ -38,11 +38,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.Organisation;
-import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.*;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -3386,7 +3382,7 @@ public class ManageOrderServiceTest {
                                                                                           .build()).build();
         List<Element<OrderDetails>> orderList = new ArrayList<>();
         orderList.add(orders);
-
+        manageOrders = manageOrders.toBuilder().ordersHearingDetails(null).build();
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -3463,5 +3459,31 @@ public class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> stringObjectMap = manageOrderService.handlePreviewOrder(callbackRequest, authToken);
         Assert.assertEquals(hearingDataList, stringObjectMap.get("ordersHearingDetails"));
+    }
+
+    @Test
+    public void testgetIsUploadedFlagSolicitor() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+        DraftOrder draftOrder = manageOrderService.getCurrentUploadDraftOrderDetails(caseData, UserRoles.SOLICITOR.name());
+        assertNotNull(draftOrder);
+    }
+
+    @Test
+    public void testgetIsUploadedFlagWithCaseWorker() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+        DraftOrder draftOrder = manageOrderService.getCurrentUploadDraftOrderDetails(caseData, UserRoles.CASEWORKER.name());
+        assertNotNull(draftOrder);
     }
 }
