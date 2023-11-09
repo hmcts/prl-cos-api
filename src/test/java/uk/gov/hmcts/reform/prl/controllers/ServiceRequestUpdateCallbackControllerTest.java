@@ -82,6 +82,7 @@ public class ServiceRequestUpdateCallbackControllerTest {
         verifyNoMoreInteractions(requestUpdateCallbackService);
 
     }
+
     @Test
     public void testServiceRequestCallBackDetailsServiceAuthWithoutBearer() throws Exception {
 
