@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +41,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -441,7 +443,25 @@ public class CaseService {
             }
 
             if (partyExternalCaseFlagField.isPresent()) {
-                flags = (Optional<Flags>) caseDetails.getData().get(partyExternalCaseFlagField.get());
+                try {
+                    log.info("data we are getting :: "
+                                 + objectMapper.writeValueAsString(caseDetails.getData().get(partyExternalCaseFlagField.get())));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+                LinkedHashMap<String, Object> externalFlagMap
+                    = (LinkedHashMap<String, Object>) caseDetails.getData().get(partyExternalCaseFlagField.get());
+                List<Object> flagList = externalFlagMap.entrySet().stream().map(Map.Entry::getValue).toList();
+                try {
+                    log.info("flagList is :: "
+                                 + objectMapper.writeValueAsString(flagList));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+
+                if (CollectionUtils.isNotEmpty(flagList)) {
+                    flags = (Optional<Flags>) flagList.get(0);
+                }
             }
         }
         return flags;
