@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AWAITING_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -48,7 +49,7 @@ public class HearingService {
     private String hearingTypeCategoryId;
 
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
-
+        log.info("Fetch Hearings for case {}", caseReferenceNumber);
         Hearings hearings = null;
         try {
             hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
@@ -116,7 +117,7 @@ public class HearingService {
 
         LocalDateTime nextHearingDate = null;
         LocalDateTime tempNextDateListed = null;
-        if (hearing.getHmcStatus().equals(LISTED)) {
+        if (hearing.getHmcStatus().equals(AWAITING_HEARING_DETAILS)) {
             Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule()).stream()
                 .map(HearingDaySchedule::getHearingStartDateTime)
                 .filter(hearingStartDateTime -> hearingStartDateTime.isAfter(LocalDateTime.now()))
