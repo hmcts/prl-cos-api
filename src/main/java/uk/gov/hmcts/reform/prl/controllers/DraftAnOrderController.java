@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -185,8 +186,8 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            log.info("DraftAnOrderController::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-            Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGenerationForaDraftOrder(authorisation, callbackRequest);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+                log.info("DraftAnOrderController::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
             //PRL-4260 - hearing screen validations
             if (ObjectUtils.isNotEmpty(caseDataUpdated.get(HEARING_SCREEN_ERRORS))) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
@@ -197,8 +198,10 @@ public class DraftAnOrderController {
                     .errors((List<String>) caseDataUpdated.get(OCCUPATIONAL_SCREEN_ERRORS))
                     .build();
             } else {
-                //Draft an order
-                return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+                return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.handleDocumentGenerationForaDraftOrder(
+                    authorisation,
+                    callbackRequest
+                )).build();
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

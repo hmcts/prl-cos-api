@@ -36,7 +36,7 @@ public enum JudgeOrMagistrateTitleEnum {
                                   "District Judge Magistrates Court"),
 
     @JsonProperty("magistrate")
-    magistrate("magistrate", "Magistrate (JP)"),
+    magistrate("magistrate", "Magistrates"),
 
     @JsonProperty("justicesLegalAdviser")
     justicesLegalAdviser("justicesLegalAdviser", "Justices' Legal Adviser"),
