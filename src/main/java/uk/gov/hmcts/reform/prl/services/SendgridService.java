@@ -77,9 +77,6 @@ public class SendgridService {
     @Value("${send-grid.rpa.email.from}")
     private String fromEmail;
 
-    @Value("${send-grid.notification.email.english.SERVE_ORDER_ANOTHER_ORGANISATION}")
-    private String sendgridTemplateConfig;
-
     private final DocumentGenService documentGenService;
 
     private final AuthTokenGenerator authTokenGenerator;
@@ -125,7 +122,6 @@ public class SendgridService {
         if (MapUtils.isNotEmpty(dynamicFields)) {
             dynamicFields.forEach(personalization::addDynamicTemplateData);
         }
-        log.info("template information {}",sendgridTemplateConfig);
         log.info("personalization element  {}", personalization);
         Mail mail = new Mail();
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
