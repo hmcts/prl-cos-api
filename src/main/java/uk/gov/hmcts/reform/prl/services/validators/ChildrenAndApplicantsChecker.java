@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -15,14 +16,13 @@ import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILDREN_AND_APPLICANTS_ERROR;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChildrenAndApplicantsChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
-    @Autowired
     @Lazy
-    EventsChecker eventsChecker;
+    private final EventsChecker eventsChecker;
 
     @Override
     public boolean isFinished(CaseData caseData) {
