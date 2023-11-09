@@ -717,7 +717,7 @@ public class DraftAnOrderService {
     public void populateOrderHearingDetails(String authorization, CaseData caseData, Map<String, Object> caseDataMap,
                                             List<Element<HearingData>> manageOrderHearingDetail,
                                             YesOrNo orderDraftedBySolicitor) {
-        String caseReferenceNumber = "1698996491033910";
+        String caseReferenceNumber = String.valueOf(caseData.getId());
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
