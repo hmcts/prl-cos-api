@@ -550,13 +550,13 @@ public class DraftAnOrderService {
             caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
             caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
-            populateOrderHearingDetails(
+            /*populateOrderHearingDetails(
                 authorisation,
                 caseData,
                 caseDataMap,
                 selectedOrder.getManageOrderHearingDetails(),
                 selectedOrder.getIsOrderCreatedBySolicitor()
-            );
+            );*/
             caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
             caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
             caseDataMap.put("hasJudgeProvidedHearingDetails", selectedOrder.getHasJudgeProvidedHearingDetails());
@@ -718,13 +718,31 @@ public class DraftAnOrderService {
                                             List<Element<HearingData>> manageOrderHearingDetail,
                                             YesOrNo orderDraftedBySolicitor) {
         String caseReferenceNumber = String.valueOf(caseData.getId());
+        Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
         if (CollectionUtils.isEmpty(manageOrderHearingDetail)) {
-            Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorization, caseReferenceNumber, caseData, hearings);
             HearingData hearingData = hearingDataService.generateHearingData(
                 hearingDataPrePopulatedDynamicLists, caseData);
             manageOrderHearingDetail = ElementUtils.wrapElements(hearingData);
+        } else {
+            List<Element<HearingData>> updatedManageOrderHearingDetail = new ArrayList<>();
+            for (Element<HearingData> hearingDataElement : manageOrderHearingDetail) {
+                hearingDataElement = Element.<HearingData>builder()
+                    .value(hearingDataElement.getValue().toBuilder()
+                               .confirmedHearingDates(DynamicList.builder()
+                                                          .value(
+                                                              hearingDataElement.getValue().getConfirmedHearingDates().getValue())
+                                                          .listItems(
+                                                              hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates()
+                                                                  .getListItems())
+                                                          .build())
+                               .build())
+                    .id(hearingDataElement.getId())
+                    .build();
+                updatedManageOrderHearingDetail.add(hearingDataElement);
+            }
+            manageOrderHearingDetail = updatedManageOrderHearingDetail;
         }
         if (Yes.equals(orderDraftedBySolicitor)) {
             caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, manageOrderHearingDetail);

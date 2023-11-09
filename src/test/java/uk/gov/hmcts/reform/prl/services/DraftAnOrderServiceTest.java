@@ -746,7 +746,8 @@ public class DraftAnOrderServiceTest {
                               .build())
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .manageOrderHearingDetails(List.of(element(HearingData.builder().build())))
+            .manageOrderHearingDetails(List.of(element(HearingData.builder()
+                                                           .confirmedHearingDates(DynamicList.builder().build()).build())))
             .build();
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString(TEST_UUID))
@@ -766,8 +767,15 @@ public class DraftAnOrderServiceTest {
                               .build())
             .draftOrdersDynamicList(TEST_UUID)
             .build();
-        when(elementUtils.getDynamicListSelectedValue(any(), any())).thenReturn(UUID.fromString(
+        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
             TEST_UUID));
+        when(hearingService.getHearings(Mockito.anyString(),
+                                        Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),
+                                                            Mockito.anyString(),
+                                                            any(),
+                                                            any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().retrievedHearingDates(DynamicList.builder().build()).build());
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authToken,
             caseData
