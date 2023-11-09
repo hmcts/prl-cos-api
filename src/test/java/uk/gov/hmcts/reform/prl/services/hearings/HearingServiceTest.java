@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.hearings;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -30,12 +29,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class HearingServiceTest {
 
     @Value("#{'${hearing_component.futureHearingStatus}'.split(',')}")
@@ -81,7 +80,7 @@ public class HearingServiceTest {
         List<HearingDaySchedule> hearingDayScheduleList = new ArrayList<>();
         hearingDayScheduleList.add(hearingDaySchedule);
 
-        caseHearing = CaseHearing.caseHearingWith().hmcStatus("AWAITING_HEARING_DETAILS")
+        caseHearing = CaseHearing.caseHearingWith().hmcStatus("LISTED")
             .hearingType("ABA5-FFH")
             .hearingDaySchedule(hearingDayScheduleList)
             .hearingID(2030006118L).build();
@@ -136,7 +135,7 @@ public class HearingServiceTest {
         Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
 
         assertNotNull(hearingsResp.getCaseHearings().get(0).getNextHearingDate());
-        //assertEquals(true,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
+        assertEquals(true,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
     }
 
     @Test
