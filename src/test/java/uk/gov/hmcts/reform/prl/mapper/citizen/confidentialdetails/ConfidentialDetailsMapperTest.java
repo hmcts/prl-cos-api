@@ -95,6 +95,7 @@ public class ConfidentialDetailsMapperTest {
             .response(Response.builder()
                           .citizenDetails(CitizenDetails
                                               .builder()
+                                              .address(Address.builder().build())
                                               .build())
                           .build())
             .firstName("ABC 1")
@@ -113,12 +114,6 @@ public class ConfidentialDetailsMapperTest {
 
         partyDetails3 = PartyDetails.builder()
             .response(Response.builder()
-                          .citizenDetails(CitizenDetails
-                                              .builder()
-                                              .contact(Contact
-                                                           .builder()
-                                                           .build())
-                                              .build())
                           .build())
             .firstName("ABC 1")
             .lastName("XYZ 2")
