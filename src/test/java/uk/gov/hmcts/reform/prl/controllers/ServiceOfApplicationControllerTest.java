@@ -22,10 +22,12 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationEmailService;
@@ -40,8 +42,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
@@ -289,6 +290,19 @@ public class ServiceOfApplicationControllerTest {
         assertExpectedException(() -> {
             serviceOfApplicationController.handleSubmitted(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void handleAboutToSubmit() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest
+                .builder()
+                .caseDetails(CaseDetails
+                        .builder().data(caseData)
+                        .build())
+                .build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController.handleAboutToSubmit("", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
