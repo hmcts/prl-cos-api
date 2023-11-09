@@ -83,6 +83,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATO
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_N;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILDREQUIRED_Y;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LATEST_HEARING_DATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORITY_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_HEARING_CHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR_HEARING_CHANNEL;
@@ -166,7 +167,7 @@ public class HearingDataService {
                 List<DynamicListElement> dynamicListElements = new ArrayList<>();
                 for (CaseHearing caseHearing: hearingDetails.getCaseHearings()) {
                     log.info("** Status {}", caseHearing.getHmcStatus());
-                    if (!caseHearing.getHmcStatus().isEmpty()) {
+                    if (LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())) {
                         dynamicListElements.add(DynamicListElement.builder()
                                                     .code(String.valueOf(caseHearing.getHearingID()))
                                                     .label(caseHearing.getHearingTypeValue() + " - "
@@ -225,7 +226,7 @@ public class HearingDataService {
 
                     if (hearingsList != null) {
                         hearingsList.getCaseHearings().stream()
-                            .filter(caseHearing -> !caseHearing.getHmcStatus().isEmpty())
+                            .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus()))
                             .forEach(
                                 hearingFromHmc ->
                                     dynamicListElements.add(
@@ -474,24 +475,40 @@ public class HearingDataService {
         return dynamicListElements;
     }
 
-    public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings) {
+    public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings, String authorisation) {
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         } else if (isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         }
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            populateHearingDynamicLists(
+                authorisation,
+                String.valueOf(caseData.getId()),
+                caseData,
+                hearings
+            );
+        hearingDetails = getHearingData(
+            hearingDetails,
+            hearingDataPrePopulatedDynamicLists,
+            caseData
+        );
         return hearingDetails.stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
                 && null != hearingData.getConfirmedHearingDates().getValue()) {
-                Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
+                Optional<CaseHearing> caseHearing = getHearingFromId(
+                    hearingData.getConfirmedHearingDates().getValue().getCode(),
+                    hearings
+                );
                 if (caseHearing.isPresent()) {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
-                                                                                      caseHearing.get().getHearingTypeValue()))
+                                                                                      caseHearing.get().getHearingTypeValue()
+                        ))
                         .build();
                 }
             }

@@ -2411,57 +2411,95 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public CaseData setHearingDataForSdo(CaseData caseData, Hearings hearings) {
+    public CaseData setHearingDataForSdo(CaseData caseData, Hearings hearings, String authorisation) {
         StandardDirectionOrder standardDirectionOrder = caseData.getStandardDirectionOrder();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(
+                authorisation,
+                String.valueOf(caseData.getId()),
+                caseData,
+                hearings
+            );
+        HearingData hearingData;
         if (isNotEmpty(standardDirectionOrder.getSdoUrgentHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoUrgentHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoUrgentHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoUrgentHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoPermissionHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoPermissionHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoPermissionHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoPermissionHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoSecondHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoSecondHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoSecondHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoSecondHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoFhdraHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoFhdraHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoFhdraHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoFhdraHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoDraHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoDraHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoDraHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoDraHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoSettlementHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoSettlementHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoSettlementHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoSettlementHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
@@ -2490,9 +2528,9 @@ public class ManageOrderService {
                 )
             );
             caseData.getManageOrders()
-                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, authorisation));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-            caseData = setHearingDataForSdo(caseData, hearings);
+            caseData = setHearingDataForSdo(caseData, hearings, authorisation);
         }
         return caseData;
     }

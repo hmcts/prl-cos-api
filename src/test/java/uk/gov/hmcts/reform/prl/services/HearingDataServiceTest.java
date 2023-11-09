@@ -816,7 +816,7 @@ public class HearingDataServiceTest {
                                                          .hearingSubChannel("TEL").build()))
                                                  .build()))
                                       .build())).build();
-        assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+        assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, "testAuth"));
     }
 
     @Test
@@ -869,7 +869,8 @@ public class HearingDataServiceTest {
                                       .build())).build();
         List<Element<HearingData>> hearingDataForSelectedHearing = hearingDataService.getHearingDataForSelectedHearing(
             caseData,
-            hearings
+            hearings,
+            "testAuth"
         );
         assertNotNull(hearingDataForSelectedHearing);
         assert (hearingDataForSelectedHearing.get(0).getValue().getHearingdataFromHearingTab().get(0).getValue().getHearingTime().equals(
@@ -926,7 +927,8 @@ public class HearingDataServiceTest {
                                       .build())).build();
         List<Element<HearingData>> hearingDataForSelectedHearing = hearingDataService.getHearingDataForSelectedHearing(
             caseData,
-            hearings
+            hearings,
+            "testAuth"
         );
         assertNotNull(hearingDataForSelectedHearing);
         assert (hearingDataForSelectedHearing.get(0).getValue().getHearingdataFromHearingTab().get(0).getValue().getHearingTime().equals(
@@ -1094,7 +1096,7 @@ public class HearingDataServiceTest {
                                                                               .hearingSubChannel("TEL").build()))
                                                                       .build()))
                                       .build())).build();
-        assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+        assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, "testAuth"));
     }
 }
 
