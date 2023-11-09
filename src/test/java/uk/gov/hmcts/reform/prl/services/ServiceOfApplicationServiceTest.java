@@ -452,7 +452,8 @@ public class ServiceOfApplicationServiceTest {
         Element applicantElement = element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails);
         partyList.add(applicantElement);
 
-
+        List<Document> c100StaticDocs = new ArrayList<>();
+        c100StaticDocs.add(Document.builder().documentFileName("Blank.pdf").build());
         DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
                 .value(List.of(DynamicMultiselectListElement.builder()
                         .label("recipient1")
@@ -490,9 +491,6 @@ public class ServiceOfApplicationServiceTest {
                 .build();
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTypeOfApplication","C100");
-        List<Document> c100StaticDocs = new ArrayList<>();
-        c100StaticDocs.add(Document.builder().documentFileName("Blank.pdf").build());
-        c100StaticDocs.add(Document.builder().documentFileName("Blank_2.pdf").build());
         when(serviceOfApplicationPostService.getStaticDocs(TEST_AUTH,PrlAppsConstants.C100_CASE_TYPE))
             .thenReturn(c100StaticDocs);
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
