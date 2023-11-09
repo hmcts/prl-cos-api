@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.hearings;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -121,7 +122,7 @@ public class HearingService {
         if (hearing.getHmcStatus().isEmpty()) {
             Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule()).stream()
                 .map(HearingDaySchedule::getHearingStartDateTime)
-                .filter(hearingStartDateTime -> hearingStartDateTime.isAfter(LocalDateTime.now()))
+                .filter(hearingStartDateTime -> ObjectUtils.isNotEmpty(hearingStartDateTime))
                 .min(LocalDateTime::compareTo);
             if (minDateOfHearingDaySche.isPresent() && (tempNextDateListed == null || tempNextDateListed.isAfter(minDateOfHearingDaySche.get()))) {
                 tempNextDateListed = minDateOfHearingDaySche.get();
