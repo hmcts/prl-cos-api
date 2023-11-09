@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,7 +40,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -409,8 +407,7 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
-    public Optional<Flags> getPartyCaseFlags(String userToken, String caseId, String partyId) {
-        Optional<Flags> flags = Optional.empty();
+    public Flags getPartyCaseFlags(String userToken, String caseId, String partyId) {
         CaseDetails caseDetails = getCase(userToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
@@ -443,28 +440,14 @@ public class CaseService {
             }
 
             if (partyExternalCaseFlagField.isPresent()) {
-                try {
-                    log.info("data we are getting :: "
-                                 + objectMapper.writeValueAsString(caseDetails.getData().get(partyExternalCaseFlagField.get())));
-                } catch (JsonProcessingException e) {
-                    log.info("error");
-                }
-                LinkedHashMap<String, Object> externalFlagMap
-                    = (LinkedHashMap<String, Object>) caseDetails.getData().get(partyExternalCaseFlagField.get());
-                List<Object> flagList = externalFlagMap.entrySet().stream().map(Map.Entry::getValue).toList();
-                try {
-                    log.info("flagList is :: "
-                                 + objectMapper.writeValueAsString(flagList));
-                } catch (JsonProcessingException e) {
-                    log.info("error");
-                }
-
-                if (CollectionUtils.isNotEmpty(flagList)) {
-                    flags = (Optional<Flags>) flagList.get(0);
-                }
+                return objectMapper.convertValue(
+                    caseDetails.getData().get(partyExternalCaseFlagField.get()),
+                    Flags.class
+                );
             }
         }
-        return flags;
+
+        return null;
     }
 
     public CaseData updatePartyFlagsAsCitizen(String authToken,
