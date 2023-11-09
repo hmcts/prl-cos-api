@@ -353,7 +353,7 @@ public class HearingServiceTest {
                 .build();
         caseHearing = CaseHearing.caseHearingWith().hmcStatus("LISTED")
             .hearingType("ABA5-FFH")
-            .hearingDaySchedule(null)
+            .hearingDaySchedule(List.of(hearingDaySchedule))
             .hearingID(2030006118L).build();
 
         hearings = Hearings.hearingsWith()
