@@ -128,4 +128,23 @@ public class AllocatedJudgeServiceTest {
         assertEquals("testSurname",actualResponse.getJudgeName());
 
     }
+
+    @Test
+    public void testWhenJudgeDetailsProvidedError() {
+        CaseData caseData = CaseData.builder()
+                .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
+        String[] personalCodes = new String[3];
+        personalCodes[0] = "123456";
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("isJudgeOrLegalAdviser", AllocatedJudgeTypeEnum.judge);
+        stringObjectMap.put("judgeNameAndEmail", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
+        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().build())).thenReturn(apiResponseList);
+        AllocatedJudge actualResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,refDataUserService);
+        assertNotNull(actualResponse);
+        assertEquals(AllocatedJudgeTypeEnum.judge,actualResponse.getIsJudgeOrLegalAdviser());
+        assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
+
+    }
 }
