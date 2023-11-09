@@ -490,6 +490,11 @@ public class ServiceOfApplicationServiceTest {
                 .build();
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTypeOfApplication","C100");
+        List<Document> c100StaticDocs = new ArrayList<>();
+        c100StaticDocs.add(Document.builder().documentFileName("Blank.pdf").build());
+        c100StaticDocs.add(Document.builder().documentFileName("Blank_2.pdf").build());
+        when(serviceOfApplicationPostService.getStaticDocs(TEST_AUTH,PrlAppsConstants.C100_CASE_TYPE))
+            .thenReturn(c100StaticDocs);
         when(objectMapper.convertValue(casedata, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
                 .forename("first")
