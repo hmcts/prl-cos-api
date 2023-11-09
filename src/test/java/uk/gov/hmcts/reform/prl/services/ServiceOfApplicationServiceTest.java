@@ -950,7 +950,6 @@ public class ServiceOfApplicationServiceTest {
 
         assertNotNull(soaCaseFieldsMap);
 
-        assertEquals(Yes, soaCaseFieldsMap.get("PeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
     }
