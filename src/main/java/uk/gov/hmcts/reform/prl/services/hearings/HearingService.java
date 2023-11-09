@@ -118,7 +118,7 @@ public class HearingService {
 
         LocalDateTime nextHearingDate = null;
         LocalDateTime tempNextDateListed = null;
-        if (hearing.getHmcStatus().equals(AWAITING_HEARING_DETAILS)) {
+        if (hearing.getHmcStatus().isEmpty()) {
             Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule()).stream()
                 .map(HearingDaySchedule::getHearingStartDateTime)
                 .filter(hearingStartDateTime -> hearingStartDateTime.isAfter(LocalDateTime.now()))
