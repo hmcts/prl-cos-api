@@ -95,6 +95,7 @@ public class ConfidentialDetailsMapperTest {
             .response(Response.builder()
                           .citizenDetails(CitizenDetails
                                               .builder()
+                                              .address(Address.builder().build())
                                               .build())
                           .build())
             .firstName("ABC 1")
@@ -106,27 +107,21 @@ public class ConfidentialDetailsMapperTest {
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
             .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
             .currentRespondent(YesOrNo.Yes)
             .build();
 
         partyDetails3 = PartyDetails.builder()
             .response(Response.builder()
-                          .citizenDetails(CitizenDetails
-                                              .builder()
-                                              .contact(Contact
-                                                           .builder()
-                                                           .build())
-                                              .build())
                           .build())
             .firstName("ABC 1")
             .lastName("XYZ 2")
             .dateOfBirth(LocalDate.of(2000, 01, 01))
             .gender(Gender.male)
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .currentRespondent(YesOrNo.Yes)
             .build();
