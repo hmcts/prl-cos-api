@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 
@@ -51,8 +52,8 @@ public class HearingService {
         log.info("Fetch Hearings for case {}", caseReferenceNumber);
         Hearings hearings = null;
         try {
-            hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), "1698996638172712");
-            log.info("Fetched Hearings {} caseId {}", hearings, "1698996638172712");
+            hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), "1697552563008404");
+            log.info("Fetched Hearings {} caseId {}", hearings, "1697552563008404");
             if (hearings != null) {
                 Map<String, String> refDataCategoryValueMap = getRefDataMap(
                     userToken,
@@ -117,10 +118,10 @@ public class HearingService {
 
         LocalDateTime nextHearingDate = null;
         LocalDateTime tempNextDateListed = null;
-        if (!hearing.getHmcStatus().isEmpty()) {
+        if (hearing.getHmcStatus().equals(LISTED)) {
             Optional<LocalDateTime> minDateOfHearingDaySche = nullSafeCollection(hearing.getHearingDaySchedule()).stream()
                 .map(HearingDaySchedule::getHearingStartDateTime)
-                .filter(hearingStartDateTime -> ObjectUtils.isNotEmpty(hearingStartDateTime))
+                .filter(hearingStartDateTime -> hearingStartDateTime.isAfter(LocalDateTime.now()))
                 .min(LocalDateTime::compareTo);
             if (minDateOfHearingDaySche.isPresent() && (tempNextDateListed == null || tempNextDateListed.isAfter(minDateOfHearingDaySche.get()))) {
                 tempNextDateListed = minDateOfHearingDaySche.get();
@@ -141,7 +142,7 @@ public class HearingService {
                 hearingStatus -> hearingStatus.equals(hearing.getHmcStatus())
             );
 
-        return isInFutureHearingStatusList && !hearing.getHmcStatus().isEmpty()
+        return isInFutureHearingStatusList && hearing.getHmcStatus().equals(LISTED)
             && hearing.getHearingDaySchedule() != null
             && !hearing.getHearingDaySchedule().stream()
             .filter(
