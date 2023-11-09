@@ -165,6 +165,68 @@ class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
+    void testCalculateAdditionalApplicationsFeeSolicitorDetailsNotEmpty() throws Exception {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+                .representedPartyType("test")
+                .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+                .build();
+        CaseData caseData = CaseData.builder()
+                .uploadAdditionalApplicationData(uploadAdditionalApplicationData)
+                .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(applicationsFeeCalculator.calculateAdditionalApplicationsFee(any(CaseData.class))).thenReturn(objectMap);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        CaseUser caseUser = CaseUser.builder().caseRole("caseworker-privatelaw-solicitor").build();
+        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
+        when(CaseUtils.getCaseData(
+                callbackRequest.getCaseDetails(),
+                objectMapper
+        )).thenReturn(caseData);
+        assertEquals(
+                objectMap,
+                uploadAdditionalApplicationService.calculateAdditionalApplicationsFee("testAuth", callbackRequest)
+        );
+    }
+
+    @Test
+    void testupdateAwpApplicationStatus() throws Exception {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle
+                .builder()
+                .otherApplicationsBundle(OtherApplicationsBundle
+                        .builder()
+                        .uploadedDateTime("01")
+                        .build())
+                .build()));
+
+        assertNotNull(
+                uploadAdditionalApplicationService
+                        .updateAwpApplicationStatus("OT_01_02", additionalApplicationsBundle, "OT")
+        );
+    }
+
+    @Test
+    void testupdateAwpApplicationStatusC2() throws Exception {
+        List<Element<AdditionalApplicationsBundle>> additionalApplicationsBundle = new ArrayList<>();
+        additionalApplicationsBundle.add(element(AdditionalApplicationsBundle
+                .builder()
+                .c2DocumentBundle(C2DocumentBundle
+                        .builder()
+                        .uploadedDateTime("01")
+                        .build())
+                .build()));
+
+        assertNotNull(
+                uploadAdditionalApplicationService
+                        .updateAwpApplicationStatus("C2_01_02", additionalApplicationsBundle, "C2")
+        );
+    }
+
+    @Test
     void testGetAdditionalApplicationElementsForC2() throws Exception {
         when(applicationsFeeCalculator.getFeeTypes(any(CaseData.class))).thenReturn(List.of(
                 FeeType.C2_WITH_NOTICE));

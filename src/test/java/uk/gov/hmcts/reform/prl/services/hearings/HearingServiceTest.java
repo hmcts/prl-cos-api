@@ -133,6 +133,18 @@ public class HearingServiceTest {
     }
 
     @Test
+    @DisplayName("test case for HearingService getHearings no hearings returned.")
+    public void getHearingsTestNoHearingReturned() {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
+        Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
+
+        assertEquals(null, hearingsResp);
+
+    }
+
+    @Test
     @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestException() {
         when(hearingApiClient.getHearingDetails(
@@ -258,6 +270,106 @@ public class HearingServiceTest {
         Assert.assertEquals(null, response);
     }
 
+    @Test
+    @DisplayName("test case for Hearing service when no hearing Schedule present for next hearing")
+    public void getHearingWithNoSchedulePresent() {
+        caseHearing = CaseHearing.caseHearingWith().hmcStatus("LISTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(null)
+            .hearingID(2030006118L).build();
+
+        hearings = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber)
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Collections.singletonList(caseHearing))
+            .build();
+        when(hearingApiClient.getHearingDetails(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(hearings);
+        Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
+        Assert.assertNotNull(hearingsResp);
+        Assert.assertNotNull(hearingsResp.getCaseHearings());
+        Assert.assertFalse(hearingsResp.getCaseHearings().isEmpty());
+        Assert.assertEquals(null, hearingsResp.getCaseHearings().get(0).getNextHearingDate());
+    }
+
+    @Test
+    @DisplayName("test case for Hearing service when no hearing listed")
+    public void getHearingWhenHearingNotListed() {
+        caseHearing = CaseHearing.caseHearingWith().hmcStatus("HEARING_REQUESTED")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(null)
+            .hearingID(2030006118L).build();
+
+        hearings = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber)
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Collections.singletonList(caseHearing))
+            .build();
+        when(hearingApiClient.getHearingDetails(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(hearings);
+        Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
+        Assert.assertNotNull(hearingsResp);
+        Assert.assertNotNull(hearingsResp.getCaseHearings());
+        Assert.assertFalse(hearingsResp.getCaseHearings().isEmpty());
+        Assert.assertEquals(null, hearingsResp.getCaseHearings().get(0).getNextHearingDate());
+    }
+
+    @Test
+    @DisplayName("test case for Hearing service returned status not present in config")
+    public void getFalseWhenHearingStatusDosNotMatch() {
+        caseHearing = CaseHearing.caseHearingWith().hmcStatus("UNKNOWN")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(null)
+            .hearingID(2030006118L).build();
+
+        hearings = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber)
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Collections.singletonList(caseHearing))
+            .build();
+        when(hearingApiClient.getHearingDetails(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(hearings);
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
+        assertEquals(false,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
+    }
+
+    @Test
+    @DisplayName("test case for Hearing service when hearing contain schedule before current date.")
+    public void getHearingWhenScheduledHearingHasBeforeCurrentDate() {
+        LocalDateTime hearingStartDate = LocalDateTime.now().minusDays(5);
+        hearingDaySchedule =
+            HearingDaySchedule.hearingDayScheduleWith()
+                .hearingStartDateTime(hearingStartDate)
+                .build();
+        caseHearing = CaseHearing.caseHearingWith().hmcStatus("UNKNOWN")
+            .hearingType("ABA5-FFH")
+            .hearingDaySchedule(null)
+            .hearingID(2030006118L).build();
+
+        hearings = Hearings.hearingsWith()
+            .caseRef(caseReferenceNumber)
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Collections.singletonList(caseHearing))
+            .build();
+        when(hearingApiClient.getHearingDetails(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(hearings);
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
+        assertEquals(false,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
+    }
 }
 
 
