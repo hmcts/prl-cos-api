@@ -520,7 +520,8 @@ public class UploadAdditionalApplicationService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         UploadAdditionalApplicationData uploadAdditionalApplicationData = caseData.getUploadAdditionalApplicationData();
-        if (isNotEmpty(uploadAdditionalApplicationData) && StringUtils.isEmpty(uploadAdditionalApplicationData.getRepresentedPartyType())) {
+        if (isNotEmpty(uploadAdditionalApplicationData)
+                && StringUtils.isEmpty(uploadAdditionalApplicationData.getRepresentedPartyType())) {
             caseData.setUploadAdditionalApplicationData(uploadAdditionalApplicationData.toBuilder().representedPartyType(
                 populateSolicitorRepresentingPartyType(authorisation, caseData)).build());
         }

@@ -374,6 +374,32 @@ class UploadAdditionalApplicationServiceTest {
     }
 
     @Test
+    void testCalculateAdditionalApplicationsFeeIsEmpty() throws Exception {
+        UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
+                .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))
+                .temporaryOtherApplicationsBundle(OtherApplicationsBundle.builder().build())
+                .build();
+        CaseData caseData = CaseData.builder()
+                .build();
+        Map<String, Object> objectMap = caseData.toMap(new ObjectMapper());
+        when(applicationsFeeCalculator.calculateAdditionalApplicationsFee(any(CaseData.class))).thenReturn(objectMap);
+        when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(objectMap).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        FindUserCaseRolesResponse findUserCaseRolesResponse = new FindUserCaseRolesResponse();
+        CaseUser caseUser = CaseUser.builder().caseRole("caseworker-privatelaw-solicitor").build();
+        findUserCaseRolesResponse.setCaseUsers(List.of(caseUser));
+        when(CaseUtils.getCaseData(
+                callbackRequest.getCaseDetails(),
+                objectMapper
+        )).thenReturn(caseData);
+        assertEquals(
+                objectMap,
+                uploadAdditionalApplicationService.calculateAdditionalApplicationsFee("testAuth", callbackRequest)
+        );
+    }
+
+    @Test
     void testCreateUploadAdditionalApplicationBundle() throws Exception {
         UploadAdditionalApplicationData uploadAdditionalApplicationData = UploadAdditionalApplicationData.builder()
             .additionalApplicationsApplyingFor(List.of(AdditionalApplicationTypeEnum.otherOrder))

@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -142,6 +144,19 @@ public class AllocatedJudgeServiceTest {
         List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().build())).thenReturn(apiResponseList);
         AllocatedJudge actualResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,refDataUserService);
+        assertNotNull(actualResponse);
+        assertEquals(AllocatedJudgeTypeEnum.judge,actualResponse.getIsJudgeOrLegalAdviser());
+        assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
+
+    }
+
+    @Test
+    public void testWhenJudgeDetailsIsNull() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("isJudgeOrLegalAdviser", AllocatedJudgeTypeEnum.judge);
+        stringObjectMap.put("judgeNameAndEmail", "");
+        when(refDataUserService.getAllJudicialUserDetails(Mockito.any())).thenReturn(null);
+        AllocatedJudge actualResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null, refDataUserService);
         assertNotNull(actualResponse);
         assertEquals(AllocatedJudgeTypeEnum.judge,actualResponse.getIsJudgeOrLegalAdviser());
         assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificJudgeOrLegalAdviserNeeded());
