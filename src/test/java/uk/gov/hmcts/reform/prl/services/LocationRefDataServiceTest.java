@@ -216,4 +216,13 @@ public class LocationRefDataServiceTest {
         List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test");
         assertNotNull(test);
     }
+
+    @Test
+    public void testGetCourtDetailsFromEpimmsIdEmptyCourtVenue() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .build());
+        Optional<CourtVenue> courtVenue = locationRefDataService.getCourtDetailsFromEpimmsId("2", "test");
+        assertTrue(courtVenue.isEmpty());
+    }
 }
