@@ -133,22 +133,22 @@ public class UpdatePartyDetailsService {
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
                 List<Element<PartyDetails>> updatedRespondents = new ArrayList<>();
-                caseData.getRespondents().forEach(eachRespondent -> {
+                caseData.getRespondents().forEach(eachRespondent ->
                     updatedRespondents.add(element(
                         eachRespondent.getId(),
                         resetRespondent(eachRespondent.getValue())
-                    ));
-                });
+                    ))
+                );
                 updatedCaseData.put(RESPONDENTS, updatedRespondents);
             }
             if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
                 List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
-                caseData.getApplicants().forEach(eachApplicant -> {
+                caseData.getApplicants().forEach(eachApplicant ->
                     updatedApplicants.add(element(
                         eachApplicant.getId(),
                         resetApplicant(eachApplicant.getValue())
-                    ));
-                });
+                    ))
+                );
                 updatedCaseData.put(APPLICANTS, updatedApplicants);
             }
             if (CollectionUtils.isNotEmpty(caseData.getChildren())
