@@ -1244,6 +1244,7 @@ public class ManageOrderService {
             .manageOrdersDateOfUnderTaking(caseData.getManageOrders().getManageOrdersDateOfUnderTaking())
             .underTakingDateExpiry(caseData.getManageOrders().getUnderTakingDateExpiry())
             .underTakingExpiryTime(caseData.getManageOrders().getUnderTakingExpiryTime())
+            .underTakingExpiryDateTime(caseData.getManageOrders().getUnderTakingExpiryDateTime())
             .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
             .orderSelectionType(orderSelectionType)
             .orderCreatedBy(loggedInUserType)
