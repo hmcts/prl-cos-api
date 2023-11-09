@@ -116,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_N
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -235,22 +236,9 @@ public class DraftAnOrderService {
             log.info("*** eid, Selected order id {} {}", e.getId(), selectedOrderId);
             log.info("*** Equals {}", e.getId().equals(selectedOrderId));
             if (e.getId().equals(selectedOrderId)) {
-                /*if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                    updatedCaseData.put(
-                        ORDER_HEARING_DETAILS,
-                        caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                    );
-                } else {
-                    updatedCaseData.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
-                }*/
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
-                    /*if (caseData.getManageOrders().getOrdersHearingDetails() == null && CollectionUtils.isNotEmpty(caseData.getOrderCollection())) {
-                        caseData.getManageOrders()
-                            .setOrdersHearingDetails(caseData.getOrderCollection().get(0)
-                                                         .getValue().getManageOrderHearingDetails());
-                    }*/
                     if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                         && !Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
@@ -294,7 +282,7 @@ public class DraftAnOrderService {
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            manageOrderService.updateCurrentOrderId(
+            updateCurrentOrderId(
                 caseData.getManageOrders().getServeOrderDynamicList(),
                 orderCollection,
                 newOrderDetails
@@ -1383,7 +1371,7 @@ public class DraftAnOrderService {
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             return caseDataUpdated;
         }
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
         Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =

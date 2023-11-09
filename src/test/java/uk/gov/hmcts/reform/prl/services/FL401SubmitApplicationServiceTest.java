@@ -873,6 +873,9 @@ public class FL401SubmitApplicationServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doNothing().when(eventPublisher).publishEvent(Mockito.any());
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
+        verify(eventPublisher, times(3)).publishEvent(
+            Mockito.any()
+        );
     }
 
     @Test
@@ -900,5 +903,8 @@ public class FL401SubmitApplicationServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doThrow(new RuntimeException()).when(eventPublisher).publishEvent(Mockito.any());
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
+        verify(eventPublisher, times(1)).publishEvent(
+            Mockito.any()
+        );
     }
 }

@@ -42,16 +42,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @Slf4j
 public class C100RespondentSolicitorController extends AbstractCallbackController {
     private final C100RespondentSolicitorService respondentSolicitorService;
-    private final ObjectMapper objectMapper;
     private final AuthorisationService authorisationService;
 
     @Autowired
     public C100RespondentSolicitorController(ObjectMapper objectMapper, EventService eventPublisher,
                                              C100RespondentSolicitorService respondentSolicitorService,
-                                             ObjectMapper objectMapper1, AuthorisationService authorisationService) {
+                                             AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
         this.respondentSolicitorService = respondentSolicitorService;
-        this.objectMapper = objectMapper1;
         this.authorisationService = authorisationService;
     }
 

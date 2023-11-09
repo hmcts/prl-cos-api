@@ -60,7 +60,6 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
 
     private final SolicitorEmailService solicitorEmailService;
     private final FeeAndPayServiceRequestService feeAndPayServiceRequestService;
-    private final EventService eventPublisher;
     private final AuthorisationService authorisationService;
 
     @Autowired
@@ -72,7 +71,6 @@ public class FeeAndPayServiceRequestController extends AbstractCallbackControlle
         super(objectMapper, eventPublisher);
         this.solicitorEmailService = solicitorEmailService;
         this.feeAndPayServiceRequestService = feeAndPayServiceRequestService;
-        this.eventPublisher = eventPublisher;
         this.authorisationService = authorisationService;
     }
 
