@@ -726,13 +726,12 @@ public class DraftAnOrderService {
                 hearingDataPrePopulatedDynamicLists, caseData);
             manageOrderHearingDetail = ElementUtils.wrapElements(hearingData);
         } else {
+            log.info("inside reset ConfirmedHearingDates list items");
             List<Element<HearingData>> updatedManageOrderHearingDetail = new ArrayList<>();
             for (Element<HearingData> hearingDataElement : manageOrderHearingDetail) {
                 hearingDataElement = Element.<HearingData>builder()
                     .value(hearingDataElement.getValue().toBuilder()
-                               .confirmedHearingDates(DynamicList.builder()
-                                                          .value(
-                                                              hearingDataElement.getValue().getConfirmedHearingDates().getValue())
+                               .confirmedHearingDates(hearingDataElement.getValue().getConfirmedHearingDates().toBuilder()
                                                           .listItems(
                                                               hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates()
                                                                   .getListItems())
