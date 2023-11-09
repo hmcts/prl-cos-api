@@ -401,7 +401,7 @@ public class ServiceOfApplicationServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .serviceOfApplicationScreen1(dynamicMultiSelectList)
             .finalDocument(Document.builder().build())
-            .c1ADocument(Document.builder().build())
+            .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
             .build();
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTypeOfApplication","C100");
@@ -486,7 +486,7 @@ public class ServiceOfApplicationServiceTest {
                 .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
                 .serviceOfApplicationScreen1(dynamicMultiSelectList)
                 .finalDocument(Document.builder().build())
-                .c1ADocument(Document.builder().build())
+                .c1ADocument(Document.builder().documentFileName("C1A_Blank.pdf").build())
                 .build();
         Map<String,Object> casedata = new HashMap<>();
         casedata.put("caseTypeOfApplication","C100");
