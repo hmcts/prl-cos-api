@@ -53,6 +53,7 @@ public class HearingService {
         Hearings hearings = null;
         try {
             hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), "1698996638172712");
+            log.info("Fetched Hearings {} caseId {}", hearings, "1698996638172712");
             if (hearings != null) {
                 Map<String, String> refDataCategoryValueMap = getRefDataMap(
                     userToken,
