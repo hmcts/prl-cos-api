@@ -107,8 +107,8 @@ public class ConfidentialDetailsMapperTest {
             .email("abc1@xyz.com")
             .phoneNumber("09876543211")
             .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
-            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
             .currentRespondent(YesOrNo.Yes)
             .build();
 
@@ -120,8 +120,8 @@ public class ConfidentialDetailsMapperTest {
             .dateOfBirth(LocalDate.of(2000, 01, 01))
             .gender(Gender.male)
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isAddressConfidential(YesOrNo.Yes)
-            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
             .isEmailAddressConfidential(YesOrNo.Yes)
             .currentRespondent(YesOrNo.Yes)
             .build();
