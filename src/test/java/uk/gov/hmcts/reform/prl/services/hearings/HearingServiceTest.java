@@ -351,9 +351,9 @@ public class HearingServiceTest {
             HearingDaySchedule.hearingDayScheduleWith()
                 .hearingStartDateTime(hearingStartDate)
                 .build();
-        caseHearing = CaseHearing.caseHearingWith().hmcStatus("UNKNOWN")
+        caseHearing = CaseHearing.caseHearingWith().hmcStatus("LISTED")
             .hearingType("ABA5-FFH")
-            .hearingDaySchedule(null)
+            .hearingDaySchedule(List.of(hearingDaySchedule))
             .hearingID(2030006118L).build();
 
         hearings = Hearings.hearingsWith()
