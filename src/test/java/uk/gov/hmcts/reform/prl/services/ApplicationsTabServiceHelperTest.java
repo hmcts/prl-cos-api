@@ -279,6 +279,42 @@ public class ApplicationsTabServiceHelperTest {
     }
 
     @Test
+    public void testGetOtherPeopleWhenOtherPartyInTheCaseRevisedIsNotEmpty() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .address(Address.builder()
+                         .addressLine1("address")
+                         .postTown("London")
+                         .build())
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(1999, 12, 10))
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .addressLivedLessThan5YearsDetails("test")
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .addressLivedLessThan5YearsDetails("Test")
+            .dxNumber("123456")
+            .gender(Gender.female)
+            .lastName("lastName")
+            .previousName("testPreviousname")
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> listOfParty = Collections.singletonList(partyWrapped);
+
+        CaseData caseData = CaseData.builder()
+            .othersToNotify(listOfParty)
+            .otherPartyInTheCaseRevised(listOfParty)
+            .build();
+
+        assertNotNull(applicationsTabService.getOtherPeopleInTheCaseRevisedTable(caseData));
+    }
+
+    @Test
     public void testGetOtherPeopleInTheCaseRevisedTableWithoutList() {
 
         CaseData caseData = CaseData.builder()

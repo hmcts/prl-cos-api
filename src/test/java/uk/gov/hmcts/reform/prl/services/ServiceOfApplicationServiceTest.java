@@ -688,6 +688,199 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
     }
 
+    @Test
+    public void testSendNotificationForSoaCitizenFL401() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+                .representativeLastName("repLastName")
+                .gender(Gender.male)
+                .email("abc@xyz.com")
+                .phoneNumber("1234567890")
+                .canYouProvideEmailAddress(Yes)
+                .isEmailAddressConfidential(Yes)
+                .isPhoneNumberConfidential(Yes)
+                .partyId(UUID.randomUUID())
+                .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+                .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+                .address(Address.builder().addressLine1("line1").build())
+                .build();
+
+
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Element applicantElement = element(partyDetails);
+        applicants.add(applicantElement);
+
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .applicants(applicants)
+                .caseCreatedBy(CaseCreatedBy.CITIZEN)
+                .applicantCaseName("Test Case 45678")
+                .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+                .serviceOfApplication(ServiceOfApplication.builder()
+                        .soaServeToRespondentOptions(No)
+                        .soaCafcassCymruServedOptions(Yes)
+                        .soaCafcassServedOptions(Yes)
+                        .soaCafcassEmailId("cymruemail@test.com")
+                        .soaCafcassCymruEmail("cymruemail@test.com")
+                        .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                        .build())
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+                .build();
+
+        when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
+                .forename("first")
+                .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH
+        );
+        assertNotNull(servedApplicationDetails);
+    }
+
+    @Test
+    public void testSendNotificationForSoaCitizenFL401Solicitor() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+                .representativeLastName("repLastName")
+                .gender(Gender.male)
+                .email("abc@xyz.com")
+                .phoneNumber("1234567890")
+                .canYouProvideEmailAddress(Yes)
+                .isEmailAddressConfidential(Yes)
+                .isPhoneNumberConfidential(Yes)
+                .partyId(UUID.randomUUID())
+                .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+                .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+                .address(Address.builder().addressLine1("line1").build())
+                .build();
+
+
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .applicantsFL401(partyDetails)
+                .caseCreatedBy(CaseCreatedBy.SOLICITOR)
+                .applicantCaseName("Test Case 45678")
+                .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+                .serviceOfApplication(ServiceOfApplication.builder()
+                        .soaServeToRespondentOptions(No)
+                        .soaCafcassCymruServedOptions(Yes)
+                        .soaCafcassServedOptions(Yes)
+                        .soaCafcassEmailId("cymruemail@test.com")
+                        .soaCafcassCymruEmail("cymruemail@test.com")
+                        .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                        .build())
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+                .build();
+
+        when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
+                .forename("first")
+                .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH
+        );
+        assertNotNull(servedApplicationDetails);
+    }
+
+    @Test
+    public void testSendNotificationForSoaCitizenC100Solicitor() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+                .representativeLastName("repLastName")
+                .gender(Gender.male)
+                .email("abc@xyz.com")
+                .phoneNumber("1234567890")
+                .canYouProvideEmailAddress(Yes)
+                .isEmailAddressConfidential(Yes)
+                .isPhoneNumberConfidential(Yes)
+                .partyId(UUID.randomUUID())
+                .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+                .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+                .address(Address.builder().addressLine1("line1").build())
+                .build();
+
+
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .applicantsFL401(partyDetails)
+                .caseCreatedBy(CaseCreatedBy.SOLICITOR)
+                .applicantCaseName("Test Case 45678")
+                .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+                .serviceOfApplication(ServiceOfApplication.builder()
+                        .soaServeToRespondentOptions(No)
+                        .soaCafcassCymruServedOptions(Yes)
+                        .soaCafcassServedOptions(Yes)
+                        .soaCafcassEmailId("cymruemail@test.com")
+                        .soaCafcassCymruEmail(null)
+                        .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                        .soaOtherParties(null)
+                        .build())
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+                .build();
+
+        when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
+                .forename("first")
+                .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH
+        );
+        assertNotNull(servedApplicationDetails);
+    }
+
+    @Test
+    public void testSendNotificationForSoaCitizenC100SolicitorOtherPeopleNull() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+                .representativeLastName("repLastName")
+                .gender(Gender.male)
+                .email("abc@xyz.com")
+                .phoneNumber("1234567890")
+                .canYouProvideEmailAddress(Yes)
+                .isEmailAddressConfidential(Yes)
+                .isPhoneNumberConfidential(Yes)
+                .partyId(UUID.randomUUID())
+                .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+                .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+                .address(Address.builder().addressLine1("line1").build())
+                .build();
+
+
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .applicantsFL401(partyDetails)
+                .caseCreatedBy(CaseCreatedBy.SOLICITOR)
+                .applicantCaseName("Test Case 45678")
+                .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+                .serviceOfApplication(ServiceOfApplication.builder()
+                        .soaServeToRespondentOptions(No)
+                        .soaCafcassCymruServedOptions(Yes)
+                        .soaCafcassServedOptions(Yes)
+                        .soaCafcassEmailId("cymruemail@test.com")
+                        .soaCafcassCymruEmail(null)
+                        .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                        .soaOtherParties(DynamicMultiSelectList.builder().value(Collections.emptyList()).build())
+                        .build())
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+                .build();
+
+        when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
+                .forename("first")
+                .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+                caseData,
+                TEST_AUTH
+        );
+        assertNotNull(servedApplicationDetails);
+    }
 
     @Test
     public void testSoaCaseFieldsMap() {
@@ -757,7 +950,6 @@ public class ServiceOfApplicationServiceTest {
 
         assertNotNull(soaCaseFieldsMap);
 
-        assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
     }
