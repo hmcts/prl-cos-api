@@ -549,6 +549,7 @@ public class DraftAnOrderService {
             caseDataMap.put("manageOrdersDateOfUnderTaking", selectedOrder.getManageOrdersDateOfUnderTaking());
             caseDataMap.put("underTakingDateExpiry", selectedOrder.getUnderTakingDateExpiry());
             caseDataMap.put("underTakingExpiryTime", selectedOrder.getUnderTakingExpiryTime());
+            caseDataMap.put("underTakingExpiryDateTime", selectedOrder.getUnderTakingExpiryDateTime());
             caseDataMap.put("underTakingFormSign", selectedOrder.getUnderTakingFormSign());
             populateOrderHearingDetails(
                 authorisation,
