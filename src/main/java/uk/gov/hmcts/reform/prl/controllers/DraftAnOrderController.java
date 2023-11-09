@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -187,7 +186,7 @@ public class DraftAnOrderController {
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-                log.info("DraftAnOrderController::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
+            log.info("DraftAnOrderController::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
             //PRL-4260 - hearing screen validations
             if (ObjectUtils.isNotEmpty(caseDataUpdated.get(HEARING_SCREEN_ERRORS))) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
