@@ -42,6 +42,7 @@ public class ConfidentialDetailsMapperTest {
     PartyDetails partyDetails2;
     PartyDetails partyDetails3;
     PartyDetails partyDetails4;
+    PartyDetails partyDetails5;
 
     @Test
     public void testChildAndPartyConfidentialDetails() {
@@ -123,6 +124,25 @@ public class ConfidentialDetailsMapperTest {
             .currentRespondent(YesOrNo.Yes)
             .build();
 
+        partyDetails5 = PartyDetails.builder()
+            .response(Response.builder()
+                          .citizenDetails(CitizenDetails
+                                              .builder()
+                                              .contact(Contact.builder().email("").phoneNumber("").build())
+                                              .build())
+                          .build())
+            .firstName("ABC 1")
+            .lastName("XYZ 2")
+            .dateOfBirth(LocalDate.of(2000, 01, 01))
+            .gender(Gender.male)
+            .address(address)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isEmailAddressConfidential(YesOrNo.No)
+            .currentRespondent(YesOrNo.Yes)
+            .build();
+
         Element<PartyDetails> partyDetailsFirstRec = Element.<PartyDetails>builder().value(
             partyDetails1).build();
         Element<PartyDetails> partyDetailsSecondRec = Element.<PartyDetails>builder().value(
@@ -131,11 +151,14 @@ public class ConfidentialDetailsMapperTest {
             partyDetails3).build();
         Element<PartyDetails> partyDetailsFourthRec = Element.<PartyDetails>builder().value(
             partyDetails4).build();
+        Element<PartyDetails> partyDetailsFifthRec = Element.<PartyDetails>builder().value(
+            partyDetails5).build();
         List<Element<PartyDetails>> listOfPartyDetails = List.of(
             partyDetailsFirstRec,
             partyDetailsSecondRec,
             partyDetailsThirdRec,
-            partyDetailsFourthRec
+            partyDetailsFourthRec,
+            partyDetailsFifthRec
         );
         CaseData caseData = CaseData.builder().respondents(listOfPartyDetails).caseTypeOfApplication(C100_CASE_TYPE).build();
         CaseData caseDataCheck = confidentialDetailsMapper.mapConfidentialData(caseData, true);
