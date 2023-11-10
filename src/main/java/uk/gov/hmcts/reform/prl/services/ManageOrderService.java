@@ -1233,7 +1233,6 @@ public class ManageOrderService {
             .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
             .manageOrdersApplicantReference(CaseUtils.getApplicantReference(caseData))
             .manageOrdersRespondent(CaseUtils.getRespondent(caseData))
-            .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
             .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
             .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
             .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
