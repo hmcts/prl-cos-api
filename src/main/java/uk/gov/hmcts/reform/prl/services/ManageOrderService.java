@@ -1230,8 +1230,9 @@ public class ManageOrderService {
             .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
             .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
             .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
-            .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
-            .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+            .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
+            .manageOrdersApplicantReference(CaseUtils.getApplicantReference(caseData))
+            .manageOrdersRespondent(CaseUtils.getRespondent(caseData))
             .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
             .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
             .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
@@ -1265,6 +1266,22 @@ public class ManageOrderService {
             || No.equals(caseData.getManageOrders().getIsTheOrderAboutAllChildren()))
             ? caseData.getManageOrders().getChildOption() : DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build();
+    }
+
+    public String getApplicant(CaseData caseData) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
+                                 caseData.getApplicantsFL401().getLastName()
+            );
+        }
+        return null;
+    }
+
+    public String getApplicantReference(CaseData caseData) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return caseData.getApplicantsFL401().getSolicitorReference();
+        }
+        return null;
     }
 
     public SdoDetails copyPropertiesToSdoDetails(CaseData caseData) {
@@ -1912,17 +1929,8 @@ public class ManageOrderService {
             }
         }
         caseData = caseData.toBuilder()
-            .manageOrders(ManageOrders.builder()
-                              .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-                              .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
-                              .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
-                              .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
-                              .orderDirections(caseData.getManageOrders().getOrderDirections())
-                              .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
-                              .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
+            .manageOrders(caseData.getManageOrders().toBuilder()
                               .fl404CustomFields(orderData)
-                              .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                              .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                               .childOption(getChildOption(caseData))
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
