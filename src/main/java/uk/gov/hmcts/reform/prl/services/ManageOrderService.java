@@ -1174,6 +1174,7 @@ public class ManageOrderService {
 
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserEmail) {
         log.info("33333333{}",caseData.getUserInfo());
+        log.info("44444444{}",currentUserEmail);
 
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
