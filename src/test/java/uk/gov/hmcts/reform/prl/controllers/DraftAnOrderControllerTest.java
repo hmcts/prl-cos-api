@@ -135,7 +135,7 @@ public class DraftAnOrderControllerTest {
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
-        when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }

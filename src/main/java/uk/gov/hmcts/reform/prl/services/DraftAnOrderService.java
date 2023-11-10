@@ -731,13 +731,7 @@ public class DraftAnOrderService {
             List<Element<HearingData>> updatedManageOrderHearingDetail = new ArrayList<>();
             for (Element<HearingData> hearingDataElement : manageOrderHearingDetail) {
                 hearingDataElement = Element.<HearingData>builder()
-                    .value(hearingDataElement.getValue().toBuilder()
-                               .confirmedHearingDates(hearingDataElement.getValue().getConfirmedHearingDates().toBuilder()
-                                                          .listItems(
-                                                              hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates()
-                                                                  .getListItems())
-                                                          .build())
-                               .build())
+                    .value(resetHearingConfirmedDatesAndLinkedCases(hearingDataPrePopulatedDynamicLists, hearingDataElement.getValue()))
                     .id(hearingDataElement.getId())
                     .build();
                 updatedManageOrderHearingDetail.add(hearingDataElement);
@@ -750,6 +744,25 @@ public class DraftAnOrderService {
         caseDataMap.put(ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
         //add hearing screen field show params
         ManageOrdersUtils.addHearingScreenFieldShowParams(null, caseDataMap, caseData);
+    }
+
+    private static HearingData resetHearingConfirmedDatesAndLinkedCases(
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+        HearingData hearingData) {
+        return hearingData.toBuilder()
+            .confirmedHearingDates(isNotEmpty(hearingData.getConfirmedHearingDates())
+                                       ? hearingData.getConfirmedHearingDates().toBuilder()
+                .listItems(
+                    hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates()
+                        .getListItems())
+                .build() : DynamicList.builder().listItems(List.of(DynamicListElement.EMPTY)).build())
+            .hearingListedLinkedCases(isNotEmpty(hearingData.getHearingListedLinkedCases())
+                                          ? hearingData.getHearingListedLinkedCases().toBuilder()
+                .listItems(
+                    hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases()
+                        .getListItems())
+                .build() : DynamicList.builder().listItems(List.of(DynamicListElement.EMPTY)).build())
+            .build();
     }
 
     public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
@@ -774,7 +787,7 @@ public class DraftAnOrderService {
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                    if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+                    if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                                .getHearingDataForSelectedHearing(
                                                                                    caseData,
@@ -1082,7 +1095,7 @@ public class DraftAnOrderService {
             DynamicList partiesList = partiesListGenerator.buildPartiesList(caseData, courtList);
             caseDataUpdated.put(SDO_INSTRUCTIONS_FILING_PARTIES_DYNAMIC_LIST, partiesList);
         }
-        populateHearingDetails(authorisation, caseData, caseDataUpdated);
+        populateSdoOrderHearingDetails(authorisation, caseData, caseDataUpdated);
         List<DynamicMultiselectListElement> applicantRespondentList = manageOrderService.getPartyDynamicMultiselectList(caseData);
         if (isEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass())) {
             caseDataUpdated.put(
@@ -1322,7 +1335,7 @@ public class DraftAnOrderService {
         }
     }
 
-    private void populateHearingDetails(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
+    private void populateSdoOrderHearingDetails(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
         Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(
@@ -1340,46 +1353,54 @@ public class DraftAnOrderService {
             caseDataUpdated,
             hearingData,
             caseData.getStandardDirectionOrder().getSdoPermissionHearingDetails(),
-            SDO_PERMISSION_HEARING_DETAILS
+            SDO_PERMISSION_HEARING_DETAILS,
+            hearingDataPrePopulatedDynamicLists
         );
         populateHearingData(
             caseDataUpdated,
             hearingData,
             caseData.getStandardDirectionOrder().getSdoSecondHearingDetails(),
-            SDO_SECOND_HEARING_DETAILS
+            SDO_SECOND_HEARING_DETAILS,
+            hearingDataPrePopulatedDynamicLists
         );
         populateHearingData(
             caseDataUpdated,
             hearingData,
             caseData.getStandardDirectionOrder().getSdoUrgentHearingDetails(),
-            SDO_URGENT_HEARING_DETAILS
+            SDO_URGENT_HEARING_DETAILS,
+            hearingDataPrePopulatedDynamicLists
         );
         populateHearingData(
             caseDataUpdated,
             hearingData,
             caseData.getStandardDirectionOrder().getSdoFhdraHearingDetails(),
-            SDO_FHDRA_HEARING_DETAILS
+            SDO_FHDRA_HEARING_DETAILS,
+            hearingDataPrePopulatedDynamicLists
         );
         populateHearingData(
             caseDataUpdated,
             hearingData,
             caseData.getStandardDirectionOrder().getSdoDraHearingDetails(),
-            SDO_DRA_HEARING_DETAILS
+            SDO_DRA_HEARING_DETAILS,
+            hearingDataPrePopulatedDynamicLists
         );
         populateHearingData(
             caseDataUpdated,
             hearingData,
             caseData.getStandardDirectionOrder().getSdoSettlementHearingDetails(),
-            SDO_SETTLEMENT_HEARING_DETAILS
+            SDO_SETTLEMENT_HEARING_DETAILS,
+            hearingDataPrePopulatedDynamicLists
         );
     }
 
     private static void populateHearingData(Map<String, Object> caseDataUpdated, HearingData hearingData,
-                                            HearingData existingHearingData, String hearingKey) {
+                                            HearingData existingHearingData, String hearingKey,
+                                            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
         if (existingHearingData == null
             || existingHearingData.getHearingDateConfirmOptionEnum() == null) {
             caseDataUpdated.put(hearingKey, hearingData);
         } else {
+            existingHearingData = resetHearingConfirmedDatesAndLinkedCases(hearingDataPrePopulatedDynamicLists, existingHearingData);
             caseDataUpdated.put(hearingKey, existingHearingData);
         }
     }
@@ -1690,7 +1711,7 @@ public class DraftAnOrderService {
                     caseData,
                     hearings
                 );
-            List<Element<HearingData>> hearingData = hearingDataService.getHearingData(
+            List<Element<HearingData>> hearingData = hearingDataService.getHearingDataForOtherOrders(
                 ordersHearingDetails,
                 hearingDataPrePopulatedDynamicLists,
                 caseData

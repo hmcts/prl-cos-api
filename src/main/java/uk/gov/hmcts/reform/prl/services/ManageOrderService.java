@@ -2523,8 +2523,8 @@ public class ManageOrderService {
 
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
-                hearingDataService.getHearingData(caseData.getManageOrders().getOrdersHearingDetails(),
-                                                  hearingDataPrePopulatedDynamicLists, caseData
+                hearingDataService.getHearingDataForOtherOrders(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                                hearingDataPrePopulatedDynamicLists, caseData
                 )
             );
             caseData.getManageOrders()
@@ -2599,7 +2599,7 @@ public class ManageOrderService {
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
 
-            return hearingDataService.getHearingData(
+            return hearingDataService.getHearingDataForOtherOrders(
                 existingOrderHearingDetails,
                 hearingDataPrePopulatedDynamicLists,
                 caseData

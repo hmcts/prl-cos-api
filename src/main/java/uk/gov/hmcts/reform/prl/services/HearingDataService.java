@@ -357,29 +357,18 @@ public class HearingDataService {
         return hearingData;
     }
 
-    public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
-                                                     HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
+    public List<Element<HearingData>> getHearingDataForOtherOrders(List<Element<HearingData>> hearingDatas,
+                                                                   HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                                                   CaseData caseData) {
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
-            hearingRequestDataMapper.mapHearingData(hearingData,hearingDataPrePopulatedDynamicLists,caseData);
-            Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
-            log.info("judgeDetailsSelected ---> {}", judgeDetailsSelected);
-            if (judgeDetailsSelected.isPresent() && judgeDetailsSelected.get().getPersonalCode() != null
-                && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
-                Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
-                log.info("JudgeAPI response {}", judgeApiResponse);
-                if (!judgeApiResponse.get().isEmpty()) {
-                    hearingData.setHearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname());
-                    hearingData.setHearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId());
-                    hearingData.setHearingJudgePersonalCode(judgeApiResponse.get().stream().findFirst().get().getPersonalCode());
-                }
-            }
+            getHearingData(hearingDataPrePopulatedDynamicLists, caseData, hearingData);
         });
         return hearingDatas;
     }
 
-    public HearingData getHearingDataForSdo(HearingData hearingData,
-                                            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
+    private HearingData getHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                       CaseData caseData, HearingData hearingData) {
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
         log.info("judgeDetailsSelected ---> {}", judgeDetailsSelected);
@@ -393,6 +382,12 @@ public class HearingDataService {
                 hearingData.setHearingJudgePersonalCode(judgeApiResponse.get().stream().findFirst().get().getPersonalCode());
             }
         }
+        return hearingData;
+    }
+
+    public HearingData getHearingDataForSdo(HearingData hearingData,
+                                            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
+        hearingData = getHearingData(hearingDataPrePopulatedDynamicLists, caseData, hearingData);
         hearingData = populateApplicantRespondentNames(hearingData, caseData);
         return hearingData;
     }
@@ -489,7 +484,7 @@ public class HearingDataService {
                 caseData,
                 hearings
             );
-        hearingDetails = getHearingData(
+        hearingDetails = getHearingDataForOtherOrders(
             hearingDetails,
             hearingDataPrePopulatedDynamicLists,
             caseData
