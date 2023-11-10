@@ -855,8 +855,8 @@ public class DraftAnOrderService {
             .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
             .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
             .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
-            .manageOrdersApplicant(getApplicant(caseData))
-            .manageOrdersApplicantReference(getApplicantReference(caseData))
+            .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
+            .manageOrdersApplicantReference(CaseUtils.getApplicantReference(caseData))
             .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
             .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
             .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
@@ -904,22 +904,6 @@ public class DraftAnOrderService {
             .hearingsType(caseData.getManageOrders().getHearingsType())
             .c21OrderOptions(draftOrder.getC21OrderOptions())
             .build();
-    }
-
-    private String getApplicant(CaseData caseData) {
-        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            return String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
-                                 caseData.getApplicantsFL401().getLastName()
-            );
-        }
-        return null;
-    }
-
-    private String getApplicantReference(CaseData caseData) {
-        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            return caseData.getApplicantsFL401().getSolicitorReference();
-        }
-        return null;
     }
 
     public CaseData updateCustomFieldsWithApplicantRespondentDetails(@RequestBody CallbackRequest callbackRequest, CaseData caseData) {
