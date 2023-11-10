@@ -948,7 +948,6 @@ public class DraftAnOrderService {
             log.info("***Court name after set {}", caseData.getCourtName());
         }
         if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            FL404 fl404CustomFields = getFl404CustomFields(caseData);
             caseData = caseData.toBuilder()
                 .standardDirectionOrder(caseData.getStandardDirectionOrder())
                 .manageOrders(caseData.getManageOrders().toBuilder()

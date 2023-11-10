@@ -100,9 +100,13 @@ public class DraftOrder {
     @JsonProperty("manageOrdersCourtAddress")
     private final Address manageOrdersCourtAddress;
     private final String manageOrdersCaseNo;
+    @JsonProperty("manageOrdersApplicant")
     private final String manageOrdersApplicant;
+    @JsonProperty("manageOrdersApplicantReference")
     private final String manageOrdersApplicantReference;
+    @JsonProperty("manageOrdersRespondent")
     private final String manageOrdersRespondent;
+    @JsonProperty("manageOrdersRespondentReference")
     private final String manageOrdersRespondentReference;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate manageOrdersRespondentDob;
