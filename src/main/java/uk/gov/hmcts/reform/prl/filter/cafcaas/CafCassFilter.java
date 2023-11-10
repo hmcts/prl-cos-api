@@ -55,7 +55,7 @@ public class CafCassFilter {
      *
      * @param object - List of Element object
      * @param <T> - Type of element in the List
-     * @return
+     * @return null
      */
     public <T> List<Element<T>>  filterNonValueList(List<Element<T>> object) {
         if (object != null && !object.isEmpty()) {

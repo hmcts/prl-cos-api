@@ -33,15 +33,19 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -52,6 +56,7 @@ import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_FHDRA_HEARING_DETAILS;
@@ -60,8 +65,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_FIRS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_URGENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOTICE_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.other;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
@@ -102,6 +109,11 @@ public class ManageOrdersController {
     @Autowired
     private AuthorisationService authorisationService;
 
+    @Autowired
+    CoreCaseDataService coreCaseDataService;
+
+    private final HearingService hearingService;
+
     private DynamicList retrievedHearingTypes;
 
     private DynamicList retrievedHearingDates;
@@ -109,6 +121,8 @@ public class ManageOrdersController {
     private DynamicList retrievedHearingChannels;
 
     private DynamicList retrievedHearingSubChannels;
+
+    private final AllTabServiceImpl allTabsService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
@@ -119,27 +133,10 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
-            if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                caseDataUpdated.put(
-                    ORDER_HEARING_DETAILS,
-                    hearingDataService.getHearingData(existingOrderHearingDetails,
-                                                      hearingDataPrePopulatedDynamicLists, caseData
-                    )
-                );
-            }
-            caseDataUpdated.putAll(manageOrderService.populatePreviewOrder(
-                authorisation,
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.handlePreviewOrder(
                 callbackRequest,
-                caseData
-            ));
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+                authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -260,8 +257,10 @@ public class ManageOrdersController {
             );
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
+
+            Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
             Map<String, Object> caseDataUpdated = new HashMap<>();
             HearingData hearingData = hearingDataService.generateHearingData(
                 hearingDataPrePopulatedDynamicLists, caseData);
@@ -298,21 +297,31 @@ public class ManageOrdersController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            //SNI-4330 fix - this will set state in caseData
+            //updating state in caseData so that caseSummaryTab is updated with latest state
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                final CaseDetails caseDetails = callbackRequest.getCaseDetails();
                 log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
-                manageOrderEmailService.sendEmailWhenOrderIsServed(caseDetails);
+                manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             // The following can be removed or utilised based on requirement
             /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
             manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+            //SNI-4330 fix
+            //update caseSummaryTab with latest state
+            caseDataUpdated.put(STATE, caseData.getState());
+            coreCaseDataService.triggerEvent(
+                JURISDICTION,
+                CASE_TYPE,
+                caseData.getId(),
+                "internal-update-all-tabs",
+                caseDataUpdated
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -345,13 +354,19 @@ public class ManageOrdersController {
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)
                 || caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+                if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
+                    Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                    caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
+                                                                           .getHearingDataForSelectedHearing(caseData, hearings));
+                }
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
                     caseData
                 ));
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
-            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            //PRL-4216 - save server order additional documents if any
+            manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             //Added below fields for WA purpose
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
@@ -369,11 +384,15 @@ public class ManageOrdersController {
             caseDataUpdated.put("performingUser", performingUser);
             caseDataUpdated.put("performingAction", performingAction);
             caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            manageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if ((YesOrNo.No).equals(caseData.getManageOrders().getIsCaseWithdrawn())) {
@@ -402,8 +421,9 @@ public class ManageOrdersController {
                     callbackRequest.getCaseDetails(),
                     namesList
                 );
+                Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
                 HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                    hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData);
+                    hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
                 caseData.setAppointedGuardianName(namesList);
                 if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
                     caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingDataService
@@ -529,8 +549,9 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
+            log.info("Manage order Before calling ref data for LA users list {}", System.currentTimeMillis());
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+            log.info("Manage order After calling ref data for LA users list {}", System.currentTimeMillis());
             caseDataUpdated.put(
                 "nameOfLaToReviewOrder",
                 DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)

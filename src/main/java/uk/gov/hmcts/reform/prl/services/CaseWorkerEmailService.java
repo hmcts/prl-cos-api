@@ -31,6 +31,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -305,12 +307,6 @@ public class CaseWorkerEmailService {
             .map(Element::getValue)
             .collect(Collectors.toList());
 
-        List<Child> child = caseData
-            .getChildren()
-            .stream()
-            .map(Element::getValue)
-            .collect(Collectors.toList());
-
         List<YesOrNo> emailAddressInfo = applicants.stream()
             .filter(eachParty -> null != eachParty.getIsEmailAddressConfidential()
                 && YesOrNo.Yes.equals(eachParty.getIsEmailAddressConfidential()))
@@ -320,7 +316,11 @@ public class CaseWorkerEmailService {
         String isConfidential = NO;
         if (emailAddressInfo.contains(YesOrNo.Yes)
             || (applicants.stream().anyMatch(PartyDetails::hasConfidentialInfo))
-            || (child.stream().anyMatch(Child::hasConfidentialInfo))) {
+            || (!TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) // requires review
+                && caseData
+                .getChildren()
+                .stream()
+                .map(Element::getValue).anyMatch(Child::hasConfidentialInfo))) {
             isConfidential = YES;
         }
 

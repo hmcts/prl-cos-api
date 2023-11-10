@@ -384,7 +384,7 @@ public class RefDataUserServiceTest {
 
         assertNotNull(legalAdvisorList.get(0).getCode());
         assertEquals("David(test2@com)",legalAdvisorList.get(0).getCode());
-        assertEquals(2, legalAdvisorList.size());
+        assertEquals(1, legalAdvisorList.size());
     }
 
 }

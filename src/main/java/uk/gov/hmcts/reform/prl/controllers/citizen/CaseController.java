@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -31,8 +33,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -169,16 +169,16 @@ public class CaseController {
         return new CitizenCaseData(caseData, caseData.getState().getLabel());
     }
 
-    @PostMapping(path = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(value = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
-    public void linkCitizenToCase(@RequestHeader("caseId") String caseId,
-                                  @RequestHeader("accessCode") String accessCode,
-                                  @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken) {
-        caseService.linkCitizenToCase(authorisation, s2sToken, accessCode, caseId);
+    public void linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                  @RequestHeader("caseId") String caseId,
+                                  @RequestHeader("accessCode") String accessCode) {
+        caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
     }
 
-    @GetMapping(path = "/validate-access-code", produces = APPLICATION_JSON)
+    @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
     public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,

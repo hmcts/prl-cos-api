@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.NoticeOfChangeEmail;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 @Component
@@ -31,7 +31,7 @@ public class NoticeOfChangeContentProvider {
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
-            .issueDate(CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()))
+            .issueDate(CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()))
             .build();
     }
 

@@ -20,6 +20,7 @@ import java.util.Optional;
 import static java.util.Optional.ofNullable;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.applicants;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren.children;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -587,5 +588,10 @@ public class AllegationsOfHarmCheckerTest {
 
         assertFalse(allegationsOfHarmChecker.validateFields(caseData));
 
+    }
+
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(allegationsOfHarmChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

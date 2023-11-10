@@ -33,12 +33,14 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.FeeService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.document.C100DocumentTemplateFinderService;
 import uk.gov.hmcts.reform.prl.services.validators.SubmitAndPayChecker;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CURRENCY_SIGN_POUND;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -68,6 +70,10 @@ public class PrePopulateFeeAndSolicitorNameController {
     private DgsService dgsService;
 
     @Autowired
+    private C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+
+
+    @Autowired
     private OrganisationService organisationService;
 
     @Autowired
@@ -76,22 +82,14 @@ public class PrePopulateFeeAndSolicitorNameController {
     @Autowired
     private AuthorisationService authorisationService;
 
-    @Value("${document.templates.c100.c100_draft_template}")
-    protected String c100DraftTemplate;
-
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;
-
-    @Value("${document.templates.c100.c100_draft_welsh_template}")
-    protected String c100DraftWelshTemplate;
 
     @Value("${document.templates.c100.c100_draft_welsh_filename}")
     protected String c100DraftWelshFilename;
 
     @Value("${southampton.court.email-address}")
     protected String southamptonCourtEmailAddress;
-
-    public static final String CURRENCY_SIGN_POUND = "£";
 
     @PostMapping(path = "/getSolicitorAndFeeDetails", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get Solicitor name and fee amount. ")
@@ -166,7 +164,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseDataForOrgDetails).build(),
-                c100DraftTemplate
+                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails,false)
             );
 
             caseData = caseData.toBuilder().isEngDocGen(documentLanguage.isGenEng() ? Yes.toString() : No.toString())
@@ -181,7 +179,7 @@ public class PrePopulateFeeAndSolicitorNameController {
             GeneratedDocumentInfo generatedWelshDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 callbackRequest.getCaseDetails(),
-                c100DraftWelshTemplate
+                    c100DocumentTemplateFinderService.findFinalDraftDocumentTemplate(caseDataForOrgDetails,true)
             );
 
             caseData = caseData.toBuilder().isWelshDocGen(documentLanguage.isGenWelsh() ? Yes.toString() : No.toString())

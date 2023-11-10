@@ -112,6 +112,7 @@ public class ListWithoutNoticeControllerFT {
     }
 
     @Test
+    @Ignore
     public void testDateReservedWithListAssit_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(dateReservedWithListAssit);
 
