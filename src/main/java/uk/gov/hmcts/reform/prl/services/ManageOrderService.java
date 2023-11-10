@@ -1912,17 +1912,8 @@ public class ManageOrderService {
             }
         }
         caseData = caseData.toBuilder()
-            .manageOrders(ManageOrders.builder()
-                              .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
-                              .isCaseWithdrawn(caseData.getManageOrders().getIsCaseWithdrawn())
-                              .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
-                              .judgeOrMagistrateTitle(caseData.getManageOrders().getJudgeOrMagistrateTitle())
-                              .orderDirections(caseData.getManageOrders().getOrderDirections())
-                              .furtherDirectionsIfRequired(caseData.getManageOrders().getFurtherDirectionsIfRequired())
-                              .furtherInformationIfRequired(caseData.getManageOrders().getFurtherInformationIfRequired())
+            .manageOrders(caseData.getManageOrders().toBuilder()
                               .fl404CustomFields(orderData)
-                              .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                              .ordersHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
                               .childOption(getChildOption(caseData))
                               .build())
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
