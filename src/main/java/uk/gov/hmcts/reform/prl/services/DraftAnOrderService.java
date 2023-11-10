@@ -502,7 +502,6 @@ public class DraftAnOrderService {
             caseDataMap.put("previewDraftOrderWelsh", selectedOrder.getOrderDocumentWelsh());
         }
         if (selectedOrder.getJudgeNotes() != null) {
-            log.info("judgeNotes {}", selectedOrder.getJudgeNotes());
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         }
         caseDataMap.put(
