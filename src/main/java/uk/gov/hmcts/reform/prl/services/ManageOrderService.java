@@ -1080,14 +1080,18 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
         String loggedInUserType = getLoggedInUserType(authorisation);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserEmail = userDetails.getEmail();
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            return setDraftOrderCollection(caseData, loggedInUserType);
+            return setDraftOrderCollection(caseData, loggedInUserType,currentUserEmail);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
-                return setDraftOrderCollection(caseData, loggedInUserType);
+                log.info("111111111111");
+
+                return setDraftOrderCollection(caseData, loggedInUserType,currentUserEmail);
             } else {
                 return setFinalOrderCollection(authorisation, caseData);
             }
@@ -1145,13 +1149,14 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,String currentUserEmail) {
+        log.info("22222222");
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = null;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType));
+            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType,currentUserEmail));
         } else {
-            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType));
+            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType,currentUserEmail));
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -1167,8 +1172,11 @@ public class ManageOrderService {
         );
     }
 
-    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
+    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserEmail) {
+        log.info("33333333{}",caseData.getUserInfo());
+
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
+
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
             .c21OrderOptions(blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())
@@ -1298,7 +1306,7 @@ public class ManageOrderService {
         return null;
     }
 
-    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType) {
+    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserEmail) {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
@@ -1368,6 +1376,7 @@ public class ManageOrderService {
     }
 
     private static String orderStatusForCreateUploadAmend(String loggedInUserType) {
+        log.info("orderStatusForCreateUploadAmend=======11111====>");
         String status = "";
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
             status = OrderStatusEnum.createdByJudge.getDisplayedValue();
