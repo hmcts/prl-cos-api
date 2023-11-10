@@ -313,7 +313,8 @@ public class DraftAnOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.nonMolestation))
+            .thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -324,7 +325,7 @@ public class DraftAnOrderControllerTest {
             .build();
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
+            caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.nonMolestation);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
@@ -364,7 +365,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData)).thenReturn(caseData);
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
+            caseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -402,7 +403,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData)).thenReturn(caseData);
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
+            caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.blankOrderOrDirections);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);

@@ -500,7 +500,8 @@ public class ManageOrdersControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(caseData)).thenReturn(stringObjectMap);
-        when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateCustomOrderFields(any(CaseData.class), any(CreateSelectOrderOptionsEnum.class)))
+            .thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken, s2sToken,callbackRequest);
         assertNotNull(callbackResponse);
@@ -558,7 +559,7 @@ public class ManageOrdersControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
-        when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateCustomOrderFields(any(CaseData.class), any(CreateSelectOrderOptionsEnum.class))).thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());
@@ -623,7 +624,8 @@ public class ManageOrdersControllerTest {
                                                                   .build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
-        when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateCustomOrderFields(any(CaseData.class), Mockito.any(CreateSelectOrderOptionsEnum.class)))
+            .thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
@@ -692,7 +694,8 @@ public class ManageOrdersControllerTest {
                                                                   .build()).build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
-        when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateCustomOrderFields(any(CaseData.class), Mockito.any(CreateSelectOrderOptionsEnum.class)))
+            .thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
@@ -1071,7 +1074,8 @@ public class ManageOrdersControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
-        when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateCustomOrderFields(any(CaseData.class), Mockito.any(CreateSelectOrderOptionsEnum.class)))
+            .thenReturn(updatedCaseData);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         when(manageOrderService.populateHearingsDropdown(anyString(), any(CaseData.class))).thenReturn(dynamicList);
@@ -1126,7 +1130,7 @@ public class ManageOrdersControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.getUpdatedCaseData(any(CaseData.class))).thenReturn(stringObjectMap);
-        when(manageOrderService.populateCustomOrderFields(any(CaseData.class))).thenReturn(updatedCaseData);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(updatedCaseData);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         CallbackResponse callbackResponse = manageOrdersController.fetchOrderDetails(authToken,s2sToken,callbackRequest);
         assertEquals("Child 1: TestName\n", callbackResponse.getData().getChildrenList());

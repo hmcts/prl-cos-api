@@ -903,7 +903,7 @@ public class ManageOrderService {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
             List<Element<OrderDetails>> orderCollection = new ArrayList<>();
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                caseData = populateCustomOrderFields(caseData);
+                caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                 caseData = populateJudgeNames(caseData);
@@ -1822,7 +1822,7 @@ public class ManageOrderService {
         }
     }
 
-    private CaseData getN117FormData(CaseData caseData) {
+    public CaseData getN117FormData(CaseData caseData) {
         log.info("*** casedata manage orders : {}", caseData.getManageOrders());
         log.info("**** Court name : {}", caseData.getCourtName());
         log.info("*** Undertaking expiry date time {}", caseData.getManageOrders().getUnderTakingExpiryDateTime());
@@ -1864,8 +1864,7 @@ public class ManageOrderService {
             .selectedOrder(getSelectedOrderInfo(caseData)).build();
     }
 
-    public CaseData populateCustomOrderFields(CaseData caseData) {
-        CreateSelectOrderOptionsEnum order = caseData.getCreateSelectOrderOptions();
+    public CaseData populateCustomOrderFields(CaseData caseData, CreateSelectOrderOptionsEnum order) {
 
         switch (order) {
             case amendDischargedVaried, occupation, nonMolestation, powerOfArrest, blank:
@@ -1879,7 +1878,7 @@ public class ManageOrderService {
         }
     }
 
-    private CaseData getFl404bFields(CaseData caseData) {
+    public CaseData getFl404bFields(CaseData caseData) {
 
         FL404 orderData = caseData.getManageOrders().getFl404CustomFields();
 
@@ -2163,7 +2162,7 @@ public class ManageOrderService {
 
         if (caseData.getCreateSelectOrderOptions() != null && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                caseData = populateCustomOrderFields(caseData);
+                caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
             log.info("*****court name --- {}", caseData.getCourtName());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
