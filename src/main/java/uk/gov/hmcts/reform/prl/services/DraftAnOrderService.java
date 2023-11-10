@@ -1909,17 +1909,18 @@ public class DraftAnOrderService {
             //PRL-4335 - hearing screen validations
             //PRL-4589 - fix, validate only when hearings are available
             if (Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())) {
-                errorList = getHearingScreenValidations(
+                errorList.addAll(getHearingScreenValidations(
                     caseData.getManageOrders().getOrdersHearingDetails(),
                     caseData.getCreateSelectOrderOptions(),
                     true
-                );
+                ));
             }
         }
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getManageOrders().getFl404CustomFields()) {
-            errorList = getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions());
+            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
         }
+
         return errorList;
     }
 
@@ -1927,8 +1928,8 @@ public class DraftAnOrderService {
         List<String> errorList = new ArrayList<>();
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
             && null != caseData.getManageOrders().getFl404CustomFields()) {
-            errorList = getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions());
-        } else {
+            errorList.addAll(getErrorForOccupationScreen(caseData, caseData.getCreateSelectOrderOptions()));
+        } else if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
             List<Element<HearingData>> existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
             boolean isSolicitorOrdersHearings = false;
             if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
@@ -1936,11 +1937,13 @@ public class DraftAnOrderService {
                 isSolicitorOrdersHearings = true;
             }
             //PRL-4260 - hearing screen validations
-            errorList = getHearingScreenValidations(
+            errorList.addAll(getHearingScreenValidations(
                 existingOrderHearingDetails,
                 draftOrder.getOrderType(),
                 isSolicitorOrdersHearings
-            );
+            ));
+        } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
+            errorList.addAll(getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder()));
         }
         return errorList;
     }
