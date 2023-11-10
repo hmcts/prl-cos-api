@@ -679,8 +679,10 @@ public class C100RespondentSolicitorService {
 
     public Element<PartyDetails> findSolicitorRepresentedRespondents(CallbackRequest callbackRequest, SolicitorRole solicitorRole) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Element<PartyDetails> solicitorRepresentedRespondent = caseData.getRespondents().get(solicitorRole.getIndex());
-        if (solicitorRepresentedRespondent.getValue().getResponse() != null
+        Element<PartyDetails> solicitorRepresentedRespondent = !caseData.getRespondents().isEmpty()
+            ? caseData.getRespondents().get(solicitorRole.getIndex()) : null;
+        if (solicitorRepresentedRespondent != null
+            && solicitorRepresentedRespondent.getValue().getResponse() != null
             && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getC7ResponseSubmitted())) {
             throw new RespondentSolicitorException(
                 RESPONSE_ALREADY_SUBMITTED_ERROR);
@@ -1304,7 +1306,7 @@ public class C100RespondentSolicitorService {
         }
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
         Element<PartyDetails> solicitorRepresentedRespondent = null;
-        if (solicitorRole.isPresent()) {
+        if (solicitorRole.isPresent() && isNotEmpty(solicitorRepresentedRespondent)) {
             solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
             String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
                 + solicitorRepresentedRespondent.getValue().getLastName();

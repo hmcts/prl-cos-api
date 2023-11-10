@@ -140,6 +140,7 @@ public class C100RespondentSolicitorServiceTest {
 
         confidentialityListEnums.add(ConfidentialityListEnum.email);
         confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
+        confidentialityListEnums.add(ConfidentialityListEnum.address);
 
         RespondentProceedingDetails proceedingDetails = RespondentProceedingDetails.builder()
             .caseNumber("122344")
@@ -551,9 +552,6 @@ public class C100RespondentSolicitorServiceTest {
 
         List<ConfidentialityListEnum> confidentialityListEnums2 = new ArrayList<>();
 
-        confidentialityListEnums.add(ConfidentialityListEnum.email);
-        confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
-
         RespondentProceedingDetails proceedingDetails2 = RespondentProceedingDetails.builder()
             .caseNumber("122344")
             .nameAndOffice("testoffice")
@@ -562,7 +560,7 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         Element<RespondentProceedingDetails> proceedingDetailsElement2 = Element.<RespondentProceedingDetails>builder()
-            .value(proceedingDetails).build();
+            .value(proceedingDetails2).build();
         List<Element<RespondentProceedingDetails>> proceedingsList2 = Collections.singletonList(proceedingDetailsElement2);
 
         User user2 = User.builder().email("respondent@example.net")
@@ -591,7 +589,7 @@ public class C100RespondentSolicitorServiceTest {
                                                   .builder()
                                                   .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
                                                   .confidentiality(Yes)
-                                                  .confidentialityList(confidentialityListEnums)
+                                                  .confidentialityList(confidentialityListEnums2)
                                                   .build())
                           .miam(Miam.builder().attendedMiam(No)
                                     .willingToAttendMiam(No)
@@ -713,7 +711,7 @@ public class C100RespondentSolicitorServiceTest {
                                                   .builder()
                                                   .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
                                                   .confidentiality(Yes)
-                                                  .confidentialityList(confidentialityListEnums)
+                                                  .confidentialityList(confidentialityListEnums2)
                                                   .build())
                           .miam(Miam.builder().attendedMiam(No)
                                     .willingToAttendMiam(No)
@@ -856,7 +854,7 @@ public class C100RespondentSolicitorServiceTest {
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                                                         .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
                                                                         .confidentiality(Yes)
-                                                                        .confidentialityList(confidentialityListEnums)
+                                                                        .confidentialityList(confidentialityListEnums2)
                                                                         .build())
 
                                          .respondentConsentToApplication(Consent
@@ -1030,6 +1028,34 @@ public class C100RespondentSolicitorServiceTest {
 
         assertTrue(response.containsKey("respondents"));
     }
+
+    @Test
+    public void validateActiveRespondentResponseIfNoRespondentExists() throws Exception {
+        caseData = caseData.toBuilder()
+            .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
+            .respondents(new ArrayList<>())
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        List<String> errorList = new ArrayList<>();
+
+        Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
+            callbackRequest, errorList, authToken
+        );
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
 
     @Test
     public void validateActiveRespondentResponseElseCase() throws Exception {
@@ -1229,7 +1255,6 @@ public class C100RespondentSolicitorServiceTest {
             );
             assertTrue(response.containsKey("respondents"));
         }
-
     }
 
     @Test
@@ -1246,8 +1271,6 @@ public class C100RespondentSolicitorServiceTest {
             assertTrue(response.containsKey("respondents"));
         }
     }
-
-    //null
 
     @Test
     public void populateAboutToSubmitCaseDataWithFewNullsTest() {
@@ -2075,10 +2098,21 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void testGenerateConfidentialMap() {
+    public void testGenerateConfidentialMapWithAllConfValues() {
 
         Map<String, Object> response = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
             callbackRequest
+        );
+
+        assertTrue(response.containsKey("confidentialListDetails"));
+
+    }
+
+    @Test
+    public void testGenerateConfidentialMapWithoutAllConfValues() {
+
+        Map<String, Object> response = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
+            callbackRequest2
         );
 
         assertTrue(response.containsKey("confidentialListDetails"));
