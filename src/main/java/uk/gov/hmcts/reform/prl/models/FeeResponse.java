@@ -16,4 +16,6 @@ public class FeeResponse {
     private Integer version;
     @JsonProperty(value = "fee_amount")
     private BigDecimal amount;
+
+    private String feeType;
 }

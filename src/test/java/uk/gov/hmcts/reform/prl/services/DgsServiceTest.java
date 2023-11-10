@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.when;
 
@@ -29,6 +30,9 @@ public class DgsServiceTest {
 
     @Mock
     private DgsApiClient dgsApiClient;
+
+    @Mock
+    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
@@ -89,6 +93,19 @@ public class DgsServiceTest {
     }
 
     @Test
+    public void testToGenerateCoverLetterDocument() throws Exception {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("coverLetter", "test.pdf");
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+        assertNotNull(dgsService.generateCoverLetterDocument(authToken, dataMap, PRL_DRAFT_TEMPLATE,
+                                                "123"));
+    }
+
+    @Test
     public void testToGenerateDocumentWithCaseDataNoDataExpectedException() throws Exception {
         dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE, null);
         Throwable exception = assertThrows(Exception.class, () -> {
@@ -99,7 +116,7 @@ public class DgsServiceTest {
 
     @Test
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
-        dgsService.generateDocument(authToken,null, PRL_DRAFT_TEMPLATE);
+        dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE);
         Throwable exception = assertThrows(Exception.class, () -> {
             throw new Exception("Error generating and storing document for case");
         });

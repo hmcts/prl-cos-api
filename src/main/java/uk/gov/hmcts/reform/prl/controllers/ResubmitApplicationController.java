@@ -22,6 +22,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
+import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
+import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -29,6 +33,7 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -94,6 +99,9 @@ public class ResubmitApplicationController {
     @Autowired
     private AuthorisationService authorisationService;
 
+    @Autowired
+    private EventService eventPublisher;
+
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to change the state and document generation and submit application. ")
     @ApiResponses(value = {
@@ -138,8 +146,17 @@ public class ResubmitApplicationController {
                         CASE_DATE_AND_TIME_SUBMITTED_FIELD,
                         DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
                     );
-                    caseWorkerEmailService.sendEmail(caseDetails);
-                    solicitorEmailService.sendReSubmitEmail(caseDetails);
+                    CaseWorkerNotificationEmailEvent caseWorkerNotificationEmailEvent = prepareCaseworkerEvent(
+                        CaseWorkerEmailNotificationEventEnum.reSubmitEmailNotification,
+                        callbackRequest
+                    );
+                    SolicitorNotificationEmailEvent solicitorNotificationEmailEvent = prepareSolicitorNotificationEvent(
+                        CaseWorkerEmailNotificationEventEnum.reSubmitEmailNotification.getDisplayedValue(),
+                        callbackRequest
+                    );
+
+                    eventPublisher.publishEvent(caseWorkerNotificationEmailEvent);
+                    eventPublisher.publishEvent(solicitorNotificationEmailEvent);
                 }
                 if (State.CASE_ISSUED.getValue().equalsIgnoreCase(previousStates.get())
                     || State.JUDICIAL_REVIEW.getValue().equalsIgnoreCase(previousStates.get())) {
@@ -150,7 +167,12 @@ public class ResubmitApplicationController {
 
                     caseDataUpdated.put(STATE_FIELD, State.fromValue((previousStates.get())));
                     caseDataUpdated.put(PrlAppsConstants.ISSUE_DATE_FIELD, caseData.getIssueDate());
-                    caseWorkerEmailService.sendEmailToCourtAdmin(callbackRequest.getCaseDetails());
+
+                    CaseWorkerNotificationEmailEvent courtAdminNotificationEmailEvent = prepareCaseworkerEvent(
+                        CaseWorkerEmailNotificationEventEnum.sendEmailToCourtAdmin,
+                        callbackRequest
+                    );
+                    eventPublisher.publishEvent(courtAdminNotificationEmailEvent);
                 }
                 // All docs will be regenerated in both issue and submitted state jira FPET-21
                 caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
@@ -170,6 +192,13 @@ public class ResubmitApplicationController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private SolicitorNotificationEmailEvent prepareSolicitorNotificationEvent(String reSubmitEmailNotification, CallbackRequest callbackRequest) {
+        return SolicitorNotificationEmailEvent.builder()
+            .typeOfEvent(reSubmitEmailNotification)
+            .caseDetailsModel(callbackRequest.getCaseDetails())
+            .build();
     }
 
     @PostMapping(path = "/fl401/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -212,8 +241,16 @@ public class ResubmitApplicationController {
                 caseDataUpdated.put(ISSUE_DATE_FIELD, caseData.getIssueDate());
             }
             try {
-                solicitorEmailService.sendEmailToFl401Solicitor(caseDetails, userDetails);
-                caseWorkerEmailService.sendEmailToFl401LocalCourt(caseDetails, caseData.getCourtEmailAddress());
+                CaseWorkerNotificationEmailEvent sendEmailToFl401CourtEvent = prepareCaseworkerEvent(
+                    CaseWorkerEmailNotificationEventEnum.notifyLocalCourt,
+                    callbackRequest
+                );
+                SolicitorNotificationEmailEvent solicitorNotificationEmailEvent = prepareSolicitorNotificationEvent(
+                    SolicitorEmailNotificationEventEnum.fl401SendEmailNotification.getDisplayedValue(),
+                    callbackRequest
+                );
+                eventPublisher.publishEvent(solicitorNotificationEmailEvent);
+                eventPublisher.publishEvent(sendEmailToFl401CourtEvent);
                 caseDataUpdated.put("isNotificationSent", "Yes");
             } catch (Exception e) {
                 log.error("Notification could not be sent due to {} ", e.getMessage());
@@ -231,6 +268,14 @@ public class ResubmitApplicationController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private CaseWorkerNotificationEmailEvent prepareCaseworkerEvent(CaseWorkerEmailNotificationEventEnum notifyLocalCourt,
+                                                                    CallbackRequest callbackRequest) {
+        return CaseWorkerNotificationEmailEvent.builder()
+            .typeOfEvent(notifyLocalCourt.getDisplayedValue())
+            .caseDetailsModel(callbackRequest.getCaseDetails())
+            .build();
     }
 
     private static boolean getPreviousState(String eachState) {
