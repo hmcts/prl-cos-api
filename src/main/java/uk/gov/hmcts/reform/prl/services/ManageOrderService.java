@@ -1230,7 +1230,16 @@ public class ManageOrderService {
             .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
             .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
             .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
-            .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
+            .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
+                                                 caseData.getApplicantsFL401().getLastName()
+            ))
+            .manageOrdersApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
+                                                ? caseData.getApplicantsFL401().getSolicitorReference() : "")
+            .manageOrdersRespondent(String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getRespondentsFL401().getFirstName(),
+                caseData.getRespondentsFL401().getLastName()
+            ))
             .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
             .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
             .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
