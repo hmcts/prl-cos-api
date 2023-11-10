@@ -64,12 +64,16 @@ public class CaseEventHandler {
 
     @EventListener
     public void handleCaseDataChange(final CaseDataChanged event) {
+        log.info("handleCaseDataChange method has invoked to generate task lists");
         final CaseData caseData = event.getCaseData();
 
         final String taskList = getUpdatedTaskList(caseData);
         final String respondentTaskListA = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_A);
+        log.info("respondentTaskListA is " + respondentTaskListA);
         final String respondentTaskListB = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_B);
+        log.info("respondentTaskListB is " + respondentTaskListB);
         final String respondentTaskListC = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_C);
+        log.info("respondentTaskListC is " + respondentTaskListC);
         final String respondentTaskListD = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_D);
         final String respondentTaskListE = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_E);
 
@@ -128,20 +132,24 @@ public class CaseEventHandler {
     }
 
     public String getRespondentTaskList(CaseData caseData, String respondent) {
+        log.info("getRespondentTaskList method invoked for " + respondent);
         String respondentTaskList = "";
         if (caseData.getRespondents() != null
             && !caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
+            log.info("Solicitor role found");
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
-
+                log.info("Solicitor role is present and its valid");
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
                 if (respondingParty.getValue() != null
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())
                     && respondingParty.getValue().getResponse() != null) {
+                    log.info("generating task list");
                     final boolean hasSubmitted = YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
                     String representedRespondentName = respondingParty.getValue().getLabelForDynamicList();
                     if (hasSubmitted) {
+                        log.info("response already submitted");
                         return respondentSolicitorTaskListRenderer
                             .render(
                                 null,
@@ -152,13 +160,14 @@ public class CaseEventHandler {
                                 caseData.getId()
                             );
                     } else {
+                        log.info("response not submitted");
                         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
 
                         List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
 
                         List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
                         eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-
+                        log.info("calling render method");
                         return respondentSolicitorTaskListRenderer
                             .render(
                                 tasks,
