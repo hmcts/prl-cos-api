@@ -364,7 +364,7 @@ public class DraftAnOrderService {
                 caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
             }
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-            && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
+                && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
                 caseData = manageOrderService.populateCustomOrderFields(caseData, draftOrder.getOrderType());
             }
             caseData = caseData.toBuilder().manageOrders(
