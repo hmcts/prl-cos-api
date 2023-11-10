@@ -855,8 +855,11 @@ public class DraftAnOrderService {
             .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
             .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
             .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
-            .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
-            .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+            .manageOrdersApplicant(String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
+                                                 caseData.getApplicantsFL401().getLastName()
+            ))
+            .manageOrdersApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
+                                                ? caseData.getApplicantsFL401().getSolicitorReference() : "")
             .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
             .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
             .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
