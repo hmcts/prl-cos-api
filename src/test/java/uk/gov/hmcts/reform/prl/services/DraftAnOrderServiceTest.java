@@ -1387,12 +1387,11 @@ public class DraftAnOrderServiceTest {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .dateCreated(LocalDateTime.now())
                               .createdBy("test")
                               .build())
             .build();
 
-        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        Element<DraftOrder> draftOrderElement = element(UUID.fromString(TEST_UUID), draftOrder);
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
         PartyDetails partyDetails = PartyDetails.builder()
@@ -1412,7 +1411,7 @@ public class DraftAnOrderServiceTest {
                                   .lastName("test")
                                   .address(Address.builder().addressLine1("test").county("test").postCode("123").build())
                                   .build())
-
+            .draftOrderCollection(draftOrderCollection)
             .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge)
                               .fl404CustomFields(fl404).c21OrderOptions(
                     C21OrderOptionsEnum.c21NoOrderMade).build())
@@ -1422,6 +1421,7 @@ public class DraftAnOrderServiceTest {
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(),Mockito.any())).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -2732,6 +2732,7 @@ public class DraftAnOrderServiceTest {
             .id(123L)
             .applicantCaseName("Jo Davis & Jon Smith")
             .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .manageOrders(ManageOrders.builder()
                               .isTheOrderByConsent(Yes)
                               .recitalsOrPreamble("test recitals")
@@ -2764,6 +2765,7 @@ public class DraftAnOrderServiceTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(),Mockito.any())).thenReturn(caseData);
         Assert.assertEquals(
             stringObjectMap,
             draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken)
@@ -2809,7 +2811,7 @@ public class DraftAnOrderServiceTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(),Mockito.any())).thenReturn(caseData);
         Assert.assertEquals(
             stringObjectMap,
             draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken)
@@ -2842,7 +2844,7 @@ public class DraftAnOrderServiceTest {
                                                             any(),
                                                             any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
-        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(),Mockito.any())).thenReturn(caseData);
         stringObjectMap.putAll(manageOrderService.getCaseData(
             "test token",
             caseData,
@@ -2900,7 +2902,7 @@ public class DraftAnOrderServiceTest {
                                                             any(),
                                                             any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
-        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(),Mockito.any())).thenReturn(caseData);
         stringObjectMap.putAll(manageOrderService.getCaseData(
             "test token",
             caseData,
@@ -4032,7 +4034,7 @@ public class DraftAnOrderServiceTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(Mockito.any(),Mockito.any())).thenReturn(caseData);
 
         Map<String, Object> caseDataMap = draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken);
 

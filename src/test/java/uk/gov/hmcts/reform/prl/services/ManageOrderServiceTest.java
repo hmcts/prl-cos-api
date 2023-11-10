@@ -341,7 +341,7 @@ public class ManageOrderServiceTest {
             .fl404bRespondentDob(LocalDate.of(1990, 10, 20))
             .build();
 
-        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData);
+        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank);
 
         assertEquals(updatedCaseData.getManageOrders().getFl404CustomFields(), expectedDetails);
 
@@ -1603,7 +1603,7 @@ public class ManageOrderServiceTest {
             .manageOrders(ManageOrders.builder().isTheOrderByConsent(YesOrNo.Yes).build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.generalForm));
     }
 
     @Test
@@ -1631,7 +1631,7 @@ public class ManageOrderServiceTest {
             .manageOrders(expectedDetails)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.noticeOfProceedings));
     }
 
     @Test
@@ -1975,7 +1975,7 @@ public class ManageOrderServiceTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank));
     }
 
     @Test
