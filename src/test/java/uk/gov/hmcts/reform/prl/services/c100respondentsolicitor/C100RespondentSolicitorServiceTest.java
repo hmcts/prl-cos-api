@@ -84,9 +84,15 @@ public class C100RespondentSolicitorServiceTest {
 
     CaseData caseData;
 
+    CaseData caseData2;
+
     PartyDetails respondent;
 
     PartyDetails respondent2;
+
+    PartyDetails respondent3;
+
+    PartyDetails respondent4;
 
     @Mock
     ObjectMapper objectMapper;
@@ -121,7 +127,11 @@ public class C100RespondentSolicitorServiceTest {
 
     Map<String, Object> stringObjectMap;
 
+    Map<String, Object> stringObjectMap2;
+
     CallbackRequest callbackRequest;
+
+    CallbackRequest callbackRequest2;
 
     @Before
     public void setUp() {
@@ -538,6 +548,417 @@ public class C100RespondentSolicitorServiceTest {
         when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
             Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
         when(systemUserService.getSysUserToken()).thenReturn("");
+
+        List<ConfidentialityListEnum> confidentialityListEnums2 = new ArrayList<>();
+
+        confidentialityListEnums.add(ConfidentialityListEnum.email);
+        confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
+
+        RespondentProceedingDetails proceedingDetails2 = RespondentProceedingDetails.builder()
+            .caseNumber("122344")
+            .nameAndOffice("testoffice")
+            .nameOfCourt("testCourt")
+            .uploadRelevantOrder(Document.builder().build())
+            .build();
+
+        Element<RespondentProceedingDetails> proceedingDetailsElement2 = Element.<RespondentProceedingDetails>builder()
+            .value(proceedingDetails).build();
+        List<Element<RespondentProceedingDetails>> proceedingsList2 = Collections.singletonList(proceedingDetailsElement2);
+
+        User user2 = User.builder().email("respondent@example.net")
+            .idamId("1234-5678").solicitorRepresented(Yes).build();
+
+        respondent3 = PartyDetails.builder()
+            .user(user2)
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .response(Response.builder()
+                          .citizenDetails(CitizenDetails.builder()
+                                              .firstName("test")
+                                              .lastName("test")
+                                              .contact(Contact.builder().phoneNumber("test").email("test").build())
+                                              .address(Address.builder().addressLine1("test").build())
+                                              .build())
+                          .c7ResponseSubmitted(No)
+                          .consent(Consent.builder()
+                                       .consentToTheApplication(No)
+                                       .noConsentReason("test")
+                                       .build())
+                          .keepDetailsPrivate(KeepDetailsPrivate
+                                                  .builder()
+                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .confidentiality(Yes)
+                                                  .confidentialityList(confidentialityListEnums)
+                                                  .build())
+                          .miam(Miam.builder().attendedMiam(No)
+                                    .willingToAttendMiam(No)
+                                    .reasonNotAttendingMiam("test").build())
+                          .respondentExistingProceedings(proceedingsList2)
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("Test")
+                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                            .anotherPersonOrderOutsideEnWl(Yes)
+                                                            .anotherPersonOrderOutsideEnWlDetails("test")
+                                                            .anotherCountryAskedInformation(Yes)
+                                                            .anotherCountryAskedInformationDetaails("test")
+                                                            .build())
+                          .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
+                                                               .builder()
+                                                               .respChildAbductionInfo(RespondentChildAbduction
+                                                                                           .builder()
+                                                                                           .previousThreatsForChildAbduction(
+                                                                                               Yes)
+                                                                                           .previousThreatsForChildAbductionDetails(
+                                                                                               "Test")
+                                                                                           .reasonForChildAbductionBelief(
+                                                                                               "Test")
+                                                                                           .whereIsChild("Test")
+                                                                                           .hasPassportOfficeNotified(
+                                                                                               Yes)
+                                                                                           .childrenHavePassport(Yes)
+                                                                                           .childrenHaveMoreThanOnePassport(
+                                                                                               Yes)
+                                                                                           .whoHasChildPassportOther(
+                                                                                               "father")
+                                                                                           .anyOrgInvolvedInPreviousAbduction(
+                                                                                               Yes)
+                                                                                           .anyOrgInvolvedInPreviousAbductionDetails(
+                                                                                               "Test")
+                                                                                           .build())
+                                                               .respOtherConcernsInfo(RespondentOtherConcerns
+                                                                                          .builder()
+                                                                                          .childHavingOtherFormOfContact(
+                                                                                              Yes)
+                                                                                          .childSpendingSupervisedTime(
+                                                                                              Yes)
+                                                                                          .ordersRespondentWantFromCourt(
+                                                                                              "Test")
+                                                                                          .childSpendingUnsupervisedTime(
+                                                                                              Yes)
+                                                                                          .build())
+                                                               .respAllegationsOfHarmInfo(RespondentAllegationsOfHarm
+                                                                                              .builder()
+                                                                                              .respondentChildAbuse(Yes)
+                                                                                              .isRespondentChildAbduction(
+                                                                                                  Yes)
+                                                                                              .respondentNonMolestationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentOccupationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentForcedMarriageOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentOtherInjunctiveOrder(
+                                                                                                  Yes)
+                                                                                              .respondentRestrainingOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDomesticAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuseDetails(
+                                                                                                  "Test")
+                                                                                              .respondentOtherSafetyConcerns(
+                                                                                                  Yes)
+                                                                                              .respondentOtherSafetyConcernsDetails(
+                                                                                                  "Test")
+                                                                                              .build())
+                                                               .respAohYesOrNo(Yes)
+                                                               .build())
+                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
+                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                          .build())
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(No)
+            .isAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
+                "AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .dxNumber("1234")
+            .address(Address.builder().addressLine1("").build())
+            .solicitorReference("test")
+            .build();
+
+        List<ContactInformation> contactInformation2 = new ArrayList<>();
+        List<DxAddress> dxAddress2 = new ArrayList<>();
+        dxAddress.add(DxAddress.builder().dxNumber("dxNumber").build());
+        contactInformation2.add(ContactInformation.builder()
+                                   .addressLine1("AddressLine1").dxAddress(dxAddress2).build());
+
+        respondent4 = PartyDetails.builder()
+            .user(user)
+            .representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .response(Response.builder()
+                          .citizenDetails(CitizenDetails.builder()
+                                              .firstName("test")
+                                              .lastName("test")
+                                              .build())
+                          .consent(Consent.builder()
+                                       .consentToTheApplication(No)
+                                       .noConsentReason("test")
+                                       .build())
+                          .c7ResponseSubmitted(No)
+                          .keepDetailsPrivate(KeepDetailsPrivate
+                                                  .builder()
+                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .confidentiality(Yes)
+                                                  .confidentialityList(confidentialityListEnums)
+                                                  .build())
+                          .miam(Miam.builder().attendedMiam(No)
+                                    .willingToAttendMiam(No)
+                                    .reasonNotAttendingMiam("test").build())
+                          .respondentExistingProceedings(proceedingsList2)
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("Test")
+                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                            .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                            .anotherPersonOrderOutsideEnWl(Yes)
+                                                            .anotherPersonOrderOutsideEnWlDetails("test")
+                                                            .anotherCountryAskedInformation(Yes)
+                                                            .anotherCountryAskedInformationDetaails("test")
+                                                            .build())
+                          .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
+                                                               .builder()
+                                                               .respChildAbductionInfo(RespondentChildAbduction
+                                                                                           .builder()
+                                                                                           .previousThreatsForChildAbduction(
+                                                                                               Yes)
+                                                                                           .previousThreatsForChildAbductionDetails(
+                                                                                               "Test")
+                                                                                           .reasonForChildAbductionBelief(
+                                                                                               "Test")
+                                                                                           .whereIsChild("Test")
+                                                                                           .hasPassportOfficeNotified(
+                                                                                               Yes)
+                                                                                           .childrenHavePassport(Yes)
+                                                                                           .childrenHaveMoreThanOnePassport(
+                                                                                               Yes)
+                                                                                           .whoHasChildPassportOther(
+                                                                                               "father")
+                                                                                           .anyOrgInvolvedInPreviousAbduction(
+                                                                                               Yes)
+                                                                                           .anyOrgInvolvedInPreviousAbductionDetails(
+                                                                                               "Test")
+                                                                                           .build())
+                                                               .respOtherConcernsInfo(RespondentOtherConcerns
+                                                                                          .builder()
+                                                                                          .childHavingOtherFormOfContact(
+                                                                                              Yes)
+                                                                                          .childSpendingSupervisedTime(
+                                                                                              Yes)
+                                                                                          .ordersRespondentWantFromCourt(
+                                                                                              "Test")
+                                                                                          .childSpendingUnsupervisedTime(
+                                                                                              Yes)
+                                                                                          .build())
+                                                               .respAllegationsOfHarmInfo(RespondentAllegationsOfHarm
+                                                                                              .builder()
+                                                                                              .respondentChildAbuse(Yes)
+                                                                                              .isRespondentChildAbduction(
+                                                                                                  Yes)
+                                                                                              .respondentNonMolestationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentOccupationOrder(
+                                                                                                  Yes)
+                                                                                              .respondentForcedMarriageOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentOtherInjunctiveOrder(
+                                                                                                  Yes)
+                                                                                              .respondentRestrainingOrder(
+                                                                                                  Yes)
+                                                                                              .respondentDomesticAbuse(
+                                                                                                  Yes)
+                                                                                              .respondentDrugOrAlcoholAbuseDetails(
+                                                                                                  "Test")
+                                                                                              .respondentOtherSafetyConcerns(
+                                                                                                  Yes)
+                                                                                              .respondentOtherSafetyConcernsDetails(
+                                                                                                  "Test")
+                                                                                              .build())
+                                                               .respAohYesOrNo(Yes)
+                                                               .build())
+                          .supportYouNeed(ReasonableAdjustmentsSupport.builder()
+                                              .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                          .build())
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .isAddressConfidential(Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
+                "AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorReference("test")
+            .address(Address.builder().addressLine1("").build())
+            .organisations(Organisations.builder().contactInformation(contactInformation2).build())
+            .build();
+
+        List<RespondentWelshNeedsListEnum> welshNeedsListEnum2 = new ArrayList<>();
+        welshNeedsListEnum2.add(RespondentWelshNeedsListEnum.speakWelsh);
+        List<PartyEnum> party2 = new ArrayList<>();
+        party2.add(PartyEnum.respondent);
+
+        List<CaseUser> caseUserList2 = new ArrayList<>();
+        caseUserList2.add(CaseUser.builder()
+                             .caseId("12345")
+                             .caseRole("[C100RESPONDENTSOLICITOR1]")
+                             .userId("1afdfa01-8280-4e2c-b810-ab7cf741988a").build());
+
+        Address address2 = Address.builder()
+            .addressLine1("test")
+            .postCode("test")
+            .build();
+        RespondentInterpreterNeeds interpreterNeeds2 = RespondentInterpreterNeeds.builder()
+            .party(party)
+            .relationName("Test")
+            .requiredLanguage("Cornish")
+            .build();
+        Element<RespondentInterpreterNeeds> wrappedInterpreter2 = Element.<RespondentInterpreterNeeds>builder()
+            .value(interpreterNeeds2).build();
+        Element<PartyDetails> wrappedRespondents3 = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent3).build();
+        Element<PartyDetails> wrappedRespondents4 = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent4).build();
+        List<Element<PartyDetails>> respondentList2 = new ArrayList<>();
+        respondentList2.add(wrappedRespondents3);
+        respondentList2.add(wrappedRespondents4);
+        respondentList2.add(wrappedRespondents3);
+        respondentList2.add(wrappedRespondents4);
+        respondentList2.add(wrappedRespondents3);
+        respondentList2.add(wrappedRespondents4);
+        List<Element<RespondentInterpreterNeeds>> interpreterList2 = Collections.singletonList(wrappedInterpreter2);
+        Element<Address> wrappedAddress2 = Element.<Address>builder().value(address2).build();
+        List<Element<Address>> addressList2 = Collections.singletonList(wrappedAddress2);
+        RespondentDocs respondentDocs2 = RespondentDocs.builder().build();
+        Element<RespondentDocs> respondentDocsElement2 = Element.<RespondentDocs>builder().value(respondentDocs2).build();
+        List<Element<RespondentDocs>> respondentDocsList2 = new ArrayList<>();
+        respondentDocsList2.add(respondentDocsElement2);
+        caseData2 = CaseData.builder().respondents(respondentList2).id(1)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
+                                                                        .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                                        .confidentiality(Yes)
+                                                                        .confidentialityList(confidentialityListEnums)
+                                                                        .build())
+
+                                         .respondentConsentToApplication(Consent
+                                                                             .builder()
+                                                                             .noConsentReason("test")
+                                                                             .courtOrderDetails("test")
+                                                                             .consentToTheApplication(Yes)
+                                                                             .permissionFromCourt(No)
+                                                                             .build())
+                                         .respondentAttendingTheCourt(AttendToCourt.builder()
+                                                                          .respondentWelshNeeds(Yes)
+                                                                          .respondentWelshNeedsList(welshNeedsListEnum2)
+                                                                          .isRespondentNeededInterpreter(Yes)
+                                                                          .respondentInterpreterNeeds(interpreterList2)
+                                                                          .haveAnyDisability(Yes)
+                                                                          .disabilityNeeds("Test")
+                                                                          .respondentSpecialArrangements(Yes)
+                                                                          .respondentSpecialArrangementDetails("Test")
+                                                                          .respondentIntermediaryNeeds(Yes)
+                                                                          .respondentIntermediaryNeedDetails("Test")
+                                                                          .build())
+                                         .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
+                                         .respondentExistingProceedings(proceedingsList2)
+                                         .abilityToParticipateInProceedings(AbilityToParticipate.builder()
+                                                                                .factorsAffectingAbilityToParticipate(
+                                                                                    YesNoDontKnow.yes)
+                                                                                .build())
+                                         .internationalElementChild(CitizenInternationalElements.builder()
+                                                                        .childrenLiveOutsideOfEnWl(Yes)
+                                                                        .childrenLiveOutsideOfEnWlDetails("Test")
+                                                                        .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                                        .parentsAnyOneLiveOutsideEnWlDetails("Test")
+                                                                        .anotherPersonOrderOutsideEnWl(Yes)
+                                                                        .anotherPersonOrderOutsideEnWlDetails("Test")
+                                                                        .anotherCountryAskedInformation(Yes)
+                                                                        .anotherCountryAskedInformationDetaails("Test")
+                                                                        .build())
+                                         .respondentAllegationsOfHarm(RespondentAllegationsOfHarm
+                                                                          .builder()
+                                                                          .respondentForcedMarriageDocument(Document.builder().build())
+                                                                          .respondentUndertakingDocument(Document.builder().build())
+                                                                          .respondentNonMolestationOrderDocument(
+                                                                              Document.builder().build())
+                                                                          .respondentOccupationOrderDocument(Document.builder().build())
+                                                                          .respondentOtherInjunctiveDocument(Document.builder().build())
+                                                                          .respondentRestrainingDocument(Document.builder().build())
+                                                                          .respondentChildAbuse(Yes)
+                                                                          .isRespondentChildAbduction(Yes)
+                                                                          .respondentNonMolestationOrder(Yes)
+                                                                          .respondentOccupationOrder(Yes)
+                                                                          .respondentForcedMarriageOrder(Yes)
+                                                                          .respondentDrugOrAlcoholAbuse(Yes)
+                                                                          .respondentOtherInjunctiveOrder(Yes)
+                                                                          .respondentRestrainingOrder(Yes)
+                                                                          .respondentDomesticAbuse(Yes)
+                                                                          .respondentDrugOrAlcoholAbuseDetails("Test")
+                                                                          .respondentOtherSafetyConcerns(Yes)
+                                                                          .respondentOtherSafetyConcernsDetails("Test")
+                                                                          .build())
+                                         .resSolConfirmEditContactDetails(CitizenDetails
+                                                                              .builder()
+                                                                              .firstName("Test")
+                                                                              .lastName("Test")
+                                                                              .address(address2)
+                                                                              .contact(Contact.builder()
+                                                                                           .email("Test")
+                                                                                           .phoneNumber("0785544").build())
+                                                                              .addressHistory(AddressHistory.builder()
+                                                                                                  .isAtAddressLessThan5Years(
+                                                                                                      No)
+                                                                                                  .previousAddressHistory(
+                                                                                                      addressList2)
+                                                                                                  .build())
+                                                                              .build())
+                                         .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
+                                                                                     .attendedMiam(No)
+                                                                                     .willingToAttendMiam(No)
+                                                                                     .reasonNotAttendingMiam("test")
+                                                                                     .build())
+                                         .build())
+            .build();
+
+        stringObjectMap2 = caseData2.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap2, CaseData.class)).thenReturn(caseData2);
+
+        callbackRequest2 = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap2)
+                             .build())
+            .eventId("SolicitorA")
+            .build();
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseData);
+        when(applicationsTabService.getRespondentsTable(caseData2)).thenReturn(List.of(Element.<Respondent>builder().build()));
+        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
+            Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
+        when(systemUserService.getSysUserToken()).thenReturn("");
     }
 
     @Test
@@ -545,7 +966,7 @@ public class C100RespondentSolicitorServiceTest {
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivateA",
             "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA",
             "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA", "c100ResSolAbilityToParticipateA",
-            "c100ResSolViewResponseDraftDocument"};
+            "c100ResSolViewResponseDraftDocumentA"};
         for (String event : events) {
             callbackRequest.setEventId(event);
             Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -796,7 +1217,7 @@ public class C100RespondentSolicitorServiceTest {
     @Test
     public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
 
-        when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(responseSubmitChecker.isFinished(respondent3)).thenReturn(mandatoryFinished);
 
         String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
             "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
@@ -806,7 +1227,22 @@ public class C100RespondentSolicitorServiceTest {
             Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
                 callbackRequest
             );
+            assertTrue(response.containsKey("respondents"));
+        }
 
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsAWhileExistingProceedingNoTest() throws Exception {
+
+        when(responseSubmitChecker.isFinished(respondent3)).thenReturn(mandatoryFinished);
+
+        String[] events = {"c100ResSolCurrentOrPreviousProceedingsA"};
+        for (String event : events) {
+            callbackRequest2.setEventId(event);
+            Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
+                callbackRequest2
+            );
             assertTrue(response.containsKey("respondents"));
         }
     }
