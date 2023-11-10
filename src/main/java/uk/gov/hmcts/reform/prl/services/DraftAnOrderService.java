@@ -83,7 +83,52 @@ import java.util.UUID;
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AFTER_SECOND_GATEKEEPING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_NEXT_STEPS_CONTENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_EX740;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_PROHIBITION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CROSS_EXAMINATION_QUALIFIED_LEGAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_APPLICATION_TO_APPLY_PERMISSION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASE_REVIEW;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PARENT_WITHCARE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PARTICIPATION_DIRECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_PERMISSION_HEARING_DIRECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_POSITION_STATEMENT_DIRECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_ASK;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARDING_CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARING_CAFCASS_CYMRU;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARENT_WITHCARE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTICIPATION_DIRECTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SAFE_GUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_CROSS_EXAMINATION_EX741;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_DRA_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_FHDRA_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_PERMISSION_HEARING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_PERMISSION_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SECOND_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SETTLEMENT_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_URGENT_HEARING_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_DA_OCCURED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_EDIT_CONTENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_INTERIM_ORDERS_FACTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_DA_OCCURED_EDIT_CONTENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_FACTS_EDIT_CONTENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
@@ -318,7 +363,8 @@ public class DraftAnOrderService {
                 && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
                 caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
             }
-            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
                 caseData = manageOrderService.populateCustomOrderFields(caseData, draftOrder.getOrderType());
             }
             caseData = caseData.toBuilder().manageOrders(
