@@ -147,7 +147,7 @@ public class ManageOrdersController {
                 CaseData.class
             );
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                caseData = manageOrderService.populateCustomOrderFields(caseData);
+                caseData = manageOrderService.populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
             return CallbackResponse.builder()
                 .data(caseData)

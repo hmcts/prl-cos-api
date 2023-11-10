@@ -192,8 +192,10 @@ public class DraftAnOrderController {
                     .errors((List<String>) caseDataUpdated.get("errorList"))
                     .build();
             } else {
-                //Draft an order
-                return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+                return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.handleDocumentGenerationForaDraftOrder(
+                    authorisation,
+                    callbackRequest
+                )).build();
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
