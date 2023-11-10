@@ -409,9 +409,7 @@ public class DraftAnOrderService {
                     .orderDocumentWelsh(manageOrderService.getGeneratedDocument(
                         generatedDocumentInfoWelsh,
                         documentLanguage.isGenWelsh(),
-                        fieldMap
-                    ))
-                    .build();
+                        fieldMap)).build();
                 log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
                 log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
             } catch (Exception e) {
