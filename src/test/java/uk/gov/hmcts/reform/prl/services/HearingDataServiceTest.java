@@ -318,9 +318,9 @@ public class HearingDataServiceTest {
             .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
             .build();
         List<Element<HearingData>> expectedResponse =
-            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,
-                                              hearingDataPrePopulatedDynamicLists,
-                                              caseData);
+            hearingDataService.getHearingDataForOtherOrders(listWithoutNoticeHearingDetails,
+                                                            hearingDataPrePopulatedDynamicLists,
+                                                            caseData);
         assertNotNull(expectedResponse);
     }
 
@@ -508,9 +508,9 @@ public class HearingDataServiceTest {
             .build();
 
         List<Element<HearingData>> expectedResponse =
-            hearingDataService.getHearingData(listWithoutNoticeHearingDetails,
-                                              hearingDataPrePopulatedDynamicLists,
-                                              caseData);
+            hearingDataService.getHearingDataForOtherOrders(listWithoutNoticeHearingDetails,
+                                                            hearingDataPrePopulatedDynamicLists,
+                                                            caseData);
         assertEquals("Test", expectedResponse.get(0).getValue().getHearingJudgePersonalCode());
     }
 

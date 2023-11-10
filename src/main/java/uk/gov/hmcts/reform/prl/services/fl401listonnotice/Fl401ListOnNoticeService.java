@@ -80,7 +80,9 @@ public class Fl401ListOnNoticeService {
         if (caseDataUpdated.containsKey(FL401_LISTONNOTICE_HEARINGDETAILS)) {
             caseDataUpdated.put(
                 FL401_LISTONNOTICE_HEARINGDETAILS,
-                hearingDataService.getHearingData(existingFl401ListOnNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData));
+                hearingDataService.getHearingDataForOtherOrders(existingFl401ListOnNoticeHearingDetails,
+                                                                hearingDataPrePopulatedDynamicLists,
+                                                                caseData));
         } else {
             HearingData hearingData = hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
             caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, ElementUtils.wrapElements(hearingData));
@@ -126,7 +128,7 @@ public class Fl401ListOnNoticeService {
             .build();
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
-            .getHearingData(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
+            .getHearingDataForOtherOrders(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
     }
