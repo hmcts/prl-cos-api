@@ -785,4 +785,5 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+
 }
