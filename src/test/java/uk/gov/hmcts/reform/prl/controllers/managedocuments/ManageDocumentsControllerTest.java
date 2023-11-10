@@ -83,7 +83,7 @@ public class ManageDocumentsControllerTest {
     @Before
     public void setup() {
         caseDataMap = new HashMap<>();
-
+        caseDataMap.put("id", 12345678L);
         caseData = CaseData.builder()
             .id(12345678L)
             .build();
@@ -178,5 +178,7 @@ public class ManageDocumentsControllerTest {
         when(manageDocumentsService.checkIfUserIsCourtStaff(auth,callbackRequest)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
         Assert.assertNotNull(response.getData());
+        Assert.assertEquals(12345678L, response.getData().get("id"));
+
     }
 }

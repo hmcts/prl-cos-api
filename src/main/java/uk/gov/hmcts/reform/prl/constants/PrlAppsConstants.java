@@ -801,4 +801,5 @@ public class PrlAppsConstants {
     public static final String AM_UPPER_CASE = "AM";
     public static final String PM_LOWER_CASE = "pm";
     public static final String PM_UPPER_CASE = "PM";
+    public static final String INTERNAL_CORRESPONDENCE_LABEL = "Internal correspondence";
 }

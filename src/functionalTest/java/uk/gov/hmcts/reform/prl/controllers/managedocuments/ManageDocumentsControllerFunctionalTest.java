@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
@@ -76,6 +77,8 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/validate-court-user")
             .then()
+            .body("errors",
+                  contains("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
             .assertThat().statusCode(200);
     }
 
