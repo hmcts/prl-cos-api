@@ -178,7 +178,6 @@ public class DraftAnOrderService {
 
     private final UserService userService;
 
-
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
