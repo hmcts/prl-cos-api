@@ -1994,8 +1994,7 @@ public class ManageOrderService {
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
         log.info("**********Inside getOrderdetailsElement**********SKS");
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserEmail = userDetails.getEmail();
+
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 
@@ -2048,6 +2047,8 @@ public class ManageOrderService {
             log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
         }
         log.info("inside getOrderDetailsElement ==> " + caseData.getManageOrders().getCurrentOrderCreatedDateTime());
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserEmail = userDetails.getEmail();
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(currentUserEmail)
