@@ -200,7 +200,7 @@ public class DraftAnOrderService {
 
     public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType, String currentUserEmail) {
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, currentUserEmail);
+            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType);
         }
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, currentUserEmail);
     }
