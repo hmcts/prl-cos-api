@@ -1173,9 +1173,6 @@ public class ManageOrderService {
     }
 
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserEmail) {
-        log.info("33333333{}",caseData.getUserInfo());
-        log.info("44444444{}",currentUserEmail);
-
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
@@ -1190,7 +1187,7 @@ public class ManageOrderService {
                     ? caseData.getUploadOrderDoc() : caseData.getPreviewOrderDoc())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .createdBy(currentUserEmail)
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
