@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
@@ -175,11 +176,15 @@ public class DraftAnOrderService {
 
     private final WelshCourtEmail welshCourtEmail;
 
+    private final UserService userService;
+
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserEmail = userDetails.getEmail();
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
+        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, currentUserEmail));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -194,11 +199,11 @@ public class DraftAnOrderService {
         );
     }
 
-    public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
+    public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType, String currentUserEmail) {
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType);
+            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, currentUserEmail);
         }
-        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
+        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, currentUserEmail);
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData, String eventId) {
