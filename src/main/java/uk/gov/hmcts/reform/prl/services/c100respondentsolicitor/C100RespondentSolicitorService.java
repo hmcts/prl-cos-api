@@ -1306,12 +1306,15 @@ public class C100RespondentSolicitorService {
         }
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
         Element<PartyDetails> solicitorRepresentedRespondent = null;
-        if (solicitorRole.isPresent() && isNotEmpty(solicitorRepresentedRespondent)) {
+        if (solicitorRole.isPresent()) {
             solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
-            String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
-                + solicitorRepresentedRespondent.getValue().getLastName();
+            if (null != solicitorRepresentedRespondent) {
+                String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
+                    + solicitorRepresentedRespondent.getValue().getLastName();
 
-            caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
+                caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
+            }
+
         }
         return caseDataUpdated;
     }
