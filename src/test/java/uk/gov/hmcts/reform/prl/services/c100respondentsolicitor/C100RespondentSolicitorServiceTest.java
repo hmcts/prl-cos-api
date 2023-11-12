@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -17,7 +18,9 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
+import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
@@ -67,6 +70,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -75,6 +80,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.RESPONSE_ALREADY_SUBMITTED_ERROR;
+import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.TECH_ERROR;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class C100RespondentSolicitorServiceTest {
@@ -1280,9 +1287,6 @@ public class C100RespondentSolicitorServiceTest {
     public void populateAboutToSubmitCaseDataWithFewNullsTest() {
         List<ConfidentialityListEnum> confidentialityListEnums = new ArrayList<>();
 
-        confidentialityListEnums.add(ConfidentialityListEnum.email);
-        confidentialityListEnums.add(ConfidentialityListEnum.phoneNumber);
-
         RespondentProceedingDetails proceedingDetails = RespondentProceedingDetails.builder()
             .caseNumber("122344")
             .nameAndOffice("testoffice")
@@ -2150,4 +2154,52 @@ public class C100RespondentSolicitorServiceTest {
         );
         Assertions.assertNotNull(response);
     }
+
+    @Test
+    public void testGetSolicitorRoleException() {
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId("")
+            .build();
+        assertExpectedException(() -> {
+            respondentSolicitorService.getSolicitorRole(
+                callbackRequest
+            );
+        }, RespondentSolicitorException.class, TECH_ERROR);
+    }
+
+    @Test
+    public void testFindSolicitorRepresentedRespondentsException() {
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        respondent.setResponse(Response.builder().c7ResponseSubmitted(Yes).build());
+        respondent2.setResponse(Response.builder().c7ResponseSubmitted(Yes).build());
+
+        caseData = caseData.toBuilder()
+            .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
+            .build();
+
+        stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        assertExpectedException(() -> {
+            respondentSolicitorService.findSolicitorRepresentedRespondents(
+                callbackRequest,SolicitorRole.C100APPLICANTSOLICITOR1
+            );
+        }, RespondentSolicitorException.class, RESPONSE_ALREADY_SUBMITTED_ERROR);
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
+    }
+
+
 }
