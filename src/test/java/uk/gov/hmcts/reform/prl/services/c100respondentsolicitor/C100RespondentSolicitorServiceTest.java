@@ -575,8 +575,8 @@ public class C100RespondentSolicitorServiceTest {
             .phoneNumber("1234567890")
             .response(Response.builder()
                           .citizenDetails(CitizenDetails.builder()
-                                              .firstName("test")
-                                              .lastName("test")
+                                              .firstName(null)
+                                              .lastName(null)
                                               .contact(Contact.builder().phoneNumber("test").email("test").build())
                                               .address(Address.builder().addressLine1("test").build())
                                               .build())
@@ -699,8 +699,12 @@ public class C100RespondentSolicitorServiceTest {
             .phoneNumber("1234567890")
             .response(Response.builder()
                           .citizenDetails(CitizenDetails.builder()
-                                              .firstName("test")
-                                              .lastName("test")
+                                              .firstName(null)
+                                              .lastName(null)
+                                              .contact(Contact.builder()
+                                                           .phoneNumber("123")
+                                                           .email("test@test.com").build())
+                                              .address(Address.builder().addressLine1("123").build())
                                               .build())
                           .consent(Consent.builder()
                                        .consentToTheApplication(No)
@@ -794,9 +798,9 @@ public class C100RespondentSolicitorServiceTest {
                                               .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
                           .build())
             .canYouProvideEmailAddress(Yes)
-            .isEmailAddressConfidential(Yes)
-            .isPhoneNumberConfidential(Yes)
-            .isAddressConfidential(Yes)
+            .isEmailAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .isAddressConfidential(No)
             .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
             .solicitorAddress(Address.builder().addressLine1("ABC").addressLine2("test").addressLine3("test").postCode(
                 "AB1 2MN").build())
@@ -2062,7 +2066,7 @@ public class C100RespondentSolicitorServiceTest {
 
         stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -2082,6 +2086,18 @@ public class C100RespondentSolicitorServiceTest {
             false
         )).thenReturn(document);
 
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        Map<String,Object> response1 = populateDataMap(stringObjectMap);
+        assertTrue(response1.containsKey("respondent"));
+        assertTrue(response1.containsKey("email"));
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData2);
+        Map<String,Object> response2 = populateDataMap(stringObjectMap);
+        assertTrue(response2.containsKey("respondent"));
+        assertTrue(response2.containsKey("email"));
+
+    }
+
+    private Map<String, Object> populateDataMap(Map<String, Object> stringObjectMap) {
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -2091,10 +2107,9 @@ public class C100RespondentSolicitorServiceTest {
             .eventId("c100ResSolViewResponseDraftDocumentB")
             .build();
 
-        Map<String, Object> response = respondentSolicitorService.populateDataMap(callbackRequest, null);
+        return respondentSolicitorService.populateDataMap(callbackRequest, null);
 
-        assertTrue(response.containsKey("respondent"));
-        assertTrue(response.containsKey("email"));
+
     }
 
     @Test
