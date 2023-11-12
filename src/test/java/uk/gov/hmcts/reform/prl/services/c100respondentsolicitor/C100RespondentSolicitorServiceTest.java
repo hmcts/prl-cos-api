@@ -2117,6 +2117,23 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
+    public void testGetOrganisationAddressException() {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        when(responseSubmitChecker.isFinished(respondent)).thenReturn(true);
+        when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenThrow(new RuntimeException());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData2);
+        Map<String,Object> response2 = populateDataMap(stringObjectMap);
+        assertTrue(response2.containsKey("respondent"));
+        assertTrue(response2.containsKey("email"));
+
+    }
+
+    @Test
     public void testGenerateConfidentialMapWithAllConfValues() {
 
         Map<String, Object> response = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
