@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
@@ -44,10 +46,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
@@ -56,7 +56,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -410,8 +409,6 @@ public class CaseService {
     public Flags getPartyCaseFlags(String userToken, String caseId, String partyId) {
         CaseDetails caseDetails = getCase(userToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
-
         Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
             partyId,
             caseData.getCaseTypeOfApplication(),
@@ -421,23 +418,11 @@ public class CaseService {
         if (partyDetailsMeta.isPresent()
             && partyDetailsMeta.get().getPartyDetails() != null
             && !StringUtils.isEmpty(partyDetailsMeta.get().getPartyDetails().getLabelForDynamicList())) {
-            PartyEnum partyType = partyDetailsMeta.get().getPartyType();
-            Optional<String> partyExternalCaseFlagField = Optional.empty();
-            if (PartyEnum.applicant == partyType) {
-                partyExternalCaseFlagField
-                    = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
-                    caseData.getCaseTypeOfApplication(),
-                    isC100Case ? PartyRole.Representing.CAAPPLICANT : PartyRole.Representing.DAAPPLICANT,
-                    partyDetailsMeta.get().getPartyIndex()
-                ));
-            } else if (PartyEnum.respondent == partyType) {
-                partyExternalCaseFlagField
-                    = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
-                    caseData.getCaseTypeOfApplication(),
-                    isC100Case ? PartyRole.Representing.CARESPONDENT : PartyRole.Representing.DARESPONDENT,
-                    partyDetailsMeta.get().getPartyIndex()
-                ));
-            }
+            Optional<String> partyExternalCaseFlagField = getPartyExternalCaseFlagField(
+                caseData.getCaseTypeOfApplication(),
+                partyDetailsMeta.get().getPartyType(),
+                partyDetailsMeta.get().getPartyIndex()
+            );
 
             if (partyExternalCaseFlagField.isPresent()) {
                 return objectMapper.convertValue(
@@ -450,10 +435,15 @@ public class CaseService {
         return null;
     }
 
-    public CaseData updatePartyFlagsAsCitizen(String authToken,
-                                              String caseId, String eventId, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
+    public ResponseEntity<Object> updateCitizenRAflags(
+        String caseId, String eventId, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
 
-        log.info("Inside updatePartyFlagsAsCitizen for partyId {}", citizenPartyFlagsRequest.getPartyIdamId());
+        if (StringUtils.isEmpty(citizenPartyFlagsRequest.getPartyIdamId()) || ObjectUtils.isEmpty(
+            citizenPartyFlagsRequest.getPartyExternalFlags())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
+        }
+
+        log.info("Inside updateCitizenRAflags for partyId {}", citizenPartyFlagsRequest.getPartyIdamId());
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
@@ -472,94 +462,79 @@ public class CaseService {
                 caseId,
                 false
             );
+
         CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
+            citizenPartyFlagsRequest.getPartyIdamId(),
+            caseData.getCaseTypeOfApplication(),
+            caseData
+        );
 
-        String caseDataFieldName;
-        if (StringUtils.isNotEmpty(citizenPartyFlagsRequest.getPartyIdamId())
-            && ObjectUtils.isNotEmpty(citizenPartyFlagsRequest.getPartyExternalFlags())) {
-            log.info("Party Type {}", citizenPartyFlagsRequest.getPartyType());
-            if (C100_CASE_TYPE.equalsIgnoreCase(citizenPartyFlagsRequest.getCaseTypeOfApplication())) {
-                caseDataFieldName = getPartyFlagFieldNameForCa(citizenPartyFlagsRequest, caseData);
-            } else {
-                caseDataFieldName = getPartyFlagFieldNameForDa(citizenPartyFlagsRequest);
-            }
-            log.info("CaseDataFieldName {}", caseDataFieldName);
-            //set the case data content
-            Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
-            if (updatedCaseData.containsKey(caseDataFieldName) && ObjectUtils.isNotEmpty(updatedCaseData.get(
-                caseDataFieldName))) {
-                Flags flags = objectMapper.convertValue(
-                    updatedCaseData.get(caseDataFieldName),
-                    Flags.class
-                );
-                log.info("Existing external Party flags {}", flags);
-                flags = flags.toBuilder()
-                    .details(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails())
-                    .build();
-                log.info("Updated external Party flags {}", flags);
-                updatedCaseData.put(caseDataFieldName, flags);
-            }
-
-            CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
-                startEventResponse,
-                updatedCaseData
-            );
-            coreCaseDataService.submitUpdate(
-                systemAuthorisation,
-                eventRequestData,
-                caseDataContent,
-                caseId,
-                false
-            );
-            log.info("Exiting updatePartyFlagsAsCitizen for partyId {}", citizenPartyFlagsRequest.getPartyIdamId());
-            return caseData;
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+        if (!partyDetailsMeta.isPresent()
+            || null == partyDetailsMeta.get().getPartyDetails()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party details not found");
         }
+
+        Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
+        Optional<String> partyExternalCaseFlagField = getPartyExternalCaseFlagField(
+            caseData.getCaseTypeOfApplication(),
+            partyDetailsMeta.get().getPartyType(),
+            partyDetailsMeta.get().getPartyIndex()
+        );
+
+        if (!partyExternalCaseFlagField.isPresent() || !updatedCaseData.containsKey(partyExternalCaseFlagField.get()) || ObjectUtils.isEmpty(
+            updatedCaseData.get(
+                partyExternalCaseFlagField.get()))) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party external flag details not found");
+        }
+        log.info("partyExternalCaseFlagField {}", partyExternalCaseFlagField.get());
+
+        Flags flags = objectMapper.convertValue(
+            updatedCaseData.get(partyExternalCaseFlagField.get()),
+            Flags.class
+        );
+        log.info("Existing external Party flags {}", flags);
+        flags = flags.toBuilder()
+            .details(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails())
+            .build();
+        log.info("Updated external Party flags {}", flags);
+        updatedCaseData.put(partyExternalCaseFlagField.get(), flags);
+
+        CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            updatedCaseData
+        );
+        coreCaseDataService.submitUpdate(
+            systemAuthorisation,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
+        return ResponseEntity.status(HttpStatus.OK).body("party flags updated");
     }
 
-    private String getPartyFlagFieldNameForCa(CitizenPartyFlagsRequest citizenPartyFlagsRequest, CaseData caseData) {
-        OptionalInt partyIndex;
-        String caseDataFieldName = EMPTY_STRING;
-        if (PartyEnum.applicant.equals(citizenPartyFlagsRequest.getPartyType())) {
-            partyIndex = getPartyIndexForCa(
-                caseData,
-                citizenPartyFlagsRequest.getPartyIdamId(),
-                PartyRole.Representing.CAAPPLICANT
-            );
-            caseDataFieldName = String.format(
-                PartyRole.Representing.CAAPPLICANT.getCaseDataExternalField(),
-                partyIndex.getAsInt() + 1
-            );
-        } else if (PartyEnum.respondent.equals(citizenPartyFlagsRequest.getPartyType())) {
-            partyIndex = getPartyIndexForCa(
-                caseData,
-                citizenPartyFlagsRequest.getPartyIdamId(),
-                PartyRole.Representing.CARESPONDENT
-            );
-            caseDataFieldName = String.format(
-                PartyRole.Representing.CARESPONDENT.getCaseDataExternalField(),
-                partyIndex.getAsInt() + 1
-            );
+    private Optional<String> getPartyExternalCaseFlagField(String caseType, PartyEnum partyType, Integer partyIndex) {
+
+        Optional<String> partyExternalCaseFlagField = Optional.empty();
+        boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseType);
+
+        if (PartyEnum.applicant == partyType) {
+            partyExternalCaseFlagField
+                = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                caseType,
+                isC100Case ? PartyRole.Representing.CAAPPLICANT : PartyRole.Representing.DAAPPLICANT,
+                partyIndex
+            ));
+        } else if (PartyEnum.respondent == partyType) {
+            partyExternalCaseFlagField
+                = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                caseType,
+                isC100Case ? PartyRole.Representing.CARESPONDENT : PartyRole.Representing.DARESPONDENT,
+                partyIndex
+            ));
         }
-        return caseDataFieldName;
-    }
 
-    private String getPartyFlagFieldNameForDa(CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
-        String caseDataFieldName = EMPTY_STRING;
-        if (PartyEnum.applicant.equals(citizenPartyFlagsRequest.getPartyType())) {
-            caseDataFieldName = PartyRole.Representing.DAAPPLICANT.getCaseDataExternalField();
-        } else if (PartyEnum.respondent.equals(citizenPartyFlagsRequest.getPartyType())) {
-            caseDataFieldName = PartyRole.Representing.DARESPONDENT.getCaseDataExternalField();
-        }
-        return caseDataFieldName;
-    }
-
-    private OptionalInt getPartyIndexForCa(CaseData caseData, String partyIdamId, PartyRole.Representing representing) {
-        List<Element<PartyDetails>> parties = representing.getCaTarget().apply(caseData);
-        return IntStream.range(0, parties.size())
-            .filter(i -> partyIdamId.equals(parties.get(i).getValue().getUser().getIdamId()))
-            .findFirst();
-
+        return partyExternalCaseFlagField;
     }
 }

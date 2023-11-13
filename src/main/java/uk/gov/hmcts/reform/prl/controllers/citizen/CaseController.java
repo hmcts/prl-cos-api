@@ -12,6 +12,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -141,7 +143,12 @@ public class CaseController {
 
     @PostMapping(value = "{caseId}/{eventId}/party-update-ra", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Update party flags for citizen")
-    public CaseData setPartyFlagsForCitizen(
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Updated party flags for citizen"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "404", description = "Not found")})
+    public ResponseEntity<Object> updateCitizenRAflags(
         @NotNull @Valid @RequestBody CitizenPartyFlagsRequest citizenPartyFlagsRequest,
         @PathVariable("eventId") String eventId,
         @PathVariable("caseId") String caseId,
@@ -149,14 +156,13 @@ public class CaseController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
-            return caseService.updatePartyFlagsAsCitizen(
-                authorisation,
+            return caseService.updateCitizenRAflags(
                 caseId,
                 eventId,
                 citizenPartyFlagsRequest
             );
         } else {
-            throw (new RuntimeException(INVALID_CLIENT));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("unauthorized");
         }
     }
 
