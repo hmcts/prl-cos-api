@@ -39,6 +39,7 @@ public enum ManageOrderFieldsEnum {
     judgeDirectionsToAdmin("judgeDirectionsToAdmin"),
     instructionsFromJudge("instructionsFromJudge"),
     judgeNotesEmpty("judgeNotesEmpty"),
+    judgeNotesEmptyDraft("judgeNotesEmptyDraft"),
     courtAdminNotes("courtAdminNotes"),
     nameOfOrder("nameOfOrder"),
     appointedGuardianName("appointedGuardianName"),

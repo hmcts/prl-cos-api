@@ -506,7 +506,7 @@ public class DraftAnOrderService {
         }
         log.info("judgeNotes {}", selectedOrder.getJudgeNotes());
         if (selectedOrder.getJudgeNotes() != null) {
-            caseDataMap.put("judgeNotesEmpty", selectedOrder.getJudgeNotes());
+            caseDataMap.put("judgeNotesEmptyDraft", selectedOrder.getJudgeNotes());
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         } else {
             caseDataMap.put("judgeNotesEmpty", "");
