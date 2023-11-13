@@ -2930,7 +2930,7 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
             .thenReturn(caseData);
         when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
-        when(manageOrderService.getCurrentUploadDraftOrderDetails(caseData, "Solicitor"))
+        when(manageOrderService.getCurrentUploadDraftOrderDetails(caseData, "Solicitor",""))
             .thenReturn(DraftOrder.builder().orderTypeId("abc").build());
         Map<String, Object> response = draftAnOrderService.prepareDraftOrderCollection(authToken,callbackRequest);
         Assert.assertEquals(

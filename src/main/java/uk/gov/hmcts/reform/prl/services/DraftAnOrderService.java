@@ -181,9 +181,9 @@ public class DraftAnOrderService {
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserEmail = userDetails.getEmail();
+        String currentUserFullName = userDetails.getFullName();
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, currentUserEmail));
+        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, currentUserFullName));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -198,11 +198,11 @@ public class DraftAnOrderService {
         );
     }
 
-    public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType, String currentUserEmail) {
+    public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType, String currentUserFullName) {
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType);
+            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, currentUserFullName);
         }
-        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, currentUserEmail);
+        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, currentUserFullName);
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData, String eventId) {
