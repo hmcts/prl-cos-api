@@ -871,8 +871,8 @@ public class SendAndReplyService {
             ? ANCHOR_HREF_START + message.getHearingsLink() + HEARINGS_ANCHOR_END : null);
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
-        addRowToMessageTable(lines, DOCUMENT, isNotBlank(message.getSelectedSubmittedDocumentValue())
-            ? ANCHOR_HREF_START + message.getSelectedSubmittedDocumentValue() + HEARINGS_ANCHOR_END : null);
+        addRowToMessageTable(lines, DOCUMENT,"<a href='" + message.getSelectedDocument()
+            + "'>" + message.getSelectedSubmittedDocumentValue() + "</a>" );
         lines.add(TABLE_END);
         lines.add(DIV_END);
 
@@ -900,9 +900,10 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
                     addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
                         ? ANCHOR_HREF_START + history.getHearingsLink() + HEARINGS_ANCHOR_END : null);
-                    addRowToMessageTable(lines, DOCUMENT, history.getSelectedSubmittedDocumentValue());
                     addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());
+                    addRowToMessageTable(lines, DOCUMENT,"<a href='" + message.getSelectedDocument()
+                        + "'>" + message.getSelectedSubmittedDocumentValue() + "</a>" );
                     lines.add(TABLE_END);
                     lines.add(DIV_END);
                 });
