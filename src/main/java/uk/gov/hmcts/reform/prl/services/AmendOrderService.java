@@ -118,6 +118,7 @@ public class AmendOrderService {
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 });
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+                log.info("manageOrderService.serveOrderrrrrrrr222222 ->>");
                 updatedOrders =  manageOrderService.serveOrder(caseData,orders);
             } else {
                 updatedOrders = orders;

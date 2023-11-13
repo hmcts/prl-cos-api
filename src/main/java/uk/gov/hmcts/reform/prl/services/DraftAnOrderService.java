@@ -1560,6 +1560,7 @@ public class DraftAnOrderService {
                 caseData, eventId
             ));
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+                log.info("manageOrderService.serveOrderrrrrrrr33333 ->>");
                 CaseData modifiedCaseData = objectMapper.convertValue(
                     caseDataUpdated,
                     CaseData.class
