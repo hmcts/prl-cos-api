@@ -68,7 +68,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.other;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.servedSavedOrders;
@@ -217,15 +220,24 @@ public class ManageOrdersController {
 
             }
 
+            //Added for SDO Orders
+            caseData = updateIsSdoSelected(caseData);
+            log.info("*****IsSdoSelected" + caseData.getIsSdoSelected());
+
+
+
             //PRL-3254 - Populate hearing details dropdown for create order
-            DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorisation, caseData);
+            DynamicList hearingsDynamicList =  manageOrderService.populateHearingsDropdown(authorisation, caseData);
             caseDataUpdated.put("hearingsType", hearingsDynamicList);
+            caseDataUpdated.put("isSdoSelected", caseData.getIsSdoSelected());
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .build();
+              .data(caseDataUpdated)
+              .build();
+
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+
     }
 
     @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -549,5 +561,24 @@ public class ManageOrdersController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private CaseData updateIsSdoSelected(CaseData caseData) {
+        log.info("**ManageOrdersOptions" + caseData.getManageOrdersOptions());
+        log.info("**CreateSelectOrderOptions" + caseData.getCreateSelectOrderOptions());
+        if (null != caseData.getManageOrdersOptions()
+            && caseData.getManageOrdersOptions().equals(createAnOrder)
+            && null != caseData.getCreateSelectOrderOptions()) {
+            if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
+                || (other).equals(caseData.getCreateSelectOrderOptions())) {
+                caseData.setIsSdoSelected(Yes);
+                log.info("isSdoSelected set to Yes" + caseData.getIsSdoSelected());
+            } else {
+                caseData.setIsSdoSelected(No);
+                log.info("isSdoSelected set to No" + caseData.getIsSdoSelected());
+            }
+        }
+        return  caseData;
+
     }
 }
