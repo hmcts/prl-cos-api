@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 
 @Data
@@ -17,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 @Builder(toBuilder = true)
 public class CitizenPartyFlagsRequest {
     private final String caseTypeOfApplication;
-    private PartyEnum partyType;
     private String partyIdamId;
     private Flags partyExternalFlags;
 }
