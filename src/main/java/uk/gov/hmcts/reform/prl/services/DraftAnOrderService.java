@@ -510,6 +510,7 @@ public class DraftAnOrderService {
         } else {
             caseDataMap.put("judgeNotesEmpty", "");
         }
+        log.info("judgeNotesEmpty",caseDataMap.get("judgeNotesEmpty"));
         caseDataMap.put(
             IS_HEARING_PAGE_NEEDED,
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
