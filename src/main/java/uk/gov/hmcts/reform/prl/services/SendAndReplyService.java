@@ -869,9 +869,10 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
         addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
             ? ANCHOR_HREF_START + message.getHearingsLink() + HEARINGS_ANCHOR_END : null);
-        addRowToMessageTable(lines, DOCUMENT, message.getSelectedSubmittedDocumentValue());
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
+        addRowToMessageTable(lines, DOCUMENT, isNotBlank(message.getSelectedSubmittedDocumentValue())
+            ? ANCHOR_HREF_START + message.getSelectedSubmittedDocumentValue() + HEARINGS_ANCHOR_END : null);
         lines.add(TABLE_END);
         lines.add(DIV_END);
 
