@@ -437,9 +437,9 @@ public class CaseService {
 
     public ResponseEntity<Object> updateCitizenRAflags(
         String caseId, String eventId, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
-        log.info("Inside updateCitizenRAflags caseId {} -->", caseId);
-        log.info("Inside updateCitizenRAflags eventId {} -->", eventId);
-        log.info("Inside updateCitizenRAflags citizenPartyFlagsRequest {} -->", citizenPartyFlagsRequest);
+        log.info("Inside updateCitizenRAflags caseId {}", caseId);
+        log.info("Inside updateCitizenRAflags eventId {}", eventId);
+        log.info("Inside updateCitizenRAflags citizenPartyFlagsRequest {}", citizenPartyFlagsRequest);
 
         if (StringUtils.isEmpty(citizenPartyFlagsRequest.getPartyIdamId()) || ObjectUtils.isEmpty(
             citizenPartyFlagsRequest.getPartyExternalFlags())) {
