@@ -828,6 +828,17 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
+
+        log.info("BBBBBBBBBBBBB ===== {}",caseData.getOrderCollection());
+
+        caseData.getOrderCollection().stream()
+            .forEach(order -> {
+                log.info("VVVVVVVVV --> {}", order.getValue().getOtherDetails());
+                log.info("***** serving c100 order *******");
+                log.info("***** serving FLLLLLL100 order *******");
+
+            });
+
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {

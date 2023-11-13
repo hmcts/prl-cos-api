@@ -924,6 +924,18 @@ public class ManageOrderService {
                                                         String flagSelectedOrder,
                                                         String flagSelectedOrderId) {
         log.info("11111");
+
+
+        log.info("CCCCCCCCCCCC ===== {}",caseData.getOrderCollection());
+
+        caseData.getOrderCollection().stream()
+            .forEach(order -> {
+                log.info("VVVVVVVVV --> {}", order.getValue().getOtherDetails());
+                log.info("***** serving c100 order *******");
+                log.info("***** serving FLLLLLL100 order *******");
+
+            });
+
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
