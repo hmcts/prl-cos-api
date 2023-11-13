@@ -504,6 +504,7 @@ public class DraftAnOrderService {
         if (language.isGenWelsh()) {
             caseDataMap.put("previewDraftOrderWelsh", selectedOrder.getOrderDocumentWelsh());
         }
+        log.info("judgeNotes", selectedOrder.getJudgeNotes());
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("judgeNotesEmpty", selectedOrder.getJudgeNotes());
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
