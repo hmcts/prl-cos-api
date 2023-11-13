@@ -1011,8 +1011,8 @@ public class SendAndReplyService {
                     replyMessage.setReplyHistory(messageHistoryList);
                     replyMessage.setUpdatedTime(dateTime.now());
                     //retain the original subject & date sent
+                    log.info("date sent {}", replyMessage.getDateSent());
                     replyMessage.setMessageSubject(message.getMessageSubject());
-                    replyMessage.setDateSent(message.getDateSent());
                     replyMessage.setSelectedApplicationCode(StringUtils.stripToNull(message.getSelectedApplicationCode()));
                     replyMessage.setSelectedFutureHearingCode(StringUtils.stripToNull(message.getSelectedFutureHearingCode()));
                     replyMessage.setJudicialOrMagistrateTierCode(StringUtils.stripToNull(message.getJudicialOrMagistrateTierCode()));
