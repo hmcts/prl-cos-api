@@ -872,6 +872,7 @@ public class SendAndReplyService {
             ? ANCHOR_HREF_START + message.getHearingsLink() + HEARINGS_ANCHOR_END : null);
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
+        log.info("Document {}",  message.getSelectedDocument());
         addDocumentRowToMessageTable(lines, DOCUMENT, message.getSelectedDocument());
         lines.add(TABLE_END);
         lines.add(DIV_END);
@@ -902,6 +903,7 @@ public class SendAndReplyService {
                         ? ANCHOR_HREF_START + history.getHearingsLink() + HEARINGS_ANCHOR_END : null);
                     addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());
+                    log.info("Document {}",  message.getSelectedDocument());
                     addDocumentRowToMessageTable(lines, DOCUMENT, message.getSelectedDocument());
                     lines.add(TABLE_END);
                     lines.add(DIV_END);
