@@ -885,7 +885,7 @@ public class ManageOrderService {
 
     private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData)
         throws Exception {
-
+        log.info("22222");
         String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
             : getSelectedOrderInfoForUpload(caseData);
@@ -923,6 +923,7 @@ public class ManageOrderService {
                                                         CaseData caseData,
                                                         String flagSelectedOrder,
                                                         String flagSelectedOrderId) {
+        log.info("11111");
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
