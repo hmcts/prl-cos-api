@@ -829,15 +829,7 @@ public class DraftAnOrderService {
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
 
-        log.info("BBBBBBBBBBBBB ===== {}",caseData.getOrderCollection());
-
-        caseData.getOrderCollection().stream()
-            .forEach(order -> {
-                log.info("VVVVVVVVV --> {}", order.getValue().getOtherDetails());
-                log.info("***** serving c100 order *******");
-                log.info("***** serving FLLLLLL100 order *******");
-
-            });
+        log.info("BBBBBBBBBBBBB ===== ");
 
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
@@ -852,7 +844,6 @@ public class DraftAnOrderService {
                 orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
             }
         }
-        log.info("draftOrder.getOtherDetails()===666666666 {}", draftOrder.getOtherDetails());
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
