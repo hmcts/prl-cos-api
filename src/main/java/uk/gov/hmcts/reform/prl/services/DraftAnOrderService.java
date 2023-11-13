@@ -541,9 +541,18 @@ public class DraftAnOrderService {
             caseDataMap.put("manageOrdersCourtName", selectedOrder.getManageOrdersCourtName());
             caseDataMap.put("manageOrdersCourtAddress", selectedOrder.getManageOrdersCourtAddress());
             caseDataMap.put("manageOrdersCaseNo", selectedOrder.getManageOrdersCaseNo());
-            caseDataMap.put("manageOrdersApplicant", selectedOrder.getManageOrdersApplicant());
-            caseDataMap.put("manageOrdersApplicantReference", selectedOrder.getManageOrdersApplicantReference());
-            caseDataMap.put("manageOrdersRespondent", selectedOrder.getManageOrdersRespondent());
+            caseDataMap.put("manageOrdersApplicant",
+                            StringUtils.isEmpty(selectedOrder.getManageOrdersApplicant()) ? CaseUtils.getApplicant(
+                                caseData) : selectedOrder.getManageOrdersApplicant()
+            );
+            caseDataMap.put("manageOrdersApplicantReference",
+                            StringUtils.isEmpty(selectedOrder.getManageOrdersApplicantReference()) ? CaseUtils.getApplicantReference(
+                                caseData) : selectedOrder.getManageOrdersApplicantReference()
+            );
+            caseDataMap.put("manageOrdersRespondent",
+                            StringUtils.isEmpty(selectedOrder.getManageOrdersRespondent()) ? CaseUtils.getRespondent(
+                                caseData) : selectedOrder.getManageOrdersRespondent()
+            );
             caseDataMap.put("manageOrdersRespondentReference", selectedOrder.getManageOrdersRespondentReference());
             caseDataMap.put("manageOrdersRespondentDob", selectedOrder.getManageOrdersRespondentDob());
             caseDataMap.put("manageOrdersRespondentAddress", selectedOrder.getManageOrdersRespondentAddress());
@@ -577,6 +586,9 @@ public class DraftAnOrderService {
         } else {
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
         }
+
+        log.info("applicant reference {}", caseDataMap.get("manageOrdersApplicantReference"));
+        log.info("applicant {}", caseDataMap.get("manageOrdersApplicant"));
         return caseDataMap;
     }
 
@@ -861,8 +873,8 @@ public class DraftAnOrderService {
             .manageOrdersCourtName(caseData.getManageOrders().getManageOrdersCourtName())
             .manageOrdersCourtAddress(caseData.getManageOrders().getManageOrdersCourtAddress())
             .manageOrdersCaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
-            .manageOrdersApplicant(caseData.getManageOrders().getManageOrdersApplicant())
-            .manageOrdersApplicantReference(caseData.getManageOrders().getManageOrdersApplicantReference())
+            .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
+            .manageOrdersApplicantReference(CaseUtils.getApplicantReference(caseData))
             .manageOrdersRespondent(caseData.getManageOrders().getManageOrdersRespondent())
             .manageOrdersRespondentReference(caseData.getManageOrders().getManageOrdersRespondentReference())
             .manageOrdersRespondentDob(caseData.getManageOrders().getManageOrdersRespondentDob())
@@ -923,7 +935,6 @@ public class DraftAnOrderService {
             log.info("***Court name after set {}", caseData.getCourtName());
         }
         if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            FL404 fl404CustomFields = getFl404CustomFields(caseData);
             caseData = caseData.toBuilder()
                 .standardDirectionOrder(caseData.getStandardDirectionOrder())
                 .manageOrders(caseData.getManageOrders().toBuilder()
