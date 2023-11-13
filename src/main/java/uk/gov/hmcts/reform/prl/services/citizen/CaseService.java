@@ -437,13 +437,15 @@ public class CaseService {
 
     public ResponseEntity<Object> updateCitizenRAflags(
         String caseId, String eventId, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
+        log.info("Inside updateCitizenRAflags caseId -->", caseId);
+        log.info("Inside updateCitizenRAflags eventId -->", eventId);
+        log.info("Inside updateCitizenRAflags citizenPartyFlagsRequest -->", citizenPartyFlagsRequest);
 
         if (StringUtils.isEmpty(citizenPartyFlagsRequest.getPartyIdamId()) || ObjectUtils.isEmpty(
             citizenPartyFlagsRequest.getPartyExternalFlags())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
         }
 
-        log.info("Inside updateCitizenRAflags for partyId {}", citizenPartyFlagsRequest.getPartyIdamId());
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
