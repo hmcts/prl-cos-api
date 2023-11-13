@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models;
+package uk.gov.hmcts.reform.prl.models.caseflags.request;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
@@ -17,5 +17,5 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 public class CitizenPartyFlagsRequest {
     private final String caseTypeOfApplication;
     private String partyIdamId;
-    private Flags partyExternalFlags;
+    private FlagsRequest partyExternalFlags;
 }
