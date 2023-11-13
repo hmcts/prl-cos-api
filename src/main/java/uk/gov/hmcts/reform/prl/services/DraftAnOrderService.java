@@ -504,14 +504,12 @@ public class DraftAnOrderService {
         if (language.isGenWelsh()) {
             caseDataMap.put("previewDraftOrderWelsh", selectedOrder.getOrderDocumentWelsh());
         }
-        log.info("judgeNotes {}", selectedOrder.getJudgeNotes());
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("judgeNotesEmptyDraft", selectedOrder.getJudgeNotes());
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         } else {
             caseDataMap.put("judgeNotesEmpty", "");
         }
-        log.info("judgeNotesEmpty {}",caseDataMap.get("judgeNotesEmpty"));
         caseDataMap.put(
             IS_HEARING_PAGE_NEEDED,
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
