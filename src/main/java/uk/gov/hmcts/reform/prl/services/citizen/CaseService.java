@@ -23,10 +23,12 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
-import uk.gov.hmcts.reform.prl.models.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
@@ -497,7 +499,7 @@ public class CaseService {
         );
         log.info("Existing external Party flags {}", flags);
         flags = flags.toBuilder()
-            .details(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails())
+            .details(convertFlags(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails()))
             .build();
         log.info("Updated external Party flags {}", flags);
         updatedCaseData.put(partyExternalCaseFlagField.get(), flags);
@@ -514,6 +516,14 @@ public class CaseService {
             false
         );
         return ResponseEntity.status(HttpStatus.OK).body("party flags updated");
+    }
+
+    private List<Element<FlagDetail>> convertFlags(List<FlagDetailRequest> details) {
+        List<Element<FlagDetail>> flagDetails = new ArrayList<>();
+        for (FlagDetailRequest detail : details) {
+
+        }
+        return flagDetails;
     }
 
     private Optional<String> getPartyExternalCaseFlagField(String caseType, PartyEnum partyType, Integer partyIndex) {
