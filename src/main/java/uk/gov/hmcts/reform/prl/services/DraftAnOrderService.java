@@ -490,7 +490,10 @@ public class DraftAnOrderService {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
+            caseDataMap.put("judgeNotesEmpty", selectedOrder.getJudgeNotes());
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
+        } else {
+            caseDataMap.put("judgeNotesEmpty", "");
         }
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
@@ -502,7 +505,10 @@ public class DraftAnOrderService {
             caseDataMap.put("previewDraftOrderWelsh", selectedOrder.getOrderDocumentWelsh());
         }
         if (selectedOrder.getJudgeNotes() != null) {
+            caseDataMap.put("judgeNotesEmpty", selectedOrder.getJudgeNotes());
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
+        } else {
+            caseDataMap.put("judgeNotesEmpty", "");
         }
         caseDataMap.put(
             IS_HEARING_PAGE_NEEDED,
