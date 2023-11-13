@@ -928,14 +928,6 @@ public class ManageOrderService {
 
         log.info("CCCCCCCCCCCC ===== {}",caseData.getOrderCollection());
 
-        caseData.getOrderCollection().stream()
-            .forEach(order -> {
-                log.info("VVVVVVVVV --> {}", order.getValue().getOtherDetails());
-                log.info("***** serving c100 order *******");
-                log.info("***** serving FLLLLLL100 order *******");
-
-            });
-
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
@@ -1406,11 +1398,9 @@ public class ManageOrderService {
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
-                    log.info("ORDERssssss --> {}", order);
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         log.info("***** serving c100 order *******");
                         servedC100Order(caseData, orders, order);
-                        log.info("***** serving FLLLLLL100 order *******");
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }
@@ -1437,7 +1427,6 @@ public class ManageOrderService {
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
-        log.info("updateServedOrderDetails=======>aaaaaaa=aa {}",order);
         updateServedOrderDetails(
             servedOrderDetails,
             null,
@@ -2010,7 +1999,6 @@ public class ManageOrderService {
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
         log.info("**********Inside getOrderdetailsElement**********SKS");
-
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 

@@ -152,17 +152,7 @@ public class AmendOrderService {
     private DraftOrder getCurrentDraftOrderDetails(CaseData caseData,
                                                    uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
                                                    String loggedInUserType) {
-        log.info("AAAAAAAAAAAAA ===== {}",caseData.getOrderCollection());
-
-        caseData.getOrderCollection().stream()
-            .forEach(order -> {
-                log.info("VVVVVVVVV --> {}", order.getValue().getOtherDetails());
-                log.info("***** serving c100 order *******");
-                log.info("***** serving FLLLLLL100 order *******");
-
-            });
-
-
+        log.info("AAAAAAAAAAAAA ===== {}");
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
