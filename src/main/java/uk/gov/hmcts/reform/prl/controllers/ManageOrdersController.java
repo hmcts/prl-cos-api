@@ -296,6 +296,7 @@ public class ManageOrdersController {
                     caseData
                 ));
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+                log.info("manageOrderService.serveOrderrrrrrrr ->>1111");
                 caseDataUpdated.put(ORDER_COLLECTION, manageOrderService.serveOrder(caseData, caseData.getOrderCollection()));
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);

@@ -1120,6 +1120,7 @@ public class ManageOrderService {
             Comparator.reverseOrder()
         ));
         if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            log.info("manageOrderService.serveOrderrrrrrrr444444 ->>");
             orderCollection = serveOrder(caseData, orderCollection);
         }
         LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
@@ -1393,9 +1394,11 @@ public class ManageOrderService {
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
+                    log.info("ORDERssssss --> {}", order);
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         log.info("***** serving c100 order *******");
                         servedC100Order(caseData, orders, order);
+                        log.info("***** serving FLLLLLL100 order *******");
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }
@@ -1422,7 +1425,7 @@ public class ManageOrderService {
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
-
+        log.info("updateServedOrderDetails=======>aaaaaaa=aa {}",order);
         updateServedOrderDetails(
             servedOrderDetails,
             null,
