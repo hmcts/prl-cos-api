@@ -365,7 +365,12 @@ public class DraftAnOrderService {
             }
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
-                caseData = manageOrderService.populateCustomOrderFields(caseData, draftOrder.getOrderType());
+                caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().manageOrdersApplicant(
+                    CaseUtils.getApplicant(caseData))
+                                                                 .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
+                                                                     caseData))
+                                                                 .manageOrdersRespondent(CaseUtils.getRespondent(
+                                                                     caseData)).build()).build();
             }
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()
