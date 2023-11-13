@@ -852,6 +852,7 @@ public class DraftAnOrderService {
                 orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
             }
         }
+        log.info("draftOrder.getOtherDetails()===666666666 {}", draftOrder.getOtherDetails());
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
@@ -859,7 +860,7 @@ public class DraftAnOrderService {
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .createdBy(draftOrder.getOtherDetails().getCreatedBy())
                               .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
