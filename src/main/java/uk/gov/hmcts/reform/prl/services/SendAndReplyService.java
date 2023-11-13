@@ -872,7 +872,7 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
         addRowToMessageTable(lines, DOCUMENT,"<a href='" + message.getSelectedDocument()
-            + "'>" + message.getSelectedSubmittedDocumentValue() + "</a>" );
+            + "'>" + message.getSelectedSubmittedDocumentValue() + "</a>");
         lines.add(TABLE_END);
         lines.add(DIV_END);
 
@@ -903,7 +903,7 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());
                     addRowToMessageTable(lines, DOCUMENT,"<a href='" + message.getSelectedDocument()
-                        + "'>" + message.getSelectedSubmittedDocumentValue() + "</a>" );
+                        + "'>" + message.getSelectedSubmittedDocumentValue() + "</a>");
                     lines.add(TABLE_END);
                     lines.add(DIV_END);
                 });
