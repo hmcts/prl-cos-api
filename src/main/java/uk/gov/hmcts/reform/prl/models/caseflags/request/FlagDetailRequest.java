@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.caseflags.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,7 +36,9 @@ public class FlagDetailRequest {
     @SuppressWarnings(value = "MemberName")
     public String flagComment_cy;
     public String flagUpdateComment;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     public LocalDateTime dateTimeCreated;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     public LocalDateTime dateTimeModified;
     public List<Element<String>> path;
     public YesOrNo hearingRelevant;
