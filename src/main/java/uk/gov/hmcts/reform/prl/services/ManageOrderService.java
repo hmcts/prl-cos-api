@@ -1103,6 +1103,8 @@ public class ManageOrderService {
     }
 
     private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData) throws Exception {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserFullName = userDetails.getFullName();
         List<Element<OrderDetails>> orderCollection;
         log.info("*** Court seal 1 {}", caseData.getCourtSeal());
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
@@ -1125,7 +1127,7 @@ public class ManageOrderService {
         ));
         if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
             log.info("manageOrderService.serveOrderrrrrrrr444444 ->>");
-            orderCollection = serveOrder(caseData, orderCollection);
+            orderCollection = serveOrder(caseData, orderCollection, currentUserFullName);
         }
         LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
         Map<String, Object> orderMap = new HashMap<>();
@@ -1387,7 +1389,7 @@ public class ManageOrderService {
         return status;
     }
 
-    public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
+    public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders, String currentUserFullName) {
         log.info("***** inside serveOrder********");
         log.info("***** orders size******** {}", orders.size());
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
@@ -1400,9 +1402,9 @@ public class ManageOrderService {
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         log.info("***** serving c100 order *******");
-                        servedC100Order(caseData, orders, order);
+                        servedC100Order(caseData, orders, order, currentUserFullName);
                     } else {
-                        servedFL401Order(caseData, orders, order);
+                        servedFL401Order(caseData, orders, order, currentUserFullName);
                     }
                 });
         }
@@ -1410,7 +1412,7 @@ public class ManageOrderService {
         return orders;
     }
 
-    private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+    private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order,String currentUserFullName) {
         ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
         List<Element<PostalInformation>> postalInformation = null;
@@ -1433,11 +1435,14 @@ public class ManageOrderService {
             orders,
             order,
             postalInformation,
-            emailInformation
+            emailInformation,
+            (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())
+                ? order.getValue().getOtherDetails().getCreatedBy()
+                : currentUserFullName)
         );
     }
 
-    private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
+    private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order, String currentUserFullName) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
         ServingRespondentsEnum servingRespondentsOptions = null;
@@ -1486,13 +1491,21 @@ public class ManageOrderService {
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
+        if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+            log.info("AMENDDDDD USerrr --->", currentUserFullName);
+        } else {
+            log.info("createdddd  USerrr --->", order.getValue().getOtherDetails().getCreatedBy());
+        }
         updateServedOrderDetails(
             servedOrderDetails,
             cafcassCymruEmail,
             orders,
             order,
             postalInformation,
-            emailInformation
+            emailInformation,
+            (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())
+                ? order.getValue().getOtherDetails().getCreatedBy()
+                : currentUserFullName)
         );
     }
 
@@ -1604,7 +1617,7 @@ public class ManageOrderService {
 
     private static void updateServedOrderDetails(Map<String, Object> servedOrderDetails, String cafcassCymruEmail, List<Element<OrderDetails>> orders,
                                                  Element<OrderDetails> order, List<Element<PostalInformation>> postalInformation,
-                                                 List<Element<EmailInformation>> emailInformation) {
+                                                 List<Element<EmailInformation>> emailInformation, String createdOrAmendedBy) {
         log.info("***** inside updateServedOrderDetails********");
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
@@ -1668,7 +1681,7 @@ public class ManageOrderService {
             .orderDocument(order.getValue().getOrderDocument())
             .orderType(order.getValue().getOrderType())
             .typeOfOrder(order.getValue().getTypeOfOrder())
-            .otherDetails(updateOtherOrderDetails(order.getValue().getOtherDetails()))
+            .otherDetails(updateOtherOrderDetails(order.getValue().getOtherDetails(),createdOrAmendedBy))
             .dateCreated(order.getValue().getDateCreated())
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
@@ -1676,10 +1689,10 @@ public class ManageOrderService {
         orders.set(orders.indexOf(order), element(order.getId(), amended));
     }
 
-    private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
+    private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails, String createdOrAmendedBy) {
         log.info("***** inside updateOtherOrderDetails******** {}", otherDetails);
         return OtherOrderDetails.builder()
-            .createdBy(otherDetails.getCreatedBy())
+            .createdBy(createdOrAmendedBy)
             .orderCreatedDate(otherDetails.getOrderCreatedDate())
             .orderAmendedDate(otherDetails.getOrderAmendedDate())
             .orderMadeDate(otherDetails.getOrderMadeDate())
