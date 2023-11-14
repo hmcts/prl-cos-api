@@ -65,7 +65,7 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     // ignoring this as managedocument event is working in demo probabaly we need to update the json here
-    @Ignore
+   // @Ignore
     public void givenCaseId_whenCopy_manage_docsEndPoint_thenRespWithCopiedDocuments() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
         request
