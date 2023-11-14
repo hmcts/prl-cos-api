@@ -42,9 +42,12 @@ import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -438,7 +441,7 @@ public class CaseService {
     }
 
     public ResponseEntity<Object> updateCitizenRAflags(
-        String caseId, String eventId, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
+        String caseId, String eventId, String authToken, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
         log.info("Inside updateCitizenRAflags caseId {}", caseId);
         log.info("Inside updateCitizenRAflags eventId {}", eventId);
         log.info("Inside updateCitizenRAflags citizenPartyFlagsRequest {}", citizenPartyFlagsRequest);
@@ -448,8 +451,7 @@ public class CaseService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
         }
 
-        String systemAuthorisation = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+        String systemUpdateUserId = systemUserService.getUserId(authToken);
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         log.info("Following case event will be triggered {}", caseEvent.getValue());
         log.info("Following party flags will be added for Citizen{}", citizenPartyFlagsRequest.getPartyExternalFlags());
@@ -461,7 +463,7 @@ public class CaseService {
 
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
-                systemAuthorisation,
+                authToken,
                 eventRequestData,
                 caseId,
                 false
@@ -509,7 +511,7 @@ public class CaseService {
             updatedCaseData
         );
         coreCaseDataService.submitUpdate(
-            systemAuthorisation,
+            authToken,
             eventRequestData,
             caseDataContent,
             caseId,
@@ -521,7 +523,25 @@ public class CaseService {
     private List<Element<FlagDetail>> convertFlags(List<FlagDetailRequest> details) {
         List<Element<FlagDetail>> flagDetails = new ArrayList<>();
         for (FlagDetailRequest detail : details) {
+            if (null != detail.getDateTimeCreated()) {
+                LocalDateTime createdDateTime
+                    = LocalDateTime
+                    .parse(detail.getDateTimeCreated().format(DateTimeFormatter.ofPattern(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                        Locale.ENGLISH
+                    )));
+                detail.setDateTimeCreated(createdDateTime);
+            }
 
+            if (null != detail.getDateTimeModified()) {
+                LocalDateTime modifiedDateTime
+                    = LocalDateTime
+                    .parse(detail.getDateTimeModified().format(DateTimeFormatter.ofPattern(
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                        Locale.ENGLISH
+                    )));
+                detail.setDateTimeModified(modifiedDateTime);
+            }
         }
         return flagDetails;
     }
