@@ -542,7 +542,28 @@ public class CaseService {
                     )));
                 detail.setDateTimeModified(modifiedDateTime);
             }
+
+            FlagDetail flagDetail = FlagDetail.builder().name(detail.getName())
+                .name_cy(detail.getName_cy())
+                .subTypeValue(detail.getSubTypeValue())
+                .subTypeValue_cy(detail.getSubTypeValue_cy())
+                .subTypeKey(detail.getSubTypeKey())
+                .otherDescription(detail.getOtherDescription())
+                .otherDescription_cy(detail.getOtherDescription_cy())
+                .flagComment(detail.getFlagComment())
+                .flagComment_cy(detail.getFlagComment_cy())
+                .flagUpdateComment(detail.getFlagUpdateComment())
+                .dateTimeCreated(detail.getDateTimeCreated())
+                .dateTimeModified(detail.getDateTimeModified())
+                .path(detail.getPath())
+                .hearingRelevant(detail.getHearingRelevant())
+                .flagCode(detail.getFlagCode())
+                .status(detail.getStatus())
+                .availableExternally(detail.getAvailableExternally())
+                .build();
+            flagDetails.add(element(flagDetail));
         }
+
         return flagDetails;
     }
 
