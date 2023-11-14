@@ -1498,7 +1498,7 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
-        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
+        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients + " Something");
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
