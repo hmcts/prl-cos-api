@@ -277,13 +277,7 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
-                    caseData = caseData.toBuilder()
-                        .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
-                        .dateOrderMade(draftOrder.getDateOrderMade())
-                        .wasTheOrderApprovedAtHearing(draftOrder.getWasTheOrderApprovedAtHearing())
-                        .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
-                        .magistrateLastName(draftOrder.getMagistrateLastName())
-                        .build();
+                    updatedCaseData = updateCaseDataForFinalOrder(updatedCaseData, draftOrder);
                 }
 
                 updatedCaseData.put(
@@ -304,6 +298,15 @@ public class DraftAnOrderService {
         updatedCaseData.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         return updatedCaseData;
 
+    }
+
+    private static Map<String, Object> updateCaseDataForFinalOrder(Map<String, Object> updatedCaseData, DraftOrder draftOrder) {
+        updatedCaseData.put("judgeOrMagistratesLastName", draftOrder.getJudgeOrMagistratesLastName());
+        updatedCaseData.put("dateOrderMade", draftOrder.getDateOrderMade());
+        updatedCaseData.put("wasTheOrderApprovedAtHearing", draftOrder.getWasTheOrderApprovedAtHearing());
+        updatedCaseData.put("justiceLegalAdviserFullName", draftOrder.getJusticeLegalAdviserFullName());
+        updatedCaseData.put("magistrateLastName", draftOrder.getMagistrateLastName());
+        return updatedCaseData;
     }
 
     private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
@@ -774,6 +777,7 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
+        Map<String, Object> updatedCaseData = new HashMap<>();
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (e.getId().equals(selectedOrderId)) {
@@ -795,6 +799,7 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
+                    updatedCaseData = updateCaseDataForFinalOrder(updatedCaseData, draftOrder);
                 }
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
@@ -807,8 +812,8 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderCollection
-        );
+        updatedCaseData.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
+        return updatedCaseData;
     }
 
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
