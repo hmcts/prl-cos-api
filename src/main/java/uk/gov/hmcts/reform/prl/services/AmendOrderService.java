@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
@@ -48,6 +49,8 @@ public class AmendOrderService {
     private final Time time;
     private final ManageOrderService manageOrderService;
 
+    private final UserService userService;
+
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
         //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
@@ -64,7 +67,7 @@ public class AmendOrderService {
             .documentBinaryUrl(eventData.getManageOrdersAmendedOrder().getDocumentBinaryUrl())
             .build();
 
-        return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType);
+        return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType, authorisation);
 
     }
 
@@ -75,7 +78,7 @@ public class AmendOrderService {
 
     private Map<String, Object> updateAmendedOrderDetails(CaseData caseData,
                                                           uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
-                                                          String loggedInUserType) {
+                                                          String loggedInUserType, String authorisation) {
         Map<String, Object> orderMap = new HashMap<>();
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
@@ -126,15 +129,16 @@ public class AmendOrderService {
             orderMap.put(ORDER_COLLECTION, updatedOrders);
             return orderMap;
         } else {
-            return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType);
+            log.info("AMEndingggg");
+            return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType, authorisation);
         }
 
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
-                                                       String loggedInUserType) {
+                                                       String loggedInUserType, String authorisation) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData,amendedDocument, loggedInUserType));
+        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData,amendedDocument, loggedInUserType,authorisation));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(draftOrderElement);
@@ -151,16 +155,18 @@ public class AmendOrderService {
 
     private DraftOrder getCurrentDraftOrderDetails(CaseData caseData,
                                                    uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
-                                                   String loggedInUserType) {
-        log.info("AAAAAAAAAAAAA ===== {}");
+                                                   String loggedInUserType,String authorisation) {
+        log.info("AAAAAAAAAAAAANeww ===== {}");
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
         String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
-
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
+        //orderDetails.get().getValue().getOtherDetails().getCreatedBy()
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserWhoAmendFullName = userDetails.getFullName();
         return DraftOrder.builder()
             .typeOfOrder(orderType)
             .orderTypeId(orderType)
@@ -168,7 +174,7 @@ public class AmendOrderService {
             .orderSelectionType(orderSelectionType)
             .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .createdBy(currentUserWhoAmendFullName)
                               .dateCreated(time.now())
                               .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
