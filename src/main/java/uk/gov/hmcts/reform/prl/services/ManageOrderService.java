@@ -915,18 +915,19 @@ public class ManageOrderService {
 
             return orderCollection;
         } else {
-            return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId);
+            log.info("HHHHHHHHHHHHHHHHHHHH for ONLY upload order");
+            UserDetails userDetails = userService.getUserDetails(authorisation);
+            String currentUserFullName = userDetails.getFullName();
+            return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId, currentUserFullName);
         }
     }
 
     private List<Element<OrderDetails>> getListOfOrders(String authorisation,
                                                         CaseData caseData,
                                                         String flagSelectedOrder,
-                                                        String flagSelectedOrderId) {
-        log.info("11111");
-
-
-        log.info("CCCCCCCCCCCC ===== {}",caseData.getOrderCollection());
+                                                        String flagSelectedOrderId,
+                                                        String currentUserFullName) {
+        log.info("11111CCCCCC");
 
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         String loggedInUserType = getLoggedInUserType(authorisation);
@@ -940,7 +941,7 @@ public class ManageOrderService {
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                    .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
                                    .otherDetails(OtherOrderDetails.builder()
-                                                     .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                                     .createdBy(currentUserFullName)
                                                      .orderCreatedDate(dateTime.now()
                                                                            .format(DateTimeFormatter.ofPattern(
                                                                                PrlAppsConstants.D_MMM_YYYY,
@@ -1429,6 +1430,18 @@ public class ManageOrderService {
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
+
+        String createdOrAmendBy;
+        if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+            log.info("AMENDDDDD USerrr --->{}", currentUserFullName);
+            createdOrAmendBy = currentUserFullName;
+        } else if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+            log.info("Upload order being served USerrrName --->{}", currentUserFullName);
+            createdOrAmendBy = currentUserFullName;
+        } else {
+            log.info("createdddd  USerrr --->{}", order.getValue().getOtherDetails().getCreatedBy());
+            createdOrAmendBy = order.getValue().getOtherDetails().getCreatedBy();
+        }
         updateServedOrderDetails(
             servedOrderDetails,
             null,
@@ -1436,9 +1449,7 @@ public class ManageOrderService {
             order,
             postalInformation,
             emailInformation,
-            (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())
-                ? currentUserFullName
-                : order.getValue().getOtherDetails().getCreatedBy())
+            createdOrAmendBy
         );
     }
 
@@ -1491,10 +1502,16 @@ public class ManageOrderService {
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
+        String createdOrAmendBy;
         if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
             log.info("AMENDDDDD USerrr --->{}", currentUserFullName);
+            createdOrAmendBy = currentUserFullName;
+        } else if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+            log.info("Upload order being served USerrrName --->{}", currentUserFullName);
+            createdOrAmendBy = currentUserFullName;
         } else {
             log.info("createdddd  USerrr --->{}", order.getValue().getOtherDetails().getCreatedBy());
+            createdOrAmendBy = order.getValue().getOtherDetails().getCreatedBy();
         }
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1503,9 +1520,7 @@ public class ManageOrderService {
             order,
             postalInformation,
             emailInformation,
-            (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())
-                ? currentUserFullName
-                : order.getValue().getOtherDetails().getCreatedBy())
+            createdOrAmendBy
         );
     }
 
