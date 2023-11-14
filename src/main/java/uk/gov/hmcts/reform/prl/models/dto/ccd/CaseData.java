@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -749,12 +750,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private YesOrNo hwfRequestedForAdditionalApplications;
 
     private List<Element<RespondentDocs>> respondentDocsList;
-    private ResponseDocuments respondentAc8;
-    private ResponseDocuments respondentBc8;
-    private ResponseDocuments respondentCc8;
-    private ResponseDocuments respondentDc8;
-    private ResponseDocuments respondentEc8;
-
+    private RespondentC8 respondentC8;
     //PRL-3454 - send and reply message enhancements
     @JsonUnwrapped
     private SendOrReplyMessage sendOrReplyMessage;
