@@ -749,6 +749,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private YesOrNo hwfRequestedForAdditionalApplications;
 
     private List<Element<RespondentDocs>> respondentDocsList;
+    @JsonUnwrapped
     private RespondentC8 respondentC8;
     //PRL-3454 - send and reply message enhancements
     @JsonUnwrapped
