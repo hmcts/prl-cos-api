@@ -149,7 +149,7 @@ public class CaseController {
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "404", description = "Not found")})
     public ResponseEntity<Object> updateCitizenRAflags(
-        @NotNull @Valid @RequestBody CitizenPartyFlagsRequest citizenPartyFlagsRequest,
+        @NotNull @RequestBody CitizenPartyFlagsRequest citizenPartyFlagsRequest,
         @PathVariable("eventId") String eventId,
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
@@ -157,42 +157,10 @@ public class CaseController {
     ) {
         log.info("Inside updateCitizenRAflags controller {}");
         if (isAuthorized(authorisation, s2sToken)) {
-            log.info("Inside updateCitizenRAflags controller - authorized {}");
             return caseService.updateCitizenRAflags(
                 caseId,
                 eventId,
-                citizenPartyFlagsRequest
-            );
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("unauthorized");
-        }
-    }
-
-    @PostMapping(value = "{caseId}/{eventId}/party-update-ra-1", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Update party flags for citizen")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Updated party flags for citizen"),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "404", description = "Not found")})
-    public ResponseEntity<Object> updateCitizenRA1flags(
-        @NotNull @RequestBody CitizenPartyFlagsRequest citizenPartyFlagsRequest,
-        @PathVariable("eventId") String eventId,
-        @PathVariable("caseId") String caseId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        log.info("Inside updateCitizenRA1flags controller {}");
-        if (isAuthorized(authorisation, s2sToken)) {
-            log.info("Inside updateCitizenRA1flags controller - authorized {}");
-            try {
-                objectMapper.writeValueAsString(citizenPartyFlagsRequest);
-            } catch (Exception ex) {
-                log.error("something wrong with the exception");
-            }
-            return caseService.updateCitizenRAflags(
-                caseId,
-                eventId,
+                authorisation,
                 citizenPartyFlagsRequest
             );
         } else {

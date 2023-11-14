@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 
@@ -12,10 +14,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Builder(toBuilder = true)
 @Getter
+@Setter
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@Jacksonized
 public class FlagDetailRequest {
     public String name;
     @SuppressWarnings(value = "MemberName")
@@ -31,8 +35,8 @@ public class FlagDetailRequest {
     @SuppressWarnings(value = "MemberName")
     public String flagComment_cy;
     public String flagUpdateComment;
-    public static LocalDateTime dateTimeCreated;
-    public static LocalDateTime dateTimeModified;
+    public LocalDateTime dateTimeCreated;
+    public LocalDateTime dateTimeModified;
     public List<Element<String>> path;
     public YesOrNo hearingRelevant;
     public String flagCode;
