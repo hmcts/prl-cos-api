@@ -308,6 +308,7 @@ public class DraftAnOrderService {
             .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
             .magistrateLastName(draftOrder.getMagistrateLastName())
             .build();
+        log.info("inside updateCaseDataForFinalOrder ==> " + caseData);
         return caseData;
     }
 
