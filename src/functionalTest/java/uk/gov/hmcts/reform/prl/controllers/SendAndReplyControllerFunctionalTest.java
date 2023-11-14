@@ -96,6 +96,19 @@ public class SendAndReplyControllerFunctionalTest {
     }
 
     @Test
+    public void givenBodyWithSendData_whenAboutToStartCallback_thenPopulateDynamicList() throws Exception {
+        String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SEND);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/send-and-reply-to-messages/send-or-reply-to-messages/about-to-start")
+            .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
     public void givenBodyWithSendData_whenMidEventCallback_thenPopulateDynamicList() throws Exception {
         String requestBody = ResourceLoader.loadJson(SEND_AND_REPLY_REQUEST_FOR_SEND);
         request
