@@ -84,6 +84,8 @@ public class AmendOrderService {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> updatedOrders;
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserFullName = userDetails.getFullName();
         if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
                 .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
@@ -122,7 +124,7 @@ public class AmendOrderService {
                 });
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                 log.info("manageOrderService.serveOrderrrrrrrr222222 ->>");
-                updatedOrders =  manageOrderService.serveOrder(caseData,orders);
+                updatedOrders =  manageOrderService.serveOrder(caseData,orders,currentUserFullName);
             } else {
                 updatedOrders = orders;
             }
