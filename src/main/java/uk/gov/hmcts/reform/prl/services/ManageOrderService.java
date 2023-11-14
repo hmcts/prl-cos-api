@@ -1437,8 +1437,8 @@ public class ManageOrderService {
             postalInformation,
             emailInformation,
             (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())
-                ? order.getValue().getOtherDetails().getCreatedBy()
-                : currentUserFullName)
+                ? currentUserFullName
+                : order.getValue().getOtherDetails().getCreatedBy())
         );
     }
 
@@ -1492,9 +1492,9 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-            log.info("AMENDDDDD USerrr --->", currentUserFullName);
+            log.info("AMENDDDDD USerrr --->{}", currentUserFullName);
         } else {
-            log.info("createdddd  USerrr --->", order.getValue().getOtherDetails().getCreatedBy());
+            log.info("createdddd  USerrr --->{}", order.getValue().getOtherDetails().getCreatedBy());
         }
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1504,8 +1504,8 @@ public class ManageOrderService {
             postalInformation,
             emailInformation,
             (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())
-                ? order.getValue().getOtherDetails().getCreatedBy()
-                : currentUserFullName)
+                ? currentUserFullName
+                : order.getValue().getOtherDetails().getCreatedBy())
         );
     }
 
@@ -1691,6 +1691,7 @@ public class ManageOrderService {
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails, String createdOrAmendedBy) {
         log.info("***** inside updateOtherOrderDetails******** {}", otherDetails);
+        log.info("createdOrAmendedByyyyyyyy {}", createdOrAmendedBy);
         return OtherOrderDetails.builder()
             .createdBy(createdOrAmendedBy)
             .orderCreatedDate(otherDetails.getOrderCreatedDate())
