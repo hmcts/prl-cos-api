@@ -1432,11 +1432,8 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         String createdOrAmendBy;
-        if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-            log.info("AMENDDDDD USerrr --->{}", currentUserFullName);
-            createdOrAmendBy = currentUserFullName;
-        } else if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-            log.info("Upload order being served USerrrName --->{}", currentUserFullName);
+        if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions()) || amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+            log.info("AMENDDDDD  Or Upload USerrr --->{}", currentUserFullName);
             createdOrAmendBy = currentUserFullName;
         } else {
             log.info("createdddd  USerrr --->{}", order.getValue().getOtherDetails().getCreatedBy());
@@ -1492,22 +1489,19 @@ public class ManageOrderService {
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
-        servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions + " Something11");
-        servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions + " Something22");
+        servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
+        servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
         servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail + " Something33");
-        servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent + " Something44");
-        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed + " Something55");
+        servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
+        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions + " Something66");
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients + " Something77");
         servedOrderDetails.put(OTHER_PARTIES, otherParties + " Something88");
-        servedOrderDetails.put(SERVED_PARTIES, servedParties + " Something99");
+        servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         String createdOrAmendBy;
-        if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-            log.info("AMENDDDDD USerrr --->{}", currentUserFullName);
-            createdOrAmendBy = currentUserFullName;
-        } else if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-            log.info("Upload order being served USerrrName --->{}", currentUserFullName);
+        if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions()) || amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
+            log.info("AMENDDDDD  Or Upload USerrr --->{}", currentUserFullName);
             createdOrAmendBy = currentUserFullName;
         } else {
             log.info("createdddd  USerrr --->{}", order.getValue().getOtherDetails().getCreatedBy());
