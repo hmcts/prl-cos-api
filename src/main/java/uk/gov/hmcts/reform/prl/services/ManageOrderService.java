@@ -157,6 +157,7 @@ public class ManageOrderService {
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
     public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
+    public static final String CAFCASS_CYMRU = "cafcassCymru";
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
     public static final String SERVING_RESPONDENTS_OPTIONS = "servingRespondentsOptions";
@@ -1452,6 +1453,8 @@ public class ManageOrderService {
 
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order, String currentUserFullName) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
+        Element<PartyDetails> partyDetailsElement = caseData.getApplicants().get(0);
+        log.info("REPPPPPPP --> {}", partyDetailsElement.getValue().getRepresentativeFullName());
         YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
         ServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
@@ -1497,10 +1500,10 @@ public class ManageOrderService {
         servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail + " Something33");
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
-
-        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients + " Something77");
-        servedOrderDetails.put(OTHER_PARTIES, otherParties + " Something88");
+        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, "SerSolName" + servingRespondentsOptions);
+        servedOrderDetails.put(CAFCASS_CYMRU, "Cafcass Cymru");
+        servedOrderDetails.put(RECIPIENTS_OPTIONS, "Solname " + recipients);
+        servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         String createdOrAmendBy;
