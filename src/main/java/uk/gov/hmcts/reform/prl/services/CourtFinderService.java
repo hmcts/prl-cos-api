@@ -96,19 +96,22 @@ public class CourtFinderService {
                 .map(Element::getValue)
                 .findFirst();
 
-        Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = Optional.ofNullable(caseData.getRelations().getChildAndApplicantRelations())
+        Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = Optional
+                .ofNullable(caseData.getRelations().getChildAndApplicantRelations())
                 .isPresent() ? caseData.getRelations().getChildAndApplicantRelations()
                 .stream()
                 .map(Element::getValue)
                 .findFirst() : Optional.empty();
 
-        Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation = Optional.ofNullable(caseData.getRelations().getChildAndRespondentRelations())
+        Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation = Optional
+                .ofNullable(caseData.getRelations().getChildAndRespondentRelations())
                 .isPresent() ? caseData.getRelations().getChildAndRespondentRelations()
                 .stream()
                 .map(Element::getValue)
                 .findFirst() : Optional.empty();
 
-        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = Optional.ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = Optional
+                .ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
                 .isPresent() ? caseData.getRelations().getChildAndOtherPeopleRelations()
                 .stream()
                 .map(Element::getValue)
@@ -134,7 +137,9 @@ public class CourtFinderService {
         return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
     }
 
-    private String whoDoestheChildWith(Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation, Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation, Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation) {
+    private String whoDoestheChildWith(Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation,
+                                       Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation,
+                                       Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation) {
 
         if (!childrenAndApplicantRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndApplicantRelation.get().getChildLivesWith())) {
             return PrlAppsConstants.CHILD_LIVES_WITH_APPLICANT;
