@@ -36,9 +36,9 @@ public class FlagDetailRequest {
     @SuppressWarnings(value = "MemberName")
     public String flagComment_cy;
     public String flagUpdateComment;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "[dd-MM-yyyy HH:mm:ss][yyyy-MM-dd'T'HH:mm:ss.SSS'Z']")
     public LocalDateTime dateTimeCreated;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "[dd-MM-yyyy HH:mm:ss][yyyy-MM-dd'T'HH:mm:ss.SSS'Z']")
     public LocalDateTime dateTimeModified;
     public List<Element<String>> path;
     public YesOrNo hearingRelevant;
