@@ -727,8 +727,8 @@ public class CourtFinderServiceTest {
             .respondents(Collections.singletonList(wrappedRespondent))
             .build();
 
-        assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
-        Assert.assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
+        assertEquals("N20 0EG", courtFinderService.getCorrectPartyPostcode(caseData));
+        Assert.assertEquals("N20 0EG", courtFinderService.getCorrectPartyPostcode(caseData));
     }
 
     @Test
