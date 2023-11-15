@@ -133,6 +133,7 @@ public class CourtFinderService {
                     return getPostCodeOtherPerson(partyDetails.get());
                 }
                 break;
+            default : log.info("Returning the applicant's Post code");
         }
         return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
     }
@@ -145,7 +146,7 @@ public class CourtFinderService {
             return PrlAppsConstants.CHILD_LIVES_WITH_APPLICANT;
         } else if (!childrenAndRespondentRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndRespondentRelation.get().getChildLivesWith())) {
             return PrlAppsConstants.CHILD_LIVES_WITH_RESPONDENT;
-        } else if (!childrenAndOtherPeopleRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.get().getChildLivesWith())){
+        } else if (!childrenAndOtherPeopleRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.get().getChildLivesWith())) {
             return PrlAppsConstants.CHILD_LIVES_WITH_OTHER_PEOPLE;
         }
         return PrlAppsConstants.BLANK_STRING;
