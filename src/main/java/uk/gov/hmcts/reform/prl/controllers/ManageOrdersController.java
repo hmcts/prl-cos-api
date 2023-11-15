@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -302,9 +301,9 @@ public class ManageOrdersController {
                 ));
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
                 log.info("manageOrderService.serveOrderrrrrrrr ->>1111");
-                UserDetails userDetails = userService.getUserDetails(authorisation);
-                String currentUserFullName = userDetails.getFullName();
-                caseDataUpdated.put(ORDER_COLLECTION, manageOrderService.serveOrder(caseData, caseData.getOrderCollection(),currentUserFullName));
+                //UserDetails userDetails = userService.getUserDetails(authorisation);
+                //String currentUserFullName = userDetails.getFullName();
+                caseDataUpdated.put(ORDER_COLLECTION, manageOrderService.serveOrder(caseData, caseData.getOrderCollection()));
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
