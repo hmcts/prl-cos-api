@@ -524,7 +524,7 @@ public class CaseService {
                 LocalDateTime createdDateTime
                     = LocalDateTime
                     .parse(detail.getDateTimeCreated().format(DateTimeFormatter.ofPattern(
-                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS",
                         Locale.ENGLISH
                     )));
                 detail.setDateTimeCreated(createdDateTime);
@@ -534,7 +534,7 @@ public class CaseService {
                 LocalDateTime modifiedDateTime
                     = LocalDateTime
                     .parse(detail.getDateTimeModified().format(DateTimeFormatter.ofPattern(
-                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS",
                         Locale.ENGLISH
                     )));
                 detail.setDateTimeModified(modifiedDateTime);
