@@ -453,9 +453,6 @@ public class CaseService {
 
         String systemUpdateUserId = systemUserService.getUserId(authToken);
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
-        log.info("Following case event will be triggered {}", caseEvent.getValue());
-        log.info("Following party flags will be added for Citizen{}", citizenPartyFlagsRequest.getPartyExternalFlags());
-
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             caseEvent,
             systemUpdateUserId
@@ -527,7 +524,7 @@ public class CaseService {
                 LocalDateTime createdDateTime
                     = LocalDateTime
                     .parse(detail.getDateTimeCreated().format(DateTimeFormatter.ofPattern(
-                        "yyyy-MM-dd'T'HH:mm:ss",
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
                         Locale.ENGLISH
                     )));
                 detail.setDateTimeCreated(createdDateTime);
@@ -537,7 +534,7 @@ public class CaseService {
                 LocalDateTime modifiedDateTime
                     = LocalDateTime
                     .parse(detail.getDateTimeModified().format(DateTimeFormatter.ofPattern(
-                        "yyyy-MM-dd'T'HH:mm:ss",
+                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
                         Locale.ENGLISH
                     )));
                 detail.setDateTimeModified(modifiedDateTime);
