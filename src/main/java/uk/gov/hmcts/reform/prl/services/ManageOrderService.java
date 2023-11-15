@@ -1158,12 +1158,13 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,String currentUserFullName) {
+        log.info("setDraftOrderCollection - manage order service");
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = null;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, currentUserFullName));
+            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType));
         } else {
-            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType,currentUserFullName));
+            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType));
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -1179,7 +1180,8 @@ public class ManageOrderService {
         );
     }
 
-    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserFullName) {
+    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
+        log.info("getCurrentCreateDraftOrderDetails--ManageOrderService");
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
@@ -1193,7 +1195,7 @@ public class ManageOrderService {
                     ? caseData.getUploadOrderDoc() : caseData.getPreviewOrderDoc())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(currentUserFullName)
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
@@ -1310,7 +1312,8 @@ public class ManageOrderService {
         return null;
     }
 
-    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserFullName) {
+    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType) {
+        log.info("getCurrentUploadDraftOrderDetails----->>");
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
@@ -1325,7 +1328,7 @@ public class ManageOrderService {
             .childrenList(caseData.getManageOrders() != null
                               ? getSelectedChildInfoFromMangeOrder(caseData) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(currentUserFullName)
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
@@ -2066,11 +2069,11 @@ public class ManageOrderService {
             log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
         }
         log.info("inside getOrderDetailsElement ==> " + caseData.getManageOrders().getCurrentOrderCreatedDateTime());
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserFullName = userDetails.getFullName();
+        //UserDetails userDetails = userService.getUserDetails(authorisation);
+        //String currentUserFullName = userDetails.getFullName();
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
-                                             .createdBy(currentUserFullName)
+                                             .createdBy(caseData.getJudgeOrMagistratesLastName())
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                                                  PrlAppsConstants.D_MMM_YYYY,
                                                  Locale.ENGLISH
