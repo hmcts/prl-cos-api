@@ -545,6 +545,193 @@ public class CourtFinderServiceTest {
 
 
     @Test
+    public void givenChildPresent_whenDoesNotLiveWithApplicant_thenReturnOtherPeoplePostcodeV2() throws NotFoundException {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .address(Address.builder()
+                         .addressLine1("address")
+                         .postTown("London")
+                         .build())
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(1999, 12, 10))
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .dxNumber("123456")
+            .gender(Gender.female)
+            .lastName("lastName")
+            .previousName("testPreviousname")
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> listOfParty = Collections.singletonList(partyWrapped);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
+        ChildrenAndRespondentRelation childrenAndRespondentRelation = ChildrenAndRespondentRelation.builder()
+            .respondentFullName("Test")
+            .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.other)
+            .childLivesWith(YesOrNo.No)
+            .childAndRespondentRelationOtherDetails("dsdfs")
+            .build();
+
+        Element<ChildrenAndRespondentRelation> childrenAndRespondentRelationElement =
+            Element.<ChildrenAndRespondentRelation>builder().value(childrenAndRespondentRelation).build();
+        List<Element<ChildrenAndRespondentRelation>> childrenAndRespondentRelationList =
+            Collections.singletonList(childrenAndRespondentRelationElement);
+
+        ChildrenAndApplicantRelation childrenAndApplicantRelation = ChildrenAndApplicantRelation.builder()
+            .applicantFullName("Test")
+            .childFullName("Name").childAndApplicantRelation(RelationshipsEnum.other)
+            .childAndApplicantRelationOtherDetails("dsdfs")
+            .childLivesWith(YesOrNo.No)
+            .build();
+
+        Element<ChildrenAndApplicantRelation> childrenAndApplicantRelationElement =
+            Element.<ChildrenAndApplicantRelation>builder().value(childrenAndApplicantRelation).build();
+        List<Element<ChildrenAndApplicantRelation>> childrenAndApplicantRelationList = Collections.singletonList(
+            childrenAndApplicantRelationElement);
+
+
+        ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = ChildrenAndOtherPeopleRelation.builder()
+            .otherPeopleFullName("Test")
+            .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.father)
+            .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationElement =
+            Element.<ChildrenAndOtherPeopleRelation>builder().value(childrenAndOtherPeopleRelation).build();
+        List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelatationList =
+            Collections.singletonList(childrenAndOtherPeopleRelationElement);
+
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        CaseData caseData = CaseData.builder()
+            .applicants(Collections.singletonList(wrappedApplicant))
+            .caseTypeOfApplication("C100")
+            .taskListVersion("v2")
+            .otherPartyInTheCaseRevised(listOfParty)
+            .relations(Relations.builder().childAndApplicantRelations(childrenAndApplicantRelationList)
+                           .childAndRespondentRelations(childrenAndRespondentRelationList)
+                           .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList).build())
+            .newChildDetails(listOfChildren)
+            .respondents(Collections.singletonList(wrappedRespondent))
+            .build();
+
+        assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
+        Assert.assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
+    }
+
+
+    @Test
+    public void givenChildPresent_whenDoesNotLiveWithApplicant_thenReturnRespondentPostcodeV2() throws NotFoundException {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .address(Address.builder()
+                         .addressLine1("address")
+                         .postTown("London")
+                         .build())
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(1999, 12, 10))
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .dxNumber("123456")
+            .gender(Gender.female)
+            .lastName("lastName")
+            .previousName("testPreviousname")
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> listOfParty = Collections.singletonList(partyWrapped);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChildren = Element.<ChildDetailsRevised>builder().value(child).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+
+        ChildrenAndRespondentRelation childrenAndRespondentRelation = ChildrenAndRespondentRelation.builder()
+            .respondentFullName("Test")
+            .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.other)
+            .childLivesWith(YesOrNo.Yes)
+            .childAndRespondentRelationOtherDetails("dsdfs")
+            .build();
+
+        Element<ChildrenAndRespondentRelation> childrenAndRespondentRelationElement =
+            Element.<ChildrenAndRespondentRelation>builder().value(childrenAndRespondentRelation).build();
+        List<Element<ChildrenAndRespondentRelation>> childrenAndRespondentRelationList =
+            Collections.singletonList(childrenAndRespondentRelationElement);
+
+        ChildrenAndApplicantRelation childrenAndApplicantRelation = ChildrenAndApplicantRelation.builder()
+            .applicantFullName("Test")
+            .childFullName("Name").childAndApplicantRelation(RelationshipsEnum.other)
+            .childAndApplicantRelationOtherDetails("dsdfs")
+            .childLivesWith(YesOrNo.No)
+            .build();
+
+        Element<ChildrenAndApplicantRelation> childrenAndApplicantRelationElement =
+            Element.<ChildrenAndApplicantRelation>builder().value(childrenAndApplicantRelation).build();
+        List<Element<ChildrenAndApplicantRelation>> childrenAndApplicantRelationList = Collections.singletonList(
+            childrenAndApplicantRelationElement);
+
+
+        ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = ChildrenAndOtherPeopleRelation.builder()
+            .otherPeopleFullName("Test")
+            .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.father)
+            .childLivesWith(YesOrNo.No)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationElement =
+            Element.<ChildrenAndOtherPeopleRelation>builder().value(childrenAndOtherPeopleRelation).build();
+        List<Element<ChildrenAndOtherPeopleRelation>> childrenAndOtherPeopleRelatationList =
+            Collections.singletonList(childrenAndOtherPeopleRelationElement);
+
+
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        Element<PartyDetails> wrappedRespondent = Element.<PartyDetails>builder().value(respondent).build();
+        CaseData caseData = CaseData.builder()
+            .applicants(Collections.singletonList(wrappedApplicant))
+            .caseTypeOfApplication("C100")
+            .taskListVersion("v2")
+            .otherPartyInTheCaseRevised(listOfParty)
+            .relations(Relations.builder().childAndApplicantRelations(childrenAndApplicantRelationList)
+                           .childAndRespondentRelations(childrenAndRespondentRelationList)
+                           .childAndOtherPeopleRelations(childrenAndOtherPeopleRelatationList).build())
+            .newChildDetails(listOfChildren)
+            .respondents(Collections.singletonList(wrappedRespondent))
+            .build();
+
+        assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
+        Assert.assertEquals("AB12 3AL", courtFinderService.getCorrectPartyPostcode(caseData));
+    }
+
+    @Test
     public void givenChildPresent_whenLivesWithApplicant_thenReturnRespondentsPostcodeV2() throws NotFoundException {
 
         PartyDetails partyDetails = PartyDetails.builder()
