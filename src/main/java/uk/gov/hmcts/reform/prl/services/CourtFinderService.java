@@ -96,46 +96,54 @@ public class CourtFinderService {
                 .map(Element::getValue)
                 .findFirst();
 
-        List<Element<ChildrenAndApplicantRelation>> childAndApplicantRelations = caseData.getRelations().getChildAndApplicantRelations();
-        List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations = caseData.getRelations().getChildAndRespondentRelations();
-        List<Element<ChildrenAndOtherPeopleRelation>> childAndOtherPeopleRelations = caseData.getRelations().getChildAndOtherPeopleRelations();
-
-
-        Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = Optional.ofNullable(childAndApplicantRelations)
-                .isPresent() ? childAndApplicantRelations
+        Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = Optional.ofNullable(caseData.getRelations().getChildAndApplicantRelations())
+                .isPresent() ? caseData.getRelations().getChildAndApplicantRelations()
                 .stream()
                 .map(Element::getValue)
-                .findFirst() : null;
+                .findFirst() : Optional.empty();
 
-        Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation = Optional.ofNullable(childAndRespondentRelations)
-                .isPresent() ? childAndRespondentRelations
+        Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation = Optional.ofNullable(caseData.getRelations().getChildAndRespondentRelations())
+                .isPresent() ? caseData.getRelations().getChildAndRespondentRelations()
                 .stream()
                 .map(Element::getValue)
-                .findFirst() : null;
+                .findFirst() : Optional.empty();
 
-        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = Optional.ofNullable(childAndOtherPeopleRelations)
-                .isPresent() ? childAndOtherPeopleRelations
+        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = Optional.ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+                .isPresent() ? caseData.getRelations().getChildAndOtherPeopleRelations()
                 .stream()
                 .map(Element::getValue)
-                .findFirst() : null;
+                .findFirst() : Optional.empty();
+
+        String childLivesWith =  this.whoDoestheChildWith(childrenAndApplicantRelation,childrenAndRespondentRelation,childrenAndOtherPeopleRelation);
+
+        switch (childLivesWith) {
+
+            case PrlAppsConstants.CHILD_LIVES_WITH_APPLICANT:
+                break;
+            case PrlAppsConstants.CHILD_LIVES_WITH_RESPONDENT:
+                if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isPresent()) {
+                    return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
+                }
+                break;
+            case PrlAppsConstants.CHILD_LIVES_WITH_OTHER_PEOPLE:
+                if (partyDetails.isPresent() && !getPostCodeOtherPerson(partyDetails.get()).isEmpty()) {
+                    return getPostCodeOtherPerson(partyDetails.get());
+                }
+                break;
+        }
+        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+    }
+
+    private String whoDoestheChildWith(Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation, Optional<ChildrenAndRespondentRelation> childrenAndRespondentRelation, Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation) {
 
         if (!childrenAndApplicantRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndApplicantRelation.get().getChildLivesWith())) {
-            return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+            return PrlAppsConstants.CHILD_LIVES_WITH_APPLICANT;
         } else if (!childrenAndRespondentRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndRespondentRelation.get().getChildLivesWith())) {
-            if (ofNullable(getPostcodeFromWrappedParty(caseData.getRespondents().get(0))).isEmpty()) {
-                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
-            }
-            return getPostcodeFromWrappedParty(caseData.getRespondents().get(0));
-        } else if (!childrenAndOtherPeopleRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.get().getChildLivesWith())) {
-            if (partyDetails.isPresent() && getPostCodeOtherPerson(partyDetails.get()).isEmpty()) {
-                return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
-            }
-            if (!partyDetails.isEmpty()) {
-                return getPostCodeOtherPerson(partyDetails.get());
-            }
+            return PrlAppsConstants.CHILD_LIVES_WITH_RESPONDENT;
+        } else if (!childrenAndOtherPeopleRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndOtherPeopleRelation.get().getChildLivesWith())){
+            return PrlAppsConstants.CHILD_LIVES_WITH_OTHER_PEOPLE;
         }
-        //default to the applicant postcode
-        return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));
+        return PrlAppsConstants.BLANK_STRING;
     }
 
     public String getCorrectPartyPostcode(CaseData caseData) throws NotFoundException {

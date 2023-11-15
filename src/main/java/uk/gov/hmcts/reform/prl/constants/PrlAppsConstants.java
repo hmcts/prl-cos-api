@@ -801,4 +801,9 @@ public class PrlAppsConstants {
     public static final String AM_UPPER_CASE = "AM";
     public static final String PM_LOWER_CASE = "pm";
     public static final String PM_UPPER_CASE = "PM";
+
+    public static final String CHILD_LIVES_WITH_APPLICANT = "Applicant";
+    public static final String CHILD_LIVES_WITH_RESPONDENT = "Respondent";
+    public static final String CHILD_LIVES_WITH_OTHER_PEOPLE = "Other People";
+
 }
