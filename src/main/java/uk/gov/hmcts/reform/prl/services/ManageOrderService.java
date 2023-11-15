@@ -1492,16 +1492,16 @@ public class ManageOrderService {
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
-        servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
-        servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
-        servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail + " Something33");
-        servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
-        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
-
-        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients + " Something77");
-        servedOrderDetails.put(OTHER_PARTIES, otherParties + " Something88");
-        servedOrderDetails.put(SERVED_PARTIES, servedParties);
+        //        servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
+        //        servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
+        //        servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail + " Something33");
+        //        servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
+        //        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
+        //        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
+        //
+        //        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients + " Something77");
+        //        servedOrderDetails.put(OTHER_PARTIES, otherParties + " Something88");
+        //        servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         String createdOrAmendBy;
         if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions()) || amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
