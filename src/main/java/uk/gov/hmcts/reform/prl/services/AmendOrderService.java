@@ -123,15 +123,15 @@ public class AmendOrderService {
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 });
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-                log.info("manageOrderService.serveOrderrrrrrrr222222 ->>");
-                updatedOrders =  manageOrderService.serveOrder(caseData,orders,currentUserFullName);
+                log.info("UPDATE AMEDND ORDER 222222 ->>");
+                updatedOrders =  manageOrderService.serveOrder(caseData,orders);
             } else {
                 updatedOrders = orders;
             }
             orderMap.put(ORDER_COLLECTION, updatedOrders);
             return orderMap;
         } else {
-            log.info("AMEndingggg");
+            log.info("AMENDINGggggg");
             return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType, authorisation);
         }
 
