@@ -1455,12 +1455,15 @@ public class ManageOrderService {
         YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
         ServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
-        String otherParties;
+
         if (Yes.equals(serveOnRespondent) || Yes.equals(serveOnRespondentOnly47a)) {
             servingRespondentsOptions = getServingRespondentsOptions(caseData);
         } else {
             recipients = getRecipients(caseData);
         }
+        log.info("MMMMMMM {}", servingRespondentsOptions);
+        log.info("MMMMMMM {}", serveOnRespondent);
+        String otherParties;
         otherParties = getOtherParties(caseData);
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
@@ -1494,7 +1497,8 @@ public class ManageOrderService {
         servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail + " Something33");
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions + " Something66");
+        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
+
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients + " Something77");
         servedOrderDetails.put(OTHER_PARTIES, otherParties + " Something88");
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
