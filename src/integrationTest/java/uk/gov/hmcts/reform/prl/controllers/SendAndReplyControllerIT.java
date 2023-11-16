@@ -25,6 +25,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 
@@ -80,6 +81,7 @@ public class SendAndReplyControllerIT {
         //        );
         assertEquals(httpResponse.get("http_status"),"200 OK");
         assertNotNull(httpResponse);
+        assertNull(httpResponse);
 
     }
 }
