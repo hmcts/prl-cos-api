@@ -779,6 +779,10 @@ public class CaseData extends BaseCaseData implements MappableObject {
      */
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
+
+    //FPET-567 - Added for hiding fields for SDO
+    @JsonProperty("isSdoSelected")
+    private YesOrNo isSdoSelected;
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
 
 }
