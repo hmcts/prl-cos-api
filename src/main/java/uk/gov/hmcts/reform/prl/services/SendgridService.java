@@ -77,6 +77,9 @@ public class SendgridService {
     @Value("${send-grid.rpa.email.from}")
     private String fromEmail;
 
+    @Autowired
+    private final SendGrid sendGrid;
+
     private final DocumentGenService documentGenService;
 
     private final AuthTokenGenerator authTokenGenerator;
@@ -100,14 +103,13 @@ public class SendgridService {
         attachments.setDisposition("attachment");
         Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmail), content);
         mail.addAttachments(attachments);
-        SendGrid sg = new SendGrid(apiKey);
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
             request.setEndpoint(MAIL_SEND);
             request.setBody(mail.build());
             log.info("Initiating email through sendgrid");
-            sg.api(request);
+            sendGrid.api(request);
             log.info("Notification to RPA sent successfully");
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
@@ -134,7 +136,6 @@ public class SendgridService {
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
         log.info("mail information {}",mail);
         log.info("sendgrid template ID reffered");
-        SendGrid sendGrid = new SendGrid(apiKey);
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
@@ -220,13 +221,12 @@ public class SendgridService {
 
         if (launchDarklyClient.isFeatureEnabled("soa-sendgrid")) {
             log.info("******Sendgrid service is enabled****");
-            SendGrid sg = new SendGrid(apiKey);
             Request request = new Request();
             try {
                 request.setMethod(Method.POST);
                 request.setEndpoint(MAIL_SEND);
                 request.setBody(mail.build());
-                Response response = sg.api(request);
+                Response response = sendGrid.api(request);
                 log.info("Sendgrid status code {}", response.getStatusCode());
                 if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                     log.info("Notification to party sent successfully");
@@ -264,13 +264,12 @@ public class SendgridService {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }
         if (launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")) {
-            SendGrid sg = new SendGrid(apiKey);
             Request request = new Request();
             try {
                 request.setMethod(Method.POST);
                 request.setEndpoint(MAIL_SEND);
                 request.setBody(mail.build());
-                Response response = sg.api(request);
+                Response response = sendGrid.api(request);
                 if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
                     log.info("Notification to party sent successfully");
                 }
