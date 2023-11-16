@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
@@ -62,14 +63,18 @@ public class RefDataUserService {
     @Value("${prl.refdata.password}")
     private String refDataIdamPassword;
 
-    private  List<DynamicListElement> listOfCategoryValues;
+    private List<DynamicListElement> listOfCategoryValues;
     private CommonDataResponse commonDataResponse;
+
+    @Autowired
+    private LaunchDarklyClient launchDarklyClient;
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
             ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
             if (null != response) {
-                Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(RD_STAFF_TOTAL_RECORDS_HEADER));
+                Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(
+                    RD_STAFF_TOTAL_RECORDS_HEADER));
                 int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
                 log.info("Total no. of records: {} ", totalRecords);
                 if (totalRecords > 0 && totalRecords < RD_STAFF_PAGE_SIZE) {
@@ -104,10 +109,18 @@ public class RefDataUserService {
     }
 
     public List<JudicialUsersApiResponse> getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest) {
+        if (launchDarklyClient.isFeatureEnabled("judicial-v2-change")) {
+            return judicialUserDetailsApi.getAllJudicialUserDetailsV2(
+                idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
+                authTokenGenerator.generate(),
+                judicialUsersApiRequest
+            );
+        }
         return judicialUserDetailsApi.getAllJudicialUserDetails(
             idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
             authTokenGenerator.generate(),
-            judicialUsersApiRequest);
+            judicialUsersApiRequest
+        );
     }
 
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
