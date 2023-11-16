@@ -41,8 +41,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -58,6 +61,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -1193,8 +1197,8 @@ public class ManageOrderEmailServiceTest {
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
     }
 
-    //  @Test
-    public void testSendEmailWhenOrderServed() {
+    @Test
+    public void testSendEmailWhenOrderServed() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1231,11 +1235,13 @@ public class ManageOrderEmailServiceTest {
                 .orderCollection(List.of(element(OrderDetails.builder().typeOfOrder("Final").build())))
                 .build();
         Map<String, Object> dataMap = new HashMap<>();
-
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                                                anyString(),
+                                                                                any(SendgridEmailConfig.class));
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
     }
