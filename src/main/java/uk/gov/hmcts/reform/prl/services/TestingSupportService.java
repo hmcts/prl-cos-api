@@ -97,6 +97,7 @@ public class TestingSupportService {
     private final SystemUserService systemUserService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final CaseInitiationService caseInitiationService;
+    private final TaskListService taskListService;
 
     private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
 
@@ -226,8 +227,6 @@ public class TestingSupportService {
                 } catch (Exception e) {
                     log.error("Error regenerating the document", e);
                 }
-            } else {
-                caseInitiationService.handleCaseInitiation(authorisation, updatedCaseData);
             }
         }
         return caseDataUpdated;
@@ -244,7 +243,9 @@ public class TestingSupportService {
                 systemAuthorisation,
                 fl401CourtNav
             );
-            partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
+            log.trace("Generating party flags now");
+            caseDetails = partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
+            log.trace("Party flags generated");
             caseDataUpdated = caseDetails.getData();
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             caseDataUpdated.putAll(updateDateInCase(FL401_CASE_TYPE, fl401CourtNav));
@@ -331,6 +332,21 @@ public class TestingSupportService {
             caseDataUpdated.putAll(allTabsFields);
 
             return caseDataUpdated;
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    public void solicitorSubmittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
+        if (isAuthorized(authorisation)) {
+            try {
+                CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+                log.trace("Granting access to the case");
+                caseInitiationService.handleCaseInitiation(authorisation, caseData);
+            } catch (Exception e) {
+                log.error("Access grant failed", e);
+            }
+            taskListService.updateTaskList(callbackRequest, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
