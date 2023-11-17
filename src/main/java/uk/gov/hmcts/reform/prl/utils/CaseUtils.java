@@ -210,7 +210,7 @@ public class CaseUtils {
                 ));
         } else if (null != caseData.getRespondentsFL401() && !hasLegalRepresentation(caseData.getRespondentsFL401())
             && Yes.equals(caseData.getRespondentsFL401().getCanYouProvideEmailAddress())
-            && !excludeId.equals(caseData.getRespondentsFL401().getPartyId())) {
+            && !caseData.getRespondentsFL401().getPartyId().equals(excludeId)) {
             respondentMap.put(
                 caseData.getRespondentsFL401().getEmail(),
                 caseData.getRespondentsFL401().getFirstName() + EMPTY_SPACE_STRING
