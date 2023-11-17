@@ -110,12 +110,14 @@ public class RefDataUserService {
 
     public List<JudicialUsersApiResponse> getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest) {
         if (launchDarklyClient.isFeatureEnabled("judicial-v2-change")) {
+            log.info("Refdata Judicial API V2 called and LD flag is ON");
             return judicialUserDetailsApi.getAllJudicialUserDetailsV2(
                 idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
                 authTokenGenerator.generate(),
                 judicialUsersApiRequest
             );
         }
+        log.info("Refdata Judicial API V1 called and LD flag is OFF");
         return judicialUserDetailsApi.getAllJudicialUserDetails(
             idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
             authTokenGenerator.generate(),
