@@ -223,7 +223,6 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
-            log.info("*** Order name {}", response.get("orderName"));
             return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(response).build();
         } else {
