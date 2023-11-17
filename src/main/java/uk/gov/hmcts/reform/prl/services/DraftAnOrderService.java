@@ -526,6 +526,7 @@ public class DraftAnOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+        log.info("*** Order name {}", caseDataMap.get("orderName"));
         return caseDataMap;
     }
 
