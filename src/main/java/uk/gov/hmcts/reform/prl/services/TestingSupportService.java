@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -85,11 +86,8 @@ public class TestingSupportService {
     @Autowired
     private final AllTabServiceImpl allTabsService;
     private final CaseService citizenCaseService;
-
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
-
     private final FL401ApplicationMapper fl401ApplicationMapper;
-
     private final LaunchDarklyClient launchDarklyClient;
     private final AuthorisationService authorisationService;
     private final CourtNavCaseService courtNavCaseService;
@@ -98,6 +96,7 @@ public class TestingSupportService {
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final CaseInitiationService caseInitiationService;
 
     private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
 
@@ -227,6 +226,8 @@ public class TestingSupportService {
                 } catch (Exception e) {
                     log.error("Error regenerating the document", e);
                 }
+            } else {
+                caseInitiationService.handleCaseInitiation(authorisation, updatedCaseData);
             }
         }
         return caseDataUpdated;
@@ -243,11 +244,11 @@ public class TestingSupportService {
                 systemAuthorisation,
                 fl401CourtNav
             );
+            partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
             caseDataUpdated = caseDetails.getData();
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             caseDataUpdated.putAll(updateDateInCase(FL401_CASE_TYPE, fl401CourtNav));
             CaseData updatedCaseData = CaseUtils.getCaseData(initialCaseDetails, objectMapper);
-            caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(updatedCaseData));
         }
 
         return caseDataUpdated;
