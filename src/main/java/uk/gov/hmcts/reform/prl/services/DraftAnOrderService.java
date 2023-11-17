@@ -100,6 +100,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_RIGHT_TO_AS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARDING_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARING_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
@@ -277,13 +278,7 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
-                    caseData = caseData.toBuilder()
-                        .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
-                        .dateOrderMade(draftOrder.getDateOrderMade())
-                        .wasTheOrderApprovedAtHearing(draftOrder.getWasTheOrderApprovedAtHearing())
-                        .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
-                        .magistrateLastName(draftOrder.getMagistrateLastName())
-                        .build();
+                    caseData = updateCaseDataForFinalOrder(caseData, draftOrder);
                 }
 
                 updatedCaseData.put(
@@ -304,6 +299,18 @@ public class DraftAnOrderService {
         updatedCaseData.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         return updatedCaseData;
 
+    }
+
+    private static CaseData updateCaseDataForFinalOrder(CaseData caseData, DraftOrder draftOrder) {
+        caseData = caseData.toBuilder()
+            .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
+            .dateOrderMade(draftOrder.getDateOrderMade())
+            .wasTheOrderApprovedAtHearing(draftOrder.getWasTheOrderApprovedAtHearing())
+            .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
+            .magistrateLastName(draftOrder.getMagistrateLastName())
+            .build();
+        log.info("inside updateCaseDataForFinalOrder ==> " + caseData);
+        return caseData;
     }
 
     private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
@@ -362,6 +369,15 @@ public class DraftAnOrderService {
             if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
                 && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
                 caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
+            }
+            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
+                caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().manageOrdersApplicant(
+                    CaseUtils.getApplicant(caseData))
+                                                                 .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
+                                                                     caseData))
+                                                                 .manageOrdersRespondent(CaseUtils.getRespondent(
+                                                                     caseData)).build()).build();
             }
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()
@@ -489,6 +505,7 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        caseDataMap.put("orderName", getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
@@ -510,6 +527,7 @@ public class DraftAnOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+        log.info("*** Order name {}", caseDataMap.get("orderName"));
         return caseDataMap;
     }
 
@@ -536,9 +554,18 @@ public class DraftAnOrderService {
             caseDataMap.put("manageOrdersCourtName", selectedOrder.getManageOrdersCourtName());
             caseDataMap.put("manageOrdersCourtAddress", selectedOrder.getManageOrdersCourtAddress());
             caseDataMap.put("manageOrdersCaseNo", selectedOrder.getManageOrdersCaseNo());
-            caseDataMap.put("manageOrdersApplicant", selectedOrder.getManageOrdersApplicant());
-            caseDataMap.put("manageOrdersApplicantReference", selectedOrder.getManageOrdersApplicantReference());
-            caseDataMap.put("manageOrdersRespondent", selectedOrder.getManageOrdersRespondent());
+            caseDataMap.put("manageOrdersApplicant",
+                            StringUtils.isEmpty(selectedOrder.getManageOrdersApplicant()) ? CaseUtils.getApplicant(
+                                caseData) : selectedOrder.getManageOrdersApplicant()
+            );
+            caseDataMap.put("manageOrdersApplicantReference",
+                            StringUtils.isEmpty(selectedOrder.getManageOrdersApplicantReference()) ? CaseUtils.getApplicantReference(
+                                caseData) : selectedOrder.getManageOrdersApplicantReference()
+            );
+            caseDataMap.put("manageOrdersRespondent",
+                            StringUtils.isEmpty(selectedOrder.getManageOrdersRespondent()) ? CaseUtils.getRespondent(
+                                caseData) : selectedOrder.getManageOrdersRespondent()
+            );
             caseDataMap.put("manageOrdersRespondentReference", selectedOrder.getManageOrdersRespondentReference());
             caseDataMap.put("manageOrdersRespondentDob", selectedOrder.getManageOrdersRespondentDob());
             caseDataMap.put("manageOrdersRespondentAddress", selectedOrder.getManageOrdersRespondentAddress());
@@ -572,6 +599,9 @@ public class DraftAnOrderService {
         } else {
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
         }
+
+        log.info("applicant reference {}", caseDataMap.get("manageOrdersApplicantReference"));
+        log.info("applicant {}", caseDataMap.get("manageOrdersApplicant"));
         return caseDataMap;
     }
 
@@ -804,6 +834,7 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
+                    updateCaseDataForFinalOrder(caseData, draftOrder);
                 }
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
