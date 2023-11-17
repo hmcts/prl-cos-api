@@ -277,7 +277,7 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
-                    caseData = updateCaseDataForFinalOrder(caseData, draftOrder);
+                    caseData = updateCaseDataForFinalOrderDocument(caseData, authorisation, draftOrder.getOrderType());
                 }
 
                 updatedCaseData.put(
@@ -300,15 +300,17 @@ public class DraftAnOrderService {
 
     }
 
-    private static CaseData updateCaseDataForFinalOrder(CaseData caseData, DraftOrder draftOrder) {
-        caseData = caseData.toBuilder()
-            .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
-            .dateOrderMade(draftOrder.getDateOrderMade())
-            .wasTheOrderApprovedAtHearing(draftOrder.getWasTheOrderApprovedAtHearing())
-            .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
-            .magistrateLastName(draftOrder.getMagistrateLastName())
-            .build();
-        log.info("inside updateCaseDataForFinalOrder ==> " + caseData);
+    private CaseData updateCaseDataForFinalOrderDocument(CaseData caseData, String authorisation, CreateSelectOrderOptionsEnum orderType) {
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, Map.class);
+        caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData));
+        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
+            caseDataMap.putAll(populateStandardDirectionOrder(authorisation, caseData));
+        } else if (!(CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(orderType)
+            || CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(orderType)
+            || CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(orderType))) {
+            caseDataMap.putAll(populateDraftOrderCustomFields(caseData, authorisation));
+        }
+        caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
         return caseData;
     }
 
@@ -803,7 +805,6 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
-                    updateCaseDataForFinalOrder(caseData, draftOrder);
                 }
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
