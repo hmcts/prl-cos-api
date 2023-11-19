@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -57,10 +58,10 @@ public class CaseControllerFunctionalTest {
     private static final String LINK_CITIZEN_REQUEST_BODY = "requests/link-citizen-case.json";
 
     private final String targetInstance =
-            StringUtils.defaultIfBlank(
-                    System.getenv("TEST_URL"),
-                    "http://localhost:4044"
-            );
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -83,14 +84,14 @@ public class CaseControllerFunctionalTest {
     public void createCaseInCcd() throws Exception {
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
         request
-                .header("Authorization", "authToken")
-                .header("ServiceAuthorization", "s2sAuthToken")
-                .body(requestBody)
-                .when()
-                .contentType("application/json")
-                .post("/case/create")
-                .then()
-                .assertThat().statusCode(200);
+            .header("Authorization", "authToken")
+            .header("ServiceAuthorization", "s2sAuthToken")
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case/create")
+            .then()
+            .assertThat().statusCode(200);
     }
 
     @Ignore
@@ -138,4 +139,29 @@ public class CaseControllerFunctionalTest {
             .andReturn();
     }
 
+    @Test
+    public void retrieveCitizenFlagsSuccessResponse() throws Exception {
+        mockMvc.perform(get("/1234567/retrieve-ra-flags/party-1")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
+    @Test
+    public void updateCitizenFlagsSuccessResponse() throws Exception {
+        String requestBody = ResourceLoader.loadJson("requests/ra-update-request.json");
+        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
+
+        mockMvc.perform(post("1234567/c100RequestSupport/party-update-ra")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .header("serviceAuthorization", "auth")
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
 }
