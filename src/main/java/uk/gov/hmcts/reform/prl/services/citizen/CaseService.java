@@ -411,8 +411,8 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
-    public Flags getPartyCaseFlags(String userToken, String caseId, String partyId) {
-        CaseDetails caseDetails = getCase(userToken, caseId);
+    public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {
+        CaseDetails caseDetails = getCase(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
             partyId,
@@ -519,24 +519,22 @@ public class CaseService {
 
     private List<Element<FlagDetail>> convertFlags(List<FlagDetailRequest> details) {
         List<Element<FlagDetail>> flagDetails = new ArrayList<>();
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
+
         for (FlagDetailRequest detail : details) {
             if (null != detail.getDateTimeCreated()) {
+
                 LocalDateTime createdDateTime
                     = LocalDateTime
-                    .parse(detail.getDateTimeCreated().format(DateTimeFormatter.ofPattern(
-                        "yyyy-MM-dd'T'HH:mm:ss.SSS",
-                        Locale.ENGLISH
-                    )));
+                    .parse(detail.getDateTimeCreated().format(dateTimeFormatter));
                 detail.setDateTimeCreated(createdDateTime);
             }
 
             if (null != detail.getDateTimeModified()) {
                 LocalDateTime modifiedDateTime
                     = LocalDateTime
-                    .parse(detail.getDateTimeModified().format(DateTimeFormatter.ofPattern(
-                        "yyyy-MM-dd'T'HH:mm:ss.SSS",
-                        Locale.ENGLISH
-                    )));
+                    .parse(detail.getDateTimeModified().format(dateTimeFormatter));
+
                 detail.setDateTimeModified(modifiedDateTime);
             }
 
