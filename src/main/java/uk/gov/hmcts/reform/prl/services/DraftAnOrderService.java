@@ -1572,7 +1572,7 @@ public class DraftAnOrderService {
 
     private Map<String, Object> getDraftOrderData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum orderType) throws Exception {
         log.info("DraftOrderService::OrderType -> {}", orderType);
-        return manageOrderService.getCaseDataNew(
+        return manageOrderService.generateOrderDocumentFromDocmosis(
             authorisation,
             caseData,
             orderType
@@ -1629,27 +1629,10 @@ public class DraftAnOrderService {
         return caseDataUpdated;
     }
 
-
-    /*public Map<String, Object> generateOrderDocumentIfOrderIsEdited(String authorisation, CallbackRequest callbackRequest,
-                                                                    List<Element<HearingData>> ordersHearingDetails) throws Exception {
-        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        updateOrderSpecificFields(authorisation, caseData, callbackRequest);
-
-        caseData.getManageOrders().setOrdersHearingDetails(
-            hearingDataService.getHearingDataForSelectedHearing(authorisation, caseData));
-
-        caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
-
-        return caseDataUpdated;
-    }*/
-
-    public Map<String, Object> generateOrderDocumentNew(String authorisation,
-                                                        CallbackRequest callbackRequest,
-                                                        List<Element<HearingData>> ordersHearingDetails,
-                                                        boolean isOrderEdited) throws Exception {
+    public Map<String, Object> generateOrderDocumentPostValidations(String authorisation,
+                                                                    CallbackRequest callbackRequest,
+                                                                    List<Element<HearingData>> ordersHearingDetails,
+                                                                    boolean isOrderEdited) throws Exception {
         log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
@@ -1660,7 +1643,7 @@ public class DraftAnOrderService {
         log.info("ordersHearingDetails new change    ------ {}", ordersHearingDetails);
         if (isNotEmpty(ordersHearingDetails)) {
             caseData.getManageOrders().setOrdersHearingDetails(
-                hearingDataService.getHearingDataForSelectedHearingNew(authorisation, caseData));
+                hearingDataService.setHearingDataForSelectedHearing(authorisation, caseData));
         }
 
         if (isOrderEdited) {
@@ -1945,7 +1928,7 @@ public class DraftAnOrderService {
         return caseData;
     }
 
-    public Map<String, Object> handleDocumentGenerationNew(String authorisation, CallbackRequest callbackRequest) throws Exception {
+    public Map<String, Object> handleDocumentGeneration(String authorisation, CallbackRequest callbackRequest) throws Exception {
         List<String> errorList = null;
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -1958,7 +1941,7 @@ public class DraftAnOrderService {
             if (errorList.size() > 0) {
                 return Map.of("errorList", errorList);
             }
-            return generateOrderDocumentNew(
+            return generateOrderDocumentPostValidations(
                 authorisation,
                 callbackRequest,
                 caseData.getManageOrders().getOrdersHearingDetails(),
@@ -1971,7 +1954,7 @@ public class DraftAnOrderService {
                 if (errorList.size() > 0) {
                     return Map.of("errorList", errorList);
                 }
-                return generateOrderDocumentNew(
+                return generateOrderDocumentPostValidations(
                     authorisation,
                     callbackRequest,
                     draftOrder.getManageOrderHearingDetails(),
@@ -1979,7 +1962,7 @@ public class DraftAnOrderService {
                 );
 
             } else {
-                return generateOrderDocumentNew(
+                return generateOrderDocumentPostValidations(
                     authorisation,
                     callbackRequest,
                     draftOrder.getManageOrderHearingDetails(),
