@@ -66,6 +66,7 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupat
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Slf4j
 @RestController
@@ -285,11 +286,11 @@ public class ManageOrdersController {
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
+                if (isHearingPageNeeded(caseData.getCreateSelectOrderOptions(), caseData.getManageOrders().getC21OrderOptions())) {
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(caseData, hearings));
+                                                                           .getHearingDataForSelectedHearing(caseData, hearings, authorisation));
                 } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                    caseData = manageOrderService.setHearingDataForSdo(caseData, hearings);
+                    caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                 }
                 log.info("*** Court seal 0 {}", caseData.getCourtSeal());
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
