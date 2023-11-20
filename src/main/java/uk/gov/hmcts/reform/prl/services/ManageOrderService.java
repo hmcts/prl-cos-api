@@ -160,6 +160,11 @@ public class ManageOrderService {
     public static final String CAFCASS_EMAIL = "cafcassEmail";
     public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
     public static final String CAFCASS_CYMRU = "cafcassCymru";
+
+    public static final String SERVE_RESP_NAME = "serveRespName";
+
+    public static final String SERVE_RECIP_NAME = "serveRecipName";
+
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
     public static final String SERVING_RESPONDENTS_OPTIONS = "servingRespondentsOptions";
@@ -1467,8 +1472,7 @@ public class ManageOrderService {
         } else {
             recipients = getRecipients(caseData);
         }
-        log.info("MMMMMMM {}", servingRespondentsOptions);
-        log.info("MMMMMMM {}", serveOnRespondent);
+
         String otherParties;
         otherParties = getOtherParties(caseData);
         YesOrNo otherPartiesServed = No;
@@ -1496,16 +1500,30 @@ public class ManageOrderService {
             cafcassCymruServedOptions = caseData.getManageOrders().getCafcassCymruServedOptions();
             cafcassCymruEmail = caseData.getManageOrders().getCafcassCymruEmail();
         }
+
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
+
+        log.info("MMMMMMM-- cafcassServedOptions-- {}", cafcassServedOptions);
+        log.info("MMMMMMM-- cafcassCymruServedOptions-- {}", cafcassCymruServedOptions);
+        log.info("MMMMMMM-- cafCassEmail-- {}", cafCassEmail);
+        log.info("MMMMMMM-- serveOnRespondent-- {}", serveOnRespondent);
+        log.info("MMMMMMM-- otherPartiesServed-- {}", otherPartiesServed);
+        log.info("MMMMMMM--- servingRespondentsOptions--- {}", servingRespondentsOptions);
+        log.info("MMMMMMM --recipients-- {}", recipients);
+        log.info("MMMMMMM -- otherParties-- {}", otherParties);
+        log.info("MMMMMMM-- servedParties --> {}", servedParties);
+
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
         servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
-        servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail + " Something33");
+        servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail);
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, "SerSolName" + servingRespondentsOptions);
+        servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(CAFCASS_CYMRU, "Cafcass Cymru");
-        servedOrderDetails.put(RECIPIENTS_OPTIONS, "Solname " + recipients);
+        servedOrderDetails.put(SERVE_RESP_NAME, servingRespondentsOptions + "serRespName");
+        servedOrderDetails.put(SERVE_RECIP_NAME, recipients + "serRecipName");
+        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
