@@ -161,9 +161,7 @@ public class ManageOrderService {
     public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
     public static final String CAFCASS_CYMRU = "cafcassCymru";
 
-    public static final String SERVE_RESP_NAME = "serveRespName";
-
-    public static final String SERVE_RECIP_NAME = "serveRecipName";
+    public static final String SERVE_RESPONDENT_NAME = "servingRespondentName";
 
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
@@ -1462,7 +1460,10 @@ public class ManageOrderService {
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         Element<PartyDetails> partyDetailsElement = caseData.getApplicants().get(0);
-        log.info("REPPPPPPP --> {}", partyDetailsElement.getValue().getRepresentativeFullName());
+        String serveRespondentName = null;
+        if (null != partyDetailsElement.getValue().getRepresentativeFullName()) {
+            serveRespondentName =  partyDetailsElement.getValue().getRepresentativeFullName();
+        }
         YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
         ServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
@@ -1521,8 +1522,9 @@ public class ManageOrderService {
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(CAFCASS_CYMRU, "Cafcass Cymru");
-        servedOrderDetails.put(SERVE_RESP_NAME, servingRespondentsOptions + "serRespName");
-        servedOrderDetails.put(SERVE_RECIP_NAME, recipients + "serRecipName");
+        if (null != serveRespondentName && null != servingRespondentsOptions && null != servingRespondentsOptions.getDisplayedValue()) {
+            servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
+        }
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
@@ -1660,8 +1662,7 @@ public class ManageOrderService {
         List<Element<ServedParties>> servedParties = new ArrayList<>();
 
         String cafCassCymruText = null;
-        String serveRespName = null;
-        String serveRecipName = null;
+        String serveRespondentName = null;
 
 
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
@@ -1696,12 +1697,8 @@ public class ManageOrderService {
             cafCassCymruText = (String) servedOrderDetails.get(CAFCASS_CYMRU);
         }
 
-        if (servedOrderDetails.containsKey(SERVE_RESP_NAME)) {
-            serveRespName = (String) servedOrderDetails.get(SERVE_RESP_NAME);
-        }
-
-        if (servedOrderDetails.containsKey(SERVE_RECIP_NAME)) {
-            serveRecipName = (String) servedOrderDetails.get(SERVE_RECIP_NAME);
+        if (servedOrderDetails.containsKey(SERVE_RESPONDENT_NAME)) {
+            serveRespondentName = (String) servedOrderDetails.get(SERVE_RESPONDENT_NAME);
         }
 
         ServeOrderDetails tempServeOrderDetails;
@@ -1723,8 +1720,7 @@ public class ManageOrderService {
             .emailInformation(emailInformation)
             .servedParties(servedParties)
             .cafcassCymru(cafCassCymruText)
-            .serveRespName(serveRespName)
-            .serveRecipName(serveRecipName)
+            .serveRespondentName(serveRespondentName)
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
