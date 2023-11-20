@@ -587,7 +587,6 @@ public class CallbackController {
             if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
                 caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_CASE_NAME));
             }
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             // Updating the case name for FL401
             if (caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME) != null) {
@@ -602,6 +601,7 @@ public class CallbackController {
                     caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
                 }
             }
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             try {
                 log.info("callbackRequest.getCaseDetails() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
                 log.info("\n\n caseDataUpdated json ===>" + objectMapper.writeValueAsString(caseDataUpdated));
