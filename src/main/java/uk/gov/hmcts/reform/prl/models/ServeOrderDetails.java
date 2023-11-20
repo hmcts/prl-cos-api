@@ -42,5 +42,5 @@ public class ServeOrderDetails {
     private final WhatToDoWithOrderEnum whatDoWithOrder;
     private final List<Element<ServedParties>> servedParties;
     private final String cafcassCymru;
-    private final String serveRespondentName;
+    private final String servingRespondentName;
 }
