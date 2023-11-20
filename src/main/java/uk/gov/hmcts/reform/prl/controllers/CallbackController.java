@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -302,7 +303,7 @@ public class CallbackController {
                                     Element::getValue)
                                 .toList()))
                 .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
-                caseData)).state(
+                    caseData)).state(
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
@@ -352,7 +353,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -404,7 +405,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -601,6 +602,12 @@ public class CallbackController {
                     caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
                 }
             }
+            try {
+                log.info("callbackRequest.getCaseDetails() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
+                log.info("\n\n caseDataUpdated json ===>" + objectMapper.writeValueAsString(caseDataUpdated));
+            } catch (JsonProcessingException e) {
+                log.error("testing");
+            }
 
             // Saving the logged-in Solicitor and Org details for the docs..
             return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(
@@ -735,6 +742,15 @@ public class CallbackController {
                     log.info("Share a case enabled");
                     log.info("userOrganisation.get().getOrganisationIdentifier() is:: " + userOrganisation.get().getOrganisationIdentifier());
                     log.info("userOrganisation.get().getName() is:: " + userOrganisation.get().getName());
+                    try {
+                        log.info("caseData.getApplicantOrganisationPolicy() is:: " + caseData.getApplicantOrganisationPolicy());
+                        log.info("caseData.getApplicantOrganisationPolicy().getOrgPolicyReference() is:: "
+                                     + caseData.getApplicantOrganisationPolicy().getOrgPolicyReference());
+                        log.info("caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() is:: "
+                                     + caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
+                    } catch (Exception e) {
+                        log.error("error from caseData.getApplicantOrganisationPolicy()");
+                    }
                     OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
                         .organisation(Organisation.builder()
                                           .organisationID(userOrganisation.get().getOrganisationIdentifier())
@@ -774,7 +790,8 @@ public class CallbackController {
 
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
-                                               Event.TRANSFER_TO_ANOTHER_COURT.getName());
+                                               Event.TRANSFER_TO_ANOTHER_COURT.getName()
+            );
         eventPublisher.publishEvent(event);
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
@@ -783,7 +800,7 @@ public class CallbackController {
         ).build());
     }
 
-    private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation,CaseData newCaseData,
+    private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation, CaseData newCaseData,
                                                                            String typeOfEvent) {
         return TransferToAnotherCourtEvent.builder()
             .authorisation(authorisation)
