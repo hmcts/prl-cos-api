@@ -183,7 +183,7 @@ public class DraftAnOrderController {
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("DraftAnOrderController::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-            Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGenerationNew(
+            Map<String, Object> caseDataUpdated = draftAnOrderService.handleDocumentGeneration(
                 authorisation,
                 callbackRequest
             );
@@ -192,10 +192,8 @@ public class DraftAnOrderController {
                     .errors((List<String>) caseDataUpdated.get("errorList"))
                     .build();
             } else {
-                return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.handleDocumentGenerationForaDraftOrder(
-                    authorisation,
-                    callbackRequest
-                )).build();
+                //Draft an order
+                return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
             }
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

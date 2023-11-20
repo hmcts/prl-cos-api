@@ -1047,7 +1047,7 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
-        when(draftAnOrderService.handleDocumentGenerationNew(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.handleDocumentGeneration(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest);
 

@@ -1716,7 +1716,9 @@ public class ManageOrderService {
     }
 
 
-    public Map<String, Object> getCaseDataNew(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
+    public Map<String, Object> generateOrderDocumentFromDocmosis(String authorisation,
+                                                                 CaseData caseData,
+                                                                 CreateSelectOrderOptionsEnum selectOrderOption)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {

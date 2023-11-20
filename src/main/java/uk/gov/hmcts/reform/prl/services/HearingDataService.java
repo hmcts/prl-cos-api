@@ -512,7 +512,7 @@ public class HearingDataService {
         }).toList();
     }
 
-    public List<Element<HearingData>> getHearingDataForSelectedHearingNew(String authorisation, CaseData caseData) {
+    public List<Element<HearingData>> setHearingDataForSelectedHearing(String authorisation, CaseData caseData) {
         boolean[] hearingFetchedOnce = {false};
         log.info("manage order printed specially - {}", caseData.getManageOrders());
 
