@@ -284,13 +284,7 @@ public class DraftAnOrderService {
                 } else {
                     log.info("Bfr getDraftOrderWithUpdatedStatus ------->>");
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
-                    caseData = caseData.toBuilder()
-                        .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
-                        .dateOrderMade(draftOrder.getDateOrderMade())
-                        .wasTheOrderApprovedAtHearing(draftOrder.getWasTheOrderApprovedAtHearing())
-                        .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
-                        .magistrateLastName(draftOrder.getMagistrateLastName())
-                        .build();
+                    caseData = updateCaseDataForFinalOrderDocument(caseData, authorisation, draftOrder.getOrderType());
                 }
 
                 updatedCaseData.put(
@@ -311,6 +305,20 @@ public class DraftAnOrderService {
         updatedCaseData.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         return updatedCaseData;
 
+    }
+
+    private CaseData updateCaseDataForFinalOrderDocument(CaseData caseData, String authorisation, CreateSelectOrderOptionsEnum orderType) {
+        Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, Map.class);
+        caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData));
+        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
+            caseDataMap.putAll(populateStandardDirectionOrder(authorisation, caseData));
+        } else if (!(CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(orderType)
+            || CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(orderType)
+            || CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(orderType))) {
+            caseDataMap.putAll(populateDraftOrderCustomFields(caseData, authorisation));
+        }
+        caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+        return caseData;
     }
 
     private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
@@ -372,7 +380,12 @@ public class DraftAnOrderService {
             }
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
-                caseData = manageOrderService.populateCustomOrderFields(caseData, draftOrder.getOrderType());
+                caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().manageOrdersApplicant(
+                    CaseUtils.getApplicant(caseData))
+                                                                 .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
+                                                                     caseData))
+                                                                 .manageOrdersRespondent(CaseUtils.getRespondent(
+                                                                     caseData)).build()).build();
             }
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()
@@ -500,6 +513,7 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        caseDataMap.put("orderName", getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
@@ -521,6 +535,7 @@ public class DraftAnOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+        log.info("*** Order name {}", caseDataMap.get("orderName"));
         return caseDataMap;
     }
 

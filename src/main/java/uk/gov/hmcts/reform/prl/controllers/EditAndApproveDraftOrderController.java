@@ -136,11 +136,13 @@ public class EditAndApproveDraftOrderController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("*** Casedataupdated for data loss *** {}", caseDataUpdated);
             log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(draftAnOrderService.adminEditAndServeAboutToSubmit(
