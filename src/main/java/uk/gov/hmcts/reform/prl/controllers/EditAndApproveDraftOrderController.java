@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -143,6 +144,9 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+            log.info("/judge-or-admin-edit-approve/about-to-submit OrdersHearingDetails start {}",
+                     null != caseData && CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                         ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(draftAnOrderService.adminEditAndServeAboutToSubmit(
