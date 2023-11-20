@@ -1461,7 +1461,7 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         if (null != serveRespondentName
             && null != servingRespondentsOptions
-            && servingRespondentsOptions.getDisplayedValue().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
+            && servingRespondentsOptions.equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
             servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
 
@@ -1557,13 +1557,13 @@ public class ManageOrderService {
         log.info("1111 {}", serveOnRespondent.equals(Yes));
         log.info("2222 {}", null != servingRespondentsOptions);
         log.info("3333 {}", null != servingRespondentsOptions);
-        log.info("4444 {}", servingRespondentsOptions.getDisplayedValue().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString()));
+        log.info("4444 {}", servingRespondentsOptions.equals(ServingRespondentsEnum.applicantLegalRepresentative.toString()));
 
 
         if (serveOnRespondent.equals(Yes)
             && null != serveRespondentName
             && null != servingRespondentsOptions
-            && servingRespondentsOptions.getDisplayedValue().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
+            && servingRespondentsOptions.equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
             servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
