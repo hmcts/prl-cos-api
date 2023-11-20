@@ -1430,8 +1430,8 @@ public class ManageOrderService {
     }
 
     private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
-        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
-            .getServingRespondentsOptionsDA();
+        log.info("***** inside servedFL401Order******** {}");
+
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
 
@@ -1440,6 +1440,7 @@ public class ManageOrderService {
         if (null != partyDetails.getRepresentativeFullName()) {
             serveRespondentName =  partyDetails.getRepresentativeFullName();
         }
+        log.info("aaaaa{}");
 
         if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
             if (caseData.getManageOrders().getEmailInformationDA() != null) {
@@ -1451,12 +1452,18 @@ public class ManageOrderService {
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
+
+        log.info("ccccccc{}");
+        servedOrderDetails.put(SERVED_PARTIES, servedParties);
+
+        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
+            .getServingRespondentsOptionsDA();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         if (null != serveRespondentName
-            && null != servingRespondentsOptions && null != servingRespondentsOptions.getDisplayedValue()) {
+            && null != servingRespondentsOptions
+            && servingRespondentsOptions.getDisplayedValue().equals(ServingRespondentsEnum.applicantLegalRepresentative)) {
             servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
-        servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1532,9 +1539,14 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
-        servedOrderDetails.put(CAFCASS_CYMRU, "Cafcass Cymru");
-        if (null != serveOnRespondent && null != serveRespondentName
-            && null != servingRespondentsOptions && null != servingRespondentsOptions.getDisplayedValue()) {
+        if (cafcassCymruServedOptions.equals(Yes)) {
+            servedOrderDetails.put(CAFCASS_CYMRU, "Cafcass Cymru");
+        }
+
+        if (null != serveOnRespondent
+            && null != serveRespondentName
+            && null != servingRespondentsOptions
+            && servingRespondentsOptions.getDisplayedValue().equals(ServingRespondentsEnum.applicantLegalRepresentative)) {
             servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
