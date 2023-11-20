@@ -56,7 +56,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         //PRL-3562 - populate document categories
         caseData = manageDocumentsService.populateDocumentCategories(authorisation, caseData);
-
+        log.info("debolina_aboutToStartResponse", caseData);
         return CallbackResponse.builder()
             .data(caseData)
             .build();
