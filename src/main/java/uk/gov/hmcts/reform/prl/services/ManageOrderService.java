@@ -123,6 +123,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLI
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.other;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.standardDirectionsOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum.draftAnOrder;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
@@ -2553,7 +2555,10 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        //Added for SDO Orders
+        caseData = updateIsSdoSelected(caseData);
 
+        caseDataUpdated.put("isSdoSelected", caseData.getIsSdoSelected());
         //C21 order related
         addC21OrderDetails(caseData, caseDataUpdated);
         //update courtName
@@ -2695,5 +2700,25 @@ public class ManageOrderService {
         waFieldsMap.put("orderNameForWA", orderNameForWA);
 
         return waFieldsMap;
+    }
+
+
+    private CaseData updateIsSdoSelected(CaseData caseData) {
+        log.info("**ManageOrdersOptions" + caseData.getManageOrdersOptions());
+        log.info("**CreateSelectOrderOptions" + caseData.getCreateSelectOrderOptions());
+        if (null != caseData.getManageOrdersOptions()
+            && caseData.getManageOrdersOptions().equals(createAnOrder)
+            && null != caseData.getCreateSelectOrderOptions()) {
+            if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
+                || (other).equals(caseData.getCreateSelectOrderOptions())) {
+                caseData.setIsSdoSelected(Yes);
+                log.info("isSdoSelected set to Yes" + caseData.getIsSdoSelected());
+            } else {
+                caseData.setIsSdoSelected(No);
+                log.info("isSdoSelected set to No" + caseData.getIsSdoSelected());
+            }
+        }
+        return  caseData;
+
     }
 }

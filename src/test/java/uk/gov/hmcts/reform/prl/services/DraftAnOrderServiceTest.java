@@ -622,7 +622,10 @@ public class DraftAnOrderServiceTest {
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
-        Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
+        Map<String, Object> caseDataMap = new HashMap<>();
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
             "eventId"
@@ -670,7 +673,10 @@ public class DraftAnOrderServiceTest {
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
-        Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
+        Map<String, Object> caseDataMap = new HashMap<>();
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
             "eventId"
@@ -810,7 +816,10 @@ public class DraftAnOrderServiceTest {
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
-        Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
+        Map<String, Object> caseDataMap = new HashMap<>();
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
             "eventId"
@@ -2214,6 +2223,7 @@ public class DraftAnOrderServiceTest {
             .previewOrderDocWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
             .manageOrders(ManageOrders.builder()
                               .serveToRespondentOptions(Yes)
                               .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
@@ -2228,7 +2238,10 @@ public class DraftAnOrderServiceTest {
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
-        Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
+        Map<String, Object> caseDataMap = new HashMap<>();
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
             EDIT_AND_APPROVE_ORDER.getId()
@@ -2424,7 +2437,7 @@ public class DraftAnOrderServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(stringObjectMap);
         stringObjectMap = draftAnOrderService.getEligibleServeOrderDetails(authToken, callbackRequest);
         assertNotNull(stringObjectMap);
     }
@@ -2474,7 +2487,7 @@ public class DraftAnOrderServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(stringObjectMap);
         stringObjectMap = draftAnOrderService.adminEditAndServeAboutToSubmit(
             authToken,
             callbackRequest
@@ -2524,7 +2537,7 @@ public class DraftAnOrderServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(stringObjectMap);
         stringObjectMap = draftAnOrderService.adminEditAndServeAboutToSubmit(
             authToken,
             callbackRequest
@@ -3549,6 +3562,7 @@ public class DraftAnOrderServiceTest {
             .previewOrderDocWelsh(Document.builder().documentFileName("abc-welsh.pdf").build())
             .orderRecipients(List.of(OrderRecipientsEnum.applicantOrApplicantSolicitor))
             .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
             .manageOrders(ManageOrders.builder()
                               .serveToRespondentOptions(Yes)
                               .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
@@ -3565,7 +3579,10 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
         when(documentLanguageService.docGenerateLang(any(CaseData.class))).thenReturn(null);
-        Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
+        Map<String, Object> caseDataMap = new HashMap<>();
+        when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
             "testevent"
