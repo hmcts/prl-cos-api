@@ -1522,7 +1522,8 @@ public class ManageOrderService {
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(CAFCASS_CYMRU, "Cafcass Cymru");
-        if (null != serveRespondentName && null != servingRespondentsOptions && null != servingRespondentsOptions.getDisplayedValue()) {
+        if (null != serveOnRespondent && null != serveRespondentName
+            && null != servingRespondentsOptions && null != servingRespondentsOptions.getDisplayedValue()) {
             servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
@@ -1720,7 +1721,7 @@ public class ManageOrderService {
             .emailInformation(emailInformation)
             .servedParties(servedParties)
             .cafcassCymru(cafCassCymruText)
-            .serveRespondentName(serveRespondentName)
+            .servingRespondentName(serveRespondentName)
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
