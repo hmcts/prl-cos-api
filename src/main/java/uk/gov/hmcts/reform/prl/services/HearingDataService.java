@@ -226,8 +226,7 @@ public class HearingDataService {
 
                     if (hearingsList != null) {
                         hearingsList.getCaseHearings().stream()
-                            .filter(caseHearing -> LISTED.equalsIgnoreCase(
-                                caseHearing.getHmcStatus()))
+                            .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus()))
                             .forEach(
                                 hearingFromHmc ->
                                     dynamicListElements.add(
@@ -358,29 +357,18 @@ public class HearingDataService {
         return hearingData;
     }
 
-    public List<Element<HearingData>> getHearingData(List<Element<HearingData>> hearingDatas,
-                                                     HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,CaseData caseData) {
+    public List<Element<HearingData>> getHearingDataForOtherOrders(List<Element<HearingData>> hearingDatas,
+                                                                   HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                                                   CaseData caseData) {
         hearingDatas.stream().parallel().forEach(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
-            hearingRequestDataMapper.mapHearingData(hearingData,hearingDataPrePopulatedDynamicLists,caseData);
-            Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
-            log.info("judgeDetailsSelected ---> {}", judgeDetailsSelected);
-            if (judgeDetailsSelected.isPresent() && judgeDetailsSelected.get().getPersonalCode() != null
-                && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
-                Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
-                log.info("JudgeAPI response {}", judgeApiResponse);
-                if (!judgeApiResponse.get().isEmpty()) {
-                    hearingData.setHearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname());
-                    hearingData.setHearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId());
-                    hearingData.setHearingJudgePersonalCode(judgeApiResponse.get().stream().findFirst().get().getPersonalCode());
-                }
-            }
+            getHearingData(hearingDataPrePopulatedDynamicLists, caseData, hearingData);
         });
         return hearingDatas;
     }
 
-    public HearingData getHearingDataForSdo(HearingData hearingData,
-                                            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
+    private HearingData getHearingData(HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                       CaseData caseData, HearingData hearingData) {
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
         log.info("judgeDetailsSelected ---> {}", judgeDetailsSelected);
@@ -394,6 +382,12 @@ public class HearingDataService {
                 hearingData.setHearingJudgePersonalCode(judgeApiResponse.get().stream().findFirst().get().getPersonalCode());
             }
         }
+        return hearingData;
+    }
+
+    public HearingData getHearingDataForSdo(HearingData hearingData,
+                                            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
+        hearingData = getHearingData(hearingDataPrePopulatedDynamicLists, caseData, hearingData);
         hearingData = populateApplicantRespondentNames(hearingData, caseData);
         return hearingData;
     }
@@ -476,24 +470,82 @@ public class HearingDataService {
         return dynamicListElements;
     }
 
-    public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings) {
+    public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings, String authorisation) {
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         } else if (isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         }
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            populateHearingDynamicLists(
+                authorisation,
+                String.valueOf(caseData.getId()),
+                caseData,
+                hearings
+            );
+        hearingDetails = getHearingDataForOtherOrders(
+            hearingDetails,
+            hearingDataPrePopulatedDynamicLists,
+            caseData
+        );
         return hearingDetails.stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
                 && null != hearingData.getConfirmedHearingDates().getValue()) {
-                Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
+                Optional<CaseHearing> caseHearing = getHearingFromId(
+                    hearingData.getConfirmedHearingDates().getValue().getCode(),
+                    hearings
+                );
                 if (caseHearing.isPresent()) {
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
                         .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
-                                                                                      caseHearing.get().getHearingTypeValue()))
+                                                                                      caseHearing.get().getHearingTypeValue()
+                        ))
+                        .build();
+                }
+            }
+            return Element.<HearingData>builder().id(hearingDataElement.getId())
+                .value(hearingData).build();
+        }).toList();
+    }
+
+    public List<Element<HearingData>> setHearingDataForSelectedHearing(String authorisation, CaseData caseData) {
+        boolean[] hearingFetchedOnce = {false};
+        log.info("manage order printed specially - {}", caseData.getManageOrders());
+
+        List<Element<HearingData>> hearingDetails = new ArrayList<>();
+        if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
+        } else if (isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
+            hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
+        }
+        final Hearings[] hearings = {null};
+        return hearingDetails.stream().parallel().map(hearingDataElement -> {
+            HearingData hearingData = hearingDataElement.getValue();
+            if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
+                && null != hearingData.getConfirmedHearingDates().getValue()) {
+
+                if (!hearingFetchedOnce[0]) {
+                    hearingFetchedOnce[0] = true;
+                    hearings[0] = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+                }
+
+                Optional<CaseHearing> caseHearing = getHearingFromId(
+                    hearingData.getConfirmedHearingDates().getValue().getCode(),
+                    hearings[0]
+                );
+                if (caseHearing.isPresent()) {
+                    List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
+                    hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
+                    hearingData = hearingData.toBuilder()
+                        .hearingdataFromHearingTab(populateHearingScheduleForDocmosis(
+                            hearingDaySchedules,
+                            caseData,
+                            caseHearing.get().getHearingTypeValue()
+                        ))
                         .build();
                 }
             }
