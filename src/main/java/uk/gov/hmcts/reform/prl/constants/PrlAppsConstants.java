@@ -289,17 +289,17 @@ public class PrlAppsConstants {
         + System.lineSeparator() + System.lineSeparator()
         + "Note that:"
         + System.lineSeparator() + System.lineSeparator()
-        + "a) the required activity is a Separated Parent Information Programme (SPIP)"
+        + "a. the required activity is a Planning Together for Children/Working Together for Children (WT4C)"
         + System.lineSeparator() + System.lineSeparator()
-        + "b ) a working together for children course (WT4C) - name for SPIP in Wales."
+        + "b. a working together for children course (WT4C) - name for SPIP in Wales."
         + System.lineSeparator() + System.lineSeparator()
-        + "c) the court shall send this order to Cafcass or Cafcass Cymru with the parties’ contact details"
+        + "c. the court shall send this order to Cafcass or Cafcass Cymru with the parties’ contact details"
         + System.lineSeparator() + System.lineSeparator()
-        + "d) the activity provider must notify the Court whether the course was at the conclusion of the activity directed";
+        + "d. the activity provider must notify the Court whether the course was completed at the conclusion of the activity directed";
     public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at (place)."
         + System.lineSeparator() + System.lineSeparator()
-        + "The reason for transfer is another court is in the area where the child  lives in this court’s area / there are on-going proceedings "
-        + "in another court / free-text box reason";
+        + "The reason for transfer is another court is in the area where the child usually lives / there are on-going "
+        + "proceedings in another court / or other reason";
 
     public static final String DIO_RIGHT_TO_ASK =   "As the direction has been made without hearing, you may ask the court to reconsider this order. "
         + "You must do that within seven days of receiving the order by writing to the court"
