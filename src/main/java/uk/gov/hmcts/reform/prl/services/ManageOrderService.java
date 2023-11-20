@@ -1659,6 +1659,10 @@ public class ManageOrderService {
         String otherParties = null;
         List<Element<ServedParties>> servedParties = new ArrayList<>();
 
+        String cafCassCymruText = null;
+        String serveRespName = null;
+        String serveRecipName = null;
+
 
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
             cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
@@ -1687,6 +1691,19 @@ public class ManageOrderService {
         if (servedOrderDetails.containsKey(SERVED_PARTIES)) {
             servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVED_PARTIES);
         }
+
+        if (servedOrderDetails.containsKey(CAFCASS_CYMRU)) {
+            cafCassCymruText = (String) servedOrderDetails.get(CAFCASS_CYMRU);
+        }
+
+        if (servedOrderDetails.containsKey(SERVE_RESP_NAME)) {
+            serveRespName = (String) servedOrderDetails.get(SERVE_RESP_NAME);
+        }
+
+        if (servedOrderDetails.containsKey(SERVE_RECIP_NAME)) {
+            serveRecipName = (String) servedOrderDetails.get(SERVE_RECIP_NAME);
+        }
+
         ServeOrderDetails tempServeOrderDetails;
         if (order.getValue().getServeOrderDetails() != null) {
             tempServeOrderDetails = order.getValue().getServeOrderDetails();
@@ -1705,6 +1722,9 @@ public class ManageOrderService {
             .postalInformation(postalInformation)
             .emailInformation(emailInformation)
             .servedParties(servedParties)
+            .cafcassCymru(cafCassCymruText)
+            .serveRespName(serveRespName)
+            .serveRecipName(serveRecipName)
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
