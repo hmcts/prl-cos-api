@@ -33,7 +33,7 @@ public class ManageDocumentsControllerFunctionalTest {
         );
 
     private static final String MANAGE_DOCUMENT_REQUEST = "requests/manage-documents-request.json";
-    private static final String MANAGE_DOCUMENT_RESPONSE = "response/MangeDocument.json";
+    //private static final String MANAGE_DOCUMENT_RESPONSE = "response/MangeDocument.json";
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -41,7 +41,7 @@ public class ManageDocumentsControllerFunctionalTest {
     @Test
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
-        String response = ResourceLoader.loadJson(MANAGE_DOCUMENT_RESPONSE);
+        //String response = ResourceLoader.loadJson(MANAGE_DOCUMENT_RESPONSE);
         //JSONObject jsObject = new JSONObject(response);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
