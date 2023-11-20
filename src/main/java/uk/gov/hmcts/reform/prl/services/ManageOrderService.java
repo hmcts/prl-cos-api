@@ -1434,6 +1434,13 @@ public class ManageOrderService {
             .getServingRespondentsOptionsDA();
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
+
+        PartyDetails partyDetails = caseData.getApplicantsFL401();
+        String serveRespondentName = null;
+        if (null != partyDetails.getRepresentativeFullName()) {
+            serveRespondentName =  partyDetails.getRepresentativeFullName();
+        }
+
         if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
             if (caseData.getManageOrders().getEmailInformationDA() != null) {
                 emailInformation = caseData.getManageOrders().getEmailInformationDA();
@@ -1445,6 +1452,10 @@ public class ManageOrderService {
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
+        if (null != serveRespondentName
+            && null != servingRespondentsOptions && null != servingRespondentsOptions.getDisplayedValue()) {
+            servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
+        }
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         updateServedOrderDetails(
