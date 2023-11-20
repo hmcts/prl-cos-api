@@ -1543,7 +1543,24 @@ public class ManageOrderService {
             servedOrderDetails.put(CAFCASS_CYMRU, "Cafcass Cymru");
         }
 
-        if (null != serveOnRespondent
+        log.info("PPPPPPP-- serveOnRespondent-- {}", serveOnRespondent);
+        log.info("PPPPPPP-- serveRespondentName-- {}", serveRespondentName);
+        log.info("PPPPPPP-- servingRespondentsOptions.getDisplayedValue()-- {}", servingRespondentsOptions.getDisplayedValue());
+        log.info("PPPPPPP-- servingRespondentsOptions.getDisplayedValue()-- {}", servingRespondentsOptions.getDisplayedValue().getClass());
+        log.info("PPPPPPP-- ServingRespondentsEnum.applicantLegalRepresentative.toString()-- {}",
+                 ServingRespondentsEnum.applicantLegalRepresentative.toString());
+        log.info("PPPPPPP-- ServingRespondentsEnum.applicantLegalRepresentative.toString()-- {}",
+                 ServingRespondentsEnum.applicantLegalRepresentative);
+        log.info("PPPPPPP-- ServingRespondentsEnum.applicantLegalRepresentative.toString()-- {}",
+                 ServingRespondentsEnum.applicantLegalRepresentative.getClass());
+
+        log.info("1111 {}", serveOnRespondent.equals(Yes));
+        log.info("2222 {}", null != servingRespondentsOptions);
+        log.info("3333 {}", null != servingRespondentsOptions);
+        log.info("4444 {}", servingRespondentsOptions.getDisplayedValue().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString()));
+
+
+        if (serveOnRespondent.equals(Yes)
             && null != serveRespondentName
             && null != servingRespondentsOptions
             && servingRespondentsOptions.getDisplayedValue().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
