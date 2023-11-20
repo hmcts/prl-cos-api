@@ -40,10 +40,10 @@ import java.util.stream.Collectors;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ID_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_ROLE;
@@ -322,7 +322,7 @@ public class CaseUtils {
         if (roles.contains(SOLICITOR_ROLE)) {
             return SOLICITOR;
         } else if (roles.contains(COURT_ADMIN_ROLE)) {
-            return COURT_STAFF;
+            return COURT_ADMIN;
         } else if (roles.contains(JUDGE_ROLE)) {
             return PrlAppsConstants.COURT_STAFF;
         } else if (roles.contains(LEGAL_ADVISER_ROLE)) {

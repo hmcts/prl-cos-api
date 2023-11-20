@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
@@ -31,16 +32,19 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
+import static uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService.COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -67,6 +71,9 @@ public class ManageDocumentsService {
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
+
+    @Autowired
+    private ReviewDocumentService reviewDocumentService;
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
 
@@ -156,15 +163,14 @@ public class ManageDocumentsService {
             log.info("legalProfUploadDocListDocTab List ---> after {}", tabDocuments);
 
             if (!quarantineDocs.isEmpty()) {
-                updateQuarantineDocs(caseDataUpdated, quarantineDocs, userRole, false);
+                updateQuarantineDocs(caseData,caseDataUpdated, quarantineDocs, userRole, false);
             }
             if (!tabDocuments.isEmpty()) {
-                updateQuarantineDocs(caseDataUpdated, tabDocuments, userRole, true);
+                updateQuarantineDocs(caseData,caseDataUpdated, tabDocuments, userRole, true);
             }
         }
         //remove manageDocuments from caseData
         caseDataUpdated.remove("manageDocuments");
-
         return caseDataUpdated;
     }
 
@@ -174,7 +180,7 @@ public class ManageDocumentsService {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
         } else if (CAFCASS.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-        } else if (COURT_STAFF.equals(userRole)) {
+        } else if (COURT_STAFF.equals(userRole) || COURT_ADMIN.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
         }
     }
@@ -193,6 +199,7 @@ public class ManageDocumentsService {
             quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
+
         } else {
             final String categoryId = manageDocument.getDocumentCategories().getValueCode();
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
@@ -208,11 +215,10 @@ public class ManageDocumentsService {
         return confidentialityFlag;
     }
 
-
-    private void updateQuarantineDocs(Map<String, Object> caseDataUpdated,
-                                      List<Element<QuarantineLegalDoc>> quarantineDocs,
-                                      String userRole,
-                                      boolean isDocumentTab) {
+    private void updateQuarantineDocs(CaseData caseData,Map<String, Object> caseDataUpdated,
+                                       List<Element<QuarantineLegalDoc>> quarantineDocs,
+                                       String userRole,
+                                       boolean isDocumentTab) {
         if (StringUtils.isEmpty(userRole)) {
             throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
@@ -239,6 +245,23 @@ public class ManageDocumentsService {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
                     caseDataUpdated.put("courtStaffQuarantineDocsList", quarantineDocs);
+                }
+                break;
+
+            case COURT_ADMIN:
+                if (isDocumentTab) {
+                    caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
+                } else {
+                    UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
+                    reviewDocumentService.uploadDocForConfOrDocTab(
+                        caseDataUpdated,
+                        caseData.getCourtStaffQuarantineDocsList(),
+                        uuid,
+                        true,
+                        caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab(),
+                        COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
+                        COURT_STAFF);
+
                 }
                 break;
 

@@ -247,7 +247,7 @@ public class ReviewDocumentService {
         }
     }
 
-    private void uploadDocForConfOrDocTab(Map<String, Object> caseDataUpdated,
+    public void uploadDocForConfOrDocTab(Map<String, Object> caseDataUpdated,
                                           List<Element<QuarantineLegalDoc>> quarantineDocsList,
                                           UUID uuid,
                                           boolean isReviewDecisionYes,
