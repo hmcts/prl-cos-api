@@ -394,6 +394,7 @@ public class DraftAnOrderService {
                 log.info("inside filterEmptyHearingDetails");
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
             }
+            log.info("generateFinalOrderDocument manageOrdersApplicantReference {} ", caseData.getManageOrders().getManageOrdersApplicantReference());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
