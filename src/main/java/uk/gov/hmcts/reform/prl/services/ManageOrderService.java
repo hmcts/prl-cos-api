@@ -886,7 +886,7 @@ public class ManageOrderService {
         return selectedOrder.toString();
     }
 
-    private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData)
+    private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData, String currentUserFullName)
         throws Exception {
 
         String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
@@ -918,8 +918,6 @@ public class ManageOrderService {
 
             return orderCollection;
         } else {
-            UserDetails userDetails = userService.getUserDetails(authorisation);
-            String currentUserFullName = userDetails.getFullName();
             return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId, currentUserFullName);
         }
     }
@@ -1097,17 +1095,17 @@ public class ManageOrderService {
                 || saveAsDraft) {
                 return setDraftOrderCollection(caseData, loggedInUserType,currentUserFullName);
             } else {
-                return setFinalOrderCollection(authorisation, caseData);
+                return setFinalOrderCollection(authorisation, caseData, currentUserFullName);
             }
         }
         return new HashMap<>();
     }
 
-    private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData) throws Exception {
+    private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData, String currentUserFullName) throws Exception {
         List<Element<OrderDetails>> orderCollection;
         log.info("*** Court seal 1 {}", caseData.getCourtSeal());
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-        List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
+        List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData, currentUserFullName);
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {

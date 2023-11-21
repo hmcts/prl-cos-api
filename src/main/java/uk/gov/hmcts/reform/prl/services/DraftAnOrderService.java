@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
@@ -1619,8 +1618,6 @@ public class DraftAnOrderService {
                     CaseData.class
                 );
                 List<Element<OrderDetails>> orderCollection = modifiedCaseData.getOrderCollection();
-                UserDetails userDetails = userService.getUserDetails(authorisation);
-                String currentUserFullName = userDetails.getFullName();
                 caseDataUpdated.put(
                     ORDER_COLLECTION,
                     manageOrderService.serveOrder(modifiedCaseData, orderCollection)
