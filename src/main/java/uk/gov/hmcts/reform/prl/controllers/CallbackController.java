@@ -734,9 +734,18 @@ public class CallbackController {
                                           .organisationID(userOrganisation.get().getOrganisationIdentifier())
                                           .organisationName(userOrganisation.get().getName())
                                           .build())
-                        .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
-                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
                         .build();
+                    if (caseData.getApplicantOrganisationPolicy() != null) {
+                        applicantOrganisationPolicy = OrganisationPolicy.builder()
+                            .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
+                            .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+                            .build();
+                    } else {
+                        applicantOrganisationPolicy = OrganisationPolicy.builder()
+                            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+                            .build();
+
+                    }
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
             }
