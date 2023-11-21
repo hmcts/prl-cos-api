@@ -278,8 +278,7 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            UserDetails userDetails = userService.getUserDetails(authorisation);
-            String currentUserFullName = userDetails.getFullName();
+
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);

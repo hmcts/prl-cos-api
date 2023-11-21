@@ -1086,14 +1086,16 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
         String loggedInUserType = getLoggedInUserType(authorisation);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserFullName = userDetails.getFullName();
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            return setDraftOrderCollection(caseData, loggedInUserType,authorisation);
+            return setDraftOrderCollection(caseData, loggedInUserType,currentUserFullName);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
-                return setDraftOrderCollection(caseData, loggedInUserType,authorisation);
+                return setDraftOrderCollection(caseData, loggedInUserType,currentUserFullName);
             } else {
                 return setFinalOrderCollection(authorisation, caseData);
             }
@@ -1151,14 +1153,14 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,String authorisation) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,String currentUserFullName) {
         log.info("setDraftOrderCollection - manage order service");
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = null;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, authorisation));
+            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, currentUserFullName));
         } else {
-            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, authorisation));
+            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, currentUserFullName));
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -1174,10 +1176,8 @@ public class ManageOrderService {
         );
     }
 
-    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, String authorisation) {
+    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserFullName) {
         log.info("getCurrentCreateDraftOrderDetails--ManageOrderService");
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserFullName = userDetails.getFullName();
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
@@ -1308,13 +1308,11 @@ public class ManageOrderService {
         return null;
     }
 
-    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, String authorisation) {
+    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserFullName) {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserFullName = userDetails.getFullName();
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(flagSelectedOrderId)
