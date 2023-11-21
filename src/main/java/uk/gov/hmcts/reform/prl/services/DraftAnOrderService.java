@@ -368,19 +368,12 @@ public class DraftAnOrderService {
                 .build();
         } else {
             manageOrderService.populateChildrenListForDocmosis(caseData);
-            log.info("generateFinalOrderDocument getJudgeOrMagistratesLastName {} " + caseData.getJudgeOrMagistratesLastName());
-            log.info("generateFinalOrderDocument getJusticeLegalAdviserFullName {} " + caseData.getJusticeLegalAdviserFullName());
-            log.info("generateFinalOrderDocument getMagistrateLastName {} " + caseData.getMagistrateLastName());
-            log.info("generateFinalOrderDocument getDateOrderMade {} " + caseData.getDateOrderMade());
             if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
                 && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
                 caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
             }
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
-                log.info("generateFinalOrderDocument getManageOrdersApplicantReference {} " + caseData.getManageOrders().getManageOrdersApplicantReference());
-                log.info("generateFinalOrderDocument getManageOrdersRespondent {} " + caseData.getManageOrders().getManageOrdersRespondent());
-                log.info("generateFinalOrderDocument getManageOrdersApplicant {} " + caseData.getManageOrders().getManageOrdersApplicant());
                 caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().manageOrdersApplicant(
                     CaseUtils.getApplicant(caseData))
                                                                  .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
