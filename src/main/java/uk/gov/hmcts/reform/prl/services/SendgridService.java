@@ -126,6 +126,7 @@ public class SendgridService {
         }
         log.info("personalization element  {}", personalization);
         Mail mail = new Mail();
+        log.info("email attachments {}",sendgridEmailConfig);
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }

@@ -502,6 +502,7 @@ public class ManageOrderEmailService {
         emailInformationCA.stream().map(Element::getValue).forEach(value -> {
             try {
                 log.info("sending email to {}", value.getEmailAddress());
+                log.info("order docs {}",orderDocuments);
                 sendgridService.sendEmailUsingTemplateWithAttachments(
                     SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
                     authorisation,
@@ -739,6 +740,7 @@ public class ManageOrderEmailService {
 
     private static List<Document> getServedOrderDocumentsAndAdditionalDocuments(CaseData caseData) {
         List<Document> orderDocuments = new ArrayList<>();
+        log.info("order docs before setting {}",orderDocuments);
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
@@ -757,6 +759,8 @@ public class ManageOrderEmailService {
                     }
                 });
         }
+        log.info("order docs returned {}",orderDocuments);
+
         return orderDocuments;
     }
 
