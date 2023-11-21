@@ -1135,7 +1135,7 @@ public class ManageOrderService {
             Comparator.reverseOrder()
         ));
         if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            log.info("manageOrderService.serveOrderrrrrrrr444444 ->>");
+            log.info("DoYouWantToServeOrder -----YES --manageOrderService.serveOrderrrrrrrr444444 ->>");
             orderCollection = serveOrder(caseData, orderCollection);
         }
         LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
@@ -1439,7 +1439,6 @@ public class ManageOrderService {
         if (null != partyDetails.getRepresentativeFullName()) {
             serveRespondentName =  partyDetails.getRepresentativeFullName();
         }
-        log.info("aaaaa{}");
 
         if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
             if (caseData.getManageOrders().getEmailInformationDA() != null) {
@@ -1452,15 +1451,15 @@ public class ManageOrderService {
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
 
-        log.info("ccccccc{}");
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
+
         if (null != serveRespondentName
             && null != servingRespondentsOptions
-            && servingRespondentsOptions.equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
+            && servingRespondentsOptions.toString().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
             servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
 
@@ -1538,23 +1537,6 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
-
-        log.info("PPPPPPP-- serveOnRespondent-- {}", serveOnRespondent);
-        log.info("PPPPPPP-- serveRespondentName-- {}", serveRespondentName);
-        log.info("PPPPPPP-- servingRespondentsOptions.getDisplayedValue()-- {}", servingRespondentsOptions.getDisplayedValue());
-        log.info("PPPPPPP-- servingRespondentsOptions.getDisplayedValue()-- {}", servingRespondentsOptions.getDisplayedValue().getClass());
-        log.info("PPPPPPP-- ServingRespondentsEnum.applicantLegalRepresentative.toString()-- {}",
-                 ServingRespondentsEnum.applicantLegalRepresentative.toString());
-        log.info("PPPPPPP-- ServingRespondentsEnum.applicantLegalRepresentative.toString()-- {}",
-                 ServingRespondentsEnum.applicantLegalRepresentative);
-        log.info("PPPPPPP-- ServingRespondentsEnum.applicantLegalRepresentative.toString()-- {}",
-                 ServingRespondentsEnum.applicantLegalRepresentative.getClass());
-
-        log.info("1111 {}", serveOnRespondent.equals(Yes));
-        log.info("2222 {}", null != servingRespondentsOptions);
-        log.info("3333 {}", null != servingRespondentsOptions.getClass());
-        log.info("4444 {}", servingRespondentsOptions.toString().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString()));
-
 
         if (serveOnRespondent.equals(Yes)
             && null != serveRespondentName
@@ -1778,7 +1760,6 @@ public class ManageOrderService {
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
         log.info("***** inside updateOtherOrderDetails******** {}", otherDetails);
-        //log.info("createdOrAmendedByyyyyyyy {}", createdOrAmendedBy);
         return OtherOrderDetails.builder()
             .createdBy(otherDetails.getCreatedBy())
             .orderCreatedDate(otherDetails.getOrderCreatedDate())
@@ -2152,11 +2133,12 @@ public class ManageOrderService {
             log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
         }
         log.info("inside getOrderDetailsElement ==> " + caseData.getManageOrders().getCurrentOrderCreatedDateTime());
-        //UserDetails userDetails = userService.getUserDetails(authorisation);
-        //String currentUserFullName = userDetails.getFullName();
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserFullName = userDetails.getFullName();
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
-                                             .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                             .createdBy(!orderDetails.getOtherDetails().getCreatedBy().isEmpty()
+                                                            ? orderDetails.getOtherDetails().getCreatedBy() : currentUserFullName)
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                                                  PrlAppsConstants.D_MMM_YYYY,
                                                  Locale.ENGLISH

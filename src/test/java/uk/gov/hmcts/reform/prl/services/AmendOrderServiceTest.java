@@ -126,7 +126,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                    .builder().build(),
-                                                                UserRoles.JUDGE.name()
+                                                                UserRoles.JUDGE.name(),""
         ));
     }
 
@@ -143,7 +143,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                ""));
+                                                                "",""));
     }
 
     @Test
@@ -159,7 +159,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                ""));
+                                                                "",""));
     }
 
     @Test
@@ -175,7 +175,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                ""));
+                                                                "",""));
     }
 
     @Test
@@ -200,7 +200,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                ""));
+                                                                "",""));
     }
 
     @Test
@@ -217,7 +217,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                UserRoles.JUDGE.name()));
+                                                                UserRoles.JUDGE.name(),""));
     }
 
     @Test
@@ -240,7 +240,7 @@ public class AmendOrderServiceTest {
         assertNotNull(amendOrderService.setDraftOrderCollection(caseData,
                                                                 uk.gov.hmcts.reform.prl.models.documents.Document
                                                                     .builder().build(),
-                                                                ""));
+                                                                "",""));
     }
 
     @Test

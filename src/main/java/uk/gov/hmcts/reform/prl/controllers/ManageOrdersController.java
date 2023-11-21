@@ -285,7 +285,7 @@ public class ManageOrdersController {
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-                log.info("BBBBBB");
+                log.info("BBBBBB when courtadmin draft and save as draft");
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                 if (null != caseData.getManageOrders().getOrdersHearingDetails()) {
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
