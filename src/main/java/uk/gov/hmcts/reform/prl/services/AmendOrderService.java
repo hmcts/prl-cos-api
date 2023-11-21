@@ -67,7 +67,10 @@ public class AmendOrderService {
             .documentBinaryUrl(eventData.getManageOrdersAmendedOrder().getDocumentBinaryUrl())
             .build();
 
-        return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType, authorisation);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserFullName = userDetails.getFullName();
+
+        return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType, currentUserFullName);
 
     }
 
@@ -78,14 +81,13 @@ public class AmendOrderService {
 
     private Map<String, Object> updateAmendedOrderDetails(CaseData caseData,
                                                           uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
-                                                          String loggedInUserType, String authorisation) {
+                                                          String loggedInUserType, String currentUserFullName) {
         Map<String, Object> orderMap = new HashMap<>();
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> updatedOrders;
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserFullName = userDetails.getFullName();
+
         if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
                 .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {

@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -96,6 +98,9 @@ public class ManageOrdersController {
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
+
+    @Autowired
+    UserService userService;
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
@@ -273,6 +278,8 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            UserDetails userDetails = userService.getUserDetails(authorisation);
+            String currentUserFullName = userDetails.getFullName();
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
