@@ -48,7 +48,7 @@ public class HearingService {
     private String hearingTypeCategoryId;
 
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
-
+        
         Hearings hearings = null;
         try {
             hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);

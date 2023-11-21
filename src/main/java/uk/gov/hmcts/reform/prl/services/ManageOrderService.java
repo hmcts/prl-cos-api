@@ -1802,6 +1802,64 @@ public class ManageOrderService {
         });
     }
 
+
+    public Map<String, Object> generateOrderDocumentFromDocmosis(String authorisation,
+                                                                 CaseData caseData,
+                                                                 CreateSelectOrderOptionsEnum selectOrderOption)
+        throws Exception {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        try {
+            GeneratedDocumentInfo generatedDocumentInfo;
+            populateChildrenListForDocmosis(caseData);
+
+            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+                log.info("*** Manage orders 12 {} :", caseData.getManageOrders().getOrdersHearingDetails());
+                caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
+            }
+
+            log.info("*** Manage orders: {}", caseData.getManageOrders());
+            Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
+            updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
+        } catch (Exception ex) {
+            log.info("Error occured while generating Draft document ==> " + ex.getMessage());
+        }
+        return caseDataUpdated;
+    }
+
+    private void updateDocmosisAttributes(String authorisation,
+                                          CaseData caseData,
+                                          Map<String, Object> caseDataUpdated,
+                                          Map<String, String> fieldsMap) throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo;
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        if (documentLanguage.isGenEng()) {
+            caseDataUpdated.put("isEngDocGen", Yes.toString());
+            generatedDocumentInfo = dgsService.generateDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldsMap.get(PrlAppsConstants.TEMPLATE)
+            );
+            caseDataUpdated.put("previewOrderDoc", Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(fieldsMap.get(PrlAppsConstants.FILE_NAME)).build());
+        }
+        if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
+            caseDataUpdated.put("isWelshDocGen", Yes.toString());
+            generatedDocumentInfo = dgsService.generateWelshDocument(
+                authorisation,
+                CaseDetails.builder().caseData(caseData).build(),
+                fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
+            );
+            caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
+        }
+    }
+
     public Map<String, Object> getCaseData(String authorisation, CaseData caseData, CreateSelectOrderOptionsEnum selectOrderOption)
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -1856,7 +1914,7 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    private CaseData populateJudgeNames(CaseData caseData) {
+    public CaseData populateJudgeNames(CaseData caseData) {
         if (isNotEmpty(caseData.getStandardDirectionOrder())
             && (isNotEmpty(caseData.getStandardDirectionOrder().getSdoAllocateOrReserveJudgeName())
             || isNotEmpty(caseData.getStandardDirectionOrder().getSdoNextStepJudgeName()))) {
@@ -2292,7 +2350,7 @@ public class ManageOrderService {
 
     public Map<String, Object> serveOrderMidEvent(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("start OrdersHearingDetails {}",
+        log.info("/judge-or-admin-edit-approve/serve-order/mid-event OrdersHearingDetails start {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -2448,57 +2506,95 @@ public class ManageOrderService {
         return caseDataUpdated;
     }
 
-    public CaseData setHearingDataForSdo(CaseData caseData, Hearings hearings) {
+    public CaseData setHearingDataForSdo(CaseData caseData, Hearings hearings, String authorisation) {
         StandardDirectionOrder standardDirectionOrder = caseData.getStandardDirectionOrder();
+        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
+            hearingDataService.populateHearingDynamicLists(
+                authorisation,
+                String.valueOf(caseData.getId()),
+                caseData,
+                hearings
+            );
+        HearingData hearingData;
         if (isNotEmpty(standardDirectionOrder.getSdoUrgentHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoUrgentHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoUrgentHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoUrgentHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoPermissionHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoPermissionHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoPermissionHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoPermissionHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoSecondHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoSecondHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoSecondHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoSecondHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoFhdraHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoFhdraHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoFhdraHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoFhdraHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoDraHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoDraHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoDraHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoDraHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
                 .build();
         }
         if (isNotEmpty(standardDirectionOrder.getSdoSettlementHearingDetails())) {
+            hearingData =  hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoSettlementHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
             standardDirectionOrder = standardDirectionOrder.toBuilder()
                 .sdoSettlementHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
-                    standardDirectionOrder.getSdoSettlementHearingDetails(),
+                    hearingData,
                     hearings,
                     caseData
                 ))
@@ -2522,14 +2618,14 @@ public class ManageOrderService {
 
             caseDataUpdated.put(
                 ORDER_HEARING_DETAILS,
-                hearingDataService.getHearingData(caseData.getManageOrders().getOrdersHearingDetails(),
-                                                  hearingDataPrePopulatedDynamicLists, caseData
+                hearingDataService.getHearingDataForOtherOrders(caseData.getManageOrders().getOrdersHearingDetails(),
+                                                                hearingDataPrePopulatedDynamicLists, caseData
                 )
             );
             caseData.getManageOrders()
-                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings));
+                .setOrdersHearingDetails(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, authorisation));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-            caseData = setHearingDataForSdo(caseData, hearings);
+            caseData = setHearingDataForSdo(caseData, hearings, authorisation);
         }
         return caseData;
     }
@@ -2598,7 +2694,7 @@ public class ManageOrderService {
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
 
-            return hearingDataService.getHearingData(
+            return hearingDataService.getHearingDataForOtherOrders(
                 existingOrderHearingDetails,
                 hearingDataPrePopulatedDynamicLists,
                 caseData

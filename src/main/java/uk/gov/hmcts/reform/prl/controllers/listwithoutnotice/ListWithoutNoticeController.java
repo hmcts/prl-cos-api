@@ -104,7 +104,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             if (caseDataUpdated.containsKey(LISTWITHOUTNOTICE_HEARINGDETAILS)) {
                 caseDataUpdated.put(
                     LISTWITHOUTNOTICE_HEARINGDETAILS,
-                    hearingDataService.getHearingData(existingListWithoutNoticeHearingDetails,
+                    hearingDataService.getHearingDataForOtherOrders(existingListWithoutNoticeHearingDetails,
                                                       hearingDataPrePopulatedDynamicLists,
                                                       caseData)
                 );
@@ -154,7 +154,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
             caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
-                .getHearingData(caseData.getListWithoutNoticeHearingDetails(), null, caseData));
+                .getHearingDataForOtherOrders(caseData.getListWithoutNoticeHearingDetails(), null, caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
