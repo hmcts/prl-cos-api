@@ -159,7 +159,6 @@ public class ManageOrderService {
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
     public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
-    public static final String CAFCASS_CYMRU = "cafcassCymru";
 
     public static final String SERVE_RESPONDENT_NAME = "servingRespondentName";
 
@@ -1539,9 +1538,6 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
-        if (cafcassCymruServedOptions.equals(Yes)) {
-            servedOrderDetails.put(CAFCASS_CYMRU, "Cafcass Cymru");
-        }
 
         log.info("PPPPPPP-- serveOnRespondent-- {}", serveOnRespondent);
         log.info("PPPPPPP-- serveRespondentName-- {}", serveRespondentName);
@@ -1692,6 +1688,12 @@ public class ManageOrderService {
         log.info("***** inside updateServedOrderDetails********");
         log.info("***** inside postalInformationnnnnn {}", postalInformation);
         log.info("***** inside servedOrderDetailssssss {}", servedOrderDetails);
+
+        List<String> organisationsName = null;
+        if (null != postalInformation) {
+            organisationsName = postalInformation.stream().map(s -> s.getValue().getPostalName()).collect(Collectors.toList());
+        }
+
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
         String cafcassEmail = null;
@@ -1702,7 +1704,7 @@ public class ManageOrderService {
         String otherParties = null;
         List<Element<ServedParties>> servedParties = new ArrayList<>();
 
-        String cafCassCymruText = null;
+        YesOrNo cafCassCymruInvolved = No;
         String serveRespondentName = null;
 
 
@@ -1734,10 +1736,6 @@ public class ManageOrderService {
             servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVED_PARTIES);
         }
 
-        if (servedOrderDetails.containsKey(CAFCASS_CYMRU)) {
-            cafCassCymruText = (String) servedOrderDetails.get(CAFCASS_CYMRU);
-        }
-
         if (servedOrderDetails.containsKey(SERVE_RESPONDENT_NAME)) {
             serveRespondentName = (String) servedOrderDetails.get(SERVE_RESPONDENT_NAME);
         }
@@ -1758,9 +1756,9 @@ public class ManageOrderService {
             .cafcassCymruEmail(cafcassCymruEmail)
             .otherPartiesServed(otherPartiesServed)
             .postalInformation(postalInformation)
+            .organisationsName(organisationsName)
             .emailInformation(emailInformation)
             .servedParties(servedParties)
-            .cafcassCymru(cafCassCymruText)
             .servingRespondentName(serveRespondentName)
             .build();
 
