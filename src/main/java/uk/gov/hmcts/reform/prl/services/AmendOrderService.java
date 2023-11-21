@@ -83,7 +83,12 @@ public class AmendOrderService {
         log.info("AAAAAA -updateAmendedOrderDetails");
         Map<String, Object> orderMap = new HashMap<>();
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
+        log.info("selectedOrderIdddddddd {}",selectedOrderId);
+
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
+
+        log.info("orderssssss {}",orders);
+
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> updatedOrders;
         UserDetails userDetails = userService.getUserDetails(authorisation);
@@ -96,6 +101,7 @@ public class AmendOrderService {
                 .filter(order -> Objects.equals(order.getId(), selectedOrderId))
                 .findFirst()
                 .ifPresent(order -> {
+                    log.info("vvvvvvvv {}",order);
                     OrderDetails amended = order.getValue().toBuilder()
                         .orderDocument(amendedDocument)
                         .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
