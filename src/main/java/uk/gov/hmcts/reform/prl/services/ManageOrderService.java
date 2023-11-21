@@ -1689,10 +1689,8 @@ public class ManageOrderService {
         log.info("***** inside postalInformationnnnnn {}", postalInformation);
         log.info("***** inside servedOrderDetailssssss {}", servedOrderDetails);
 
-        List<String> organisationsName = null;
-        if (null != postalInformation) {
-            organisationsName = postalInformation.stream().map(s -> s.getValue().getPostalName()).collect(Collectors.toList());
-        }
+
+
 
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
@@ -1704,7 +1702,6 @@ public class ManageOrderService {
         String otherParties = null;
         List<Element<ServedParties>> servedParties = new ArrayList<>();
 
-        YesOrNo cafCassCymruInvolved = No;
         String serveRespondentName = null;
 
 
@@ -1745,6 +1742,14 @@ public class ManageOrderService {
             tempServeOrderDetails = order.getValue().getServeOrderDetails();
         } else {
             tempServeOrderDetails = ServeOrderDetails.builder().build();
+        }
+
+        String organisationsName = null;
+        if (null != postalInformation) {
+            List<String> orgNameList = postalInformation.stream().map(s -> s.getValue().getPostalName()).collect(Collectors.toList());
+            if (!orgNameList.isEmpty()) {
+                organisationsName = String.join(", ", orgNameList);
+            }
         }
         ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
