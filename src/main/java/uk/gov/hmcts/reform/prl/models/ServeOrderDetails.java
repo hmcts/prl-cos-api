@@ -42,5 +42,5 @@ public class ServeOrderDetails {
     private final WhatToDoWithOrderEnum whatDoWithOrder;
     private final List<Element<ServedParties>> servedParties;
     private final String servingRespondentName;
-    private final String organisationsName;
+    private final String cafcassCymru;
 }

@@ -1761,8 +1761,8 @@ public class ManageOrderService {
             .cafcassCymruEmail(cafcassCymruEmail)
             .otherPartiesServed(otherPartiesServed)
             .postalInformation(postalInformation)
-            .organisationsName(organisationsName)
             .emailInformation(emailInformation)
+            .cafcassCymru(organisationsName)
             .servedParties(servedParties)
             .servingRespondentName(serveRespondentName)
             .build();
