@@ -296,7 +296,7 @@ public class PrlAppsConstants {
         + "c. the court shall send this order to Cafcass or Cafcass Cymru with the parties’ contact details"
         + System.lineSeparator() + System.lineSeparator()
         + "d. the activity provider must notify the Court whether the course was completed at the conclusion of the activity directed";
-    public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at (place)."
+    public static final String PARENT_WITHCARE = "The application is transferred to the Family Court at [place]."
         + System.lineSeparator() + System.lineSeparator()
         + "The reason for transfer is another court is in the area where the child usually lives / there are on-going "
         + "proceedings in another court / or other reason";
