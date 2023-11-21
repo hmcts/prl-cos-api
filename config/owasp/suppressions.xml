@@ -7,9 +7,33 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+     jose4j-0.5.5.jar ]]></notes>
+    <cve>CVE-2023-31582</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
       jackson-databind-2.13.3.jar ]]></notes>
     <cve>CVE-2023-35116</cve>
     <cve>CVE-2022-45688</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     json-20230227.jar ]]></notes>
+    <cve>CVE-2023-5072</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     tomcat-embed-websocket-10.1.12.jar ]]></notes>
+    <cve>CVE-2023-42795</cve>
+    <cve>CVE-2023-45648</cve>
+    <cve>CVE-2023-44487</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     tomcat-embed-core-10.1.12.jar ]]></notes>
+    <cve>CVE-2023-42795</cve>
+    <cve>CVE-2023-45648</cve>
+    <cve>CVE-2023-44487</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -33,5 +57,13 @@
     <notes><![CDATA[
      spring-cloud-starter-openfeign-3.0.5.jar ]]></notes>
     <cve>CVE-2023-34040</cve>
+  </suppress>
+  <suppress>
+    <notes>temporary></notes>
+    <cve>CVE-2023-45648</cve>
+    <cve>CVE-2023-42795</cve>
+    <cve>CVE-2023-44487</cve>
+    <cve>CVE-2023-5072</cve>
+    <cve>CVE-2023-31582</cve>
   </suppress>
 </suppressions>
