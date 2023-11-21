@@ -1552,14 +1552,14 @@ public class ManageOrderService {
 
         log.info("1111 {}", serveOnRespondent.equals(Yes));
         log.info("2222 {}", null != servingRespondentsOptions);
-        log.info("3333 {}", null != servingRespondentsOptions);
-        log.info("4444 {}", servingRespondentsOptions.equals(ServingRespondentsEnum.applicantLegalRepresentative.toString()));
+        log.info("3333 {}", null != servingRespondentsOptions.getClass());
+        log.info("4444 {}", servingRespondentsOptions.toString().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString()));
 
 
         if (serveOnRespondent.equals(Yes)
             && null != serveRespondentName
             && null != servingRespondentsOptions
-            && servingRespondentsOptions.equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
+            && servingRespondentsOptions.toString().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
             servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
@@ -1689,9 +1689,6 @@ public class ManageOrderService {
         log.info("***** inside postalInformationnnnnn {}", postalInformation);
         log.info("***** inside servedOrderDetailssssss {}", servedOrderDetails);
 
-
-
-
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
         String cafcassEmail = null;
@@ -1762,7 +1759,7 @@ public class ManageOrderService {
             .otherPartiesServed(otherPartiesServed)
             .postalInformation(postalInformation)
             .emailInformation(emailInformation)
-            .cafcassCymru(organisationsName)
+            .organisationsName(organisationsName)
             .servedParties(servedParties)
             .servingRespondentName(serveRespondentName)
             .build();
