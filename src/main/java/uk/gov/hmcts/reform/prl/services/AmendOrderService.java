@@ -83,11 +83,11 @@ public class AmendOrderService {
         log.info("AAAAAA -updateAmendedOrderDetails");
         Map<String, Object> orderMap = new HashMap<>();
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
-        log.info("selectedOrderIdddddddd {}",selectedOrderId);
+        log.info("selectedOrderIdddddddd1111 {}",selectedOrderId);
 
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
 
-        log.info("orderssssss {}",orders);
+        log.info("orderssssss1111 {}",orders);
 
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> updatedOrders;
@@ -101,7 +101,7 @@ public class AmendOrderService {
                 .filter(order -> Objects.equals(order.getId(), selectedOrderId))
                 .findFirst()
                 .ifPresent(order -> {
-                    log.info("vvvvvvvv {}",order);
+                    log.info("v1v1v1v1v1 {}",order);
                     OrderDetails amended = order.getValue().toBuilder()
                         .orderDocument(amendedDocument)
                         .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
@@ -111,8 +111,7 @@ public class AmendOrderService {
                         .serveOrderDetails(null)
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
                                           .orderServedDate(null)
-                                          .createdBy(!order.getValue().getOtherDetails().getCreatedBy().isEmpty()
-                                                         ? order.getValue().getOtherDetails().getCreatedBy() : currentUserFullName)
+                                          .createdBy(currentUserFullName)
                                           .orderCreatedDate(time.now().format(DateTimeFormatter.ofPattern(
                                               PrlAppsConstants.D_MMM_YYYY,
                                               Locale.ENGLISH
