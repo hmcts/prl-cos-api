@@ -131,15 +131,15 @@ public class AmendOrderService {
             orderMap.put(ORDER_COLLECTION, updatedOrders);
             return orderMap;
         } else {
-            return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType, authorisation);
+            return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType, currentUserFullName);
         }
 
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
-                                                       String loggedInUserType, String authorisation) {
+                                                       String loggedInUserType, String currentUserFullName) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData,amendedDocument, loggedInUserType, authorisation));
+        Element<DraftOrder> draftOrderElement = element(getCurrentDraftOrderDetails(caseData,amendedDocument, loggedInUserType, currentUserFullName));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(draftOrderElement);
@@ -156,7 +156,7 @@ public class AmendOrderService {
 
     private DraftOrder getCurrentDraftOrderDetails(CaseData caseData,
                                                    uk.gov.hmcts.reform.prl.models.documents.Document amendedDocument,
-                                                   String loggedInUserType, String authorisation) {
+                                                   String loggedInUserType, String currentUserFullName) {
         UUID selectedOrderId = caseData.getManageOrders().getAmendOrderDynamicList().getValueCodeAsUuid();
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
@@ -164,8 +164,6 @@ public class AmendOrderService {
             .findFirst();
         String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserFullName = userDetails.getFullName();
 
         return DraftOrder.builder()
             .typeOfOrder(orderType)

@@ -1312,6 +1312,7 @@ public class ManageOrderService {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
+
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String currentUserFullName = userDetails.getFullName();
         return DraftOrder.builder()
@@ -1408,7 +1409,6 @@ public class ManageOrderService {
                         servedFL401Order(caseData, orders, order);
                     }
                 });
-
         }
         log.info("***** orders size before returning******** {}", orders.size());
         return orders;
@@ -1657,7 +1657,6 @@ public class ManageOrderService {
 
         String serveRespondentName = null;
 
-
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
             cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
         }
@@ -1685,11 +1684,9 @@ public class ManageOrderService {
         if (servedOrderDetails.containsKey(SERVED_PARTIES)) {
             servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVED_PARTIES);
         }
-
         if (servedOrderDetails.containsKey(SERVE_RESPONDENT_NAME)) {
             serveRespondentName = (String) servedOrderDetails.get(SERVE_RESPONDENT_NAME);
         }
-
         ServeOrderDetails tempServeOrderDetails;
         if (order.getValue().getServeOrderDetails() != null) {
             tempServeOrderDetails = order.getValue().getServeOrderDetails();
