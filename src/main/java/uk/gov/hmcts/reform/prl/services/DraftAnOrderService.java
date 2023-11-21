@@ -198,7 +198,6 @@ public class DraftAnOrderService {
     }
 
     public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType,String authorisation) {
-        log.info("getCurrentOrderDetails----->>");
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, authorisation);
         }
@@ -256,7 +255,6 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
-        log.info("removeDraftOrderAndAddToFinalOrder ------->>");
         Map<String, Object> updatedCaseData = new HashMap<>();
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -280,10 +278,8 @@ public class DraftAnOrderService {
                     } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                         caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                     }
-                    log.info("Bfr getUpdatedDraftOrder ------->>");
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
-                    log.info("Bfr getDraftOrderWithUpdatedStatus ------->>");
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                     caseData = updateCaseDataForFinalOrderDocument(caseData, authorisation, draftOrder.getOrderType());
                 }
@@ -818,7 +814,6 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId) {
-        log.info("updateDraftOrderCollection-->>");
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -841,10 +836,8 @@ public class DraftAnOrderService {
                         caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                         log.info("Updated sdo order hearing details for docmosis");
                     }
-                    log.info("updateDraftOrderCollection---getUpdatedDraftOrder-->>");
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
-                    log.info("updateDraftOrderCollection---getDraftOrderWithUpdatedStatus-->>");
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
                 draftOrderCollection.set(
@@ -880,9 +873,6 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
-
-        log.info("inside getUpdatedDraftOrder ------->>");
-
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
@@ -1613,7 +1603,6 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-        log.info("adminEditAndServeAboutToSubmit ------>>");
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
@@ -1625,7 +1614,6 @@ public class DraftAnOrderService {
                 caseData, eventId
             ));
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-                log.info("adminEditAndServeAboutToSubmit ----getDoYouWantToServeOrder-->>");
                 CaseData modifiedCaseData = objectMapper.convertValue(
                     caseDataUpdated,
                     CaseData.class
@@ -1639,7 +1627,6 @@ public class DraftAnOrderService {
                 );
             }
         } else if (WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
-            log.info("adminEditAndServeAboutToSubmit ----getWhatDoWithOrder-->>");
             caseDataUpdated.putAll(updateDraftOrderCollection(caseData, authorisation, eventId));
         }
         manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);

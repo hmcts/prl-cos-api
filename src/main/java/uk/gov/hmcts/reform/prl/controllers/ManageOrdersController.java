@@ -282,11 +282,9 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
-                log.info("AAAAAA -about to submit");
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-                log.info("BBBBBB when courtadmin draft and save as draft");
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                 if (isHearingPageNeeded(caseData.getCreateSelectOrderOptions(), caseData.getManageOrders().getC21OrderOptions())) {
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
@@ -300,10 +298,6 @@ public class ManageOrdersController {
                     caseData
                 ));
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-                log.info("CCCCCC");
-                log.info("manageOrderService.serveOrderrrrrrrr ->>1111");
-                //UserDetails userDetails = userService.getUserDetails(authorisation);
-                //String currentUserFullName = userDetails.getFullName();
                 caseDataUpdated.put(ORDER_COLLECTION, manageOrderService.serveOrder(caseData, caseData.getOrderCollection()));
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
@@ -408,7 +402,6 @@ public class ManageOrdersController {
             if (caseData.getServeOrderData().getDoYouWantToServeOrder().equals(YesOrNo.Yes)) {
                 caseDataUpdated.put(ORDERS_NEED_TO_BE_SERVED, YesOrNo.Yes);
                 if (amendOrderUnderSlipRule.equals(caseData.getManageOrdersOptions())) {
-                    log.info("AAAAAA -MIDEvent");
                     caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
                 } else {
                     caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(

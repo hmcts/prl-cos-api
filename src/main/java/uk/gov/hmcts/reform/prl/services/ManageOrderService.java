@@ -159,9 +159,7 @@ public class ManageOrderService {
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
     public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
-
     public static final String SERVE_RESPONDENT_NAME = "servingRespondentName";
-
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
     public static final String SERVING_RESPONDENTS_OPTIONS = "servingRespondentsOptions";
@@ -890,7 +888,7 @@ public class ManageOrderService {
 
     private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData)
         throws Exception {
-        log.info("22222");
+
         String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
             ? caseData.getCreateSelectOrderOptions().getDisplayedValue()
             : getSelectedOrderInfoForUpload(caseData);
@@ -920,7 +918,6 @@ public class ManageOrderService {
 
             return orderCollection;
         } else {
-            log.info("HHHHHHHHHHHHHHHHHHHH for ONLY upload order");
             UserDetails userDetails = userService.getUserDetails(authorisation);
             String currentUserFullName = userDetails.getFullName();
             return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId, currentUserFullName);
@@ -932,8 +929,6 @@ public class ManageOrderService {
                                                         String flagSelectedOrder,
                                                         String flagSelectedOrderId,
                                                         String currentUserFullName) {
-        log.info("11111CCCCCC");
-
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
@@ -1090,21 +1085,16 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
-        log.info("addOrderDetailsAndReturnReverseSortedList -------->>");
         String loggedInUserType = getLoggedInUserType(authorisation);
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            log.info("addOrderDetailsAndReturnReverseSortedList ---judge----->>");
             return setDraftOrderCollection(caseData, loggedInUserType,authorisation);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
-            log.info("addOrderDetailsAndReturnReverseSortedList ---admin----->>");
             if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
-                log.info("addOrderDetailsAndReturnReverseSortedList ---nocheck----->>");
                 return setDraftOrderCollection(caseData, loggedInUserType,authorisation);
             } else {
-                log.info("addOrderDetailsAndReturnReverseSortedList ---Check----->>");
                 return setFinalOrderCollection(authorisation, caseData);
             }
         }
@@ -1112,8 +1102,6 @@ public class ManageOrderService {
     }
 
     private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData) throws Exception {
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserFullName = userDetails.getFullName();
         List<Element<OrderDetails>> orderCollection;
         log.info("*** Court seal 1 {}", caseData.getCourtSeal());
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
@@ -1135,7 +1123,6 @@ public class ManageOrderService {
             Comparator.reverseOrder()
         ));
         if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            log.info("DoYouWantToServeOrder -----YES --manageOrderService.serveOrderrrrrrrr444444 ->>");
             orderCollection = serveOrder(caseData, orderCollection);
         }
         LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
@@ -1322,7 +1309,6 @@ public class ManageOrderService {
     }
 
     public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, String authorisation) {
-        log.info("getCurrentUploadDraftOrderDetails----->>");
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
@@ -1520,16 +1506,6 @@ public class ManageOrderService {
 
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
 
-        log.info("MMMMMMM-- cafcassServedOptions-- {}", cafcassServedOptions);
-        log.info("MMMMMMM-- cafcassCymruServedOptions-- {}", cafcassCymruServedOptions);
-        log.info("MMMMMMM-- cafCassEmail-- {}", cafCassEmail);
-        log.info("MMMMMMM-- serveOnRespondent-- {}", serveOnRespondent);
-        log.info("MMMMMMM-- otherPartiesServed-- {}", otherPartiesServed);
-        log.info("MMMMMMM--- servingRespondentsOptions--- {}", servingRespondentsOptions);
-        log.info("MMMMMMM --recipients-- {}", recipients);
-        log.info("MMMMMMM -- otherParties-- {}", otherParties);
-        log.info("MMMMMMM-- servedParties --> {}", servedParties);
-
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
         servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
@@ -1537,6 +1513,9 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVE_ON_RESPONDENT, serveOnRespondent);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
+        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
+        servedOrderDetails.put(OTHER_PARTIES, otherParties);
+        servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         if (serveOnRespondent.equals(Yes)
             && null != serveRespondentName
@@ -1544,9 +1523,6 @@ public class ManageOrderService {
             && servingRespondentsOptions.toString().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
             servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
-        servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
-        servedOrderDetails.put(OTHER_PARTIES, otherParties);
-        servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1668,8 +1644,6 @@ public class ManageOrderService {
                                                  Element<OrderDetails> order, List<Element<PostalInformation>> postalInformation,
                                                  List<Element<EmailInformation>> emailInformation) {
         log.info("***** inside updateServedOrderDetails********");
-        log.info("***** inside postalInformationnnnnn {}", postalInformation);
-        log.info("***** inside servedOrderDetailssssss {}", servedOrderDetails);
 
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
