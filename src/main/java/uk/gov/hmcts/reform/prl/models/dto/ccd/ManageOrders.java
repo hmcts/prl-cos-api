@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOther;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
@@ -191,6 +192,10 @@ public class ManageOrders implements MappableObject {
     private final String cafcassCymruEmail;
     @JsonProperty("serveOtherPartiesCA")
     private final List<OtherOrganisationOptions> serveOtherPartiesCA;
+
+    @JsonProperty("serveOtherPartiesCA")
+    private final List<Element<ServeOther>> serveOptionsCaDaOther;
+
     private final DeliveryByEnum deliveryByOptionsCA;
     @JsonProperty("emailInformationCA")
     private final List<Element<EmailInformation>> emailInformationCA;
