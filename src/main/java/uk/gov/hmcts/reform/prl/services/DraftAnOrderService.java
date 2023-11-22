@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
@@ -157,6 +158,7 @@ public class DraftAnOrderService {
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
     private final DgsService dgsService;
+    private final UserService userService;
     private final DocumentLanguageService documentLanguageService;
     private final LocationRefDataService locationRefDataService;
     private final PartiesListGenerator partiesListGenerator;
@@ -194,10 +196,12 @@ public class DraftAnOrderService {
     }
 
     public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType,String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserFullName = userDetails.getFullName();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, authorisation);
+            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, currentUserFullName);
         }
-        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, authorisation);
+        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, currentUserFullName);
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData, String eventId) {
