@@ -258,13 +258,13 @@ public class ManageDocumentsService {
 
                     // caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
                     List<UUID> idArray = quarantineDocs.stream().map(element -> element.getId()).toList();
-                    caseData.setCourtStaffQuarantineDocsList(quarantineDocs);
+                    //caseData.setCourtStaffQuarantineDocsList(quarantineDocs);
                     for (UUID uuid:idArray) {
                         //UUID uuid = UUID.fromString(dynamicListElements.stream().map());
 
                         reviewDocumentService.uploadDocForConfOrDocTab(
                             caseDataUpdated,
-                            caseData.getCourtStaffQuarantineDocsList(),
+                            quarantineDocs,
                             uuid,
                             true,
                             caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab(),
