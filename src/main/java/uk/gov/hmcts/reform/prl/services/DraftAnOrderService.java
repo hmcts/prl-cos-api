@@ -120,9 +120,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_PERMISSION_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SECOND_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SETTLEMENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_URGENT_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_DA_OCCURED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_EDIT_CONTENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_INTERIM_ORDERS_FACTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_DA_OCCURED_EDIT_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_FACTS_EDIT_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
@@ -1257,18 +1255,6 @@ public class DraftAnOrderService {
             caseDataUpdated.put(
                 "sdoSection7EditContent",
                 SECTION7_EDIT_CONTENT
-            );
-        }
-        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7FactsEditContent())) {
-            caseDataUpdated.put(
-                "sdoSection7FactsEditContent",
-                SECTION7_INTERIM_ORDERS_FACTS
-            );
-        }
-        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7daOccuredEditContent())) {
-            caseDataUpdated.put(
-                "sdoSection7daOccuredEditContent",
-                SECTION7_DA_OCCURED
             );
         }
     }
