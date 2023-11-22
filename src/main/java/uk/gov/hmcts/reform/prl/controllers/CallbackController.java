@@ -724,43 +724,19 @@ public class CallbackController {
         try {
             UserDetails userDetails = userService.getUserDetails(authorisation);
             Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
-            log.info("userDetails.getFullName():: " + userDetails.getFullName());
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
             if (userOrganisation.isPresent()) {
                 log.info("Got the Org Details");
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
                 if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
-                    log.info("Share a case enabled");
-                    log.info("userOrganisation.get().getOrganisationIdentifier() is:: " + userOrganisation.get().getOrganisationIdentifier());
-                    log.info("userOrganisation.get().getName() is:: " + userOrganisation.get().getName());
-                    try {
-                        log.info("caseData.getApplicantOrganisationPolicy() is:: " + caseData.getApplicantOrganisationPolicy());
-                    } catch (Exception e) {
-                        log.error("error from caseData.getApplicantOrganisationPolicy()");
-                    }
                     OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
                         .organisation(Organisation.builder()
                                           .organisationID(userOrganisation.get().getOrganisationIdentifier())
                                           .organisationName(userOrganisation.get().getName())
                                           .build())
+                        .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
+                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
                         .build();
-                    if (caseData.getApplicantOrganisationPolicy() != null) {
-                        log.info("caseData.getApplicantOrganisationPolicy().getOrgPolicyReference() is:: "
-                                     + caseData.getApplicantOrganisationPolicy().getOrgPolicyReference());
-                        log.info("caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() is:: "
-                                     + caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
-                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
-                            .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
-                            .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
-                            .build();
-                    } else {
-                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
-                            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
-                            .orgPolicyReference(null)
-                            .build();
-
-                    }
-                    log.info("applicantOrganisationPolicy is:: " + applicantOrganisationPolicy);
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
             }

@@ -214,6 +214,7 @@ public class CourtNavCaseService {
         data.putAll(documentGenService.generateDocuments(authToken, objectMapper.convertValue(data, CaseData.class)));
         CaseData caseData = objectMapper.convertValue(data, CaseData.class);
         allTabService.updateAllTabsIncludingConfTab(caseData);
+        log.info("**********************Tab refresh and Courtnav case creation complete**************************");
     }
 }
 
