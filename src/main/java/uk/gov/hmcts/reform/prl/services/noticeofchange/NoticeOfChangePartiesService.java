@@ -395,6 +395,7 @@ public class NoticeOfChangePartiesService {
 
         Element<PartyDetails> updatedRepresentedRespondentElement;
         if (CARESPONDENT.equals(representing)) {
+            log.info("type of event is {}", typeOfNocEvent);
             if (updPartyDetails.getResponse() != null
                 && !YesOrNo.Yes.equals(updPartyDetails.getResponse().getC7ResponseSubmitted())) {
                 PartyDetails respondingParty = updPartyDetails.toBuilder().response(Response.builder().build()).build();
@@ -406,23 +407,28 @@ public class NoticeOfChangePartiesService {
             }
             caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
             if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
+                log.info("About to enter generateIndividualPartySolicitorCaseFlags for respondents with true");
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                     caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR, true);
             } else {
+                log.info("About to enter generateIndividualPartySolicitorCaseFlags for respondents with false");
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                     caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR, false);
             }
         } else if (CAAPPLICANT.equals(representing)) {
+            log.info("type of event is {}", typeOfNocEvent);
             updatedRepresentedRespondentElement = ElementUtils
                 .element(partyDetailsElement.getId(), updPartyDetails);
             caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
             if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
+                log.info("About to enter generateIndividualPartySolicitorCaseFlags for applicants with true");
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                     caseData,
                     partyIndex,
                     PartyRole.Representing.CAAPPLICANTSOLICITOR, true
                 );
             } else {
+                log.info("About to enter generateIndividualPartySolicitorCaseFlags for applicants with false");
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                     caseData,
                     partyIndex,
@@ -446,6 +452,7 @@ public class NoticeOfChangePartiesService {
                 typeOfNocEvent
             );
             caseData = caseData.toBuilder().applicantsFL401(updPartyDetails).build();
+            log.info("type of event is {}", typeOfNocEvent);
             if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                     caseData,
@@ -460,6 +467,7 @@ public class NoticeOfChangePartiesService {
                 );
             }
         } else if (DARESPONDENT.equals(representing)) {
+            log.info("type of event is {}", typeOfNocEvent);
             PartyDetails updPartyDetails = updatePartyDetails(
                 legalRepresentativeSolicitorDetails,
                 changeOrganisationRequest,
