@@ -870,6 +870,10 @@ public class ManageOrderServiceTest {
     @Test
     public void testPopulateFinalOrderFromCaseData() throws Exception {
 
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+
+
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
