@@ -285,7 +285,7 @@ public class NoticeOfChangePartiesService {
                 changeOrganisationRequest.getOrganisationToAdd().getOrganisationID()
             );
         }
-
+        log.info("allTabsUpdateCaseData {}", allTabsUpdateCaseData);
         tabService.updatePartyDetailsForNoc(
             null,
             systemAuthorisation,
