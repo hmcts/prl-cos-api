@@ -194,6 +194,9 @@ idam:
   cafcass:
     username: ${CAFCASS_USERNAME:xxxxxx}
     password: ${CAFCASS_PASSWORD:xxxxxx}
+  judge:
+    username: ${JUDGE_USER_NAME:xxxxxx}
+    password: ${JUDGE_PASSWORD:xxxxxx}
   api_gw:
     microservice: api_gw
 

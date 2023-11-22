@@ -44,12 +44,22 @@ public class IdamTokenGenerator {
     @Value("${idam.cafcass.password}")
     private String cafcassPassword;
 
+    @Value("${idam.judge.username}")
+    private String judgeUserName;
+
+    @Value("${idam.judge.password}")
+    private String judgePassword;
+
     public String generateIdamTokenForSolicitor() {
         return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
     }
 
     public String generateIdamTokenForSystem() {
         return idamClient.getAccessToken(systemUpdateUsername, systemUpdatePassword);
+    }
+
+    public String generateIdamTokenForJudge() {
+        return idamClient.getAccessToken(judgeUserName, judgePassword);
     }
 
     public String generateIdamTokenForCourtNav() {

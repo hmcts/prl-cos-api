@@ -82,6 +82,20 @@ public class ManageDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Test
+    public void givenManageDocuments_ShouldNotGiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/validate-court-user")
+            .then()
+            .body("data.caseTypeOfApplication", equalTo("C100"))
+            .assertThat().statusCode(200);
+    }
+
     // ignoring this as managedocument event is working in demo probabaly we need to update the json here
     @Ignore
     public void givenCaseId_whenCopy_manage_docsEndPoint_thenRespWithCopiedDocuments() throws Exception {
