@@ -14,11 +14,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
@@ -160,6 +162,9 @@ public class DraftAnOrderServiceTest {
 
     @Mock
     private HearingService hearingService;
+
+    @Mock
+    private UserService userService;
 
     private DynamicList dynamicList;
     private DynamicMultiSelectList dynamicMultiSelectList;
@@ -336,6 +341,9 @@ public class DraftAnOrderServiceTest {
             .thenReturn(List.of(element(HearingData.builder().build())));
         uuid = UUID.fromString(TEST_UUID);
         when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(caseData);
+
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
     }
 
     @Test
