@@ -88,7 +88,6 @@ public class NoticeOfChangeEventHandler {
 
     private void sendEmailToApplicantsRespondents(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateNames) {
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
-        log.trace("Event representing got while sendEmailToApplicantsRespondents::" + event.getRepresenting());
         Map<String, String> applicantsRespondentsToNotify = new HashMap<>();
         applicantsRespondentsToNotify.putAll(CaseUtils.getApplicantsToNotify(
             caseData,
