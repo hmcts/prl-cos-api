@@ -320,7 +320,7 @@ public class PartyLevelCaseFlagsService {
             && PartyRole.fromRepresentingAndIndex(representing, partyIndex + 1).isPresent()
             && solicitorRepresented) {
             log.info("inside now:: is represented -- " + solicitorRepresented);
-            partyLevelCaseFlagsGenerator.generatePartyFlags(
+            caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                 caseData,
                 partyDetails.getRepresentativeFullNameForCaseFlags(),
                 caseDataExternalField,
@@ -331,7 +331,7 @@ public class PartyLevelCaseFlagsService {
                 false,
                 groupId
             );
-            partyLevelCaseFlagsGenerator.generatePartyFlags(
+            caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                 caseData,
                 partyDetails.getRepresentativeFullNameForCaseFlags(),
                 caseDataInternalField,
@@ -352,7 +352,7 @@ public class PartyLevelCaseFlagsService {
             log.info("got the flags");
         } else {
             log.info("inside now:: is represented false-- " + solicitorRepresented);
-            partyLevelCaseFlagsGenerator.generatePartyFlags(
+            caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                 caseData,
                 PrlAppsConstants.EMPTY_STRING,
                 caseDataExternalField,
@@ -363,7 +363,7 @@ public class PartyLevelCaseFlagsService {
                 false,
                 groupId
             );
-            partyLevelCaseFlagsGenerator.generatePartyFlags(
+            caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                 caseData,
                 PrlAppsConstants.EMPTY_STRING,
                 caseDataInternalField,
