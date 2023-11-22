@@ -85,7 +85,6 @@ public class AmendOrderService {
         List<Element<OrderDetails>> orders = caseData.getOrderCollection();
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> updatedOrders;
-
         if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             || WhatToDoWithOrderEnum.finalizeSaveToServeLater
                 .equals(caseData.getServeOrderData().getWhatDoWithOrder())) {
@@ -163,8 +162,8 @@ public class AmendOrderService {
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
         String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
-        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
+        String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
             .typeOfOrder(orderType)
             .orderTypeId(orderType)

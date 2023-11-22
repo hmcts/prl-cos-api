@@ -1638,7 +1638,6 @@ public class ManageOrderService {
                                                  Element<OrderDetails> order, List<Element<PostalInformation>> postalInformation,
                                                  List<Element<EmailInformation>> emailInformation) {
         log.info("***** inside updateServedOrderDetails********");
-
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
         String cafcassEmail = null;
