@@ -2157,9 +2157,11 @@ public class ManageOrderService {
         log.info("inside getOrderDetailsElement ==> " + caseData.getManageOrders().getCurrentOrderCreatedDateTime());
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String currentUserFullName = userDetails.getFullName();
+        log.info("orderDetails-----> {}", orderDetails);
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
-                                             .createdBy(null != orderDetails.getOtherDetails().getCreatedBy()
+                                             .createdBy(
+                                                 (null != orderDetails.getOtherDetails() && null != orderDetails.getOtherDetails().getCreatedBy())
                                                             ? orderDetails.getOtherDetails().getCreatedBy() : currentUserFullName)
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                                                  PrlAppsConstants.D_MMM_YYYY,
