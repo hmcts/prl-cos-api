@@ -129,6 +129,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
@@ -493,6 +494,8 @@ public class DraftAnOrderService {
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("judgeNotesEmptyUploadJourney", NO);
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
+        } else {
+            caseDataMap.put("judgeNotesEmptyUploadJourney", YES);
         }
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
@@ -506,6 +509,8 @@ public class DraftAnOrderService {
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("judgeNotesEmptyDraftJourney", NO);
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
+        } else {
+            caseDataMap.put("judgeNotesEmptyDraftJourney", YES);
         }
         caseDataMap.put(
             IS_HEARING_PAGE_NEEDED,
