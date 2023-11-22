@@ -175,10 +175,7 @@ public class DraftAnOrderService {
 
     private final WelshCourtEmail welshCourtEmail;
 
-    private final UserService userService;
-
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
-        log.info("generateDraftOrderCollection----->>");
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, authorisation));
@@ -1602,6 +1599,7 @@ public class DraftAnOrderService {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
+
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         String eventId = callbackRequest.getEventId();
