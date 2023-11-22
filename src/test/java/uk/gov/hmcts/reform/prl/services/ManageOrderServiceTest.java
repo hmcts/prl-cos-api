@@ -340,7 +340,7 @@ public class ManageOrderServiceTest {
             .fl404bRespondentDob(LocalDate.of(1990, 10, 20))
             .build();
 
-        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData);
+        CaseData updatedCaseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank);
 
         assertEquals(updatedCaseData.getManageOrders().getFl404CustomFields(), expectedDetails);
 
@@ -1078,7 +1078,16 @@ public class ManageOrderServiceTest {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .firstName("")
+            .lastName("")
+            .dateOfBirth(LocalDate.now())
+            .address(Address.builder().build())
+            .solicitorReference("123")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("test")
+            .representativeLastName("test")
             .build();
+
         Element<PartyDetails> partyDetailsElement = element(details);
         partyDetails.add(partyDetailsElement);
         recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
@@ -1130,10 +1139,30 @@ public class ManageOrderServiceTest {
             .hashToken("testHashToken")
             .build();
 
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("")
+            .lastName("")
+            .dateOfBirth(LocalDate.now())
+            .address(Address.builder().build())
+            .solicitorReference("123")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("test")
+            .representativeLastName("test")
+            .build();
+
+        PartyDetails respPartyDetails = PartyDetails.builder()
+            .firstName("")
+            .lastName("")
+            .dateOfBirth(LocalDate.now())
+            .address(Address.builder().build())
+            .build();
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(respPartyDetails)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
             .orderCollection(new ArrayList<>())
@@ -1601,7 +1630,7 @@ public class ManageOrderServiceTest {
             .manageOrders(ManageOrders.builder().isTheOrderByConsent(YesOrNo.Yes).build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.generalForm));
     }
 
     @Test
@@ -1628,7 +1657,7 @@ public class ManageOrderServiceTest {
             .manageOrders(expectedDetails)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.noticeOfProceedings).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.noticeOfProceedings));
     }
 
     @Test
@@ -1892,9 +1921,29 @@ public class ManageOrderServiceTest {
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
 
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("")
+            .lastName("")
+            .dateOfBirth(LocalDate.now())
+            .address(Address.builder().build())
+            .solicitorReference("123")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("test")
+            .representativeLastName("test")
+            .build();
+
+        PartyDetails respPartyDetails = PartyDetails.builder()
+            .firstName("")
+            .lastName("")
+            .dateOfBirth(LocalDate.now())
+            .address(Address.builder().build())
+            .build();
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
+            .applicantsFL401(partyDetails)
+            .respondentsFL401(respPartyDetails)
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .fl401FamilymanCaseNumber("familyman12345")
@@ -1971,7 +2020,7 @@ public class ManageOrderServiceTest {
             .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blank)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData));
+        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blank));
     }
 
     @Test
@@ -2575,7 +2624,7 @@ public class ManageOrderServiceTest {
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
-        when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
         when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
