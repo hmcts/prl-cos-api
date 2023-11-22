@@ -1511,8 +1511,7 @@ public class ManageOrderService {
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
-        if (serveOnRespondent.equals(Yes)
-            && null != serveRespondentName
+        if (null != serveRespondentName
             && null != servingRespondentsOptions
             && servingRespondentsOptions.toString().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
             servedOrderDetails.put(SERVE_RESPONDENT_NAME, serveRespondentName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
@@ -1689,7 +1688,8 @@ public class ManageOrderService {
 
         String organisationsName = null;
         if (null != postalInformation) {
-            List<String> orgNameList = postalInformation.stream().map(s -> s.getValue().getPostalName()).collect(Collectors.toList());
+            List<String> orgNameList = postalInformation.stream()
+                .map(postalInfoElem -> postalInfoElem.getValue().getPostalName()).collect(Collectors.toList());
             if (!orgNameList.isEmpty()) {
                 organisationsName = String.join(", ", orgNameList);
             }
