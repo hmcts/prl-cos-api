@@ -24,24 +24,18 @@ import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
+import java.lang.reflect.Array;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService.COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB;
@@ -180,8 +174,10 @@ public class ManageDocumentsService {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
         } else if (CAFCASS.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-        } else if (COURT_STAFF.equals(userRole) || COURT_ADMIN.equals(userRole)) {
+        } else if (COURT_STAFF.equals(userRole) ) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
+        }else if (COURT_ADMIN.equals(userRole) ) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "ADMIN");
         }
     }
 
@@ -252,15 +248,22 @@ public class ManageDocumentsService {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
-                    UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-                    reviewDocumentService.uploadDocForConfOrDocTab(
-                        caseDataUpdated,
-                        caseData.getCourtStaffQuarantineDocsList(),
-                        uuid,
-                        true,
-                        caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab(),
-                        COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
-                        COURT_STAFF);
+                    //reviewDocumentService.getDynamicListElements(caseData);
+
+                    // caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
+                    List<UUID>idArray=quarantineDocs.stream().map(element->element.getId()).toList();
+                    for(UUID uuid:idArray) {
+                        //UUID uuid = UUID.fromString(dynamicListElements.stream().map());
+                        reviewDocumentService.uploadDocForConfOrDocTab(
+                            caseDataUpdated,
+                            caseData.getCourtStaffQuarantineDocsList(),
+                            uuid,
+                            true,
+                            caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab(),
+                            COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
+                            COURT_STAFF
+                        );
+                    }
 
                 }
                 break;
