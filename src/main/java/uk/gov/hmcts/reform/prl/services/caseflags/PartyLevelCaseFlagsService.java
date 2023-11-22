@@ -314,7 +314,7 @@ public class PartyLevelCaseFlagsService {
             && PartyRole.fromRepresentingAndIndex(representing, partyIndex + 1).isPresent()
             && solicitorRepresented) {
             log.trace("inside now:: is represented -- " + solicitorRepresented);
-            partyLevelCaseFlagsGenerator.generatePartyFlags(
+            caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                 caseData,
                 partyDetails.getRepresentativeFullNameForCaseFlags(),
                 caseDataExternalField,
@@ -325,7 +325,7 @@ public class PartyLevelCaseFlagsService {
                 false,
                 groupId
             );
-            partyLevelCaseFlagsGenerator.generatePartyFlags(
+            caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                 caseData,
                 partyDetails.getRepresentativeFullNameForCaseFlags(),
                 caseDataInternalField,
