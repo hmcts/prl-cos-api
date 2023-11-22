@@ -299,6 +299,14 @@ public class ManageDocumentsService {
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
                     caseData.getCourtStaffQuarantineDocsList()
                 );
+            case COURT_ADMIN:
+
+                return getQuarantineOrUploadDocsBasedOnDocumentTab(
+                    isDocumentTab,
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                    caseData.getCourtStaffQuarantineDocsList()
+                );
+
             default:
                 throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
