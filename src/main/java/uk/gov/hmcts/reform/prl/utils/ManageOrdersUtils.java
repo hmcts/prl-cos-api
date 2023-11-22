@@ -280,9 +280,12 @@ public class ManageOrdersUtils {
         if (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(createSelectOrderOptions)) {
             return C21OrderOptionsEnum.c21other.equals(c21OrderOptions);
         }
-
-        return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
-            .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(createSelectOrderOptions)));
+        if (ObjectUtils.isNotEmpty(createSelectOrderOptions)) {
+            return Arrays.stream(HEARING_PAGE_NEEDED_ORDER_IDS)
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(String.valueOf(createSelectOrderOptions)));
+        } else {
+            return false;
+        }
     }
 
 
