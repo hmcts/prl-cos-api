@@ -207,6 +207,9 @@ idam:
   citizen:
     username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
     password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}
+  judge:
+    username: ${JUDGE_USER_NAME:xxxxxx}
+    password: ${JUDGE_PASSWORD:xxxxxx}
 
 security:
   oauth2:
