@@ -1,6 +1,10 @@
 package uk.gov.hmcts.reform.prl.utils.caseflags;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.caseflags.AllPartyFlags;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -10,7 +14,10 @@ import java.util.Collections;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class PartyLevelCaseFlagsGenerator {
+    private final ObjectMapper objectMapper;
+
     public Flags generateExternalPartyFlags(String partyName, String roleOnCase, String groupId) {
         return Flags
                 .builder()
@@ -146,9 +153,19 @@ public class PartyLevelCaseFlagsGenerator {
                 }
 
                 case "caRespondentSolicitor1InternalFlags": {
-                    log.info("case is :: {}", caseDataField);
+                    log.info("case is special condition :: {}", caseDataField);
+                    try {
+                        log.info("case data before " + objectMapper.writeValueAsString(caseData));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor1InternalFlags(
                             partyInternalFlag).build()).build();
+                    try {
+                        log.info("case data after " + objectMapper.writeValueAsString(caseData));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                     break;
                 }
                 case "caRespondentSolicitor2InternalFlags": {
@@ -281,8 +298,18 @@ public class PartyLevelCaseFlagsGenerator {
                 }
                 case "caRespondent2ExternalFlags": {
                     log.info("case is :: {}", caseDataField);
+                    try {
+                        log.info("case data before " + objectMapper.writeValueAsString(caseData));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondent2ExternalFlags(
                             partyExternalFlag).build()).build();
+                    try {
+                        log.info("case data after " + objectMapper.writeValueAsString(caseData));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
                     break;
                 }
                 case "caRespondent3ExternalFlags": {
@@ -309,7 +336,7 @@ public class PartyLevelCaseFlagsGenerator {
                     break;
                 }
                 case "caRespondentSolicitor2ExternalFlags": {
-                    log.info("case is :: {}", caseDataField);
+                    log.info("case is special case:: {}", caseDataField);
                     caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().caRespondentSolicitor2ExternalFlags(
                             partyExternalFlag).build()).build();
                     break;
@@ -360,6 +387,11 @@ public class PartyLevelCaseFlagsGenerator {
                     break;
                 }
             }
+        }
+        try {
+            log.info("case data is now after the flags set " + objectMapper.writeValueAsString(caseData));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
         return caseData;
     }
