@@ -174,8 +174,7 @@ public class AmendOrderService {
             .orderSelectionType(orderSelectionType)
             .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(!orderDetails.get().getValue().getOtherDetails().getCreatedBy().isEmpty()
-                                             ? orderDetails.get().getValue().getOtherDetails().getCreatedBy() : currentUserFullName)
+                              .createdBy(currentUserFullName)
                               .dateCreated(time.now())
                               .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
