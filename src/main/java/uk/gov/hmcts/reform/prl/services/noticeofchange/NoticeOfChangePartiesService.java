@@ -410,10 +410,8 @@ public class NoticeOfChangePartiesService {
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                     caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR, true);
             } else {
-                if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
-                    caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                        caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR, false);
-                }
+                caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+                    caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR, false);
             }
         } else if (CAAPPLICANT.equals(representing)) {
             updatedRepresentedRespondentElement = ElementUtils
