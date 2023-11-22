@@ -1411,8 +1411,6 @@ public class ManageOrderService {
     }
 
     private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
-        log.info("***** inside servedFL401Order******** {}");
-
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
 
@@ -2162,7 +2160,7 @@ public class ManageOrderService {
         String currentUserFullName = userDetails.getFullName();
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
-                                             .createdBy(!orderDetails.getOtherDetails().getCreatedBy().isEmpty()
+                                             .createdBy(null != orderDetails.getOtherDetails().getCreatedBy()
                                                             ? orderDetails.getOtherDetails().getCreatedBy() : currentUserFullName)
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                                                  PrlAppsConstants.D_MMM_YYYY,

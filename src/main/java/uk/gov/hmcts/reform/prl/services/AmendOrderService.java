@@ -48,7 +48,6 @@ public class AmendOrderService {
     private final  UploadDocumentService uploadService;
     private final Time time;
     private final ManageOrderService manageOrderService;
-
     private final UserService userService;
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
@@ -69,7 +68,6 @@ public class AmendOrderService {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String currentUserFullName = userDetails.getFullName();
-
         return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType, currentUserFullName);
 
     }
