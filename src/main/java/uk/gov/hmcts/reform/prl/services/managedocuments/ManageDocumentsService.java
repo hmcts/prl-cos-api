@@ -198,14 +198,9 @@ public class ManageDocumentsService {
         // if restricted then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-            log.info("quarantineLegalDoc ", quarantineLegalDoc);
             quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
-            log.info("quarantineLegalDoc 2", quarantineLegalDoc);
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
-            log.info("quarantineDocs now ", quarantineLegalDoc);
-
-
         } else {
             final String categoryId = manageDocument.getDocumentCategories().getValueCode();
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
@@ -258,13 +253,8 @@ public class ManageDocumentsService {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
-                    //reviewDocumentService.getDynamicListElements(caseData);
-
-                    // caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
                     List<UUID> idArray = quarantineDocs.stream().map(element -> element.getId()).toList();
-                    caseData.setCourtStaffQuarantineDocsList(quarantineDocs);
                     for (UUID uuid:idArray) {
-                        //UUID uuid = UUID.fromString(dynamicListElements.stream().map());
 
                         reviewDocumentService.uploadDocForConfOrDocTab(
                             caseDataUpdated,
