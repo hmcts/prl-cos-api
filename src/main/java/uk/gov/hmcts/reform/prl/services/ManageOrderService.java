@@ -1416,7 +1416,7 @@ public class ManageOrderService {
 
         PartyDetails partyDetails = caseData.getApplicantsFL401();
         String serveRespondentName = null;
-        if (null != partyDetails.getRepresentativeFullName()) {
+        if (null != partyDetails && null != partyDetails.getRepresentativeFullName()) {
             serveRespondentName =  partyDetails.getRepresentativeFullName();
         }
 
