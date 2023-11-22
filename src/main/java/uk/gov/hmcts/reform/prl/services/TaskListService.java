@@ -243,9 +243,6 @@ public class TaskListService {
     }
 
     public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
-        log.info("Private law monitoring: TaskListController - handleSubmitted event started for case id {} at {} ",
-                 callbackRequest.getCaseDetails().getId(), LocalDate.now()
-        );
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
@@ -255,14 +252,7 @@ public class TaskListService {
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
             try {
-                log.info("Private law monitoring: TaskListController - handleSubmitted Generating documents for case id {} at {} ",
-                         callbackRequest.getCaseDetails().getId(), LocalDate.now()
-                );
-                log.info("Generating documents for the amended details");
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
-                log.info("Private law monitoring: TaskListController - handleSubmitted Generating documents completed for case id {} at {} ",
-                         callbackRequest.getCaseDetails().getId(), LocalDate.now()
-                );
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())
@@ -277,22 +267,10 @@ public class TaskListService {
             }
         }
 
-        log.info("Private law monitoring: TaskListController - updateAllTabsIncludingConfTab started for case id {} at {} ",
-                 callbackRequest.getCaseDetails().getId(), LocalDate.now()
-        );
         tabService.updateAllTabsIncludingConfTab(caseData);
-        log.info("Private law monitoring: TaskListController - updateAllTabsIncludingConfTab completed for case id {} at {} ",
-                 callbackRequest.getCaseDetails().getId(), LocalDate.now()
-        );
 
         if (!isCourtStaff) {
-            log.info("Private law monitoring: TaskListController - case data changed started for case id {} at {} ",
-                     callbackRequest.getCaseDetails().getId(), LocalDate.now()
-            );
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
-            log.info("Private law monitoring: TaskListController - case data changed completed for case id {} at {} ",
-                     callbackRequest.getCaseDetails().getId(), LocalDate.now()
-            );
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
