@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
-import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
@@ -16,7 +15,7 @@ public class ServeOther {
     @JsonProperty("serveByPostOrEmail")
     private final DeliveryByEnum serveByPostOrEmail;
     @JsonProperty("emailInformationCA")
-    private final List<Element<EmailInformation>> emailInformation;
+    private final List<EmailInformation> emailInformation;
     @JsonProperty("postalInformationCA")
-    private final List<Element<PostalInformation>> postalInformation;
+    private final List<PostalInformation> postalInformation;
 }
