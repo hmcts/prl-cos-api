@@ -72,7 +72,8 @@ public class ManageDocumentsService {
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
-    private final ReviewDocumentService reviewDocumentService;
+    @Autowired
+    private ReviewDocumentService reviewDocumentService;
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
 
@@ -191,10 +192,10 @@ public class ManageDocumentsService {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
         } else if (CAFCASS.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
-        } else if (COURT_ADMIN.equals(userRole)) {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "ADMIN");
         } else if (COURT_STAFF.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
+        } else if (COURT_ADMIN.equals(userRole)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "ADMIN");
         }
     }
 
@@ -309,13 +310,6 @@ public class ManageDocumentsService {
                     caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
                     caseData.getCafcassQuarantineDocsList()
                 );
-            case COURT_ADMIN:
-
-                return getQuarantineOrUploadDocsBasedOnDocumentTab(
-                    isDocumentTab,
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getCourtStaffQuarantineDocsList()
-                );
             case COURT_STAFF:
 
                 return getQuarantineOrUploadDocsBasedOnDocumentTab(
@@ -323,6 +317,14 @@ public class ManageDocumentsService {
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
                     caseData.getCourtStaffQuarantineDocsList()
                 );
+            case COURT_ADMIN:
+
+                return getQuarantineOrUploadDocsBasedOnDocumentTab(
+                    isDocumentTab,
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                    caseData.getCourtStaffQuarantineDocsList()
+                );
+
             default:
                 throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
@@ -344,9 +346,9 @@ public class ManageDocumentsService {
                 .documentCreatedOn(localZoneDate).build() : null)
             .cafcassQuarantineDocument(CAFCASS.equals(userRole) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
-            .courtStaffQuarantineDocument(COURT_ADMIN.equals(userRole) ? manageDocument.getDocument().toBuilder()
-                .documentCreatedOn(localZoneDate).build() : null)
             .courtStaffQuarantineDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
+                .documentCreatedOn(localZoneDate).build() : null)
+            .courtStaffQuarantineDocument(COURT_ADMIN.equals(userRole) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
             .build();
     }
