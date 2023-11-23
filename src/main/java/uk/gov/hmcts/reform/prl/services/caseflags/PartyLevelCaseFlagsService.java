@@ -41,8 +41,6 @@ public class PartyLevelCaseFlagsService {
     public CaseDetails generateAndStoreCaseFlags(String caseId) {
         String systemAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
-        CaseEvent caseEvent = CaseEvent.UPDATE_ALL_TABS;
-        log.trace("Following case event will be triggered {}", caseEvent.getValue());
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.UPDATE_ALL_TABS,
@@ -62,14 +60,13 @@ public class PartyLevelCaseFlagsService {
             startEventResponse,
             raPartyFlags
         );
-        CaseDetails caseDetails = coreCaseDataService.submitUpdate(
+        return coreCaseDataService.submitUpdate(
             systemAuthorisation,
             eventRequestData,
             caseDataContent,
             caseId,
             true
         );
-        return caseDetails;
     }
 
     public Map<String, Object> generatePartyCaseFlags(CaseData caseData) {
@@ -86,7 +83,6 @@ public class PartyLevelCaseFlagsService {
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENT));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLCIITOR));
         }
-        log.trace("*** flags we have now: " + data);
         return data;
     }
 
@@ -97,8 +93,6 @@ public class PartyLevelCaseFlagsService {
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-            log.trace("Party role we have now::" + partyRole.getCaseRoleLabel());
-            log.trace("Representing is now::" + partyRole.getCaseRoleLabel());
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetails = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
                 findAndGeneratePartyFlags(representing, i, partyDetails, data, partyRole);
@@ -112,13 +106,9 @@ public class PartyLevelCaseFlagsService {
                                            Optional<Element<PartyDetails>> partyDetails,
                                            Map<String, Object> data,
                                            PartyRole partyRole) {
-        log.trace("party details is present");
         String caseDataExternalField = String.format(representing.getCaseDataExternalField(), partyIndex + 1);
         String caseDataInternalField = String.format(representing.getCaseDataInternalField(), partyIndex + 1);
         String groupId = String.format(representing.getGroupId(), partyIndex + 1);
-        log.trace("groupId is::" + groupId);
-        log.trace("caseDataExternalField is::" + caseDataExternalField);
-        log.trace("caseDataInternalField is::" + caseDataInternalField);
         switch (representing) {
             case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY: {
                 if (partyDetails.isPresent()
@@ -195,16 +185,10 @@ public class PartyLevelCaseFlagsService {
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-            log.trace("Party role we have now::" + partyRole.getCaseRoleLabel());
-            log.trace("Representing is now::" + partyRole.getCaseRoleLabel());
             if (null != partyDetails) {
-                log.trace("party details is present");
                 String caseDataExternalField = String.format(representing.getCaseDataExternalField(), i + 1);
-                log.trace("caseDataExternalField is::" + caseDataExternalField);
                 String caseDataInternalField = String.format(representing.getCaseDataInternalField(), i + 1);
-                log.trace("caseDataInternalField is::" + caseDataInternalField);
                 String groupId = String.format(representing.getGroupId(), i + 1);
-                log.trace("groupId is::" + groupId);
                 switch (representing) {
                     case DAAPPLICANT, DARESPONDENT: {
                         if (!StringUtils.isEmpty(partyDetails.getLabelForDynamicList())) {
@@ -264,8 +248,7 @@ public class PartyLevelCaseFlagsService {
         switch (representing) {
             case CAAPPLICANTSOLICITOR, CARESPONDENTSOLCIITOR: {
                 List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
-                Optional<Element<PartyDetails>> partyDetails = Optional.of(caElements.get(partyIndex));
-                log.trace("About to generate solicitor flags");
+                Optional<Element<PartyDetails>> partyDetails = Optional.ofNullable(caElements.get(partyIndex));
                 if (partyDetails.isPresent()) {
                     caseData = regenerateSolicitorFlags(
                         caseData,
@@ -302,18 +285,13 @@ public class PartyLevelCaseFlagsService {
                                               PartyRole.Representing representing,
                                               int partyIndex,
                                               boolean solicitorRepresented) {
-        log.trace("regenerateSolicitorFlags");
         String caseDataExternalField = String.format(representing.getCaseDataExternalField(), partyIndex + 1);
-        log.trace("caseDataExternalField is::" + caseDataExternalField);
         String caseDataInternalField = String.format(representing.getCaseDataInternalField(), partyIndex + 1);
-        log.trace("caseDataInternalField is::" + caseDataInternalField);
         String groupId = String.format(representing.getGroupId(), partyIndex + 1);
-        log.trace("groupId is::" + groupId);
 
         if (!StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())
             && PartyRole.fromRepresentingAndIndex(representing, partyIndex + 1).isPresent()
             && solicitorRepresented) {
-            log.trace("inside now:: is represented -- " + solicitorRepresented);
             caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                 caseData,
                 partyDetails.getRepresentativeFullNameForCaseFlags(),
@@ -336,10 +314,7 @@ public class PartyLevelCaseFlagsService {
                 true,
                 groupId
             );
-
-            log.trace("got the flags");
         } else {
-            log.trace("inside now:: is represented false-- " + solicitorRepresented);
             partyLevelCaseFlagsGenerator.generatePartyFlags(
                 caseData,
                 PrlAppsConstants.EMPTY_STRING,
@@ -401,8 +376,6 @@ public class PartyLevelCaseFlagsService {
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-            log.trace("Party role we have now::" + partyRole.getCaseRoleLabel());
-            log.trace("Representing is now::" + representing);
             if (null != caElements) {
                 Optional<Element<PartyDetails>> partyDetails = i < numElements ? Optional.of(caElements.get(i)) : Optional.empty();
                 if (partyDetails.isPresent()) {
@@ -418,16 +391,13 @@ public class PartyLevelCaseFlagsService {
                                                     int partyIndex,
                                                     Optional<Element<PartyDetails>> partyDetails,
                                                     PartyRole partyRole) {
-        log.trace("party details is present");
         String caseDataExternalField = String.format(representing.getCaseDataExternalField(), partyIndex + 1);
-        log.trace("caseDataExternalField is::" + caseDataExternalField);
         String caseDataInternalField = String.format(representing.getCaseDataInternalField(), partyIndex + 1);
-        log.trace("caseDataInternalField is::" + caseDataInternalField);
         String groupId = String.format(representing.getGroupId(), partyIndex + 1);
-        log.trace("groupId is::" + groupId);
         switch (representing) {
             case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY: {
-                if (!StringUtils.isEmpty(partyDetails.get().getValue().getLabelForDynamicList())) {
+                if (partyDetails.isPresent()
+                    && !StringUtils.isEmpty(partyDetails.get().getValue().getLabelForDynamicList())) {
                     caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                         caseData,
                         partyDetails.get().getValue().getLabelForDynamicList(),
@@ -444,12 +414,12 @@ public class PartyLevelCaseFlagsService {
                         true,
                         groupId
                     );
-                    log.trace("flag is set");
                 }
                 break;
             }
             case CAAPPLICANTSOLICITOR, CARESPONDENTSOLCIITOR: {
-                if (!StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
+                if (partyDetails.isPresent()
+                    && !StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
                     caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                         caseData,
                         partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags(),
@@ -466,7 +436,6 @@ public class PartyLevelCaseFlagsService {
                         true,
                         groupId
                     );
-                    log.trace("flag is set");
                 }
                 break;
             }

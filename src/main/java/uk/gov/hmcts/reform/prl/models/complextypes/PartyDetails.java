@@ -32,6 +32,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PartyDetails {
 
+    public static final String FULL_NAME_FORMAT = "%s %s";
     private final String firstName;
     private final String lastName;
     private final String previousName;
@@ -83,7 +84,7 @@ public class PartyDetails {
     private YesOrNo currentRespondent;
 
     // it will hold either applicant flag or respondent flag
-    // partyInternalFlags will refer to this
+    // Deprecated. kept for backward compatibility
     private Flags partyLevelFlag;
 
     private ContactPreferences contactPreferences;
@@ -110,7 +111,7 @@ public class PartyDetails {
     @JsonIgnore
     public String getLabelForDynamicList() {
         return String.format(
-            "%s %s",
+            FULL_NAME_FORMAT,
             this.firstName,
             this.lastName
         );
@@ -119,7 +120,7 @@ public class PartyDetails {
     @JsonIgnore
     public String getRepresentativeFullName() {
         return String.format(
-            "%s %s",
+            FULL_NAME_FORMAT,
             this.representativeFirstName,
             this.representativeLastName
         );
@@ -130,7 +131,7 @@ public class PartyDetails {
         if (!StringUtils.isEmpty(this.representativeFirstName)
             && !StringUtils.isEmpty(this.representativeLastName)) {
             return String.format(
-                "%s %s",
+                FULL_NAME_FORMAT,
                 StringUtils.capitalize(this.representativeFirstName.trim()),
                 StringUtils.capitalize(this.representativeLastName.trim())
             );
