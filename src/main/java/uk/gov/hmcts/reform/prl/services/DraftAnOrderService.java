@@ -310,6 +310,7 @@ public class DraftAnOrderService {
             caseDataMap.putAll(populateDraftOrderCustomFields(caseData, authorisation));
         }
         caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+        log.info("updateCaseDataForFinalOrderDocument " + caseData);
         return caseData;
     }
 
@@ -677,6 +678,7 @@ public class DraftAnOrderService {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
             }
         }
+        log.info("standardDirectionOrderMap ==>" + standardDirectionOrderMap);
         return standardDirectionOrderMap;
     }
 
