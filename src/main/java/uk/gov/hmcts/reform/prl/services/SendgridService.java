@@ -120,7 +120,7 @@ public class SendgridService {
                                                       String authorization, SendgridEmailConfig sendgridEmailConfig) throws IOException {
         Personalization personalization = new Personalization();
         personalization.addTo(getEmail(sendgridEmailConfig.getToEmailAddress()));
-        Map<String, String> dynamicFields = sendgridEmailConfig.getDynamicTemplateData();
+        Map<String, Object> dynamicFields = sendgridEmailConfig.getDynamicTemplateData();
         if (MapUtils.isNotEmpty(dynamicFields)) {
             dynamicFields.forEach(personalization::addDynamicTemplateData);
         }

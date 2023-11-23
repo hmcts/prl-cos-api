@@ -48,6 +48,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -497,8 +498,36 @@ public class ManageOrderEmailService {
     private void sendEmailToOtherOrganisation(CaseData caseData, List<Element<EmailInformation>> emailInformationCA,
                                               String authorisation, List<Document> orderDocuments) {
 
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
 
-        Map<String, String> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
+            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
+            log.info("selected order ids {}", selectedOrderIds);
+            AtomicBoolean newOrdersExists = new AtomicBoolean(false);
+            AtomicBoolean finalOrdersExists = new AtomicBoolean(false);
+            caseData.getOrderCollection().stream()
+                .filter(order -> selectedOrderIds.contains(order.getId().toString()))
+                .forEach(order -> {
+                    if (StringUtils.equals(
+                        order.getValue().getTypeOfOrder(),
+                        SelectTypeOfOrderEnum.interim.getDisplayedValue()
+                    ) || StringUtils.equals(
+                        order.getValue().getTypeOfOrder(),
+                        SelectTypeOfOrderEnum.general.getDisplayedValue()
+                    )) {
+                        newOrdersExists.set(true);
+                    } else if (StringUtils.equals(
+                        order.getValue().getTypeOfOrder(),
+                        SelectTypeOfOrderEnum.finl.getDisplayedValue()
+                    )) {
+
+                        finalOrdersExists.set(true);
+                    }
+
+                });
+            setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
+        }
         emailInformationCA.stream().map(Element::getValue).forEach(value -> {
             try {
                 log.info("sending email to {}", value.getEmailAddress());
@@ -517,6 +546,37 @@ public class ManageOrderEmailService {
         });
 
 
+    }
+
+    private void setOrderSpecificDynamicFields(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists,
+                                               AtomicBoolean finalOrdersExists, List<String> selectedOrderIds) {
+        setTypeOfOrderForEmail(dynamicData, newOrdersExists, finalOrdersExists);
+        setMultipleOrdersForEmail(dynamicData, selectedOrderIds);
+    }
+
+    private void setMultipleOrdersForEmail(Map<String, Object> dynamicData, List<String> selectedOrderIds) {
+        if (CollectionUtils.size(selectedOrderIds) > 1) {
+            dynamicData.put("multipleOrders", true);
+        } else {
+            dynamicData.put("multipleOrders", false);
+        }
+    }
+
+    private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {
+        if (newOrdersExists.get() && finalOrdersExists.get()) {
+            dynamicData.put("newAndFInal", true);
+            dynamicData.put("final", false);
+            dynamicData.put("new", false);
+
+        } else if (newOrdersExists.get()) {
+            dynamicData.put("newAndFInal", false);
+            dynamicData.put("final", false);
+            dynamicData.put("new", true);
+        } else if (finalOrdersExists.get()) {
+            dynamicData.put("newAndFInal", false);
+            dynamicData.put("final", true);
+            dynamicData.put("new", false);
+        }
     }
 
     private SelectTypeOfOrderEnum isOrderFinal(CaseData caseData) {

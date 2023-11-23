@@ -12,7 +12,7 @@ import java.util.Map;
 @Builder
 public class SendgridEmailConfig {
 
-    private Map<String, String> dynamicTemplateData;
+    private Map<String, Object> dynamicTemplateData;
 
     private String toEmailAddress;
 
