@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.cafcass.CafcassUploadDocService;
-import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -47,9 +46,8 @@ public class CourtNavCaseController {
     private final CourtNavCaseService courtNavCaseService;
     private final AuthorisationService authorisationService;
     private final FL401ApplicationMapper fl401ApplicationMapper;
-    private final CafcassUploadDocService cafcassUploadDocService;
+    private  final CafcassUploadDocService cafcassUploadDocService;
     private final SystemUserService systemUserService;
-    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @PostMapping(path = "/case", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Third party to call this service to create a case in CCD")
@@ -74,8 +72,6 @@ public class CourtNavCaseController {
             );
             log.info("Case has been created {}", caseDetails.getId());
             courtNavCaseService.refreshTabs(authorisation, caseDetails.getData(), caseDetails.getId());
-            partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
-            log.info("**********************Tab refresh and Courtnav case creation complete**************************");
             return ResponseEntity.status(HttpStatus.CREATED).body(new CaseCreationResponse(
                 String.valueOf(caseDetails.getId())));
         } else {
