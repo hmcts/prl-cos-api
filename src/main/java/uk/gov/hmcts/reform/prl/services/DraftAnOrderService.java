@@ -302,14 +302,17 @@ public class DraftAnOrderService {
     private CaseData updateCaseDataForFinalOrderDocument(CaseData caseData, String authorisation, CreateSelectOrderOptionsEnum orderType) {
         Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, Map.class);
         caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData));
+        StandardDirectionOrder standardDirectionOrder = null;
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
-            caseDataMap.putAll(populateStandardDirectionOrder(authorisation, caseData));
+            Map<String, Object> standardDirectionOrderMap = populateStandardDirectionOrder(authorisation, caseData);
+            standardDirectionOrder = objectMapper.convertValue(standardDirectionOrderMap, StandardDirectionOrder.class);
         } else if (!(CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(orderType))) {
             caseDataMap.putAll(populateDraftOrderCustomFields(caseData, authorisation));
         }
         caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+        caseData = caseData.toBuilder().standardDirectionOrder(null != standardDirectionOrder ? standardDirectionOrder : null).build();
         log.info("updateCaseDataForFinalOrderDocument " + caseData);
         return caseData;
     }
