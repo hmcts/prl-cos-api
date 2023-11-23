@@ -63,7 +63,7 @@ import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.uploadAnOrder;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.cleanUpSelectedManageOrderOptions;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
-import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedToFl401Case;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
@@ -175,7 +175,7 @@ public class ManageOrdersController {
             );
 
             List<String> errorList = new ArrayList<>();
-            if (getErrorsForOrdersProhibitedForC100FL401(
+            if (getErrorsForOrdersProhibitedToFl401Case(
                 caseData,
                 caseData.getCreateSelectOrderOptions(),
                 errorList

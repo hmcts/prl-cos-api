@@ -26,14 +26,11 @@ import java.util.Map;
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.isBlank;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_PAGE_NEEDED_ORDER_IDS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_C100;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VALID_ORDER_IDS_FOR_C100;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VALID_ORDER_IDS_FOR_FL401;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -289,16 +286,12 @@ public class ManageOrdersUtils {
     }
 
 
-    public static boolean getErrorsForOrdersProhibitedForC100FL401(CaseData caseData,
-                                                                   CreateSelectOrderOptionsEnum selectedOrder,
-                                                                   List<String> errorList) {
+    public static boolean getErrorsForOrdersProhibitedToFl401Case(CaseData caseData,
+                                                                  CreateSelectOrderOptionsEnum selectedOrder,
+                                                                  List<String> errorList) {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             || ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && !Arrays.stream(VALID_ORDER_IDS_FOR_C100)
-                .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
-                errorList.add(ORDER_NOT_AVAILABLE_C100);
-            } else if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && !Arrays.stream(VALID_ORDER_IDS_FOR_FL401)
                 .anyMatch(orderId -> orderId.equalsIgnoreCase(selectedOrder.toString()))) {
                 errorList.add(ORDER_NOT_AVAILABLE_FL401);

@@ -108,7 +108,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_NOT_AVAILABLE_FL401;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RIGHT_TO_ASK_COURT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
@@ -125,6 +124,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class DraftAnOrderServiceTest {
 
+    public static final String C49_ORDER = "<span class='heading-h3'>Transfer of case to another court (C49)</span>";
+    public static final String NON_MOL_ORDER = "<span class='heading-h3'>Non-molestation order (FL404A)</span>";
     @InjectMocks
     private DraftAnOrderService draftAnOrderService;
 
@@ -3422,7 +3423,7 @@ public class DraftAnOrderServiceTest {
     }
 
     @Test
-    public void testSelectedOrderForDraftAnOrderScenarioFL401ThrowsError() throws Exception {
+    public void testSelectedOrderForDraftAnOrderScenarioFL401CaseWithC100OrderThrowError() throws Exception {
         List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
                 .value(Child.builder().build()).build());
         CaseData caseData = CaseData.builder()
@@ -3446,9 +3447,81 @@ public class DraftAnOrderServiceTest {
                 .getChildrenMultiSelectList(caseData);
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(callbackRequest, authToken);
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
+            callbackRequest,
+            authToken
+        );
+        assertNotNull(response.getErrors());
         assertEquals(1, response.getErrors().size());
-        assertEquals(ORDER_NOT_AVAILABLE_FL401, response.getErrors().get(0));
+    }
+
+
+    @Test
+    public void testDaOrderForC100Case() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .children(children)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.nonMolestation)
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutChildren(Yes)
+                              .build())
+            .selectedOrder("Test order")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
+            callbackRequest,
+            authToken
+        );
+        assertNull(response.getErrors());
+        assertNotNull(response.getData().get("selectedOrder"));
+        assertEquals(NON_MOL_ORDER, response.getData().get("selectedOrder"));
+    }
+
+
+    @Test
+    public void testCaOrderForFl401CaseThrowError() throws Exception {
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("Fl401")
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .children(children)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutChildren(Yes)
+                              .build())
+            .selectedOrder("Test order")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderService.handleSelectedOrder(
+            callbackRequest,
+            authToken
+        );
+        assertNotNull(response.getErrors());
+        assertEquals(1, response.getErrors().size());
     }
 
     @Test

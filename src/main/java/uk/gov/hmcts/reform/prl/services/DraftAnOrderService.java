@@ -132,7 +132,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
-import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedForC100FL401;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorsForOrdersProhibitedToFl401Case;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidations;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getHearingScreenValidationsForSdo;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
@@ -1826,7 +1826,7 @@ public class DraftAnOrderService {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        } else if (getErrorsForOrdersProhibitedForC100FL401(
+        } else if (getErrorsForOrdersProhibitedToFl401Case(
             caseData,
             caseData.getCreateSelectOrderOptions(),
             errorList
