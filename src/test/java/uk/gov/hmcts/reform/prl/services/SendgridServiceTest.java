@@ -244,7 +244,7 @@ public class SendgridServiceTest {
         headers.put("Content-Type", "mail/send");
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         when(sendGrid.api(any(Request.class))).thenThrow(new IOException("expected exception"));
-        Map<String, String> dynamicTemplateData = new HashMap<>();
+        Map<String, Object> dynamicTemplateData = new HashMap<>();
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().listOfAttachments(documentList)
             .toEmailAddress(applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
@@ -344,7 +344,7 @@ public class SendgridServiceTest {
             "response body",
             Map.of()
         ));
-        Map<String, String> dynamicTemplateData = new HashMap<>();
+        Map<String, Object> dynamicTemplateData = new HashMap<>();
         dynamicTemplateData.put("caseName", caseData.getApplicantCaseName());
         dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().listOfAttachments(documentList).toEmailAddress(

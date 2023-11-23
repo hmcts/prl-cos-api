@@ -49,8 +49,8 @@ public class EmailUtils {
         return emailProps;
     }
 
-    public static Map<String, String> getCommonSendgridDynamicTemplateData(CaseData caseData) {
-        Map<String, String> dynamicTemplateData = new HashMap<>();
+    public static Map<String, Object> getCommonSendgridDynamicTemplateData(CaseData caseData) {
+        Map<String, Object> dynamicTemplateData = new HashMap<>();
 
         dynamicTemplateData.put("caseName", caseData.getApplicantCaseName());
         dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
