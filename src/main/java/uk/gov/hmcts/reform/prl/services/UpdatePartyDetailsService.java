@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +45,7 @@ public class UpdatePartyDetailsService {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Qualifier("caseSummaryTab")
-    private final CaseSummaryTabService caseSummaryTabService;
+    private final  CaseSummaryTabService caseSummaryTabService;
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
@@ -61,11 +60,6 @@ public class UpdatePartyDetailsService {
         final Flags caseFlags = Flags.builder().build();
 
         updatedCaseData.put("caseFlags", caseFlags);
-        try {
-            log.info(objectMapper.writeValueAsString(updatedCaseData));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
@@ -78,18 +72,12 @@ public class UpdatePartyDetailsService {
 
             if (Objects.nonNull(fl401Applicant)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put(
-                    "applicantName",
-                    fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName()
-                );
+                updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
             }
 
             if (Objects.nonNull(fl401respondent)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put(
-                    "respondentName",
-                    fl401respondent.getFirstName() + " " + fl401respondent.getLastName()
-                );
+                updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
             }
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
@@ -103,15 +91,12 @@ public class UpdatePartyDetailsService {
                     .collect(Collectors.toList());
                 PartyDetails applicant1 = applicants.get(0);
                 if (Objects.nonNull(applicant1)) {
-                    updatedCaseData.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
+                    updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
             }
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             if (applicantList.isPresent()) {
-                setApplicantOrganisationPolicyIfOrgEmpty(
-                    updatedCaseData,
-                    ElementUtils.unwrapElements(applicantList.get()).get(0)
-                );
+                setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
             }
         }
 

@@ -121,7 +121,6 @@ public class FL401SubmitApplicationService {
     public CaseData fl401SendApplicationNotification(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseData.getId()));
         try {
             SolicitorNotificationEmailEvent event = prepareFl401SolNotificationEvent(callbackRequest, userDetails);
             eventPublisher.publishEvent(event);
