@@ -243,13 +243,9 @@ public class TestingSupportService {
                 systemAuthorisation,
                 fl401CourtNav
             );
-            log.trace("Generating party flags now");
-            caseDetails = partyLevelCaseFlagsService.generateAndStoreCaseFlags(String.valueOf(caseDetails.getId()));
-            log.trace("Party flags generated");
             caseDataUpdated = caseDetails.getData();
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             caseDataUpdated.putAll(updateDateInCase(FL401_CASE_TYPE, fl401CourtNav));
-            CaseData updatedCaseData = CaseUtils.getCaseData(initialCaseDetails, objectMapper);
         }
 
         return caseDataUpdated;
@@ -341,7 +337,6 @@ public class TestingSupportService {
         if (isAuthorized(authorisation)) {
             try {
                 CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-                log.trace("Granting access to the case");
                 caseInitiationService.handleCaseInitiation(authorisation, caseData);
             } catch (Exception e) {
                 log.error("Access grant failed", e);
