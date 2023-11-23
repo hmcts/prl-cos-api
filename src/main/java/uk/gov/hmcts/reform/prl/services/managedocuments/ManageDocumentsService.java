@@ -279,6 +279,7 @@ public class ManageDocumentsService {
                             COURT_STAFF
                         );
                     }
+                    caseDataUpdated.remove("manageDocuments");
 
                 }
                 break;
