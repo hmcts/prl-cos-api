@@ -249,12 +249,12 @@ public class ReviewDocumentService {
     }
 
     public void uploadDocForConfOrDocTab(Map<String, Object> caseDataUpdated,
-                                          List<Element<QuarantineLegalDoc>> quarantineDocsList,
-                                          UUID uuid,
-                                          boolean isReviewDecisionYes,
-                                          List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
-                                          String uploadDocListConfOrDocTabKey,
-                                          String uploadedBy) {
+                                         List<Element<QuarantineLegalDoc>> quarantineDocsList,
+                                         UUID uuid,
+                                         boolean isReviewDecisionYes,
+                                         List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
+                                         String uploadDocListConfOrDocTabKey,
+                                         String uploadedBy) {
 
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
             getQuarantineDocumentById(quarantineDocsList, uuid);
@@ -294,10 +294,12 @@ public class ReviewDocumentService {
             case CAFCASS:
                 return quarantineLegalDoc.getCafcassQuarantineDocument();
 
-            case COURT_STAFF:
-                return quarantineLegalDoc.getCourtStaffQuarantineDocument();
             case COURT_ADMIN:
                 return quarantineLegalDoc.getCourtStaffQuarantineDocument();
+
+            case COURT_STAFF:
+                return quarantineLegalDoc.getCourtStaffQuarantineDocument();
+
             case BULK_SCAN:
                 return quarantineLegalDoc.getUrl();
 
