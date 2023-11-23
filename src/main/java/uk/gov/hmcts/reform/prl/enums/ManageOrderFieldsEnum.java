@@ -1,49 +1,5 @@
 package uk.gov.hmcts.reform.prl.enums;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import uk.gov.hmcts.reform.prl.enums.dio.DioOtherDirectionEnum;
-import uk.gov.hmcts.reform.prl.enums.dio.DioTransferCourtDirectionEnum;
-import uk.gov.hmcts.reform.prl.enums.dio.MiamOtherDirectionEnum;
-import uk.gov.hmcts.reform.prl.enums.dio.OtherDirectionPositionStatementEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.AllocateOrReserveJudgeEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoApplicantRespondentEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtRequestedEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoNextStepsAllocationEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportSentByEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsAlsoSentToEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoReportsSentToEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoScheduleOfAllegationsEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoSection7ImpactAnalysisEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
-import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
-import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
-import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.AddNewPreamble;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
-import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoFurtherDirections;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoNameOfApplicant;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.SdoNameOfRespondent;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-
-import java.time.LocalDate;
-import java.util.List;
-
 public enum ManageOrderFieldsEnum {
 
     manageOrdersOptions("manageOrdersOptions"),
