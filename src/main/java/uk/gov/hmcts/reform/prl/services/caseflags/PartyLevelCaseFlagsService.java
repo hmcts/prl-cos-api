@@ -288,18 +288,19 @@ public class PartyLevelCaseFlagsService {
         String caseDataExternalField = String.format(representing.getCaseDataExternalField(), partyIndex + 1);
         String caseDataInternalField = String.format(representing.getCaseDataInternalField(), partyIndex + 1);
         String groupId = String.format(representing.getGroupId(), partyIndex + 1);
+        Optional<PartyRole> partyRole = PartyRole.fromRepresentingAndIndex(
+            representing,
+            partyIndex + 1
+        );
 
         if (!StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())
-            && PartyRole.fromRepresentingAndIndex(representing, partyIndex + 1).isPresent()
+            && partyRole.isPresent()
             && solicitorRepresented) {
             caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
                 caseData,
                 partyDetails.getRepresentativeFullNameForCaseFlags(),
                 caseDataExternalField,
-                String.valueOf(PartyRole.fromRepresentingAndIndex(
-                    representing,
-                    partyIndex + 1
-                )),
+                partyRole.get().getCaseRoleLabel(),
                 false,
                 groupId
             );
@@ -307,10 +308,7 @@ public class PartyLevelCaseFlagsService {
                 caseData,
                 partyDetails.getRepresentativeFullNameForCaseFlags(),
                 caseDataInternalField,
-                String.valueOf(PartyRole.fromRepresentingAndIndex(
-                    representing,
-                    partyIndex + 1
-                )),
+                partyRole.get().getCaseRoleLabel(),
                 true,
                 groupId
             );
@@ -319,10 +317,7 @@ public class PartyLevelCaseFlagsService {
                 caseData,
                 PrlAppsConstants.EMPTY_STRING,
                 caseDataExternalField,
-                String.valueOf(PartyRole.fromRepresentingAndIndex(
-                    representing,
-                    partyIndex + 1
-                )),
+                partyRole.get().getCaseRoleLabel(),
                 false,
                 groupId
             );
@@ -330,10 +325,7 @@ public class PartyLevelCaseFlagsService {
                 caseData,
                 PrlAppsConstants.EMPTY_STRING,
                 caseDataInternalField,
-                String.valueOf(PartyRole.fromRepresentingAndIndex(
-                    representing,
-                    partyIndex + 1
-                )),
+                partyRole.get().getCaseRoleLabel(),
                 true,
                 groupId
             );
