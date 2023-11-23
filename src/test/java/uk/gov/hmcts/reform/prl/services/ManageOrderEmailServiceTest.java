@@ -1220,6 +1220,7 @@ public class ManageOrderEmailServiceTest {
                                  .cafcassEmailAddress(List.of(element("test")))
                                  .serveToRespondentOptions(YesOrNo.No)
                                  .recipientsOptions(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .deliveryByOptionsCA(DeliveryByEnum.email)
                               .emailInformationCA(List.of(Element.<EmailInformation>builder()
@@ -1232,8 +1233,13 @@ public class ManageOrderEmailServiceTest {
                               .otherParties(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                                                          .build())
-                .orderCollection(List.of(element(OrderDetails.builder().typeOfOrder("Final").build())))
-                .build();
+            .orderCollection(List.of(Element.<OrderDetails>builder()
+                                         .id(uuid)
+                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                                                 List.of(element(Document.builder().build()))).build())
+                                                    .typeOfOrder("Final").build())
+                                         .build()))
+            .build();
         Map<String, Object> dataMap = new HashMap<>();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
