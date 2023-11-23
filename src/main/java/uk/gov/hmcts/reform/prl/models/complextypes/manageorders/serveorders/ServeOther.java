@@ -14,8 +14,8 @@ import java.util.List;
 public class ServeOther {
     @JsonProperty("serveByPostOrEmail")
     private final DeliveryByEnum serveByPostOrEmail;
-    @JsonProperty("emailInformationCA")
+    @JsonProperty("emailInformation")
     private final List<EmailInformation> emailInformation;
-    @JsonProperty("postalInformationCA")
+    @JsonProperty("postalInformation")
     private final List<PostalInformation> postalInformation;
 }

@@ -193,7 +193,7 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("serveOtherPartiesCA")
     private final List<OtherOrganisationOptions> serveOtherPartiesCA;
 
-    @JsonProperty("serveOtherPartiesCA")
+    @JsonProperty("serveOptionsCaDaOther")
     private final List<Element<ServeOther>> serveOptionsCaDaOther;
 
     private final DeliveryByEnum deliveryByOptionsCA;
