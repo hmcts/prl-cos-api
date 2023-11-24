@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Tag(name = "case-initiation-controller")
 @RestController
@@ -28,7 +27,6 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 @SecurityRequirement(name = "Bearer Authentication")
 public class CaseInitiationController extends AbstractCallbackController {
     private final CaseInitiationService caseInitiationService;
-
     private final AuthorisationService authorisationService;
 
     @PostMapping("/submitted")
@@ -38,7 +36,7 @@ public class CaseInitiationController extends AbstractCallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             caseInitiationService.handleCaseInitiation(
                 authorisation,
-                getCaseData(callbackRequest.getCaseDetails())
+                callbackRequest
             );
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
