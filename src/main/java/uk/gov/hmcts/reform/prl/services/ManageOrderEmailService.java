@@ -448,6 +448,7 @@ public class ManageOrderEmailService {
                 .contains(OtherOrganisationOptions.anotherOrganisation)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
                 log.info("Another organisation emails {}", manageOrders.getEmailInformationCA());
+                log.info("order documents count {}",orderDocuments.size());
                 sendEmailToOtherOrganisation(caseData,manageOrders.getEmailInformationCA(),authorisation, orderDocuments);
                 //manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
                 //  .add(value.getEmailAddress()));
@@ -516,12 +517,16 @@ public class ManageOrderEmailService {
                         order.getValue().getTypeOfOrder(),
                         SelectTypeOfOrderEnum.general.getDisplayedValue()
                     )) {
+                        log.info("one new or general order exists {} with acutal type: {}",
+                                 order.getId(), order.getValue().getTypeOfOrder());
                         newOrdersExists.set(true);
                     } else if (StringUtils.equals(
                         order.getValue().getTypeOfOrder(),
                         SelectTypeOfOrderEnum.finl.getDisplayedValue()
                     )) {
 
+                        log.info("one final order exists {} with acutal type: {}",
+                                 order.getId(), order.getValue().getTypeOfOrder());
                         finalOrdersExists.set(true);
                     }
 
@@ -557,22 +562,30 @@ public class ManageOrderEmailService {
     private void setMultipleOrdersForEmail(Map<String, Object> dynamicData, List<String> selectedOrderIds) {
         if (CollectionUtils.size(selectedOrderIds) > 1) {
             dynamicData.put("multipleOrders", true);
+            log.info("multiple orders are present");
         } else {
             dynamicData.put("multipleOrders", false);
+            log.info("multiple orders are not present");
+
         }
     }
 
     private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {
         if (newOrdersExists.get() && finalOrdersExists.get()) {
+            log.info("both new and final orders exists");
             dynamicData.put("newAndFInal", true);
             dynamicData.put("final", false);
             dynamicData.put("new", false);
 
         } else if (newOrdersExists.get()) {
+            log.info("only new orders exists");
+
             dynamicData.put("newAndFInal", false);
             dynamicData.put("final", false);
             dynamicData.put("new", true);
         } else if (finalOrdersExists.get()) {
+            log.info("both final orders exists");
+
             dynamicData.put("newAndFInal", false);
             dynamicData.put("final", true);
             dynamicData.put("new", false);
@@ -810,9 +823,11 @@ public class ManageOrderEmailService {
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (isNotEmpty(order.getValue().getOrderDocument())) {
+                        log.info("english order document added order {} with id {}", order.getValue().getOrderType(),order.getId());
                         orderDocuments.add(order.getValue().getOrderDocument());
                     }
                     if (isNotEmpty(order.getValue().getOrderDocumentWelsh())) {
+                        log.info("welsh order document added order {} with id {}", order.getValue().getOrderType(),order.getId());
                         orderDocuments.add(order.getValue().getOrderDocumentWelsh());
                     }
                     if (CollectionUtils.isNotEmpty(order.getValue().getServeOrderDetails().getAdditionalDocuments())) {
