@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -1358,14 +1359,12 @@ public class ManageOrderService {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesDA())) {
             otherPartiesServed = Yes;
-            if (caseData.getManageOrders().getEmailInformationDA() != null) {
-                emailInformation = caseData.getManageOrders().getEmailInformationDA();
-            }
-            if (caseData.getManageOrders().getPostalInformationDA() != null) {
-                postalInformation = caseData.getManageOrders().getPostalInformationDA();
-            }
+            Map<String, Object> emailOrPostalInfo = new HashMap<>();
+            getEmailAndPostalInfoCa(caseData, emailOrPostalInfo);
+            postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get("post");
+            emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get("email");
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
@@ -1399,11 +1398,13 @@ public class ManageOrderService {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())
-            || isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCaOnlyC47a())) {
+
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())) {
             otherPartiesServed = Yes;
-            emailInformation = getEmailInformationCA(caseData);
-            postalInformation = getPostalInformationCA(caseData);
+            Map<String, Object> emailOrPostalInfo = new HashMap<>();
+            getEmailAndPostalInfoCa(caseData, emailOrPostalInfo);
+            postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get("post");
+            emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get("email");
         }
         YesOrNo cafcassServedOptions = No;
         YesOrNo cafcassCymruServedOptions = No;
@@ -1487,24 +1488,19 @@ public class ManageOrderService {
         return servingRespondentsOptions;
     }
 
-    private static List<Element<PostalInformation>> getPostalInformationCA(CaseData caseData) {
-        List<Element<PostalInformation>> postalInformation = null;
-        if (caseData.getManageOrders().getPostalInformationCA() != null) {
-            postalInformation = caseData.getManageOrders().getPostalInformationCA();
-        } else if (caseData.getManageOrders().getPostalInformationCaOnlyC47a() != null) {
-            postalInformation = caseData.getManageOrders().getPostalInformationCaOnlyC47a();
-        }
-        return postalInformation;
-    }
-
-    private static List<Element<EmailInformation>> getEmailInformationCA(CaseData caseData) {
-        List<Element<EmailInformation>> emailInformation = null;
-        if (caseData.getManageOrders().getEmailInformationCA() != null) {
-            emailInformation = caseData.getManageOrders().getEmailInformationCA();
-        } else if (caseData.getManageOrders().getEmailInformationCaOnlyC47a() != null) {
-            emailInformation = caseData.getManageOrders().getEmailInformationCaOnlyC47a();
-        }
-        return emailInformation;
+    private static void getEmailAndPostalInfoCa(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
+        List<Element<PostalInformation>> postalInformation = new ArrayList<>();
+        List<Element<EmailInformation>> emailInformation = new ArrayList<>();
+        caseData.getManageOrders().getServeOptionsCaDaOther().stream().map(Element::getValue)
+            .forEach(serveOther -> {
+                if (DeliveryByEnum.email.equals(serveOther.getServeByPostOrEmail())) {
+                    postalInformation.add(element(serveOther.getPostalInformation()));
+                } else if (DeliveryByEnum.post.equals(serveOther.getServeByPostOrEmail())) {
+                    emailInformation.add(element(serveOther.getEmailInformation()));
+                }
+            });
+        emailOrPostalInfo.put("email", emailInformation);
+        emailOrPostalInfo.put("post", postalInformation);
     }
 
     private static String getOtherParties(CaseData caseData) {
