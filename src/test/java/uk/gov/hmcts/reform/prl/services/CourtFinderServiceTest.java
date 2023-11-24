@@ -581,15 +581,10 @@ public class CourtFinderServiceTest {
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
 
-        ChildrenAndRespondentRelation childrenAndRespondentRelation = ChildrenAndRespondentRelation.builder()
-            .respondentFullName("Test")
-            .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.other)
-            .childLivesWith(YesOrNo.No)
-            .childAndRespondentRelationOtherDetails("dsdfs")
-            .build();
+
 
         Element<ChildrenAndRespondentRelation> childrenAndRespondentRelationElement =
-            Element.<ChildrenAndRespondentRelation>builder().value(childrenAndRespondentRelation).build();
+            Element.<ChildrenAndRespondentRelation>builder().value(null).build();
         List<Element<ChildrenAndRespondentRelation>> childrenAndRespondentRelationList =
             Collections.singletonList(childrenAndRespondentRelationElement);
 
@@ -875,12 +870,7 @@ public class CourtFinderServiceTest {
         List<Element<ChildrenAndRespondentRelation>> childrenAndRespondentRelationList =
             Collections.singletonList(childrenAndRespondentRelationElement);
 
-        ChildrenAndApplicantRelation childrenAndApplicantRelation = ChildrenAndApplicantRelation.builder()
-            .applicantFullName("Test")
-            .childFullName("Name").childAndApplicantRelation(RelationshipsEnum.other)
-            .childAndApplicantRelationOtherDetails("dsdfs")
-            .childLivesWith(YesOrNo.No)
-            .build();
+        ChildrenAndApplicantRelation childrenAndApplicantRelation = null;
 
         Element<ChildrenAndApplicantRelation> childrenAndApplicantRelationElement =
             Element.<ChildrenAndApplicantRelation>builder().value(childrenAndApplicantRelation).build();
