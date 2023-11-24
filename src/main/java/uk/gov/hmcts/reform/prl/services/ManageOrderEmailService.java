@@ -437,15 +437,12 @@ public class ManageOrderEmailService {
                 );
             }
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
-                .contains(OtherOrganisationOptions.anotherOrganisation)
-                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
-                manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
-            } else if (manageOrders.getServeOtherPartiesCaOnlyC47a() != null && manageOrders.getServeOtherPartiesCaOnlyC47a()
-                .contains(OtherOrganisationOptions.anotherOrganisation)
-                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCaOnlyC47a())) {
-                manageOrders.getEmailInformationCaOnlyC47a().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
+                .contains(OtherOrganisationOptions.anotherOrganisation)) {
+                manageOrders.getServeOptionsCaDaOther().stream().map(Element::getValue).forEach(value -> {
+                    if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
+                        listOfOtherAndCafcassEmails.add(value.getEmailInformation().getEmailAddress());
+                    }
+                });
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties()) || isNotEmpty(manageOrders.getOtherPartiesOnlyC47a())) {
@@ -467,10 +464,12 @@ public class ManageOrderEmailService {
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
             sendEmailForFlCaseType(caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
-                .contains(ServeOtherPartiesOptions.other)
-                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsDA())) {
-                manageOrders.getEmailInformationDA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
+                .contains(ServeOtherPartiesOptions.other)) {
+                manageOrders.getServeOptionsCaDaOther().stream().map(Element::getValue).forEach(value -> {
+                    if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
+                        listOfOtherAndCafcassEmails.add(value.getEmailInformation().getEmailAddress());
+                    }
+                });
             }
         }
         // Send email notification to other organisations

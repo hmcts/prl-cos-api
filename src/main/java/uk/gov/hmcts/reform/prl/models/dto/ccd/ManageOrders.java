@@ -192,23 +192,12 @@ public class ManageOrders implements MappableObject {
     private final String cafcassCymruEmail;
     @JsonProperty("serveOtherPartiesCA")
     private final List<OtherOrganisationOptions> serveOtherPartiesCA;
-
     @JsonProperty("serveOptionsCaDaOther")
     private final List<Element<ServeOther>> serveOptionsCaDaOther;
 
-    private final DeliveryByEnum deliveryByOptionsCA;
-    @JsonProperty("emailInformationCA")
-    private final List<Element<EmailInformation>> emailInformationCA;
-    @JsonProperty("postalInformationCA")
-    private final List<Element<PostalInformation>> postalInformationCA;
-
     private final ServingRespondentsEnum servingRespondentsOptionsDA;
     private final List<ServeOtherPartiesOptions> serveOtherPartiesDA;
-    private final DeliveryByEnum deliveryByOptionsDA;
-    @JsonProperty("emailInformationDA")
-    private final List<Element<EmailInformation>> emailInformationDA;
-    @JsonProperty("postalInformationDA")
-    private final List<Element<PostalInformation>> postalInformationDA;
+
     @JsonProperty("withdrawnOrRefusedOrder")
     private final WithDrawTypeOfOrderEnum withdrawnOrRefusedOrder;
     @JsonProperty("ordersNeedToBeServed")
@@ -251,20 +240,13 @@ public class ManageOrders implements MappableObject {
     private final C21OrderOptionsEnum c21OrderOptions;
     @JsonProperty("typeOfC21Order")
     private String typeOfC21Order;
+
     private final YesOrNo isOnlyC47aOrderSelectedToServe;
     private final YesOrNo otherPeoplePresentInCaseFlag;
-
     private final YesOrNo serveToRespondentOptionsOnlyC47a;
     private final ServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
     private final DynamicMultiSelectList recipientsOptionsOnlyC47a;
     private final DynamicMultiSelectList otherPartiesOnlyC47a;
-    @JsonProperty("serveOtherPartiesCaOnlyC47a")
-    private final List<OtherOrganisationOptions> serveOtherPartiesCaOnlyC47a;
-    private final DeliveryByEnum deliveryByOptionsCaOnlyC47a;
-    @JsonProperty("emailInformationCaOnlyC47a")
-    private final List<Element<EmailInformation>> emailInformationCaOnlyC47a;
-    @JsonProperty("postalInformationCaOnlyC47a")
-    private final List<Element<PostalInformation>> postalInformationCaOnlyC47a;
 
     @JsonProperty("ordersHearingDetails")
     @JsonUnwrapped
@@ -288,4 +270,23 @@ public class ManageOrders implements MappableObject {
     //PRL-4216 - serve order additional documents
     @JsonProperty("additionalOrderDocuments")
     private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
+
+
+    private final DeliveryByEnum deliveryByOptionsCaOnlyC47a;
+    @JsonProperty("emailInformationCaOnlyC47a")
+    private final List<Element<EmailInformation>> emailInformationCaOnlyC47a;
+    @JsonProperty("postalInformationCaOnlyC47a")
+    private final List<Element<PostalInformation>> postalInformationCaOnlyC47a;
+    private final DeliveryByEnum deliveryByOptionsDA;
+    @JsonProperty("emailInformationDA")
+    private final List<Element<EmailInformation>> emailInformationDA;
+    @JsonProperty("postalInformationDA")
+    private final List<Element<PostalInformation>> postalInformationDA;
+    @JsonProperty("serveOtherPartiesCaOnlyC47a")
+    private final List<OtherOrganisationOptions> serveOtherPartiesCaOnlyC47a;
+    private final DeliveryByEnum deliveryByOptionsCA;
+    @JsonProperty("emailInformationCA")
+    private final List<Element<EmailInformation>> emailInformationCA;
+    @JsonProperty("postalInformationCA")
+    private final List<Element<PostalInformation>> postalInformationCA;
 }
