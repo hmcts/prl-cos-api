@@ -336,8 +336,7 @@ public class TestingSupportService {
     public void solicitorSubmittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
             try {
-                CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-                caseInitiationService.handleCaseInitiation(authorisation, caseData);
+                caseInitiationService.handleCaseInitiation(authorisation, callbackRequest);
             } catch (Exception e) {
                 log.error("Access grant failed", e);
             }
