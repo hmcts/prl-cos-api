@@ -283,4 +283,6 @@ public class ManageOrders implements MappableObject {
     //PRL-4216 - serve order additional documents
     @JsonProperty("additionalOrderDocuments")
     private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
+    @JsonProperty("displayLegalRepOption")
+    private String displayLegalRepOption;
 }
