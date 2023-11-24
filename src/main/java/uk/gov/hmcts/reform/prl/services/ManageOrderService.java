@@ -1079,6 +1079,7 @@ public class ManageOrderService {
                         m -> m.getValue().getDateCreated(),
                         Comparator.reverseOrder()
                     ));
+                    log.info("order collection after adding new order {}",orderCollection);
                     if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                         orderCollection = serveOrder(caseData, orderCollection);
                     }
@@ -1088,8 +1089,11 @@ public class ManageOrderService {
             }
         } else {
             orderCollection = serveOrder(caseData, caseData.getOrderCollection());
+            log.info("order collection after adding new order {}",orderCollection);
+
         }
         orderMap.put("orderCollection", orderCollection);
+        log.info("order collection after adding new order {}",orderCollection);
         return orderMap;
     }
 
