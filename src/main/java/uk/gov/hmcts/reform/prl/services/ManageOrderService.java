@@ -1685,15 +1685,23 @@ public class ManageOrderService {
         } else {
             tempServeOrderDetails = ServeOrderDetails.builder().build();
         }
-
+        List<String> orgNameList = new ArrayList<>();
         String organisationsName = null;
         if (null != postalInformation) {
-            List<String> orgNameList = postalInformation.stream()
-                .map(postalInfoElem -> postalInfoElem.getValue().getPostalName()).collect(Collectors.toList());
-            if (!orgNameList.isEmpty()) {
-                organisationsName = String.join(", ", orgNameList);
-            }
+            orgNameList.addAll(postalInformation.stream()
+                .map(postalInfoElem -> postalInfoElem.getValue().getPostalName()).collect(Collectors.toList()));
         }
+
+        if (null != emailInformation) {
+            orgNameList.addAll(emailInformation.stream()
+                .map(emailInfoElem -> emailInfoElem.getValue().getEmailName()).collect(Collectors.toList()));
+        }
+
+        if (!orgNameList.isEmpty()) {
+            organisationsName = String.join(", ", orgNameList);
+        }
+
+
         ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .recipientsOptions(recipients)
