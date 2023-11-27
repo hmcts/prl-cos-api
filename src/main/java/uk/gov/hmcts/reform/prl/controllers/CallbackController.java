@@ -351,6 +351,7 @@ public class CallbackController {
                 quarantineDocs.add(element(miamQuarantineDoc));
                 caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
                 caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+                caseDataUpdated.put("miamDetails", null);
             }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
