@@ -161,7 +161,6 @@ public class ManageDocumentsService {
 
             if (!quarantineDocs.isEmpty()) {
                 updateQuarantineDocs(
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
                     caseDataUpdated,
                     quarantineDocs,
                     userRole,
@@ -170,7 +169,6 @@ public class ManageDocumentsService {
             }
             if (!tabDocuments.isEmpty()) {
                 updateQuarantineDocs(
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
                     caseDataUpdated,
                     tabDocuments,
                     userRole,
@@ -225,8 +223,7 @@ public class ManageDocumentsService {
         return confidentialityFlag;
     }
 
-    private void updateQuarantineDocs(List<Element<QuarantineLegalDoc>> data,
-                                      Map<String, Object> caseDataUpdated,
+    private void updateQuarantineDocs(Map<String, Object> caseDataUpdated,
                                       List<Element<QuarantineLegalDoc>> quarantineDocs,
                                       String userRole,
                                       boolean isDocumentTab) {
@@ -263,7 +260,7 @@ public class ManageDocumentsService {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
-                    //  mapConfidentialFilesToConfidentialTaB(data, caseDataUpdated, quarantineDocs);
+                    quarantineDocs.remove(restrictToGroup);
                     caseDataUpdated.put("courtStaffUploadDocListConfTab", quarantineDocs);
                 }
                 break;
@@ -308,7 +305,6 @@ public class ManageDocumentsService {
                 return getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    // caseData.getCourtStaffQuarantineDocsList()
                     caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()
                 );
 
@@ -335,8 +331,6 @@ public class ManageDocumentsService {
                 .documentCreatedOn(localZoneDate).build() : null)
             .courtStaffQuarantineDocument((COURT_STAFF.equals(userRole) || COURT_ADMIN.equals(userRole)) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
-            //.courtAdminQuarantineDocument(COURT_ADMIN.equals(userRole) ? manageDocument.getDocument().toBuilder()
-            //.documentCreatedOn(localZoneDate).build() : null)
             .build();
     }
 }
