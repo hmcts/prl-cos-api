@@ -32,9 +32,6 @@ public enum BundlingDocGroupEnum {
     @JsonProperty("respondentApplication")
     respondentApplication("respondentApplication", "respondentApplication"),
 
-    @JsonProperty("ordersFromOtherProceedings")
-    ordersFromOtherProceedings("ordersFromOtherProceedings", "ordersFromOtherProceedings"),
-
     @JsonProperty("respondentC1AApplication")
     respondentC1AApplication("respondentC1AApplication", "respondentC1AApplication"),
 
