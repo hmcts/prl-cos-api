@@ -34,7 +34,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
@@ -248,7 +247,7 @@ public class ReviewDocumentService {
         }
     }
 
-    public void uploadDocForConfOrDocTab(Map<String, Object> caseDataUpdated,
+    private void uploadDocForConfOrDocTab(Map<String, Object> caseDataUpdated,
                                          List<Element<QuarantineLegalDoc>> quarantineDocsList,
                                          UUID uuid,
                                          boolean isReviewDecisionYes,
@@ -293,9 +292,6 @@ public class ReviewDocumentService {
 
             case CAFCASS:
                 return quarantineLegalDoc.getCafcassQuarantineDocument();
-
-            case COURT_ADMIN:
-                return quarantineLegalDoc.getCourtStaffQuarantineDocument();
 
             case COURT_STAFF:
                 return quarantineLegalDoc.getCourtStaffQuarantineDocument();

@@ -9,7 +9,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -385,7 +384,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testCopyDocumentIfRestrictedWithCourtStaffRole() {
+    public void testCopyDocumentIfRestrictedWithCourtAdminRole() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
@@ -419,8 +418,6 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
-        ReviewDocumentService reviewDocumentService = new ReviewDocumentService();
-        MockitoAnnotations.openMocks(this);
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
@@ -428,14 +425,19 @@ public class ManageDocumentsServiceTest {
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
 
+        List<Element<QuarantineLegalDoc>> courtStaffUploadDocListConfTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
+            "courtStaffUploadDocListConfTab");
+
+        assertEquals(1,courtStaffUploadDocListConfTab.size());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
         assertEquals(0,courtStaffQuarantineDocsList.size());
         assertEquals(0,courtStaffUploadDocListDocTab.size());
+
     }
 
 
     @Test
-    public void testCopyDocumentIfRestrictedWithCourtStaffRoleNonEmptyCourtStaffUploadDocListDocTab() {
+    public void testCopyDocumentIfRestrictedWithCourtAdminRoleNonEmptyCourtStaffUploadDocListDocTab() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
@@ -473,18 +475,20 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
 
 
-        ReviewDocumentService reviewDocumentService = new ReviewDocumentService();
-        MockitoAnnotations.openMocks(this);
-
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
 
+        List<Element<QuarantineLegalDoc>> courtStaffUploadDocListConfTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
+            "courtStaffUploadDocListConfTab");
+
+        assertEquals(1,courtStaffUploadDocListConfTab.size());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
         assertEquals(0,courtStaffQuarantineDocsList.size());
         assertEquals(1,courtStaffUploadDocListDocTab.size());
+
     }
 
     @Test
