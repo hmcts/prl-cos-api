@@ -1589,6 +1589,9 @@ public class ManageOrderService {
         } else {
             tempServeOrderDetails = ServeOrderDetails.builder().build();
         }
+        log.info("*** EMail info {}", emailInformation);
+        log.info("*** Postal info {}", postalInformation);
+
         ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .recipientsOptions(recipients)
@@ -1603,6 +1606,7 @@ public class ManageOrderService {
             .additionalDocuments(additionalDocuments)
             .servedParties(servedParties)
             .build();
+        log.info("*** Serve order details {}", servedOrderDetails);
 
         OrderDetails amended = order.getValue().toBuilder()
             .orderDocument(order.getValue().getOrderDocument())
@@ -1613,7 +1617,11 @@ public class ManageOrderService {
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
+        log.info("*** order details {}", order);
+
         orders.set(orders.indexOf(order), element(order.getId(), amended));
+        log.info("*** orders details {}", orders);
+
     }
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
