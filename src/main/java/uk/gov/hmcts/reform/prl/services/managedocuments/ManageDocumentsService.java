@@ -265,19 +265,7 @@ public class ManageDocumentsService {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
-                    List<UUID> uuidList = quarantineDocs.stream().map(element -> element.getId()).toList();
-                    for (UUID uuid : uuidList) {
-
-                        reviewDocumentService.uploadDocForConfOrDocTab(
-                            caseDataUpdated,
-                            quarantineDocs,
-                            uuid,
-                            true,
-                            data,
-                            COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
-                            COURT_STAFF
-                        );
-                    }
+                    mapConfidentialFilesToConfidentialTaB(data, caseDataUpdated, quarantineDocs);
                     caseDataUpdated.remove("manageDocuments");
 
                 }
@@ -286,6 +274,24 @@ public class ManageDocumentsService {
             default:
                 throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
 
+        }
+    }
+
+    private void mapConfidentialFilesToConfidentialTaB(List<Element<QuarantineLegalDoc>> data,
+                                                       Map<String, Object> caseDataUpdated,
+                                                       List<Element<QuarantineLegalDoc>> quarantineDocs) {
+        List<UUID> uuidList = quarantineDocs.stream().map(Element::getId).toList();
+        for (UUID uuid : uuidList) {
+
+            reviewDocumentService.uploadDocForConfOrDocTab(
+                caseDataUpdated,
+                quarantineDocs,
+                uuid,
+                true,
+                data,
+                COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
+                COURT_STAFF
+            );
         }
     }
 
