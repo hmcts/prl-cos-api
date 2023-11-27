@@ -307,7 +307,6 @@ public class ManageOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                               .recitalsOrPreamble("test")
                               .isCaseWithdrawn(YesOrNo.Yes)
-                              .isTheOrderByConsent(YesOrNo.Yes)
                               .fl404CustomFields(FL404.builder().build())
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
                               .orderDirections("test")
@@ -359,7 +358,6 @@ public class ManageOrderServiceTest {
             .furtherDirectionsIfRequired("fur dir")
             .recitalsOrPreamble("reci")
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesClerk)
-            .isTheOrderByConsent(YesOrNo.Yes)
             .build();
         CaseData caseData = CaseData.builder()
             .id(12345674L)
@@ -1646,7 +1644,6 @@ public class ManageOrderServiceTest {
             .furtherDirectionsIfRequired("fur dir")
             .recitalsOrPreamble("reci")
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesClerk)
-            .isTheOrderByConsent(YesOrNo.Yes)
             .build();
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("")
@@ -2009,7 +2006,6 @@ public class ManageOrderServiceTest {
             .furtherDirectionsIfRequired("fur dir")
             .recitalsOrPreamble("reci")
             .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesClerk)
-            .isTheOrderByConsent(YesOrNo.Yes)
             .build();
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("")
@@ -2158,7 +2154,6 @@ public class ManageOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                               .recitalsOrPreamble("test")
                               .isCaseWithdrawn(YesOrNo.Yes)
-                              .isTheOrderByConsent(YesOrNo.Yes)
                               .judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.circuitJudge)
                               .orderDirections("test")
                               .furtherDirectionsIfRequired("test")
