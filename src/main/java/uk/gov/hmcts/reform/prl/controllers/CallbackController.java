@@ -313,7 +313,11 @@ public class CallbackController {
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             caseDataUpdated.putAll(map);
-            log.info("3333333333333333----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
+            log.info("3333333333333333----> {}",caseData.getMiamDetails());
+            if (null != caseData.getMiamDetails()) {
+                log.info("4444444444444444----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
+            }
+
 
             if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
                 // updating Summary tab to update case status
