@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -112,7 +113,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RestController
@@ -283,10 +286,9 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        log.info("11111");
+        log.info("1111111111111111");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            log.info("222222 {}",caseData);
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(
@@ -313,11 +315,6 @@ public class CallbackController {
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             caseDataUpdated.putAll(map);
-            log.info("3333333333333333----> {}",caseData.getMiamDetails());
-            if (null != caseData.getMiamDetails()) {
-                log.info("4444444444444444----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
-            }
-
 
             if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
                 // updating Summary tab to update case status
@@ -344,6 +341,17 @@ public class CallbackController {
                 .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
+            List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
+            if (null != caseData.getMiamDetails()) {
+                log.info("MiamCertDocUploadddddd()----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
+                Element<ManageDocuments> element;
+                QuarantineLegalDoc miamQuarantineDoc = QuarantineLegalDoc.builder()
+                    .document(caseData.getMiamDetails().getMiamCertificationDocumentUpload().toBuilder().build())
+                    .build();
+                quarantineDocs.add(element(miamQuarantineDoc));
+                caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
+                caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+            }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
