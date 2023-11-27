@@ -72,8 +72,7 @@ public class ManageDocumentsService {
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
-    @Autowired
-    private ReviewDocumentService reviewDocumentService;
+    private final ReviewDocumentService reviewDocumentService;
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
 
