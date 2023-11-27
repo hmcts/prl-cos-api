@@ -333,10 +333,10 @@ public class ManageDocumentsService {
                 .documentCreatedOn(localZoneDate).build() : null)
             .cafcassQuarantineDocument(CAFCASS.equals(userRole) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
-            .courtStaffQuarantineDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
+            .courtStaffQuarantineDocument((COURT_STAFF.equals(userRole)||COURT_ADMIN.equals(userRole)) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
-            .courtStaffQuarantineDocument(COURT_ADMIN.equals(userRole) ? manageDocument.getDocument().toBuilder()
-                .documentCreatedOn(localZoneDate).build() : null)
+            //.courtAdminQuarantineDocument(COURT_ADMIN.equals(userRole) ? manageDocument.getDocument().toBuilder()
+                //.documentCreatedOn(localZoneDate).build() : null)
             .build();
     }
 }
