@@ -283,10 +283,10 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
+        log.info("11111");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
+            log.info("222222 {}",caseData);
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(
@@ -313,6 +313,7 @@ public class CallbackController {
             // updating Summary tab to update case status
             caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
             caseDataUpdated.putAll(map);
+            log.info("3333333333333333----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
 
             if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
                 // updating Summary tab to update case status
