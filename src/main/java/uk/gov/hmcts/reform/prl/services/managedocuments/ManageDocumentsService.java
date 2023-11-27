@@ -266,8 +266,6 @@ public class ManageDocumentsService {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
                     mapConfidentialFilesToConfidentialTaB(data, caseDataUpdated, quarantineDocs);
-                    caseDataUpdated.remove("manageDocuments");
-                    quarantineDocs.clear();
                 }
                 break;
 
