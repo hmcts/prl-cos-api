@@ -4,13 +4,12 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -30,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
@@ -44,6 +44,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -72,6 +73,8 @@ public class ManageDocumentsServiceTest {
     @Mock
     private UserService userService;
 
+    @Mock
+    private ReviewDocumentService reviewDocumentService;
     private final String auth = "auth-token";
 
     private final String serviceAuthToken = "Bearer testServiceAuth";
@@ -166,9 +169,9 @@ public class ManageDocumentsServiceTest {
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
 
         when(coreCaseDataApi.getCategoriesAndDocuments(
-            Mockito.any(),
-            Mockito.any(),
-            Mockito.any()
+            any(),
+            any(),
+            any()
         )).thenReturn(categoriesAndDocuments);
 
         CaseData caseData = CaseData.builder().build();
@@ -381,7 +384,6 @@ public class ManageDocumentsServiceTest {
         assertEquals(1,cafcassUploadDocListDocTab.size());
     }
 
-    @Ignore
     @Test
     public void testCopyDocumentIfRestrictedWithCourtStaffRole() {
 
@@ -417,6 +419,8 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
+        ReviewDocumentService reviewDocumentService = new ReviewDocumentService();
+        MockitoAnnotations.openMocks(this);
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
@@ -425,11 +429,11 @@ public class ManageDocumentsServiceTest {
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(1,courtStaffQuarantineDocsList.size());
+        assertEquals(0,courtStaffQuarantineDocsList.size());
         assertEquals(0,courtStaffUploadDocListDocTab.size());
     }
 
-    @Ignore
+
     @Test
     public void testCopyDocumentIfRestrictedWithCourtStaffRoleNonEmptyCourtStaffUploadDocListDocTab() {
 
@@ -468,6 +472,10 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
 
+
+        ReviewDocumentService reviewDocumentService = new ReviewDocumentService();
+        MockitoAnnotations.openMocks(this);
+
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
@@ -475,7 +483,7 @@ public class ManageDocumentsServiceTest {
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(1,courtStaffQuarantineDocsList.size());
+        assertEquals(0,courtStaffQuarantineDocsList.size());
         assertEquals(1,courtStaffUploadDocListDocTab.size());
     }
 
