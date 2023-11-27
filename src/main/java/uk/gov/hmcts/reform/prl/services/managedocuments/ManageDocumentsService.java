@@ -301,4 +301,33 @@ public class ManageDocumentsService {
                 .documentCreatedOn(localZoneDate).build() : null)
             .build();
     }
+
+    public Map<String,Object> createQuarantineDocs(Map<String,Object> caseDataUpdated,CaseData caseData) {
+        List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
+        if (null != caseData.getMiamDetails()) {
+
+            log.info("MiamCertDocUploadddddd()----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
+            QuarantineLegalDoc miamQuarantineDoc = QuarantineLegalDoc.builder()
+                .document(caseData.getMiamDetails().getMiamCertificationDocumentUpload().toBuilder().build())
+                .build();
+            quarantineDocs.add(element(miamQuarantineDoc));
+            caseDataUpdated.put("miamDetails", caseData.getMiamDetails().toBuilder().miamCertificationDocumentUpload(null).build());
+        }
+
+        if (null != caseData.getDraftConsentOrderFile()) {
+            log.info("ConsentOrderUpload()----> {}",caseData.getDraftConsentOrderFile());
+            QuarantineLegalDoc consentOrderQuarantineDoc = QuarantineLegalDoc.builder()
+                .document(caseData.getDraftConsentOrderFile().toBuilder().build())
+                .build();
+            quarantineDocs.add(element(consentOrderQuarantineDoc));
+            caseDataUpdated.put("draftConsentOrderFile", caseData.toBuilder().draftConsentOrderFile(null).build());
+        }
+
+        if (!quarantineDocs.isEmpty()) {
+            caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
+            caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+        }
+
+        return caseDataUpdated;
+    }
 }

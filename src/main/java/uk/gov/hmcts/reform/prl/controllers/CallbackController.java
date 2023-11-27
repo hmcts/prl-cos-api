@@ -47,7 +47,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
-import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -72,6 +71,7 @@ import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -113,9 +113,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE
 import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RestController
@@ -154,6 +152,8 @@ public class CallbackController {
     private final C100IssueCaseService c100IssueCaseService;
     private final AmendCourtService amendCourtService;
     private final EventService eventPublisher;
+
+    private final ManageDocumentsService manageDocumentsService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -334,26 +334,13 @@ public class CallbackController {
                     "paymentServiceRequestReferenceNumber",
                     paymentServiceResponse.getServiceRequestReference()
                 );
+                caseDataUpdated = manageDocumentsService.createQuarantineDocs(caseDataUpdated,caseData);
             }
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(C100_DEFAULT_REGION_ID)
                 .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
-
-            List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
-            if (null != caseData.getMiamDetails()) {
-                log.info("MiamCertDocUploadddddd()----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
-                Element<ManageDocuments> element;
-                QuarantineLegalDoc miamQuarantineDoc = QuarantineLegalDoc.builder()
-                    .document(caseData.getMiamDetails().getMiamCertificationDocumentUpload().toBuilder().build())
-                    .build();
-                quarantineDocs.add(element(miamQuarantineDoc));
-                caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
-                caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
-
-                caseDataUpdated.put("miamDetails", caseData.getMiamDetails().toBuilder().miamCertificationDocumentUpload(null).build());
-            }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
