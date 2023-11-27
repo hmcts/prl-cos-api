@@ -64,7 +64,7 @@ public class JudicialUsersApiConsumerTest {
     @Pact(provider = "judicialUserDetailsApi", consumer = "prl_cos")
     public RequestResponsePact generatePactFragmentForAllocateJudge(PactDslWithProvider builder) throws Exception {
         String[] personalCodes = new String[2];
-        personalCodes[0] = "49933940";
+        personalCodes[0] = "4923952";
         judicialUsersApiRequest = JudicialUsersApiRequest.builder().personalCode(personalCodes).build();
         // @formatter:off
         return builder
@@ -91,7 +91,7 @@ public class JudicialUsersApiConsumerTest {
         assertNotNull(judicialUsersList);
         JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersList.get(0);
         assertNotNull(judicialUsersApiResponse);
-        assertEquals(judicialUsersApiResponse.getPersonalCode(),"49933940");
+        assertEquals(judicialUsersApiResponse.getPersonalCode(),"4923952");
         assertEquals(judicialUsersApiResponse.getEmailId(),"49933940EMP-@ejudiciary.net");
         assertEquals(judicialUsersApiResponse.getSurname(), "Prakasscs");
     }
