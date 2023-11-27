@@ -267,7 +267,7 @@ public class ManageDocumentsService {
                 } else {
                     mapConfidentialFilesToConfidentialTaB(data, caseDataUpdated, quarantineDocs);
                     caseDataUpdated.remove("manageDocuments");
-
+                    quarantineDocs.clear();
                 }
                 break;
 
