@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -25,7 +26,7 @@ public class FL401Respondent {
     private final YesOrNo canYouProvidePhoneNumber;
     private final String phoneNumber;
 
-    private final String doTheyHaveLegalRepresentation;
+    private final YesNoDontKnow doTheyHaveLegalRepresentation;
     private final String representativeFirstName;
     private final String representativeLastName;
     private final String solicitorEmail;
