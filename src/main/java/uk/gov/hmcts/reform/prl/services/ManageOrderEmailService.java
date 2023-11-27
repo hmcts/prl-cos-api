@@ -241,6 +241,11 @@ public class ManageOrderEmailService {
                                                   String emailAddress,
                                                   EmailTemplateVars email,
                                                   CaseData caseData) {
+        log.info("*** Email addt {}", emailAddress);
+        log.info("*** Email {}", email);
+        log.info("*** final order {}", isFinalOrder);
+        log.info("*** languahge pref {}", caseData.getWelshLanguageRequirement());
+
         emailService.send(
             emailAddress,
             (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL
