@@ -268,7 +268,7 @@ public class EditAndApproveDraftOrderController {
             );
             if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData)).build();
+                    .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData, true)).build();
             } else {
                 List<String> errorList = new ArrayList<>();
                 errorList.add(
