@@ -1080,6 +1080,9 @@ public class ManageOrderService {
                         m -> m.getValue().getDateCreated(),
                         Comparator.reverseOrder()
                     ));
+                    log.info("** Does order needs to be served {}",caseData.getManageOrders().getOrdersNeedToBeServed());
+                    log.info("** Do you eant to serve {}",caseData.getServeOrderData().getDoYouWantToServeOrder());
+
                     if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                         orderCollection = serveOrder(caseData, orderCollection);
                     }
