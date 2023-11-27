@@ -32,7 +32,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -44,7 +43,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZON
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
-import static uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService.COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
@@ -265,7 +263,8 @@ public class ManageDocumentsService {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
-                    mapConfidentialFilesToConfidentialTaB(data, caseDataUpdated, quarantineDocs);
+                    //  mapConfidentialFilesToConfidentialTaB(data, caseDataUpdated, quarantineDocs);
+                    caseDataUpdated.put("courtStaffUploadDocListConfTab", quarantineDocs);
                 }
                 break;
 
@@ -275,23 +274,6 @@ public class ManageDocumentsService {
         }
     }
 
-    private void mapConfidentialFilesToConfidentialTaB(List<Element<QuarantineLegalDoc>> data,
-                                                       Map<String, Object> caseDataUpdated,
-                                                       List<Element<QuarantineLegalDoc>> quarantineDocs) {
-        List<UUID> uuidList = quarantineDocs.stream().map(Element::getId).toList();
-        for (UUID uuid : uuidList) {
-
-            reviewDocumentService.uploadDocForConfOrDocTab(
-                caseDataUpdated,
-                quarantineDocs,
-                uuid,
-                true,
-                data,
-                COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
-                COURT_STAFF
-            );
-        }
-    }
 
     private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
                                                                 String userRole,
@@ -326,7 +308,8 @@ public class ManageDocumentsService {
                 return getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getCourtStaffQuarantineDocsList()
+                    // caseData.getCourtStaffQuarantineDocsList()
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()
                 );
 
             default:
