@@ -260,7 +260,7 @@ public class ManageDocumentsService {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
-                    quarantineDocs.remove(restrictToGroup);
+                    quarantineDocs.forEach(n->n.getValue().getRestrictCheckboxCorrespondence().clear());
                     caseDataUpdated.put("courtStaffUploadDocListConfTab", quarantineDocs);
                 }
                 break;
