@@ -108,9 +108,7 @@ public class SendgridService {
             request.setMethod(Method.POST);
             request.setEndpoint(MAIL_SEND);
             request.setBody(mail.build());
-            log.info("Initiating email through sendgrid");
             sendGrid.api(request);
-            log.info("Notification to RPA sent successfully");
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
@@ -124,25 +122,18 @@ public class SendgridService {
         if (MapUtils.isNotEmpty(dynamicFields)) {
             dynamicFields.forEach(personalization::addDynamicTemplateData);
         }
-        log.info("personalization element  {}", personalization);
         Mail mail = new Mail();
-        log.info("email attachments {}",sendgridEmailConfig);
         if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
             attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
         }
         mail.setFrom(getEmail(fromEmail));
         mail.addPersonalization(personalization);
-        log.info("sendgrid email template names {}",sendgridEmailTemplateNames);
-        log.info("sendgrid email config {} ", sendgridEmailConfig);
         mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
-        log.info("mail information {}",mail);
-        log.info("sendgrid template ID reffered");
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
             request.setEndpoint(MAIL_SEND);
             request.setBody(mail.build());
-            log.info("Initiating email through sendgrid");
             Response response = sendGrid.api(request);
             log.info("Sendgrid status code {}", response.getStatusCode());
             if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
@@ -155,18 +146,7 @@ public class SendgridService {
     }
 
     private String getTemplateId(SendgridEmailTemplateNames templateName, LanguagePreference languagePreference) {
-
-        try {
-            log.info("object {}",sendgridEmailTemplatesConfig);
-            log.info("list of templates {}",sendgridEmailTemplatesConfig.getTemplates());
-
-            log.info("sendgrid template ID  is  {} ",sendgridEmailTemplatesConfig.getTemplates().get(languagePreference).get(templateName));
-            return sendgridEmailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
-
-        } catch (Exception e) {
-            log.info("failed due to null pointer exception");
-        }
-        return "d-2dbde39ca0ed4297825fe736b26a0bb6";
+        return sendgridEmailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
     }
 
 
