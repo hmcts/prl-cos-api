@@ -626,16 +626,14 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
-            log.info("eventsForCase {}", eventsForCase);
 
             Optional<String> previousState = eventsForCase.stream()
                 .map(CaseEventDetail::getStateId)
                 .findFirst();
             previousState.ifPresent(s -> caseDataUpdated.put(
                 VERIFY_CASE_NUMBER_ADDED,
-                SUBMITTED_PAID.getLabel().equalsIgnoreCase(s) ? Yes : No
+                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes : No
             ));
-            log.info("caseData123 {}", caseDataUpdated);
             log.info("previousState {}", previousState);
             log.info("isAddCaseNumberAdded {}", caseDataUpdated.get("isAddCaseNumberAdded"));
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
