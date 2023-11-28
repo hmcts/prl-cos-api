@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.google.common.collect.ImmutableMap;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
@@ -11,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.prl.config.SendgridEmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -61,6 +63,9 @@ public class SendgridServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    private SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
 
     @Value("${citizen.url}")
     private String citizenUrl;
@@ -232,6 +237,13 @@ public class SendgridServiceTest {
         request.setMethod(Method.POST);
         request.setEndpoint("mail/send");
         request.setBody("test body");
+        when(sendgridEmailTemplatesConfig.getTemplates())
+            .thenReturn(
+                ImmutableMap.of(
+                    LanguagePreference.english, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
+                    LanguagePreference.welsh, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
+                )
+            );
 
         byte[] biteData = "test bytes".getBytes();
         for (Document d : documentList) {
@@ -347,6 +359,13 @@ public class SendgridServiceTest {
         Map<String, Object> dynamicTemplateData = new HashMap<>();
         dynamicTemplateData.put("caseName", caseData.getApplicantCaseName());
         dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
+        when(sendgridEmailTemplatesConfig.getTemplates())
+            .thenReturn(
+                ImmutableMap.of(
+                    LanguagePreference.english, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "111"),
+                    LanguagePreference.welsh, ImmutableMap.of(SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION, "222")
+                )
+            );
         SendgridEmailConfig sendgridEmailConfig = SendgridEmailConfig.builder().listOfAttachments(documentList).toEmailAddress(
                 applicant.getSolicitorEmail())
             .languagePreference(LanguagePreference.english)
