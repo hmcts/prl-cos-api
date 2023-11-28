@@ -1737,6 +1737,7 @@ public class ManageOrderService {
         log.info("***** inside updateOtherOrderDetails******** {}", otherDetails);
         return OtherOrderDetails.builder()
             .createdBy(otherDetails.getCreatedBy())
+            .orderCreatedBy(otherDetails.getOrderCreatedBy())
             .orderCreatedDate(otherDetails.getOrderCreatedDate())
             .orderAmendedDate(otherDetails.getOrderAmendedDate())
             .orderMadeDate(otherDetails.getOrderMadeDate())
