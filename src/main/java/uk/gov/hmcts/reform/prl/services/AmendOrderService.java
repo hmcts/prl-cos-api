@@ -101,7 +101,8 @@ public class AmendOrderService {
                         .serveOrderDetails(null)
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
                                           .orderServedDate(null)
-                                          .createdBy(currentUserFullName)
+                                          .createdBy(order.getValue().getOtherDetails().getCreatedBy())
+                                          .orderCreatedBy(currentUserFullName)
                                           .orderCreatedDate(time.now().format(DateTimeFormatter.ofPattern(
                                               PrlAppsConstants.D_MMM_YYYY,
                                               Locale.ENGLISH
@@ -171,7 +172,8 @@ public class AmendOrderService {
             .orderSelectionType(orderSelectionType)
             .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(currentUserFullName)
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .orderCreatedBy(currentUserFullName)
                               .dateCreated(time.now())
                               .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
