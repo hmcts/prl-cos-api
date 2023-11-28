@@ -262,6 +262,7 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         updatedCaseData.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+            log.info("1111111111");
             DraftOrder draftOrder = e.getValue();
             log.info("*** eid, Selected order id {} {}", e.getId(), selectedOrderId);
             log.info("*** Equals {}", e.getId().equals(selectedOrderId));
@@ -269,6 +270,7 @@ public class DraftAnOrderService {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
+                    log.info("222222222");
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
@@ -280,6 +282,7 @@ public class DraftAnOrderService {
                     }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
+                    log.info("44444444{}",draftOrder.getOtherDetails().getOrderCreatedBy());
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                     caseData = updateCaseDataForFinalOrderDocument(caseData, authorisation, draftOrder.getOrderType());
                 }
@@ -319,7 +322,7 @@ public class DraftAnOrderService {
     }
 
     private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
-
+        log.info("55555555{}",draftOrder.getOtherDetails().getOrderCreatedBy());
         List<Element<OrderDetails>> orderCollection;
         if (caseData.getOrderCollection() != null) {
             orderCollection = caseData.getOrderCollection();
@@ -887,6 +890,7 @@ public class DraftAnOrderService {
                 orderDocumentWelsh = draftOrder.getOrderDocumentWelsh();
             }
         }
+        log.info("3333333{}",draftOrder.getOtherDetails().getOrderCreatedBy());
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
