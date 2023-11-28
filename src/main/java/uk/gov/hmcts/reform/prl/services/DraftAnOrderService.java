@@ -856,10 +856,11 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
+        log.info("vvvvvvvv ----{}",draftOrder.getOrderCreatedBy());
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
-            .otherDetails(draftOrder.getOtherDetails().toBuilder()
+            .otherDetails(draftOrder.getOtherDetails().toBuilder().orderCreatedBy(draftOrder.getOrderCreatedBy())
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
                                   loggedInUserType,
