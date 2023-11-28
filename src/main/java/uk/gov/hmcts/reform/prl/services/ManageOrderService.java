@@ -1067,6 +1067,7 @@ public class ManageOrderService {
                     if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
                         && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
                         && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                        log.info("updating order ID");
                         updateCurrentOrderId(
                             caseData.getManageOrders().getServeOrderDynamicList(),
                             orderCollection,
@@ -1103,17 +1104,22 @@ public class ManageOrderService {
         String currentOrderId;
         List<String> selectedOrderIds = serveOrderDynamicList.getValue()
             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+        log.info(" selected order ID indide updateCurrentOrderId() {}",selectedOrderIds);
         List<UUID> existingOrderIds = existingOrderCollection.stream().map(Element::getId).collect(Collectors.toList());
+        log.info("existing order ID indide updateCurrentOrderId() {}",existingOrderIds);
+
         currentOrderId = selectedOrderIds
             .stream()
             .filter(selectedOrderId -> !existingOrderIds.contains(UUID.fromString(selectedOrderId)))
             .collect(Collectors.joining());
+        log.info("current order ID  {}",currentOrderId);
         if (StringUtils.isNotBlank((currentOrderId))) {
             newOrderDetails.set(
                 0,
                 element(UUID.fromString(currentOrderId), newOrderDetails.get(0).getValue())
             );
         }
+        log.info("new order details after updateCurrentOrderId {}",newOrderDetails);
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType) {
