@@ -893,7 +893,8 @@ public class DraftAnOrderService {
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(draftOrder.getOtherDetails().getCreatedBy())
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
                               .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
