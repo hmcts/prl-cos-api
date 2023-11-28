@@ -2575,6 +2575,7 @@ public class ManageOrderServiceTest {
             .orderCollection(new ArrayList<>())
             .dateOrderMade(LocalDate.now())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.interim)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .manageOrders(manageOrders.toBuilder()
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .build())
@@ -2837,7 +2838,8 @@ public class ManageOrderServiceTest {
         when(dateTime.now()).thenReturn(LocalDateTime.now());
 
         ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
-        manageOrders = manageOrders.toBuilder().amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck).build();
+        manageOrders = manageOrders.toBuilder()
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck).build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2850,6 +2852,7 @@ public class ManageOrderServiceTest {
             .orderRecipients(recipientList)
             .applicants(partyDetails)
             .respondents(partyDetails)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .doesOrderClosesCase(YesOrNo.Yes)
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
@@ -3054,7 +3057,7 @@ public class ManageOrderServiceTest {
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         manageOrderService.setMarkedToServeEmailNotification(caseData,caseDataUpdated);
-        Assert.assertEquals(YesOrNo.No,caseDataUpdated.get("markedToServeEmailNotification"));
+        Assert.assertEquals(YesOrNo.Yes,caseDataUpdated.get("markedToServeEmailNotification"));
 
     }
 
@@ -3114,6 +3117,7 @@ public class ManageOrderServiceTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .fl401FamilymanCaseNumber("familyman12345")
             .dateOrderMade(LocalDate.now())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .manageOrders(manageOrders)
