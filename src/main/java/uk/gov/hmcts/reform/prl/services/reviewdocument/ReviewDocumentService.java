@@ -109,7 +109,7 @@ public class ReviewDocumentService {
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + element.getValue().getDocumentUploadedDate()
                                                    .format(DateTimeFormatter.ofPattern(D_MMM_YYYY, Locale.UK)))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarantineDocsList().stream()
@@ -119,7 +119,7 @@ public class ReviewDocumentService {
                                                    D_MMM_YYYY,
                                                    element.getValue().getDateCreated()
                                                ))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         if (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())) {
             dynamicListElements.addAll(caseData.getScannedDocuments().stream()
@@ -130,7 +130,7 @@ public class ReviewDocumentService {
                                                    D_MMM_YYYY,
                                                    element.getValue().getScannedDate().toLocalDate()
                                                ))
-                                               .build()).collect(Collectors.toList()));
+                                               .build()).toList());
         }
         return dynamicListElements;
     }

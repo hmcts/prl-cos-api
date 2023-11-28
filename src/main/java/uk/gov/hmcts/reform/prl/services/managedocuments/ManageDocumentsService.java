@@ -260,7 +260,7 @@ public class ManageDocumentsService {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
-                    log.info("qurantine docs at confidential tab",quarantineDocs);
+                    log.info("qurantine docs for confidential tab {}",quarantineDocs);
                     caseDataUpdated.put("courtStaffUploadDocListConfTab", quarantineDocs);
                 }
                 break;
