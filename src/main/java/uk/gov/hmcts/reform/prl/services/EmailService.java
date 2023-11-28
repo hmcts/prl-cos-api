@@ -42,7 +42,7 @@ public class EmailService {
                                                                       reference);
             onAfterLog(templateName, templateVars.getCaseReference(), reference, response.getNotificationId());
         } catch (NotificationClientException exception) {
-            log.info("error thrown for sending email ");
+            throw new IllegalArgumentException(exception);
         }
     }
 

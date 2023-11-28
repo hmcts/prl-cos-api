@@ -107,7 +107,7 @@ public class EmailServiceTest {
         );
     }
 
-    // @Test
+    @Test
     public void sendShouldHandleNotificationClientExceptionAndRethrow() throws NotificationClientException {
         when(notificationClient.sendEmail(eq(EMAIL_TEMPLATE_ID_2), any(), any(), any()))
             .thenThrow(NotificationClientException.class);
