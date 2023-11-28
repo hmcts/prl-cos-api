@@ -319,7 +319,6 @@ public class DraftAnOrderService {
     }
 
     private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
-        log.info("55555555{}",draftOrder.getOtherDetails().getOrderCreatedBy());
         List<Element<OrderDetails>> orderCollection;
         if (caseData.getOrderCollection() != null) {
             orderCollection = caseData.getOrderCollection();
