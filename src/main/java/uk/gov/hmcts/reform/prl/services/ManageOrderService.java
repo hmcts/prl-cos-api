@@ -1082,7 +1082,7 @@ public class ManageOrderService {
                     ));
                     log.info("** Does order needs to be served {}",caseData.getManageOrders() != null
                         ? caseData.getManageOrders().getOrdersNeedToBeServed() : "null");
-                    log.info("** Do you eant to serve {}",caseData.getServeOrderData()!=null
+                    log.info("** Do you eant to serve {}",caseData.getServeOrderData() != null
                         ? caseData.getServeOrderData().getDoYouWantToServeOrder() : "null");
 
                     if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
