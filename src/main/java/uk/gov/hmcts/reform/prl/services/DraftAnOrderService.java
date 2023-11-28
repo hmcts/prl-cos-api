@@ -105,7 +105,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LOCAL_AUTHORUTY_LETTER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -513,7 +512,6 @@ public class DraftAnOrderService {
         caseDataMap.put("orderName", getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
-            caseDataMap.put("judgeNotesEmptyUploadJourney", NO);
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
         } else {
             caseDataMap.put("judgeNotesEmptyUploadJourney", YES);
@@ -528,7 +526,6 @@ public class DraftAnOrderService {
             caseDataMap.put("previewDraftOrderWelsh", selectedOrder.getOrderDocumentWelsh());
         }
         if (selectedOrder.getJudgeNotes() != null) {
-            caseDataMap.put("judgeNotesEmptyDraftJourney", NO);
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
         } else {
             caseDataMap.put("judgeNotesEmptyDraftJourney", YES);
