@@ -205,7 +205,11 @@ public class ManageDocumentsService {
         // if restricted then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-            quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
+            if(userRole==COURT_ADMIN){
+                quarantineLegalDoc = DocumentUtils.addConfFields(quarantineLegalDoc, manageDocument);
+            }else {
+                quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
+            }
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
         } else {
@@ -260,7 +264,7 @@ public class ManageDocumentsService {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
-                    log.info("qurantine docs for confidential tab {}",quarantineDocs);
+                    log.info("quarantineDocs List ---> conf {}", quarantineDocs);
                     caseDataUpdated.put("courtStaffUploadDocListConfTab", quarantineDocs);
                 }
                 break;

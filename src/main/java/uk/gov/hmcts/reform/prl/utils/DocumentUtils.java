@@ -194,6 +194,17 @@ public class DocumentUtils {
         return quarantineLegalDoc.toBuilder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
+            .notes(manageDocument.getDocumentDetails())
+            .categoryId(manageDocument.getDocumentCategories().getValueCode())
+            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            .build();
+    }
+    public static QuarantineLegalDoc addConfFields(QuarantineLegalDoc quarantineLegalDoc,
+                                                         ManageDocuments manageDocument) {
+        return quarantineLegalDoc.toBuilder()
+            .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .notes(manageDocument.getDocumentDetails())
             .categoryId(manageDocument.getDocumentCategories().getValueCode())
             .categoryName(manageDocument.getDocumentCategories().getValueLabel())
