@@ -939,7 +939,8 @@ public class ManageOrderService {
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
                                    .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
                                    .otherDetails(OtherOrderDetails.builder()
-                                                     .createdBy(currentUserFullName)
+                                                     .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                                     .orderCreatedBy(currentUserFullName)
                                                      .orderCreatedDate(dateTime.now()
                                                                            .format(DateTimeFormatter.ofPattern(
                                                                                PrlAppsConstants.D_MMM_YYYY,
@@ -1189,7 +1190,8 @@ public class ManageOrderService {
                     ? caseData.getUploadOrderDoc() : caseData.getPreviewOrderDoc())
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(currentUserFullName)
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .orderCreatedBy(currentUserFullName)
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
@@ -1321,7 +1323,8 @@ public class ManageOrderService {
             .childrenList(caseData.getManageOrders() != null
                               ? getSelectedChildInfoFromMangeOrder(caseData) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy(currentUserFullName)
+                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .orderCreatedBy(currentUserFullName)
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
@@ -2168,9 +2171,11 @@ public class ManageOrderService {
         log.info("orderDetails-----> {}", orderDetails);
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
-                                             .createdBy(
-                                                 (null != orderDetails.getOtherDetails() && null != orderDetails.getOtherDetails().getCreatedBy())
-                                                            ? orderDetails.getOtherDetails().getCreatedBy() : currentUserFullName)
+                                             .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                             .orderCreatedBy(
+                                                 (null != orderDetails.getOtherDetails()
+                                                     && null != orderDetails.getOtherDetails().getOrderCreatedBy())
+                                                            ? orderDetails.getOtherDetails().getOrderCreatedBy() : currentUserFullName)
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                                                  PrlAppsConstants.D_MMM_YYYY,
                                                  Locale.ENGLISH
