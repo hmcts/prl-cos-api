@@ -24,8 +24,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -1355,7 +1355,7 @@ public class ManageOrderService {
     }
 
     private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
-        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
@@ -1389,7 +1389,7 @@ public class ManageOrderService {
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
-        ServingRespondentsEnum servingRespondentsOptions = null;
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
         String otherParties;
         if (Yes.equals(serveOnRespondent) || Yes.equals(serveOnRespondentOnly47a)) {
@@ -1475,8 +1475,8 @@ public class ManageOrderService {
         return servedParties;
     }
 
-    private static ServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
-        ServingRespondentsEnum servingRespondentsOptions = null;
+    private static SoaSolicitorServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         if (caseData.getManageOrders()
             .getServingRespondentsOptionsCA() != null) {
             servingRespondentsOptions = caseData.getManageOrders()
@@ -1556,7 +1556,7 @@ public class ManageOrderService {
         String cafcassEmail = null;
         YesOrNo serveOnRespondent = null;
         YesOrNo otherPartiesServed = null;
-        ServingRespondentsEnum servingRespondentsOptions = null;
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
         String otherParties = null;
         List<Element<ServedParties>> servedParties = new ArrayList<>();
@@ -1578,7 +1578,7 @@ public class ManageOrderService {
             otherPartiesServed = (YesOrNo) servedOrderDetails.get(OTHER_PARTIES_SERVED);
         }
         if (servedOrderDetails.containsKey(SERVING_RESPONDENTS_OPTIONS)) {
-            servingRespondentsOptions = (ServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
+            servingRespondentsOptions = (SoaSolicitorServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
         }
         if (servedOrderDetails.containsKey(RECIPIENTS_OPTIONS)) {
             recipients = (String) servedOrderDetails.get(RECIPIENTS_OPTIONS);
