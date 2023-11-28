@@ -205,9 +205,9 @@ public class ManageDocumentsService {
         // if restricted then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-            if(userRole==COURT_ADMIN){
+            if (userRole == COURT_ADMIN) {
                 quarantineLegalDoc = DocumentUtils.addConfFields(quarantineLegalDoc, manageDocument);
-            }else {
+            } else {
                 quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
             }
             confidentialityFlag = true;

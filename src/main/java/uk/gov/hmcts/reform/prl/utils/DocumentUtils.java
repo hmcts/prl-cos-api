@@ -200,6 +200,7 @@ public class DocumentUtils {
             .categoryName(manageDocument.getDocumentCategories().getValueLabel())
             .build();
     }
+
     public static QuarantineLegalDoc addConfFields(QuarantineLegalDoc quarantineLegalDoc,
                                                          ManageDocuments manageDocument) {
         return quarantineLegalDoc.toBuilder()
