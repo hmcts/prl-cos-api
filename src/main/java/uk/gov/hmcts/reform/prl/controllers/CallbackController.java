@@ -634,6 +634,8 @@ public class CallbackController {
                 VERIFY_CASE_NUMBER_ADDED,
                 SUBMITTED_PAID.getLabel().equalsIgnoreCase(s) ? Yes : No
             ));
+            log.info("all caseData", caseDataUpdated);
+            log.info("Verify_case_number_added", caseDataUpdated.get("isAddCaseNumberAdded"));
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
