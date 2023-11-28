@@ -133,6 +133,8 @@ public class ManageOrderService {
     public static final String C_47_A = "C47A";
     public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
     public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
+    public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
+
     @Autowired
     LocationRefDataService locationRefDataService;
 
@@ -2124,8 +2126,25 @@ public class ManageOrderService {
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            caseData.getApplicants().stream().findFirst().ifPresent(party -> {
+                populateLegalRepFlag(party.getValue().getDoTheyHaveLegalRepresentation(), caseDataUpdated);
+            });
+        } else {
+            populateLegalRepFlag(caseData.getApplicantsFL401().getDoTheyHaveLegalRepresentation(), caseDataUpdated);
+        }
         return caseDataUpdated;
     }
+
+    private void populateLegalRepFlag(YesNoDontKnow legalRepPresent, Map<String, Object> caseDataUpdated) {
+        if (YesNoDontKnow.yes.equals(legalRepPresent)) {
+            caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
+        } else {
+            caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
+        }
+    }
+
 
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
