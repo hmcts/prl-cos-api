@@ -1067,7 +1067,7 @@ public class ManageOrderService {
                     List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
                     if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
                         && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
-                        && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                        && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                         updateCurrentOrderId(
                             caseData.getManageOrders().getServeOrderDynamicList(),
                             orderCollection,
@@ -1085,7 +1085,7 @@ public class ManageOrderService {
                     log.info("** Do you eant to serve {}",caseData.getServeOrderData() != null
                         ? caseData.getServeOrderData().getDoYouWantToServeOrder() : "null");
 
-                    if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                    if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                         orderCollection = serveOrder(caseData, orderCollection);
                     }
                     LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
@@ -1496,14 +1496,16 @@ public class ManageOrderService {
     private static void getEmailAndPostalInfoCa(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
         List<Element<PostalInformation>> postalInformation = new ArrayList<>();
         List<Element<EmailInformation>> emailInformation = new ArrayList<>();
-        caseData.getManageOrders().getServeOptionsCaDaOther().stream().map(Element::getValue)
-            .forEach(serveOther -> {
-                if (DeliveryByEnum.email.equals(serveOther.getServeByPostOrEmail())) {
-                    postalInformation.add(element(serveOther.getPostalInformation()));
-                } else if (DeliveryByEnum.post.equals(serveOther.getServeByPostOrEmail())) {
-                    emailInformation.add(element(serveOther.getEmailInformation()));
-                }
-            });
+        if (null != caseData.getManageOrders().getServeOptionsCaDaOther()) {
+            caseData.getManageOrders().getServeOptionsCaDaOther().stream().map(Element::getValue)
+                .forEach(serveOther -> {
+                    if (DeliveryByEnum.email.equals(serveOther.getServeByPostOrEmail())) {
+                        postalInformation.add(element(serveOther.getPostalInformation()));
+                    } else if (DeliveryByEnum.post.equals(serveOther.getServeByPostOrEmail())) {
+                        emailInformation.add(element(serveOther.getEmailInformation()));
+                    }
+                });
+        }
         emailOrPostalInfo.put("email", emailInformation);
         emailOrPostalInfo.put("post", postalInformation);
     }
@@ -2222,7 +2224,7 @@ public class ManageOrderService {
     }
 
     public void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if ((null != caseData.getManageOrders() && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed()))
+        if (servedSavedOrders.equals(caseData.getManageOrdersOptions())
             || (null != caseData.getServeOrderData() && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
             caseDataUpdated.put("markedToServeEmailNotification", Yes);
         } else {
