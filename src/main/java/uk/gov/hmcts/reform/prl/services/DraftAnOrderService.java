@@ -120,9 +120,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_PERMISSION_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SECOND_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_SETTLEMENT_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SDO_URGENT_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_DA_OCCURED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_EDIT_CONTENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION7_INTERIM_ORDERS_FACTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_DA_OCCURED_EDIT_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SECTION_7_FACTS_EDIT_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUMENTS;
@@ -305,14 +303,18 @@ public class DraftAnOrderService {
     private CaseData updateCaseDataForFinalOrderDocument(CaseData caseData, String authorisation, CreateSelectOrderOptionsEnum orderType) {
         Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, Map.class);
         caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData));
+        StandardDirectionOrder standardDirectionOrder = null;
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
-            caseDataMap.putAll(populateStandardDirectionOrder(authorisation, caseData));
+            Map<String, Object> standardDirectionOrderMap = populateStandardDirectionOrder(authorisation, caseData, false);
+            standardDirectionOrder = objectMapper.convertValue(standardDirectionOrderMap, StandardDirectionOrder.class);
         } else if (!(CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(orderType))) {
             caseDataMap.putAll(populateDraftOrderCustomFields(caseData, authorisation));
         }
         caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
+        caseData = caseData.toBuilder().standardDirectionOrder(null != standardDirectionOrder ? standardDirectionOrder : null).build();
+        log.info("updateCaseDataForFinalOrderDocument " + caseData);
         return caseData;
     }
 
@@ -613,23 +615,30 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateStandardDirectionOrder(String authorisation, CaseData caseData) {
+    public Map<String, Object> populateStandardDirectionOrder(String authorisation, CaseData caseData, boolean editOrder) {
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (null != selectedOrder.getSdoDetails()) {
             StandardDirectionOrder standardDirectionOrder;
             try {
                 SdoDetails updatedSdoDetails = selectedOrder.getSdoDetails().toBuilder()
-                    .sdoPreamblesList(caseData.getStandardDirectionOrder().getSdoPreamblesList())
-                    .sdoHearingsAndNextStepsList(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())
-                    .sdoCafcassOrCymruList(caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList())
-                    .sdoLocalAuthorityList(caseData.getStandardDirectionOrder().getSdoLocalAuthorityList())
-                    .sdoCourtList(caseData.getStandardDirectionOrder().getSdoCourtList())
-                    .sdoDocumentationAndEvidenceList(caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList())
-                    .sdoFurtherList(caseData.getStandardDirectionOrder().getSdoFurtherList())
-                    .sdoOtherList(caseData.getStandardDirectionOrder().getSdoOtherList())
+                    .sdoPreamblesList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
+                                                                     : selectedOrder.getSdoDetails().getSdoPreamblesList())
+                    .sdoHearingsAndNextStepsList(editOrder ? caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList()
+                        : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
+                    .sdoCafcassOrCymruList(editOrder ? caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList()
+                        : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
+                    .sdoLocalAuthorityList(editOrder ? caseData.getStandardDirectionOrder().getSdoLocalAuthorityList()
+                        : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
+                    .sdoCourtList(editOrder ? caseData.getStandardDirectionOrder().getSdoCourtList()
+                        : selectedOrder.getSdoDetails().getSdoCourtList())
+                    .sdoDocumentationAndEvidenceList(editOrder ? caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList()
+                        : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
+                    .sdoFurtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoFurtherList()
+                        : selectedOrder.getSdoDetails().getSdoFurtherList())
+                    .sdoOtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoOtherList()
+                        : selectedOrder.getSdoDetails().getSdoOtherList())
                     .build();
-
                 standardDirectionOrder = copyPropertiesToStandardDirectionOrder(updatedSdoDetails);
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                 HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -684,6 +693,7 @@ public class DraftAnOrderService {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
             }
         }
+        log.info("standardDirectionOrderMap ==>" + standardDirectionOrderMap);
         return standardDirectionOrderMap;
     }
 
@@ -1264,18 +1274,6 @@ public class DraftAnOrderService {
                 SECTION7_EDIT_CONTENT
             );
         }
-        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7FactsEditContent())) {
-            caseDataUpdated.put(
-                "sdoSection7FactsEditContent",
-                SECTION7_INTERIM_ORDERS_FACTS
-            );
-        }
-        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7daOccuredEditContent())) {
-            caseDataUpdated.put(
-                "sdoSection7daOccuredEditContent",
-                SECTION7_DA_OCCURED
-            );
-        }
     }
 
     private static void populateCafcassNextSteps(CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -1783,7 +1781,6 @@ public class DraftAnOrderService {
             if (manageOrders.getC21OrderOptions() != null) {
                 manageOrders = manageOrders.toBuilder().typeOfC21Order(BOLD_BEGIN + manageOrders
                         .getC21OrderOptions().getDisplayedValue() + BOLD_END)
-                    .isTheOrderByConsent(Yes)
                     .build();
                 caseData = caseData.toBuilder().manageOrders(manageOrders).build();
             }
@@ -1852,7 +1849,6 @@ public class DraftAnOrderService {
             caseDataUpdated.put(SELECTED_ORDER, null != caseData.getCreateSelectOrderOptions()
                 ? BOLD_BEGIN + caseData.getCreateSelectOrderOptions().getDisplayedValue() + BOLD_END : "");
             caseDataUpdated.put(DATE_ORDER_MADE, LocalDate.now());
-            caseDataUpdated.put("isTheOrderByConsent", Yes);
             caseDataUpdated.put("magistrateLastName", CollectionUtils.isNotEmpty(caseData.getMagistrateLastName())
                 ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
 

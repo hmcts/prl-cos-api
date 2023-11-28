@@ -1900,7 +1900,7 @@ public class DraftAnOrderServiceTest {
             new ArrayList<>()
         )).thenReturn(DynamicList.builder().build());
 
-        Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder("test-token", caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, true);
         assertEquals(1, ((List<Element<DraftOrder>>) caseDataMap.get("sdoDisclosureOfPapersCaseNumbers")).size());
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
@@ -1983,7 +1983,7 @@ public class DraftAnOrderServiceTest {
             new ArrayList<>()
         )).thenReturn(DynamicList.builder().build());
 
-        Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder("test-token", caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, false);
         assertEquals(1, ((List<Element<DraftOrder>>) caseDataMap.get("sdoDisclosureOfPapersCaseNumbers")).size());
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
@@ -2058,7 +2058,7 @@ public class DraftAnOrderServiceTest {
         )).thenReturn(DynamicList.builder().build());
 
         assertExpectedException(() -> {
-            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData);
+            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, false);
         }, ManageOrderRuntimeException.class, "Failed to update SDO order details");
         //assertNotNull(caseDataUpdated.get("sdoRightToAskCourt"));
     }
@@ -2768,7 +2768,7 @@ public class DraftAnOrderServiceTest {
         when(draftAnOrderService.copyPropertiesToStandardDirectionOrder(sdoDetails)).thenThrow(JsonProcessingException.class);
 
         assertExpectedException(() -> {
-            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData);
+            draftAnOrderService.populateStandardDirectionOrder("test-token", caseData, true);
         }, UnsupportedOperationException.class, "Could not find order");
     }
 

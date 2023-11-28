@@ -521,10 +521,8 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "e) if direct contact is not appropriate, whether there should be indirect contact and, if so, in what form";
 
-    public static final String SECTION_7_DA_OCCURED_EDIT_CONTENT = "With regard to the findings of fact made as set out in the schedule to "
-        + "((this order / the order made on)) ((date that the order was made)):"
-        + System.lineSeparator() + System.lineSeparator()
-        + "a) any harm suffered by the ((child or children)) and the parent with whom the ((child or children)) are living as a consequence "
+    public static final String SECTION_7_DA_OCCURED_EDIT_CONTENT = "a) any harm suffered by the ((child or children)) and "
+        + "the parent with whom the ((child or children)) are living as a consequence "
         + "of the domestic abuse found"
         + System.lineSeparator()
         + "b) any harm which the ((child or children)) and the parent with whom the ((child or children)) "
