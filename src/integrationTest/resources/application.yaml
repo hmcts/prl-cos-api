@@ -160,6 +160,13 @@ notify:
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  notification:
+    email:
+      templates:
+        english:
+          SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
+        welsh:
+          SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
