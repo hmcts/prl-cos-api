@@ -1499,9 +1499,9 @@ public class ManageOrderService {
         if (null != caseData.getManageOrders().getServeOptionsCaDaOther()) {
             caseData.getManageOrders().getServeOptionsCaDaOther().stream().map(Element::getValue)
                 .forEach(serveOther -> {
-                    if (DeliveryByEnum.email.equals(serveOther.getServeByPostOrEmail())) {
+                    if (DeliveryByEnum.post.equals(serveOther.getServeByPostOrEmail())) {
                         postalInformation.add(element(serveOther.getPostalInformation()));
-                    } else if (DeliveryByEnum.post.equals(serveOther.getServeByPostOrEmail())) {
+                    } else if (DeliveryByEnum.email.equals(serveOther.getServeByPostOrEmail())) {
                         emailInformation.add(element(serveOther.getEmailInformation()));
                     }
                 });
