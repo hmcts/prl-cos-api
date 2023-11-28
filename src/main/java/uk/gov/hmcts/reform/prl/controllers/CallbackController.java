@@ -626,6 +626,7 @@ public class CallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(callbackRequest.getCaseDetails().getId()));
+            log.info("eventsForCase {}", eventsForCase);
 
             Optional<String> previousState = eventsForCase.stream()
                 .map(CaseEventDetail::getStateId)
