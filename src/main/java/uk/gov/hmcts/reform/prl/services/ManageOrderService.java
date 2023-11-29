@@ -1851,7 +1851,7 @@ public class ManageOrderService {
         return caseData;
     }
 
-    private CaseData populatePartyDetailsOfNewParterForDocmosis(CaseData caseData) {
+    public CaseData populatePartyDetailsOfNewParterForDocmosis(CaseData caseData) {
         if (isNotEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass()) && CollectionUtils.isNotEmpty(
             caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass().getValue())) {
             String partyDetailsForCafcass = dynamicMultiSelectListService

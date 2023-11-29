@@ -628,6 +628,8 @@ public class DraftAnOrderServiceTest {
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
+        when(manageOrderService.populateJudgeNames(caseData)).thenReturn(caseData);
+        when(manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData)).thenReturn(caseData);
         Map<String, Object> caseDataMap = new HashMap<>();
         when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
@@ -740,6 +742,8 @@ public class DraftAnOrderServiceTest {
         when(manageOrderService.getOrderTemplateAndFile(any())).thenReturn(fieldMap);
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
+        when(manageOrderService.populateJudgeNames(caseData)).thenReturn(caseData);
+        when(manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData)).thenReturn(caseData);
         Map<String, Object> caseDataMap = draftAnOrderService.removeDraftOrderAndAddToFinalOrder(
             "test token",
             caseData,
@@ -830,6 +834,8 @@ public class DraftAnOrderServiceTest {
             .thenReturn(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"));
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
+        when(manageOrderService.populateJudgeNames(caseData)).thenReturn(caseData);
+        when(manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData)).thenReturn(caseData);
         Map<String, Object> caseDataMap = new HashMap<>();
         when(objectMapper.convertValue(caseData, Map.class)).thenReturn(caseDataMap);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
@@ -2445,6 +2451,8 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
+        when(manageOrderService.populateJudgeNames(caseData)).thenReturn(caseData);
+        when(manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
             .eventId("adminEditAndApproveAnOrder")
@@ -2495,6 +2503,8 @@ public class DraftAnOrderServiceTest {
             .thenReturn(caseData);
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
+        when(manageOrderService.populateJudgeNames(caseData)).thenReturn(caseData);
+        when(manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetailsBefore(CaseDetails.builder().data(stringObjectMap).build())
             .eventId("adminEditAndApproveAnOrder")
@@ -3891,6 +3901,8 @@ public class DraftAnOrderServiceTest {
                                                                             .isGenWelsh(true).isGenEng(false).build());
         when(manageOrderService.getOrderTemplateAndFile(any())).thenReturn(fieldMap);
         when(manageOrderService.filterEmptyHearingDetails(caseData)).thenReturn(caseData);
+        when(manageOrderService.populateJudgeNames(caseData)).thenReturn(caseData);
+        when(manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData)).thenReturn(caseData);
         Hearings hearings = Hearings.hearingsWith().build();
         when(hearingService.getHearings(Mockito.anyString(),
                                         Mockito.anyString())).thenReturn(hearings);
