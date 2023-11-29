@@ -156,6 +156,17 @@ public class OrganisationService {
         return caseData;
     }
 
+    public CaseData getRespondentOrganisationDetailsForFL401(CaseData caseData) {
+        if (Optional.ofNullable(caseData.getRespondentsFL401()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            PartyDetails respondentWithOrg = getRespondentWithOrg(caseData.getRespondentsFL401(), userToken);
+            caseData = caseData.toBuilder()
+                .respondentsFL401(respondentWithOrg)
+                .build();
+        }
+        return caseData;
+    }
+
     public Optional<Organisations> findUserOrganisation(String authorization) {
         try {
             return ofNullable(organisationApi.findUserOrganisation(authorization, authTokenGenerator.generate()));

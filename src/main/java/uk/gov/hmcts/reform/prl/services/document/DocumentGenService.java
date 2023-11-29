@@ -323,6 +323,7 @@ public class DocumentGenService {
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
+            caseData = organisationService.getRespondentOrganisationDetailsForFL401(caseData);
         }
         log.info("Called org service to update the org address .. for case id {} ", caseData.getId());
         return caseData;
