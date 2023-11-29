@@ -1729,7 +1729,10 @@ public class ManageOrderService {
                 log.info("*** Manage orders 12 {} :", caseData.getManageOrders().getOrdersHearingDetails());
                 caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
             }
-
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
+                caseData = populateJudgeNames(caseData);
+                caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
+            }
             log.info("*** Manage orders: {}", caseData.getManageOrders());
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
