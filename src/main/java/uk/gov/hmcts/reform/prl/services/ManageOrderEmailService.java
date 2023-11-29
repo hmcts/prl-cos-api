@@ -419,22 +419,21 @@ public class ManageOrderEmailService {
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
-            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
-                || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
+            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("** CA case email notifications***");
-                DynamicMultiSelectList recipientsOptions = isNotEmpty(manageOrders.getRecipientsOptions()) && CollectionUtils.isNotEmpty(
-                    manageOrders.getRecipientsOptions().getValue())
-                    ? manageOrders.getRecipientsOptions() : manageOrders.getRecipientsOptionsOnlyC47a();
-                //applicants
-                sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
-                                                caseData.getApplicants(),
-                                                isFinalOrder, caseData
-                );
-                //respondents
-                sendEmailToSolicitorOrPostToRespondent(recipientsOptions.getValue(),
-                                                       caseData.getRespondents(), isFinalOrder, caseData,
-                                                       authorisation, orderDocuments, bulkPrintOrderDetails
-                );
+                DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
+                if (recipientsOptions != null) {
+                    //applicants
+                    sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
+                                                    caseData.getApplicants(),
+                                                    isFinalOrder, caseData
+                    );
+                    //respondents
+                    sendEmailToSolicitorOrPostToRespondent(recipientsOptions.getValue(),
+                                                           caseData.getRespondents(), isFinalOrder, caseData,
+                                                           authorisation, orderDocuments, bulkPrintOrderDetails
+                    );
+                }
             }
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)
