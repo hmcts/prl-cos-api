@@ -1609,8 +1609,8 @@ public class ManageOrderEmailServiceTest {
                                .code("00000000-0000-0000-0000-000000000000")
                                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptionsOnlyC47a(YesOrNo.No)
-            .recipientsOptionsOnlyC47a(dynamicMultiSelectList)
+            .serveToRespondentOptions(YesOrNo.No)
+            .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOtherPartiesCaOnlyC47a(List.of(OtherOrganisationOptions.anotherOrganisation))
             .deliveryByOptionsCaOnlyC47a(DeliveryByEnum.email)
