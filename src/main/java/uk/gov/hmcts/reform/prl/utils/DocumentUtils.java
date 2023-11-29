@@ -209,6 +209,8 @@ public class DocumentUtils {
             .notes(manageDocument.getDocumentDetails())
             .categoryId(manageDocument.getDocumentCategories().getValueCode())
             .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            //move document into confidential category/folder
+            .confidentialDocument(manageDocument.getDocument())
             .build();
     }
 
