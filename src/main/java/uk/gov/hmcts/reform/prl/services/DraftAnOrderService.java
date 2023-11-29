@@ -401,6 +401,10 @@ public class DraftAnOrderService {
                                                                  .manageOrdersRespondent(CaseUtils.getRespondent(
                                                                      caseData)).build()).build();
             }
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
+                caseData = manageOrderService.populateJudgeNames(caseData);
+                caseData = manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData);
+            }
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
