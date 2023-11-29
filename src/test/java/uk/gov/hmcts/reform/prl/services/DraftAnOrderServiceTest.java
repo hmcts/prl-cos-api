@@ -120,6 +120,13 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.noticeOfProceedingsParties;
+import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
+import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsOnly;
+import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.safeguardingCafcassCymru;
+import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.safeguardingCafcassOnly;
+import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.section7Report;
+import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.addNewPreamble;
+import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGateKeeping;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -1688,9 +1695,11 @@ public class DraftAnOrderServiceTest {
                 SdoCourtEnum.crossExaminationEx740,
                 SdoCourtEnum.crossExaminationQualifiedLegal
             ))
-            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru))
+            .sdoCafcassOrCymruList(List.of(SdoCafcassOrCymruEnum.safeguardingCafcassCymru,
+                                           partyToProvideDetailsOnly, partyToProvideDetailsCmyru,
+                                           section7Report, safeguardingCafcassOnly, safeguardingCafcassCymru))
             .sdoOtherList(List.of(SdoOtherEnum.parentWithCare))
-            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt))
+            .sdoPreamblesList(List.of(SdoPreamblesEnum.rightToAskCourt, afterSecondGateKeeping, addNewPreamble))
             .sdoHearingsAndNextStepsList(List.of(
                 SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping,
                 SdoHearingsAndNextStepsEnum.hearingNotNeeded,
