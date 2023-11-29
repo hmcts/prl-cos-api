@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 
+import com.launchdarkly.shaded.com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -104,10 +105,14 @@ public class RefDataUserService {
     }
 
     public List<JudicialUsersApiResponse> getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest) {
+        String token = idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword);
+        String authToken = authTokenGenerator.generate();
+        log.info("token {} ,  authtoken {}  ,   request {}", token, authToken, new Gson().toJson(judicialUsersApiRequest));
+
         return judicialUserDetailsApi.getAllJudicialUserDetails(
-            idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
-            authTokenGenerator.generate(),
-            judicialUsersApiRequest);
+                token,
+                authToken,
+                judicialUsersApiRequest);
     }
 
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
