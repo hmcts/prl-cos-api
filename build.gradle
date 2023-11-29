@@ -607,7 +607,6 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/SendAndReplyService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java',
   '**/uk/gov/hmcts/reform/prl/utils/caseflags/PartyLevelCaseFlagsGenerator.java',
-  '**/uk/gov/hmcts/reform/prl/services/RequestUpdateCallbackService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/TaskListController.java',
   '**/uk/gov/hmcts/reform/prl/services/TaskListService.java',
   '**/uk/gov/hmcts/reform/prl/services/caseflags/PartyLevelCaseFlagsService.java',
