@@ -67,7 +67,7 @@ public class RefDataUserService {
     private CommonDataResponse commonDataResponse;
 
     @Autowired
-    private LaunchDarklyClient launchDarklyClient;
+    LaunchDarklyClient launchDarklyClient;
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
