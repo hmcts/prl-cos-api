@@ -632,7 +632,7 @@ public class CallbackController {
                 .findFirst();
             previousState.ifPresent(s -> caseDataUpdated.put(
                 VERIFY_CASE_NUMBER_ADDED,
-                SUBMITTED_PAID.getLabel().equalsIgnoreCase(s) ? Yes : No
+                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes : No
             ));
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
