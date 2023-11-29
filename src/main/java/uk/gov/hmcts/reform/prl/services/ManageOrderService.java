@@ -1066,8 +1066,7 @@ public class ManageOrderService {
                     List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
                     if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
                         && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
-                        && (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())
-                        || Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+                        && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
                         updateCurrentOrderId(
                             caseData.getManageOrders().getServeOrderDynamicList(),
                             orderCollection,
