@@ -446,7 +446,6 @@ public class ManageOrderEmailService {
                 serveOrderToOtherPersons(authorisation,
                                          manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
                 );
-
             }
             //Send email notification to Cafcass or Cafcass cymru based on selection
             if (getCafcassEmail(manageOrders) != null) {
