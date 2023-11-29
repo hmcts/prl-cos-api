@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,22 +41,20 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefDataUserService {
 
-    @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    private final AuthTokenGenerator authTokenGenerator;
 
-    @Autowired
-    StaffResponseDetailsApi staffResponseDetailsApi;
+    private final StaffResponseDetailsApi staffResponseDetailsApi;
 
-    @Autowired
-    JudicialUserDetailsApi judicialUserDetailsApi;
+    private final JudicialUserDetailsApi judicialUserDetailsApi;
 
-    @Autowired
-    IdamClient idamClient;
+    private final IdamClient idamClient;
 
-    @Autowired
-    CommonDataRefApi commonDataRefApi;
+    private final CommonDataRefApi commonDataRefApi;
+
+    private final LaunchDarklyClient launchDarklyClient;
 
     @Value("${prl.refdata.username}")
     private String refDataIdamUsername;
@@ -65,9 +64,6 @@ public class RefDataUserService {
 
     private List<DynamicListElement> listOfCategoryValues;
     private CommonDataResponse commonDataResponse;
-
-    @Autowired
-    LaunchDarklyClient launchDarklyClient;
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
