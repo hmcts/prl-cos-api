@@ -342,7 +342,6 @@ public class ManageDocumentsService {
                 .map(Element::getValue)
                 .forEach(otherProceeding -> {
                     if (null != otherProceeding.getUploadRelevantOrder()) {
-                        log.info("UploadRelevantOrder()----> {}", otherProceeding.getUploadRelevantOrder());
                         QuarantineLegalDoc otherProceedingQuarantineDoc = QuarantineLegalDoc.builder()
                             .document(otherProceeding.getUploadRelevantOrder())
                             .build();
@@ -351,10 +350,13 @@ public class ManageDocumentsService {
                                                                                          PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME);
                         quarantineDocs.add(element(otherProceedingQuarantineDoc));
                         //TODO - Remove uploadRelevantOrder doc from original documents
+                        otherProceeding.setUploadRelevantOrder(null);
                     }
                 });
+            caseDataUpdated.put("existingProceedings", caseData.getExistingProceedings());
         }
 
+        log.info("quarantineDocs()----> {}", quarantineDocs);
         if (!quarantineDocs.isEmpty()) {
             caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
             caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
