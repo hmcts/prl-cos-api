@@ -26,7 +26,7 @@ public class FL401Respondent {
     private final YesOrNo canYouProvidePhoneNumber;
     private final String phoneNumber;
 
-    private final YesNoDontKnow doTheyHaveLegalRepresentation;
+    private final String doTheyHaveLegalRepresentation;
     private final String representativeFirstName;
     private final String representativeLastName;
     private final String solicitorEmail;
