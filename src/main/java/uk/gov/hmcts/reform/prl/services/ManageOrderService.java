@@ -2126,13 +2126,14 @@ public class ManageOrderService {
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
-
+        caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            caseData.getApplicants().stream().findFirst().ifPresent(party -> {
-                populateLegalRepFlag(party.getValue().getDoTheyHaveLegalRepresentation(), caseDataUpdated);
-            });
+            caseData.getApplicants().stream().findFirst().ifPresent(party ->
+                populateLegalRepFlag(party.getValue().getDoTheyHaveLegalRepresentation(), caseDataUpdated));
         } else {
-            populateLegalRepFlag(caseData.getApplicantsFL401().getDoTheyHaveLegalRepresentation(), caseDataUpdated);
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(caseData.getApplicantsFL401().getRepresentativeFirstName())) {
+                caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
+            }
         }
         return caseDataUpdated;
     }
@@ -2140,8 +2141,6 @@ public class ManageOrderService {
     private void populateLegalRepFlag(YesNoDontKnow legalRepPresent, Map<String, Object> caseDataUpdated) {
         if (YesNoDontKnow.yes.equals(legalRepPresent)) {
             caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
-        } else {
-            caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
         }
     }
 
