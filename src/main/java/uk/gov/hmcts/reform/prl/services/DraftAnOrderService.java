@@ -147,8 +147,6 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoOtherEnum.parentWithCare;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.addNewPreamble;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGateKeeping;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.rightToAskCourt;
-import static uk.gov.hmcts.reform.prl.enums.sdo.SdoSection7ImpactAnalysisEnum.daOccured;
-import static uk.gov.hmcts.reform.prl.enums.sdo.SdoSection7ImpactAnalysisEnum.interimOrders;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.updateCurrentOrderId;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.getErrorForOccupationScreen;
