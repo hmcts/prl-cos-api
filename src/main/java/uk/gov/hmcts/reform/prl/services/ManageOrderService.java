@@ -2085,7 +2085,9 @@ public class ManageOrderService {
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
+        log.info("---- Check display legal rep options  ----");
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            log.info("---- C100 check ----");
             caseData.getApplicants().stream().findFirst().ifPresent(party ->
                 populateLegalRepFlag(party.getValue().getDoTheyHaveLegalRepresentation(), caseDataUpdated));
         } else {
@@ -2093,11 +2095,14 @@ public class ManageOrderService {
                 caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
             }
         }
+        log.info("---- display Legal rep ----{}", caseDataUpdated.get(DISPLAY_LEGAL_REP_OPTION));
         return caseDataUpdated;
     }
 
     private void populateLegalRepFlag(YesNoDontKnow legalRepPresent, Map<String, Object> caseDataUpdated) {
+        log.info("---- Legal rep present ----{}", legalRepPresent);
         if (YesNoDontKnow.yes.equals(legalRepPresent)) {
+            log.info("---- Legal rep present ----");
             caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
         }
     }
