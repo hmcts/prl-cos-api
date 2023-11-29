@@ -443,9 +443,9 @@ public class ManageOrderEmailService {
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties())) {
-                    serveOrderToOtherPersons(authorisation,
-                                             manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
-                    );
+                serveOrderToOtherPersons(authorisation,
+                                         manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
+                );
 
             }
             //Send email notification to Cafcass or Cafcass cymru based on selection
