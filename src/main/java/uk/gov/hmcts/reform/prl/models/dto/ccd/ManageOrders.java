@@ -251,7 +251,6 @@ public class ManageOrders implements MappableObject {
     private String typeOfC21Order;
     private final YesOrNo isOnlyC47aOrderSelectedToServe;
     private final YesOrNo otherPeoplePresentInCaseFlag;
-
     private final YesOrNo serveToRespondentOptionsOnlyC47a;
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
     private final DynamicMultiSelectList recipientsOptionsOnlyC47a;

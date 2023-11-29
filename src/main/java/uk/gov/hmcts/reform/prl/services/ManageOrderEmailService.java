@@ -440,19 +440,13 @@ public class ManageOrderEmailService {
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
                 manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
                     .add(value.getEmailAddress()));
-            } else if (manageOrders.getServeOtherPartiesCaOnlyC47a() != null && manageOrders.getServeOtherPartiesCaOnlyC47a()
-                .contains(OtherOrganisationOptions.anotherOrganisation)
-                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCaOnlyC47a())) {
-                manageOrders.getEmailInformationCaOnlyC47a().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
             }
             //PRL-4225 - send order & additional docs to other people via post only
-            if (isNotEmpty(manageOrders.getOtherParties()) || isNotEmpty(manageOrders.getOtherPartiesOnlyC47a())) {
-                DynamicMultiSelectList otherParties = isNotEmpty(manageOrders.getOtherParties())
-                    ? manageOrders.getOtherParties() : manageOrders.getOtherPartiesOnlyC47a();
-                serveOrderToOtherPersons(authorisation,
-                                         otherParties, caseData, orderDocuments, bulkPrintOrderDetails
-                );
+            if (isNotEmpty(manageOrders.getOtherParties())) {
+                    serveOrderToOtherPersons(authorisation,
+                                             manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
+                    );
+
             }
             //Send email notification to Cafcass or Cafcass cymru based on selection
             if (getCafcassEmail(manageOrders) != null) {

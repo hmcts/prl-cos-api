@@ -1612,16 +1612,16 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptions(YesOrNo.No)
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOtherPartiesCaOnlyC47a(List.of(OtherOrganisationOptions.anotherOrganisation))
-            .deliveryByOptionsCaOnlyC47a(DeliveryByEnum.email)
-            .emailInformationCaOnlyC47a(List.of(Element.<EmailInformation>builder()
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .deliveryByOptionsCA(DeliveryByEnum.email)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
                                             .id(uuid)
                                             .value(EmailInformation
                                                        .builder()
                                                        .emailAddress("test")
                                                        .build())
                                             .build()))
-            .otherPartiesOnlyC47a(dynamicMultiSelectList)
+            .otherParties(dynamicMultiSelectList)
             .build();
 
         childLiveWithList.add(LiveWithEnum.applicant);
