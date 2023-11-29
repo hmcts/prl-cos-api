@@ -131,7 +131,6 @@ public class ManageOrderService {
     public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
     public static final String OTHER_PEOPLE_PRESENT_IN_CASE_FLAG = "otherPeoplePresentInCaseFlag";
     public static final String C_47_A = "C47A";
-    public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
     public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
 
     @Autowired
@@ -607,10 +606,6 @@ public class ManageOrderService {
             .getOtherPeopleMultiSelectList(caseData);
         headerMap.put(
             OTHER_PARTIES, DynamicMultiSelectList.builder()
-                .listItems(otherPeopleList)
-                .build());
-        headerMap.put(
-            OTHER_PARTIES_ONLY_C_47_A, DynamicMultiSelectList.builder()
                 .listItems(otherPeopleList)
                 .build());
         if (otherPeopleList.isEmpty()) {
@@ -1394,8 +1389,7 @@ public class ManageOrderService {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())
-            || isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCaOnlyC47a())) {
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())) {
             otherPartiesServed = Yes;
             emailInformation = getEmailInformationCA(caseData);
             postalInformation = getPostalInformationCA(caseData);
@@ -1454,10 +1448,6 @@ public class ManageOrderService {
                 servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
                     caseData.getManageOrders().getOtherParties()
                 ));
-            } else if (caseData.getManageOrders().getOtherPartiesOnlyC47a() != null) {
-                servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
-                    caseData.getManageOrders().getOtherPartiesOnlyC47a()
-                ));
             }
         }
         return servedParties;
@@ -1477,8 +1467,6 @@ public class ManageOrderService {
         List<Element<PostalInformation>> postalInformation = null;
         if (caseData.getManageOrders().getPostalInformationCA() != null) {
             postalInformation = caseData.getManageOrders().getPostalInformationCA();
-        } else if (caseData.getManageOrders().getPostalInformationCaOnlyC47a() != null) {
-            postalInformation = caseData.getManageOrders().getPostalInformationCaOnlyC47a();
         }
         return postalInformation;
     }
@@ -1487,8 +1475,6 @@ public class ManageOrderService {
         List<Element<EmailInformation>> emailInformation = null;
         if (caseData.getManageOrders().getEmailInformationCA() != null) {
             emailInformation = caseData.getManageOrders().getEmailInformationCA();
-        } else if (caseData.getManageOrders().getEmailInformationCaOnlyC47a() != null) {
-            emailInformation = caseData.getManageOrders().getEmailInformationCaOnlyC47a();
         }
         return emailInformation;
     }
@@ -1501,13 +1487,6 @@ public class ManageOrderService {
             .getOtherParties().getValue() != null) {
             for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
                 .getOtherParties().getValue()) {
-                otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
-            }
-        } else if (caseData.getManageOrders()
-            .getOtherPartiesOnlyC47a() != null && caseData.getManageOrders()
-            .getOtherPartiesOnlyC47a().getValue() != null) {
-            for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
-                .getOtherPartiesOnlyC47a().getValue()) {
                 otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
             }
         }

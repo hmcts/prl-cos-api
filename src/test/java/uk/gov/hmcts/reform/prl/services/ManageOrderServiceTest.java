@@ -1765,7 +1765,7 @@ public class ManageOrderServiceTest {
             .build();
 
         ManageOrders manageOrders = ManageOrders.builder()
-            .otherPartiesOnlyC47a(dynamicMultiSelectList)
+            .otherParties(dynamicMultiSelectList)
             .cafcassServedOptions(YesOrNo.Yes)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
@@ -1860,7 +1860,7 @@ public class ManageOrderServiceTest {
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(elements)
                              .build())
-            .otherPartiesOnlyC47a(DynamicMultiSelectList.builder()
+            .otherParties(DynamicMultiSelectList.builder()
                               .listItems(elements)
                               .build())
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
@@ -2339,7 +2339,7 @@ public class ManageOrderServiceTest {
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
             .recipientsOptions(dummyDynamicMultiSelectList)
-            .otherPartiesOnlyC47a(dummyDynamicMultiSelectList)
+            .otherParties(dummyDynamicMultiSelectList)
             .emailInformationCA(List.of(Element.<EmailInformation>builder()
                                             .value(EmailInformation.builder().emailAddress("test").build()).build()))
             .postalInformationCA(List.of(Element.<PostalInformation>builder()
