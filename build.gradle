@@ -610,7 +610,6 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/controllers/TaskListController.java',
   '**/uk/gov/hmcts/reform/prl/services/caseflags/PartyLevelCaseFlagsService.java',
   '**/uk/gov/hmcts/reform/prl/services/caseinitiation/CaseInitiationService.java',
-  '**/uk/gov/hmcts/reform/prl/controllers/CallbackController.java',
 ]
 
 sonarqube {
