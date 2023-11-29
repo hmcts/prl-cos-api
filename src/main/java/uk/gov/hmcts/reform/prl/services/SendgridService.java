@@ -108,7 +108,9 @@ public class SendgridService {
             request.setMethod(Method.POST);
             request.setEndpoint(MAIL_SEND);
             request.setBody(mail.build());
+            log.info("Initiating email through sendgrid");
             sendGrid.api(request);
+            log.info("Notification to RPA sent successfully");
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
