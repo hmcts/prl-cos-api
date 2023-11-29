@@ -1146,15 +1146,13 @@ public class DraftAnOrderService {
     }
 
     private static void populateSdoSection7FactsEditContent(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (caseData.getStandardDirectionOrder().getSdoSection7ImpactAnalysisOptions().contains(interimOrders)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7FactsEditContent())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7FactsEditContent())) {
             caseDataUpdated.put("sdoSection7FactsEditContent", SECTION_7_FACTS_EDIT_CONTENT);
         }
     }
 
     private static void populateSdoSection7daOccuredEditContent(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if (caseData.getStandardDirectionOrder().getSdoSection7ImpactAnalysisOptions().contains(daOccured)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7daOccuredEditContent())) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoSection7daOccuredEditContent())) {
             caseDataUpdated.put("sdoSection7daOccuredEditContent", SECTION_7_DA_OCCURED_EDIT_CONTENT);
         }
     }
@@ -1302,10 +1300,8 @@ public class DraftAnOrderService {
                 SECTION7_EDIT_CONTENT
             );
         }
-        if (CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoSection7ImpactAnalysisOptions())) {
-            populateSdoSection7FactsEditContent(caseData, caseDataUpdated);
-            populateSdoSection7daOccuredEditContent(caseData, caseDataUpdated);
-        }
+        populateSdoSection7FactsEditContent(caseData, caseDataUpdated);
+        populateSdoSection7daOccuredEditContent(caseData, caseDataUpdated);
     }
 
     private static void populateCafcassNextSteps(CaseData caseData, Map<String, Object> caseDataUpdated) {
