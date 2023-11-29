@@ -35,6 +35,12 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_SUBMITTED_WITH_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_SUBMITTED_WITH_APPLICATION_NAME;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
@@ -302,32 +308,56 @@ public class ManageDocumentsService {
             .build();
     }
 
-    public Map<String,Object> createQuarantineDocs(Map<String,Object> caseDataUpdated,CaseData caseData) {
+    public void createQuarantineDocs(Map<String,Object> caseDataUpdated,CaseData caseData) {
         List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
-        if (null != caseData.getMiamDetails()) {
 
+        //MIAM certificate
+        if (null != caseData.getMiamDetails()) {
             log.info("MiamCertDocUploadddddd()----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
             QuarantineLegalDoc miamQuarantineDoc = QuarantineLegalDoc.builder()
-                .document(caseData.getMiamDetails().getMiamCertificationDocumentUpload().toBuilder().build())
+                .document(caseData.getMiamDetails().getMiamCertificationDocumentUpload())
                 .build();
+            miamQuarantineDoc = DocumentUtils.addQuarantineFields(miamQuarantineDoc, MIAM_CERTIFICATE, MIAM_CERTIFICATE_NAME);
             quarantineDocs.add(element(miamQuarantineDoc));
-            caseDataUpdated.put("miamDetails", caseData.getMiamDetails().toBuilder().miamCertificationDocumentUpload(null).build());
+            caseDataUpdated.remove("miamCertificationDocumentUpload");
         }
 
+        //Draft consent order
         if (null != caseData.getDraftConsentOrderFile()) {
             log.info("ConsentOrderUpload()----> {}",caseData.getDraftConsentOrderFile());
             QuarantineLegalDoc consentOrderQuarantineDoc = QuarantineLegalDoc.builder()
-                .document(caseData.getDraftConsentOrderFile().toBuilder().build())
+                .document(caseData.getDraftConsentOrderFile())
                 .build();
+            consentOrderQuarantineDoc = DocumentUtils.addQuarantineFields(consentOrderQuarantineDoc,
+                                                                          ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                                          ORDERS_SUBMITTED_WITH_APPLICATION_NAME);
             quarantineDocs.add(element(consentOrderQuarantineDoc));
-            caseDataUpdated.put("draftConsentOrderFile", caseData.toBuilder().draftConsentOrderFile(null).build());
+            caseDataUpdated.remove("draftConsentOrderFile");
+        }
+
+        //Other proceedings
+        if (!isEmpty(caseData.getExistingProceedings())) {
+            log.info("ExistingProceedings()----> {}", caseData.getExistingProceedings());
+            caseData.getExistingProceedings().stream()
+                .map(Element::getValue)
+                .forEach(otherProceeding -> {
+                    if (null != otherProceeding.getUploadRelevantOrder()) {
+                        log.info("UploadRelevantOrder()----> {}", otherProceeding.getUploadRelevantOrder());
+                        QuarantineLegalDoc otherProceedingQuarantineDoc = QuarantineLegalDoc.builder()
+                            .document(otherProceeding.getUploadRelevantOrder())
+                            .build();
+                        otherProceedingQuarantineDoc = DocumentUtils.addQuarantineFields(otherProceedingQuarantineDoc,
+                                                                                         PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                                                         PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME);
+                        quarantineDocs.add(element(otherProceedingQuarantineDoc));
+                        //TODO - Remove uploadRelevantOrder doc from original documents
+                    }
+                });
         }
 
         if (!quarantineDocs.isEmpty()) {
             caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
             caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
         }
-
-        return caseDataUpdated;
     }
 }

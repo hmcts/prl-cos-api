@@ -334,13 +334,16 @@ public class CallbackController {
                     "paymentServiceRequestReferenceNumber",
                     paymentServiceResponse.getServiceRequestReference()
                 );
-                caseDataUpdated = manageDocumentsService.createQuarantineDocs(caseDataUpdated,caseData);
             }
+
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(C100_DEFAULT_REGION_ID)
                 .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
+
+            //PRL-4778 - move docs to quarantine & remove original docs
+            manageDocumentsService.createQuarantineDocs(caseDataUpdated, caseData);
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
