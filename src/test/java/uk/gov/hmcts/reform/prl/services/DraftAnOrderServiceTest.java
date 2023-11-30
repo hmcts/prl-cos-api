@@ -3848,7 +3848,7 @@ public class DraftAnOrderServiceTest {
 
         assertNotNull(caseDataUpdated);
         assertFalse(caseDataUpdated.isEmpty());
-        assertEquals("HearingType cannot be empty, please select a hearingType", errors.get(0));
+        assertEquals("You must select a hearing type", errors.get(0));
         assertEquals("Please enter numeric value for Hearing estimated days", errors.get(1));
         assertEquals("Please enter numeric value for Hearing estimated hours", errors.get(2));
         assertEquals("Please enter numeric value for Hearing estimated minutes", errors.get(3));
