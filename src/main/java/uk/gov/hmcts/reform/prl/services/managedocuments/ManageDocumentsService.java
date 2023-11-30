@@ -338,7 +338,7 @@ public class ManageDocumentsService {
         if (null != caseData.getMiamDetails()) {
             log.info("MiamCertDocUploadddddd()----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
             QuarantineLegalDoc miamQuarantineDoc = QuarantineLegalDoc.builder()
-                .document(caseData.getMiamDetails().getMiamCertificationDocumentUpload().toBuilder()
+                .legalProfQuarantineDocument(caseData.getMiamDetails().getMiamCertificationDocumentUpload().toBuilder()
                               .documentCreatedOn(localZoneDate).build())
                 .build();
             miamQuarantineDoc = DocumentUtils.addQuarantineFields(miamQuarantineDoc, MIAM_CERTIFICATE, MIAM_CERTIFICATE_NAME);
