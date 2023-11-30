@@ -424,22 +424,21 @@ public class ManageOrderEmailService {
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
-            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
-                || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
+            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("** CA case email notifications***");
-                DynamicMultiSelectList recipientsOptions = isNotEmpty(manageOrders.getRecipientsOptions()) && CollectionUtils.isNotEmpty(
-                    manageOrders.getRecipientsOptions().getValue())
-                    ? manageOrders.getRecipientsOptions() : manageOrders.getRecipientsOptionsOnlyC47a();
-                //applicants
-                sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
-                                                caseData.getApplicants(),
-                                                isFinalOrder, caseData
-                );
-                //respondents
-                sendEmailToSolicitorOrPostToRespondent(recipientsOptions.getValue(),
-                                                       caseData.getRespondents(), isFinalOrder, caseData,
-                                                       authorisation, orderDocuments, bulkPrintOrderDetails
-                );
+                DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
+                if (recipientsOptions != null) {
+                    //applicants
+                    sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
+                                                    caseData.getApplicants(),
+                                                    isFinalOrder, caseData
+                    );
+                    //respondents
+                    sendEmailToSolicitorOrPostToRespondent(recipientsOptions.getValue(),
+                                                           caseData.getRespondents(), isFinalOrder, caseData,
+                                                           authorisation, orderDocuments, bulkPrintOrderDetails
+                    );
+                }
             }
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)) {
@@ -450,11 +449,9 @@ public class ManageOrderEmailService {
                 });
             }
             //PRL-4225 - send order & additional docs to other people via post only
-            if (isNotEmpty(manageOrders.getOtherParties()) || isNotEmpty(manageOrders.getOtherPartiesOnlyC47a())) {
-                DynamicMultiSelectList otherParties = isNotEmpty(manageOrders.getOtherParties())
-                    ? manageOrders.getOtherParties() : manageOrders.getOtherPartiesOnlyC47a();
+            if (isNotEmpty(manageOrders.getOtherParties())) {
                 serveOrderToOtherPersons(authorisation,
-                                         otherParties, caseData, orderDocuments, bulkPrintOrderDetails
+                                         manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
                 );
             }
             //Send email notification to Cafcass or Cafcass cymru based on selection

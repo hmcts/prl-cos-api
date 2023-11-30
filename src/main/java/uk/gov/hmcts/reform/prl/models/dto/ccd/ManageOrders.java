@@ -19,9 +19,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.RespondentOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.MappableObject;
@@ -183,7 +184,9 @@ public class ManageOrders implements MappableObject {
     private final List<Element<Document>> serveOrderAdditionalDocuments;
 
     private final YesOrNo serveToRespondentOptions;
-    private final ServingRespondentsEnum servingRespondentsOptionsCA;
+    @JsonProperty("servingOptionsForNonLegalRep")
+    private final SoaCitizenServingRespondentsEnum servingOptionsForNonLegalRep;
+    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCA;
     private final DynamicMultiSelectList recipientsOptions;
     private final DynamicMultiSelectList otherParties;
     private final YesOrNo cafcassServedOptions;
@@ -195,7 +198,7 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("serveOptionsCaDaOther")
     private final List<Element<ServeOther>> serveOptionsCaDaOther;
 
-    private final ServingRespondentsEnum servingRespondentsOptionsDA;
+    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA;
     private final List<ServeOtherPartiesOptions> serveOtherPartiesDA;
 
     @JsonProperty("withdrawnOrRefusedOrder")
@@ -244,7 +247,7 @@ public class ManageOrders implements MappableObject {
     private final YesOrNo isOnlyC47aOrderSelectedToServe;
     private final YesOrNo otherPeoplePresentInCaseFlag;
     private final YesOrNo serveToRespondentOptionsOnlyC47a;
-    private final ServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
+    private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsCaOnlyC47a;
     private final DynamicMultiSelectList recipientsOptionsOnlyC47a;
     private final DynamicMultiSelectList otherPartiesOnlyC47a;
 
@@ -271,6 +274,8 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("additionalOrderDocuments")
     private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
 
+    @JsonProperty("displayLegalRepOption")
+    private String displayLegalRepOption;
 
     private final DeliveryByEnum deliveryByOptionsCaOnlyC47a;
     @JsonProperty("emailInformationCaOnlyC47a")
