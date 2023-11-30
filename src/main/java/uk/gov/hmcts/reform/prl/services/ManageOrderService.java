@@ -1792,7 +1792,10 @@ public class ManageOrderService {
                 log.info("*** Manage orders 12 {} :", caseData.getManageOrders().getOrdersHearingDetails());
                 caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
             }
-
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
+                caseData = populateJudgeNames(caseData);
+                caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
+            }
             log.info("*** Manage orders: {}", caseData.getManageOrders());
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
@@ -1911,7 +1914,7 @@ public class ManageOrderService {
         return caseData;
     }
 
-    private CaseData populatePartyDetailsOfNewParterForDocmosis(CaseData caseData) {
+    public CaseData populatePartyDetailsOfNewParterForDocmosis(CaseData caseData) {
         if (isNotEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass()) && CollectionUtils.isNotEmpty(
             caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcass().getValue())) {
             String partyDetailsForCafcass = dynamicMultiSelectListService
@@ -2783,7 +2786,6 @@ public class ManageOrderService {
         //PRL-3254 - Populate hearing details dropdown for create order
         caseDataUpdated.put("hearingsType", populateHearingsDropdown(authorisation, caseData));
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
-        caseDataUpdated.put("isTheOrderByConsent", Yes);
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
             ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
     }
