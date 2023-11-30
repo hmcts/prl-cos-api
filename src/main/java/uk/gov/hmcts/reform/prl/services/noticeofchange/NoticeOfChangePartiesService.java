@@ -407,10 +407,10 @@ public class NoticeOfChangePartiesService {
             caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
             if (TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)) {
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                    caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR, true);
+                    caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLICITOR, true);
             } else {
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-                    caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLCIITOR, false);
+                    caseData, partyIndex, PartyRole.Representing.CARESPONDENTSOLICITOR, false);
             }
         } else if (CAAPPLICANT.equals(representing)) {
             updatedRepresentedRespondentElement = ElementUtils
@@ -471,13 +471,13 @@ public class NoticeOfChangePartiesService {
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                     caseData,
                     0,
-                    PartyRole.Representing.DARESPONDENTSOLCIITOR, true
+                    PartyRole.Representing.DARESPONDENTSOLICITOR, true
                 );
             } else {
                 caseData = partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
                     caseData,
                     0,
-                    PartyRole.Representing.DARESPONDENTSOLCIITOR, false
+                    PartyRole.Representing.DARESPONDENTSOLICITOR, false
                 );
             }
         }
