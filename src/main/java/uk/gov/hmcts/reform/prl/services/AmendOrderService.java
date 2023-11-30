@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -46,7 +45,7 @@ public class AmendOrderService {
     private final Time time;
     private final ManageOrderService manageOrderService;
 
-    public Map<String, Object> updateOrder(CaseData caseData, String authorisation){
+    public Map<String, Object> updateOrder(CaseData caseData, String authorisation) {
         ManageOrders eventData = caseData.getManageOrders();
         //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
         // Hence needs to revisit the logic, once XUI issue is resolved

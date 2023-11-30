@@ -41,32 +41,34 @@ public class HearingRequestDataMapper {
         mapHearingDataForC100Cases(hearingData, hearingDataPrePopulatedDynamicLists, caseData, isHearingDynamicListItemsNullifyReq);
     }
 
-    private void mapHearingDataForC100Cases(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData, boolean isHearingDynamicListItemsNullifyReq) {
+    private void mapHearingDataForC100Cases(HearingData hearingData,
+                                            HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                            CaseData caseData,
+                                            boolean isHearingDynamicListItemsNullifyReq) {
         boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
         if (isC100Case) {
             int numberOfApplicant = getPartyNameList(caseData.getApplicants()).size();
-            int numberOfRespondents = getPartyNameList(caseData.getRespondents()).size();
-            int numberOfApplicantSolicitors = getApplicantSolicitorNameList(caseData.getApplicants()).size();
-            int numberOfRespondentSolicitors  = getRespondentSolicitorNameList(caseData.getRespondents()).size();
-
             setHearingDataForApplicants(
                 hearingData,
                 hearingDataPrePopulatedDynamicLists,
                 isHearingDynamicListItemsNullifyReq,
                 numberOfApplicant
             );
+            int numberOfApplicantSolicitors = getApplicantSolicitorNameList(caseData.getApplicants()).size();
             setHearingDataForSolicitors(
                 hearingData,
                 hearingDataPrePopulatedDynamicLists,
                 isHearingDynamicListItemsNullifyReq,
                 numberOfApplicantSolicitors
             );
+            int numberOfRespondents = getPartyNameList(caseData.getRespondents()).size();
             setHearingDataForRespondents(
                 hearingData,
                 hearingDataPrePopulatedDynamicLists,
                 isHearingDynamicListItemsNullifyReq,
                 numberOfRespondents
             );
+            int numberOfRespondentSolicitors  = getRespondentSolicitorNameList(caseData.getRespondents()).size();
             setHearingDataForRespondentSolicitor(
                 hearingData,
                 hearingDataPrePopulatedDynamicLists,
@@ -76,7 +78,10 @@ public class HearingRequestDataMapper {
         }
     }
 
-    private void setHearingDataForRespondentSolicitor(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, boolean isHearingDynamicListItemsNullifyReq, int numberOfRespondentSolicitors) {
+    private void setHearingDataForRespondentSolicitor(HearingData hearingData,
+                                                      HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                                      boolean isHearingDynamicListItemsNullifyReq,
+                                                      int numberOfRespondentSolicitors) {
         hearingData.setRespondentSolicitorHearingChannel1(0 < numberOfRespondentSolicitors
                                                               ? mapHearingChannel(
             hearingData.getRespondentSolicitorHearingChannel1(),
@@ -109,7 +114,10 @@ public class HearingRequestDataMapper {
         ) : null);
     }
 
-    private void setHearingDataForRespondents(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, boolean isHearingDynamicListItemsNullifyReq, int numberOfRespondents) {
+    private void setHearingDataForRespondents(HearingData hearingData,
+                                              HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                              boolean isHearingDynamicListItemsNullifyReq,
+                                              int numberOfRespondents) {
         hearingData.setRespondentHearingChannel1(0 < numberOfRespondents
                                                      ? mapHearingChannel(
             hearingData.getRespondentHearingChannel1(),
@@ -142,7 +150,10 @@ public class HearingRequestDataMapper {
         ) : null);
     }
 
-    private void setHearingDataForSolicitors(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, boolean isHearingDynamicListItemsNullifyReq, int numberOfApplicantSolicitors) {
+    private void setHearingDataForSolicitors(HearingData hearingData,
+                                             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                             boolean isHearingDynamicListItemsNullifyReq,
+                                             int numberOfApplicantSolicitors) {
         hearingData.setApplicantSolicitorHearingChannel1(0 < numberOfApplicantSolicitors
                                                              ? mapHearingChannel(
             hearingData.getApplicantSolicitorHearingChannel1(),
@@ -175,7 +186,10 @@ public class HearingRequestDataMapper {
         ) : null);
     }
 
-    private void setHearingDataForApplicants(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, boolean isHearingDynamicListItemsNullifyReq, int numberOfApplicant) {
+    private void setHearingDataForApplicants(HearingData hearingData,
+                                             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                             boolean isHearingDynamicListItemsNullifyReq,
+                                             int numberOfApplicant) {
         hearingData.setApplicantHearingChannel1(0 < numberOfApplicant
                                                     ? mapHearingChannel(
             hearingData.getApplicantHearingChannel1(),
@@ -208,7 +222,10 @@ public class HearingRequestDataMapper {
         ) : null);
     }
 
-    private void mapHearingDataForFL401Cases(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData, boolean isHearingDynamicListItemsNullifyReq) {
+    private void mapHearingDataForFL401Cases(HearingData hearingData,
+                                             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
+                                             CaseData caseData,
+                                             boolean isHearingDynamicListItemsNullifyReq) {
         boolean isFL401Case = FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication());
         if (isFL401Case) {
             hearingData.setApplicantHearingChannel(mapHearingChannel(

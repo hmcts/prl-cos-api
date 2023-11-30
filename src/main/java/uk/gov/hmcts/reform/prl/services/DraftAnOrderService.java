@@ -1691,7 +1691,7 @@ public class DraftAnOrderService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseData = updateOrderSpecificFields( caseData, callbackRequest);
+        caseData = updateOrderSpecificFields(caseData, callbackRequest);
 
         log.info("caseData.getManageOrders() new change    ------ {}", caseData.getManageOrders());
         log.info("ordersHearingDetails new change    ------ {}", ordersHearingDetails);
@@ -1923,12 +1923,13 @@ public class DraftAnOrderService {
         List<String> errorList = new ArrayList<>();
         if (ManageOrdersUtils.isHearingPageNeeded(
             caseData.getCreateSelectOrderOptions(),
-            caseData.getManageOrders().getC21OrderOptions()
-        ) && (Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails()))) {
-                errorList.addAll(getHearingScreenValidations(
-                    caseData.getManageOrders().getOrdersHearingDetails(),
-                    caseData.getCreateSelectOrderOptions(),
-                    true
+            caseData.getManageOrders().getC21OrderOptions())
+            &&
+            (Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails()))) {
+            errorList.addAll(getHearingScreenValidations(
+                caseData.getManageOrders().getOrdersHearingDetails(),
+                caseData.getCreateSelectOrderOptions(),
+                true
                 ));
         }
         if (CreateSelectOrderOptionsEnum.occupation.equals(caseData.getCreateSelectOrderOptions())
@@ -1964,7 +1965,7 @@ public class DraftAnOrderService {
     }
 
 
-    private CaseData updateOrderSpecificFields( CaseData caseData, CallbackRequest callbackRequest) {
+    private CaseData updateOrderSpecificFields(CaseData caseData, CallbackRequest callbackRequest) {
         if (caseData.getCreateSelectOrderOptions() != null
             && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
             List<Element<AppointedGuardianFullName>> namesList = new ArrayList<>();
