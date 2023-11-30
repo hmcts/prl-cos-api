@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -102,9 +101,6 @@ public class ManageOrderEmailService {
     private final SystemUserService systemUserService;
     @Autowired
     private final SendgridService sendgridService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     @Autowired
     private Time dateTime;
@@ -448,8 +444,6 @@ public class ManageOrderEmailService {
                 .contains(OtherOrganisationOptions.anotherOrganisation)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
                 sendEmailToOtherOrganisation(caseData,manageOrders.getEmailInformationCA(),authorisation, orderDocuments);
-                //manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                //  .add(value.getEmailAddress()));
             } else if (manageOrders.getServeOtherPartiesCaOnlyC47a() != null && manageOrders.getServeOtherPartiesCaOnlyC47a()
                 .contains(OtherOrganisationOptions.anotherOrganisation)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCaOnlyC47a())) {
@@ -514,11 +508,13 @@ public class ManageOrderEmailService {
                         order.getValue().getTypeOfOrder(),
                         SelectTypeOfOrderEnum.general.getDisplayedValue()
                     )) {
+                        log.info("New order is selected to serve {}",order.getId());
                         newOrdersExists.set(true);
                     } else if (StringUtils.equals(
                         order.getValue().getTypeOfOrder(),
                         SelectTypeOfOrderEnum.finl.getDisplayedValue()
                     )) {
+                        log.info("Final order is selected to serve {}",order.getId());
                         finalOrdersExists.set(true);
                     }
 
@@ -536,7 +532,7 @@ public class ManageOrderEmailService {
                         orderDocuments).languagePreference(LanguagePreference.english).build()
                 );
             } catch (IOException e) {
-                log.info("there is a failure in sending email {}", e.getMessage());
+                log.error("there is a failure in sending email for email {} with exception {}", value.getEmailAddress(),e.getMessage());
             }
         });
 
@@ -559,18 +555,18 @@ public class ManageOrderEmailService {
 
     private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {
         if (newOrdersExists.get() && finalOrdersExists.get()) {
-            dynamicData.put("newAndFInal", true);
+            dynamicData.put("newAndFinal", true);
             dynamicData.put("final", false);
             dynamicData.put("new", false);
 
         } else if (newOrdersExists.get()) {
 
-            dynamicData.put("newAndFInal", false);
+            dynamicData.put("newAndFinal", false);
             dynamicData.put("final", false);
             dynamicData.put("new", true);
         } else if (finalOrdersExists.get()) {
 
-            dynamicData.put("newAndFInal", false);
+            dynamicData.put("newAndFinal", false);
             dynamicData.put("final", true);
             dynamicData.put("new", false);
         }
