@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
-public class ServeOther {
+public class ServeOrgDetails {
     @JsonProperty("serveByPostOrEmail")
     private final DeliveryByEnum serveByPostOrEmail;
     @JsonProperty("emailInformation")

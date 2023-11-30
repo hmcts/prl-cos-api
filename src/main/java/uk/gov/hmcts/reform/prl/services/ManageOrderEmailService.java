@@ -442,7 +442,7 @@ public class ManageOrderEmailService {
             }
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)) {
-                manageOrders.getServeOptionsCaDaOther().stream().map(Element::getValue).forEach(value -> {
+                manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
                     if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
                         listOfOtherAndCafcassEmails.add(value.getEmailInformation().getEmailAddress());
                     }
@@ -467,7 +467,7 @@ public class ManageOrderEmailService {
             sendEmailForFlCaseType(caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)) {
-                manageOrders.getServeOptionsCaDaOther().stream().map(Element::getValue).forEach(value -> {
+                manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
                     if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
                         listOfOtherAndCafcassEmails.add(value.getEmailInformation().getEmailAddress());
                     }
