@@ -398,7 +398,7 @@ public class ManageDocumentsService {
                         otherProceeding.setUploadRelevantOrder(null);
                     }
                 });
-            caseDataUpdated.put("existingProceedings", caseData.getFl401OtherProceedingDetails());
+            caseDataUpdated.put("fl401OtherProceedingDetails", caseData.getFl401OtherProceedingDetails());
         }
 
         //Witness statements
