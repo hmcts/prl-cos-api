@@ -21,6 +21,7 @@ import java.util.UUID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@SuppressWarnings({"java:S5976"})
 public class PartyLevelCaseFlagsGeneratorTest {
 
     @InjectMocks
