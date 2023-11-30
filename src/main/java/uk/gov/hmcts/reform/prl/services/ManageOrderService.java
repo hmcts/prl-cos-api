@@ -2211,6 +2211,7 @@ public class ManageOrderService {
     public void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
         if (servedSavedOrders.equals(caseData.getManageOrdersOptions())
             || (null != caseData.getServeOrderData() && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+            log.info("inside Mark to serve email notification");
             caseDataUpdated.put("markedToServeEmailNotification", Yes);
         } else {
             caseDataUpdated.put("markedToServeEmailNotification", No);
