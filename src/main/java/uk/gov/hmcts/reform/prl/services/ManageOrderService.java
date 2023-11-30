@@ -25,8 +25,8 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -132,8 +132,8 @@ public class ManageOrderService {
     public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
     public static final String OTHER_PEOPLE_PRESENT_IN_CASE_FLAG = "otherPeoplePresentInCaseFlag";
     public static final String C_47_A = "C47A";
-    public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
-    public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
+    public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
+
     @Autowired
     LocationRefDataService locationRefDataService;
 
@@ -600,11 +600,6 @@ public class ManageOrderService {
             RECIPIENTS_OPTIONS, DynamicMultiSelectList.builder()
                 .listItems(applicantRespondentList)
                 .build());
-        headerMap.put(
-            RECIPIENTS_OPTIONS_ONLY_C_47_A, DynamicMultiSelectList.builder()
-                .listItems(applicantRespondentList)
-                .build());
-
     }
 
     private void setOtherParties(CaseData caseData, Map<String, Object> headerMap) {
@@ -612,10 +607,6 @@ public class ManageOrderService {
             .getOtherPeopleMultiSelectList(caseData);
         headerMap.put(
             OTHER_PARTIES, DynamicMultiSelectList.builder()
-                .listItems(otherPeopleList)
-                .build());
-        headerMap.put(
-            OTHER_PARTIES_ONLY_C_47_A, DynamicMultiSelectList.builder()
                 .listItems(otherPeopleList)
                 .build());
         if (otherPeopleList.isEmpty()) {
@@ -1082,7 +1073,7 @@ public class ManageOrderService {
                     ));
                     log.info("** Does order needs to be served {}",caseData.getManageOrders() != null
                         ? caseData.getManageOrders().getOrdersNeedToBeServed() : "null");
-                    log.info("** Do you eant to serve {}",caseData.getServeOrderData() != null
+                    log.info("** Do you Want to serve {}",caseData.getServeOrderData() != null
                         ? caseData.getServeOrderData().getDoYouWantToServeOrder() : "null");
 
                     if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
@@ -1359,7 +1350,7 @@ public class ManageOrderService {
     }
 
     private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
-        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
@@ -1390,11 +1381,10 @@ public class ManageOrderService {
 
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
-        YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
-        ServingRespondentsEnum servingRespondentsOptions = null;
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
         String otherParties;
-        if (Yes.equals(serveOnRespondent) || Yes.equals(serveOnRespondentOnly47a)) {
+        if (Yes.equals(serveOnRespondent)) {
             servingRespondentsOptions = getServingRespondentsOptions(caseData);
         } else {
             recipients = getRecipients(caseData);
@@ -1403,7 +1393,6 @@ public class ManageOrderService {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-
         if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())) {
             otherPartiesServed = Yes;
             Map<String, Object> emailOrPostalInfo = new HashMap<>();
@@ -1453,11 +1442,6 @@ public class ManageOrderService {
                 .getServedPartyDetailsFromDynamicSelectList(caseData
                                                                 .getManageOrders()
                                                                 .getRecipientsOptions());
-        } else if (caseData.getManageOrders()
-            .getRecipientsOptionsOnlyC47a() != null) {
-            servedParties = dynamicMultiSelectListService
-                .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
-                                                         .getRecipientsOptionsOnlyC47a());
         }
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -1470,25 +1454,17 @@ public class ManageOrderService {
                 servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
                     caseData.getManageOrders().getOtherParties()
                 ));
-            } else if (caseData.getManageOrders().getOtherPartiesOnlyC47a() != null) {
-                servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
-                    caseData.getManageOrders().getOtherPartiesOnlyC47a()
-                ));
             }
         }
         return servedParties;
     }
 
-    private static ServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
-        ServingRespondentsEnum servingRespondentsOptions = null;
+    private static SoaSolicitorServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         if (caseData.getManageOrders()
             .getServingRespondentsOptionsCA() != null) {
             servingRespondentsOptions = caseData.getManageOrders()
                 .getServingRespondentsOptionsCA();
-        } else if (caseData.getManageOrders()
-            .getServingRespondentsOptionsCaOnlyC47a() != null) {
-            servingRespondentsOptions = caseData.getManageOrders()
-                .getServingRespondentsOptionsCaOnlyC47a();
         }
         return servingRespondentsOptions;
     }
@@ -1520,13 +1496,6 @@ public class ManageOrderService {
                 .getOtherParties().getValue()) {
                 otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
             }
-        } else if (caseData.getManageOrders()
-            .getOtherPartiesOnlyC47a() != null && caseData.getManageOrders()
-            .getOtherPartiesOnlyC47a().getValue() != null) {
-            for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
-                .getOtherPartiesOnlyC47a().getValue()) {
-                otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
-            }
         }
         otherParties = String.join(", ", otherPartiesList);
         return otherParties;
@@ -1539,11 +1508,6 @@ public class ManageOrderService {
             recipients = dynamicMultiSelectListService
                 .getStringFromDynamicMultiSelectList(caseData.getManageOrders().getRecipientsOptions());
 
-        } else if (caseData.getManageOrders()
-            .getRecipientsOptionsOnlyC47a() != null) {
-            recipients = dynamicMultiSelectListService
-                .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                         .getRecipientsOptionsOnlyC47a());
         }
         return recipients;
     }
@@ -1557,7 +1521,7 @@ public class ManageOrderService {
         String cafcassEmail = null;
         YesOrNo serveOnRespondent = null;
         YesOrNo otherPartiesServed = null;
-        ServingRespondentsEnum servingRespondentsOptions = null;
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
         String otherParties = null;
         List<Element<ServedParties>> servedParties = new ArrayList<>();
@@ -1579,7 +1543,7 @@ public class ManageOrderService {
             otherPartiesServed = (YesOrNo) servedOrderDetails.get(OTHER_PARTIES_SERVED);
         }
         if (servedOrderDetails.containsKey(SERVING_RESPONDENTS_OPTIONS)) {
-            servingRespondentsOptions = (ServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
+            servingRespondentsOptions = (SoaSolicitorServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
         }
         if (servedOrderDetails.containsKey(RECIPIENTS_OPTIONS)) {
             recipients = (String) servedOrderDetails.get(RECIPIENTS_OPTIONS);
@@ -2135,8 +2099,29 @@ public class ManageOrderService {
         log.info("end OrdersHearingDetails {}",
                  CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
                      ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+        caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
+        log.info("---- Check display legal rep options  ----");
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            log.info("---- C100 check ----");
+            caseData.getApplicants().stream().findFirst().ifPresent(party ->
+                populateLegalRepFlag(party.getValue().getDoTheyHaveLegalRepresentation(), caseDataUpdated));
+        } else {
+            if (org.apache.commons.lang3.StringUtils.isNotEmpty(caseData.getApplicantsFL401().getRepresentativeFirstName())) {
+                caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
+            }
+        }
+        log.info("---- display Legal rep ----{}", caseDataUpdated.get(DISPLAY_LEGAL_REP_OPTION));
         return caseDataUpdated;
     }
+
+    private void populateLegalRepFlag(YesNoDontKnow legalRepPresent, Map<String, Object> caseDataUpdated) {
+        log.info("---- Legal rep present ----{}", legalRepPresent);
+        if (YesNoDontKnow.yes.equals(legalRepPresent)) {
+            log.info("---- Legal rep present ----");
+            caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
+        }
+    }
+
 
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
         Map<String, Object> caseDataUpdated = new HashMap<>();

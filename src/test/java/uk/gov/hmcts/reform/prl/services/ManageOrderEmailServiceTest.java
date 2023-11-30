@@ -1608,14 +1608,14 @@ public class ManageOrderEmailServiceTest {
                                .code("00000000-0000-0000-0000-000000000000")
                                .build())).build();
         ManageOrders manageOrders = ManageOrders.builder()
-            .serveToRespondentOptionsOnlyC47a(YesOrNo.No)
-            .recipientsOptionsOnlyC47a(dynamicMultiSelectList)
+            .serveToRespondentOptions(YesOrNo.No)
+            .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
-            .otherPartiesOnlyC47a(dynamicMultiSelectList)
+            .otherParties(dynamicMultiSelectList)
             .build();
 
         childLiveWithList.add(LiveWithEnum.applicant);
