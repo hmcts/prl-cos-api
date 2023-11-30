@@ -33,7 +33,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404b;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOther;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDate;
@@ -196,7 +196,7 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("serveOtherPartiesCA")
     private final List<OtherOrganisationOptions> serveOtherPartiesCA;
     @JsonProperty("serveOptionsCaDaOther")
-    private final List<Element<ServeOther>> serveOptionsCaDaOther;
+    private final List<Element<ServeOrgDetails>> serveOrgDetailsList;
 
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA;
     private final List<ServeOtherPartiesOptions> serveOtherPartiesDA;

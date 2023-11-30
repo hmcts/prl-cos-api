@@ -34,7 +34,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOther;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -1217,7 +1217,7 @@ public class ManageOrderEmailServiceTest {
                                  .serveToRespondentOptions(YesOrNo.No)
                                  .recipientsOptions(dynamicMultiSelectList)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-                              .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                                          .emailInformation(EmailInformation.builder().emailName("").build())
                                                                          .build())))
                               .otherParties(dynamicMultiSelectList)
@@ -1418,7 +1418,7 @@ public class ManageOrderEmailServiceTest {
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .serveToRespondentOptions(YesOrNo.No)
                               .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                              .serveOptionsCaDaOther(List.of(element(ServeOther.builder()
+                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                                                                          .serveByPostOrEmail(DeliveryByEnum.email)
                                                                          .emailInformation(EmailInformation.builder()
                                                                                                .emailAddress("test").build())
@@ -1612,7 +1612,7 @@ public class ManageOrderEmailServiceTest {
             .recipientsOptions(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-            .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
             .otherParties(dynamicMultiSelectList)

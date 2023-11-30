@@ -57,7 +57,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOther;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AdditionalOrderDocument;
@@ -1638,7 +1638,7 @@ public class ManageOrderServiceTest {
             .recipientsOptions(DynamicMultiSelectList.builder()
                                    .listItems(elements)
                                    .build())
-            .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
             .childOption(DynamicMultiSelectList.builder()
@@ -1705,7 +1705,7 @@ public class ManageOrderServiceTest {
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
             .build();
@@ -1758,7 +1758,7 @@ public class ManageOrderServiceTest {
                                                        .value(Document.builder().documentFileName(
                                                            "abc.pdf").build())
                                                        .build()))
-            .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
             .serveToRespondentOptions(YesOrNo.Yes)
@@ -1834,7 +1834,7 @@ public class ManageOrderServiceTest {
             .recipientsOptions(DynamicMultiSelectList.builder()
                                    .listItems(elements)
                                    .build())
-            .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.post)
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.post)
                                                        .postalInformation(PostalInformation.builder().postalName("").build())
                                                        .build())))
             .childOption(DynamicMultiSelectList.builder()
@@ -2299,7 +2299,7 @@ public class ManageOrderServiceTest {
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
-            .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailAddress("").build())
                                                        .build())))
             .recipientsOptions(dummyDynamicMultiSelectList)
@@ -2358,7 +2358,7 @@ public class ManageOrderServiceTest {
                                                            "abc.pdf").build())
                                                        .build()))
             .serveToRespondentOptions(YesOrNo.No)
-            .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
+            .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)

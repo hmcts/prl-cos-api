@@ -1358,7 +1358,7 @@ public class ManageOrderService {
         if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesDA())) {
             otherPartiesServed = Yes;
             Map<String, Object> emailOrPostalInfo = new HashMap<>();
-            getEmailAndPostalInfoCa(caseData, emailOrPostalInfo);
+            getEmailAndPostalInfoOfOrg(caseData, emailOrPostalInfo);
             postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get("post");
             emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get("email");
         }
@@ -1396,7 +1396,7 @@ public class ManageOrderService {
         if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())) {
             otherPartiesServed = Yes;
             Map<String, Object> emailOrPostalInfo = new HashMap<>();
-            getEmailAndPostalInfoCa(caseData, emailOrPostalInfo);
+            getEmailAndPostalInfoOfOrg(caseData, emailOrPostalInfo);
             postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get("post");
             emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get("email");
         }
@@ -1469,11 +1469,11 @@ public class ManageOrderService {
         return servingRespondentsOptions;
     }
 
-    private static void getEmailAndPostalInfoCa(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
+    private static void getEmailAndPostalInfoOfOrg(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
         List<Element<PostalInformation>> postalInformation = new ArrayList<>();
         List<Element<EmailInformation>> emailInformation = new ArrayList<>();
-        if (null != caseData.getManageOrders().getServeOptionsCaDaOther()) {
-            caseData.getManageOrders().getServeOptionsCaDaOther().stream().map(Element::getValue)
+        if (null != caseData.getManageOrders().getServeOrgDetailsList()) {
+            caseData.getManageOrders().getServeOrgDetailsList().stream().map(Element::getValue)
                 .forEach(serveOther -> {
                     if (DeliveryByEnum.post.equals(serveOther.getServeByPostOrEmail())) {
                         postalInformation.add(element(serveOther.getPostalInformation()));
