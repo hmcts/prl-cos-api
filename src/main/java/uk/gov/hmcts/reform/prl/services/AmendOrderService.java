@@ -52,9 +52,7 @@ public class AmendOrderService {
         ManageOrders eventData = caseData.getManageOrders();
         //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
         // Hence needs to revisit the logic, once XUI issue is resolved
-        //byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersAmendedOrder(), authorisation);
         String amendedFileName = updateFileName(eventData.getManageOrdersDocumentToAmend());
-        //Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
 
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
 

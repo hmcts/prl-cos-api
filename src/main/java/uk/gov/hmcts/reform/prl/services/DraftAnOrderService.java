@@ -181,6 +181,7 @@ public class DraftAnOrderService {
     private final HearingService hearingService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
+    private static final String ORDER_NAME = "orderName";
     private static final String MANAGE_ORDER_SDO_FAILURE
         = "Failed to update SDO order details";
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
@@ -532,7 +533,7 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        caseDataMap.put("orderName", getOrderName(selectedOrder));
+        caseDataMap.put(ORDER_NAME, getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
@@ -554,7 +555,7 @@ public class DraftAnOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
-        log.info("*** Order name {}", caseDataMap.get("orderName"));
+        log.info("*** Order name {}", caseDataMap.get(ORDER_NAME));
         return caseDataMap;
     }
 
@@ -728,7 +729,7 @@ public class DraftAnOrderService {
 
         log.info("selected order: {}", selectedOrder);
 
-        caseDataMap.put("orderName", getOrderName(selectedOrder));
+        caseDataMap.put(ORDER_NAME, getOrderName(selectedOrder));
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put(DATE_ORDER_MADE, selectedOrder.getDateOrderMade());
