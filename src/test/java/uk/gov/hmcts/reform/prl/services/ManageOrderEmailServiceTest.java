@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -33,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOther;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.ServiceArea;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -61,11 +63,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageOrderEmailServiceTest {
-
     private static final String manageCaseUrl = null;
     public static final String authToken = "Bearer TestAuthToken";
     private static final String URGENT_CASE = "Urgent ";
@@ -1217,25 +1217,18 @@ public class ManageOrderEmailServiceTest {
                                  .serveToRespondentOptions(YesOrNo.No)
                                  .recipientsOptions(dynamicMultiSelectList)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-                              .deliveryByOptionsCA(DeliveryByEnum.email)
-                              .emailInformationCA(List.of(Element.<EmailInformation>builder()
-                                                              .id(uuid)
-                                                              .value(EmailInformation
-                                                                                                        .builder()
-                                                                                                        .emailAddress("test")
-                                                                                                        .build())
-                                                              .build()))
+                              .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                                                                         .emailInformation(EmailInformation.builder().emailName("").build())
+                                                                         .build())))
                               .otherParties(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                                                          .build())
                 .orderCollection(List.of(element(OrderDetails.builder().typeOfOrder("Final").build())))
                 .build();
         Map<String, Object> dataMap = new HashMap<>();
-
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
     }
@@ -1424,13 +1417,19 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .serveToRespondentOptions(YesOrNo.No)
+                              .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                              .serveOptionsCaDaOther(List.of(element(ServeOther.builder()
+                                                                         .serveByPostOrEmail(DeliveryByEnum.email)
+                                                                         .emailInformation(EmailInformation.builder()
+                                                                                               .emailAddress("test").build())
+                                                                         .build())))
                               .recipientsOptions(dynamicMultiSelectList)
                               .cafcassEmailId("test").build())
             .build();
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
+        Mockito.verify(emailService,Mockito.times(3)).send(Mockito.any(), any(), any(), any());
     }
 
 
@@ -1612,15 +1611,10 @@ public class ManageOrderEmailServiceTest {
             .serveToRespondentOptionsOnlyC47a(YesOrNo.No)
             .recipientsOptionsOnlyC47a(dynamicMultiSelectList)
             .serveOrderDynamicList(dynamicMultiSelectList)
-            .serveOtherPartiesCaOnlyC47a(List.of(OtherOrganisationOptions.anotherOrganisation))
-            .deliveryByOptionsCaOnlyC47a(DeliveryByEnum.email)
-            .emailInformationCaOnlyC47a(List.of(Element.<EmailInformation>builder()
-                                            .id(uuid)
-                                            .value(EmailInformation
-                                                       .builder()
-                                                       .emailAddress("test")
-                                                       .build())
-                                            .build()))
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .serveOptionsCaDaOther(List.of(element(ServeOther.builder().serveByPostOrEmail(DeliveryByEnum.email)
+                                                       .emailInformation(EmailInformation.builder().emailName("").build())
+                                                       .build())))
             .otherPartiesOnlyC47a(dynamicMultiSelectList)
             .build();
 
