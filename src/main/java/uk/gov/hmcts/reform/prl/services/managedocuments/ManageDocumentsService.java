@@ -35,14 +35,18 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC_NAME;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_SUBMITTED_WITH_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_SUBMITTED_WITH_APPLICATION_NAME;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
@@ -311,11 +315,31 @@ public class ManageDocumentsService {
     public void createQuarantineDocs(Map<String,Object> caseDataUpdated,CaseData caseData) {
         List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
 
+        log.info("Case type of application {}", caseData.getCaseTypeOfApplication());
+        switch (caseData.getCaseTypeOfApplication()) {
+            case C100_CASE_TYPE -> createC100QuarantineDocuments(quarantineDocs, caseDataUpdated, caseData);
+            case FL401_CASE_TYPE -> createFL401QuarantineDocuments(quarantineDocs, caseDataUpdated, caseData);
+
+            default -> log.error("Invalid case type of application");
+        }
+
+        log.info("quarantineDocs()----> {}", quarantineDocs);
+        if (!quarantineDocs.isEmpty()) {
+            caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
+            caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+        }
+    }
+
+    private void createC100QuarantineDocuments(List<Element<QuarantineLegalDoc>> quarantineDocs,
+                                               Map<String, Object> caseDataUpdated,
+                                               CaseData caseData) {
+        log.info("##################### C100 Quarantine documents #####################");
         //MIAM certificate
         if (null != caseData.getMiamDetails()) {
             log.info("MiamCertDocUploadddddd()----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
             QuarantineLegalDoc miamQuarantineDoc = QuarantineLegalDoc.builder()
-                .document(caseData.getMiamDetails().getMiamCertificationDocumentUpload())
+                .document(caseData.getMiamDetails().getMiamCertificationDocumentUpload().toBuilder()
+                              .documentCreatedOn(localZoneDate).build())
                 .build();
             miamQuarantineDoc = DocumentUtils.addQuarantineFields(miamQuarantineDoc, MIAM_CERTIFICATE, MIAM_CERTIFICATE_NAME);
             quarantineDocs.add(element(miamQuarantineDoc));
@@ -326,7 +350,8 @@ public class ManageDocumentsService {
         if (null != caseData.getDraftConsentOrderFile()) {
             log.info("ConsentOrderUpload()----> {}",caseData.getDraftConsentOrderFile());
             QuarantineLegalDoc consentOrderQuarantineDoc = QuarantineLegalDoc.builder()
-                .document(caseData.getDraftConsentOrderFile())
+                .document(caseData.getDraftConsentOrderFile().toBuilder()
+                              .documentCreatedOn(localZoneDate).build())
                 .build();
             consentOrderQuarantineDoc = DocumentUtils.addQuarantineFields(consentOrderQuarantineDoc,
                                                                           ORDERS_SUBMITTED_WITH_APPLICATION,
@@ -343,23 +368,86 @@ public class ManageDocumentsService {
                 .forEach(otherProceeding -> {
                     if (null != otherProceeding.getUploadRelevantOrder()) {
                         QuarantineLegalDoc otherProceedingQuarantineDoc = QuarantineLegalDoc.builder()
-                            .document(otherProceeding.getUploadRelevantOrder())
+                            .document(otherProceeding.getUploadRelevantOrder().toBuilder()
+                                          .documentCreatedOn(localZoneDate).build())
                             .build();
                         otherProceedingQuarantineDoc = DocumentUtils.addQuarantineFields(otherProceedingQuarantineDoc,
                                                                                          PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
                                                                                          PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME);
                         quarantineDocs.add(element(otherProceedingQuarantineDoc));
-                        //TODO - Remove uploadRelevantOrder doc from original documents
                         otherProceeding.setUploadRelevantOrder(null);
                     }
                 });
             caseDataUpdated.put("existingProceedings", caseData.getExistingProceedings());
         }
+        log.info("##################### C100 Quarantine documents #####################");
+    }
 
-        log.info("quarantineDocs()----> {}", quarantineDocs);
-        if (!quarantineDocs.isEmpty()) {
-            caseDataUpdated.put("legalProfQuarantineDocsList", quarantineDocs);
-            caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+    private void createFL401QuarantineDocuments(List<Element<QuarantineLegalDoc>> quarantineDocs,
+                                                Map<String, Object> caseDataUpdated,
+                                                CaseData caseData) {
+        log.info("******************* FL401 Quarantine documents *******************");
+        //Other proceedings
+        if (null != caseData.getFl401OtherProceedingDetails()
+            && !isEmpty(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings())) {
+            log.info("ExistingProceedings()----> {}", caseData.getFl401OtherProceedingDetails());
+            caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
+                .map(Element::getValue)
+                .forEach(otherProceeding -> {
+                    if (null != otherProceeding.getUploadRelevantOrder()) {
+                        QuarantineLegalDoc otherProceedingQuarantineDoc = QuarantineLegalDoc.builder()
+                            .document(otherProceeding.getUploadRelevantOrder().toBuilder()
+                                          .documentCreatedOn(localZoneDate).build())
+                            .build();
+                        otherProceedingQuarantineDoc = DocumentUtils.addQuarantineFields(otherProceedingQuarantineDoc,
+                                                                                         PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                                                         PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME);
+                        quarantineDocs.add(element(otherProceedingQuarantineDoc));
+                        otherProceeding.setUploadRelevantOrder(null);
+                    }
+                });
+            caseDataUpdated.put("existingProceedings", caseData.getFl401OtherProceedingDetails());
         }
+
+        //Witness statements
+        if (!isEmpty(caseData.getFl401UploadWitnessDocuments())) {
+            log.info("Witness statements()----> {}",caseData.getFl401UploadWitnessDocuments());
+            caseData.getFl401UploadWitnessDocuments().stream()
+                .map(Element::getValue)
+                .forEach(document -> {
+                    if (null != document) {
+                        QuarantineLegalDoc witnessQuarantineDoc = QuarantineLegalDoc.builder()
+                            .document(document.toBuilder()
+                                          .documentCreatedOn(localZoneDate).build())
+                            .build();
+                        witnessQuarantineDoc = DocumentUtils.addQuarantineFields(witnessQuarantineDoc,
+                                                                                 ANY_OTHER_DOC,
+                                                                                 ANY_OTHER_DOC_NAME);
+                        quarantineDocs.add(element(witnessQuarantineDoc));
+                    }
+                });
+            caseDataUpdated.remove("fl401UploadWitnessDocuments");
+        }
+
+        //Supporting documents
+        if (!isEmpty(caseData.getFl401UploadSupportDocuments())) {
+            log.info("Supporting documents()----> {}",caseData.getFl401UploadSupportDocuments());
+            caseData.getFl401UploadSupportDocuments().stream()
+                .map(Element::getValue)
+                .forEach(document -> {
+                    if (null != document) {
+                        QuarantineLegalDoc supportingQuarantineDoc = QuarantineLegalDoc.builder()
+                            .document(document.toBuilder()
+                                          .documentCreatedOn(localZoneDate).build())
+                            .build();
+                        supportingQuarantineDoc = DocumentUtils.addQuarantineFields(supportingQuarantineDoc,
+                                                                                    ANY_OTHER_DOC,
+                                                                                    ANY_OTHER_DOC_NAME);
+                        quarantineDocs.add(element(supportingQuarantineDoc));
+                    }
+                });
+            caseDataUpdated.remove("fl401UploadSupportDocuments");
+        }
+        log.info("******************* FL401 Quarantine documents *******************");
     }
 }

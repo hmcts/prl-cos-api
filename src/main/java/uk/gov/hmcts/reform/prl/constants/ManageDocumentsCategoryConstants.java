@@ -64,4 +64,5 @@ public class ManageDocumentsCategoryConstants {
     public static final String MIAM_CERTIFICATE_NAME = "MIAMCertificate";
     public static final String ORDERS_SUBMITTED_WITH_APPLICATION_NAME = "ordersSubmittedWithApplication";
     public static final String PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME = "previousOrdersSubmittedWithApplication";
+    public static final String ANY_OTHER_DOC_NAME = "Any Other Documents";
 }
