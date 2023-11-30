@@ -662,8 +662,8 @@ public class ManageOrderEmailService {
                             UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData, authorisation, orderDocuments);
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
-                                    buildBulkPrintOrderDetail(bulkPrintId, element.getCode(),
-                                            partyData.getLabelForDynamicList()))
+                                buildBulkPrintOrderDetail(bulkPrintId, element.getCode(),
+                                                          partyData.getLabelForDynamicList()))
                             );
                         } else {
                             log.info("Couldn't send serve order details to respondent, address is null/empty for {}", element.getCode());
