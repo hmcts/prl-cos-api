@@ -1576,6 +1576,7 @@ public class ManageOrderEmailServiceTest {
             .issueDate(LocalDate.now())
             .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                               .serveToRespondentOptions(YesOrNo.No)
+                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                               .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
                               .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                                                                          .serveByPostOrEmail(DeliveryByEnum.email)
