@@ -40,15 +40,13 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class AmendOrderService {
-    private static final String MEDIA_TYPE = "application/pdf";
+
     private static final String FILE_NAME_PREFIX = "amended_";
 
-    private final AmendedOrderStamper stamper;
-    private final  UploadDocumentService uploadService;
     private final Time time;
     private final ManageOrderService manageOrderService;
 
-    public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
+    public Map<String, Object> updateOrder(CaseData caseData, String authorisation){
         ManageOrders eventData = caseData.getManageOrders();
         //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
         // Hence needs to revisit the logic, once XUI issue is resolved

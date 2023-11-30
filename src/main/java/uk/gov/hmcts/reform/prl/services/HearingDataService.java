@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -100,33 +101,19 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class HearingDataService {
-    @Autowired
-    RefDataUserService refDataUserService;
 
-    @Autowired
-    HearingService hearingService;
+    private final RefDataUserService refDataUserService;
 
-    @Autowired
-    LocationRefDataService locationRefDataService;
+    private final HearingService hearingService;
 
-    @Autowired
-    CoreCaseDataApi coreCaseDataApi;
+    private final LocationRefDataService locationRefDataService;
 
-    @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    private final AllocatedJudgeService allocatedJudgeService;
 
-    @Autowired
-    ObjectMapper objectMapper;
+    private final HearingRequestDataMapper hearingRequestDataMapper;
 
-    @Autowired
-    AllocatedJudgeService allocatedJudgeService;
-
-    @Autowired
-    HearingRequestDataMapper hearingRequestDataMapper;
-
-    @Autowired
-    CaseService caseService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     DateTimeFormatter customDateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
