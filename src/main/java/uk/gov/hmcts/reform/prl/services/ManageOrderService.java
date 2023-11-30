@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -1066,7 +1067,7 @@ public class ManageOrderService {
                     List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
                     if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
                         && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
-                        && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                        && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                         updateCurrentOrderId(
                             caseData.getManageOrders().getServeOrderDynamicList(),
                             orderCollection,
@@ -1079,7 +1080,12 @@ public class ManageOrderService {
                         m -> m.getValue().getDateCreated(),
                         Comparator.reverseOrder()
                     ));
-                    if (Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed())) {
+                    log.info("** Does order needs to be served {}",caseData.getManageOrders() != null
+                        ? caseData.getManageOrders().getOrdersNeedToBeServed() : "null");
+                    log.info("** Do you eant to serve {}",caseData.getServeOrderData() != null
+                        ? caseData.getServeOrderData().getDoYouWantToServeOrder() : "null");
+
+                    if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
                         orderCollection = serveOrder(caseData, orderCollection);
                     }
                     LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
@@ -1358,14 +1364,12 @@ public class ManageOrderService {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesDA())) {
             otherPartiesServed = Yes;
-            if (caseData.getManageOrders().getEmailInformationDA() != null) {
-                emailInformation = caseData.getManageOrders().getEmailInformationDA();
-            }
-            if (caseData.getManageOrders().getPostalInformationDA() != null) {
-                postalInformation = caseData.getManageOrders().getPostalInformationDA();
-            }
+            Map<String, Object> emailOrPostalInfo = new HashMap<>();
+            getEmailAndPostalInfoCa(caseData, emailOrPostalInfo);
+            postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get("post");
+            emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get("email");
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
@@ -1399,11 +1403,13 @@ public class ManageOrderService {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())
-            || isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCaOnlyC47a())) {
+
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())) {
             otherPartiesServed = Yes;
-            emailInformation = getEmailInformationCA(caseData);
-            postalInformation = getPostalInformationCA(caseData);
+            Map<String, Object> emailOrPostalInfo = new HashMap<>();
+            getEmailAndPostalInfoCa(caseData, emailOrPostalInfo);
+            postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get("post");
+            emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get("email");
         }
         YesOrNo cafcassServedOptions = No;
         YesOrNo cafcassCymruServedOptions = No;
@@ -1487,24 +1493,21 @@ public class ManageOrderService {
         return servingRespondentsOptions;
     }
 
-    private static List<Element<PostalInformation>> getPostalInformationCA(CaseData caseData) {
-        List<Element<PostalInformation>> postalInformation = null;
-        if (caseData.getManageOrders().getPostalInformationCA() != null) {
-            postalInformation = caseData.getManageOrders().getPostalInformationCA();
-        } else if (caseData.getManageOrders().getPostalInformationCaOnlyC47a() != null) {
-            postalInformation = caseData.getManageOrders().getPostalInformationCaOnlyC47a();
+    private static void getEmailAndPostalInfoCa(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
+        List<Element<PostalInformation>> postalInformation = new ArrayList<>();
+        List<Element<EmailInformation>> emailInformation = new ArrayList<>();
+        if (null != caseData.getManageOrders().getServeOptionsCaDaOther()) {
+            caseData.getManageOrders().getServeOptionsCaDaOther().stream().map(Element::getValue)
+                .forEach(serveOther -> {
+                    if (DeliveryByEnum.post.equals(serveOther.getServeByPostOrEmail())) {
+                        postalInformation.add(element(serveOther.getPostalInformation()));
+                    } else if (DeliveryByEnum.email.equals(serveOther.getServeByPostOrEmail())) {
+                        emailInformation.add(element(serveOther.getEmailInformation()));
+                    }
+                });
         }
-        return postalInformation;
-    }
-
-    private static List<Element<EmailInformation>> getEmailInformationCA(CaseData caseData) {
-        List<Element<EmailInformation>> emailInformation = null;
-        if (caseData.getManageOrders().getEmailInformationCA() != null) {
-            emailInformation = caseData.getManageOrders().getEmailInformationCA();
-        } else if (caseData.getManageOrders().getEmailInformationCaOnlyC47a() != null) {
-            emailInformation = caseData.getManageOrders().getEmailInformationCaOnlyC47a();
-        }
-        return emailInformation;
+        emailOrPostalInfo.put("email", emailInformation);
+        emailOrPostalInfo.put("post", postalInformation);
     }
 
     private static String getOtherParties(CaseData caseData) {
@@ -1593,6 +1596,9 @@ public class ManageOrderService {
         } else {
             tempServeOrderDetails = ServeOrderDetails.builder().build();
         }
+        log.info("*** EMail info {}", emailInformation);
+        log.info("*** Postal info {}", postalInformation);
+
         ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .recipientsOptions(recipients)
@@ -1607,6 +1613,7 @@ public class ManageOrderService {
             .additionalDocuments(additionalDocuments)
             .servedParties(servedParties)
             .build();
+        log.info("*** Serve order details {}", servedOrderDetails);
 
         OrderDetails amended = order.getValue().toBuilder()
             .orderDocument(order.getValue().getOrderDocument())
@@ -1617,7 +1624,11 @@ public class ManageOrderService {
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
+        log.info("*** order details {}", order);
+
         orders.set(orders.indexOf(order), element(order.getId(), amended));
+        log.info("*** orders details {}", orders);
+
     }
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
@@ -2213,7 +2224,7 @@ public class ManageOrderService {
     }
 
     public void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if ((null != caseData.getManageOrders() && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed()))
+        if (servedSavedOrders.equals(caseData.getManageOrdersOptions())
             || (null != caseData.getServeOrderData() && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
             caseDataUpdated.put("markedToServeEmailNotification", Yes);
         } else {

@@ -474,7 +474,7 @@
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": null,
+          "doTheyHaveLegalRepresentation": "Yes",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [],
           "isRemoveLegalRepresentativeRequested": null,
