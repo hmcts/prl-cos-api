@@ -9,8 +9,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDet
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
+import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -38,6 +41,7 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,6 +83,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -314,6 +319,13 @@ public class DocumentGenService {
 
     @Autowired
     private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Autowired
+    private DgsApiClient dgsApiClient;
+
+    private final AuthTokenGenerator authTokenGenerator;
+
+    protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
 
 
     public CaseData fillOrgDetails(CaseData caseData) {
@@ -1227,5 +1239,57 @@ public class DocumentGenService {
                 }
             })
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
+    }
+
+    private boolean checkFileFormat(String fileName) {
+        log.info("Allowed file types {} ", ALLOWED_FILE_TYPES);
+        String format = "";
+        if (null != fileName) {
+            int i = fileName.lastIndexOf('.');
+            if (i >= 0) {
+                format = fileName.substring(i + 1);
+            }
+            String finalFormat = format;
+            return Arrays.stream(ALLOWED_FILE_TYPES).anyMatch(s -> s.equalsIgnoreCase(finalFormat));
+        } else {
+            return false;
+        }
+    }
+
+    public Document convertToPdf(String authorisation, Document document) {
+        String filename = document.getDocumentFileName();
+        if (checkFileFormat(document.getDocumentFileName())) {
+            ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
+                authorisation,
+                authTokenGenerator.generate(),
+                document.getDocumentBinaryUrl()
+            );
+            byte[] docInBytes = Optional.ofNullable(responseEntity)
+                .map(ResponseEntity::getBody)
+                .map(resource -> {
+                    try {
+                        return resource.getInputStream().readAllBytes();
+                    } catch (IOException e) {
+                        throw new InvalidResourceException("Doc name " + filename, e);
+                    }
+                })
+                .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
+
+            Map<String, Object> tempCaseDetails = new HashMap<>();
+            tempCaseDetails.put("fileName", docInBytes);
+            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
+                document.getDocumentFileName(),
+                authorisation, GenerateDocumentRequest
+                    .builder().template(DUMMY).values(tempCaseDetails).build()
+            );
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentFileName(generatedDocumentInfo.getDocName())
+                .build();
+
+
+        }
+        return document;
     }
 }
