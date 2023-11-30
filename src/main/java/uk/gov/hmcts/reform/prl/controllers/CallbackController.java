@@ -581,6 +581,7 @@ public class CallbackController {
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("case data updated before submit {}",caseDataUpdated);
             //Added for Case linking
             if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
                 caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_CASE_NAME));
@@ -727,6 +728,7 @@ public class CallbackController {
             UserDetails userDetails = userService.getUserDetails(authorisation);
             Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
+            log.info("organisation details {}",userOrganisation);
             if (userOrganisation.isPresent()) {
                 log.info("Got the Org Details");
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
@@ -738,8 +740,9 @@ public class CallbackController {
                                           .build())
                         .orgPolicyReference(Objects.nonNull(caseData.getApplicantOrganisationPolicy())
                                                 ? caseData.getApplicantOrganisationPolicy().getOrgPolicyReference() : StringUtils.EMPTY)
-                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+                        .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
                         .build();
+                    log.info("organisation policy {}",applicantOrganisationPolicy);
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
             }
