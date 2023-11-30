@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -55,6 +56,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -119,6 +121,9 @@ public class FL401SubmitApplicationServiceTest {
 
     @Mock
     private EventService eventPublisher;
+
+    @Mock
+    private ManageDocumentsService manageDocumentsService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -240,6 +245,7 @@ public class FL401SubmitApplicationServiceTest {
 
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -297,6 +303,7 @@ public class FL401SubmitApplicationServiceTest {
 
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -401,6 +408,7 @@ public class FL401SubmitApplicationServiceTest {
             objectMapper
         )))
             .thenReturn(court);
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationService
@@ -502,6 +510,7 @@ public class FL401SubmitApplicationServiceTest {
             objectMapper
         )))
             .thenReturn(court);
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         fl401SubmitApplicationService
@@ -596,6 +605,7 @@ public class FL401SubmitApplicationServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -684,6 +694,7 @@ public class FL401SubmitApplicationServiceTest {
             objectMapper
         )))
             .thenReturn(court);
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
@@ -762,6 +773,8 @@ public class FL401SubmitApplicationServiceTest {
 
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class))).thenReturn(
             fl401DocsMap);
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
+
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);
 
@@ -834,6 +847,7 @@ public class FL401SubmitApplicationServiceTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         Map<String, Object> response = fl401SubmitApplicationService
             .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest, caseData);

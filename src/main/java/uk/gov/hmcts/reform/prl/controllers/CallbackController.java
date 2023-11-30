@@ -343,7 +343,7 @@ public class CallbackController {
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
             //PRL-4778 - move docs to quarantine & remove original docs
-            manageDocumentsService.createQuarantineDocs(caseDataUpdated, caseData);
+            manageDocumentsService.createC100QuarantineDocuments(caseDataUpdated, caseData);
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
