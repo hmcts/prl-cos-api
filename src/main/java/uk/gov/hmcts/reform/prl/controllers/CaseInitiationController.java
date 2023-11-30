@@ -52,6 +52,7 @@ public class CaseInitiationController extends AbstractCallbackController {
             final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             final CaseData caseData = getCaseData(caseDetails).toBuilder().build();
 
+            log.info("case detail received from xui {}",caseDetails);
             assignCaseAccessService.assignCaseAccess(caseDetails.getId().toString(), authorisation);
 
             // setting supplementary data updates to enable global search
