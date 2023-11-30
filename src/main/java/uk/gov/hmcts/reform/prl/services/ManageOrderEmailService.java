@@ -446,14 +446,14 @@ public class ManageOrderEmailService {
 
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
-                if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
-                    .contains(OtherOrganisationOptions.anotherOrganisation)) {
-                    manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
-                        if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
-                            listOfOtherAndCafcassEmails.add(value.getEmailInformation().getEmailAddress());
-                        }
-                    });
-                }
+            if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
+                .contains(OtherOrganisationOptions.anotherOrganisation)) {
+                manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
+                    if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
+                        listOfOtherAndCafcassEmails.add(value.getEmailInformation().getEmailAddress());
+                    }
+                });
+            }
 
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties())) {
