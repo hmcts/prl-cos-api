@@ -307,4 +307,25 @@ public class ManageOrdersUtils {
 
         return !errorList.isEmpty();
     }
+
+    public static String getAdditionalRequirementsForHearingReq(List<Element<HearingData>> ordersHearingDetails) {
+        List<String> additionalRequirementsForHearingReqList = new ArrayList<>();
+        ordersHearingDetails.stream()
+            .map(Element::getValue)
+            .forEach(hearingData -> {
+                if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+                    && (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+                    .equals(hearingData.getHearingDateConfirmOptionEnum())
+                    || HearingDateConfirmOptionEnum.dateToBeFixed
+                    .equals(hearingData.getHearingDateConfirmOptionEnum()))
+                    && ObjectUtils.isEmpty(hearingData.getAdditionalDetailsFor3And4Options())) {
+                    additionalRequirementsForHearingReqList.add(hearingData.getAdditionalDetailsFor3And4Options());
+                }
+            });
+        if (CollectionUtils.isNotEmpty(additionalRequirementsForHearingReqList)) {
+            return String.join(", ", additionalRequirementsForHearingReqList);
+        } else {
+            return null;
+        }
+    }
 }

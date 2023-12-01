@@ -933,6 +933,10 @@ public class DraftAnOrderService {
                               ))
                               .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
                                                          ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
+                              .additionalRequirementsForHearingReq(CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                                                                       ? ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
+                                                                           caseData.getManageOrders().getOrdersHearingDetails())
+                                                                       : null)
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
