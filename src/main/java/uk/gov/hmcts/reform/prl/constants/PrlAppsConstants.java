@@ -861,4 +861,9 @@ public class PrlAppsConstants {
     public static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
         "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
 
+    public static final String WA_PERFORMING_USER = "performingUser";
+    public static final String WA_PERFORMING_ACTION = "performingAction";
+    public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
+    public static final String WA_ORDER_NAME = "orderNameForWA";
+
 }
