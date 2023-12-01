@@ -845,7 +845,7 @@ public class ServiceOfApplicationService {
                 ? getCollapsableOfSentDocuments()
                 : getCollapsableOfSentDocumentsFL401()
         );
-        log.info("SOA_DOCUMENT_PLACE_HOLDER", caseDataUpdated.get("SOA_DOCUMENT_PLACE_HOLDER"));
+        log.info("SOA_DOCUMENT_PLACE_HOLDER {}", caseDataUpdated.get("SOA_DOCUMENT_PLACE_HOLDER"));
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, isRespondentDetailsConfidential(caseData)
             || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
