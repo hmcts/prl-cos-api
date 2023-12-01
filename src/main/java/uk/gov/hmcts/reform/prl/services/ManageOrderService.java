@@ -2100,7 +2100,7 @@ public class ManageOrderService {
                 );
                 orderDetails = orderDetails.toBuilder().orderDocumentWelsh(getGeneratedDocument(
                     generatedDocumentInfoWelsh,
-                    false,
+                    true,
                     fieldMap
                 )).build();
             }
