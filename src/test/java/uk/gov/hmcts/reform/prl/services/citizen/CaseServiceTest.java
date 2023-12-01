@@ -830,8 +830,8 @@ public class CaseServiceTest {
             .flagCode("RA0018")
             .status("Requested")
             .dateTimeCreated(LocalDateTime.parse(
-                "2023-11-11T12:12:12.000",
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                "2023-11-11T12:12:12.000Z",
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             ))
             .availableExternally(Yes)
             .build();
@@ -842,8 +842,8 @@ public class CaseServiceTest {
             .flagCode("RA0033")
             .status("Requested")
             .dateTimeCreated(LocalDateTime.parse(
-                "2023-11-11T12:13:02.000",
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                "2023-11-11T12:13:02.000Z",
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             ))
             .availableExternally(Yes)
             .build();
@@ -855,12 +855,12 @@ public class CaseServiceTest {
             .flagCode("RA0018")
             .status("Inactive")
             .dateTimeCreated(LocalDateTime.parse(
-                "2023-11-11T12:13:02.000",
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                "2023-11-11T12:13:02.000Z",
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             ))
             .dateTimeModified(LocalDateTime.parse(
-                "12-11-2023 10:09:21",
-                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+                "2023-11-12T10:09:21.000Z",
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             ))
             .availableExternally(YesOrNo.Yes)
             .build();
@@ -872,12 +872,12 @@ public class CaseServiceTest {
             .flagCode("RA0033")
             .status("Inactive")
             .dateTimeCreated(LocalDateTime.parse(
-                "2023-11-11T12:13:02.000",
-                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+                "2023-11-11T12:13:02.000Z",
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             ))
             .dateTimeModified(LocalDateTime.parse(
-                "12-11-2023 10:09:21",
-                DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+                "2023-11-12T10:09:21.000Z",
+                DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             ))
             .availableExternally(Yes)
             .build();
