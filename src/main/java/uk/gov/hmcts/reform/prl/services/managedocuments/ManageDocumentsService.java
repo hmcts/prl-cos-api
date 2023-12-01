@@ -15,6 +15,8 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -320,7 +322,7 @@ public class ManageDocumentsService {
             log.info("MiamCertDocUploadddddd()----> {}",caseData.getMiamDetails().getMiamCertificationDocumentUpload());
             if (null != caseData.getMiamDetails().getMiamCertificationDocumentUpload()) {
                 QuarantineLegalDoc miamQuarantineDoc = QuarantineLegalDoc.builder()
-                    .legalProfQuarantineDocument(caseData.getMiamDetails().getMiamCertificationDocumentUpload().toBuilder()
+                    .document(caseData.getMiamDetails().getMiamCertificationDocumentUpload().toBuilder()
                                                      .documentCreatedOn(localZoneDate).build())
                     .build();
                 miamQuarantineDoc = DocumentUtils.addQuarantineFields(miamQuarantineDoc, MIAM_CERTIFICATE, MIAM_CERTIFICATE_NAME);
@@ -348,7 +350,25 @@ public class ManageDocumentsService {
         //Other proceedings
         if (!isEmpty(caseData.getExistingProceedings())) {
             log.info("ExistingProceedings()----> {}", caseData.getExistingProceedings());
-            caseData.getExistingProceedings().stream()
+            for (int index = 0; index < caseData.getExistingProceedings().size(); index++) {
+                ProceedingDetails otherProceeding = caseData.getExistingProceedings().get(index).getValue();
+                if (null != otherProceeding
+                    && null != otherProceeding.getUploadRelevantOrder()) {
+                    QuarantineLegalDoc otherProceedingQuarantineDoc = QuarantineLegalDoc.builder()
+                        .document(otherProceeding.getUploadRelevantOrder().toBuilder()
+                                      .documentCreatedOn(localZoneDate).build())
+                        .index(index)
+                        .build();
+                    otherProceedingQuarantineDoc = DocumentUtils.addQuarantineFields(otherProceedingQuarantineDoc,
+                                                                                     PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                                                     PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME);
+                    quarantineDocs.add(element(otherProceedingQuarantineDoc));
+                    //remove original doc
+                    otherProceeding.setUploadRelevantOrder(null);
+                    otherProceeding.setIndex(index);
+                }
+            }
+            /*caseData.getExistingProceedings().stream()
                 .map(Element::getValue)
                 .forEach(otherProceeding -> {
                     if (null != otherProceeding.getUploadRelevantOrder()) {
@@ -361,8 +381,9 @@ public class ManageDocumentsService {
                                                                                          PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME);
                         quarantineDocs.add(element(otherProceedingQuarantineDoc));
                         otherProceeding.setUploadRelevantOrder(null);
+                        otherProceeding.setIndex();
                     }
-                });
+                });*/
             caseDataUpdated.put("existingProceedings", caseData.getExistingProceedings());
         }
 
@@ -383,7 +404,25 @@ public class ManageDocumentsService {
         if (null != caseData.getFl401OtherProceedingDetails()
             && !isEmpty(caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings())) {
             log.info("ExistingProceedings()----> {}", caseData.getFl401OtherProceedingDetails());
-            caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
+            for (int index = 0; index < caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().size(); index++) {
+                FL401Proceedings otherProceeding = caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().get(index).getValue();
+                if (null != otherProceeding
+                    && null != otherProceeding.getUploadRelevantOrder()) {
+                    QuarantineLegalDoc otherProceedingQuarantineDoc = QuarantineLegalDoc.builder()
+                        .document(otherProceeding.getUploadRelevantOrder().toBuilder()
+                                      .documentCreatedOn(localZoneDate).build())
+                        .index(index)
+                        .build();
+                    otherProceedingQuarantineDoc = DocumentUtils.addQuarantineFields(otherProceedingQuarantineDoc,
+                                                                                     PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
+                                                                                     PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME);
+                    quarantineDocs.add(element(otherProceedingQuarantineDoc));
+                    //remove original doc
+                    otherProceeding.setUploadRelevantOrder(null);
+                    otherProceeding.setIndex(index);
+                }
+            }
+            /*caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
                 .map(Element::getValue)
                 .forEach(otherProceeding -> {
                     if (null != otherProceeding.getUploadRelevantOrder()) {
@@ -397,7 +436,7 @@ public class ManageDocumentsService {
                         quarantineDocs.add(element(otherProceedingQuarantineDoc));
                         otherProceeding.setUploadRelevantOrder(null);
                     }
-                });
+                });*/
             caseDataUpdated.put("fl401OtherProceedingDetails", caseData.getFl401OtherProceedingDetails());
         }
 

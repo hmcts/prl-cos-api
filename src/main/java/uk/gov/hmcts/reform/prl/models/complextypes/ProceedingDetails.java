@@ -28,5 +28,6 @@ public class ProceedingDetails {
     private final String nameOfGuardian;
     private final String nameAndOffice;
     private Document uploadRelevantOrder;
+    private int index;
 
 }

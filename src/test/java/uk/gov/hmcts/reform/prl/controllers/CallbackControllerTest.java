@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Assertions;
@@ -98,6 +97,7 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
@@ -151,7 +151,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 @PropertySource(value = "classpath:application.yaml")
-@Ignore
 public class CallbackControllerTest {
     public static final String SOLICITOR_EMAIL = "unknown@test.com";
     @Mock
@@ -263,6 +262,9 @@ public class CallbackControllerTest {
 
     @Mock
     private  EventService eventPublisher;
+
+    @Mock
+    private ManageDocumentsService manageDocumentsService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
@@ -1407,6 +1409,7 @@ public class CallbackControllerTest {
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -1563,6 +1566,7 @@ public class CallbackControllerTest {
                    "finalWelshDocument", "document"
             )
         );
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -1660,6 +1664,7 @@ public class CallbackControllerTest {
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -1843,6 +1848,8 @@ public class CallbackControllerTest {
         when(paymentRequestService.createServiceRequestFromCcdCallack(Mockito.any(),Mockito.any())).thenReturn(
             PaymentServiceResponse.builder().serviceRequestReference("1234").build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
+
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
                 authToken,
@@ -2024,6 +2031,7 @@ public class CallbackControllerTest {
                    "finalWelshDocument", "document"
             )
         );
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             callbackController.generateDocumentSubmitApplication(
@@ -2371,6 +2379,7 @@ public class CallbackControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
                                                        .data(stringObjectMap).build()).build();
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         assertExpectedException(() -> {
             callbackController.generateDocumentSubmitApplication(authToken,s2sToken,callbackRequest);

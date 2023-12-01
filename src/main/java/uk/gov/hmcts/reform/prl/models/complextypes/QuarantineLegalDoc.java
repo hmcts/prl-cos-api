@@ -90,6 +90,9 @@ public class QuarantineLegalDoc {
     public final LocalDateTime scannedDate;
     public final LocalDateTime deliveryDate;
 
+    //PRL-4778 - added to determine index of other proceedings for Return application
+    private int index;
+
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
             "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine"
