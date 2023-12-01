@@ -128,6 +128,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
@@ -1787,8 +1788,18 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+        caseDataUpdated.put(WA_ORDER_NAME, getDraftOrderNameForWA(caseData));
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return caseDataUpdated;
+    }
+
+    private String getDraftOrderNameForWA(CaseData caseData) {
+        if (caseData.getDraftOrderOptions().equals(DraftOrderOptionsEnum.draftAnOrder)) {
+            return caseData.getCreateSelectOrderOptions().getDisplayedValue();
+        } else if (caseData.getDraftOrderOptions().equals(DraftOrderOptionsEnum.uploadAnOrder)) {
+            return ManageOrdersUtils.getOrderNameAlongWithTime(manageOrderService.getSelectedOrderInfoForUpload(caseData));
+        }
+        return null;
     }
 
     public Map<String, Object> resetFields(CallbackRequest callbackRequest) {
