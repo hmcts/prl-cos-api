@@ -183,8 +183,6 @@ public class AmendOrderService {
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
                               .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
-                              .additionalRequirementsForHearingReq(
-                                  ManageOrdersUtils.getAdditionalRequirementsForHearingReq(orderHearingDetails, true))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
 
