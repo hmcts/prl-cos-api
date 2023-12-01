@@ -42,12 +42,9 @@ import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -517,25 +514,8 @@ public class CaseService {
 
     private List<Element<FlagDetail>> convertFlags(List<FlagDetailRequest> details) {
         List<Element<FlagDetail>> flagDetails = new ArrayList<>();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.ENGLISH);
 
         for (FlagDetailRequest detail : details) {
-            if (null != detail.getDateTimeCreated()) {
-
-                LocalDateTime createdDateTime
-                    = LocalDateTime
-                    .parse(detail.getDateTimeCreated().format(dateTimeFormatter));
-                detail.setDateTimeCreated(createdDateTime);
-            }
-
-            if (null != detail.getDateTimeModified()) {
-                LocalDateTime modifiedDateTime
-                    = LocalDateTime
-                    .parse(detail.getDateTimeModified().format(dateTimeFormatter));
-
-                detail.setDateTimeModified(modifiedDateTime);
-            }
-
             FlagDetail flagDetail = FlagDetail.builder().name(detail.getName())
                 .name_cy(detail.getName_cy())
                 .subTypeValue(detail.getSubTypeValue())
