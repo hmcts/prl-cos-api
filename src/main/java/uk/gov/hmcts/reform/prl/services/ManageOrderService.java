@@ -1197,10 +1197,9 @@ public class ManageOrderService {
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
                               .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
-                              .additionalRequirementsForHearingReq(CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                                                                       ? ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
-                                                                           caseData.getManageOrders().getOrdersHearingDetails())
-                                                                       : null)
+                              .additionalRequirementsForHearingReq(ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
+                                                                           caseData.getManageOrders().getOrdersHearingDetails(),
+                                                                           true))
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .dateOrderMade(caseData.getDateOrderMade())
@@ -2132,6 +2131,10 @@ public class ManageOrderService {
                                              .status(getOrderStatus(CaseUtils.getOrderSelectionType(caseData),
                                                                     getLoggedInUserType(authorisation), null, null
                                              ))
+                                             .additionalRequirementsForHearingReq(
+                                                 ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
+                                                     caseData.getManageOrders().getOrdersHearingDetails(),
+                                                     false))
                                              .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())

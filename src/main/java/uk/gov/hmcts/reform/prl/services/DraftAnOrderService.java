@@ -500,6 +500,10 @@ public class DraftAnOrderService {
                         eventId,
                         draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
                     ))
+                    .additionalRequirementsForHearingReq(
+                        ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
+                            draftOrder.getManageOrderHearingDetails(),
+                            false))
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(draftOrder.getIsTheOrderAboutAllChildren())
@@ -933,10 +937,9 @@ public class DraftAnOrderService {
                               ))
                               .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
                                                          ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
-                              .additionalRequirementsForHearingReq(CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                                                                       ? ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
-                                                                           caseData.getManageOrders().getOrdersHearingDetails())
-                                                                       : null)
+                              .additionalRequirementsForHearingReq(ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
+                                                                           caseData.getManageOrders().getOrdersHearingDetails(),
+                                                                           true))
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())

@@ -308,27 +308,41 @@ public class ManageOrdersUtils {
         return !errorList.isEmpty();
     }
 
-    public static String getAdditionalRequirementsForHearingReq(List<Element<HearingData>> ordersHearingDetails) {
+    public static String getAdditionalRequirementsForHearingReq(List<Element<HearingData>> ordersHearingDetails, boolean isDraftOrder) {
         log.info("inside getAdditionalRequirementsForHearingReq");
         List<String> additionalRequirementsForHearingReqList = new ArrayList<>();
-        ordersHearingDetails.stream()
-            .map(Element::getValue)
-            .forEach(hearingData -> {
-                if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-                    && (HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
-                    .equals(hearingData.getHearingDateConfirmOptionEnum())
-                    || HearingDateConfirmOptionEnum.dateToBeFixed
-                    .equals(hearingData.getHearingDateConfirmOptionEnum()))
-                    && ObjectUtils.isNotEmpty(hearingData.getAdditionalDetailsFor3And4Options())) {
-                    log.info("getAdditionalDetailsFor3And4Options {}", hearingData.getAdditionalDetailsFor3And4Options());
-                    additionalRequirementsForHearingReqList.add(hearingData.getAdditionalDetailsFor3And4Options());
-                }
-            });
+        if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
+            getAdditionalRequirementsForHearingReqForOtherOrders(
+                ordersHearingDetails,
+                isDraftOrder,
+                additionalRequirementsForHearingReqList
+            );
+        }
         log.info("additionalRequirementsForHearingReqList " + additionalRequirementsForHearingReqList);
         if (CollectionUtils.isNotEmpty(additionalRequirementsForHearingReqList)) {
             return String.join(", ", additionalRequirementsForHearingReqList);
         } else {
             return null;
         }
+    }
+
+    private static void getAdditionalRequirementsForHearingReqForOtherOrders(List<Element<HearingData>> ordersHearingDetails,
+                                                                             boolean isDraftOrder,
+                                                                             List<String> additionalRequirementsForHearingReqList) {
+        ordersHearingDetails.stream()
+            .map(Element::getValue)
+            .forEach(hearingData -> {
+                boolean isOption3Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+                    && HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+                    .equals(hearingData.getHearingDateConfirmOptionEnum());
+                boolean isOption4Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+                    && HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+                    .equals(hearingData.getHearingDateConfirmOptionEnum());
+                if (((isDraftOrder && (isOption3Selected || isOption4Selected))
+                    || (!isDraftOrder && isOption4Selected))
+                    && ObjectUtils.isNotEmpty(hearingData.getAdditionalDetailsFor3And4Options())) {
+                    additionalRequirementsForHearingReqList.add(hearingData.getAdditionalDetailsFor3And4Options());
+                }
+            });
     }
 }
