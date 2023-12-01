@@ -336,7 +336,7 @@ public class ManageOrdersUtils {
                     && HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
                     .equals(hearingData.getHearingDateConfirmOptionEnum());
                 boolean isOption4Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-                    && HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+                    && HearingDateConfirmOptionEnum.dateToBeFixed
                     .equals(hearingData.getHearingDateConfirmOptionEnum());
                 if (((isDraftOrder && (isOption3Selected || isOption4Selected))
                     || (!isDraftOrder && isOption4Selected))
