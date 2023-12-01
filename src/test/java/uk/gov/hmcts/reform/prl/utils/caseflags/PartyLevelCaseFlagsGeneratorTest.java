@@ -24,6 +24,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @SuppressWarnings({"java:S5976"})
 public class PartyLevelCaseFlagsGeneratorTest {
 
+    public static final String STRING_CONSTANT = "test";
     @InjectMocks
     private PartyLevelCaseFlagsGenerator partyLevelCaseFlagsGenerator;
 
@@ -62,11 +63,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForApplicantWithExternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = false;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caApplicant" + i + "ExternalFlags";
@@ -79,11 +80,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForApplicantSolicitorWithExternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = false;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caApplicantSolicitor" + i + "ExternalFlags";
@@ -97,11 +98,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForRespondentWithExternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = false;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caRespondent" + i + "ExternalFlags";
@@ -115,11 +116,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForRespondentSolicitorWithExternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = false;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caRespondentSolicitor" + i + "ExternalFlags";
@@ -133,11 +134,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForOtherPartyWithExternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = false;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caOtherParty" + i + "ExternalFlags";
@@ -151,11 +152,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForApplicantWithInternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = true;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caApplicant" + i + "InternalFlags";
@@ -169,11 +170,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForApplicantSolicitorWithInternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = true;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caApplicantSolicitor" + i + "InternalFlags";
@@ -187,11 +188,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForRespondentWithInternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = true;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caRespondent" + i + "InternalFlags";
@@ -205,11 +206,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForRespondentSolicitorWithInternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = true;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caRespondentSolicitor" + i + "InternalFlags";
@@ -223,11 +224,11 @@ public class PartyLevelCaseFlagsGeneratorTest {
 
     @Test
     public void generatePartyFlagsForOtherPartyWithInternalFlag() {
-        String partyName = "abc";
+        String partyName = STRING_CONSTANT;
         String caseDataField;
-        String roleOnCase = "abc";
+        String roleOnCase = STRING_CONSTANT;
         boolean internalFlag = true;
-        String groupId = "abc";
+        String groupId = STRING_CONSTANT;
         List resultList = new ArrayList();
         for (int i = 1; i <= 5; i++) {
             caseDataField = "caOtherParty" + i + "InternalFlags";
