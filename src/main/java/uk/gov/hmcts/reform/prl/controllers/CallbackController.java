@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -756,9 +757,18 @@ public class CallbackController {
                                           .organisationID(userOrganisation.get().getOrganisationIdentifier())
                                           .organisationName(userOrganisation.get().getName())
                                           .build())
-                        .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
-                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
                         .build();
+                    if (caseData.getApplicantOrganisationPolicy() != null) {
+                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                            .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
+                            .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+                            .build();
+                    } else {
+                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                            .orgPolicyReference(StringUtils.EMPTY)
+                            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+                            .build();
+                    }
                     log.info("applicantOrganisationPolicy is:: " + applicantOrganisationPolicy);
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
