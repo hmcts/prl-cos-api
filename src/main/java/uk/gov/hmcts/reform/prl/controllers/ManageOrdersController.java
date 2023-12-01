@@ -286,10 +286,19 @@ public class ManageOrdersController {
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                if (isHearingPageNeeded(caseData.getCreateSelectOrderOptions(), caseData.getManageOrders().getC21OrderOptions())) {
+                if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                    && isHearingPageNeeded(
+                    caseData.getCreateSelectOrderOptions(),
+                    caseData.getManageOrders().getC21OrderOptions()
+                )) {
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(caseData, hearings, authorisation));
-                } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                                                                           .getHearingDataForSelectedHearing(
+                                                                               caseData,
+                                                                               hearings,
+                                                                               authorisation
+                                                                           ));
+                } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                    && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                     caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                 }
                 log.info("*** Court seal 0 {}", caseData.getCourtSeal());

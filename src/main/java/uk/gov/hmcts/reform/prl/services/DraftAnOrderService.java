@@ -1770,6 +1770,20 @@ public class DraftAnOrderService {
         manageOrderService.resetChildOptions(callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+        if (caseData.getDraftOrderOptions().equals(DraftOrderOptionsEnum.draftAnOrder)
+            && isHearingPageNeeded(
+            caseData.getCreateSelectOrderOptions(),
+            caseData.getManageOrders().getC21OrderOptions()
+        )) {
+            log.info("inside block to set SolicitorOrdersHearingDetail");
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+            caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingDataService
+                                                                            .getHearingDataForSelectedHearing(
+                                                                                caseData,
+                                                                                hearings,
+                                                                                authorisation
+                                                                            ));
+        }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
