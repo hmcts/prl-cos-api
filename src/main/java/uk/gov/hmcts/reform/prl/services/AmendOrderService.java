@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -14,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -96,9 +96,7 @@ public class AmendOrderService {
                                          ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : LocalDateTime.now())
                         .orderType(order.getValue().getOrderType())
                         .typeOfOrder(order.getValue().getTypeOfOrder())
-                        .serveOrderDetails(null)
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
-                                          .orderServedDate(null)
                                           .orderCreatedDate(time.now().format(DateTimeFormatter.ofPattern(
                                               PrlAppsConstants.D_MMM_YYYY,
                                               Locale.ENGLISH
@@ -158,8 +156,12 @@ public class AmendOrderService {
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
-        String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
-
+        String orderType = null;
+        List<Element<HearingData>> orderHearingDetails = null;
+        if (orderDetails.isPresent()) {
+            orderType = orderDetails.get().getValue().getOrderType();
+            orderHearingDetails = orderDetails.get().getValue().getManageOrderHearingDetails();
+        }
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
             .typeOfOrder(orderType)
@@ -181,10 +183,8 @@ public class AmendOrderService {
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
                               .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
-                              .additionalRequirementsForHearingReq(CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                                                                       ? ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
-                                  caseData.getManageOrders().getOrdersHearingDetails())
-                                                                       : null)
+                              .additionalRequirementsForHearingReq(
+                                  ManageOrdersUtils.getAdditionalRequirementsForHearingReq(orderHearingDetails, true))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
 
