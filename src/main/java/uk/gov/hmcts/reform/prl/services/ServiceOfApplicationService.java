@@ -849,6 +849,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, isRespondentDetailsConfidential(caseData)
             || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        log.info("SOA caseTypeOfApplication {}", caseDataUpdated.get("caseTypeOfApplication"));
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
         return caseDataUpdated;
     }

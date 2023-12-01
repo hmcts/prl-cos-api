@@ -124,6 +124,7 @@ public class ServiceOfApplicationController {
         if (ObjectUtils.isEmpty(updatedCaseData.get("proceedToServing"))) {
             updatedCaseData.put("proceedToServing", Yes);
             log.info("SOA proceed to serving {}", updatedCaseData.get("proceedToServing"));
+            log.info("SOA caseTypeOfApplication {}", updatedCaseData.get("caseTypeOfApplication"));
         }
         return AboutToStartOrSubmitCallbackResponse
             .builder()
