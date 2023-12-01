@@ -195,4 +195,7 @@ public class HearingData {
     private List<Element<HearingDataFromTabToDocmosis>> hearingdataFromHearingTab;
 
     private final YesOrNo isCafcassCymru;
+
+    @JsonProperty("additionalDetailsFor3And4Options")
+    private String additionalDetailsFor3And4Options;
 }
