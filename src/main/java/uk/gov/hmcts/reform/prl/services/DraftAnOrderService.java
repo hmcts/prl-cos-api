@@ -1794,9 +1794,9 @@ public class DraftAnOrderService {
     }
 
     private String getDraftOrderNameForWA(CaseData caseData) {
-        if (caseData.getDraftOrderOptions().equals(DraftOrderOptionsEnum.draftAnOrder)) {
+        if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
             return caseData.getCreateSelectOrderOptions().getDisplayedValue();
-        } else if (caseData.getDraftOrderOptions().equals(DraftOrderOptionsEnum.uploadAnOrder)) {
+        } else if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             return ManageOrdersUtils.getOrderNameAlongWithTime(manageOrderService.getSelectedOrderInfoForUpload(caseData));
         }
         return null;
