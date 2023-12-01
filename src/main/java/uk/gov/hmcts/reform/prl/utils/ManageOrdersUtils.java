@@ -309,6 +309,7 @@ public class ManageOrdersUtils {
     }
 
     public static String getAdditionalRequirementsForHearingReq(List<Element<HearingData>> ordersHearingDetails) {
+        log.info("inside getAdditionalRequirementsForHearingReq");
         List<String> additionalRequirementsForHearingReqList = new ArrayList<>();
         ordersHearingDetails.stream()
             .map(Element::getValue)
@@ -318,10 +319,12 @@ public class ManageOrdersUtils {
                     .equals(hearingData.getHearingDateConfirmOptionEnum())
                     || HearingDateConfirmOptionEnum.dateToBeFixed
                     .equals(hearingData.getHearingDateConfirmOptionEnum()))
-                    && ObjectUtils.isEmpty(hearingData.getAdditionalDetailsFor3And4Options())) {
+                    && ObjectUtils.isNotEmpty(hearingData.getAdditionalDetailsFor3And4Options())) {
+                    log.info("getAdditionalDetailsFor3And4Options {}", hearingData.getAdditionalDetailsFor3And4Options());
                     additionalRequirementsForHearingReqList.add(hearingData.getAdditionalDetailsFor3And4Options());
                 }
             });
+        log.info("additionalRequirementsForHearingReqList " + additionalRequirementsForHearingReqList);
         if (CollectionUtils.isNotEmpty(additionalRequirementsForHearingReqList)) {
             return String.join(", ", additionalRequirementsForHearingReqList);
         } else {
