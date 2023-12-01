@@ -315,10 +315,15 @@ public class ManageOrdersUtils {
 
     public static String getOrderNameAlongWithTime(String name) {
         if (!isBlank(name)) {
-            return name.concat(LocalDateTime.now().format(DateTimeFormatter.ofPattern(
-                PrlAppsConstants.D_MMM_YYYY_HH_MM,
-                Locale.ENGLISH
-            )));
+            return String.format(
+                "%s - %s",
+                name,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMM_YYYY_HH_MM,
+                    Locale.ENGLISH
+                                           )
+                )
+            );
         }
         return " ";
     }
