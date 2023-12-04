@@ -30,7 +30,7 @@ java:
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PAY_CALLBACK_URL: https://prl-cos-pr-1880.preview.platform.hmcts.net/service-request-update
+    PAY_CALLBACK_URL: https://prl-cos-pr-1874.preview.platform.hmcts.net/service-request-update
     FEE_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
     IDAM_CLIENT_ID: prl-cos-api
@@ -55,7 +55,6 @@ java:
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1640-aac-manage-case-assignment
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
-    BUNDLE_URL: http://prl-ccd-definitions-pr-1640-em-ccdorc
     HEARING_API_BASEURL : http://fis-hmc-api-aat.service.core-compute-aat.internal
     REFDATA_API_URL: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     JUDICIAL_USERS_API: http://rd-judicial-api-aat.service.core-compute-aat.internal
