@@ -12,5 +12,4 @@ public class FL401Proceedings {
     private final String typeOfCase;
     private final String anyOtherDetails;
     private Document uploadRelevantOrder;
-    private int index;
 }

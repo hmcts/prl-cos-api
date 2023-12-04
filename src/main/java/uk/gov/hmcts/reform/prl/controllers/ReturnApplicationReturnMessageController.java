@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -57,6 +58,9 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     CaseEventHandler caseEventHandler;
     @Autowired
     EventService eventPublisher;
+
+    @Autowired
+    private ManageDocumentsService manageDocumentsService;
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to get return message of the return application ")
@@ -109,6 +113,10 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
 
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
+
+            //PRL-4778 - Move quarantine docs back to original
+            log.info("Return C100/FL401 application");
+            manageDocumentsService.removeQuarantineDocsAndMoveToOriginal(caseDataUpdated, caseData);
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
