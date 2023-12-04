@@ -916,6 +916,8 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
+        log.info("getUpdatedDraftOrderrrrrrrr --> ", caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("getUpdatedDraftOrderrrrrrrr  IF SOLI--> ", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
@@ -1722,6 +1724,9 @@ public class DraftAnOrderService {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
         }
+        log.info("PRINTTTTTTTt    ------ {}",  caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("==================================");
+        log.info("OTHERRRRR    ------ {}",  caseData.getManageOrders().getOrdersHearingDetails());
 
         if (isOrderEdited) {
             log.info("isOrderEditedddddd  ------ ");
