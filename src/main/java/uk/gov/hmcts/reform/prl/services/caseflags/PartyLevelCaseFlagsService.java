@@ -75,13 +75,13 @@ public class PartyLevelCaseFlagsService {
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANT));
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAAPPLICANTSOLICITOR));
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENT));
-            data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTSOLCIITOR));
+            data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CARESPONDENTSOLICITOR));
             data.putAll(generateC100PartyCaseFlags(caseData, PartyRole.Representing.CAOTHERPARTY));
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANT));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DAAPPLICANTSOLICITOR));
             data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENT));
-            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLCIITOR));
+            data.putAll(generateFl401PartyCaseFlags(caseData, PartyRole.Representing.DARESPONDENTSOLICITOR));
         }
         return data;
     }
@@ -141,7 +141,7 @@ public class PartyLevelCaseFlagsService {
                 }
                 break;
             }
-            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLCIITOR: {
+            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR: {
                 if (partyDetails.isPresent()
                     && !StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
                     data.put(
@@ -211,7 +211,7 @@ public class PartyLevelCaseFlagsService {
                         }
                         break;
                     }
-                    case DAAPPLICANTSOLICITOR, DARESPONDENTSOLCIITOR: {
+                    case DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
                         if (!StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())) {
                             data.put(
                                 caseDataExternalField,
@@ -246,7 +246,7 @@ public class PartyLevelCaseFlagsService {
                                                               PartyRole.Representing representing,
                                                               boolean solicitorRepresented) {
         switch (representing) {
-            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLCIITOR: {
+            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR: {
                 List<Element<PartyDetails>> caElements = representing.getCaTarget().apply(caseData);
                 Optional<Element<PartyDetails>> partyDetails = Optional.ofNullable(caElements.get(partyIndex));
                 if (partyDetails.isPresent()) {
@@ -260,7 +260,7 @@ public class PartyLevelCaseFlagsService {
                 }
                 break;
             }
-            case DAAPPLICANTSOLICITOR, DARESPONDENTSOLCIITOR: {
+            case DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
                 Optional<PartyDetails> partyDetails = Optional.ofNullable(representing.getDaTarget().apply(caseData));
                 if (partyDetails.isPresent()) {
                     caseData = regenerateSolicitorFlags(
@@ -292,43 +292,43 @@ public class PartyLevelCaseFlagsService {
             representing,
             partyIndex + 1
         );
-
-        if (!StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())
-            && partyRole.isPresent()
-            && solicitorRepresented) {
-            caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
-                caseData,
-                partyDetails.getRepresentativeFullNameForCaseFlags(),
-                caseDataExternalField,
-                partyRole.get().getCaseRoleLabel(),
-                false,
-                groupId
-            );
-            caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
-                caseData,
-                partyDetails.getRepresentativeFullNameForCaseFlags(),
-                caseDataInternalField,
-                partyRole.get().getCaseRoleLabel(),
-                true,
-                groupId
-            );
-        } else {
-            partyLevelCaseFlagsGenerator.generatePartyFlags(
-                caseData,
-                PrlAppsConstants.EMPTY_STRING,
-                caseDataExternalField,
-                partyRole.get().getCaseRoleLabel(),
-                false,
-                groupId
-            );
-            partyLevelCaseFlagsGenerator.generatePartyFlags(
-                caseData,
-                PrlAppsConstants.EMPTY_STRING,
-                caseDataInternalField,
-                partyRole.get().getCaseRoleLabel(),
-                true,
-                groupId
-            );
+        if (partyRole.isPresent()) {
+            if (!StringUtils.isEmpty(partyDetails.getRepresentativeFullNameForCaseFlags())
+                && solicitorRepresented) {
+                caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
+                    caseData,
+                    partyDetails.getRepresentativeFullNameForCaseFlags(),
+                    caseDataExternalField,
+                    partyRole.get().getCaseRoleLabel(),
+                    false,
+                    groupId
+                );
+                caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(
+                    caseData,
+                    partyDetails.getRepresentativeFullNameForCaseFlags(),
+                    caseDataInternalField,
+                    partyRole.get().getCaseRoleLabel(),
+                    true,
+                    groupId
+                );
+            } else {
+                partyLevelCaseFlagsGenerator.generatePartyFlags(
+                    caseData,
+                    PrlAppsConstants.EMPTY_STRING,
+                    caseDataExternalField,
+                    partyRole.get().getCaseRoleLabel(),
+                    false,
+                    groupId
+                );
+                partyLevelCaseFlagsGenerator.generatePartyFlags(
+                    caseData,
+                    PrlAppsConstants.EMPTY_STRING,
+                    caseDataInternalField,
+                    partyRole.get().getCaseRoleLabel(),
+                    true,
+                    groupId
+                );
+            }
         }
         return caseData;
     }
@@ -352,7 +352,7 @@ public class PartyLevelCaseFlagsService {
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
             startEventResponseData,
-            PartyRole.Representing.CARESPONDENTSOLCIITOR
+            PartyRole.Representing.CARESPONDENTSOLICITOR
         );
         caseData = generateC100IndividualPartyCaseFlags(
             caseData,
@@ -409,7 +409,7 @@ public class PartyLevelCaseFlagsService {
                 }
                 break;
             }
-            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLCIITOR: {
+            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR: {
                 if (partyDetails.isPresent()
                     && !StringUtils.isEmpty(partyDetails.get().getValue().getRepresentativeFullNameForCaseFlags())) {
                     caseData = partyLevelCaseFlagsGenerator.generatePartyFlags(

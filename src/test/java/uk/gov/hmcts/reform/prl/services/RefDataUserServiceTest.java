@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
@@ -29,6 +30,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGCHANNEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGTYPE;
@@ -74,6 +76,9 @@ public class RefDataUserServiceTest {
 
     @Mock
     CommonDataRefApi commonDataRefApi;
+
+    @Mock
+    LaunchDarklyClient launchDarklyClient;
 
     @Value("${prl.refdata.username}")
     private String refDataIdamUsername;
@@ -150,7 +155,7 @@ public class RefDataUserServiceTest {
     }
 
     @Test
-    public void testGetAllJudicialUsers() {
+    public void testGetAllJudicialUsersForV2() {
         when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
         JudicialUsersApiResponse judge1 = JudicialUsersApiResponse.builder().surname("lastName1").fullName("judge1@test.com").build();
@@ -158,6 +163,28 @@ public class RefDataUserServiceTest {
         List<JudicialUsersApiResponse> listOfJudges = new ArrayList<>();
         listOfJudges.add(judge1);
         listOfJudges.add(judge2);
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(true);
+        JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder().personalCode(new String[3]).build();
+        when(judicialUserDetailsApi.getAllJudicialUserDetailsV2(
+            idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),
+            authTokenGenerator.generate(),
+            judicialUsersApiRequest
+        )).thenReturn(listOfJudges);
+        List<JudicialUsersApiResponse> expectedRespose = refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest);
+        assertNotNull(expectedRespose);
+        assertEquals("lastName1",expectedRespose.get(0).getSurname());
+    }
+
+    @Test
+    public void testGetAllJudicialUsersForV1() {
+        when(idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword)).thenReturn(authToken);
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        JudicialUsersApiResponse judge1 = JudicialUsersApiResponse.builder().surname("lastName1").fullName("judge1@test.com").build();
+        JudicialUsersApiResponse judge2 = JudicialUsersApiResponse.builder().surname("lastName2").fullName("judge2@test.com").build();
+        List<JudicialUsersApiResponse> listOfJudges = new ArrayList<>();
+        listOfJudges.add(judge1);
+        listOfJudges.add(judge2);
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(false);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder().personalCode(new String[3]).build();
         when(judicialUserDetailsApi.getAllJudicialUserDetails(
             idamClient.getAccessToken(refDataIdamUsername,refDataIdamPassword),

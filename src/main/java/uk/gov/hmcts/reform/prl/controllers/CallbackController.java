@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -632,7 +633,7 @@ public class CallbackController {
                 .findFirst();
             previousState.ifPresent(s -> caseDataUpdated.put(
                 VERIFY_CASE_NUMBER_ADDED,
-                SUBMITTED_PAID.getLabel().equalsIgnoreCase(s) ? Yes : No
+                SUBMITTED_PAID.getValue().equalsIgnoreCase(s) ? Yes : No
             ));
             caseDataUpdated.put(ISSUE_DATE_FIELD, LocalDate.now());
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -734,9 +735,18 @@ public class CallbackController {
                                           .organisationID(userOrganisation.get().getOrganisationIdentifier())
                                           .organisationName(userOrganisation.get().getName())
                                           .build())
-                        .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
-                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
                         .build();
+                    if (caseData.getApplicantOrganisationPolicy() != null) {
+                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                            .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
+                            .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+                            .build();
+                    } else {
+                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                            .orgPolicyReference(StringUtils.EMPTY)
+                            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+                            .build();
+                    }
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
             }
