@@ -468,9 +468,12 @@ public class DraftAnOrderService {
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         StandardDirectionOrder standardDirectionOrder = null;
+        log.info("getOrderType ===> " + draftOrder.getOrderType());
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
             try {
+                log.info("getSdoDetails ===> " + draftOrder.getSdoDetails());
                 standardDirectionOrder = copyPropertiesToStandardDirectionOrder(draftOrder.getSdoDetails());
+                log.info("standardDirectionOrder ===> " + standardDirectionOrder);
             } catch (JsonProcessingException exception) {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
             }
