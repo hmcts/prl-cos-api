@@ -81,6 +81,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
@@ -198,6 +199,12 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
+
+        //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
+        orderDetails.getValue().getManageOrderHearingDetails().stream()
+            .map(s -> s.getValue().toBuilder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)).collect(
+                Collectors.toList());
+
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -208,6 +215,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
+        log.info("FINALLLLL -> {}",draftOrderList);
         return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
         );
     }
@@ -1789,42 +1797,17 @@ public class DraftAnOrderService {
         )) {
             log.info("inside block to set SolicitorOrdersHearingDetail");
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-            log.info("1111111  hearingss {}",hearings);
-            if (null != caseData.getManageOrders().getSolicitorOrdersHearingDetails()) {
-                log.info("GGGGGGGGGGGGGG");
-                caseData.getManageOrders().getSolicitorOrdersHearingDetails().stream()
-                    .forEach(s -> System.out.println("GGGGG --> " + s.getValue().getHearingDateConfirmOptionEnum()));
-            }
-            log.info("BFRRRRRR {}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingDataService
                                                                             .getHearingDataForSelectedHearing(
                                                                                 caseData,
                                                                                 hearings,
                                                                                 authorisation
                                                                             ));
-            log.info("AFTRERRRR {}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
-            if (null != caseData.getManageOrders().getSolicitorOrdersHearingDetails()) {
-                log.info("YYYEAHHHHHHHHH");
-                caseData.getManageOrders().getSolicitorOrdersHearingDetails().stream()
-                    .forEach(s -> System.out.println("BBBBB --> " + s.getValue().getHearingDateConfirmOptionEnum()));
-
-                caseData.getManageOrders().getSolicitorOrdersHearingDetails().stream().parallel().map(hearingDataElement -> {
-                    HearingData hearingData = hearingDataElement.getValue();
-                    hearingData = hearingData.toBuilder()
-                        .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
-                        .build();
-                    return Element.<HearingData>builder().id(hearingDataElement.getId())
-                        .value(hearingData).build();
-                }).toList();
-
-                caseData.getManageOrders().getSolicitorOrdersHearingDetails().stream()
-                    .forEach(s -> System.out.println("CCCCCCC --> " + s.getValue().getHearingDateConfirmOptionEnum()));
-
-            }
         }
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+        log.info("MMMMMMMMM {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
