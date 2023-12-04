@@ -81,7 +81,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
@@ -194,23 +193,15 @@ public class DraftAnOrderService {
 
     private final WelshCourtEmail welshCourtEmail;
 
-
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
 
-        //List<Element<HearingData>> a = orderDetails.getValue().getManageOrderHearingDetails();
-
-        //List<HearingData> a1 = a.stream().map(s->s.getValue().toBuilder()
-        // .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit).build()).collect(
-        //    Collectors.toList());
-
-
         //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
-        orderDetails.getValue().getManageOrderHearingDetails().stream()
-            .map(s -> s.getValue().toBuilder().hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit).build()).collect(
-                Collectors.toList());
+        orderDetails.getValue().getManageOrderHearingDetails()
+            .forEach(hearingDataElement -> hearingDataElement.getValue()
+                .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
 
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -222,9 +213,10 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        log.info("AAAAAA1111111 -> {}",orderDetails);
-        log.info("========================");
+        log.info("===========STARTTT=============");
         log.info("BBBBBBBB1111111 -> {}",orderDetails);
+
+        log.info("===========ENDD=============");
         return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
         );
     }
