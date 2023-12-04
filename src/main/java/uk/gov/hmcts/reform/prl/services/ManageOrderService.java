@@ -1199,7 +1199,9 @@ public class ManageOrderService {
                               .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
                               .additionalRequirementsForHearingReq(ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
                                                                            caseData.getManageOrders().getOrdersHearingDetails(),
-                                                                           true))
+                                                                           true,
+                                                                           caseData.getStandardDirectionOrder(),
+                                                                           caseData.getCreateSelectOrderOptions()))
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .dateOrderMade(caseData.getDateOrderMade())
@@ -2134,7 +2136,9 @@ public class ManageOrderService {
                                              .additionalRequirementsForHearingReq(
                                                  ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
                                                      caseData.getManageOrders().getOrdersHearingDetails(),
-                                                     false))
+                                                     false,
+                                                     caseData.getStandardDirectionOrder(),
+                                                     caseData.getCreateSelectOrderOptions()))
                                              .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())

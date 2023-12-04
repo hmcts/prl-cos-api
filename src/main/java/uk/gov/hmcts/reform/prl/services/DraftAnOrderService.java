@@ -467,6 +467,14 @@ public class DraftAnOrderService {
     private OrderDetails getOrderDetails(CaseData caseData, DraftOrder draftOrder, String eventId, String loggedInUserType) {
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        StandardDirectionOrder standardDirectionOrder = null;
+        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
+            try {
+                standardDirectionOrder = copyPropertiesToStandardDirectionOrder(draftOrder.getSdoDetails());
+            } catch (JsonProcessingException exception) {
+                throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
+            }
+        }
         return OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .orderTypeId(draftOrder.getOrderTypeId())
@@ -503,7 +511,9 @@ public class DraftAnOrderService {
                     .additionalRequirementsForHearingReq(
                         ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
                             draftOrder.getManageOrderHearingDetails(),
-                            false))
+                            false,
+                            standardDirectionOrder,
+                            draftOrder.getOrderType()))
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(draftOrder.getIsTheOrderAboutAllChildren())
@@ -939,7 +949,9 @@ public class DraftAnOrderService {
                                                          ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
                               .additionalRequirementsForHearingReq(ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
                                                                            caseData.getManageOrders().getOrdersHearingDetails(),
-                                                                           true))
+                                                                           true,
+                                                                           caseData.getStandardDirectionOrder(),
+                                                                           draftOrder.getOrderType()))
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
