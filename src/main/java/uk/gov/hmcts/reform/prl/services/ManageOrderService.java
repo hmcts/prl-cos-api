@@ -120,6 +120,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_JUDGE_LA_REVIEW_REQUIRED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
@@ -2100,7 +2104,7 @@ public class ManageOrderService {
                 );
                 orderDetails = orderDetails.toBuilder().orderDocumentWelsh(getGeneratedDocument(
                     generatedDocumentInfoWelsh,
-                    false,
+                    true,
                     fieldMap
                 )).build();
             }
@@ -2749,8 +2753,10 @@ public class ManageOrderService {
         if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
             || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-                orderNameForWA = caseData.getCreateSelectOrderOptions() != null
-                    ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : "Test";
+                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions() != null
+                                                                                 ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
+            } else if (ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
+                orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(getSelectedOrderInfoForUpload(caseData));
             }
             performingUser = getLoggedInUserType(authorisation);
             performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
@@ -2759,10 +2765,10 @@ public class ManageOrderService {
                     .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
             }
         }
-        waFieldsMap.put("performingUser", performingUser);
-        waFieldsMap.put("performingAction", performingAction);
-        waFieldsMap.put("judgeLaReviewRequired", judgeLaReviewRequired);
-        waFieldsMap.put("orderNameForWA", orderNameForWA);
+        waFieldsMap.put(WA_PERFORMING_USER, performingUser);
+        waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
+        waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);
+        waFieldsMap.put(WA_ORDER_NAME, orderNameForWA);
 
         return waFieldsMap;
     }
