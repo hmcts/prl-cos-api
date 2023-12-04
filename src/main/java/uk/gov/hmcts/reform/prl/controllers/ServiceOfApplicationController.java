@@ -120,8 +120,6 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         log.info("handleAboutToSubmit: Callback for about-to-submit");
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("sentDocumentPlaceHolder {}", updatedCaseData.get("sentDocumentPlaceHolder"));
-        log.info("SOA caseTypeOfApplication {}", updatedCaseData.get("caseTypeOfApplication"));
         if (ObjectUtils.isEmpty(updatedCaseData.get("proceedToServing"))) {
             updatedCaseData.put("proceedToServing", Yes);
             log.info("SOA proceed to serving {}", updatedCaseData.get("proceedToServing"));
