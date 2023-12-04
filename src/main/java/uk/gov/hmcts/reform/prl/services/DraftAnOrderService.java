@@ -1705,6 +1705,9 @@ public class DraftAnOrderService {
         if (isNotEmpty(ordersHearingDetails)) {
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.setHearingDataForSelectedHearing(authorisation, caseData));
+        } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+            caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
         }
 
         if (isOrderEdited) {
