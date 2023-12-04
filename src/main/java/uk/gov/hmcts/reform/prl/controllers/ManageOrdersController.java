@@ -110,6 +110,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+        log.info("callback request for /populate-preview-order - {}", objectMapper.writeValueAsString(callbackRequest));
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -286,10 +287,19 @@ public class ManageOrdersController {
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                if (isHearingPageNeeded(caseData.getCreateSelectOrderOptions(), caseData.getManageOrders().getC21OrderOptions())) {
+                if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                    && isHearingPageNeeded(
+                    caseData.getCreateSelectOrderOptions(),
+                    caseData.getManageOrders().getC21OrderOptions()
+                )) {
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(caseData, hearings, authorisation));
-                } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                                                                           .getHearingDataForSelectedHearing(
+                                                                               caseData,
+                                                                               hearings,
+                                                                               authorisation
+                                                                           ));
+                } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                    && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                     caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                 }
                 log.info("*** Court seal 0 {}", caseData.getCourtSeal());
@@ -492,6 +502,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+        log.info("request data from callback ->{}", objectMapper.writeValueAsString(callbackRequest));
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList = null;
