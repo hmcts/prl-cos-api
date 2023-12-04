@@ -1707,7 +1707,6 @@ public class DraftAnOrderService {
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.setHearingDataForSelectedHearing(authorisation, caseData));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
-            log.info("generateOrderDocumentPostValidations inside sdo ------ {}", caseData.getCreateSelectOrderOptions());
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
         }
