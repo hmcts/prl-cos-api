@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -14,6 +15,8 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 @Slf4j
 @Service
@@ -26,7 +29,8 @@ public class CaseInitiationService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AssignCaseAccessService assignCaseAccessService;
 
-    public void handleCaseInitiation(String authorisation, CaseData caseData) {
+    public void handleCaseInitiation(String authorisation, CallbackRequest callbackRequest) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         String caseId = String.valueOf(caseData.getId());
         assignCaseAccessService.assignCaseAccess(caseId, authorisation);
 

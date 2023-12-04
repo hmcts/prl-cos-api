@@ -30,11 +30,11 @@ public enum PartyRole {
     C100RESPONDENT3("Respondent 3", 3, Representing.CARESPONDENT),
     C100RESPONDENT4("Respondent 4", 4, Representing.CARESPONDENT),
     C100RESPONDENT5("Respondent 5", 5, Representing.CARESPONDENT),
-    C100RESPONDENTSOLICITOR1("Respondent solicitor 1", 1, Representing.CARESPONDENTSOLCIITOR),
-    C100RESPONDENTSOLICITOR2("Respondent solicitor 2", 2, Representing.CARESPONDENTSOLCIITOR),
-    C100RESPONDENTSOLICITOR3("Respondent solicitor 3", 3, Representing.CARESPONDENTSOLCIITOR),
-    C100RESPONDENTSOLICITOR4("Respondent solicitor 4", 4, Representing.CARESPONDENTSOLCIITOR),
-    C100RESPONDENTSOLICITOR5("Respondent solicitor 5", 5, Representing.CARESPONDENTSOLCIITOR),
+    C100RESPONDENTSOLICITOR1("Respondent solicitor 1", 1, Representing.CARESPONDENTSOLICITOR),
+    C100RESPONDENTSOLICITOR2("Respondent solicitor 2", 2, Representing.CARESPONDENTSOLICITOR),
+    C100RESPONDENTSOLICITOR3("Respondent solicitor 3", 3, Representing.CARESPONDENTSOLICITOR),
+    C100RESPONDENTSOLICITOR4("Respondent solicitor 4", 4, Representing.CARESPONDENTSOLICITOR),
+    C100RESPONDENTSOLICITOR5("Respondent solicitor 5", 5, Representing.CARESPONDENTSOLICITOR),
     C100OTHERPARTY1("Other people in the case 1", 1, Representing.CAOTHERPARTY),
     C100OTHERPARTY2("Other people in the case 2", 2, Representing.CAOTHERPARTY),
     C100OTHERPARTY3("Other people in the case 3", 3, Representing.CAOTHERPARTY),
@@ -43,7 +43,7 @@ public enum PartyRole {
     FL401APPLICANT("Applicant", 1, Representing.DAAPPLICANT),
     FL401APPLICANTSOLICITOR("Applicant solicitor", 1, Representing.DAAPPLICANTSOLICITOR),
     FL401RESPONDENT("Respondent", 1, Representing.DARESPONDENT),
-    FL401RESPONDENTSOLICITOR("Respondent solicitor", 1, Representing.DARESPONDENTSOLCIITOR);
+    FL401RESPONDENTSOLICITOR("Respondent solicitor", 1, Representing.DARESPONDENTSOLICITOR);
 
     private final String caseRoleLabel;
     private final int index;
@@ -96,7 +96,7 @@ public enum PartyRole {
                 Constants.CA_RESPONDENT_EXTERNAL,
                 Constants.CA_RESPONDENT_INTERNAL,
                 Constants.CA_RESPONDENT_GROUP_ID),
-        CARESPONDENTSOLCIITOR(
+        CARESPONDENTSOLICITOR(
                 CaseData::getRespondents,
                 CaseData::getRespondentsFL401,
                 Constants.CA_RESPONDENT_SOLICITOR_EXTERNAL,
@@ -126,7 +126,7 @@ public enum PartyRole {
                 Constants.DA_RESPONDENT_EXTERNAL,
                 Constants.DA_RESPONDENT_INTERNAL,
                 Constants.DA_RESPONDENT_GROUP_ID),
-        DARESPONDENTSOLCIITOR(
+        DARESPONDENTSOLICITOR(
                 CaseData::getRespondents,
                 CaseData::getRespondentsFL401,
                 Constants.DA_RESPONDENT_SOLICITOR_EXTERNAL,
