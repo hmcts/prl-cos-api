@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
@@ -1806,6 +1807,19 @@ public class DraftAnOrderService {
                 log.info("YYYEAHHHHHHHHH");
                 caseData.getManageOrders().getSolicitorOrdersHearingDetails().stream()
                     .forEach(s -> System.out.println("BBBBB --> " + s.getValue().getHearingDateConfirmOptionEnum()));
+
+                caseData.getManageOrders().getSolicitorOrdersHearingDetails().stream().parallel().map(hearingDataElement -> {
+                    HearingData hearingData = hearingDataElement.getValue();
+                    hearingData = hearingData.toBuilder()
+                        .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+                        .build();
+                    return Element.<HearingData>builder().id(hearingDataElement.getId())
+                        .value(hearingData).build();
+                }).toList();
+
+                caseData.getManageOrders().getSolicitorOrdersHearingDetails().stream()
+                    .forEach(s -> System.out.println("CCCCCCC --> " + s.getValue().getHearingDateConfirmOptionEnum()));
+
             }
         }
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
