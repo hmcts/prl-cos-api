@@ -67,4 +67,9 @@
     <cve>CVE-2023-5072</cve>
     <cve>CVE-2023-31582</cve>
   </suppress>
+  <suppress>
+    <notes><![CDATA[
+     bcprov-jdk15on-1.70.jar ]]></notes>
+    <cve>CVE-2023-33202</cve>
+  </suppress>
 </suppressions>
