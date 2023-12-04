@@ -1678,18 +1678,11 @@ public class ManageOrderService {
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
         log.info("***** inside updateOtherOrderDetails******** {}", otherDetails);
-        return OtherOrderDetails.builder()
-            .createdBy(otherDetails.getCreatedBy())
-            .orderCreatedDate(otherDetails.getOrderCreatedDate())
-            .orderAmendedDate(otherDetails.getOrderAmendedDate())
-            .orderMadeDate(otherDetails.getOrderMadeDate())
-            .approvalDate(otherDetails.getApprovalDate())
-            .orderRecipients(otherDetails.getOrderRecipients())
+        return otherDetails.toBuilder()
             .orderServedDate(LocalDate.now().format(DateTimeFormatter.ofPattern(
                 PrlAppsConstants.D_MMM_YYYY,
                 Locale.ENGLISH
             )))
-            .status(otherDetails.getStatus())
             .build();
     }
 
