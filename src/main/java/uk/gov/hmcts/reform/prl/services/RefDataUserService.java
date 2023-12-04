@@ -2,7 +2,8 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 
-import com.launchdarkly.shaded.com.google.gson.Gson;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.prl.clients.CommonDataRefApi;
 import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
@@ -40,22 +42,20 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefDataUserService {
 
-    @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    private final AuthTokenGenerator authTokenGenerator;
 
-    @Autowired
-    StaffResponseDetailsApi staffResponseDetailsApi;
+    private final StaffResponseDetailsApi staffResponseDetailsApi;
 
-    @Autowired
-    JudicialUserDetailsApi judicialUserDetailsApi;
+    private final JudicialUserDetailsApi judicialUserDetailsApi;
 
-    @Autowired
-    IdamClient idamClient;
+    private final IdamClient idamClient;
 
-    @Autowired
-    CommonDataRefApi commonDataRefApi;
+    private final CommonDataRefApi commonDataRefApi;
+
+    private final LaunchDarklyClient launchDarklyClient;
 
     @Value("${prl.refdata.username}")
     private String refDataIdamUsername;
@@ -63,14 +63,15 @@ public class RefDataUserService {
     @Value("${prl.refdata.password}")
     private String refDataIdamPassword;
 
-    private  List<DynamicListElement> listOfCategoryValues;
+    private List<DynamicListElement> listOfCategoryValues;
     private CommonDataResponse commonDataResponse;
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
             ResponseEntity<List<StaffResponse>> response = getStaffResponse(RD_STAFF_FIRST_PAGE);
             if (null != response) {
-                Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(RD_STAFF_TOTAL_RECORDS_HEADER));
+                Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(
+                    RD_STAFF_TOTAL_RECORDS_HEADER));
                 int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
                 log.info("Total no. of records: {} ", totalRecords);
                 if (totalRecords > 0 && totalRecords < RD_STAFF_PAGE_SIZE) {
@@ -105,14 +106,21 @@ public class RefDataUserService {
     }
 
     public List<JudicialUsersApiResponse> getAllJudicialUserDetails(JudicialUsersApiRequest judicialUsersApiRequest) {
-        String token = idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword);
-        String authToken = authTokenGenerator.generate();
-        log.info("token {} ,  authtoken {}  ,   request {}", token, authToken, new Gson().toJson(judicialUsersApiRequest));
-
+        if (launchDarklyClient.isFeatureEnabled("judicial-v2-change")) {
+            log.info("Refdata Judicial API V2 called and LD flag is ON");
+            return judicialUserDetailsApi.getAllJudicialUserDetailsV2(
+                idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
+                authTokenGenerator.generate(),
+                judicialUsersApiRequest
+            );
+        }
+        log.info("Refdata Judicial API V1 called and LD flag is OFF");
         return judicialUserDetailsApi.getAllJudicialUserDetails(
-                token,
-                authToken,
-                judicialUsersApiRequest);
+            idamClient.getAccessToken(refDataIdamUsername, refDataIdamPassword),
+            authTokenGenerator.generate(),
+            judicialUsersApiRequest
+        );
+
     }
 
     private List<DynamicListElement> onlyLegalAdvisor(List<StaffResponse> listOfStaffResponse) {
