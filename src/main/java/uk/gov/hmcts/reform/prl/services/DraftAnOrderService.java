@@ -1788,12 +1788,25 @@ public class DraftAnOrderService {
         )) {
             log.info("inside block to set SolicitorOrdersHearingDetail");
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+            log.info("1111111  hearingss {}",hearings);
+            if(null != caseData.getManageOrders().getSolicitorOrdersHearingDetails()){
+                log.info("GGGGGGGGGGGGGG");
+                caseData.getManageOrders().getSolicitorOrdersHearingDetails().stream()
+                    .forEach(s-> System.out.println("GGGGG --> "+s.getValue().getHearingDateConfirmOptionEnum()));
+            }
+            log.info("BFRRRRRR {}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingDataService
                                                                             .getHearingDataForSelectedHearing(
                                                                                 caseData,
                                                                                 hearings,
                                                                                 authorisation
                                                                             ));
+            log.info("AFTRERRRR {}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+            if(null != caseData.getManageOrders().getSolicitorOrdersHearingDetails()){
+                log.info("YYYEAHHHHHHHHH");
+                caseData.getManageOrders().getSolicitorOrdersHearingDetails().stream()
+                    .forEach(s-> System.out.println("BBBBB --> "+s.getValue().getHearingDateConfirmOptionEnum()));
+            }
         }
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
