@@ -778,7 +778,7 @@ public class DraftAnOrderService {
         //PRL-3319 - Fetch hearings dropdown
         DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorization, caseData);
         caseDataMap.put("hearingsType", hearingsDynamicList);
-        log.info("inside populateCommonDraftOrderFields ==>" + caseDataMap);
+        log.info("inside populateCommonDraftOrderFieldsssssssss ==>" + caseDataMap);
         return caseDataMap;
     }
 
@@ -805,7 +805,9 @@ public class DraftAnOrderService {
             }
             manageOrderHearingDetail = updatedManageOrderHearingDetail;
         }
+        log.info("AAAAAAAAAA {}",manageOrderHearingDetail);
         if (Yes.equals(orderDraftedBySolicitor)) {
+            log.info("ORderrrr drafted by soliii");
             caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
         }
         caseDataMap.put(ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
@@ -1693,7 +1695,7 @@ public class DraftAnOrderService {
                                                                     CallbackRequest callbackRequest,
                                                                     List<Element<HearingData>> ordersHearingDetails,
                                                                     boolean isOrderEdited) throws Exception {
-        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
+        log.info("DraftOrderService::existingOrderHearingDetails postttttttttt -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1707,8 +1709,10 @@ public class DraftAnOrderService {
         }
 
         if (isOrderEdited) {
+            log.info("isOrderEditedddddd  ------ ");
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
         } else {
+            log.info("isOrderEditedddddd  --NO---- ");
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
 
@@ -1719,7 +1723,7 @@ public class DraftAnOrderService {
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
                                                      List<Element<HearingData>> ordersHearingDetails,
                                                      boolean isSolicitorOrdersHearings) throws Exception {
-        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
+        log.info("DraftOrderService::existingOrderHearingDetails generateOrderDocumentttttttt -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
