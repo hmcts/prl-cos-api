@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -18,9 +19,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import static org.apache.commons.collections.CollectionUtils.isEmpty;
@@ -306,5 +310,21 @@ public class ManageOrdersUtils {
         }
 
         return !errorList.isEmpty();
+    }
+
+
+    public static String getOrderNameAlongWithTime(String name) {
+        if (!isBlank(name)) {
+            return String.format(
+                "%s - %s",
+                name,
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern(
+                    PrlAppsConstants.D_MMM_YYYY_HH_MM,
+                    Locale.ENGLISH
+                                           )
+                )
+            );
+        }
+        return " ";
     }
 }

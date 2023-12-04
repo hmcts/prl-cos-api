@@ -128,6 +128,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPECIFIED_DOCUM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
@@ -1694,8 +1695,9 @@ public class DraftAnOrderService {
     public Map<String, Object> generateOrderDocumentPostValidations(String authorisation,
                                                                     CallbackRequest callbackRequest,
                                                                     List<Element<HearingData>> ordersHearingDetails,
-                                                                    boolean isOrderEdited) throws Exception {
-        log.info("DraftOrderService::existingOrderHearingDetails postttttttttt -> {}", ordersHearingDetails);
+                                                                    boolean isOrderEdited,
+                                                                    CreateSelectOrderOptionsEnum orderType) throws Exception {
+        log.info("DraftOrderService::existingOrderHearingDetails postttttt -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1706,6 +1708,9 @@ public class DraftAnOrderService {
         if (isNotEmpty(ordersHearingDetails)) {
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.setHearingDataForSelectedHearing(authorisation, caseData));
+        } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+            caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
         }
 
         if (isOrderEdited) {
@@ -1713,7 +1718,7 @@ public class DraftAnOrderService {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
         } else {
             log.info("isOrderEditedddddd  --NO---- ");
-            caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+            caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, orderType));
         }
 
 
@@ -1773,12 +1778,41 @@ public class DraftAnOrderService {
     public Map<String, Object> prepareDraftOrderCollection(String authorisation, CallbackRequest callbackRequest) {
         manageOrderService.resetChildOptions(callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        caseDataUpdated.put(WA_ORDER_NAME, getDraftOrderNameForWA(caseData, false));
+        caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
+        if (caseData.getDraftOrderOptions().equals(DraftOrderOptionsEnum.draftAnOrder)
+            && isHearingPageNeeded(
+            caseData.getCreateSelectOrderOptions(),
+            caseData.getManageOrders().getC21OrderOptions()
+        )) {
+            log.info("inside block to set SolicitorOrdersHearingDetail");
+            Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
+            caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingDataService
+                                                                            .getHearingDataForSelectedHearing(
+                                                                                caseData,
+                                                                                hearings,
+                                                                                authorisation
+                                                                            ));
+        }
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
         return caseDataUpdated;
+    }
+
+    public String getDraftOrderNameForWA(CaseData caseData, boolean isApprovalJourney) {
+        if (isApprovalJourney) {
+            return getSelectedDraftOrderDetails(caseData).getLabelForOrdersDynamicList();
+        } else {
+            if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
+                return ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions().getDisplayedValue());
+            } else if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
+                return ManageOrdersUtils.getOrderNameAlongWithTime(manageOrderService.getSelectedOrderInfoForUpload(
+                    caseData));
+            }
+        }
+        return null;
     }
 
     public Map<String, Object> resetFields(CallbackRequest callbackRequest) {
@@ -2007,7 +2041,8 @@ public class DraftAnOrderService {
                 authorisation,
                 callbackRequest,
                 caseData.getManageOrders().getOrdersHearingDetails(),
-                false
+                false,
+                caseData.getCreateSelectOrderOptions()
             );
         } else {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
@@ -2020,7 +2055,8 @@ public class DraftAnOrderService {
                     authorisation,
                     callbackRequest,
                     draftOrder.getManageOrderHearingDetails(),
-                    true
+                    true,
+                    draftOrder.getOrderType()
                 );
 
             } else {
@@ -2028,7 +2064,8 @@ public class DraftAnOrderService {
                     authorisation,
                     callbackRequest,
                     draftOrder.getManageOrderHearingDetails(),
-                    false
+                    false,
+                    draftOrder.getOrderType()
                 );
 
             }
