@@ -1693,7 +1693,8 @@ public class DraftAnOrderService {
     public Map<String, Object> generateOrderDocumentPostValidations(String authorisation,
                                                                     CallbackRequest callbackRequest,
                                                                     List<Element<HearingData>> ordersHearingDetails,
-                                                                    boolean isOrderEdited) throws Exception {
+                                                                    boolean isOrderEdited,
+                                                                    CreateSelectOrderOptionsEnum orderType) throws Exception {
         log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
@@ -1705,7 +1706,7 @@ public class DraftAnOrderService {
         if (isNotEmpty(ordersHearingDetails)) {
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.setHearingDataForSelectedHearing(authorisation, caseData));
-        } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+        } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
             log.info("generateOrderDocumentPostValidations inside sdo ------ {}", caseData.getCreateSelectOrderOptions());
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
@@ -1714,7 +1715,7 @@ public class DraftAnOrderService {
         if (isOrderEdited) {
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
         } else {
-            caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
+            caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, orderType));
         }
 
 
@@ -2037,7 +2038,8 @@ public class DraftAnOrderService {
                 authorisation,
                 callbackRequest,
                 caseData.getManageOrders().getOrdersHearingDetails(),
-                false
+                false,
+                caseData.getCreateSelectOrderOptions()
             );
         } else {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
@@ -2050,7 +2052,8 @@ public class DraftAnOrderService {
                     authorisation,
                     callbackRequest,
                     draftOrder.getManageOrderHearingDetails(),
-                    true
+                    true,
+                    draftOrder.getOrderType()
                 );
 
             } else {
@@ -2058,7 +2061,8 @@ public class DraftAnOrderService {
                     authorisation,
                     callbackRequest,
                     draftOrder.getManageOrderHearingDetails(),
-                    false
+                    false,
+                    draftOrder.getOrderType()
                 );
 
             }
