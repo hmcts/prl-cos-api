@@ -10,6 +10,8 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsCourtAdminEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -286,4 +288,12 @@ public class ManageOrders implements MappableObject {
     //PRL-4216 - serve order additional documents
     @JsonProperty("additionalOrderDocuments")
     private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
+
+    @JsonProperty("additionalOrderDocuments")
+    private JudgeApprovalDecisionsSolicitorEnum whatToDoWithOrderSolicitor;
+    @JsonProperty("additionalOrderDocuments")
+    private JudgeApprovalDecisionsCourtAdminEnum whatToDoWithOrderCourtAdmin;
+    @JsonProperty("instructionsToLegalRepresentaive")
+    private String instructionsToLegalRepresentaive;
+
 }
