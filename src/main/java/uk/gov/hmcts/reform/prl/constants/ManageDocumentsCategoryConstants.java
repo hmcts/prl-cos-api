@@ -61,4 +61,9 @@ public class ManageDocumentsCategoryConstants {
     public static final String CASE_SUMMARY = "caseSummary";
     public static final String CAFCASS_QUARANTINE = "cafcassQuarantine";
 
+    public static final String MIAM_CERTIFICATE_NAME = "MIAM certificate";
+    public static final String ORDERS_SUBMITTED_WITH_APPLICATION_NAME = "Draft orders";
+    public static final String PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION_NAME = "Orders from other proceedings";
+    public static final String OTHER_WITNESS_STATEMENTS_NAME = "Other witness statements";
+    public static final String ANY_OTHER_DOC_NAME = "Any other documents";
 }

@@ -71,6 +71,7 @@ import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -151,6 +152,8 @@ public class CallbackController {
     private final C100IssueCaseService c100IssueCaseService;
     private final AmendCourtService amendCourtService;
     private final EventService eventPublisher;
+
+    private final ManageDocumentsService manageDocumentsService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -283,10 +286,9 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-
+        log.info("1111111111111111");
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(
@@ -333,12 +335,15 @@ public class CallbackController {
                     paymentServiceResponse.getServiceRequestReference()
                 );
             }
+
             //Assign default court to all c100 cases for work allocation.
             caseDataUpdated.put("caseManagementLocation", CaseManagementLocation.builder()
                 .region(C100_DEFAULT_REGION_ID)
                 .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
 
+            //PRL-4778 - move docs to quarantine & remove original docs
+            manageDocumentsService.createC100QuarantineDocuments(caseDataUpdated, caseData);
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {

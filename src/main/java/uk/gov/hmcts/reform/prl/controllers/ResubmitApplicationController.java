@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
@@ -38,6 +37,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -101,6 +101,9 @@ public class ResubmitApplicationController {
 
     @Autowired
     private EventService eventPublisher;
+
+    @Autowired
+    private ManageDocumentsService manageDocumentsService;
 
     @PostMapping(path = "/resubmit-application", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to change the state and document generation and submit application. ")
@@ -186,6 +189,10 @@ public class ResubmitApplicationController {
                 caseDataUpdated.put("submitAgreeStatement", null);
             }
 
+            //PRL-4778 - move docs to quarantine & remove original docs
+            log.info("Resubmit C100 application");
+            manageDocumentsService.createC100QuarantineDocuments(caseDataUpdated, caseData);
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();
@@ -219,8 +226,6 @@ public class ResubmitApplicationController {
             Optional<String> previousStates = eventsForCase.stream().map(CaseEventDetail::getStateId).filter(
                 ResubmitApplicationController::getPreviousState).findFirst();
             Map<String, Object> caseDataUpdated = new HashMap<>(caseDetails.getData());
-
-            UserDetails userDetails = userService.getUserDetails(authorisation);
 
             if (previousStates.isPresent() && (State.SUBMITTED_PAID.getValue().equalsIgnoreCase(previousStates.get()))) {
                 caseData = caseData.toBuilder().state(State.SUBMITTED_PAID).build();
@@ -262,6 +267,11 @@ public class ResubmitApplicationController {
             caseDataUpdated.put("fl401ConfidentialityCheckResubmit", null);
             caseDataUpdated.putAll(documentGenService.generateDocuments(authorisation, caseData));
             caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
+
+            //PRL-4778 - move docs to quarantine & remove original docs
+            log.info("Resubmit FL401 application");
+            manageDocumentsService.createFL401QuarantineDocuments(caseDataUpdated, caseData);
+
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
                 .build();

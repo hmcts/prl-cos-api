@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.ReturnApplicationService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Collections;
@@ -34,6 +35,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -79,6 +81,9 @@ public class ReturnApplicationReturnMessageControllerTest {
 
     @Mock
     private AuthorisationService authorisationService;
+
+    @Mock
+    private ManageDocumentsService manageDocumentsService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
@@ -148,7 +153,7 @@ public class ReturnApplicationReturnMessageControllerTest {
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
-
+        doNothing().when(manageDocumentsService).removeQuarantineDocsAndMoveToOriginal(stringObjectMap, caseData);
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             returnApplicationReturnMessageController.returnApplicationEmailNotification(authToken, s2sToken, callbackRequest);

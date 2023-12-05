@@ -11,5 +11,5 @@ public class FL401Proceedings {
     private final String caseNumber;
     private final String typeOfCase;
     private final String anyOtherDetails;
-    private final Document uploadRelevantOrder;
+    private Document uploadRelevantOrder;
 }

@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -10,6 +12,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
@@ -201,4 +204,15 @@ public class DocumentUtils {
             .build();
     }
 
+    public static QuarantineLegalDoc addQuarantineFields(QuarantineLegalDoc quarantineLegalDoc,
+                                                         String categoryId,
+                                                         String categoryName) {
+        return quarantineLegalDoc.toBuilder()
+            .documentParty(DocumentPartyEnum.APPLICANT.getDisplayedValue())
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .restrictCheckboxCorrespondence(List.of(RestrictToCafcassHmcts.restrictToGroup))
+            .categoryId(categoryId)
+            .categoryName(categoryName)
+            .build();
+    }
 }

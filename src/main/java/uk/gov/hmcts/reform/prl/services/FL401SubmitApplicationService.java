@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -47,6 +48,7 @@ public class FL401SubmitApplicationService {
     private final ObjectMapper objectMapper;
     private final CourtSealFinderService courtSealFinderService;
     private final EventService eventPublisher;
+    private final ManageDocumentsService manageDocumentsService;
 
     public Map<String, Object> fl401GenerateDocumentSubmitApplication(String authorisation,
                                                                       CallbackRequest callbackRequest, CaseData caseData) throws Exception {
@@ -110,6 +112,8 @@ public class FL401SubmitApplicationService {
             DateTimeFormatter.ISO_OFFSET_DATE_TIME.format(zonedDateTime)
         );
 
+        //PRL-4778 - move docs to quarantine & remove original docs
+        manageDocumentsService.createFL401QuarantineDocuments(caseDataUpdated, caseData);
 
         caseDataUpdated.putAll(allTabService.getAllTabsFields(caseData));
         return caseDataUpdated;

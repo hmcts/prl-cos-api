@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
@@ -44,6 +45,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
@@ -110,6 +112,9 @@ public class ResubmitApplicationControllerTest {
     private AllegationOfHarm allegationOfHarm;
     @Mock
     private AuthorisationService authorisationService;
+
+    @Mock
+    private ManageDocumentsService manageDocumentsService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
@@ -180,6 +185,9 @@ public class ResubmitApplicationControllerTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseDataSubmitted);
         when(caseEventService.findEventsForCase(String.valueOf(caseDataSubmitted.getId()))).thenReturn(caseEvents);
         when(courtFinderService.getNearestFamilyCourt(caseData)).thenReturn(court);
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createC100QuarantineDocuments(stringObjectMap, caseData);
+
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertEquals(State.SUBMITTED_PAID, response.getData().get("state"));
@@ -212,6 +220,9 @@ public class ResubmitApplicationControllerTest {
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
             ));
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createC100QuarantineDocuments(stringObjectMap, caseData);
+
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertEquals(State.JUDICIAL_REVIEW, response.getData().get("state"));
@@ -247,6 +258,9 @@ public class ResubmitApplicationControllerTest {
                                DOCUMENT_FIELD_C1A, "test",
                                DOCUMENT_FIELD_FINAL, "test"
             ));
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createC100QuarantineDocuments(stringObjectMap, caseData);
+
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertEquals(State.CASE_ISSUED, response.getData().get("state"));
@@ -291,7 +305,8 @@ public class ResubmitApplicationControllerTest {
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
             .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
             ));
-
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createC100QuarantineDocuments(stringObjectMap, caseData);
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(
             authToken,
@@ -343,7 +358,8 @@ public class ResubmitApplicationControllerTest {
         when(documentGenService.generateDocuments(Mockito.anyString(), Mockito.any(CaseData.class)))
                 .thenReturn(Map.of(DOCUMENT_FIELD_C8_WELSH, "test", DOCUMENT_FIELD_FINAL_WELSH, "test"
                 ));
-
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createC100QuarantineDocuments(stringObjectMap, caseData);
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(
                 authToken,
@@ -387,6 +403,8 @@ public class ResubmitApplicationControllerTest {
                                DOCUMENT_FIELD_FINAL_WELSH, "test",
                                DOCUMENT_FIELD_C1A_WELSH, "test"
             ));
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createC100QuarantineDocuments(stringObjectMap, caseData);
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
 
@@ -413,6 +431,8 @@ public class ResubmitApplicationControllerTest {
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
 
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController
             .fl401resubmitApplication(authToken, s2sToken, callbackRequest);
@@ -442,6 +462,9 @@ public class ResubmitApplicationControllerTest {
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createC100QuarantineDocuments(stringObjectMap, caseData);
+
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
         assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
         assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
@@ -467,6 +490,9 @@ public class ResubmitApplicationControllerTest {
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createC100QuarantineDocuments(stringObjectMap, caseData);
+
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.resubmitApplication(authToken, s2sToken, callbackRequest);
         assertTrue(response.getData().containsKey("applicantsConfidentialDetails"));
         assertTrue(response.getData().containsKey("childrenConfidentialDetails"));
@@ -491,6 +517,9 @@ public class ResubmitApplicationControllerTest {
             List.of(Element.builder().value(ChildConfidentialityDetails.builder().build()))
         ));
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        doNothing().when(manageDocumentsService).createFL401QuarantineDocuments(stringObjectMap, caseData);
+
         AboutToStartOrSubmitCallbackResponse response = resubmitApplicationController.fl401resubmitApplication(authToken, s2sToken, callbackRequest);
         assertTrue(response.getData().containsKey("fl401ConfidentialityCheckResubmit"));
     }
