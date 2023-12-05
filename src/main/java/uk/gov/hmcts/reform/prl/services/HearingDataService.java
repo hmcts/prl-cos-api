@@ -473,10 +473,13 @@ public class HearingDataService {
     public List<Element<HearingData>> getHearingDataForSelectedHearing(CaseData caseData, Hearings hearings, String authorisation) {
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            log.info("HEreeeeee --> ORH {}",caseData.getManageOrders().getOrdersHearingDetails());
             hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         } else if (isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
+            log.info("ELSEEEEE --> SORH {}",caseData.getManageOrders().getOrdersHearingDetails());
             hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         }
+        log.info("hearingDetails sie{}",hearingDetails.size());
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             populateHearingDynamicLists(
                 authorisation,
@@ -489,15 +492,18 @@ public class HearingDataService {
             hearingDataPrePopulatedDynamicLists,
             caseData
         );
+        log.info("OTHERSSSS sie{}",hearingDetails);
         return hearingDetails.stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
                 && null != hearingData.getConfirmedHearingDates().getValue()) {
+                log.info("insideeeeeeeee");
                 Optional<CaseHearing> caseHearing = getHearingFromId(
                     hearingData.getConfirmedHearingDates().getValue().getCode(),
                     hearings
                 );
                 if (caseHearing.isPresent()) {
+                    log.info("insideeeeeeeee111111");
                     List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                     hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                     hearingData = hearingData.toBuilder()
@@ -507,6 +513,7 @@ public class HearingDataService {
                         .build();
                 }
             }
+            log.info("EACH sie{}",hearingData);
             return Element.<HearingData>builder().id(hearingDataElement.getId())
                 .value(hearingData).build();
         }).toList();
