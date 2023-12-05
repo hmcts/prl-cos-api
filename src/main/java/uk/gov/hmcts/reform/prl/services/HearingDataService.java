@@ -492,7 +492,7 @@ public class HearingDataService {
             caseData
         );
         log.info("OTHERSSSS sieeee{}",hearingDetails.size());
-        log.info("OTHERSSSS  VALUE sie{}",hearingDetails.size());
+        log.info("OTHERSSSS  VALUE sie{}",hearingDetails);
         return hearingDetails.stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())

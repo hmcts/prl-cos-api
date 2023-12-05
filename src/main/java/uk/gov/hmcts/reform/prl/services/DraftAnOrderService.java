@@ -922,8 +922,8 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
-        log.info("getUpdatedDraftOrderrrrrrrr --> ", caseData.getManageOrders().getOrdersHearingDetails());
-        log.info("getUpdatedDraftOrderrrrrrrr  IF SOLI--> ", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+        log.info("getUpdatedDraftOrderrrrrrrr --> {} ", caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("getUpdatedDraftOrderrrrrrrr  IF SOLI--> {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
