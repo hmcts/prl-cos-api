@@ -1098,6 +1098,84 @@ public class HearingDataServiceTest {
                                       .build())).build();
         assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, "testAuth"));
     }
+
+    @Test
+    public void testSetHearingDataForSelectedHearing() {
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(Element.<HearingData>builder()
+                                                           .id(UUID.fromString(TEST_UUID))
+                                                           .value(HearingData.builder()
+                                                                      .confirmedHearingDates(DynamicList.builder()
+                                                                                                 .value(
+                                                                                                     DynamicListElement.builder()
+                                                                                                         .code(
+                                                                                                             "123")
+                                                                                                         .build())
+                                                                                                 .build())
+                                                                      .hearingDateConfirmOptionEnum(
+                                                                          HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                                                                      .build())
+                                                           .build()))
+                              .build())
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
+        assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData));
+    }
+
+    @Test
+    public void testSetHearingDataForSelectedHearingForSolicitorOrder() {
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .manageOrders(ManageOrders.builder()
+                              .solicitorOrdersHearingDetails(List.of(Element.<HearingData>builder()
+                                                                .id(UUID.fromString(TEST_UUID))
+                                                                .value(HearingData.builder()
+                                                                           .confirmedHearingDates(DynamicList.builder()
+                                                                                                      .value(
+                                                                                                          DynamicListElement.builder()
+                                                                                                              .code(
+                                                                                                                  "123")
+                                                                                                              .build())
+                                                                                                      .build())
+                                                                           .hearingDateConfirmOptionEnum(
+                                                                               HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                                                                           .build())
+                                                                .build()))
+                              .build())
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
+        assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData));
+    }
 }
 
 
