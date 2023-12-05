@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +36,11 @@ public class ConfidentialDetailsMapper {
     private final AllTabServiceImpl allTabsService;
 
     public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {
+        try {
+            log.info("Ready for mapConfidentialData ===>" + objectMapper.writeValueAsString(caseData));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             Optional<List<Element<PartyDetails>>> respondentsList = ofNullable(caseData.getRespondents());
@@ -59,6 +65,11 @@ public class ConfidentialDetailsMapper {
             caseData = caseData.toBuilder()
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
+        }
+        try {
+            log.info("Right before the all tab service call ===>" + objectMapper.writeValueAsString(caseData));
+        } catch (JsonProcessingException e) {
+            log.info("error");
         }
         if (updateTabs) {
             allTabsService.updateAllTabsIncludingConfTab(caseData);

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -87,6 +88,11 @@ public class AllTabServiceImpl implements AllTabsService {
 
     public void updateAllTabsIncludingConfTab(CaseData caseData) {
         Map<String, Object> combinedFieldsMap = findCaseDataMap(caseData);
+        try {
+            log.info("combinedFieldsMap is now ===>" + objectMapper.writeValueAsString(combinedFieldsMap));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         // Calling event to refresh the page.
         refreshCcdUsingEvent(caseData, combinedFieldsMap);
     }
@@ -187,7 +193,27 @@ public class AllTabServiceImpl implements AllTabsService {
             combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
         }
         getDocumentsMap(caseData, combinedFieldsMap);
+        try {
+            log.info("combinedFieldsMap is before the update ===>" + objectMapper.writeValueAsString(combinedFieldsMap));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        try {
+            log.info("What do we have here ===>" + objectMapper.writeValueAsString(caseData.getAllPartyFlags()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        try {
+            log.info("What are we getting here ===>" + objectMapper.writeValueAsString(applicationsTabService.toMap(caseData.getAllPartyFlags())));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         combinedFieldsMap.putAll(applicationsTabService.toMap(caseData.getAllPartyFlags()));
+        try {
+            log.info("combinedFieldsMap is after the update ===>" + objectMapper.writeValueAsString(combinedFieldsMap));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         return combinedFieldsMap;
     }
 
