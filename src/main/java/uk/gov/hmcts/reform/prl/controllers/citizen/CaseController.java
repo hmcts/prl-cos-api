@@ -202,11 +202,12 @@ public class CaseController {
 
     @PostMapping(value = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
-    public void linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                  @RequestHeader("caseId") String caseId,
-                                  @RequestHeader("accessCode") String accessCode) {
+    public CaseDetails linkCitizenToCase(@RequestHeader(AUTHORIZATION) String authorisation,
+                                         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                         @RequestHeader("caseId") String caseId,
+                                         @RequestHeader("accessCode") String accessCode) {
         caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
+        return caseService.getCase(authorisation, caseId);
     }
 
     @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)
