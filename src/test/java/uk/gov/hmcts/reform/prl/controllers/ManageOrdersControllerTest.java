@@ -3264,14 +3264,11 @@ public class ManageOrdersControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(manageOrderService.setHearingDataForSdo(any(),any(),any())).thenReturn(caseData);
         assertExpectedException(() -> {
-             manageOrdersController.saveOrderDetails(
-                authToken,
-                s2sToken,
-                callbackRequest
-            );
+            manageOrdersController.saveOrderDetails(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
 
     }
+
     @Test
     public void testNoHearingDataValidationFailedToAutherisation() throws Exception {
         CaseData caseData = CaseData.builder()
@@ -3291,9 +3288,7 @@ public class ManageOrdersControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
 
         assertExpectedException(() -> {
-            manageOrdersController
-                .validateAndPopulateHearingData(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
+            manageOrdersController.validateAndPopulateHearingData(authToken, s2sToken, callbackRequest); }, RuntimeException.class, "Invalid Client");
 
     }
 }
