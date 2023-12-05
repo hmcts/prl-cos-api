@@ -446,11 +446,11 @@ public class CaseService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
         }
 
-        String systemUpdateUserId = systemUserService.getUserId(authToken);
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             caseEvent,
-            systemUpdateUserId
+            userDetails.getId()
         );
 
         StartEventResponse startEventResponse =
@@ -496,11 +496,12 @@ public class CaseService {
             .details(convertFlags(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails()))
             .build();
         log.info("Updated external Party flags {}", flags);
-        updatedCaseData.put(partyExternalCaseFlagField.get(), flags);
+        Map<String, Object> testMap = new HashMap<>();
+        testMap.put(partyExternalCaseFlagField.get(), flags);
 
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
             startEventResponse,
-            updatedCaseData
+            testMap
         );
         coreCaseDataService.submitUpdate(
             authToken,
