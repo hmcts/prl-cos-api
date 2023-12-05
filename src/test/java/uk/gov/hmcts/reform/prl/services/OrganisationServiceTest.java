@@ -377,6 +377,15 @@ public class OrganisationServiceTest {
         assertEquals(orgData, caseData);
     }
 
+    @Test
+    public void testRespondentOrganisationDetailsForFl401WhenRespondentNull() {
+
+        CaseData caseData = CaseData.builder().respondentsFL401(null).build();
+
+        CaseData orgData =  organisationService.getRespondentOrganisationDetailsForFL401(caseData);
+        assertEquals(orgData, caseData);
+    }
+
 
     @Test
     public void findUserOrganisationTest() {
