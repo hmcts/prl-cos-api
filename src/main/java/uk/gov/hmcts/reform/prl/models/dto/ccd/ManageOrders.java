@@ -289,9 +289,9 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("additionalOrderDocuments")
     private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
 
-    @JsonProperty("additionalOrderDocuments")
+    @JsonProperty("whatToDoWithOrderSolicitor")
     private JudgeApprovalDecisionsSolicitorEnum whatToDoWithOrderSolicitor;
-    @JsonProperty("additionalOrderDocuments")
+    @JsonProperty("whatToDoWithOrderCourtAdmin")
     private JudgeApprovalDecisionsCourtAdminEnum whatToDoWithOrderCourtAdmin;
     @JsonProperty("instructionsToLegalRepresentaive")
     private String instructionsToLegalRepresentaive;
