@@ -512,7 +512,7 @@ public class DraftAnOrderService {
                         draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
                     ))
                     .additionalRequirementsForHearingReq(
-                        ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
+                        manageOrderService.getAdditionalRequirementsForHearingReq(
                             draftOrder.getManageOrderHearingDetails(),
                             false,
                             standardDirectionOrder,
@@ -950,7 +950,7 @@ public class DraftAnOrderService {
                               ))
                               .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
                                                          ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
-                              .additionalRequirementsForHearingReq(ManageOrdersUtils.getAdditionalRequirementsForHearingReq(
+                              .additionalRequirementsForHearingReq(manageOrderService.getAdditionalRequirementsForHearingReq(
                                                                            caseData.getManageOrders().getOrdersHearingDetails(),
                                                                            true,
                                                                            caseData.getStandardDirectionOrder(),
