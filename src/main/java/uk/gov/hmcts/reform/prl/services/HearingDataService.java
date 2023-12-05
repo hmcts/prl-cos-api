@@ -476,7 +476,6 @@ public class HearingDataService {
             log.info("HEreeeeee --> ORH {}",caseData.getManageOrders().getOrdersHearingDetails());
             hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
         } else if (isNotEmpty(caseData.getManageOrders().getSolicitorOrdersHearingDetails())) {
-            log.info("ELSEEEEE --> SORH {}",caseData.getManageOrders().getOrdersHearingDetails());
             hearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
         }
         log.info("hearingDetails sie{}",hearingDetails.size());
@@ -492,7 +491,8 @@ public class HearingDataService {
             hearingDataPrePopulatedDynamicLists,
             caseData
         );
-        log.info("OTHERSSSS sie{}",hearingDetails);
+        log.info("OTHERSSSS sieeee{}",hearingDetails.size());
+        log.info("OTHERSSSS  VALUE sie{}",hearingDetails.size());
         return hearingDetails.stream().parallel().map(hearingDataElement -> {
             HearingData hearingData = hearingDataElement.getValue();
             if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
@@ -514,6 +514,7 @@ public class HearingDataService {
                 }
             }
             log.info("EACH sie{}",hearingData);
+            log.info("================EACH SPLITTTTTTT========================================={}",hearingDataElement.getId());
             return Element.<HearingData>builder().id(hearingDataElement.getId())
                 .value(hearingData).build();
         }).toList();

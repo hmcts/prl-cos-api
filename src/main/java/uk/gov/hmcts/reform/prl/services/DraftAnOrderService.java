@@ -299,6 +299,12 @@ public class DraftAnOrderService {
                                                                                .getHearingDataForSelectedHearing(caseData,
                                                                                                                  hearings,
                                                                                                                  authorisation));
+                        log.info("STRINGHT from-- >{}",hearingDataService
+                            .getHearingDataForSelectedHearing(caseData,
+                                                              hearings,
+                                                              authorisation));
+                        log.info("=========SPLit========");
+                        log.info("MAin place -- >{}",caseData.getManageOrders().getOrdersHearingDetails());
                     } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                         caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                     }
