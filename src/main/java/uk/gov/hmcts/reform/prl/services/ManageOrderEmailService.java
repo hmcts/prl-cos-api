@@ -421,8 +421,8 @@ public class ManageOrderEmailService {
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
 
+        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
                 || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
                 log.info("** CA case email notifications***");
@@ -471,8 +471,7 @@ public class ManageOrderEmailService {
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsDA())) {
-                manageOrders.getEmailInformationDA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
+                sendEmailToOtherOrganisation(caseData,manageOrders.getEmailInformationDA(),authorisation, orderDocuments);
             }
         }
         // Send email notification to other organisations
