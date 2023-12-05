@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
@@ -192,11 +193,16 @@ public class DraftAnOrderService {
 
     private final WelshCourtEmail welshCourtEmail;
 
-
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
+
+        //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
+        orderDetails.getValue().getManageOrderHearingDetails()
+            .forEach(hearingDataElement -> hearingDataElement.getValue()
+                .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
+
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -207,6 +213,10 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
+        log.info("===========STARTTT=============");
+        log.info("BBBBBBBB1111111 -> {}",orderDetails);
+
+        log.info("===========ENDD=============");
         return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
         );
     }
@@ -289,6 +299,12 @@ public class DraftAnOrderService {
                                                                                .getHearingDataForSelectedHearing(caseData,
                                                                                                                  hearings,
                                                                                                                  authorisation));
+                        log.info("STRINGHT from-- >{}",hearingDataService
+                            .getHearingDataForSelectedHearing(caseData,
+                                                              hearings,
+                                                              authorisation));
+                        log.info("=========SPLit========");
+                        log.info("MAin place -- >{}",caseData.getManageOrders().getOrdersHearingDetails());
                     } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                         caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                     }
@@ -779,7 +795,7 @@ public class DraftAnOrderService {
         //PRL-3319 - Fetch hearings dropdown
         DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorization, caseData);
         caseDataMap.put("hearingsType", hearingsDynamicList);
-        log.info("inside populateCommonDraftOrderFields ==>" + caseDataMap);
+        log.info("inside populateCommonDraftOrderFieldsssssssss ==>" + caseDataMap);
         return caseDataMap;
     }
 
@@ -806,7 +822,9 @@ public class DraftAnOrderService {
             }
             manageOrderHearingDetail = updatedManageOrderHearingDetail;
         }
+        log.info("AAAAAAAAAA {}",manageOrderHearingDetail);
         if (Yes.equals(orderDraftedBySolicitor)) {
+            log.info("ORderrrr drafted by soliii");
             caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
         }
         caseDataMap.put(ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
@@ -904,6 +922,8 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
+        log.info("getUpdatedDraftOrderrrrrrrr --> {} ", caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("getUpdatedDraftOrderrrrrrrr  IF SOLI--> {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
@@ -990,9 +1010,7 @@ public class DraftAnOrderService {
             .orderCreatedBy(loggedInUserType)
             .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
             .approvalDate(draftOrder.getApprovalDate())
-            .manageOrderHearingDetails(YesOrNo.Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
-                                           ? caseData.getManageOrders().getSolicitorOrdersHearingDetails()
-                                           : caseData.getManageOrders().getOrdersHearingDetails())
+            .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData))
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
                             ? manageOrderService.copyPropertiesToSdoDetails(caseData) : null)
@@ -1695,7 +1713,7 @@ public class DraftAnOrderService {
                                                                     List<Element<HearingData>> ordersHearingDetails,
                                                                     boolean isOrderEdited,
                                                                     CreateSelectOrderOptionsEnum orderType) throws Exception {
-        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
+        log.info("DraftOrderService::existingOrderHearingDetails postttttt -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1710,10 +1728,15 @@ public class DraftAnOrderService {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
         }
+        log.info("PRINTTTTTTTt    ------ {}",  caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("==================================");
+        log.info("OTHERRRRR    ------ {}",  caseData.getManageOrders().getOrdersHearingDetails());
 
         if (isOrderEdited) {
+            log.info("isOrderEditedddddd  ------ ");
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
         } else {
+            log.info("isOrderEditedddddd  --NO---- ");
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, orderType));
         }
 
@@ -1724,7 +1747,7 @@ public class DraftAnOrderService {
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
                                                      List<Element<HearingData>> ordersHearingDetails,
                                                      boolean isSolicitorOrdersHearings) throws Exception {
-        log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
+        log.info("DraftOrderService::existingOrderHearingDetails generateOrderDocumentttttttt -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1794,6 +1817,7 @@ public class DraftAnOrderService {
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+        log.info("MMMMMMMMM {}", caseDataUpdated);
         return caseDataUpdated;
     }
 

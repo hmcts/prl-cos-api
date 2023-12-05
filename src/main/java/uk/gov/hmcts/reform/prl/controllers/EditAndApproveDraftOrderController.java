@@ -145,6 +145,8 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            log.info("AFTER JUDEGE submittttt ORDERSSS {}",caseData.getManageOrders().getOrdersHearingDetails());
+            log.info("AFTER JUDEGE submittttt  SOL orders{}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             log.info("/judge-or-admin-edit-approve/about-to-submit OrdersHearingDetails start {}",
                      null != caseData && CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
