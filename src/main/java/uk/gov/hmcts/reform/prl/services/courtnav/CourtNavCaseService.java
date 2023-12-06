@@ -62,7 +62,6 @@ public class CourtNavCaseService {
 
     public CaseDetails createCourtNavCase(String authToken, CaseData caseData) throws Exception {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        log.info("****************Creating courtnav case***************");
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.COURTNAV_CASE_CREATION,
             idamClient.getUserInfo(authToken).getUid()

@@ -100,16 +100,10 @@ public class ReviewDocumentsController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*************************** BEFORE REVIEW ***************************");
-        log.info("*** Legal prof docs q ** {}", caseData.getLegalProfQuarantineDocsList());
-        log.info("*** Cafcass quarantine docs ** {}", caseData.getCafcassQuarantineDocsList());
-        log.info("***citizen docs q ** {}", caseData.getCitizenUploadQuarantineDocsList());
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
         reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
         log.info("*************************** AFTER REVIEW ***************************");
-        log.info("*** Legal prof docs q ** {}", caseData.getLegalProfQuarantineDocsList());
-        log.info("*** Cafcass quarantine docs ** {}", caseData.getCafcassQuarantineDocsList());
-        log.info("***citizen docs q ** {}", caseData.getCitizenUploadQuarantineDocsList());
 
         //clear fields
         CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());

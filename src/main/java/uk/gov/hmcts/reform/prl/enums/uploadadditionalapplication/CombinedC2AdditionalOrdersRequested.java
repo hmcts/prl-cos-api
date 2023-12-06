@@ -2,14 +2,15 @@ package uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum C2AdditionalOrdersRequested {
+@Getter
+public enum CombinedC2AdditionalOrdersRequested {
 
     @JsonProperty("CHANGE_SURNAME_OR_REMOVE_JURISDICTION")
     CHANGE_SURNAME_OR_REMOVE_JURISDICTION(
@@ -35,19 +36,19 @@ public enum C2AdditionalOrdersRequested {
     REQUESTING_ADJOURNMENT(
         "REQUESTING_ADJOURNMENT",
             "Requesting an adjournment for a scheduled hearing"
+    ),
+    @JsonProperty("OTHER")
+    OTHER(
+        "OTHER",
+        "Other"
     );
 
 
     private final String id;
     private final String displayedValue;
 
-    @JsonValue
-    public String getDisplayedValue() {
-        return displayedValue;
-    }
-
     @JsonCreator
-    public static C2AdditionalOrdersRequested getValue(String key) {
-        return C2AdditionalOrdersRequested.valueOf(key);
+    public static CombinedC2AdditionalOrdersRequested getValue(String key) {
+        return CombinedC2AdditionalOrdersRequested.valueOf(key);
     }
 }
