@@ -1170,6 +1170,8 @@ public class ManageOrderService {
     }
 
     public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
+        log.info("getCurrentCreateDraftOrderDetails------>");
+        log.info("FromgetOrdersHearingDetails() --- {}",caseData.getManageOrders().getOrdersHearingDetails());
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())

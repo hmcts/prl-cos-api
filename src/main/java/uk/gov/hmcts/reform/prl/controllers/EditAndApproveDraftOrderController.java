@@ -141,6 +141,8 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            log.info("AFTER JUDEGE submit----- ORDERSSS {}",caseData.getManageOrders().getOrdersHearingDetails());
+            log.info("AFTER JUDEGE submit------SOL orders{}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
