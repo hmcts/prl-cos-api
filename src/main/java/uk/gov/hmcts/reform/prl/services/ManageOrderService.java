@@ -904,7 +904,6 @@ public class ManageOrderService {
         } else {
             flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         }
-        log.info("*** Court seal 2 {}", caseData.getCourtSeal());
         if (caseData.getCreateSelectOrderOptions() != null
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
@@ -1774,7 +1773,6 @@ public class ManageOrderService {
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                log.info("*** Manage orders 12 {} :", caseData.getManageOrders().getOrdersHearingDetails());
                 caseData = filterEmptyHearingDetails(caseData);
                 if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
                     caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
@@ -1784,8 +1782,6 @@ public class ManageOrderService {
                 caseData = populateJudgeNames(caseData);
                 caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
             }
-            log.info("*** Manage orders: {}", caseData.getManageOrders());
-            log.info("*** Case Data Json : {}", objectMapper.writeValueAsString(caseData));
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -2064,7 +2060,6 @@ public class ManageOrderService {
                 .toBuilder()
                 .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
                 .build();
-            log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
         }
         if (documentLanguage.isGenWelsh()) {
             String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
@@ -2080,7 +2075,6 @@ public class ManageOrderService {
                     fieldMap
                 )).build();
             }
-            log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
         }
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
@@ -2215,7 +2209,6 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
-            log.info("*****court name --- {}", caseData.getCourtName());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
             if (caseData.getCreateSelectOrderOptions() != null
                 && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
