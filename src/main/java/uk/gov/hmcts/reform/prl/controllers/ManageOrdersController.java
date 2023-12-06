@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,8 +19,10 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -102,6 +105,12 @@ public class ManageOrdersController {
     private final HearingService hearingService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
+
+    public static final String CONFIRMATION_HEADER = "# Order approved";
+    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
+        ### What happens next \n\n We will send this order to admin.
+        \n\n If you have included further directions, admin will also receive them.
+        """;
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -530,5 +539,21 @@ public class ManageOrdersController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    @PostMapping(path = "/edit-and-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestHeader("Authorization")
+                                                                     @Parameter(hidden = true) String authorisation,
+                                                                     @RequestBody CallbackRequest callbackRequest) {
+        CaseDetails caseDetails = callbackRequest.getCaseDetails();
+        if (!(JudgeApprovalDecisionsSolicitorEnum.ASK_LEGAL_REP_TO_MAKE_CHANGES.toString()
+            .equals(caseDetails.getData().get("whatToDoWithOrderSolicitor")))
+            || JudgeApprovalDecisionsSolicitorEnum.ASK_LEGAL_REP_TO_MAKE_CHANGES.toString()
+            .equals(caseDetails.getData().get("whatToDoWithOrderCourtAdmin"))) {
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationHeader(CONFIRMATION_HEADER)
+                                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+        }
+        return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
     }
 }
