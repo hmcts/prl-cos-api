@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +9,6 @@ import lombok.Setter;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.ApplicantAge;
 
-import javax.validation.constraints.NotNull;
 
 @Data
 @Builder(toBuilder = true)

@@ -21,14 +21,17 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.DocumentCategoryEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.events.TransferToAnotherCourtEvent;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -58,6 +61,7 @@ import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
 import uk.gov.hmcts.reform.prl.services.CourtSealFinderService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
@@ -119,6 +123,9 @@ public class CallbackController {
     public static final String C100_DEFAULT_REGION_NAME = "Midlands";
     public static final String C100_DEFAULT_REGION_ID = "2";
     public static final String COURT_LIST = "courtList";
+    private static final String CONFIRMATION_HEADER = "# Case transferred to another court ";
+    private static final String CONFIRMATION_BODY_PREFIX = "The case has been transferred to ";
+    private static final String CONFIRMATION_BODY_SUFFIX = " \n\n Local court admin have been notified ";
     private final CaseEventService caseEventService;
     private final ApplicationConsiderationTimetableValidationWorkflow applicationConsiderationTimetableValidationWorkflow;
     private final OrganisationService organisationService;
@@ -143,6 +150,7 @@ public class CallbackController {
     private final AuthorisationService authorisationService;
     private final C100IssueCaseService c100IssueCaseService;
     private final AmendCourtService amendCourtService;
+    private final EventService eventPublisher;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -338,35 +346,67 @@ public class CallbackController {
         }
     }
 
-    @PostMapping(path = "/amend-court-details/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/transfer-court/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse amendCourtAboutToStart(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            List<DynamicListElement> courtList = locationRefDataService.getCourtLocations(authorisation);
+            List<DynamicListElement> courtList;
+            if (Event.TRANSFER_TO_ANOTHER_COURT.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                courtList = locationRefDataService.getFilteredCourtLocations(authorisation);
+            } else {
+                courtList = locationRefDataService.getCourtLocations(authorisation);
+            }
             caseDataUpdated.put(COURT_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(courtList)
                 .build());
+            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 
-    @PostMapping(path = "/amend-court-details/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+
+    @PostMapping(path = "/transfer-court/validate-court-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to validate court fields")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Child details are fetched"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse validateCourtFields(
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+        List<String> errorList = new ArrayList<>();
+        if (amendCourtService.validateCourtFields(caseData, errorList)) {
+            return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        }
+        return uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse.builder()
+            .data(caseData)
+            .build();
+    }
+
+    @PostMapping(path = "/transfer-court/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Issue and send to local court")
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse amendCourtAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -553,13 +593,11 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
-
                 if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
                     if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
                         caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
                     }
                 }
-
             }
 
             // Saving the logged-in Solicitor and Org details for the docs..
@@ -706,8 +744,45 @@ public class CallbackController {
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }
+
         return caseDataUpdated;
 
+    }
+
+
+    @PostMapping(path = "/transfer-court/transfer-court-confirmation",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to create confirmation of transfer court ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public ResponseEntity<SubmittedCallbackResponse> transferCourtConfirmation(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        allTabsService.updateAllTabs(caseData);
+
+        TransferToAnotherCourtEvent event =
+            prepareTransferToAnotherCourtEvent(authorisation, caseData,
+                                               Event.TRANSFER_TO_ANOTHER_COURT.getName());
+        eventPublisher.publishEvent(event);
+        return ok(SubmittedCallbackResponse.builder().confirmationHeader(
+            CONFIRMATION_HEADER).confirmationBody(
+            CONFIRMATION_BODY_PREFIX + caseData.getCourtName()
+                + CONFIRMATION_BODY_SUFFIX
+        ).build());
+    }
+
+    private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation,CaseData newCaseData,
+                                                                           String typeOfEvent) {
+        return TransferToAnotherCourtEvent.builder()
+            .authorisation(authorisation)
+            .caseData(newCaseData)
+            .typeOfEvent(typeOfEvent)
+            .build();
     }
 
 }
