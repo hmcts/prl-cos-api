@@ -54,6 +54,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -464,7 +465,7 @@ public class ManageOrderEmailService {
 
             //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
             addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
-            caseDataMap.put("orderCollection", caseData.getOrderCollection());
+            caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
 
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
             sendEmailForFlCaseType(caseData, isFinalOrder);
@@ -803,8 +804,8 @@ public class ManageOrderEmailService {
                     if (isNotEmpty(order.getValue().getOrderDocumentWelsh())) {
                         orderDocuments.add(order.getValue().getOrderDocumentWelsh());
                     }
-                    if (CollectionUtils.isNotEmpty(order.getValue().getServeOrderDetails().getAdditionalDocuments())) {
-                        order.getValue().getServeOrderDetails().getAdditionalDocuments().forEach(
+                    if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
+                        caseData.getManageOrders().getServeOrderAdditionalDocuments().forEach(
                             additionalDocumentEl -> orderDocuments.add(additionalDocumentEl.getValue()));
                     }
                 });
