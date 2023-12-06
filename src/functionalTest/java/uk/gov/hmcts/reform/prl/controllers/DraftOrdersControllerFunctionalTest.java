@@ -117,7 +117,7 @@ public class DraftOrdersControllerFunctionalTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE).id(Long.parseLong("1647373355918192"))
             .build();
-        when(manageOrderService.populateCustomOrderFields(any())).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(any(), any())).thenReturn(caseData);
         mockMvc.perform(post("/populate-draft-order-fields")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
