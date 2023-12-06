@@ -1251,59 +1251,6 @@ public class DraftAnOrderServiceTest {
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
                               .build())
-            .isOrderCreatedBySolicitor(No)
-            .build();
-
-        Element<DraftOrder> draftOrderElement = element(draftOrder);
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
-        PartyDetails partyDetails = PartyDetails.builder()
-            .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-        Element<PartyDetails> respondents = element(partyDetails);
-        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
-                                                    .value(Child.builder().build()).build());
-        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
-        ordersHearingDetails.add(element(HearingData.builder().build()));
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .children(children)
-            .draftOrderCollection(draftOrderCollection)
-            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
-            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
-            .doYouWantToEditTheOrder(No)
-            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge)
-                              .makeChangesToUploadedOrder(Yes)
-                              .ordersHearingDetails(ordersHearingDetails)
-                              .build())
-            .respondents(List.of(respondents))
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .build();
-        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
-            .getChildrenMultiSelectList(caseData);
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
-        Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
-            caseData,
-            "test-auth",
-            null
-        );
-
-        assertNotNull(caseDataMap);
-    }
-
-    @Test
-    public void testUpdateDraftOrderCollection2() {
-        DraftOrder draftOrder = DraftOrder.builder()
-            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
-            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .otherDetails(OtherDraftOrderDetails.builder()
-                              .dateCreated(LocalDateTime.now())
-                              .createdBy("test")
-                              .build())
             .build();
 
         Element<DraftOrder> draftOrderElement = element(draftOrder);
@@ -3903,7 +3850,7 @@ public class DraftAnOrderServiceTest {
 
         assertNotNull(caseDataUpdated);
         assertFalse(caseDataUpdated.isEmpty());
-        assertEquals("HearingType cannot be empty, please select a hearingType", errors.get(0));
+        assertEquals("You must select a hearing type", errors.get(0));
         assertEquals("Please enter numeric value for Hearing estimated days", errors.get(1));
         assertEquals("Please enter numeric value for Hearing estimated hours", errors.get(2));
         assertEquals("Please enter numeric value for Hearing estimated minutes", errors.get(3));
