@@ -235,7 +235,6 @@ public class ManageOrdersController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
-                log.info("** Calling email service to send emails to recipients on serve order - manage orders**");
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             // The following can be removed or utilised based on requirement
@@ -286,10 +285,19 @@ public class ManageOrdersController {
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-                if (isHearingPageNeeded(caseData.getCreateSelectOrderOptions(), caseData.getManageOrders().getC21OrderOptions())) {
+                if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                    && isHearingPageNeeded(
+                    caseData.getCreateSelectOrderOptions(),
+                    caseData.getManageOrders().getC21OrderOptions()
+                )) {
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
-                                                                           .getHearingDataForSelectedHearing(caseData, hearings, authorisation));
-                } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                                                                           .getHearingDataForSelectedHearing(
+                                                                               caseData,
+                                                                               hearings,
+                                                                               authorisation
+                                                                           ));
+                } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
+                    && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                     caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                 }
                 log.info("*** Court seal 0 {}", caseData.getCourtSeal());
@@ -471,9 +479,7 @@ public class ManageOrdersController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            log.info("Manage order Before calling ref data for LA users list {}", System.currentTimeMillis());
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-            log.info("Manage order After calling ref data for LA users list {}", System.currentTimeMillis());
             caseDataUpdated.put(
                 "nameOfLaToReviewOrder",
                 DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
