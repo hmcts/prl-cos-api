@@ -27,7 +27,9 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsManageRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyUpdatedFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -435,11 +437,14 @@ public class CaseService {
         return null;
     }
 
-    public ResponseEntity<Object> updateCitizenRAflags(
+    public ResponseEntity<Object> createCitizenReasonableAdjustmentsFlags(
         String caseId, String eventId, String authToken, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
-        log.info("Inside updateCitizenRAflags caseId {}", caseId);
-        log.info("Inside updateCitizenRAflags eventId {}", eventId);
-        log.info("Inside updateCitizenRAflags citizenPartyFlagsRequest {}", citizenPartyFlagsRequest);
+        log.info("Inside createCitizenReasonableAdjustmentsFlags caseId {}", caseId);
+        log.info("Inside createCitizenReasonableAdjustmentsFlags eventId {}", eventId);
+        log.info(
+            "Inside createCitizenReasonableAdjustmentsFlags citizenPartyFlagsRequest {}",
+            citizenPartyFlagsRequest
+        );
 
         if (StringUtils.isEmpty(citizenPartyFlagsRequest.getPartyIdamId()) || ObjectUtils.isEmpty(
             citizenPartyFlagsRequest.getPartyExternalFlags())) {
@@ -473,18 +478,19 @@ public class CaseService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party details not found");
         }
 
-        Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
         Optional<String> partyExternalCaseFlagField = getPartyExternalCaseFlagField(
             caseData.getCaseTypeOfApplication(),
             partyDetailsMeta.get().getPartyType(),
             partyDetailsMeta.get().getPartyIndex()
         );
 
-        if (!partyExternalCaseFlagField.isPresent() || !updatedCaseData.containsKey(partyExternalCaseFlagField.get()) || ObjectUtils.isEmpty(
-            updatedCaseData.get(
-                partyExternalCaseFlagField.get()))) {
+        Map<String, Object> caseDataMap = startEventResponse.getCaseDetails().getData();
+        if (!partyExternalCaseFlagField.isPresent()
+            || !caseDataMap.containsKey(partyExternalCaseFlagField.get())
+            || ObjectUtils.isEmpty(caseDataMap.get(partyExternalCaseFlagField.get()))) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party external flag details not found");
         }
+
         try {
             log.info("partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(partyExternalCaseFlagField.get()));
         } catch (JsonProcessingException e) {
@@ -492,7 +498,210 @@ public class CaseService {
         }
 
         Flags flags = objectMapper.convertValue(
-            updatedCaseData.get(partyExternalCaseFlagField.get()),
+            caseDataMap.get(partyExternalCaseFlagField.get()),
+            Flags.class
+        );
+        try {
+            log.info("Existing external Party flags  ===>" + objectMapper.writeValueAsString(flags));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        flags.getDetails().addAll(convertFlags(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails()));
+
+        try {
+            log.info("Updated external Party flags  ===>" + objectMapper.writeValueAsString(flags));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        Map<String, Object> updatedCaseDataMap = new HashMap<>();
+        updatedCaseDataMap.put(partyExternalCaseFlagField.get(), flags);
+
+        CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            updatedCaseDataMap
+        );
+
+        try {
+            log.info("Case data content is  ===>" + objectMapper.writeValueAsString(caseDataContent));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        coreCaseDataService.submitUpdate(
+            authToken,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
+        return ResponseEntity.status(HttpStatus.OK).body("party flags updated");
+    }
+
+    public ResponseEntity<Object> manageCitizenReasonableAdjustmentsFlags(
+        String caseId, String eventId, String authToken, CitizenPartyFlagsManageRequest citizenPartyFlagsManageRequest) {
+        log.info("Inside createCitizenReasonableAdjustmentsFlags caseId {}", caseId);
+        log.info("Inside createCitizenReasonableAdjustmentsFlags eventId {}", eventId);
+        log.info(
+            "Inside createCitizenReasonableAdjustmentsFlags citizenPartyFlagsRequest {}",
+            citizenPartyFlagsManageRequest
+        );
+
+        if (StringUtils.isEmpty(citizenPartyFlagsManageRequest.getPartyIdamId()) || ObjectUtils.isEmpty(
+            citizenPartyFlagsManageRequest.getPartyExternalFlags())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
+        }
+
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+            caseEvent,
+            userDetails.getId()
+        );
+
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+
+        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
+            citizenPartyFlagsManageRequest.getPartyIdamId(),
+            caseData.getCaseTypeOfApplication(),
+            caseData
+        );
+
+        if (!partyDetailsMeta.isPresent()
+            || null == partyDetailsMeta.get().getPartyDetails()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party details not found");
+        }
+
+        Optional<String> partyExternalCaseFlagField = getPartyExternalCaseFlagField(
+            caseData.getCaseTypeOfApplication(),
+            partyDetailsMeta.get().getPartyType(),
+            partyDetailsMeta.get().getPartyIndex()
+        );
+
+        Map<String, Object> caseDataMap = startEventResponse.getCaseDetails().getData();
+        if (!partyExternalCaseFlagField.isPresent()
+            || !caseDataMap.containsKey(partyExternalCaseFlagField.get())
+            || ObjectUtils.isEmpty(caseDataMap.get(partyExternalCaseFlagField.get()))) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party external flag details not found");
+        }
+
+        try {
+            log.info("partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(partyExternalCaseFlagField.get()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        Flags flags = objectMapper.convertValue(
+            caseDataMap.get(partyExternalCaseFlagField.get()),
+            Flags.class
+        );
+        try {
+            log.info("Existing external Party flags  ===>" + objectMapper.writeValueAsString(flags));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        flags = flags.toBuilder()
+            .details(convertManageFlags(flags, citizenPartyFlagsManageRequest.getPartyExternalFlags().getDetails()))
+            .build();
+
+        try {
+            log.info("Updated external Party flags  ===>" + objectMapper.writeValueAsString(flags));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        Map<String, Object> updatedCaseDataMap = new HashMap<>();
+        updatedCaseDataMap.put(partyExternalCaseFlagField.get(), flags);
+
+        CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            updatedCaseDataMap
+        );
+
+        try {
+            log.info("Case data content is  ===>" + objectMapper.writeValueAsString(caseDataContent));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        coreCaseDataService.submitUpdate(
+            authToken,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
+        return ResponseEntity.status(HttpStatus.OK).body("party flags updated");
+    }
+
+    public ResponseEntity<Object> replaceCitizenReasonableAdjustmentsFlags(
+        String caseId, String eventId, String authToken, CitizenPartyUpdatedFlagsRequest citizenPartyUpdatedFlagsRequest) {
+        log.info("Inside replaceCitizenReasonableAdjustmentsFlags caseId {}", caseId);
+        log.info("Inside replaceCitizenReasonableAdjustmentsFlags eventId {}", eventId);
+        log.info(
+            "Inside replaceCitizenReasonableAdjustmentsFlags citizenPartyFlagsRequest {}",
+            citizenPartyUpdatedFlagsRequest
+        );
+
+        if (StringUtils.isEmpty(citizenPartyUpdatedFlagsRequest.getPartyIdamId()) || ObjectUtils.isEmpty(
+            citizenPartyUpdatedFlagsRequest.getPartyExternalFlags())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
+        }
+
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+            caseEvent,
+            userDetails.getId()
+        );
+
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+
+        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
+            citizenPartyUpdatedFlagsRequest.getPartyIdamId(),
+            caseData.getCaseTypeOfApplication(),
+            caseData
+        );
+
+        if (!partyDetailsMeta.isPresent()
+            || null == partyDetailsMeta.get().getPartyDetails()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party details not found");
+        }
+
+        Optional<String> partyExternalCaseFlagField = getPartyExternalCaseFlagField(
+            caseData.getCaseTypeOfApplication(),
+            partyDetailsMeta.get().getPartyType(),
+            partyDetailsMeta.get().getPartyIndex()
+        );
+
+        Map<String, Object> caseDataMap = startEventResponse.getCaseDetails().getData();
+        if (!partyExternalCaseFlagField.isPresent()
+            || !caseDataMap.containsKey(partyExternalCaseFlagField.get())
+            || ObjectUtils.isEmpty(caseDataMap.get(partyExternalCaseFlagField.get()))) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party external flag details not found");
+        }
+
+        try {
+            log.info("partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(partyExternalCaseFlagField.get()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        Flags flags = objectMapper.convertValue(
+            caseDataMap.get(partyExternalCaseFlagField.get()),
             Flags.class
         );
         try {
@@ -501,19 +710,20 @@ public class CaseService {
             log.info("error");
         }
         flags = flags.toBuilder()
-            .details(convertFlags(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails()))
+            .details(convertFlags1(citizenPartyUpdatedFlagsRequest.getPartyExternalFlags().getDetails()))
             .build();
+
         try {
             log.info("Updated external Party flags  ===>" + objectMapper.writeValueAsString(flags));
         } catch (JsonProcessingException e) {
             log.info("error");
         }
-        Map<String, Object> testMap = new HashMap<>();
-        testMap.put(partyExternalCaseFlagField.get(), flags);
+        Map<String, Object> updatedCaseDataMap = new HashMap<>();
+        updatedCaseDataMap.put(partyExternalCaseFlagField.get(), flags);
 
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
             startEventResponse,
-            testMap
+            updatedCaseDataMap
         );
 
         try {
@@ -555,6 +765,57 @@ public class CaseService {
                 .availableExternally(detail.getAvailableExternally())
                 .build();
             flagDetails.add(element(flagDetail));
+        }
+
+        return flagDetails;
+    }
+
+    private List<Element<FlagDetail>> convertManageFlags(Flags flags, List<Element<FlagDetailRequest>> details) {
+        List<Element<FlagDetail>> flagDetails = flags.getDetails();
+
+        for (Element<FlagDetail> flagDetail : flagDetails) {
+            Optional<Element<FlagDetailRequest>> data
+                = details.stream().filter(x -> x.getId().equals(flagDetail.getId())).findFirst();
+
+            if (data.isPresent()) {
+
+                FlagDetail flagData = flagDetail.getValue().toBuilder().status(data.get().getValue().getStatus())
+                    .dateTimeModified(data.get().getValue().getDateTimeModified())
+                    .build();
+
+                int index = flagDetails.indexOf(flagDetail);
+                flagDetails.set(index, element(flagDetail.getId(), flagData));
+            }
+        }
+
+        return flagDetails;
+    }
+
+    private List<Element<FlagDetail>> convertFlags1(List<Element<FlagDetailRequest>> details) {
+        List<Element<FlagDetail>> flagDetails = new ArrayList<>();
+
+        for (Element<FlagDetailRequest> detail1 : details) {
+            FlagDetailRequest detail = detail1.getValue();
+            FlagDetail flagDetail = FlagDetail.builder().name(detail.getName())
+                .name_cy(detail.getName_cy())
+                .subTypeValue(detail.getSubTypeValue())
+                .subTypeValue_cy(detail.getSubTypeValue_cy())
+                .subTypeKey(detail.getSubTypeKey())
+                .otherDescription(detail.getOtherDescription())
+                .otherDescription_cy(detail.getOtherDescription_cy())
+                .flagComment(detail.getFlagComment())
+                .flagComment_cy(detail.getFlagComment_cy())
+                .flagUpdateComment(detail.getFlagUpdateComment())
+                .dateTimeCreated(detail.getDateTimeCreated())
+                .dateTimeModified(detail.getDateTimeModified())
+                .path(detail.getPath())
+                .hearingRelevant(detail.getHearingRelevant())
+                .flagCode(detail.getFlagCode())
+                .status(detail.getStatus())
+                .availableExternally(detail.getAvailableExternally())
+                .build();
+
+            flagDetails.add(element(detail1.getId(), flagDetail));
         }
 
         return flagDetails;

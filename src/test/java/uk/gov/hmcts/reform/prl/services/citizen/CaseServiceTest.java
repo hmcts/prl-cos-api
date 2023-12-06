@@ -943,7 +943,7 @@ public class CaseServiceTest {
             0
         )).thenReturn("caRespondent1ExternalFlags");
         ResponseEntity<Object> updatePartyFlagsResponse;
-        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
+        updatePartyFlagsResponse = caseService.createCitizenReasonableAdjustmentsFlags(
             caseId,
             "c100RequestSupport",
             authToken,
@@ -966,7 +966,7 @@ public class CaseServiceTest {
                                         updateFlagDetailRequestForFillingForms,
                                         updateFlagDetailRequestForHearing
                                     )).build()).build();
-        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
+        updatePartyFlagsResponse = caseService.createCitizenReasonableAdjustmentsFlags(
             caseId,
             "c100RequestSupport",
             authToken,
@@ -978,7 +978,7 @@ public class CaseServiceTest {
         updatePartyFlagsRequest = CitizenPartyFlagsRequest.builder()
             .caseTypeOfApplication("C100")
             .partyIdamId("respondent-1").build();
-        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
+        updatePartyFlagsResponse = caseService.createCitizenReasonableAdjustmentsFlags(
             caseId,
             "c100RequestSupport",
             authToken,
@@ -990,7 +990,7 @@ public class CaseServiceTest {
         updatePartyFlagsRequest = CitizenPartyFlagsRequest.builder()
             .caseTypeOfApplication("C100")
             .partyIdamId("respondent-3").partyExternalFlags(FlagsRequest.builder().build()).build();
-        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
+        updatePartyFlagsResponse = caseService.createCitizenReasonableAdjustmentsFlags(
             caseId,
             "c100RequestSupport",
             authToken,
@@ -1008,7 +1008,7 @@ public class CaseServiceTest {
         updatePartyFlagsRequest = CitizenPartyFlagsRequest.builder()
             .caseTypeOfApplication("C100")
             .partyIdamId("respondent-2").partyExternalFlags(FlagsRequest.builder().build()).build();
-        updatePartyFlagsResponse = caseService.updateCitizenRAflags(
+        updatePartyFlagsResponse = caseService.createCitizenReasonableAdjustmentsFlags(
             caseId,
             "c100RequestSupport",
             authToken,
