@@ -10,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum SdoSafeguardingCafcassCymruEnum {
     @JsonProperty("other")
-    other("other", "Other direction for safeguarding next steps (Cafcass Cymru)");
+    other("other", "Other direction for safeguarding next steps Cafcass Cymru");
 
     private final String id;
     private final String displayedValue;
