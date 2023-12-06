@@ -1,0 +1,493 @@
+{
+  "provider": {
+    "name": "createBundleApi"
+  },
+  "consumer": {
+    "name": "prl_cos"
+  },
+  "interactions": [
+    {
+      "description": "a request to create a bundle in bundling api with valid authorization",
+      "request": {
+        "method": "POST",
+        "path": "/api/new-bundle",
+        "headers": {
+          "Authorization": "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
+          "ServiceAuthorization": "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre",
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "caseTypeId": null,
+          "jurisdictionId": null,
+          "case_details": null,
+          "event_id": null
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "body": {
+          "data": {
+            "bundleConfiguration": "prl-bundle-config.yaml",
+            "id”:”1234”,”data": {
+              "applicantCaseName": "1 Test Case",
+              "caseNumber": "1671137388417020",
+              "orders": [
+
+              ],
+              "allOtherDocuments": [
+
+              ],
+              "applications": [
+                {
+                  "id": null,
+                  "value": {
+                    "documentLink": {
+                      "document_url": "http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7",
+                      "document_binary_url": "http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7/binary",
+                      "document_filename": "C100FinalDocument.pdf",
+                      "dsampleurlocument_hash": null,
+                      "document_creation_date": null
+                    },
+                    "documentFileName": "C100FinalDocument.pdf",
+                    "documentGroup": "applicantApplication"
+                  }
+                },
+                {
+                  "id": null,
+                  "value": {
+                    "documentLink": {
+                      "document_url": "http://sampleurl/documents/f32cc141-5538-45c9-8488-e3476efccc03",
+                      "document_binary_url": "http://sampleurl/documents/f32cc141-5538-45c9-8488-e3476efccc03/binary",
+                      "document_filename": "C1A_Document.pdf",
+                      "document_hash": null,
+                      "document_creation_date": null
+                    },
+                    "documentFileName": "C1A_Document.pdf",
+                    "documentGroup": "applicantC1AApplication"
+                  }
+                },
+                {
+                  "id": null,
+                  "value": {
+                    "documentLink": {
+                      "document_url": "http://sampleurl/documents/c67520fd-3b40-49d6-93b7-5ccb95ac4af0",
+                      "document_binary_url": "http://sampleurl/documents/c67520fd-3b40-49d6-93b7-5ccb95ac4af0/binary",
+                      "document_filename": "dummy.pdf",
+                      "document_hash": null,
+                      "document_creation_date": null
+                    },
+                    "documentFileName": "dummy.pdf",
+                    "documentGroup": "applicantMiamCertificate"
+                  }
+                }
+              ]
+            },
+            "caseBundles": [
+              {
+                "value": {
+                  "id": "2f3c1012-2d94-475c-b65a-edab955e6513",
+                  "title": "/case_details/id",
+                  "description": null,
+                  "eligibleForStitching": "no",
+                  "eligibleForCloning": "no",
+                  "documents": [
+
+                  ],
+                  "folders": [
+                    {
+                      "value": {
+                        "name": "Preliminary Documents",
+                        "documents": [
+
+                        ],
+                        "folders": [
+                          {
+                            "value": {
+                              "name": "Position statements",
+                              "documents": [
+
+                              ],
+                              "folders": [
+                                {
+                                  "value": {
+                                    "name": "Applicant Position Statement",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Respondent Position Statement",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "sortIndex": 0
+                      }
+                    },
+                    {
+                      "value": {
+                        "name": "Applications and Orders",
+                        "documents": [
+
+                        ],
+                        "folders": [
+                          {
+                            "value": {
+                              "name": "Applicant Documents",
+                              "documents": [
+
+                              ],
+                              "folders": [
+                                {
+                                  "value": {
+                                    "name": "Applicant Application",
+                                    "documents": [
+                                      {
+                                        "value": {
+                                          "name": "C100FinalDocument.pdf",
+                                          "description": null,
+                                          "sortIndex": 0,
+                                          "sourceDocument": {
+                                            "document_url": "http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7",
+                                            "document_filename": "C100FinalDocument.pdf",
+                                            "document_binary_url": "http://sampleurl/documents/2d134d2f-660d-41ed-8878-df3f70d748b7/binary"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Applicant C1A Application",
+                                    "documents": [
+                                      {
+                                        "value": {
+                                          "name": "C1A_Document.pdf",
+                                          "description": null,
+                                          "sortIndex": 0,
+                                          "sourceDocument": {
+                                            "document_url": "http://sampleurl/documents/f32cc141-5538-45c9-8488-e3476efccc03",
+                                            "document_filename": "C1A_Document.pdf",
+                                            "document_binary_url": "http://sampleurl/documents/f32cc141-5538-45c9-8488-e3476efccc03/binary"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Miam Certificate",
+                                    "documents": [
+                                      {
+                                        "value": {
+                                          "name": "dummy.pdf",
+                                          "description": null,
+                                          "sortIndex": 0,
+                                          "sourceDocument": {
+                                            "document_url": "http://sampleurl/documents/c67520fd-3b40-49d6-93b7-5ccb95ac4af0",
+                                            "document_filename": "dummy.pdf",
+                                            "document_binary_url": "http://sampleurl/documents/c67520fd-3b40-49d6-93b7-5ccb95ac4af0/binary"
+                                          }
+                                        }
+                                      }
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Previous Orders Submitted With Application",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "value": {
+                              "name": "Respondent Documents",
+                              "documents": [
+
+                              ],
+                              "folders": [
+                                {
+                                  "value": {
+                                    "name": "Respondent Application",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "value": {
+                              "name": "Orders",
+                              "documents": [
+
+                              ],
+                              "folders": [
+                                {
+                                  "value": {
+                                    "name": "Orders Submitted with Application",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "sortIndex": 1
+                      }
+                    },
+                    {
+                      "value": {
+                        "name": "Witness Statement And Evidence",
+                        "documents": [
+
+                        ],
+                        "folders": [
+                          {
+                            "value": {
+                              "name": "Applicant's Statements",
+                              "documents": [
+
+                              ],
+                              "folders": [
+                                {
+                                  "value": {
+                                    "name": "Witness Statements",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Letters from School",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Statements of supporting evidence",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Digital or Mobile Phone Screenshots or Photographic Evidences",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Other Evidences",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "value": {
+                              "name": "Respondent's Statements",
+                              "documents": [
+
+                              ],
+                              "folders": [
+                                {
+                                  "value": {
+                                    "name": "Witness Statements",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Letters from School",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Other Evidences",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "value": {
+                              "name": "Other Witness Statements",
+                              "documents": [
+
+                              ],
+                              "folders": null
+                            }
+                          }
+                        ],
+                        "sortIndex": 2
+                      }
+                    },
+                    {
+                      "value": {
+                        "name": "Expert Reports including Guardian (CAFCASS)",
+                        "documents": [
+
+                        ],
+                        "folders": [
+                          {
+                            "value": {
+                              "name": "CAFCASS Report and Guardian",
+                              "documents": [
+
+                              ],
+                              "folders": [
+                                {
+                                  "value": {
+                                    "name": "Other Documents",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          },
+                          {
+                            "value": {
+                              "name": "Expert Reports",
+                              "documents": [
+
+                              ],
+                              "folders": [
+                                {
+                                  "value": {
+                                    "name": "Medical Reports",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "DNA Reports",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Medical Records",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Drug And Alcohol Tests(Toxicology)",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Police Reports",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                },
+                                {
+                                  "value": {
+                                    "name": "Other Reports",
+                                    "documents": [
+
+                                    ]
+                                  }
+                                }
+                              ]
+                            }
+                          }
+                        ],
+                        "sortIndex": 3
+                      }
+                    }
+                  ],
+                  "stitchStatus": "DONE",
+                  "stitchedDocument": {
+                    "document_url": "url",
+                    "document_filename": "StitchedPDF",
+                    "document_binary_url": "document_binary_url"
+                  },
+                  "hasCoversheets": "No",
+                  "hasTableOfContents": "Yes",
+                  "hasFolderCoversheets": "Yes",
+                  "stitchingFailureMessage": null,
+                  "fileName": "Applicant Firstname Applicant Lastname-Bundle.pdf",
+                  "paginationStyle": "bottomRight",
+                  "coverpageTemplate": "coverpage.docx",
+                  "pageNumberFormat": "pageRange"
+                }
+              }
+            ]
+          },
+          "errors": [
+
+          ],
+          "warnings": [
+
+          ],
+          "documentTaskId": 180790
+        }
+      },
+      "providerStates": [
+        {
+          "name": "A request to create a bundle in Bundling api"
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "pactSpecification": {
+      "version": "3.0.0"
+    },
+    "pact-jvm": {
+      "version": "4.1.11"
+    }
+  }
+}

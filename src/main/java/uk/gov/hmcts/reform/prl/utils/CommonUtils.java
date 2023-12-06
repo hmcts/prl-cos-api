@@ -20,7 +20,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 
 
 @Slf4j
@@ -140,7 +146,7 @@ public class CommonUtils {
     public static String formatDate(String pattern, LocalDate localDate) {
         try {
             if (localDate != null) {
-                return localDate.format(DateTimeFormatter.ofPattern(pattern));
+                return localDate.format(DateTimeFormatter.ofPattern(pattern,  Locale.ENGLISH));
             }
         } catch (Exception e) {
             log.error(ERROR_STRING + e.getMessage());
@@ -170,7 +176,7 @@ public class CommonUtils {
         }
         return personalCodes;
     }
-     
+
     public static LocalDate formattedLocalDate(String date, String pattern) {
         if (date != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
@@ -179,18 +185,15 @@ public class CommonUtils {
         return null;
     }
 
-
-    public static String getFormattedStringDate(String date, String format) {
+    public static String formatDateTime(String pattern, LocalDateTime localDateTime) {
         try {
-            if (date != null) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(format);
-                LocalDate parse = LocalDate.parse(date, formatter);
-                return parse.toString();
+            if (null != localDateTime) {
+                return localDateTime.format(DateTimeFormatter.ofPattern(pattern, Locale.ENGLISH))
+                    .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE, PM_UPPER_CASE);
             }
         } catch (Exception e) {
-            log.error(ERROR_STRING + e.getMessage());
+            log.error("Error while formatting the date time", e);
         }
-        return " ";
+        return "";
     }
-
 }

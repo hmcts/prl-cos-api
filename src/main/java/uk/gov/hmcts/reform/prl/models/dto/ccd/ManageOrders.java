@@ -139,6 +139,9 @@ public class ManageOrders implements MappableObject {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
+    @JsonProperty("underTakingExpiryDateTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private final LocalDateTime underTakingExpiryDateTime;
     private final YesOrNo underTakingFormSign;
 
     private final YesOrNo isTheOrderByConsent;
@@ -175,7 +178,8 @@ public class ManageOrders implements MappableObject {
     @Builder.Default
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
-
+    @Builder.Default
+    @JsonProperty("serveOrderDynamicList")
     private DynamicMultiSelectList serveOrderDynamicList;
     @JsonProperty("serveOrderAdditionalDocuments")
     private final List<Element<Document>> serveOrderAdditionalDocuments;
@@ -268,7 +272,7 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("solicitorOrdersHearingDetails")
     @JsonUnwrapped
     @Builder.Default
-    private final List<Element<HearingData>> solicitorOrdersHearingDetails;
+    private List<Element<HearingData>> solicitorOrdersHearingDetails;
 
     @JsonProperty("hasJudgeProvidedHearingDetails")
     private YesOrNo hasJudgeProvidedHearingDetails;

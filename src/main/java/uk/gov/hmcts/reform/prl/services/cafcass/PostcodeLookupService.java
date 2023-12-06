@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -91,7 +91,7 @@ public class PostcodeLookupService {
                     String.class
                 );
 
-            HttpStatus responseStatus = ((ResponseEntity) response).getStatusCode();
+            HttpStatusCode responseStatus = ((ResponseEntity) response).getStatusCode();
 
             if (responseStatus.value() == org.apache.http.HttpStatus.SC_OK) {
                 return objectMapper.readValue(response.getBody(), PostcodeResponse.class);

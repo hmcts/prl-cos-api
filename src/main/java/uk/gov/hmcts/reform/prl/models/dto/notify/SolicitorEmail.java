@@ -29,12 +29,15 @@ public class SolicitorEmail extends EmailTemplateVars {
     @JsonProperty("issueDate")
     private final String issueDate;
 
+    @JsonProperty("solicitorName")
+    private final String solicitorName;
+
     @Builder
     public SolicitorEmail(String caseReference,
                           String caseName,
                           String applicantName, String courtName,
                           String courtEmail, String fullName,
-                          String caseLink, String issueDate) {
+                          String caseLink, String issueDate, String solicitorName) {
         super(caseReference);
         this.caseName = caseName;
         this.applicantName = applicantName;
@@ -43,5 +46,6 @@ public class SolicitorEmail extends EmailTemplateVars {
         this.fullName = fullName;
         this.caseLink = caseLink;
         this.issueDate = issueDate;
+        this.solicitorName = solicitorName;
     }
 }

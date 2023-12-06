@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -30,6 +31,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
@@ -46,17 +50,18 @@ public class AmendOrderService {
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
         ManageOrders eventData = caseData.getManageOrders();
-
-        byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersDocumentToAmend(), authorisation);
+        //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
+        // Hence needs to revisit the logic, once XUI issue is resolved
+        //byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersAmendedOrder(), authorisation);
         String amendedFileName = updateFileName(eventData.getManageOrdersDocumentToAmend());
-        Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
+        //Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
 
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
 
         uk.gov.hmcts.reform.prl.models.documents.Document updatedDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-            .documentFileName(stampedDocument.originalDocumentName)
-            .documentUrl(stampedDocument.links.self.href)
-            .documentBinaryUrl(stampedDocument.links.binary.href)
+            .documentFileName(amendedFileName)
+            .documentUrl(eventData.getManageOrdersAmendedOrder().getDocumentUrl())
+            .documentBinaryUrl(eventData.getManageOrdersAmendedOrder().getDocumentBinaryUrl())
             .build();
 
         return updateAmendedOrderDetails(caseData, updatedDocument, loggedInUserType);
@@ -94,7 +99,7 @@ public class AmendOrderService {
                                           .orderServedDate(null)
                                           .orderCreatedDate(time.now().format(DateTimeFormatter.ofPattern(
                                               PrlAppsConstants.D_MMM_YYYY,
-                                              Locale.UK
+                                              Locale.ENGLISH
                                           )))
                                           .status(manageOrderService.getOrderStatus(
                                               orderSelectionType,
@@ -117,7 +122,7 @@ public class AmendOrderService {
             } else {
                 updatedOrders = orders;
             }
-            orderMap.put("orderCollection", updatedOrders);
+            orderMap.put(ORDER_COLLECTION, updatedOrders);
             return orderMap;
         } else {
             return  setDraftOrderCollection(caseData, amendedDocument, loggedInUserType);
@@ -164,6 +169,11 @@ public class AmendOrderService {
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .dateCreated(time.now())
                               .status(manageOrderService.getOrderStatus(orderSelectionType, loggedInUserType, null, null))
+                              .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                  caseData.getManageOrders().getAmendOrderSelectCheckOptions())
+                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType) ? No : Yes)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
@@ -171,6 +181,7 @@ public class AmendOrderService {
                               .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
+
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .build();
     }

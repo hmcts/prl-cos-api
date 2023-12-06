@@ -5,15 +5,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -34,7 +33,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@RunWith(SpringRunner.class)
+
+@RunWith(MockitoJUnitRunner.class)
 public class BulkPrintServiceTest {
 
     @Mock
@@ -48,9 +48,6 @@ public class BulkPrintServiceTest {
 
     @Mock
     private AuthTokenGenerator authTokenGenerator;
-
-    @Mock
-    private LaunchDarklyClient launchDarklyClient;
 
     private UUID uuid;
 
@@ -110,7 +107,6 @@ public class BulkPrintServiceTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
             .build();
-        when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
 
         when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
 
@@ -168,14 +164,12 @@ public class BulkPrintServiceTest {
                                              .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                              .build())))
             .build();
-        when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
 
-        when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
+        //when(sendLetterApi.sendLetter(any(), any(LetterWithPdfsRequest.class))).thenReturn(sendLetterResponse);
+
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
-        when(caseDocumentClient.getDocumentBinary(authToken, s2sToken, "TestUrl"))
-            .thenReturn(expectedResponse);
         assertThrows(
             NullPointerException.class,
             () -> bulkPrintService.send("123",
