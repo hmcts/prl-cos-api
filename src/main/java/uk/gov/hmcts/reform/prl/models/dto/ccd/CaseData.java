@@ -781,9 +781,12 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
 
-    //FPET-567 - Added for hiding fields for SDO
-    @JsonProperty("isSdoSelected")
-    private YesOrNo isSdoSelected;
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+
+    /**
+     * PRL-4260,4335,4301 - manage orders hearing screen fields show params.
+     */
+    @JsonUnwrapped
+    public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
 
 }

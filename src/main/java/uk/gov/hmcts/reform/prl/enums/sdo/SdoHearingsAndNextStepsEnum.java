@@ -24,7 +24,7 @@ public enum SdoHearingsAndNextStepsEnum {
     @JsonProperty("fhdra")
     fhdra("fhdra", "First hearing dispute resolution (FHDRA)"),
     @JsonProperty("positionStatement")
-    positionStatement("positionStatement", "Position statements"),
+    positionStatement("positionStatement", "Position statement"),
     @JsonProperty("participationDirections")
     participationDirections("participationDirections", "Participation directions"),
     @JsonProperty("miamAttendance")
