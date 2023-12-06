@@ -2742,7 +2742,7 @@ public class ManageOrderService {
 
     }
 
-    public static String getAdditionalRequirementsForHearingReq(List<Element<HearingData>> ordersHearingDetails,
+    public String getAdditionalRequirementsForHearingReq(List<Element<HearingData>> ordersHearingDetails,
                                                                 boolean isDraftOrder,
                                                                 StandardDirectionOrder standardDirectionOrder,
                                                                 CreateSelectOrderOptionsEnum orderType) {
@@ -2769,7 +2769,7 @@ public class ManageOrderService {
         }
     }
 
-    private static void getAdditionalRequirementsForHearingReqForOtherOrders(List<Element<HearingData>> ordersHearingDetails,
+    private void getAdditionalRequirementsForHearingReqForOtherOrders(List<Element<HearingData>> ordersHearingDetails,
                                                                              boolean isDraftOrder,
                                                                              List<String> additionalRequirementsForHearingReqList) {
         ordersHearingDetails.stream()
@@ -2779,7 +2779,7 @@ public class ManageOrderService {
             });
     }
 
-    private static void populateAdditionalRequirementsForHearingReqList(boolean isDraftOrder,
+    private void populateAdditionalRequirementsForHearingReqList(boolean isDraftOrder,
                                                                         List<String> additionalRequirementsForHearingReqList,
                                                                         HearingData hearingData) {
         boolean isOption3Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
@@ -2795,7 +2795,7 @@ public class ManageOrderService {
         }
     }
 
-    private static void getAdditionalRequirementsForHearingReqForSdo(StandardDirectionOrder standardDirectionOrder,
+    private void getAdditionalRequirementsForHearingReqForSdo(StandardDirectionOrder standardDirectionOrder,
                                                                      boolean isDraftOrder,
                                                                      List<String> additionalRequirementsForHearingReqList) {
 
