@@ -446,11 +446,11 @@ public class CaseService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
         }
 
-        String systemUpdateUserId = systemUserService.getUserId(authToken);
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             caseEvent,
-            systemUpdateUserId
+            userDetails.getId()
         );
 
         StartEventResponse startEventResponse =
@@ -485,23 +485,43 @@ public class CaseService {
                 partyExternalCaseFlagField.get()))) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party external flag details not found");
         }
-        log.info("partyExternalCaseFlagField {}", partyExternalCaseFlagField.get());
+        try {
+            log.info("partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(partyExternalCaseFlagField.get()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
 
         Flags flags = objectMapper.convertValue(
             updatedCaseData.get(partyExternalCaseFlagField.get()),
             Flags.class
         );
-        log.info("Existing external Party flags {}", flags);
+        try {
+            log.info("Existing external Party flags  ===>" + objectMapper.writeValueAsString(flags));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         flags = flags.toBuilder()
             .details(convertFlags(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails()))
             .build();
-        log.info("Updated external Party flags {}", flags);
-        updatedCaseData.put(partyExternalCaseFlagField.get(), flags);
+        try {
+            log.info("Updated external Party flags  ===>" + objectMapper.writeValueAsString(flags));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        Map<String, Object> testMap = new HashMap<>();
+        testMap.put(partyExternalCaseFlagField.get(), flags);
 
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
             startEventResponse,
-            updatedCaseData
+            testMap
         );
+
+        try {
+            log.info("Case data content is  ===>" + objectMapper.writeValueAsString(caseDataContent));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
         coreCaseDataService.submitUpdate(
             authToken,
             eventRequestData,
