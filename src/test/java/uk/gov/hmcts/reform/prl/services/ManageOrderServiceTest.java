@@ -1158,24 +1158,6 @@ public class ManageOrderServiceTest {
             .address(Address.builder().build())
             .build();
 
-        PartyDetails partyDetails = PartyDetails.builder()
-            .firstName("")
-            .lastName("")
-            .dateOfBirth(LocalDate.now())
-            .address(Address.builder().build())
-            .solicitorReference("123")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .representativeFirstName("test")
-            .representativeLastName("test")
-            .build();
-
-        PartyDetails respPartyDetails = PartyDetails.builder()
-            .firstName("")
-            .lastName("")
-            .dateOfBirth(LocalDate.now())
-            .address(Address.builder().build())
-            .build();
-
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("FL401")
@@ -1938,24 +1920,6 @@ public class ManageOrderServiceTest {
             .postalInformationCA(List.of(Element.<PostalInformation>builder()
                                              .value(PostalInformation.builder().postalAddress(
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
-            .build();
-
-        PartyDetails partyDetails = PartyDetails.builder()
-            .firstName("")
-            .lastName("")
-            .dateOfBirth(LocalDate.now())
-            .address(Address.builder().build())
-            .solicitorReference("123")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .representativeFirstName("test")
-            .representativeLastName("test")
-            .build();
-
-        PartyDetails respPartyDetails = PartyDetails.builder()
-            .firstName("")
-            .lastName("")
-            .dateOfBirth(LocalDate.now())
-            .address(Address.builder().build())
             .build();
 
         PartyDetails partyDetails = PartyDetails.builder()
