@@ -299,12 +299,6 @@ public class DraftAnOrderService {
                                                                                .getHearingDataForSelectedHearing(caseData,
                                                                                                                  hearings,
                                                                                                                  authorisation));
-                        log.info("STRINGHT from-- >{}",hearingDataService
-                            .getHearingDataForSelectedHearing(caseData,
-                                                              hearings,
-                                                              authorisation));
-                        log.info("=========SPLit========");
-                        log.info("MAin place -- >{}",caseData.getManageOrders().getOrdersHearingDetails());
                     } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                         caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                     }
@@ -1776,10 +1770,10 @@ public class DraftAnOrderService {
             caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
             caseData.getManageOrders().setOrdersHearingDetails(hearingData);
             //PRL-4335 - solicitor draft order edit by judge/admin, persist into solicitor orders hearings
-            if (isSolicitorOrdersHearings) {
-                caseDataUpdated.put(SOLICITOR_ORDERS_HEARING_DETAILS, hearingData);
-                caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingData);
-            }
+            //if (isSolicitorOrdersHearings) {
+            //    caseDataUpdated.put(SOLICITOR_ORDERS_HEARING_DETAILS, hearingData);
+            //    caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingData);
+            //}
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, authorisation));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
@@ -2129,10 +2123,10 @@ public class DraftAnOrderService {
             if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-                    if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                        existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
-                        isSolicitorOrdersHearings = true;
-                    }
+                    //if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
+                    //    existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
+                    //    isSolicitorOrdersHearings = true;
+                    //}
                     //PRL-4260 - hearing screen validations
                     errorList = getHearingScreenValidations(
                         existingOrderHearingDetails,
