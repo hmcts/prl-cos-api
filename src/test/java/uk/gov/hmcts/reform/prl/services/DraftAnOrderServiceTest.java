@@ -14,6 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
@@ -89,6 +90,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -865,6 +867,7 @@ public class DraftAnOrderServiceTest {
             .solicitorOrg(Organisation.builder().organisationName("test").build())
             .build();
         Element<PartyDetails> applicants = element(partyDetails);
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseTypeOfApplication("C100")
@@ -875,7 +878,6 @@ public class DraftAnOrderServiceTest {
             .doYouWantToEditTheOrder(Yes)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(No).build())
             .build();
-        when(dateTime.now()).thenReturn(LocalDateTime.now());
         when(documentLanguageService.docGenerateLang(caseData)).thenReturn(null);
         when(manageOrderService.updateOrderFieldsForDocmosis(draftOrder,caseData)).thenReturn(caseData);
         when(elementUtils.getDynamicListSelectedValue(
@@ -1189,6 +1191,59 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void testUpdateDraftOrderCollection1() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .build())
+            .isOrderCreatedBySolicitor(No)
+            .build();
+
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        ordersHearingDetails.add(element(HearingData.builder().build()));
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .children(children)
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+            .doYouWantToEditTheOrder(No)
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.districtJudge)
+                              .makeChangesToUploadedOrder(Yes)
+                              .ordersHearingDetails(ordersHearingDetails)
+                              .build())
+            .respondents(List.of(respondents))
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+        Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
+            caseData,
+            "test-auth",
+            null
+        );
+
+        assertNotNull(caseDataMap);
+    }
+
+    @Test
+    public void testUpdateDraftOrderCollection2() {
         DraftOrder draftOrder = DraftOrder.builder()
             .orderDocument(Document.builder().documentFileName("abc.pdf").build())
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
@@ -3848,7 +3903,7 @@ public class DraftAnOrderServiceTest {
 
         assertNotNull(caseDataUpdated);
         assertFalse(caseDataUpdated.isEmpty());
-        assertEquals("You must select a hearing type", errors.get(0));
+        assertEquals("HearingType cannot be empty, please select a hearingType", errors.get(0));
         assertEquals("Please enter numeric value for Hearing estimated days", errors.get(1));
         assertEquals("Please enter numeric value for Hearing estimated hours", errors.get(2));
         assertEquals("Please enter numeric value for Hearing estimated minutes", errors.get(3));
@@ -4185,6 +4240,151 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> objectMap = draftAnOrderService.handleDocumentGenerationForaDraftOrder(authToken, callbackRequest);
         assertNotNull(objectMap);
 
+    }
+
+    @Test
+    public void testOrderNameForWaFieldInEditAndApproveJourney() {
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+            .orderTypeId(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue())
+            .manageOrderHearingDetails(List.of(element(HearingData.builder()
+
+                                                           .confirmedHearingDates(DynamicList.builder().build()).build())))
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .createdBy("test title")
+                              .dateCreated(nowTime)
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().id(UUID.fromString(TEST_UUID))
+            .value(draftOrder).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
+            .draftOrderCollection(draftOrderCollection)
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
+            TEST_UUID));
+        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, true);
+        assertNotNull(name);
+        assertTrue(name.contains(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue()));
+        assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
+            PrlAppsConstants.D_MMM_YYYY_HH_MM,
+            Locale.ENGLISH
+        ))));
+    }
+
+    @Test
+    public void testOrderNameForWaFieldInDraftOrderJourney() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.parentalResponsibility)
+            .build();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
+        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, false);
+        assertNotNull(name);
+        assertTrue(name.contains(CreateSelectOrderOptionsEnum.parentalResponsibility.getDisplayedValue()));
+        assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
+            PrlAppsConstants.D_MMM_YYYY_HH_MM,
+            Locale.ENGLISH
+        ))));
+    }
+
+
+    @Test
+    public void testOrderNameForWaFieldInDraftUploadOrderJourney() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderOptions(DraftOrderOptionsEnum.uploadAnOrder)
+            .childArrangementOrders(ChildArrangementOrdersEnum.declarationOfParentageOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.parentalResponsibility)
+            .build();
+        when(manageOrderService.getSelectedOrderInfoForUpload(
+            caseData)).thenReturn(ChildArrangementOrdersEnum.declarationOfParentageOrder.getDisplayedValue());
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+        LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
+        String name = draftAnOrderService.getDraftOrderNameForWA(caseData, false);
+        assertNotNull(name);
+        assertTrue(name.contains(ChildArrangementOrdersEnum.declarationOfParentageOrder.getDisplayedValue()));
+        assertTrue(name.contains(nowTime.format(DateTimeFormatter.ofPattern(
+            PrlAppsConstants.D_MMM_YYYY_HH_MM,
+            Locale.ENGLISH
+        ))));
+    }
+
+
+    @Test
+    public void testHandleDocumentGenerationDraftOrder() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.parentalResponsibility)
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .manageOrders(ManageOrders.builder()
+                              .isTheOrderAboutChildren(Yes)
+                              .build())
+            .draftOrdersDynamicList(TEST_UUID)
+            .doYouWantToEditTheOrder(No)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId(Event.DRAFT_AN_ORDER.getId())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
+    }
+
+    @Test
+    public void testHandleDocumentGenerationEditOrder() throws Exception {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .parentName("test")
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .createdBy("test")
+                              .build())
+            .build();
+
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .draftOrderCollection(draftOrderCollection)
+            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+            .respondents(List.of(respondents))
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId(EDIT_AND_APPROVE_ORDER.getId())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
     }
 
 }

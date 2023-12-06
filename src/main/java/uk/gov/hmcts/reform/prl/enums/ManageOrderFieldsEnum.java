@@ -300,7 +300,8 @@ public enum ManageOrderFieldsEnum {
     nameOfLaAmendOrder("nameOfLaAmendOrder"),
     nameOfJudgeToReviewOrder("nameOfJudgeToReviewOrder"),
     nameOfLaToReviewOrder("nameOfLaToReviewOrder"),
-    manageOrdersDocumentToAmend("manageOrdersDocumentToAmend");
+    manageOrdersDocumentToAmend("manageOrdersDocumentToAmend"),
+    draftOrderOptions("draftOrderOptions");
 
     private final String value;
 
