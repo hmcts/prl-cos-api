@@ -247,7 +247,6 @@ public class DraftAnOrderService {
 
     private static void filterDraftOrderForExistingCases(String eventId, List<Element<DraftOrder>> supportedDraftOrderList,
                                                          Element<DraftOrder> draftOrderElement) {
-        log.info("inside filterDraftOrderForExistingCases");
         String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))
@@ -259,7 +258,6 @@ public class DraftAnOrderService {
 
     private static void filterDraftOrderForNewCases(String eventId, List<Element<DraftOrder>> supportedDraftOrderList,
                                                     Element<DraftOrder> draftOrderElement) {
-        log.info("inside filterDraftOrderForNewCases");
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && Yes.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))
             || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
@@ -277,8 +275,6 @@ public class DraftAnOrderService {
         updatedCaseData.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
-            log.info("*** eid, Selected order id {} {}", e.getId(), selectedOrderId);
-            log.info("*** Equals {}", e.getId().equals(selectedOrderId));
             if (e.getId().equals(selectedOrderId)) {
                 updatedCaseData.put("orderUploadedAsDraftFlag", draftOrder.getIsOrderUploadedByJudgeOrAdmin());
                 if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
@@ -332,7 +328,6 @@ public class DraftAnOrderService {
         }
         caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
         caseData = caseData.toBuilder().standardDirectionOrder(null != standardDirectionOrder ? standardDirectionOrder : null).build();
-        log.info("updateCaseDataForFinalOrderDocument " + caseData);
         return caseData;
     }
 
@@ -369,7 +364,6 @@ public class DraftAnOrderService {
             eventId,
             loggedInUserType
         );
-        log.info("DraftOrderService::ManageOrderHearingDetails -> {}", draftOrder.getManageOrderHearingDetails());
         orderDetails = generateFinalOrderDocument(
             auth,
             caseData,
@@ -411,15 +405,9 @@ public class DraftAnOrderService {
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
                     .build()
             ).build();
-            log.info(
-                "DraftOrderService::OrdersHearingDetails -> {}",
-                caseData.getManageOrders().getOrdersHearingDetails()
-            );
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                log.info("inside filterEmptyHearingDetails");
                 caseData = manageOrderService.filterEmptyHearingDetails(caseData);
             }
-            log.info("generateFinalOrderDocument manageOrdersApplicantReference {} ", caseData.getManageOrders().getManageOrdersApplicantReference());
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             Map<String, String> fieldMap = manageOrderService.getOrderTemplateAndFile(draftOrder.getOrderType());
             if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -429,7 +417,6 @@ public class DraftAnOrderService {
             }
             try {
                 if (documentLanguage.isGenEng()) {
-                    log.info("before generating english document");
                     generatedDocumentInfo = dgsService.generateDocument(
                         auth,
                         CaseDetails.builder().caseData(caseData).build(),
@@ -437,7 +424,6 @@ public class DraftAnOrderService {
                     );
                 }
                 if (documentLanguage.isGenWelsh() && fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH) != null) {
-                    log.info("before generating welsh document");
                     generatedDocumentInfoWelsh = dgsService.generateDocument(
                         auth,
                         CaseDetails.builder().caseData(caseData).build(),
@@ -452,8 +438,6 @@ public class DraftAnOrderService {
                         fieldMap
                     ))
                     .build();
-                log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
-                log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
             } catch (Exception e) {
                 log.error(
                     "Error while generating the final document for case {} and  order {}",
@@ -555,7 +539,6 @@ public class DraftAnOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
-        log.info("*** Order name {}", caseDataMap.get("orderName"));
         return caseDataMap;
     }
 
@@ -582,17 +565,20 @@ public class DraftAnOrderService {
             caseDataMap.put("manageOrdersCourtName", selectedOrder.getManageOrdersCourtName());
             caseDataMap.put("manageOrdersCourtAddress", selectedOrder.getManageOrdersCourtAddress());
             caseDataMap.put("manageOrdersCaseNo", selectedOrder.getManageOrdersCaseNo());
-            caseDataMap.put("manageOrdersApplicant",
-                            StringUtils.isEmpty(selectedOrder.getManageOrdersApplicant()) ? CaseUtils.getApplicant(
-                                caseData) : selectedOrder.getManageOrdersApplicant()
+            caseDataMap.put(
+                "manageOrdersApplicant",
+                StringUtils.isEmpty(selectedOrder.getManageOrdersApplicant()) ? CaseUtils.getApplicant(
+                    caseData) : selectedOrder.getManageOrdersApplicant()
             );
-            caseDataMap.put("manageOrdersApplicantReference",
-                            StringUtils.isEmpty(selectedOrder.getManageOrdersApplicantReference()) ? CaseUtils.getApplicantReference(
-                                caseData) : selectedOrder.getManageOrdersApplicantReference()
+            caseDataMap.put(
+                "manageOrdersApplicantReference",
+                StringUtils.isEmpty(selectedOrder.getManageOrdersApplicantReference()) ? CaseUtils.getApplicantReference(
+                    caseData) : selectedOrder.getManageOrdersApplicantReference()
             );
-            caseDataMap.put("manageOrdersRespondent",
-                            StringUtils.isEmpty(selectedOrder.getManageOrdersRespondent()) ? CaseUtils.getRespondent(
-                                caseData) : selectedOrder.getManageOrdersRespondent()
+            caseDataMap.put(
+                "manageOrdersRespondent",
+                StringUtils.isEmpty(selectedOrder.getManageOrdersRespondent()) ? CaseUtils.getRespondent(
+                    caseData) : selectedOrder.getManageOrdersRespondent()
             );
             caseDataMap.put("manageOrdersRespondentReference", selectedOrder.getManageOrdersRespondentReference());
             caseDataMap.put("manageOrdersRespondentDob", selectedOrder.getManageOrdersRespondentDob());
@@ -628,8 +614,6 @@ public class DraftAnOrderService {
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
         }
 
-        log.info("applicant reference {}", caseDataMap.get("manageOrdersApplicantReference"));
-        log.info("applicant {}", caseDataMap.get("manageOrdersApplicant"));
         return caseDataMap;
     }
 
