@@ -89,16 +89,14 @@ public class CourtFinderService {
             throw new NotFoundException("No child details found");
         }
 
-        List<Element<PartyDetails>> othersPersion = caseData.getOtherPartyInTheCaseRevised();
+        Optional<List<Element<PartyDetails>>> othersPerson = Optional.ofNullable(caseData.getOtherPartyInTheCaseRevised());
 
-        Optional<PartyDetails> partyDetails = othersPersion
-                .stream()
+        Optional<PartyDetails> partyDetails = othersPerson.flatMap(elements -> elements.stream()
                 .map(Element::getValue)
-                .findFirst();
+                .findFirst());
 
         List<Element<ChildrenAndApplicantRelation>> childAndApplicantRelations = caseData.getRelations().getChildAndApplicantRelations();
         List<Element<ChildrenAndRespondentRelation>> childAndRespondentRelations = caseData.getRelations().getChildAndRespondentRelations();
-        List<Element<ChildrenAndOtherPeopleRelation>> childAndOtherPeopleRelations = caseData.getRelations().getChildAndOtherPeopleRelations();
         Optional<ChildrenAndApplicantRelation> childrenAndApplicantRelation = childAndApplicantRelations
                 .stream()
                 .map(Element::getValue)
@@ -108,10 +106,12 @@ public class CourtFinderService {
                 .stream()
                 .map(Element::getValue)
                 .findFirst();
-        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = childAndOtherPeopleRelations
+        Optional<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelation = Optional
+                .ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations())
+                .isPresent() ? caseData.getRelations().getChildAndOtherPeopleRelations()
                 .stream()
                 .map(Element::getValue)
-                .findFirst();
+                .findFirst() : Optional.empty();
 
         if (!childrenAndApplicantRelation.isEmpty() && YesOrNo.Yes.equals(childrenAndApplicantRelation.get().getChildLivesWith())) {
             return getPostcodeFromWrappedParty(caseData.getApplicants().get(0));

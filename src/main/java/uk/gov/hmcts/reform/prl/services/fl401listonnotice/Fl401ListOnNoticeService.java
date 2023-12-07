@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -79,12 +80,14 @@ public class Fl401ListOnNoticeService {
         if (caseDataUpdated.containsKey(FL401_LISTONNOTICE_HEARINGDETAILS)) {
             caseDataUpdated.put(
                 FL401_LISTONNOTICE_HEARINGDETAILS,
-                hearingDataService.getHearingData(existingFl401ListOnNoticeHearingDetails,hearingDataPrePopulatedDynamicLists,caseData));
+                hearingDataService.getHearingDataForOtherOrders(existingFl401ListOnNoticeHearingDetails,
+                                                                hearingDataPrePopulatedDynamicLists,
+                                                                caseData));
         } else {
-            caseDataUpdated.put(
-                FL401_LISTONNOTICE_HEARINGDETAILS,
-                ElementUtils.wrapElements(hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData)));
-
+            HearingData hearingData = hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
+            caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, ElementUtils.wrapElements(hearingData));
+            //add hearing screen field show params
+            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
         }
         List<DynamicListElement> linkedCasesList = hearingDataService.getLinkedCases(authorisation, caseData);
         caseDataUpdated.put(
@@ -125,7 +128,7 @@ public class Fl401ListOnNoticeService {
             .build();
         caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
         caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
-            .getHearingData(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
+            .getHearingDataForOtherOrders(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
         caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataUpdated;
     }
