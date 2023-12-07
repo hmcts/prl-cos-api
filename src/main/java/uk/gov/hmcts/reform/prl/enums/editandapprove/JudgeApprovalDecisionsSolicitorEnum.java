@@ -12,13 +12,13 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum JudgeApprovalDecisionsSolicitorEnum {
     @JsonProperty("sendToAdminToServe")
-    SEND_TO_ADMIN_TO_SERVE("sendToAdminToServe", "Send to admin to serve"),
+    sendToAdminToServe("sendToAdminToServe", "Send to admin to serve"),
     @JsonProperty("giveAdminFurtherDirectionsAndServe")
-    GIVE_ADMIN_FURTHER_DIRECTIONS_AND_SERVE("giveAdminFurtherDirectionsAndServe", "Give admin further directions then serve"),
+    giveAdminFurtherDirectionsAndServe("giveAdminFurtherDirectionsAndServe", "Give admin further directions then serve"),
     @JsonProperty("editTheOrderAndServe")
-    EDIT_THE_ORDER_AND_SERVE("editTheOrderAndServe", "Edit the order myself and send to admin to serve"),
+    editTheOrderAndServe("editTheOrderAndServe", "Edit the order myself and send to admin to serve"),
     @JsonProperty("askLegalRepToMakeChanges")
-    ASK_LEGAL_REP_TO_MAKE_CHANGES("askLegalRepToMakeChanges", "Ask the legal representative to make changes");
+    askLegalRepToMakeChanges("askLegalRepToMakeChanges", "Ask the legal representative to make changes");
 
     private final String id;
     private final String displayedValue;
