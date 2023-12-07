@@ -547,7 +547,7 @@ public class ManageOrdersController {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             log.info("Solicitor created order options {}",caseDetails.getData().get("whatToDoWithOrderSolicitor"));
             log.info("Court admin created order options {}",caseDetails.getData().get("whatToDoWithOrderCourtAdmin"));
-            if (!(JudgeApprovalDecisionsSolicitorEnum.ASK_LEGAL_REP_TO_MAKE_CHANGES
+            if (!(JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges
                 .equals(caseDetails.getData().get("whatToDoWithOrderSolicitor")))) {
                 return ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                              .confirmationHeader(CONFIRMATION_HEADER)

@@ -2914,7 +2914,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void testHandleEditAndApproveSubmitted() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsCourtAdminEnum.EDIT_THE_ORDER_AND_SERVE);
+        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsCourtAdminEnum.editTheOrderAndServe);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -2948,7 +2948,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void testHandleEditAndApproveSubmittedWhenAskLegalRepChoosen() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsSolicitorEnum.ASK_LEGAL_REP_TO_MAKE_CHANGES);
+        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
