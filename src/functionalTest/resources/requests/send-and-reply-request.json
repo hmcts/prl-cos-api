@@ -1,15 +1,16 @@
 {
   "case_details": {
     "callback_response_status": "string",
+    "applicantCaseName": "John Smith",
     "case_data": {
+      "applicantCaseName": "John Smith",
       "caseTypeOfApplication": "C100",
       "chooseSendOrReply": "SEND",
       "messageReply": {
         "isReplying": "Yes",
         "sendReplyJudgeName": {
           "idamId": "testIdamId"
-        },
-        "applicantCaseName": "testCase"
+        }
       },
       "respondToMessage": "Yes",
       "openMessages": [{
