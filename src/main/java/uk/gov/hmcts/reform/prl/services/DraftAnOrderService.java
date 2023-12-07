@@ -203,10 +203,11 @@ public class DraftAnOrderService {
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
         log.info("DETAILSSSSSS------->{}",orderDetails);
         //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
-        orderDetails.getValue().getManageOrderHearingDetails()
-            .forEach(hearingDataElement -> hearingDataElement.getValue()
-                .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
-
+        if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
+            orderDetails.getValue().getManageOrderHearingDetails()
+                .forEach(hearingDataElement -> hearingDataElement.getValue()
+                    .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
+        }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
