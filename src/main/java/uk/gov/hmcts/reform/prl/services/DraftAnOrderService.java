@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsCourtAdminEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -748,7 +750,7 @@ public class DraftAnOrderService {
             IS_HEARING_PAGE_NEEDED,
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
-        caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
+        //caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
 
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
@@ -833,7 +835,9 @@ public class DraftAnOrderService {
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             DraftOrder draftOrder = e.getValue();
             if (e.getId().equals(selectedOrderId)) {
-                if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder()) || (caseData.getManageOrders() != null
+                boolean isOrderEdited = false;
+                isOrderEdited = isOrderEdited(caseData, eventId, isOrderEdited);
+                if (isOrderEdited || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
@@ -867,6 +871,23 @@ public class DraftAnOrderService {
         );
     }
 
+    private boolean isOrderEdited(CaseData caseData, String eventId, boolean isOrderEdited) {
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(eventId)) {
+            if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+                isOrderEdited = true;
+            }
+        } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(eventId)) {
+            if (caseData.getManageOrders() != null && (JudgeApprovalDecisionsCourtAdminEnum.EDIT_THE_ORDER_AND_SERVE
+                .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()) || JudgeApprovalDecisionsSolicitorEnum.EDIT_THE_ORDER_AND_SERVE
+                .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()))) {
+                isOrderEdited = true;
+            }
+        }
+        return isOrderEdited;
+    }
+
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
@@ -890,7 +911,8 @@ public class DraftAnOrderService {
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
             orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
         } else {
-            if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+            boolean isOrderEdited = false;
+            if (isOrderEdited(caseData, eventId, isOrderEdited)) {
                 orderDocumentEng = caseData.getPreviewOrderDoc();
                 orderDocumentWelsh = caseData.getPreviewOrderDocWelsh();
             } else {
@@ -2023,7 +2045,8 @@ public class DraftAnOrderService {
             );
         } else {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-            if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+            boolean isOrderEdited = false;
+            if (isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited)) {
                 errorList = validateEditedOrderDetails(caseData, draftOrder);
                 if (errorList.size() > 0) {
                     return Map.of("errorList", errorList);
@@ -2084,7 +2107,8 @@ public class DraftAnOrderService {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
             occupationErrorList.addAll(getErrorForOccupationScreen(caseData, draftOrder.getOrderType()));
             if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
-                if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+                boolean isOrderEdited = false;
+                if (isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited)) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
                     if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
                         existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
