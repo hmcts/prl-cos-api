@@ -195,7 +195,7 @@ public class DraftAnOrderService {
 
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
-        log.info("generateDraftOrderCollection------>");
+        log.info("generateDraftOrderCollection------->");
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
