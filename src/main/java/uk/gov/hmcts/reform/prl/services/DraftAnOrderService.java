@@ -751,8 +751,7 @@ public class DraftAnOrderService {
             authorization,
             caseData,
             caseDataMap,
-            selectedOrder.getManageOrderHearingDetails(),
-            selectedOrder.getIsOrderCreatedBySolicitor()
+            selectedOrder.getManageOrderHearingDetails()
         );
 
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
@@ -778,8 +777,7 @@ public class DraftAnOrderService {
     }
 
     public void populateOrderHearingDetails(String authorization, CaseData caseData, Map<String, Object> caseDataMap,
-                                            List<Element<HearingData>> manageOrderHearingDetail,
-                                            YesOrNo orderDraftedBySolicitor) {
+                                            List<Element<HearingData>> manageOrderHearingDetail) {
         log.info("populateOrderHearingDetails------->");
         String caseReferenceNumber = String.valueOf(caseData.getId());
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
@@ -1716,8 +1714,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
-                                                     List<Element<HearingData>> ordersHearingDetails,
-                                                     boolean isSolicitorOrdersHearings) throws Exception {
+                                                     List<Element<HearingData>> ordersHearingDetails) throws Exception {
         log.info("generateOrderDocument------->");
         log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -2125,9 +2122,7 @@ public class DraftAnOrderService {
         return generateOrderDocument(
             authorisation,
             callbackRequest,
-            existingOrderHearingDetails,
-            isSolicitorOrdersHearings
-        );
+            existingOrderHearingDetails);
     }
 
     private String getOrderName(DraftOrder selectedOrder) {
