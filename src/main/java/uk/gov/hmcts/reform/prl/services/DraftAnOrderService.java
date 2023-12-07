@@ -750,8 +750,11 @@ public class DraftAnOrderService {
             IS_HEARING_PAGE_NEEDED,
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
-        //caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
-
+        caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
+        if (caseData.getManageOrders() != null) {
+            caseDataMap.put("whatToDoWithOrderCourtAdmin", caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin());
+            caseDataMap.put("whatToDoWithOrderSolicitor", caseData.getManageOrders().getWhatToDoWithOrderSolicitor());
+        }
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
             ? caseData.getManageOrders().toBuilder().hearingsType(selectedOrder.getHearingsType()).build()
