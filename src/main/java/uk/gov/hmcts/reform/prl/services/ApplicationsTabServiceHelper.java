@@ -39,7 +39,6 @@ public class ApplicationsTabServiceHelper {
     private final ObjectMapper objectMapper;
 
     public List<Element<OtherPersonInTheCaseRevised>> getOtherPeopleInTheCaseRevisedTable(CaseData caseData) {
-        log.info("-->getOtherPeopleInTheCaseRevisedTable()--->start");
         Optional<List<Element<PartyDetails>>> otherPeopleCheck = ofNullable(caseData.getOtherPartyInTheCaseRevised());
         List<Element<OtherPersonInTheCaseRevised>> otherPersonsInTheCase = new ArrayList<>();
 
@@ -57,7 +56,6 @@ public class ApplicationsTabServiceHelper {
                 .value(other).build();
             otherPersonsInTheCase.add(wrappedPerson);
         }
-        log.info("-->getOtherPeopleInTheCaseRevisedTable()---> end");
         return otherPersonsInTheCase;
     }
 
@@ -65,7 +63,6 @@ public class ApplicationsTabServiceHelper {
 
 
     public List<Element<ChildDetailsRevised>> getChildRevisedDetails(CaseData caseData) {
-        log.info("-->getChildRevisedDetails()--->start");
         Optional<List<Element<uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised>>> childElementsCheck =
             ofNullable(caseData.getNewChildDetails());
         List<Element<ChildDetailsRevised>> childFinalList = new ArrayList<>();
@@ -84,7 +81,6 @@ public class ApplicationsTabServiceHelper {
             Element<ChildDetailsRevised> res = Element.<ChildDetailsRevised>builder().value(c).build();
             childFinalList.add(res);
         }
-        log.info("getChildRevisedDetails()----> end");
         return childFinalList;
     }
 
