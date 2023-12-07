@@ -67,20 +67,8 @@
     <cve>CVE-2023-5072</cve>
     <cve>CVE-2023-31582</cve>
     <cve>CVE-2023-33202</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-     spring-boot-actuator-3.1.3.jar ]]></notes>
-    <cve>CVE-2023-34055</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-     spring-context-6.0.11.jar ]]></notes>
     <cve>CVE-2023-34053</cve>
-  </suppress>
-  <suppress>
-    <notes><![CDATA[
-     tomcat-embed-core-10.1.12.jar ]]></notes>
+    <cve>CVE-2023-34055</cve>
     <cve>CVE-2023-46589</cve>
   </suppress>
 </suppressions>

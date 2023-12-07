@@ -903,7 +903,6 @@ public class ManageOrderService {
         } else {
             flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         }
-        log.info("*** Court seal 2 {}", caseData.getCourtSeal());
         if (caseData.getCreateSelectOrderOptions() != null
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
@@ -1103,20 +1102,17 @@ public class ManageOrderService {
 
     private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData) throws Exception {
         List<Element<OrderDetails>> orderCollection;
-        log.info("*** Court seal 1 {}", caseData.getCourtSeal());
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
         List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            log.info("*** inside updateCurrentOrderId ");
             updateCurrentOrderId(
                 caseData.getManageOrders().getServeOrderDynamicList(),
                 orderCollection,
                 newOrderDetails
             );
         }
-        log.info("orderDetails ==> " + newOrderDetails);
         orderCollection.addAll(newOrderDetails);
         orderCollection.sort(Comparator.comparing(
             m -> m.getValue().getDateCreated(),
@@ -1386,25 +1382,19 @@ public class ManageOrderService {
     }
 
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
-        log.info("***** inside serveOrder********");
-        log.info("***** orders size******** {}", orders.size());
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-            log.info("order collection id's {}", orders.stream().map(Element::getId).collect(Collectors.toList()));
-            log.info("***** selected order Ids******** {}", selectedOrderIds);
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                        log.info("***** serving c100 order *******");
                         servedC100Order(caseData, orders, order);
                     } else {
                         servedFL401Order(caseData, orders, order);
                     }
                 });
         }
-        log.info("***** orders size before returning******** {}", orders.size());
         return orders;
     }
 
@@ -1604,7 +1594,6 @@ public class ManageOrderService {
     private static void updateServedOrderDetails(Map<String, Object> servedOrderDetails, String cafcassCymruEmail, List<Element<OrderDetails>> orders,
                                                  Element<OrderDetails> order, List<Element<PostalInformation>> postalInformation,
                                                  List<Element<EmailInformation>> emailInformation) {
-        log.info("***** inside updateServedOrderDetails********");
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
         String cafcassEmail = null;
@@ -1676,7 +1665,6 @@ public class ManageOrderService {
     }
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
-        log.info("***** inside updateOtherOrderDetails******** {}", otherDetails);
         return OtherOrderDetails.builder()
             .createdBy(otherDetails.getCreatedBy())
             .orderCreatedDate(otherDetails.getOrderCreatedDate())
@@ -1730,14 +1718,12 @@ public class ManageOrderService {
             populateChildrenListForDocmosis(caseData);
 
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-                log.info("*** Manage orders 12 {} :", caseData.getManageOrders().getOrdersHearingDetails());
                 caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeNames(caseData);
                 caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
             }
-            log.info("*** Manage orders: {}", caseData.getManageOrders());
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
         } catch (Exception ex) {
@@ -1788,7 +1774,6 @@ public class ManageOrderService {
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             populateChildrenListForDocmosis(caseData);
             if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
-                log.info("*** Manage orders 12 {} :", caseData.getManageOrders().getOrdersHearingDetails());
                 caseData = filterEmptyHearingDetails(caseData);
                 if (!caseData.getManageOrders().getOrdersHearingDetails().isEmpty()) {
                     caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
@@ -1797,10 +1782,7 @@ public class ManageOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectOrderOption)) {
                 caseData = populateJudgeNames(caseData);
                 caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
-                log.info("StandardDirectionOrder before generating document " + caseData.getStandardDirectionOrder());
             }
-            log.info("*** Manage orders: {}", caseData.getManageOrders());
-            log.info("*** Case Data Json : {}", objectMapper.writeValueAsString(caseData));
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -1841,11 +1823,9 @@ public class ManageOrderService {
             String sdoNamedJudgeFullName = getJudgeFullName(
                 caseData.getStandardDirectionOrder().getSdoAllocateOrReserveJudgeName()
             );
-            log.info("sdoNamedJudgeFullName " + sdoNamedJudgeFullName);
             String sdoAllocateDecisionJudgeFullName = getJudgeFullName(
                 caseData.getStandardDirectionOrder().getSdoNextStepJudgeName()
             );
-            log.info("sdoAllocateDecisionJudgeFullName " + sdoAllocateDecisionJudgeFullName);
             caseData = caseData.toBuilder()
                 .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder()
                                             .sdoNamedJudgeFullName(sdoNamedJudgeFullName)
@@ -1864,7 +1844,6 @@ public class ManageOrderService {
                 .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder().sdoNewPartnerPartiesCafcassText(
                     partyDetailsForCafcass).build())
                 .build();
-            log.info("partyDetailsForCafcass " + partyDetailsForCafcass);
         }
         if (isNotEmpty(caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcassCymru()) && CollectionUtils.isNotEmpty(
             caseData.getStandardDirectionOrder().getSdoNewPartnerPartiesCafcassCymru().getValue())) {
@@ -1874,7 +1853,6 @@ public class ManageOrderService {
                 .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder().sdoNewPartnerPartiesCafcassCymruText(
                     partyDetailsForCafcassCymru).build())
                 .build();
-            log.info("partyDetailsForCafcassCymru " + partyDetailsForCafcassCymru);
         }
         return caseData;
     }
@@ -1907,9 +1885,6 @@ public class ManageOrderService {
     }
 
     public CaseData getN117FormData(CaseData caseData) {
-        log.info("*** casedata manage orders : {}", caseData.getManageOrders());
-        log.info("**** Court name : {}", caseData.getCourtName());
-        log.info("*** Undertaking expiry date time {}", caseData.getManageOrders().getUnderTakingExpiryDateTime());
         ManageOrders orderData = caseData.getManageOrders().toBuilder()
             .manageOrdersCaseNo(String.valueOf(caseData.getId()))
             .recitalsOrPreamble(caseData.getManageOrders().getRecitalsOrPreamble())
@@ -2058,7 +2033,6 @@ public class ManageOrderService {
     private Element<OrderDetails> getOrderDetailsElement(String authorisation, String flagSelectedOrderId,
                                                          String flagSelectedOrder, Map<String, String> fieldMap,
                                                          CaseData caseData) throws Exception {
-        log.info("**********Inside getOrderdetailsElement**********SKS");
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
 
@@ -2074,11 +2048,8 @@ public class ManageOrderService {
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseData = filterEmptyHearingDetails(caseData);
         }
-        log.info("*** Court seal {}", caseData.getCourtSeal());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("FinalDocument::OrdersHearingDetails -> {}", caseData.getManageOrders().getOrdersHearingDetails());
         if (documentLanguage.isGenEng()) {
-            log.info("*** Generating Final order in English ***");
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
             GeneratedDocumentInfo generatedDocumentInfo = dgsService.generateDocument(
@@ -2090,12 +2061,9 @@ public class ManageOrderService {
                 .toBuilder()
                 .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
                 .build();
-            log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
         }
         if (documentLanguage.isGenWelsh()) {
-            log.info("*** Generating Final order in Welsh ***");
             String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
-            log.info("Generating document for {}, {}", FINAL_TEMPLATE_WELSH, welshTemplate);
             if (welshTemplate != null && welshTemplate.contains("-WEL-")) {
                 GeneratedDocumentInfo generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
                     authorisation,
@@ -2108,9 +2076,7 @@ public class ManageOrderService {
                     fieldMap
                 )).build();
             }
-            log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
         }
-        log.info("inside getOrderDetailsElement ==> " + caseData.getManageOrders().getCurrentOrderCreatedDateTime());
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
@@ -2239,7 +2205,6 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
-            log.info("*****court name --- {}", caseData.getCourtName());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
             if (caseData.getCreateSelectOrderOptions() != null
                 && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
@@ -2267,9 +2232,6 @@ public class ManageOrderService {
 
     public Map<String, Object> serveOrderMidEvent(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("/judge-or-admin-edit-approve/serve-order/mid-event OrdersHearingDetails start {}",
-                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
@@ -2289,7 +2251,6 @@ public class ManageOrderService {
 
     //Needs reverting, changed for testing purposes. case reference number is wrong
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
-        log.info("Retrieving hearings for caseId: {}", caseData.getId());
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
             String.valueOf(caseData.getId())
@@ -2298,7 +2259,6 @@ public class ManageOrderService {
         List<CaseHearing> completedHearings = caseHearings.stream()
             .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
             .toList();
-        log.info("completed hearings: {}", completedHearings);
 
         //get hearings dropdown
         List<DynamicListElement> hearingDropdowns = completedHearings.stream()
@@ -2309,7 +2269,6 @@ public class ManageOrderService {
                 Optional<List<HearingDaySchedule>> hearingDaySchedules = Optional.ofNullable(caseHearing.getHearingDaySchedule());
                 return hearingDaySchedules.map(daySchedules -> daySchedules.stream().map(hearingDaySchedule -> {
                     if (null != hearingDaySchedule && null != hearingDaySchedule.getHearingStartDateTime()) {
-                        log.info("completed hearings: {}", caseHearing);
                         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss");
                         String hearingDate = hearingDaySchedule.getHearingStartDateTime().format(dateTimeFormatter);
                         return concat(concat(hearingType, " - "), hearingDate);
@@ -2388,7 +2347,6 @@ public class ManageOrderService {
                     JudicialUsersApiRequest.builder()
                         .personalCode(personalCodes).build());
                 if (CollectionUtils.isNotEmpty(judicialUsersApiResponses)) {
-                    log.info("populateJudgeName for SDO ==>" + judicialUsersApiResponses.get(0));
                     judgeFullName = judicialUsersApiResponses.get(0).getFullName();
                 }
             } catch (Exception e) {
@@ -2401,7 +2359,6 @@ public class ManageOrderService {
     public Map<String, Object> handlePreviewOrder(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("manage orders from request : {}", caseData.getManageOrders());
 
         if (Event.MANAGE_ORDERS.getId().equals(callbackRequest.getEventId()) && ManageOrdersOptionsEnum.uploadAnOrder.equals(
             caseData.getManageOrdersOptions())) {
@@ -2525,11 +2482,8 @@ public class ManageOrderService {
                                            CaseData caseData,
                                            Map<String, Object> caseDataUpdated) {
         String caseReferenceNumber = String.valueOf(caseData.getId());
-        log.info("Inside updateExistingHearingData for {}", caseReferenceNumber);
-        log.info("existingOrderHearingDetails : {}", caseData.getManageOrders().getOrdersHearingDetails());
         Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-            log.info("Existing hearing details are not empty");
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
 
@@ -2553,8 +2507,6 @@ public class ManageOrderService {
     public void saveAdditionalOrderDocuments(String authorization,
                                              CaseData caseData,
                                              Map<String, Object> caseDataUpdated) {
-        log.info("Serve order additional documents {}", caseData.getManageOrders().getServeOrderAdditionalDocuments());
-        log.info("Served orders {}", caseData.getManageOrders().getServeOrderDynamicList());
         if (null != caseData.getManageOrders()
             && isNotEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
             UserDetails userDetails = userService.getUserDetails(authorization);
@@ -2603,10 +2555,7 @@ public class ManageOrderService {
                                                                             List<Element<HearingData>> existingOrderHearingDetails,
                                                                             CaseData caseData) {
         String caseReferenceNumber = String.valueOf(caseData.getId());
-        log.info("Inside getHearingDataFromExistingHearingData for {}", caseReferenceNumber);
-        log.info("existingOrderHearingDetails : {}", caseData.getManageOrders().getOrdersHearingDetails());
         if (CollectionUtils.isNotEmpty(existingOrderHearingDetails)) {
-            log.info("Existing hearing details are not empty");
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
                 hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
@@ -2645,12 +2594,9 @@ public class ManageOrderService {
     private void populateHearingData(String authorisation,
                                      CaseData caseData,
                                      Map<String, Object> caseDataUpdated) {
-        log.info("Inside populateHearingData for {}", caseData.getCreateSelectOrderOptions());
         //Set only in case order needs hearing details
         if (isHearingPageNeeded(caseData.getCreateSelectOrderOptions(), caseData.getManageOrders().getC21OrderOptions())) {
-            log.info("order needs hearing data, fetch & populate");
             HearingData hearingData = getHearingData(authorisation, caseData);
-            log.info("Hearing data {}", hearingData);
             caseDataUpdated.put(ORDER_HEARING_DETAILS, ElementUtils.wrapElements(hearingData));
             //add hearing screen field show params
             ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
@@ -2658,7 +2604,6 @@ public class ManageOrderService {
 
         //For DIO
         if (CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
-            log.info("Direction on issue order, populate hearings data");
             HearingData hearingData = getHearingData(authorisation, caseData);
             //add hearing screen field show params
             ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
