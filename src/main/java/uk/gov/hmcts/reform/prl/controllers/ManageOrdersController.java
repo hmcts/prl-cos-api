@@ -539,18 +539,23 @@ public class ManageOrdersController {
     }
 
     @PostMapping(path = "/edit-and-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestHeader("Authorization")
+    public ResponseEntity<SubmittedCallbackResponse> handleEditAndApproveSubmitted(@RequestHeader("Authorization")
                                                                      @Parameter(hidden = true) String authorisation,
-                                                                     @RequestBody CallbackRequest callbackRequest) {
-        CaseDetails caseDetails = callbackRequest.getCaseDetails();
-        if (!(JudgeApprovalDecisionsSolicitorEnum.ASK_LEGAL_REP_TO_MAKE_CHANGES.toString()
-            .equals(caseDetails.getData().get("whatToDoWithOrderSolicitor")))
-            || JudgeApprovalDecisionsSolicitorEnum.ASK_LEGAL_REP_TO_MAKE_CHANGES.toString()
-            .equals(caseDetails.getData().get("whatToDoWithOrderCourtAdmin"))) {
-            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
-                                         .confirmationHeader(CONFIRMATION_HEADER)
-                                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+                                                                   @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                                                   @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            log.info("Solicitor created order options {}",caseDetails.getData().get("whatToDoWithOrderSolicitor"));
+            log.info("Court admin created order options {}",caseDetails.getData().get("whatToDoWithOrderCourtAdmin"));
+            if (!(JudgeApprovalDecisionsSolicitorEnum.ASK_LEGAL_REP_TO_MAKE_CHANGES
+                .equals(caseDetails.getData().get("whatToDoWithOrderSolicitor")))) {
+                return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                             .confirmationHeader(CONFIRMATION_HEADER)
+                                             .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            }
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
         }
-        return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
     }
 }
