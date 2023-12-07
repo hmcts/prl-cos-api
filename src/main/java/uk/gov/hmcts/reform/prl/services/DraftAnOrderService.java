@@ -802,10 +802,10 @@ public class DraftAnOrderService {
             manageOrderHearingDetail = updatedManageOrderHearingDetail;
         }
         log.info("AAAAAAAAAAAAAAAAAAAAA");
-        if (Yes.equals(orderDraftedBySolicitor)) {
-            log.info("ORderrrr drafted by SOLICITORRRR");
-            caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
-        }
+        //if (Yes.equals(orderDraftedBySolicitor)) {
+        //    log.info("ORderrrr drafted by SOLICITORRRR");
+        //    caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
+        //}
         caseDataMap.put(ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
         //add hearing screen field show params
         ManageOrdersUtils.addHearingScreenFieldShowParams(null, caseDataMap, caseData);
