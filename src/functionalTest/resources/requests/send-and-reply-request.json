@@ -16,7 +16,7 @@
         "value": {
           "senderEmail": "sender@email.com",
           "recipientEmail": "recipient@email.com",
-          "messageContent": "testContent",
+          "messageContent": "testContet",
           "messageUrgency": "testUrgnecy",
           "messageSubject": "testSubject",
           "sendReplyJudgeName": {
@@ -24,7 +24,8 @@
           },
           "status": "OPEN",
           "recipientEmailAddresses": "fprl_caseworker_solicitor@mailinator.com",
-          "updatedTime": "2022-12-12T12:12:12.000000"
+          "updatedTime": "2022-12-12T12:12:12.000000",
+          "latestMessage": "latestMessage"
         }
       }],
       "messageObject": {
