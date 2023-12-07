@@ -801,11 +801,7 @@ public class DraftAnOrderService {
             }
             manageOrderHearingDetail = updatedManageOrderHearingDetail;
         }
-        log.info("AAAAAAAAAAAAAAAAAAAAA");
-        //if (Yes.equals(orderDraftedBySolicitor)) {
-        //    log.info("ORderrrr drafted by SOLICITORRRR");
-        //    caseDataMap.put(SOLICITOR_ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
-        //}
+
         caseDataMap.put(ORDERS_HEARING_DETAILS, manageOrderHearingDetail);
         //add hearing screen field show params
         ManageOrdersUtils.addHearingScreenFieldShowParams(null, caseDataMap, caseData);
@@ -901,8 +897,8 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
-        log.info("getUpdatedDraftOrderrrrrrrr --> {} ", caseData.getManageOrders().getOrdersHearingDetails());
-        log.info("getUpdatedDraftOrderrrrrrrr  IF SOLI--> {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
+        log.info("OrdersHearingDetails --> {} ", caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("SolicitorOrdersHearingDetails --> {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
@@ -1710,10 +1706,8 @@ public class DraftAnOrderService {
         }
 
         if (isOrderEdited) {
-            log.info("isOrderEditeddddddTTT  ---YES--- ");
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
         } else {
-            log.info("isOrderEditeddddddTTTT  --NO---- ");
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, orderType));
         }
 
@@ -1753,11 +1747,7 @@ public class DraftAnOrderService {
             //PRL-4260 - hearing screen changes
             caseDataUpdated.put(ORDER_HEARING_DETAILS, hearingData);
             caseData.getManageOrders().setOrdersHearingDetails(hearingData);
-            //PRL-4335 - solicitor draft order edit by judge/admin, persist into solicitor orders hearings
-            //if (isSolicitorOrdersHearings) {
-            //    caseDataUpdated.put(SOLICITOR_ORDERS_HEARING_DETAILS, hearingData);
-            //    caseData.getManageOrders().setSolicitorOrdersHearingDetails(hearingData);
-            //}
+
             caseData.getManageOrders().setOrdersHearingDetails(
                 hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, authorisation));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
@@ -1792,8 +1782,6 @@ public class DraftAnOrderService {
                                                                                 authorisation
                                                                             ));
         }
-        log.info("AAA--> {}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
-        log.info("BBB--> {}",caseData.getManageOrders().getOrdersHearingDetails());
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
         ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
@@ -2110,10 +2098,7 @@ public class DraftAnOrderService {
             if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
                 if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
-                    //if (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())) {
-                    //    existingOrderHearingDetails = caseData.getManageOrders().getSolicitorOrdersHearingDetails();
-                    //    isSolicitorOrdersHearings = true;
-                    //}
+
                     //PRL-4260 - hearing screen validations
                     errorList = getHearingScreenValidations(
                         existingOrderHearingDetails,
