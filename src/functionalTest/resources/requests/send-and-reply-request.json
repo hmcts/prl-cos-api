@@ -35,7 +35,8 @@
         "messageUrgency": null,
         "sendReplyJudgeName": {
           "idamId": "testIdamId"
-        }
+        },
+        "applicantCaseName": "testCase"
       }
     },
     "case_type_id": "string",
@@ -60,7 +61,9 @@
     "locked_by_user_id": 0,
     "security_classification": "PRIVATE",
     "security_level": 0,
-    "state": "string"
+    "state": "string",
+    "applicantCaseName": "testCase"
   },
-  "event_id": "string"
+  "event_id": "string",
+  "applicantCaseName": "testCase"
 }
