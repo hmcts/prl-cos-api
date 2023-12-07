@@ -782,4 +782,11 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private ReviewDocuments reviewDocuments;
 
     private List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+
+    /**
+     * PRL-4260,4335,4301 - manage orders hearing screen fields show params.
+     */
+    @JsonUnwrapped
+    public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
+
 }
