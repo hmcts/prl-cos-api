@@ -42,6 +42,36 @@ public class SendAndReplyControllerIntegrationTest {
     }
 
     @Test
+    public void whenInvalidRequestFormatmidEvent_Return400() throws IOException {
+
+        HttpPost httpPost = new HttpPost(serviceUrl + "/mid-event");
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(
+            httpResponse.getStatusLine().getStatusCode(),
+            HttpStatus.SC_BAD_REQUEST);
+    }
+
+    @Test
+    public void whenInvalidRequestFormatAboutToSubmit_Return400() throws IOException {
+
+        HttpPost httpPost = new HttpPost(serviceUrl + "/about-to-submit");
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(
+            httpResponse.getStatusLine().getStatusCode(),
+            HttpStatus.SC_BAD_REQUEST);
+    }
+
+    @Test
+    public void whenInvalidRequestFormatSubmitted_Return400() throws IOException {
+
+        HttpPost httpPost = new HttpPost(serviceUrl + "/submitted");
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(
+            httpResponse.getStatusLine().getStatusCode(),
+            HttpStatus.SC_BAD_REQUEST);
+    }
+
+    @Test
     public void whenSendAndReplyMidEventValidRequest_Return200() throws Exception {
 
         HttpPost httpPost = new HttpPost(serviceUrl + "/send-and-reply-to-messages/mid-event");
