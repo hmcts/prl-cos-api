@@ -6,9 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
 @Data
@@ -17,6 +19,7 @@ import java.util.Locale;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
+@Slf4j
 public class OtherDetails {
 
     public String createdBy;
@@ -25,16 +28,50 @@ public class OtherDetails {
     public String orderCreatedDate;
 
     public void setOrderCreatedDate(String orderCreatedDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
-        LocalDate dateTime = LocalDate.parse(orderCreatedDate, formatter);
-        this.orderCreatedDate = dateTime.toString();
+        if (orderCreatedDate != null) {
+            LocalDate dateTime = null;
+            try {
+                dateTime = LocalDate.parse(orderCreatedDate, DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK));
+            } catch (DateTimeParseException dateTimeParseException) {
+                try {
+                    dateTime = LocalDate.parse(orderCreatedDate, DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK));
+                } catch (DateTimeParseException e) {
+                    try {
+                        dateTime = LocalDate.parse(
+                            orderCreatedDate,
+                            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+                        );
+                    } catch (DateTimeParseException exception) {
+                        log.info("orderCreatedDate received {}", orderCreatedDate);
+                    }
+                }
+            }
+            this.orderCreatedDate = dateTime.toString();
+        }
     }
 
     public String orderMadeDate;
 
     public void setOrderMadeDate(String orderMadeDate) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH);
-        LocalDate dateTime = LocalDate.parse(orderMadeDate, formatter);
-        this.orderMadeDate = dateTime.toString();
+        if (orderMadeDate != null) {
+            LocalDate dateTime = null;
+            try {
+                dateTime = LocalDate.parse(orderMadeDate, DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK));
+            } catch (DateTimeParseException e) {
+                try {
+                    dateTime = LocalDate.parse(orderMadeDate, DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK));
+                } catch (DateTimeParseException ex) {
+                    try {
+                        dateTime = LocalDate.parse(
+                            orderMadeDate,
+                            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+                        );
+                    } catch (DateTimeParseException exception) {
+                        log.info("orderMadeDate received {}", orderMadeDate);
+                    }
+                }
+            }
+            this.orderMadeDate = dateTime.toString();
+        }
     }
 }
