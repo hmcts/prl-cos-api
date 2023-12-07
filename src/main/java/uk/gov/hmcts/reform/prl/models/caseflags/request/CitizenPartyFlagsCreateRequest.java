@@ -13,7 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class CitizenPartyFlagsRequest {
+public class CitizenPartyFlagsCreateRequest {
     private final String caseTypeOfApplication;
     private String partyIdamId;
     private FlagsRequest partyExternalFlags;

@@ -416,23 +416,10 @@ public class CaseUtils {
             : getFL401PartyDetailsMeta(partyId, caseData);
     }
 
-    private static int findPartyIndex(String partyId, List<Element<PartyDetails>> parties) {
-        return IntStream.range(0, parties.size())
-            .filter(index -> (ObjectUtils.isNotEmpty(parties.get(index))
-                && ObjectUtils.isNotEmpty(parties.get(index).getValue())
-                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser())
-                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser().getIdamId())
-                && parties.get(index).getValue().getUser().getIdamId().toString().equals(
-                partyId)))
-            .findFirst()
-            .orElse(-1);
-    }
-
     private static Optional<PartyDetailsMeta> getC100PartyDetailsMeta(String partyId, CaseData caseData) {
         Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
         if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
             int partyIndex = findPartyIndex(partyId, caseData.getApplicants());
-
             if (partyIndex > -1) {
                 partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
                                                            .builder()
@@ -486,5 +473,17 @@ public class CaseUtils {
         }
 
         return partyDetailsMeta;
+    }
+
+    private static int findPartyIndex(String partyId, List<Element<PartyDetails>> parties) {
+        return IntStream.range(0, parties.size())
+            .filter(index -> (ObjectUtils.isNotEmpty(parties.get(index))
+                && ObjectUtils.isNotEmpty(parties.get(index).getValue())
+                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser())
+                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser().getIdamId())
+                && parties.get(index).getValue().getUser().getIdamId().toString().equals(
+                partyId)))
+            .findFirst()
+            .orElse(-1);
     }
 }

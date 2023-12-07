@@ -137,6 +137,20 @@ public class CaseController {
         }
     }
 
+    @GetMapping(path = "/citizen/{role}/retrieve-cases/{userId}", produces = APPLICATION_JSON)
+    public List<CaseData> retrieveCases(
+        @PathVariable("role") String role,
+        @PathVariable("userId") String userId,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
+    ) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     @GetMapping(path = "/cases", produces = APPLICATION_JSON)
     public List<CitizenCaseData> retrieveCitizenCases(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -170,9 +184,9 @@ public class CaseController {
     public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                      @RequestHeader(value = "caseId", required = true)
-                                     String caseId,
+                                         String caseId,
                                      @RequestHeader(value = "accessCode", required = true)
-                                     String accessCode) {
+                                         String accessCode) {
         if (isAuthorized(authorisation, s2sToken)) {
             String cosApis2sToken = authTokenGenerator.generate();
             return caseService.validateAccessCode(authorisation, cosApis2sToken, caseId, accessCode);
