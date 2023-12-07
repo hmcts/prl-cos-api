@@ -1,7 +1,6 @@
 {
   "case_details": {
     "callback_response_status": "string",
-    "applicantCaseName": "John Smith",
     "case_data": {
       "applicantCaseName": "John Smith",
       "caseTypeOfApplication": "C100",
@@ -37,8 +36,7 @@
         "messageUrgency": null,
         "sendReplyJudgeName": {
           "idamId": "testIdamId"
-        },
-        "applicantCaseName": "testCase"
+        }
       }
     },
     "case_type_id": "string",
@@ -53,7 +51,9 @@
   },
   "case_details_before": {
     "callback_response_status": "string",
-    "case_data": {},
+    "case_data": {
+      "applicantCaseName": "John Smith"
+    },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
     "id": 0,
@@ -62,9 +62,7 @@
     "locked_by_user_id": 0,
     "security_classification": "PRIVATE",
     "security_level": 0,
-    "state": "string",
-    "applicantCaseName": "testCase"
+    "state": "string"
   },
-  "event_id": "string",
-  "applicantCaseName": "testCase"
+  "event_id": "string"
 }
