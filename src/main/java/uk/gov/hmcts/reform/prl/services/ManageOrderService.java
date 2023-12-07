@@ -1085,48 +1085,38 @@ public class ManageOrderService {
                 || saveAsDraft) {
                 return setDraftOrderCollection(caseData, loggedInUserType);
             } else {
-                return setFinalOrderCollection(authorisation, caseData, loggedInUserType);
+                return setFinalOrderCollection(authorisation, caseData);
             }
         }
         return new HashMap<>();
     }
 
-    private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData, String loggedInUserType) throws Exception {
-        if (caseData.getManageOrdersOptions().equals(createAnOrder)
-            && ((caseData.getServeOrderData() != null
-            && (YesOrNo.No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
-            && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder())))
-            || (caseData.getManageOrders() != null
-            && !AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())))) {
-            log.info("Second");
-            return setDraftOrderCollection(caseData, loggedInUserType);
-        } else {
-            List<Element<OrderDetails>> orderCollection;
-            orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-            List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
-            if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
-                && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
-                && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-                updateCurrentOrderId(
-                    caseData.getManageOrders().getServeOrderDynamicList(),
-                    orderCollection,
-                    newOrderDetails
-                );
-            }
-            orderCollection.addAll(newOrderDetails);
-            orderCollection.sort(Comparator.comparing(
-                m -> m.getValue().getDateCreated(),
-                Comparator.reverseOrder()
-            ));
-            if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-                orderCollection = serveOrder(caseData, orderCollection);
-            }
-            LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
-            Map<String, Object> orderMap = new HashMap<>();
-            orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
-            orderMap.put(ORDER_COLLECTION, orderCollection);
-            return orderMap;
+    private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData) throws Exception {
+        List<Element<OrderDetails>> orderCollection;
+        orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
+        List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
+        if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
+            && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
+            && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            updateCurrentOrderId(
+                caseData.getManageOrders().getServeOrderDynamicList(),
+                orderCollection,
+                newOrderDetails
+            );
         }
+        orderCollection.addAll(newOrderDetails);
+        orderCollection.sort(Comparator.comparing(
+            m -> m.getValue().getDateCreated(),
+            Comparator.reverseOrder()
+        ));
+        if (Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+            orderCollection = serveOrder(caseData, orderCollection);
+        }
+        LocalDateTime currentOrderCreatedDateTime = newOrderDetails.get(0).getValue().getDateCreated();
+        Map<String, Object> orderMap = new HashMap<>();
+        orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
+        orderMap.put(ORDER_COLLECTION, orderCollection);
+        return orderMap;
     }
 
     public static void updateCurrentOrderId(DynamicMultiSelectList serveOrderDynamicList,
