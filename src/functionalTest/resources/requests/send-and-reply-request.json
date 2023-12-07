@@ -15,6 +15,7 @@
         "id": "559c3c44-a2fc-475d-9822-42747c29469c",
         "value": {
           "senderEmail": "sender@email.com",
+          "recipientEmail": "recipient@email.com",
           "messageContent": "testContent",
           "messageUrgency": "testUrgnecy",
           "messageSubject": "testSubject",
@@ -44,7 +45,8 @@
     "locked_by_user_id": 0,
     "security_classification": "PRIVATE",
     "security_level": 0,
-    "state": "string"
+    "state": "string",
+    "applicantCaseName": "testCase"
   },
   "case_details_before": {
     "callback_response_status": "string",
