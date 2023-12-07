@@ -133,7 +133,6 @@ import static uk.gov.hmcts.reform.prl.enums.sdo.SdoPreamblesEnum.afterSecondGate
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class DraftAnOrderServiceTest {
 
     @InjectMocks
