@@ -158,6 +158,7 @@ public class ManageOrderService {
     public static final String C_47_A = "C47A";
     public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
     public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
+    public static final String PREVIEW_ORDER_DOC = "previewOrderDoc";
     @Autowired
     LocationRefDataService locationRefDataService;
 
@@ -1202,7 +1203,8 @@ public class ManageOrderService {
                                                                            caseData.getManageOrders().getOrdersHearingDetails(),
                                                                            true,
                                                                            caseData.getStandardDirectionOrder(),
-                                                                           caseData.getCreateSelectOrderOptions()))
+                                                                           caseData.getCreateSelectOrderOptions(),
+                                                                           caseData.getManageOrders().getC21OrderOptions()))
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .dateOrderMade(caseData.getDateOrderMade())
@@ -1713,7 +1715,6 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
-            GeneratedDocumentInfo generatedDocumentInfo;
             populateChildrenListForDocmosis(caseData);
 
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
@@ -1744,7 +1745,7 @@ public class ManageOrderService {
                 CaseDetails.builder().caseData(caseData).build(),
                 fieldsMap.get(PrlAppsConstants.TEMPLATE)
             );
-            caseDataUpdated.put("previewOrderDoc", Document.builder()
+            caseDataUpdated.put(PREVIEW_ORDER_DOC, Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
@@ -1790,7 +1791,7 @@ public class ManageOrderService {
                         CaseDetails.builder().caseData(caseData).build(),
                         fieldsMap.get(PrlAppsConstants.TEMPLATE)
                     );
-                caseDataUpdated.put("previewOrderDoc", Document.builder()
+                caseDataUpdated.put(PREVIEW_ORDER_DOC, Document.builder()
                         .documentUrl(generatedDocumentInfo.getUrl())
                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                         .documentHash(generatedDocumentInfo.getHashToken())
@@ -2101,7 +2102,8 @@ public class ManageOrderService {
                                                      caseData.getManageOrders().getOrdersHearingDetails(),
                                                      false,
                                                      caseData.getStandardDirectionOrder(),
-                                                     caseData.getCreateSelectOrderOptions()))
+                                                     caseData.getCreateSelectOrderOptions(),
+                                                     caseData.getManageOrders().getC21OrderOptions()))
                                              .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
@@ -2217,7 +2219,7 @@ public class ManageOrderService {
 
             }
         } else {
-            caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
+            caseDataUpdated.put(PREVIEW_ORDER_DOC, caseData.getUploadOrderDoc());
         }
         return caseDataUpdated;
     }
@@ -2743,12 +2745,13 @@ public class ManageOrderService {
     }
 
     public String getAdditionalRequirementsForHearingReq(List<Element<HearingData>> ordersHearingDetails,
-                                                                boolean isDraftOrder,
-                                                                StandardDirectionOrder standardDirectionOrder,
-                                                                CreateSelectOrderOptionsEnum orderType) {
+                                                         boolean isDraftOrder,
+                                                         StandardDirectionOrder standardDirectionOrder,
+                                                         CreateSelectOrderOptionsEnum orderType,
+                                                         C21OrderOptionsEnum c21OrderOptions) {
         log.info("inside getAdditionalRequirementsForHearingReq");
         List<String> additionalRequirementsForHearingReqList = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
+        if (isHearingPageNeeded(orderType, c21OrderOptions) && CollectionUtils.isNotEmpty(ordersHearingDetails)) {
             getAdditionalRequirementsForHearingReqForOtherOrders(
                 ordersHearingDetails,
                 isDraftOrder,
@@ -2774,9 +2777,9 @@ public class ManageOrderService {
                                                                              List<String> additionalRequirementsForHearingReqList) {
         ordersHearingDetails.stream()
             .map(Element::getValue)
-            .forEach(hearingData -> {
-                populateAdditionalRequirementsForHearingReqList(isDraftOrder, additionalRequirementsForHearingReqList, hearingData);
-            });
+            .forEach(hearingData -> populateAdditionalRequirementsForHearingReqList(isDraftOrder,
+                                                                                    additionalRequirementsForHearingReqList,
+                                                                                    hearingData));
     }
 
     private void populateAdditionalRequirementsForHearingReqList(boolean isDraftOrder,

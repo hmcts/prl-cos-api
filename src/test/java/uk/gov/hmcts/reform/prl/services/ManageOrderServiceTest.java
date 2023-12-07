@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
@@ -3446,7 +3447,8 @@ public class ManageOrderServiceTest {
             ordersHearingDetails,
             true,
             null,
-            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections,
+            C21OrderOptionsEnum.c21other
         );
         assertNotNull(response);
         assertTrue(response.equals("bbbb, cccc"));
@@ -3475,7 +3477,8 @@ public class ManageOrderServiceTest {
             ordersHearingDetails,
             false,
             null,
-            CreateSelectOrderOptionsEnum.blankOrderOrDirections
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections,
+            C21OrderOptionsEnum.c21other
         );
         assertNotNull(response);
         assertTrue(response.equals("cccc"));
@@ -3511,7 +3514,8 @@ public class ManageOrderServiceTest {
             ordersHearingDetails,
             true,
             standardDirectionOrder,
-            CreateSelectOrderOptionsEnum.standardDirectionsOrder
+            CreateSelectOrderOptionsEnum.standardDirectionsOrder,
+            null
         );
         assertNotNull(response);
         assertTrue(response.equals("bbbb, cccc"));
@@ -3546,7 +3550,8 @@ public class ManageOrderServiceTest {
             ordersHearingDetails,
             false,
             standardDirectionOrder,
-            CreateSelectOrderOptionsEnum.standardDirectionsOrder
+            CreateSelectOrderOptionsEnum.standardDirectionsOrder,
+            null
         );
         assertNotNull(response);
         assertTrue(response.equals("cccc"));

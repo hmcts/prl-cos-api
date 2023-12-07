@@ -498,7 +498,8 @@ public class DraftAnOrderService {
                             draftOrder.getManageOrderHearingDetails(),
                             false,
                             standardDirectionOrder,
-                            draftOrder.getOrderType()))
+                            draftOrder.getOrderType(),
+                            draftOrder.getC21OrderOptions()))
                     .build())
             .isTheOrderAboutChildren(draftOrder.getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(draftOrder.getIsTheOrderAboutAllChildren())
@@ -936,7 +937,8 @@ public class DraftAnOrderService {
                                                                            caseData.getManageOrders().getOrdersHearingDetails(),
                                                                            true,
                                                                            caseData.getStandardDirectionOrder(),
-                                                                           draftOrder.getOrderType()))
+                                                                           draftOrder.getOrderType(),
+                                                                           draftOrder.getC21OrderOptions()))
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
