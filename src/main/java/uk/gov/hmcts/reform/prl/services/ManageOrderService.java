@@ -1303,6 +1303,10 @@ public class ManageOrderService {
     }
 
     public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType) {
+        log.info("WHILE UPLOADDDDDDD");
+        log.info("1111--->{}",caseData.getManageOrders().getOrdersHearingDetails());
+        log.info("============MIDDDD=============");
+        log.info("22222--->{}",caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);

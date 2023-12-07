@@ -201,7 +201,7 @@ public class DraftAnOrderService {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
-
+        log.info("DETAILSSSSSS------->{}",orderDetails);
         //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
         orderDetails.getValue().getManageOrderHearingDetails()
             .forEach(hearingDataElement -> hearingDataElement.getValue()
@@ -224,8 +224,10 @@ public class DraftAnOrderService {
     public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
         log.info("getCurrentOrderDetails------>");
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
+            log.info("UPLOADDDDD------>");
             return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType);
         }
+        log.info("DRAFTTTTTTTT------>");
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
