@@ -8,7 +8,8 @@
         "isReplying": "Yes",
         "sendReplyJudgeName": {
           "idamId": "testIdamId"
-        }
+        },
+        "applicantCaseName": "testCase"
       },
       "respondToMessage": "Yes",
       "openMessages": [{
@@ -47,8 +48,7 @@
     "locked_by_user_id": 0,
     "security_classification": "PRIVATE",
     "security_level": 0,
-    "state": "string",
-    "applicantCaseName": "testCase"
+    "state": "string"
   },
   "case_details_before": {
     "callback_response_status": "string",
