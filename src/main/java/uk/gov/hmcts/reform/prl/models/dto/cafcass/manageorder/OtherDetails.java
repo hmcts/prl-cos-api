@@ -46,7 +46,10 @@ public class OtherDetails {
                     }
                 }
             }
-            this.orderCreatedDate = dateTime.toString();
+            this.orderCreatedDate = dateTime.plusDays(7).toString();
+            if (this.orderMadeDate == null) {
+                this.orderMadeDate = "---" + this.orderCreatedDate;
+            }
         }
     }
 
