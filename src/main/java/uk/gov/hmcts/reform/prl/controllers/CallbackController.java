@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -187,8 +186,6 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
-        log.info("Auth token in functional tests in miam :: {}", authorisation);
-        log.info("Service Auth token in functional tests in miam:: {}", s2sToken);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
@@ -469,7 +466,6 @@ public class CallbackController {
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             if (previousState.isPresent() && !stateList.contains(previousState.get())) {
                 caseDataUpdated.put("isWithdrawRequestSent", "Pending");
-                log.info("Case is updated as WithdrawRequestSent");
             } else {
                 if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                     // Refreshing the page in the same event. Hence no external event call needed.
@@ -498,11 +494,8 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("authtoken from functional test: {}", authorisation);
-        log.info("Service authtoken from functional test: {} ", s2sToken);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            log.info("Gatekeeping details for the case id : {}", caseData.getId());
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -603,13 +596,6 @@ public class CallbackController {
                 }
             }
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            try {
-                log.info("callbackRequest.getCaseDetails() json ===>" + objectMapper.writeValueAsString(callbackRequest.getCaseDetails()));
-                log.info("\n\n caseDataUpdated json ===>" + objectMapper.writeValueAsString(caseDataUpdated));
-            } catch (JsonProcessingException e) {
-                log.error("testing");
-            }
-
             // Saving the logged-in Solicitor and Org details for the docs..
             return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(
                 authorisation,
@@ -679,9 +665,7 @@ public class CallbackController {
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
         List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getLegalProfQuarantineDocsList() != null
             ? caseData.getLegalProfQuarantineDocsList() : new ArrayList<>();
-        log.info("*** Category *** {}", caseData.getDocumentCategoryChecklist());
         if (furtherEvidencesList != null) {
-            log.info("*** further evidences *** {}", furtherEvidencesList);
             quarantineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
                     .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
                                .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
@@ -691,7 +675,6 @@ public class CallbackController {
                                .build())
                     .id(element.getId()).build())
                                       .toList());
-            log.info("*** test evidences *** {}", quarantineDocs);
         }
         if (correspondenceList != null) {
             quarantineDocs.addAll(correspondenceList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
@@ -729,29 +712,13 @@ public class CallbackController {
     }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
-
-        log.info("Fetching the user and Org Details ");
         try {
             UserDetails userDetails = userService.getUserDetails(authorisation);
             Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
-            log.info("userDetails.getFullName():: " + userDetails.getFullName());
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
             if (userOrganisation.isPresent()) {
-                log.info("Got the Org Details");
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
                 if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
-                    log.info("Share a case enabled");
-                    log.info("userOrganisation.get().getOrganisationIdentifier() is:: " + userOrganisation.get().getOrganisationIdentifier());
-                    log.info("userOrganisation.get().getName() is:: " + userOrganisation.get().getName());
-                    try {
-                        log.info("caseData.getApplicantOrganisationPolicy() is:: " + caseData.getApplicantOrganisationPolicy());
-                        log.info("caseData.getApplicantOrganisationPolicy().getOrgPolicyReference() is:: "
-                                     + caseData.getApplicantOrganisationPolicy().getOrgPolicyReference());
-                        log.info("caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole() is:: "
-                                     + caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole());
-                    } catch (Exception e) {
-                        log.error("error from caseData.getApplicantOrganisationPolicy()");
-                    }
                     OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
                         .organisation(Organisation.builder()
                                           .organisationID(userOrganisation.get().getOrganisationIdentifier())
@@ -769,11 +736,9 @@ public class CallbackController {
                             .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
                             .build();
                     }
-                    log.info("applicantOrganisationPolicy is:: " + applicantOrganisationPolicy);
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
             }
-            log.info("SUCCESSFULLY fetched user and Org Details ");
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }

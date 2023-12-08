@@ -97,12 +97,10 @@ public class ServiceOfApplicationController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-        log.info("handleAboutToSubmit: Callback for about-to-submit");
+        @RequestBody CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
         if (ObjectUtils.isEmpty(updatedCaseData.get(PROCEED_TO_SERVING))) {
             updatedCaseData.put(PROCEED_TO_SERVING, Yes);
-            log.info("SOA proceed to serving {}", updatedCaseData.get(PROCEED_TO_SERVING));
         }
         return AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -126,12 +124,10 @@ public class ServiceOfApplicationController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getProceedToServing() != null && YesOrNo.No.equals(
                 caseData.getServiceOfApplication().getProceedToServing())) {
-                log.info("Confidential details are present, case needs to be reviewed and served later");
                 return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                     CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
                     CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
             }
-            log.info("Confidential details are NOT present in case {}", caseData.getId());
             if (caseData.getFinalServedApplicationDetailsList() != null) {
                 finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
             } else {
@@ -155,7 +151,6 @@ public class ServiceOfApplicationController {
                 "internal-update-all-tabs",
                 caseDataMap
             );
-            log.info("Cervice of application is completed for case {}", caseData.getId());
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
                 CONFIRMATION_BODY_PREFIX).build());
