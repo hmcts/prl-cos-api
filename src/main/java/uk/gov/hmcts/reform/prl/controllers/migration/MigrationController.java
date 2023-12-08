@@ -48,12 +48,16 @@ public class MigrationController extends AbstractCallbackController {
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
 
+        log.info("about start started");
+
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        log.info("about start ended");
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();
+
 
     }
 
@@ -62,9 +66,12 @@ public class MigrationController extends AbstractCallbackController {
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
 
+        log.info("about submit started");
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         caseDataMap.putAll(caseFlagMigrationService.migrateCaseForCaseFlags(caseDataMap,caseData));
+        log.info("about submit ended");
+
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
