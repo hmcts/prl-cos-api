@@ -369,7 +369,6 @@ public class HearingDataService {
                                        CaseData caseData, HearingData hearingData) {
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
-
         if (judgeDetailsSelected.isPresent() && judgeDetailsSelected.get().getPersonalCode() != null
             && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
             Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));

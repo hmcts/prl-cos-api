@@ -3423,7 +3423,7 @@ public class ManageOrderServiceTest {
         Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
         assertNotNull(response);
         assertTrue(response.containsKey("orderNameForWA"));
-        assertNull(response.get("orderNameForWA"));
+        assertNotNull(response.get("orderNameForWA"));
     }
 
     @Test

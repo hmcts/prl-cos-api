@@ -335,7 +335,7 @@ public class DraftAnOrderService {
     }
 
     private List<Element<OrderDetails>> getFinalOrderCollection(String auth, CaseData caseData, DraftOrder draftOrder, String eventId) {
-      
+
         List<Element<OrderDetails>> orderCollection;
         if (caseData.getOrderCollection() != null) {
             orderCollection = caseData.getOrderCollection();
@@ -543,7 +543,6 @@ public class DraftAnOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
-        log.info("*** Order name {}", caseDataMap.get("orderName"));
         return caseDataMap;
     }
 
@@ -833,6 +832,7 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId) {
+
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
