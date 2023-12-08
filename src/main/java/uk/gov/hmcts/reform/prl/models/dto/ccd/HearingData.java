@@ -196,6 +196,6 @@ public class HearingData {
 
     private final YesOrNo isCafcassCymru;
 
-    @JsonProperty("additionalDetailsFor3And4Options")
-    private String additionalDetailsFor3And4Options;
+    @JsonProperty("additionalDetailsForHearingDateOptions")
+    private String additionalDetailsForHearingDateOptions;
 }
