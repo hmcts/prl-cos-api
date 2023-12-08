@@ -118,7 +118,6 @@ public class EditAndApproveDraftOrderController {
                 authorisation,
                 callbackRequest
             );
-            log.info("/judge-or-admin-edit-approve/mid-event caseDataUpdated {}", caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {
@@ -139,16 +138,11 @@ public class EditAndApproveDraftOrderController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            log.info("*** Casedataupdated for data loss *** {}", caseDataUpdated);
-            log.info("Serve order multiselect {}", caseDataUpdated.get("serveOrderDynamicList"));
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
-            log.info("/judge-or-admin-edit-approve/about-to-submit OrdersHearingDetails start {}",
-                     null != caseData && CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                         ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(draftAnOrderService.adminEditAndServeAboutToSubmit(
@@ -224,7 +218,6 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws JsonProcessingException {
-        log.info("/judge-or-admin-populate-draft-order-common-fields  {}", objectMapper.writeValueAsString(callbackRequest));
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
