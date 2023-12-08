@@ -215,8 +215,6 @@ public class HearingDataService {
                 authorisation,
                 caseLinkedRequest
             ));
-            log.info("Linked cases {}", caseLinkedDataList);
-
             if (caseLinkedDataList.isPresent() && isNotEmpty(caseLinkedDataList.get())) {
                 caseLinkedDataList.get().forEach(caseLinkedData -> {
                     Hearings hearingsList = hearingService.getHearings(
@@ -371,11 +369,10 @@ public class HearingDataService {
                                        CaseData caseData, HearingData hearingData) {
         hearingRequestDataMapper.mapHearingData(hearingData, hearingDataPrePopulatedDynamicLists, caseData);
         Optional<JudicialUser> judgeDetailsSelected = ofNullable(hearingData.getHearingJudgeNameAndEmail());
-        log.info("judgeDetailsSelected ---> {}", judgeDetailsSelected);
+
         if (judgeDetailsSelected.isPresent() && judgeDetailsSelected.get().getPersonalCode() != null
             && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
             Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
-            log.info("JudgeAPI response {}", judgeApiResponse);
             if (!judgeApiResponse.get().isEmpty()) {
                 hearingData.setHearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname());
                 hearingData.setHearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId());
@@ -453,7 +450,6 @@ public class HearingDataService {
     List<DynamicListElement> getLinkedCasesDynamicList(String authorisation, String caseId) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         try {
-            log.info("getLinkedCasesDynamicList case method ", caseId);
             CaseLinkedRequest caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith()
                 .caseReference(caseId).build();
             Optional<List<CaseLinkedData>> caseLinkedDataList = ofNullable(hearingService.getCaseLinkedData(authorisation, caseLinkedRequest));
@@ -514,8 +510,6 @@ public class HearingDataService {
 
     public List<Element<HearingData>> setHearingDataForSelectedHearing(String authorisation, CaseData caseData) {
         boolean[] hearingFetchedOnce = {false};
-        log.info("manage order printed specially - {}", caseData.getManageOrders());
-
         List<Element<HearingData>> hearingDetails = new ArrayList<>();
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
@@ -555,18 +549,14 @@ public class HearingDataService {
     }
 
     public HearingData getHearingDataForSelectedHearingForSdo(HearingData hearingData, Hearings hearings, CaseData caseData) {
-        log.info("inside getHearingDataForSelectedHearingForSdo");
         if (HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab.equals(hearingData.getHearingDateConfirmOptionEnum())
             && null != hearingData.getConfirmedHearingDates().getValue()) {
-            log.info("ConfirmedHearingDates " + hearingData.getConfirmedHearingDates());
             Optional<CaseHearing> caseHearing = getHearingFromId(hearingData.getConfirmedHearingDates().getValue().getCode(), hearings);
             if (caseHearing.isPresent()) {
-                log.info("caseHearing " + caseHearing.get());
                 List<HearingDaySchedule> hearingDaySchedules = new ArrayList<>(caseHearing.get().getHearingDaySchedule());
                 hearingDaySchedules.sort(Comparator.comparing(HearingDaySchedule::getHearingStartDateTime));
                 List<Element<HearingDataFromTabToDocmosis>> elementList = populateHearingScheduleForDocmosis(hearingDaySchedules, caseData,
                                                                                                              caseHearing.get().getHearingTypeValue());
-                log.info("populateHearingScheduleForDocmosis " + elementList);
                 hearingData = hearingData.toBuilder()
                     .hearingdataFromHearingTab(elementList)
                     .build();
