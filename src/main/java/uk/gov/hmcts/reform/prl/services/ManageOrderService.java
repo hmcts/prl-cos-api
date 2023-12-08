@@ -1107,13 +1107,11 @@ public class ManageOrderService {
 
     private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData, String currentUserFullName) throws Exception {
         List<Element<OrderDetails>> orderCollection;
-        log.info("*** Court seal 1 {}", caseData.getCourtSeal());
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
         List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData, currentUserFullName);
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
-            log.info("*** inside updateCurrentOrderId ");
             updateCurrentOrderId(
                 caseData.getManageOrders().getServeOrderDynamicList(),
                 orderCollection,
@@ -1155,7 +1153,6 @@ public class ManageOrderService {
     }
 
     public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,String currentUserFullName) {
-        log.info("setDraftOrderCollection - manage order service");
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = null;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
@@ -1410,10 +1407,8 @@ public class ManageOrderService {
     }
 
     private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
-
         ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
-
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
 
