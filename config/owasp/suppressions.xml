@@ -70,6 +70,7 @@
     <cve>CVE-2022-41881</cve>
     <cve>CVE-2022-41915</cve>
     <cve>CVE-2023-31582</cve>
+    <cve>CVE-2023-6378</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
