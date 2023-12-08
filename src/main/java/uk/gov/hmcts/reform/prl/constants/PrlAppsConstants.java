@@ -854,8 +854,6 @@ public class PrlAppsConstants {
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
-
-
     public static final String WA_PERFORMING_USER = "performingUser";
     public static final String WA_PERFORMING_ACTION = "performingAction";
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";

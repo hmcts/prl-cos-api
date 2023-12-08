@@ -1177,8 +1177,3 @@ public class HearingDataServiceTest {
         assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData));
     }
 }
-
-
-
-
-

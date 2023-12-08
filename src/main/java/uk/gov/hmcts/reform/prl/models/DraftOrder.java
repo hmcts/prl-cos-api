@@ -152,7 +152,6 @@ public class DraftOrder {
 
     @JsonIgnore
     public String getLabelForOrdersDynamicList() {
-        log.info("orderTypeId {},orderTypeId {}", this.orderType, this.orderTypeId);
         return String.format(
             "%s - %s",
             this.orderTypeId,
