@@ -134,9 +134,6 @@ public class TestingSupportService {
                 adminCreateApplication,
                 dummyCaseDetails
             );
-            if (!adminCreateApplication) {
-                solicitorSubmittedCaseCreation(callbackRequest, authorisation);
-            }
             return caseDataUpdated;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -307,6 +304,7 @@ public class TestingSupportService {
 
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
+            solicitorSubmittedCaseCreation(callbackRequest, authorisation);
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
