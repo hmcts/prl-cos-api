@@ -904,7 +904,6 @@ public class ManageOrderService {
         } else {
             flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         }
-        log.info("*** Court seal 2 {}", caseData.getCourtSeal());
         if (caseData.getCreateSelectOrderOptions() != null
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
             Map<String, String> fieldMap = getOrderTemplateAndFile(caseData.getCreateSelectOrderOptions());
@@ -1437,8 +1436,6 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
-        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
-            .getServingRespondentsOptionsDA();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
 
         if (null != serveRespondentName
@@ -1854,8 +1851,6 @@ public class ManageOrderService {
                 caseData = populateJudgeNames(caseData);
                 caseData = populatePartyDetailsOfNewParterForDocmosis(caseData);
             }
-            log.info("*** Manage orders: {}", caseData.getManageOrders());
-            log.info("*** Case Data Json : {}", objectMapper.writeValueAsString(caseData));
             DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             if (documentLanguage.isGenEng()) {
                 caseDataUpdated.put("isEngDocGen", Yes.toString());
@@ -2121,9 +2116,7 @@ public class ManageOrderService {
         if (caseData.getManageOrders().getOrdersHearingDetails() != null) {
             caseData = filterEmptyHearingDetails(caseData);
         }
-        log.info("*** Court seal {}", caseData.getCourtSeal());
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("FinalDocument::OrdersHearingDetails -> {}", caseData.getManageOrders().getOrdersHearingDetails());
         if (documentLanguage.isGenEng()) {
             String template = fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_NAME);
 
@@ -2136,7 +2129,6 @@ public class ManageOrderService {
                 .toBuilder()
                 .orderDocument(getGeneratedDocument(generatedDocumentInfo, false, fieldMap))
                 .build();
-            log.info("FinalDocumentEnglish -> {}", orderDetails.getOrderDocument());
         }
         if (documentLanguage.isGenWelsh()) {
             String welshTemplate = fieldMap.get(FINAL_TEMPLATE_WELSH);
@@ -2152,7 +2144,6 @@ public class ManageOrderService {
                     fieldMap
                 )).build();
             }
-            log.info("FinalDocumentWelsh -> {}", orderDetails.getOrderDocumentWelsh());
         }
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
@@ -2291,7 +2282,6 @@ public class ManageOrderService {
             if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                 caseData = populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
             }
-            log.info("*****court name --- {}", caseData.getCourtName());
             caseDataUpdated.putAll(getCaseData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
             if (caseData.getCreateSelectOrderOptions() != null
                 && CreateSelectOrderOptionsEnum.specialGuardianShip.equals(caseData.getCreateSelectOrderOptions())) {
@@ -2319,7 +2309,6 @@ public class ManageOrderService {
 
     public Map<String, Object> serveOrderMidEvent(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<DynamicMultiselectListElement> selectedServedOrderList = caseData.getManageOrders().getServeOrderDynamicList().getValue();
         if (selectedServedOrderList != null && selectedServedOrderList.size() == 1
