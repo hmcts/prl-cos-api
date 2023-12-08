@@ -181,20 +181,16 @@ public class PartyLevelCaseFlagsService {
     public Map<String, Object> generateFl401PartyCaseFlags(CaseData caseData, PartyRole.Representing representing) {
         Map<String, Object> data = new HashMap<>();
         PartyDetails partyDetails = representing.getDaTarget().apply(caseData);
-        log.info("party details  {}",partyDetails);
 
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
-        log.info("party roles {}",partyRoles);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
             if (null != partyDetails) {
                 String caseDataExternalField = String.format(representing.getCaseDataExternalField(), i + 1);
                 String caseDataInternalField = String.format(representing.getCaseDataInternalField(), i + 1);
                 String groupId = String.format(representing.getGroupId(), i + 1);
-                log.info("reprasenting {}",representing);
                 switch (representing) {
                     case DAAPPLICANT, DARESPONDENT: {
-                        log.info("party details dynamic list  {}",partyDetails.getLabelForDynamicList());
                         if (!StringUtils.isEmpty(partyDetails.getLabelForDynamicList())) {
                             data.put(
                                 caseDataExternalField,
@@ -213,7 +209,6 @@ public class PartyLevelCaseFlagsService {
                                 )
                             );
                         }
-                        log.info("data after settin da applicant and da repondent {}",data);
                         break;
                     }
                     case DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
@@ -243,7 +238,6 @@ public class PartyLevelCaseFlagsService {
                 }
             }
         }
-        log.info("data after setting everything {}",data);
         return data;
     }
 

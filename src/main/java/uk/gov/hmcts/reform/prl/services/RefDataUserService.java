@@ -158,7 +158,7 @@ public class RefDataUserService {
 
 
     public CaseFlag retrieveCaseFlags(String authorization, String flagType) {
-        log.info("retrieve case flags for flag type{}", flagType);
+        log.info("retrieve case flags for flag type{} ", flagType);
         try {
             caseFlag = commonDataRefApi.retrieveCaseFlagsByServiceId(
                 authorization,

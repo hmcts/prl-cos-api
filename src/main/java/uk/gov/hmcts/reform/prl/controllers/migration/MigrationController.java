@@ -54,6 +54,7 @@ public class MigrationController extends AbstractCallbackController {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         log.info("about start ended");
+        log.info("case data map after setting the fields {}",caseDataMap);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(caseDataMap)
             .build();

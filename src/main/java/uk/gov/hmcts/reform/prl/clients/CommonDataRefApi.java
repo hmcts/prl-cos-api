@@ -31,9 +31,8 @@ public interface CommonDataRefApi {
     CaseFlag    retrieveCaseFlagsByServiceId(
         @RequestHeader("Authorization") String authorisation,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
-        @PathVariable(value = "serviceId") String serviceId,
-        @RequestParam(value = "flag-type", required = false) String flagType,
-        @RequestParam(value = "welsh-required", required = false) String welshRequired
+        @PathVariable(value = "service-id") String serviceId,
+        @RequestParam(value = "flag-type", required = false) String flagType
     );
 }
 

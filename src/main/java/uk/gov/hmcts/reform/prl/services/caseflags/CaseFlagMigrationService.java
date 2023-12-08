@@ -34,7 +34,9 @@ public class CaseFlagMigrationService {
 
     public Map<String, Object> migrateCaseForCaseFlags(Map<String, Object> caseDataMap, CaseData caseData) {
 
+        log.info("making refdata call");
         CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(systemUserService.getSysUserToken(), FLAG_TYPE);
+        log.info("refdata call completed");
 
 
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
