@@ -127,13 +127,17 @@ public class TestingSupportService {
                 adminCreateApplication = true;
             }
             CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-            return updateCaseDetails(
+            Map<String, Object> caseDataUpdated = updateCaseDetails(
                 authorisation,
                 initialCaseDetails,
                 initialCaseData,
                 adminCreateApplication,
                 dummyCaseDetails
             );
+            if (!adminCreateApplication) {
+                solicitorSubmittedCaseCreation(callbackRequest, authorisation);
+            }
+            return caseDataUpdated;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
