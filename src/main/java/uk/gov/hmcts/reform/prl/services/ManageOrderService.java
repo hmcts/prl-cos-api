@@ -2793,8 +2793,8 @@ public class ManageOrderService {
             .equals(hearingData.getHearingDateConfirmOptionEnum());
         if (((isDraftOrder && (isOption3Selected || isOption4Selected))
             || (!isDraftOrder && isOption4Selected))
-            && ObjectUtils.isNotEmpty(hearingData.getAdditionalDetailsFor3And4Options())) {
-            additionalRequirementsForHearingReqList.add(hearingData.getAdditionalDetailsFor3And4Options());
+            && ObjectUtils.isNotEmpty(hearingData.getAdditionalDetailsForHearingDateOptions())) {
+            additionalRequirementsForHearingReqList.add(hearingData.getAdditionalDetailsForHearingDateOptions());
         }
     }
 

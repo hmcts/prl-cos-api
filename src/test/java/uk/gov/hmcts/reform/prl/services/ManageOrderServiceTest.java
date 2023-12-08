@@ -3429,15 +3429,15 @@ public class ManageOrderServiceTest {
         List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
-            .additionalDetailsFor3And4Options("aaaa")
+            .additionalDetailsForHearingDateOptions("aaaa")
             .build();
         HearingData hearingData1 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
-            .additionalDetailsFor3And4Options("bbbb")
+            .additionalDetailsForHearingDateOptions("bbbb")
             .build();
         HearingData hearingData2 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
-            .additionalDetailsFor3And4Options("cccc")
+            .additionalDetailsForHearingDateOptions("cccc")
             .build();
         ordersHearingDetails.add(element(hearingData));
         ordersHearingDetails.add(element(hearingData1));
@@ -3451,7 +3451,7 @@ public class ManageOrderServiceTest {
             C21OrderOptionsEnum.c21other
         );
         assertNotNull(response);
-        assertTrue(response.equals("bbbb, cccc"));
+        assertEquals("bbbb, cccc", response);
     }
 
     @Test
@@ -3459,15 +3459,15 @@ public class ManageOrderServiceTest {
         List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
-            .additionalDetailsFor3And4Options("aaaa")
+            .additionalDetailsForHearingDateOptions("aaaa")
             .build();
         HearingData hearingData1 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
-            .additionalDetailsFor3And4Options("bbbb")
+            .additionalDetailsForHearingDateOptions("bbbb")
             .build();
         HearingData hearingData2 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
-            .additionalDetailsFor3And4Options("cccc")
+            .additionalDetailsForHearingDateOptions("cccc")
             .build();
         ordersHearingDetails.add(element(hearingData));
         ordersHearingDetails.add(element(hearingData1));
@@ -3481,7 +3481,7 @@ public class ManageOrderServiceTest {
             C21OrderOptionsEnum.c21other
         );
         assertNotNull(response);
-        assertTrue(response.equals("cccc"));
+        assertEquals("cccc", response);
     }
 
     @Test
@@ -3489,15 +3489,15 @@ public class ManageOrderServiceTest {
         List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
-            .additionalDetailsFor3And4Options("aaaa")
+            .additionalDetailsForHearingDateOptions("aaaa")
             .build();
         HearingData hearingData1 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
-            .additionalDetailsFor3And4Options("bbbb")
+            .additionalDetailsForHearingDateOptions("bbbb")
             .build();
         HearingData hearingData2 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
-            .additionalDetailsFor3And4Options("cccc")
+            .additionalDetailsForHearingDateOptions("cccc")
             .build();
 
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
@@ -3518,7 +3518,7 @@ public class ManageOrderServiceTest {
             null
         );
         assertNotNull(response);
-        assertTrue(response.equals("bbbb, cccc"));
+        assertEquals("bbbb, cccc", response);
     }
 
     @Test
@@ -3526,15 +3526,15 @@ public class ManageOrderServiceTest {
         List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
         HearingData hearingData = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
-            .additionalDetailsFor3And4Options("aaaa")
+            .additionalDetailsForHearingDateOptions("aaaa")
             .build();
         HearingData hearingData1 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
-            .additionalDetailsFor3And4Options("bbbb")
+            .additionalDetailsForHearingDateOptions("bbbb")
             .build();
         HearingData hearingData2 = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
-            .additionalDetailsFor3And4Options("cccc")
+            .additionalDetailsForHearingDateOptions("cccc")
             .build();
 
         StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
@@ -3554,6 +3554,6 @@ public class ManageOrderServiceTest {
             null
         );
         assertNotNull(response);
-        assertTrue(response.equals("cccc"));
+        assertEquals("cccc", response);
     }
 }
