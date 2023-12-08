@@ -32,11 +32,16 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class DraftAnOrderController {
-    private final ObjectMapper objectMapper;
-    private final DraftAnOrderService draftAnOrderService;
-    private final AuthorisationService authorisationService;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private DraftAnOrderService draftAnOrderService;
+
+    @Autowired
+    private AuthorisationService authorisationService;
 
     @PostMapping(path = "/reset-fields", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to reset fields")
@@ -83,8 +88,8 @@ public class DraftAnOrderController {
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
-                    callbackRequest.getCaseDetails().getData(),
-                    CaseData.class
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
             );
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
             if (isNotEmpty(errorList)) {

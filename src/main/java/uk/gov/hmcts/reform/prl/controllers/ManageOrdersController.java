@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -53,7 +54,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDERS_NEED_TO_BE_SERVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -70,18 +70,37 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor
 public class ManageOrdersController {
-    private final ObjectMapper objectMapper;
-    private final ManageOrderService manageOrderService;
-    private final ManageOrderEmailService manageOrderEmailService;
-    private final AmendOrderService amendOrderService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private ManageOrderService manageOrderService;
+
+    @Autowired
+    private ManageOrderEmailService manageOrderEmailService;
+
+    @Autowired
+    private AmendOrderService amendOrderService;
+
+    @Autowired
+    RefDataUserService refDataUserService;
+
+    @Autowired
+    private HearingDataService hearingDataService;
+
+    @Autowired
+    private AuthorisationService authorisationService;
+
+    @Autowired
+    CoreCaseDataService coreCaseDataService;
+
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
-    private final RefDataUserService refDataUserService;
-    private final HearingDataService hearingDataService;
-    private final AuthorisationService authorisationService;
-    private final CoreCaseDataService coreCaseDataService;
+
     private final HearingService hearingService;
+
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -105,6 +124,34 @@ public class ManageOrdersController {
                 callbackRequest,
                 authorisation
             )).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    //todo: API not required
+    @PostMapping(path = "/fetch-child-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to fetch case data and custom order fields")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Child details are fetched"),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public CallbackResponse fetchOrderDetails(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                caseData = manageOrderService.populateCustomOrderFields(caseData, caseData.getCreateSelectOrderOptions());
+            }
+            return CallbackResponse.builder()
+                .data(caseData)
+                .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -145,23 +192,6 @@ public class ManageOrdersController {
 
     }
 
-    private void populateOrderTypeAndCourtName(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
-        C21OrderOptionsEnum c21OrderType = (null != caseData.getManageOrders())
-            ? caseData.getManageOrders().getC21OrderOptions() : null;
-        caseDataUpdated.putAll(manageOrderService.getUpdatedCaseData(caseData));
-
-        caseDataUpdated.put("c21OrderOptions", c21OrderType);
-        caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
-            .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-        caseDataUpdated.put("loggedInUserType", manageOrderService.getLoggedInUserType(authorisation));
-
-        if (null != caseData.getCreateSelectOrderOptions()
-            && CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(caseData.getCreateSelectOrderOptions())) {
-            caseDataUpdated.put("typeOfC21Order", null != caseData.getManageOrders().getC21OrderOptions()
-                ? caseData.getManageOrders().getC21OrderOptions().getDisplayedValue() : null);
-
-        }
-    }
 
     @PostMapping(path = "/populate-header", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
@@ -207,6 +237,11 @@ public class ManageOrdersController {
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
+            // The following can be removed or utilised based on requirement
+            /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
+            manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
+            manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
+            manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
@@ -282,28 +317,6 @@ public class ManageOrdersController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-
-    }
-
-    private void populateFieldsForWa(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
-        String performingUser = null;
-        String performingAction = null;
-        String judgeLaReviewRequired = null;
-        if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
-            || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-            performingUser = manageOrderService.getLoggedInUserType(authorisation);
-            performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
-            if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {
-                judgeLaReviewRequired = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck
-                    .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
-            }
-        }
-        log.info("***performingUser***{}", performingUser);
-        log.info("***performingAction***{}", performingAction);
-        log.info("***judgeLaReviewRequired***{}", judgeLaReviewRequired);
-        caseDataUpdated.put("performingUser", performingUser);
-        caseDataUpdated.put("performingAction", performingAction);
-        caseDataUpdated.put("judgeLaReviewRequired", judgeLaReviewRequired);
     }
 
     private static void setIsWithdrawnRequestSent(CaseData caseData, Map<String, Object> caseDataUpdated) {

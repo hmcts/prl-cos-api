@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.fl401listonnotice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -42,17 +41,29 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Fl401ListOnNoticeService {
 
-    private final ObjectMapper objectMapper;
-    private final HearingDataService hearingDataService;
-    private final RefDataUserService refDataUserService;
-    private final AllocatedJudgeService allocatedJudgeService;
-    private final DocumentGenService documentGenService;
-    private final HearingService hearingService;
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    HearingDataService hearingDataService;
+
+    @Autowired
+    RefDataUserService refDataUserService;
+
+    @Autowired
+    AllocatedJudgeService allocatedJudgeService;
+
+    @Autowired
+    private DocumentGenService documentGenService;
+
+    @Autowired
+    private HearingService hearingService;
+
+    @Autowired
     @Qualifier("caseSummaryTab")
-    private final CaseSummaryTabService caseSummaryTabService;
+    private CaseSummaryTabService caseSummaryTabService;
 
     public Map<String, Object> prePopulateHearingPageDataForFl401ListOnNotice(String authorisation, CaseData caseData) {
 
