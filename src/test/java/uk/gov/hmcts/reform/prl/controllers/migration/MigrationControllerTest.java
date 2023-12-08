@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagMigrationService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.HashMap;
@@ -29,6 +30,9 @@ public class MigrationControllerTest {
 
     @InjectMocks
     MigrationController migrationController;
+
+    @Mock
+    CaseFlagMigrationService caseFlagMigrationService;
 
 
     Map<String, Object> caseDataMap;
