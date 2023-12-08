@@ -83,7 +83,7 @@ public class TestingSupportController {
     }
 
     @PostMapping(path = "/solicitor-submitted-case-creation-solicitor", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Initiate the case creation for testing support")
+    @Operation(description = "Update the case details for solicitor submission")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.",
             content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
