@@ -164,8 +164,7 @@ public class RefDataUserService {
                 authorization,
                 authTokenGenerator.generate(),
                 SERVICE_ID,
-                flagType,
-                StringUtils.EMPTY
+                flagType
             );
             log.info("response for case flag {}",caseFlag);
 
