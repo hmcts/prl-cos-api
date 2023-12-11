@@ -43,35 +43,15 @@ public class MigrationController extends AbstractCallbackController {
     CaseFlagMigrationService caseFlagMigrationService;
 
 
-    @PostMapping("/about-to-start")
-    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
-        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
-
-        log.info("about start started");
-
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
-        log.info("about start ended");
-        log.info("case data map after setting the fields {}",caseDataMap);
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(caseDataMap)
-            .build();
-
-
-    }
-
     @PostMapping("/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestHeader("Authorization")
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
 
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        log.info("about submit started with case map {} :",caseDataMap);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        caseDataMap.putAll(caseFlagMigrationService.migrateCaseForCaseFlags(caseDataMap,caseData));
-        log.info("about submit ending with case map {} :",caseDataMap);
+        caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        caseDataMap.putAll(caseFlagMigrationService.migrateCaseForCaseFlags(caseDataMap));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
