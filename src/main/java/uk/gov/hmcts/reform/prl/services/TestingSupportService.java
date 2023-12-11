@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.CourtNavFl401;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentDto;
 import uk.gov.hmcts.reform.prl.models.dto.payment.ServiceRequestUpdateDto;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.courtnav.CourtNavCaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -84,11 +86,8 @@ public class TestingSupportService {
     @Autowired
     private final AllTabServiceImpl allTabsService;
     private final CaseService citizenCaseService;
-
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
-
     private final FL401ApplicationMapper fl401ApplicationMapper;
-
     private final LaunchDarklyClient launchDarklyClient;
     private final AuthorisationService authorisationService;
     private final CourtNavCaseService courtNavCaseService;
@@ -96,6 +95,9 @@ public class TestingSupportService {
     private final CoreCaseDataApi coreCaseDataApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final CaseInitiationService caseInitiationService;
+    private final TaskListService taskListService;
 
     private static final String VALID_C100_DRAFT_INPUT_JSON = "C100_Dummy_Draft_CaseDetails.json";
 
@@ -125,13 +127,14 @@ public class TestingSupportService {
                 adminCreateApplication = true;
             }
             CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-            return updateCaseDetails(
+            Map<String, Object> caseDataUpdated = updateCaseDetails(
                 authorisation,
                 initialCaseDetails,
                 initialCaseData,
                 adminCreateApplication,
                 dummyCaseDetails
             );
+            return caseDataUpdated;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -216,6 +219,7 @@ public class TestingSupportService {
             caseDataUpdated.put(CASE_DATA_ID, initialCaseDetails.getId());
             if (adminCreateApplication) {
                 caseDataUpdated.putAll(updateDateInCase(initialCaseData.getCaseTypeOfApplication(), updatedCaseData));
+                caseDataUpdated.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(updatedCaseData));
                 try {
                     caseDataUpdated.putAll(dgsService.generateDocumentsForTestingSupport(
                         authorisation,
@@ -300,6 +304,7 @@ public class TestingSupportService {
 
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
+            solicitorSubmittedCaseCreation(callbackRequest, authorisation);
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -325,6 +330,19 @@ public class TestingSupportService {
             caseDataUpdated.putAll(allTabsFields);
 
             return caseDataUpdated;
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    public void solicitorSubmittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
+        if (isAuthorized(authorisation)) {
+            try {
+                caseInitiationService.handleCaseInitiation(authorisation, callbackRequest);
+            } catch (Exception e) {
+                log.error("Access grant failed", e);
+            }
+            taskListService.updateTaskList(callbackRequest, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

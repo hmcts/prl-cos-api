@@ -45,6 +45,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentP
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -104,6 +106,13 @@ public class TestingSupportServiceTest {
     private AuthTokenGenerator authTokenGenerator;
     @Mock
     private CaseService caseService;
+    @Mock
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    @Mock
+    private CaseInitiationService caseInitiationService;
+
+    @Mock
+    private TaskListService taskListService;
 
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
