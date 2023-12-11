@@ -26,6 +26,8 @@ def secrets = [
     secret("southampton-court-email-address", "SOUTHAMPTON_COURT_EMAIL_ADDRESS"),
     secret("idam-solicitor-username", "IDAM_SOLICITOR_USERNAME"),
     secret("idam-solicitor-password", "IDAM_SOLICITOR_PASSWORD"),
+    secret("judge-testuser-one", "IDAM_JUDGE_USERNAME"),
+    secret("judge-testpassword", "IDAM_JUDGE_PASSWORD"),
     secret("send-grid-api-key", "SEND_GRID_API_KEY"),
     secret("rpa-notify-to-email", "RPA_NOTIFY_TO_EMAIL"),
     secret("rpa-notify-from-email", "RPA_NOTIFY_FROM_EMAIL"),
