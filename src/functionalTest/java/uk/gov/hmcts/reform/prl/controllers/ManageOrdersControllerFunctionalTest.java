@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -106,13 +107,24 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_whenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+        assert request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/edit-and-approve/submitted")
-            .then().assertThat().statusCode(200);
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .response()
+            .body()
+            .print()
+            .toString()
+            .equals(
+                "{\"confirmation_header\":\"# Order approved\",\"confirmation_body\":\"### What happens next \\n\\n We will send this order to admin.\\n\\n\\n If you have included further directions, admin will also receive them.\\n\"}"
+            );
+
+
     }
 }
