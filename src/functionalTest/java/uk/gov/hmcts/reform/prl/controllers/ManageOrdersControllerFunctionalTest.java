@@ -101,4 +101,18 @@ public class ManageOrdersControllerFunctionalTest {
             .post("/case-order-email-notification")
             .then().assertThat().statusCode(500);
     }
+
+    @Test
+    public void givenRequestBody_whenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/edit-and-approve/submitted")
+            .then().assertThat().statusCode(200);
+    }
 }

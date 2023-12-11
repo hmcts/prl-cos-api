@@ -605,7 +605,6 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/SendAndReplyService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java',
   '**/uk/gov/hmcts/reform/prl/controllers/DraftAnOrderController.java',
-  '**/uk/gov/hmcts/reform/prl/controllers/ManageOrdersController.java',
   '**/uk/gov/hmcts/reform/prl/services/HearingDataService.java'
 ]
 
