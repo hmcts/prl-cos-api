@@ -35,6 +35,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -467,7 +468,7 @@ public class CaseUtils {
 
     private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
         Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
-        if (isNotEmpty(caseData.getApplicantsFL401())
+        if (isNotEmpty(Collections.singleton(caseData.getApplicantsFL401()))
             && caseData.getApplicantsFL401().getPartyId().toString().equals(partyId)) {
             partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
                                                        .builder()
@@ -478,7 +479,7 @@ public class CaseUtils {
             return partyDetailsMeta;
         }
 
-        if (isNotEmpty(caseData.getRespondentsFL401())
+        if (isNotEmpty(Collections.singleton(caseData.getRespondentsFL401()))
             && caseData.getRespondentsFL401().getPartyId().toString().equals(partyId)) {
             partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
                                                        .builder()
@@ -491,7 +492,7 @@ public class CaseUtils {
 
         return partyDetailsMeta;
     }
-  
+
     public static List<String> getPartyNameList(List<Element<PartyDetails>> parties) {
         List<String> applicantList = new ArrayList<>();
         if (isNotEmpty(parties)) {

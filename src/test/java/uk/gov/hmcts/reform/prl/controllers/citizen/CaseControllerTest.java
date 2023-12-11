@@ -55,6 +55,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseControllerTest {
@@ -553,15 +554,15 @@ public class CaseControllerTest {
         String caseId = "1234567891234567L";
         String eventId = "c100RequestSupport";
         String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-        FlagDetailRequest flagDetailRequest = FlagDetailRequest.builder()
+        Element<FlagDetailRequest> flagDetailRequest = element(FlagDetailRequest.builder()
             .name("Support filling in forms")
             .name_cy("Cymorth i lenwi ffurflenni")
             .hearingRelevant(YesOrNo.No)
             .flagCode("RA0018")
             .status("Requested")
             .availableExternally(YesOrNo.Yes)
-            .build();
-        List<FlagDetailRequest> flagDetailsRequest = Collections.singletonList(flagDetailRequest);
+            .build());
+        List<Element<FlagDetailRequest>> flagDetailsRequest = Collections.singletonList(flagDetailRequest);
         CitizenPartyFlagsRequest partyRequestFlags = CitizenPartyFlagsRequest.builder()
             .caseTypeOfApplication("C100")
             .partyIdamId(partyId)
@@ -586,15 +587,15 @@ public class CaseControllerTest {
         String caseId = "1234567891234567L";
         String eventId = "fl401RequestSupport";
         String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
-        FlagDetailRequest flagDetailRequest = FlagDetailRequest.builder()
+        Element<FlagDetailRequest> flagDetailRequest = element(FlagDetailRequest.builder()
             .name("Support filling in forms")
             .name_cy("Cymorth i lenwi ffurflenni")
             .hearingRelevant(YesOrNo.No)
             .flagCode("RA0018")
             .status("Requested")
             .availableExternally(YesOrNo.Yes)
-            .build();
-        List<FlagDetailRequest> flagDetailsRequest = Collections.singletonList(flagDetailRequest);
+            .build());
+        List<Element<FlagDetailRequest>> flagDetailsRequest = Collections.singletonList(flagDetailRequest);
         CitizenPartyFlagsRequest partyRequestFlags = CitizenPartyFlagsRequest.builder()
             .caseTypeOfApplication("FL401")
             .partyIdamId(partyId)
