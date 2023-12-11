@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -159,7 +160,11 @@ public class AllTabServiceImpl implements AllTabsService {
             combinedFieldsMap = findCaseDataMap(caseData);
             combinedFieldsMap.putAll(dataMap);
         }
-
+        try {
+            log.info("/nocRequestSubmitted callbackRequest start json ===>" + objectMapper.writeValueAsString(combinedFieldsMap));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         coreCaseDataServiceCcdClient.submitUpdate(
             authorisation,
             allTabsUpdateEventRequestData,
