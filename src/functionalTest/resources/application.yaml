@@ -179,6 +179,9 @@ idam:
       context-path: /oauth2/token
   user:
     genericpassword: ${PRL_GENERIC_PASSWORD:xxxxxx}
+  judge:
+    username: ${IDAM_JUDGE_USERNAME:xxxxxxxxx}
+    password: ${IDAM_JUDGE_PASSWORD:xxxxxxxxx}
   citizen:
     username: ${IDAM_CITIZEN_USERNAME:xxxxxxxxx}
     password: ${IDAM_CITIZEN_PASSWORD:xxxxxxxxx}

@@ -18,6 +18,8 @@ java:
         - southampton-court-email-address
         - idam-solicitor-username
         - idam-solicitor-password
+        - judge-testuser-one
+        - judge-testpassword
         - courtnav-functional-test-user
         - courtnav-functional-test-pwd
         - filtered-court-ids
