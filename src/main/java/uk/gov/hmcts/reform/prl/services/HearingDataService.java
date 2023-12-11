@@ -473,9 +473,11 @@ public class HearingDataService {
             && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
             Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
             if (!judgeApiResponse.isEmpty() && !judgeApiResponse.get().isEmpty()) {
-                hearingData.setHearingJudgeLastName(judgeApiResponse.get().stream().findFirst().get().getSurname());
-                hearingData.setHearingJudgeEmailAddress(judgeApiResponse.get().stream().findFirst().get().getEmailId());
-                hearingData.setHearingJudgePersonalCode(judgeApiResponse.get().stream().findFirst().get().getPersonalCode());
+                judgeApiResponse.get().stream().findFirst().ifPresent(response -> {
+                    hearingData.setHearingJudgeLastName(response.getSurname());
+                    hearingData.setHearingJudgeEmailAddress(response.getEmailId());
+                    hearingData.setHearingJudgePersonalCode(response.getPersonalCode());
+                });
             }
         }
         return hearingData;
