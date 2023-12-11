@@ -547,13 +547,13 @@ public class ManageOrdersController {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             log.info("Solicitor created order options {}",caseDetails.getData().get("whatToDoWithOrderSolicitor"));
             log.info("Court admin created order options {}",caseDetails.getData().get("whatToDoWithOrderCourtAdmin"));
-            if (!(JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges
-                .equals(caseDetails.getData().get("whatToDoWithOrderSolicitor")))) {
-                return ResponseEntity.ok(SubmittedCallbackResponse.builder()
-                                             .confirmationHeader(CONFIRMATION_HEADER)
-                                             .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            if (JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString()
+                .equals(caseDetails.getData().get("whatToDoWithOrderSolicitor"))) {
+                return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
             }
-            return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationHeader(CONFIRMATION_HEADER)
+                                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
