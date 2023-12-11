@@ -127,13 +127,14 @@ public class TestingSupportService {
                 adminCreateApplication = true;
             }
             CaseDetails dummyCaseDetails = objectMapper.readValue(requestBody, CaseDetails.class);
-            return updateCaseDetails(
+            Map<String, Object> caseDataUpdated = updateCaseDetails(
                 authorisation,
                 initialCaseDetails,
                 initialCaseData,
                 adminCreateApplication,
                 dummyCaseDetails
             );
+            return caseDataUpdated;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -303,6 +304,7 @@ public class TestingSupportService {
 
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
+            solicitorSubmittedCaseCreation(callbackRequest, authorisation);
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

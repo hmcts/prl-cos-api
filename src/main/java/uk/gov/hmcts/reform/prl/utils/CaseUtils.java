@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -33,6 +34,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -42,7 +44,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static org.apache.logging.log4j.util.Strings.concat;
+import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -485,5 +489,76 @@ public class CaseUtils {
                 partyId)))
             .findFirst()
             .orElse(-1);
+    }
+  
+    public static List<String> getPartyNameList(List<Element<PartyDetails>> parties) {
+        List<String> applicantList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            applicantList = parties.stream()
+                .map(Element::getValue)
+                .map(PartyDetails::getLabelForDynamicList)
+                .toList();
+        }
+        return applicantList;
+    }
+
+    public static List<String> getApplicantSolicitorNameList(List<Element<PartyDetails>> parties) {
+        List<String> applicantSolicitorList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            applicantSolicitorList = parties.stream()
+                .map(Element::getValue)
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .toList();
+        }
+        return applicantSolicitorList;
+    }
+
+    public static List<String> getRespondentSolicitorNameList(List<Element<PartyDetails>> parties) {
+        List<String> respondentSolicitorList = new ArrayList<>();
+        if (isNotEmpty(parties)) {
+            respondentSolicitorList = parties.stream()
+                .map(Element::getValue)
+                .filter(partyDetails -> YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()))
+                .map(element -> element.getRepresentativeFirstName() + " " + element.getRepresentativeLastName())
+                .toList();
+        }
+        return respondentSolicitorList;
+    }
+
+    public static String getFL401SolicitorName(PartyDetails party) {
+        if (null != party
+            && isNotBlank(party.getRepresentativeFirstName())
+            && isNotBlank(party.getRepresentativeLastName())) {
+            return concat(party.getRepresentativeFirstName(),
+                          concat(" ", party.getRepresentativeLastName()));
+        }
+        return null;
+    }
+
+    public static String getApplicant(CaseData caseData) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return String.format(PrlAppsConstants.FORMAT, caseData.getApplicantsFL401().getFirstName(),
+                                 caseData.getApplicantsFL401().getLastName()
+            );
+        }
+        return null;
+    }
+
+    public static String getApplicantReference(CaseData caseData) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return caseData.getApplicantsFL401().getSolicitorReference();
+        }
+        return null;
+    }
+
+    public static String getRespondent(CaseData caseData) {
+        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return String.format(
+                PrlAppsConstants.FORMAT,
+                caseData.getRespondentsFL401().getFirstName(),
+                caseData.getRespondentsFL401().getLastName()
+            );
+        }
+        return null;
     }
 }
