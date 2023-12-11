@@ -532,29 +532,34 @@ public class CaseService {
         return ResponseEntity.status(HttpStatus.OK).body("party flags updated");
     }
 
-    private List<Element<FlagDetail>> convertFlags(List<FlagDetailRequest> details) {
+    private List<Element<FlagDetail>> convertFlags(List<Element<FlagDetailRequest>> details) {
         List<Element<FlagDetail>> flagDetails = new ArrayList<>();
 
-        for (FlagDetailRequest detail : details) {
-            FlagDetail flagDetail = FlagDetail.builder().name(detail.getName())
-                .name_cy(detail.getName_cy())
-                .subTypeValue(detail.getSubTypeValue())
-                .subTypeValue_cy(detail.getSubTypeValue_cy())
-                .subTypeKey(detail.getSubTypeKey())
-                .otherDescription(detail.getOtherDescription())
-                .otherDescription_cy(detail.getOtherDescription_cy())
-                .flagComment(detail.getFlagComment())
-                .flagComment_cy(detail.getFlagComment_cy())
-                .flagUpdateComment(detail.getFlagUpdateComment())
-                .dateTimeCreated(detail.getDateTimeCreated())
-                .dateTimeModified(detail.getDateTimeModified())
-                .path(detail.getPath())
-                .hearingRelevant(detail.getHearingRelevant())
-                .flagCode(detail.getFlagCode())
-                .status(detail.getStatus())
-                .availableExternally(detail.getAvailableExternally())
+        for (Element<FlagDetailRequest> detail : details) {
+            FlagDetail flagDetail = FlagDetail.builder().name(detail.getValue().getName())
+                .name_cy(detail.getValue().getName_cy())
+                .subTypeValue(detail.getValue().getSubTypeValue())
+                .subTypeValue_cy(detail.getValue().getSubTypeValue_cy())
+                .subTypeKey(detail.getValue().getSubTypeKey())
+                .otherDescription(detail.getValue().getOtherDescription())
+                .otherDescription_cy(detail.getValue().getOtherDescription_cy())
+                .flagComment(detail.getValue().getFlagComment())
+                .flagComment_cy(detail.getValue().getFlagComment_cy())
+                .flagUpdateComment(detail.getValue().getFlagUpdateComment())
+                .dateTimeCreated(detail.getValue().getDateTimeCreated())
+                .dateTimeModified(detail.getValue().getDateTimeModified())
+                .path(detail.getValue().getPath())
+                .hearingRelevant(detail.getValue().getHearingRelevant())
+                .flagCode(detail.getValue().getFlagCode())
+                .status(detail.getValue().getStatus())
+                .availableExternally(detail.getValue().getAvailableExternally())
                 .build();
-            flagDetails.add(element(flagDetail));
+
+            if (null != detail.getId()) {
+                flagDetails.add(element(detail.getId(), flagDetail));
+            } else {
+                flagDetails.add(element(flagDetail));
+            }
         }
 
         return flagDetails;

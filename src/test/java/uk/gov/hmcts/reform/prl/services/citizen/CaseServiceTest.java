@@ -850,7 +850,7 @@ public class CaseServiceTest {
             .availableExternally(Yes)
             .build();
 
-        FlagDetailRequest updateFlagDetailRequestForFillingForms = FlagDetailRequest.builder()
+        Element<FlagDetailRequest>  updateFlagDetailRequestForFillingForms = element(FlagDetailRequest.builder()
             .name("Support filling in forms")
             .name_cy("Cymorth i lenwi ffurflenni")
             .hearingRelevant(YesOrNo.No)
@@ -865,9 +865,9 @@ public class CaseServiceTest {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             ))
             .availableExternally(YesOrNo.Yes)
-            .build();
+            .build());
 
-        FlagDetailRequest updateFlagDetailRequestForHearing = FlagDetailRequest.builder()
+        Element<FlagDetailRequest>  updateFlagDetailRequestForHearing = element(FlagDetailRequest.builder()
             .name("Private waiting area")
             .name_cy("Ystafell aros breifat")
             .hearingRelevant(Yes)
@@ -882,7 +882,7 @@ public class CaseServiceTest {
                 DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
             ))
             .availableExternally(Yes)
-            .build();
+            .build());
 
         Flags applicant1PartyFlags = Flags.builder().roleOnCase("Applicant 1").partyName("Applicant 1 FN Applicant 1 LN").details(
             Collections.singletonList(element(flagDetailRequestForFillingForms))).build();
