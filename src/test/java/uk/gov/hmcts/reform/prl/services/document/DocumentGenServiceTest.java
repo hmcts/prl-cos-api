@@ -1316,6 +1316,24 @@ public class DocumentGenServiceTest {
     }
 
     @Test
+    public void testDocGenerationWithNoName() throws Exception {
+        Map<String, Object> respondentDetails = new HashMap<>();
+        documentGenService.convertToPdf("auth", Document.builder().build());
+        verify(caseDocumentClient, times(0)).getDocumentBinary(
+                authToken, "s2s token", generatedDocumentInfo.getUrl()
+        );
+    }
+
+    @Test
+    public void testDocGenerationWithNoPeriods() throws Exception {
+        Map<String, Object> respondentDetails = new HashMap<>();
+        documentGenService.convertToPdf("auth", Document.builder().documentFileName("i").build());
+        verify(caseDocumentClient, times(0)).getDocumentBinary(
+                authToken, "s2s token", generatedDocumentInfo.getUrl()
+        );
+    }
+
+    @Test
     public void testSingleDocGeneration() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
