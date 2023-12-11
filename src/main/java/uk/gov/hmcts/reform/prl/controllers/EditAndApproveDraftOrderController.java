@@ -223,6 +223,11 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
+            boolean isOrderEdited = false;
+            isOrderEdited = draftAnOrderService.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited);
+            if (isOrderEdited) {
+                response.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
+            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(response).build();
         } else {

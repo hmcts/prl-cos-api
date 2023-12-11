@@ -875,7 +875,7 @@ public class DraftAnOrderService {
         );
     }
 
-    private boolean isOrderEdited(CaseData caseData, String eventId, boolean isOrderEdited) {
+    public boolean isOrderEdited(CaseData caseData, String eventId, boolean isOrderEdited) {
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(eventId)) {
             if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
