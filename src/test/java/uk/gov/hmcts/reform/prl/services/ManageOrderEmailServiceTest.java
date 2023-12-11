@@ -1347,7 +1347,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServed() {
+    public void testSendEmailWhenOrderServedC100() {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1591,6 +1591,144 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verify(emailService,Mockito.times(3)).send(Mockito.any(), any(), any(), any());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNull() {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+                .builder()
+                .code("00000000-0000-0000-0000-000000000000")
+                .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+                .value(List.of(dynamicMultiselectListElement))
+                .build();
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+                .builder()
+                .code(uuid.toString())
+                .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+                .value(List.of(serveOrderDynamicMultiselectListElement))
+                .build();
+        applicant = applicant.toBuilder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .representativeLastName("")
+                .representativeFirstName("")
+                .solicitorEmail("test@gmail.com")
+                .build();
+        caseData = caseData.toBuilder()
+                .caseTypeOfApplication("Fl401")
+                .applicantsFL401(applicant)
+                .respondentsFL401(applicant)
+                .issueDate(LocalDate.now())
+                .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                        .serveToRespondentOptions(YesOrNo.No)
+                        .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                        .serveOtherPartiesDA(null)
+                        .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                                .serveByPostOrEmail(DeliveryByEnum.email)
+                                .emailInformation(EmailInformation.builder()
+                                        .emailAddress("test").build())
+                                .build())))
+                        .recipientsOptions(dynamicMultiSelectList)
+                        .cafcassEmailId("test").build())
+                .build();
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOther() {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+                .builder()
+                .code("00000000-0000-0000-0000-000000000000")
+                .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+                .value(List.of(dynamicMultiselectListElement))
+                .build();
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+                .builder()
+                .code(uuid.toString())
+                .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+                .value(List.of(serveOrderDynamicMultiselectListElement))
+                .build();
+        applicant = applicant.toBuilder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .representativeLastName("")
+                .representativeFirstName("")
+                .solicitorEmail("test@gmail.com")
+                .build();
+        caseData = caseData.toBuilder()
+                .caseTypeOfApplication("Fl401")
+                .applicantsFL401(applicant)
+                .respondentsFL401(applicant)
+                .issueDate(LocalDate.now())
+                .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                        .serveToRespondentOptions(YesOrNo.No)
+                        .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                        .serveOtherPartiesDA(List.of())
+                        .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                                .serveByPostOrEmail(DeliveryByEnum.email)
+                                .emailInformation(EmailInformation.builder()
+                                        .emailAddress("test").build())
+                                .build())))
+                        .recipientsOptions(dynamicMultiSelectList)
+                        .cafcassEmailId("test").build())
+                .build();
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderServed() {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+                .builder()
+                .code("00000000-0000-0000-0000-000000000000")
+                .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+                .value(List.of(dynamicMultiselectListElement))
+                .build();
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+                .builder()
+                .code(uuid.toString())
+                .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+                .value(List.of(serveOrderDynamicMultiselectListElement))
+                .build();
+        applicant = applicant.toBuilder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .representativeLastName("")
+                .representativeFirstName("")
+                .solicitorEmail("test@gmail.com")
+                .build();
+        caseData = caseData.toBuilder()
+                .caseTypeOfApplication("")
+                .applicantsFL401(applicant)
+                .respondentsFL401(applicant)
+                .issueDate(LocalDate.now())
+                .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                        .serveToRespondentOptions(YesOrNo.No)
+                        .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                        .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                        .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                                .serveByPostOrEmail(DeliveryByEnum.email)
+                                .emailInformation(EmailInformation.builder()
+                                        .emailAddress("test").build())
+                                .build())))
+                        .recipientsOptions(dynamicMultiSelectList)
+                        .cafcassEmailId("test").build())
+                .build();
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        Mockito.verify(emailService,Mockito.times(0)).send(Mockito.any(), any(), any(), any());
     }
 
 
