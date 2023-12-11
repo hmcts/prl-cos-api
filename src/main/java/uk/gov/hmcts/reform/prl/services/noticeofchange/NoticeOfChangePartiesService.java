@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -221,8 +222,18 @@ public class NoticeOfChangePartiesService {
     }
 
     public AboutToStartOrSubmitCallbackResponse applyDecision(CallbackRequest callbackRequest, String authorisation) {
+        try {
+            log.info("/aboutToSubmitNoCRequest callbackRequest start json ===>" + objectMapper.writeValueAsString(callbackRequest));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
 
+        try {
+            log.info("/aboutToSubmitNoCRequest decisionRequest start json ===>" + objectMapper.writeValueAsString(decisionRequest(caseDetails)));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         return assignCaseAccessClient.applyDecision(
             authorisation,
             tokenGenerator.generate(),
@@ -231,6 +242,11 @@ public class NoticeOfChangePartiesService {
     }
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest) {
+        try {
+            log.info("/nocRequestSubmitted callbackRequest start json ===>" + objectMapper.writeValueAsString(callbackRequest));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
 
         String systemAuthorisation = systemUserService.getSysUserToken();
@@ -300,7 +316,11 @@ public class NoticeOfChangePartiesService {
             String.valueOf(allTabsUpdateCaseData.getId())
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
+        try {
+            log.info("/nocRequestSubmitted caseData start json ===>" + objectMapper.writeValueAsString(caseData));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         sendEmailOnAddLegalRepresentative(
