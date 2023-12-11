@@ -122,7 +122,9 @@ public class ManageOrdersControllerFunctionalTest {
             .print()
             .toString()
             .equals(
-                "{\"confirmation_header\":\"# Order approved\",\"confirmation_body\":\"### What happens next \\n\\n We will send this order to admin.\\n\\n\\n If you have included further directions, admin will also receive them.\\n\"}"
+                "{\"confirmation_header\":\"# Order approved\"," +
+                    "\"confirmation_body\":\"### What happens next \\n\\n We will send this order to admin." +
+                    "\\n\\n\\n If you have included further directions, admin will also receive them.\\n\"}"
             );
 
 
