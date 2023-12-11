@@ -548,7 +548,7 @@ public class ManageOrdersController {
             log.info("Solicitor created order options {}",caseDetails.getData().get("whatToDoWithOrderSolicitor"));
             log.info("Court admin created order options {}",caseDetails.getData().get("whatToDoWithOrderCourtAdmin"));
             if (JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString()
-                .equals(caseDetails.getData().get("whatToDoWithOrderSolicitor"))) {
+                .equalsIgnoreCase(String.valueOf(caseDetails.getData().get("whatToDoWithOrderSolicitor")))) {
                 return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
             }
             return ResponseEntity.ok(SubmittedCallbackResponse.builder()
