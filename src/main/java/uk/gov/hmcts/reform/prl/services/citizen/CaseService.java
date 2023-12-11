@@ -508,12 +508,12 @@ public class CaseService {
         } catch (JsonProcessingException e) {
             log.info("error");
         }
-        Map<String, Object> testMap = new HashMap<>();
-        testMap.put(partyExternalCaseFlagField.get(), flags);
+        Map<String, Object> externalCaseFlagMap = new HashMap<>();
+        externalCaseFlagMap.put(partyExternalCaseFlagField.get(), flags);
 
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
             startEventResponse,
-            testMap
+            externalCaseFlagMap
         );
 
         try {
