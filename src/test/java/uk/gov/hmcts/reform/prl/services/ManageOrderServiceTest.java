@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -1385,10 +1384,10 @@ public class ManageOrderServiceTest {
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .build();
 
-        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateDocument(anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
-        when(dgsService.generateWelshDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+        when(dgsService.generateWelshDocument(anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
             .thenReturn(generatedDocumentInfo);
 
         Map<String, Object> caseDataUpdated = manageOrderService.getCaseData(
@@ -3094,7 +3093,6 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    @Ignore
     public void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedYes() {
 
         ManageOrders manageOrders = ManageOrders.builder()
@@ -3122,7 +3120,6 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    @Ignore
     public void testSetMarkedToServeEmailNotificationWithOrdersNeedToBeServedNo() {
 
         ManageOrders manageOrders = ManageOrders.builder()
