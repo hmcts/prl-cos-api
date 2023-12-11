@@ -32,7 +32,7 @@ public class ManageOrderControllerIntegrationTest {
     private final String fetchChildDetailsEndpoint = "/fetch-child-details";
     private final String populateHeaderEndpoint = "/populate-header";
     private final String caseOrderEmailNotificationEndpoint = "/case-order-email-notification";
-
+    private final String editAndApproveOrderSubmittedEndpoint = "/edit-and-approve/submitted";
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
@@ -98,4 +98,16 @@ public class ManageOrderControllerIntegrationTest {
         assertEquals(HttpStatus.SC_INTERNAL_SERVER_ERROR, httpResponse.getStatusLine().getStatusCode());
     }
 
+    @Test
+    public void testCaseOrderSubmittedEndPoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + editAndApproveOrderSubmittedEndpoint);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
 }
