@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 public enum SdoCourtRequestedEnum {
 
     @JsonProperty("allegationsMade")
-    allegationsMade("allegationsMade", "a list of allegations made"),
+    allegationsMade("allegationsMade", "A list of allegations made"),
     @JsonProperty("writtenResponse")
     writtenResponse("writtenResponse", "A written response to each of the allegations made");
 
