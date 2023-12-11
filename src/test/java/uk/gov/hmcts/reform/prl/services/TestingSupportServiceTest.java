@@ -111,6 +111,9 @@ public class TestingSupportServiceTest {
     @Mock
     private CaseInitiationService caseInitiationService;
 
+    @Mock
+    private TaskListService taskListService;
+
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
     CaseData caseData;
