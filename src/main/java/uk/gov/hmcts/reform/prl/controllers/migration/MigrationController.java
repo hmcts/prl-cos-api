@@ -67,12 +67,11 @@ public class MigrationController extends AbstractCallbackController {
                                                                             @Parameter(hidden = true) String authorisation,
                                                                             @RequestBody CallbackRequest callbackRequest) {
 
-        log.info("about submit started");
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        log.info("about submit started with case map {} :",caseDataMap);
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         caseDataMap.putAll(caseFlagMigrationService.migrateCaseForCaseFlags(caseDataMap,caseData));
-        log.info("about submit ended");
-
+        log.info("about submit ending with case map {} :",caseDataMap);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
     }
 
