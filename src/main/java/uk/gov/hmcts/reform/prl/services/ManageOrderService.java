@@ -142,13 +142,14 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S3776","java:S6204"})
 public class ManageOrderService {
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
 
     public static final String IS_THE_ORDER_ABOUT_ALL_CHILDREN = "isTheOrderAboutAllChildren";
+    public static final String PREVIEW_ORDER_DOC = "previewOrderDoc";
 
     public static final String CHILD_OPTION = "childOption";
 
@@ -157,8 +158,6 @@ public class ManageOrderService {
     public static final String C_47_A = "C47A";
     public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
     public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
-    @Autowired
-    LocationRefDataService locationRefDataService;
 
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
@@ -557,15 +556,9 @@ public class ManageOrderService {
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
-    @Autowired
     private final UserService userService;
-
-    @Autowired
     private final HearingService hearingService;
-
     private final HearingDataService hearingDataService;
-
-    @Autowired
     private final WelshCourtEmail welshCourtEmail;
 
 
@@ -1715,7 +1708,6 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
-            GeneratedDocumentInfo generatedDocumentInfo;
             populateChildrenListForDocmosis(caseData);
 
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
@@ -1746,7 +1738,7 @@ public class ManageOrderService {
                 CaseDetails.builder().caseData(caseData).build(),
                 fieldsMap.get(PrlAppsConstants.TEMPLATE)
             );
-            caseDataUpdated.put("previewOrderDoc", Document.builder()
+            caseDataUpdated.put(PREVIEW_ORDER_DOC, Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
@@ -1795,7 +1787,7 @@ public class ManageOrderService {
                         CaseDetails.builder().caseData(caseData).build(),
                         fieldsMap.get(PrlAppsConstants.TEMPLATE)
                     );
-                caseDataUpdated.put("previewOrderDoc", Document.builder()
+                caseDataUpdated.put(PREVIEW_ORDER_DOC, Document.builder()
                         .documentUrl(generatedDocumentInfo.getUrl())
                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                         .documentHash(generatedDocumentInfo.getHashToken())
@@ -2222,7 +2214,7 @@ public class ManageOrderService {
 
             }
         } else {
-            caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
+            caseDataUpdated.put(PREVIEW_ORDER_DOC, caseData.getUploadOrderDoc());
         }
         return caseDataUpdated;
     }
