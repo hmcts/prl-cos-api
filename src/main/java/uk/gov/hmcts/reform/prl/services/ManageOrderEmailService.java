@@ -444,7 +444,7 @@ public class ManageOrderEmailService {
                     );
                 }
             }
-
+            //some
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
@@ -467,7 +467,7 @@ public class ManageOrderEmailService {
                 listOfOtherAndCafcassEmails.add(getCafcassEmail(manageOrders));
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
-
+            //some
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
             sendEmailForFlCaseType(caseData, isFinalOrder);
@@ -567,6 +567,7 @@ public class ManageOrderEmailService {
                     }
                 });
     }
+    //some
 
     private void serveOrderToOtherPersons(String authorisation,
                                           DynamicMultiSelectList otherParties,

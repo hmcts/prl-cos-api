@@ -755,6 +755,7 @@ public class NoticeOfChangePartiesService {
                 removeSolPartyDetailsMap
             ));
         }
+        log.info("AAAAAAAAAAa22222");
     }
 
     private static void getRemovedSolicitorRolesForFl401(CaseData newCaseData, DynamicMultiselectListElement solStopRepChoosePartyElement,
@@ -965,11 +966,12 @@ public class NoticeOfChangePartiesService {
 
     public Map<String, Object> populateAboutToStartAdminRemoveLegalRepresentative(CallbackRequest callbackRequest,
                                                                                   List<String> errorList) {
+        log.info("BBBBBBB");
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList removeLegalRepAndPartiesList
             = dynamicMultiSelectListService.getRemoveLegalRepAndPartiesList(caseData);
-
+        log.info("removeLegalRepAndPartiesList--->{}",removeLegalRepAndPartiesList);
         if (removeLegalRepAndPartiesList.getListItems().isEmpty()) {
             errorList.add(CASE_NOT_REPRESENTED_BY_SOLICITOR_ERROR);
         } else {
@@ -990,25 +992,28 @@ public class NoticeOfChangePartiesService {
             removeLegalRepAndPartiesList,
             selectedPartyDetailsMap
         );
-
+        log.info("aboutToSubmitAdminRemoveLegalRepresentative--->");
         caseDataUpdated = createChangeOrgReqAndRemoveRepresentative(
             authorisation,
             caseDetails,
             selectedPartyDetailsMap,
             caseDataUpdated
         );
+        log.info("aboutToSubmitAdminRemoveLegalRepresentative- end-->{}",caseDataUpdated);
         return caseDataUpdated;
     }
 
     public SubmittedCallbackResponse submittedAdminRemoveLegalRepresentative(CallbackRequest callbackRequest) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList removeLegalRepAndPartiesList = caseData.getRemoveLegalRepAndPartiesList();
+        log.info("aaaaaa111111--removeLegalRepAndPartiesList--->{}",removeLegalRepAndPartiesList);
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
         getSelectedPartyDetailsMap(
             caseData,
             removeLegalRepAndPartiesList,
             selectedPartyDetailsMap
         );
+        log.info("aaaaaa111111--selectedPartyDetailsMap--->{}",selectedPartyDetailsMap);
         sendEmailAndUpdateCaseData(selectedPartyDetailsMap, String.valueOf(caseData.getId()));
 
         return prepareSubmittedCallbackResponse(selectedPartyDetailsMap);
