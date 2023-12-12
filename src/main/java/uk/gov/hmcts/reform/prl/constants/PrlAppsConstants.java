@@ -860,4 +860,8 @@ public class PrlAppsConstants {
     public static final String WA_PERFORMING_ACTION = "performingAction";
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
     public static final String WA_ORDER_NAME = "orderNameForWA";
+    public static final String WA_ORDER_NAME_JUDGE_APPROVED = "orderNameForJudgeApproved";
+    public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
+    public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
+    public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
 }
