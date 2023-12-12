@@ -445,6 +445,10 @@ public class ManageOrderEmailService {
                 }
             }
             //some
+
+            log.info("All applicants0-----> {}",caseData.getApplicants().get(0).getValue().getUser().getSolicitorRepresented());
+            log.info("All applicants1-----> {}",caseData.getApplicants().get(1).getValue().getUser().getSolicitorRepresented());
+            log.info("All applicants2-----> {}",caseData.getApplicants().get(2).getValue().getUser().getSolicitorRepresented());
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
