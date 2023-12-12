@@ -56,8 +56,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1233,6 +1232,51 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
+        assertNotNull(dataMap.get("orderCollection"));
+    }
+
+    @Test
+    public void testServeOrdersToOtherOrganisationThrowsException() throws Exception {
+        PostalInformation address = PostalInformation.builder()
+                .postalAddress(Address.builder()
+                        .addressLine1("Made Up Street").build())
+                .postalName("Test")
+                .build();
+        Element<PostalInformation> wrappedAddress = Element.<PostalInformation>builder()
+                .id(uuid)
+                .value(address).build();
+        List<Element<PostalInformation>> listOfAddress = Collections.singletonList(wrappedAddress);
+
+        OrderDetails orderDetails = OrderDetails.builder()
+                .orderTypeId("abc")
+                .dateCreated(LocalDateTime.now())
+                .orderDocument(englishOrderDoc)
+                .orderDocumentWelsh(welshOrderDoc)
+                .typeOfOrder("Final")
+                .serveOrderDetails(ServeOrderDetails.builder()
+                        .additionalDocuments(List.of(element(additionalOrderDoc)))
+                        .otherPartiesServed(YesOrNo.Yes)
+                        .postalInformation(listOfAddress)
+                        .build())
+                .build();
+
+        caseData = CaseData.builder()
+                .id(12345L)
+                .applicantCaseName("TestCaseName")
+                .caseTypeOfApplication("C100")
+                .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
+                .manageOrders(ManageOrders.builder()
+                        .serveOrderDynamicList(dynamicMultiSelectList)
+                        .build())
+                .orderCollection(List.of(element(uuid,orderDetails)))
+                .build();
+
+        when(serviceOfApplicationPostService.getCoverLetter(caseData,"testAuth", address.getPostalAddress(),"Test"))
+                .thenThrow(new RuntimeException());
+
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("testAuth", caseData, dataMap);
         assertNotNull(dataMap.get("orderCollection"));
     }
 
