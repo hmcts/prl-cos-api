@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -22,14 +24,16 @@ import static org.testng.AssertJUnit.assertNotNull;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ChildrenAndOtherPeopleRelationshipCheckerTest {
-
-
     @Mock
     TaskErrorService taskErrorService;
 
     @Mock
     EventsChecker eventsChecker;
 
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @InjectMocks
     ChildrenAndOtherPeopleInThisApplicationChecker otherPeopleInTheCaseChecker;

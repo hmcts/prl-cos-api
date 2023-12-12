@@ -21,8 +21,9 @@ public class ChildrenAndApplicantsChecker implements EventChecker {
 
     private final TaskErrorService taskErrorService;
 
+    @Autowired
     @Lazy
-    private final EventsChecker eventsChecker;
+    private EventsChecker eventsChecker;
 
     @Override
     public boolean isFinished(CaseData caseData) {

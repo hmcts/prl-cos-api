@@ -1,9 +1,11 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -24,7 +26,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Event.APPLICANT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ChildrenAndApplicantsCheckerTest {
 
 
@@ -36,6 +38,11 @@ public class ChildrenAndApplicantsCheckerTest {
 
     @InjectMocks
     ChildrenAndApplicantsChecker childrenAndApplicantsChecker;
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     public void whenNoCaseDataPresentThenIsStartedReturnsFalse() {
