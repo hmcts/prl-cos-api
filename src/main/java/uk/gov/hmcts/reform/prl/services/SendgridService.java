@@ -1,25 +1,32 @@
 
 package uk.gov.hmcts.reform.prl.services;
 
-import com.sendgrid.Attachments;
-import com.sendgrid.Content;
-import com.sendgrid.Email;
-import com.sendgrid.Mail;
 import com.sendgrid.Method;
 import com.sendgrid.Request;
 import com.sendgrid.Response;
 import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Attachments;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
+import com.sendgrid.helpers.mail.objects.Personalization;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.prl.config.SendgridEmailTemplatesConfig;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.TransferCaseTemplate;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.io.IOException;
@@ -27,6 +34,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.json.JsonObject;
@@ -37,7 +45,11 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_START;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.FINAL_ORDER_TITLE;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.NEW_ORDER_TITLE;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ATTACHMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONTENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISPOSITION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -49,6 +61,7 @@ public class SendgridService {
     public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
     public static final String MAIL_SEND = "mail/send";
     public static final String CASE_NAME = "caseName";
+    public static final String NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY = "Notification to party sent successfully";
     @Value("${send-grid.api-key}")
     private String apiKey;
 
@@ -61,12 +74,14 @@ public class SendgridService {
     @Value("${send-grid.rpa.email.from}")
     private String fromEmail;
 
+    private final SendGrid sendGrid;
     private final DocumentGenService documentGenService;
     private final AuthTokenGenerator authTokenGenerator;
     private final LaunchDarklyClient launchDarklyClient;
+    private final SendgridEmailTemplatesConfig sendgridEmailTemplatesConfig;
+    private final ResourceLoader resourceLoader;
 
     public void sendEmail(JsonObject caseData) throws IOException {
-
         String subject = PRL_RPA_NOTIFICATION + caseData.get("id") + ".json";
         Content content = new Content("text/plain", " ");
         Attachments attachments = new Attachments();
@@ -77,18 +92,66 @@ public class SendgridService {
         attachments.setDisposition("attachment");
         Mail mail = new Mail(new Email(fromEmail), subject, new Email(toEmail), content);
         mail.addAttachments(attachments);
-        SendGrid sg = new SendGrid(apiKey);
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
             request.setEndpoint(MAIL_SEND);
             request.setBody(mail.build());
             log.info("Initiating email through sendgrid");
-            sg.api(request);
+            sendGrid.api(request);
             log.info("Notification to RPA sent successfully");
         } catch (IOException ex) {
             throw new IOException(ex.getMessage());
         }
+    }
+
+    public void sendEmailUsingTemplateWithAttachments(SendgridEmailTemplateNames sendgridEmailTemplateNames,
+                                                      String authorization, SendgridEmailConfig sendgridEmailConfig) throws IOException {
+        Personalization personalization = new Personalization();
+        personalization.addTo(getEmail(sendgridEmailConfig.getToEmailAddress()));
+        Map<String, Object> dynamicFields = sendgridEmailConfig.getDynamicTemplateData();
+        if (MapUtils.isNotEmpty(dynamicFields)) {
+            dynamicFields.forEach(personalization::addDynamicTemplateData);
+        }
+        Mail mail = new Mail();
+        if (CollectionUtils.isNotEmpty(sendgridEmailConfig.getListOfAttachments())) {
+            attachFiles(authorization, mail, getCommonEmailProps(), sendgridEmailConfig.getListOfAttachments());
+        }
+        mail.setFrom(getEmail(fromEmail));
+        mail.addPersonalization(personalization);
+        mail.setTemplateId(getTemplateId(sendgridEmailTemplateNames, sendgridEmailConfig.getLanguagePreference()));
+        Request request = new Request();
+        try {
+            request.setMethod(Method.POST);
+            request.setEndpoint(MAIL_SEND);
+            request.setBody(mail.build());
+            Response response = sendGrid.api(request);
+            log.info("Sendgrid status code {}", response.getStatusCode());
+            if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
+                log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
+            }
+        } catch (IOException ex) {
+            log.info("error is {}", ex.getMessage());
+            throw new IOException(ex.getMessage());
+        }
+    }
+
+    private String getTemplateId(SendgridEmailTemplateNames templateName, LanguagePreference languagePreference) {
+        return sendgridEmailTemplatesConfig.getTemplates().get(languagePreference).get(templateName);
+    }
+
+
+    private Map<String, String> getCommonEmailProps() {
+        Map<String, String> emailProps = new HashMap<>();
+        emailProps.put(SUBJECT, "A case has been transferred to your court");
+        emailProps.put(CONTENT, "Case details");
+        emailProps.put(ATTACHMENT_TYPE, "pdf");
+        emailProps.put(DISPOSITION, "attachment");
+        return emailProps;
+    }
+
+    private Email getEmail(String toEmailAddress) {
+        return new Email(toEmailAddress);
     }
 
     public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
@@ -133,16 +196,15 @@ public class SendgridService {
 
         if (launchDarklyClient.isFeatureEnabled("soa-sendgrid")) {
             log.info("******Sendgrid service is enabled****");
-            SendGrid sg = new SendGrid(apiKey);
             Request request = new Request();
             try {
                 request.setMethod(Method.POST);
                 request.setEndpoint(MAIL_SEND);
                 request.setBody(mail.build());
-                Response response = sg.api(request);
+                Response response = sendGrid.api(request);
                 log.info("Sendgrid status code {}", response.getStatusCode());
                 if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-                    log.info("Notification to party sent successfully");
+                    log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
                 }
 
             } catch (IOException ex) {
@@ -176,15 +238,14 @@ public class SendgridService {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }
         if (launchDarklyClient.isFeatureEnabled("transfer-case-sendgrid")) {
-            SendGrid sg = new SendGrid(apiKey);
             Request request = new Request();
             try {
                 request.setMethod(Method.POST);
                 request.setEndpoint(MAIL_SEND);
                 request.setBody(mail.build());
-                Response response = sg.api(request);
+                Response response = sendGrid.api(request);
                 if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-                    log.info("Notification to party sent successfully");
+                    log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
                 }
             } catch (IOException ex) {
                 log.error("Notification to parties failed");

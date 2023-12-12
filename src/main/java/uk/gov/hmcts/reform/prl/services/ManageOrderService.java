@@ -1129,6 +1129,7 @@ public class ManageOrderService {
         List<String> selectedOrderIds = serveOrderDynamicList.getValue()
             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
         List<UUID> existingOrderIds = existingOrderCollection.stream().map(Element::getId).collect(Collectors.toList());
+
         currentOrderId = selectedOrderIds
             .stream()
             .filter(selectedOrderId -> !existingOrderIds.contains(UUID.fromString(selectedOrderId)))
