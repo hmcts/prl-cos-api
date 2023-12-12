@@ -446,12 +446,12 @@ public class ManageOrderEmailService {
             }
             //some
 
-            caseData.getApplicants().stream().map(Element::getValue).forEach(value -> {
-                log.info("VALUE -->{}",value.getUser().getSolicitorRepresented());
-                log.info("ADDRESS -->{}",value.getAddress());
+            caseData.getApplicants().stream().forEach(partyDetailsElement -> {
+                log.info("VALUE --> {}",partyDetailsElement.getValue().getUser().getSolicitorRepresented());
+                log.info("ADDRESS --> {}",partyDetailsElement.getValue().getAddress());
 
-                if (YesOrNo.No.equals(value.getUser().getSolicitorRepresented())) {
-                    serveOrdersToApplicantAddress(caseData, authorisation, orderDocuments, bulkPrintOrderDetails,value.getAddress());
+                if (YesOrNo.No.equals(partyDetailsElement.getValue().getUser().getSolicitorRepresented())) {
+                    serveOrdersToApplicantAddress(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, partyDetailsElement);
                 }
             });
 
@@ -583,44 +583,39 @@ public class ManageOrderEmailService {
     private void serveOrdersToApplicantAddress(CaseData caseData, String authorisation,
                                                 List<Document> orderDocuments,
                                                List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
-                                               Address address) {
+                                               Element<PartyDetails> applicantElement) {
         List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
         List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-        log.info("selectedOrderIds------>>:", selectedOrderIds);
-        log.info("orderCollectionIds----->>:", orderCollection);
+
         orderCollection.stream().filter(orderDetailsElement ->
                                             selectedOrderIds.contains(orderDetailsElement.getId().toString()))
             .forEach(orderDetailsElement -> {
                 if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
-                    && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
-                    && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation()))) {
-                    List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue()
-                        .getServeOrderDetails().getPostalInformation();
-                    log.info("postalInformationnn--->{}", postalInformation);
+                    && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation())) {
 
-                    if (null != address) {
-                        if ((isNotEmpty(address))
-                            && isNotEmpty(address.getAddressLine1())) {
-                            try {
-                                UUID bulkPrintId = sendOrderDocumentViaPost(caseData, address,
-                                                                            "PostalName", authorisation, orderDocuments);
-                                //PRL-4225 save bulk print details
-                                //bulkPrintOrderDetails.add(element(
-                                //    buildBulkPrintOrderDetail(bulkPrintId, String.valueOf(organisationPostalInfo.getId()),
-                                //                              organisationPostalInfo.getValue().getPostalName())));
-                            } catch (Exception e) {
-                                //log.error("Error in sending order docs to other person {}", organisationPostalInfo.getId());
-                                log.error("Exception occurred in sending order docs to other person", e);
-                            }
-                        } else {
-                            log.info("Couldn't send serve order details to other person, address is null/empty for {}");
+                    if ((isNotEmpty(applicantElement.getValue().getAddress()))
+                        && isNotEmpty(applicantElement.getValue().getAddress().getAddressLine1())) {
+                        try {
+                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, applicantElement.getValue().getAddress(),
+                                                                        null, authorisation, orderDocuments
+                            );
+                            log.info("bulkPrintOrderDetails Start....");
+                            //PRL-4225 save bulk print details
+                            bulkPrintOrderDetails.add(element(
+                                buildBulkPrintOrderDetail(bulkPrintId, String.valueOf(applicantElement.getId()), null)));
+                            log.info("bulkPrintOrderDetails End....");
+                        } catch (Exception e) {
+                            log.error("Error in sending order docs to applicant address {}", applicantElement.getId());
+                            log.error("Exception occurred in sending order docs to applicant address", e);
                         }
+                    } else {
+                        log.info("Couldn't send serve order details to applicant address, address is null/empty for {}",
+                                 applicantElement.getId());
                     }
                 }
             });
     }
-    //some
 
     private void serveOrderToOtherPersons(String authorisation,
                                           DynamicMultiSelectList otherParties,
@@ -700,6 +695,7 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
+                    log.info("isSolicitorEmailExists");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
                                                      buildApplicantRespondentSolicitorEmail(
                                                              caseData,
@@ -708,6 +704,7 @@ public class ManageOrderEmailService {
                                                      caseData
                     );
                 } else if (isPartyProvidedWithEmail(partyData)) {
+                    log.info("isPartyProvidedWithEmail");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
                                                      buildApplicantRespondentEmail(
                                                              caseData,
