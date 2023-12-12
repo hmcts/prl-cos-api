@@ -548,7 +548,7 @@ public class ManageOrderEmailService {
     }
 
     private void setMultipleOrdersForEmail(Map<String, Object> dynamicData, List<String> selectedOrderIds) {
-        dynamicData.put("multipleOrders", CollectionUtils.size(selectedOrderIds) > 1 ? true : false);
+        dynamicData.put("multipleOrders", CollectionUtils.size(selectedOrderIds) > 1);
     }
 
     private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {
