@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -199,7 +198,7 @@ public class EditAndApproveDraftOrderController {
                     .data(caseDataUpdated).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation)).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -215,8 +214,7 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse populateCommonFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
-    ) throws JsonProcessingException {
+        @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -296,9 +294,6 @@ public class EditAndApproveDraftOrderController {
             }
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             caseDataUpdated.put(STATE, caseData.getState());
-            /*if (!CollectionUtils.isEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
-                caseDataUpdated.put("serveOrderAdditionalDocuments", null);
-            }*/
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
