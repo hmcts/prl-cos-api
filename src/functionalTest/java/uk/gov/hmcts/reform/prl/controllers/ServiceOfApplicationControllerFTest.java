@@ -39,9 +39,7 @@ public class ServiceOfApplicationControllerFTest {
             "http://localhost:4044"
         );
 
-    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance)
-        .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
-        .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd());
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
     public void givenRequestWithCaseDataOkResponseForAboutToStart() throws Exception {
@@ -61,6 +59,8 @@ public class ServiceOfApplicationControllerFTest {
     public void givenRequestWithCaseDataResponseContainsHeaderAndCollapsable() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         RestAssured.given().spec(request)
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON)
@@ -75,6 +75,8 @@ public class ServiceOfApplicationControllerFTest {
     public void givenRequestWithCaseDataResponseAboutToSubmit() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         RestAssured.given().spec(request)
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON)
@@ -88,6 +90,8 @@ public class ServiceOfApplicationControllerFTest {
     public void givenRequestWithCaseDataResponseSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         RestAssured.given().spec(request)
+            .header(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header(SERVICE_AUTHORIZATION, serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType(APPLICATION_JSON)
