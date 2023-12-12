@@ -447,8 +447,8 @@ public class ManageOrderEmailService {
             //some
 
             caseData.getApplicants().stream().map(Element::getValue).forEach(value -> {
-                log.info("VALUEEE -->{}",value.getUser().getSolicitorRepresented());
-                log.info("ADDREss -->{}",value.getAddress());
+                log.info("VALUE -->{}",value.getUser().getSolicitorRepresented());
+                log.info("ADDRESS -->{}",value.getAddress());
 
                 if (YesOrNo.No.equals(value.getUser().getSolicitorRepresented())) {
                     serveOrdersToApplicantAddress(caseData, authorisation, orderDocuments, bulkPrintOrderDetails,value.getAddress());
@@ -587,8 +587,8 @@ public class ManageOrderEmailService {
         List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
         List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-        log.info("selectedOrderIds11111:", selectedOrderIds);
-        log.info("orderCollectionIds1111111:", orderCollection);
+        log.info("selectedOrderIds------>>:", selectedOrderIds);
+        log.info("orderCollectionIds----->>:", orderCollection);
         orderCollection.stream().filter(orderDetailsElement ->
                                             selectedOrderIds.contains(orderDetailsElement.getId().toString()))
             .forEach(orderDetailsElement -> {
@@ -597,7 +597,7 @@ public class ManageOrderEmailService {
                     && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation()))) {
                     List<Element<PostalInformation>> postalInformation = orderDetailsElement.getValue()
                         .getServeOrderDetails().getPostalInformation();
-                    log.info("BBBBBBBBBBBBBB--->{}", postalInformation);
+                    log.info("postalInformationnn--->{}", postalInformation);
 
                     if (null != address) {
                         if ((isNotEmpty(address))
