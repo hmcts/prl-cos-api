@@ -67,6 +67,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class ManageOrderEmailService {
 
+    public static final String NEW_AND_FINAL = "newAndFinal";
+    public static final String FINAL = "final";
+    public static final String NEW = "new";
     @Autowired
     private EmailService emailService;
 
@@ -545,29 +548,25 @@ public class ManageOrderEmailService {
     }
 
     private void setMultipleOrdersForEmail(Map<String, Object> dynamicData, List<String> selectedOrderIds) {
-        if (CollectionUtils.size(selectedOrderIds) > 1) {
-            dynamicData.put("multipleOrders", true);
-        } else {
-            dynamicData.put("multipleOrders", false);
-        }
+        dynamicData.put("multipleOrders", CollectionUtils.size(selectedOrderIds) > 1 ? true : false);
     }
 
     private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {
         if (newOrdersExists.get() && finalOrdersExists.get()) {
-            dynamicData.put("newAndFinal", true);
-            dynamicData.put("final", false);
-            dynamicData.put("new", false);
+            dynamicData.put(NEW_AND_FINAL, true);
+            dynamicData.put(FINAL, false);
+            dynamicData.put(NEW, false);
 
         } else if (newOrdersExists.get()) {
 
-            dynamicData.put("newAndFinal", false);
-            dynamicData.put("final", false);
-            dynamicData.put("new", true);
+            dynamicData.put(NEW_AND_FINAL, false);
+            dynamicData.put(FINAL, false);
+            dynamicData.put(NEW, true);
         } else if (finalOrdersExists.get()) {
 
-            dynamicData.put("newAndFinal", false);
-            dynamicData.put("final", true);
-            dynamicData.put("new", false);
+            dynamicData.put(NEW_AND_FINAL, false);
+            dynamicData.put(FINAL, true);
+            dynamicData.put(NEW, false);
         }
     }
 

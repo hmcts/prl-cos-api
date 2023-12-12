@@ -65,6 +65,7 @@ public class SendgridService {
     public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
     public static final String MAIL_SEND = "mail/send";
     public static final String CASE_NAME = "caseName";
+    public static final String NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY = "Notification to party sent successfully";
     @Value("${send-grid.api-key}")
     private String apiKey;
 
@@ -139,7 +140,7 @@ public class SendgridService {
             Response response = sendGrid.api(request);
             log.info("Sendgrid status code {}", response.getStatusCode());
             if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-                log.info("Notification to party sent successfully");
+                log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
             }
         } catch (IOException ex) {
             log.info("error is {}", ex.getMessage());
@@ -212,7 +213,7 @@ public class SendgridService {
                 Response response = sendGrid.api(request);
                 log.info("Sendgrid status code {}", response.getStatusCode());
                 if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-                    log.info("Notification to party sent successfully");
+                    log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
                 }
 
             } catch (IOException ex) {
@@ -254,7 +255,7 @@ public class SendgridService {
                 request.setBody(mail.build());
                 Response response = sendGrid.api(request);
                 if (!HttpStatus.valueOf(response.getStatusCode()).is2xxSuccessful()) {
-                    log.info("Notification to party sent successfully");
+                    log.info(NOTIFICATION_TO_PARTY_SENT_SUCCESSFULLY);
                 }
             } catch (IOException ex) {
                 log.error("Notification to parties failed");
