@@ -450,6 +450,7 @@ public class ManageOrderEmailService {
                 log.info("ADDRESS --> {}",partyDetailsElement.getValue().getAddress());
 
                 if (YesOrNo.No.equals(partyDetailsElement.getValue().getUser().getSolicitorRepresented())) {
+                    log.info("c1000--->");
                     serveOrdersToApplicantAddress(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, partyDetailsElement);
                 }
             });
@@ -595,32 +596,31 @@ public class ManageOrderEmailService {
         List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
         List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-
+        log.info("VALUE -C100-inside-> {}",applicantElement.getValue().getUser().getSolicitorRepresented());
+        log.info("ADDRESS inside--> {}",applicantElement.getValue().getAddress());
         orderCollection.stream().filter(orderDetailsElement ->
                                             selectedOrderIds.contains(orderDetailsElement.getId().toString()))
             .forEach(orderDetailsElement -> {
-                if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
-                    && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation())) {
-
-                    if ((isNotEmpty(applicantElement.getValue().getAddress()))
-                        && isNotEmpty(applicantElement.getValue().getAddress().getAddressLine1())) {
-                        try {
-                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, applicantElement.getValue().getAddress(),
-                                                                        null, authorisation, orderDocuments
-                            );
-                            log.info("bulkPrintOrderDetails Start....");
-                            //PRL-4225 save bulk print details
-                            bulkPrintOrderDetails.add(element(
-                                buildBulkPrintOrderDetail(bulkPrintId, String.valueOf(applicantElement.getId()), null)));
-                            log.info("bulkPrintOrderDetails End....");
-                        } catch (Exception e) {
-                            log.error("Error in sending order docs to applicant address {}", applicantElement.getId());
-                            log.error("Exception occurred in sending order docs to applicant address", e);
-                        }
-                    } else {
-                        log.info("Couldn't send serve order details to applicant address, address is null/empty for {}",
-                                 applicantElement.getId());
+                if ((isNotEmpty(applicantElement.getValue().getAddress()))
+                    && isNotEmpty(applicantElement.getValue().getAddress().getAddressLine1())) {
+                    try {
+                        UUID bulkPrintId = sendOrderDocumentViaPost(caseData, applicantElement.getValue().getAddress(),
+                                                                    null, authorisation, orderDocuments
+                        );
+                        log.info("bulkPrintOrderDetails Start....");
+                        //PRL-4225 save bulk print details
+                        bulkPrintOrderDetails.add(element(
+                            buildBulkPrintOrderDetail(bulkPrintId, String.valueOf(applicantElement.getId()), null)));
+                        log.info("bulkPrintOrderDetails End....");
+                    } catch (Exception e) {
+                        log.error("Error in sending order docs to applicant address {}", applicantElement.getId());
+                        log.error("Exception occurred in sending order docs to applicant address", e);
                     }
+                } else {
+                    log.info(
+                        "Couldn't send serve order details to applicant address, address is null/empty for {}",
+                        applicantElement.getId()
+                    );
                 }
             });
     }
