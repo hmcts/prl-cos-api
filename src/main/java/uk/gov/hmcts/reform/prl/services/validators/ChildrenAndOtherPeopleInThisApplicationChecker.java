@@ -29,6 +29,7 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILDREN_AND_OTHER_P
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SuppressWarnings({"java:S6813"})
 public class ChildrenAndOtherPeopleInThisApplicationChecker implements EventChecker {
 
     private final TaskErrorService taskErrorService;
