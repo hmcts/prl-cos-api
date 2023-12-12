@@ -108,7 +108,7 @@ public class ManageOrdersController {
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
-        ### What happens next \n\n We will send this order to admin.
+        ### What happens next \n We will send this order to admin.
         \n\n If you have included further directions, admin will also receive them.
         """;
 
