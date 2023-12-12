@@ -222,7 +222,7 @@ public class EditAndApproveDraftOrderController {
             );
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(response).build();
+                .data(response).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

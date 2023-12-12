@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -30,7 +29,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Base64;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import javax.json.JsonObject;
 
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_BODY;
@@ -38,9 +36,8 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_END;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_START;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.FINAL_ORDER_TITLE;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.NEW_ORDER_TITLE;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -49,7 +46,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class SendgridService {
-
     public static final String PRL_RPA_NOTIFICATION = "Private Reform Law CCD Notification ";
     public static final String MAIL_SEND = "mail/send";
     public static final String CASE_NAME = "caseName";
@@ -66,13 +62,8 @@ public class SendgridService {
     private String fromEmail;
 
     private final DocumentGenService documentGenService;
-
     private final AuthTokenGenerator authTokenGenerator;
-
     private final LaunchDarklyClient launchDarklyClient;
-
-    @Autowired
-    ResourceLoader resourceLoader;
 
     public void sendEmail(JsonObject caseData) throws IOException {
 
@@ -104,29 +95,32 @@ public class SendgridService {
                                                              String toEmailAddress, List<Document> listOfAttachments, String servedParty)
         throws IOException {
 
-        Content content = new Content();
+        Content content;
         String subject = emailProps.get("subject");
         if (emailProps.containsKey("orderURLLinkNeeded")) {
             subject = emailProps.get("orderSubject");
-            emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get("caseNumber") + "#Orders");
+            emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get(CASE_NUMBER) + "#Orders");
             String title = emailProps.containsKey("finalOrder") ? FINAL_ORDER_TITLE : NEW_ORDER_TITLE;
-            String body = emailProps.containsKey("finalOrder")
-                    ? RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY : RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 
-            content = new Content("text/html", String.format(
-                   title + EMAIL_START
-                            + body + EMAIL_END,
-                    emailProps.get(CASE_NAME),
-                    emailProps.get("caseNumber"),
-                    emailProps.get("solicitorName"),
-                    emailProps.get("orderUrLLink")
-            ));
+            String emailStart = String.format(
+                EMAIL_START,
+                emailProps.get(CASE_NAME),
+                emailProps.get("caseNumber"),
+                emailProps.get("solicitorName")
+            );
+
+            String emailEnd = String.format(
+                EMAIL_END,
+                emailProps.get("orderUrLLink")
+            );
+
+            content = new Content("text/html", String.format("%s%s%s", title, emailStart, emailEnd));
         } else {
             content = new Content("text/plain", String.format(
                     (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
                             .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
                     emailProps.get(CASE_NAME),
-                    emailProps.get("caseNumber"),
+                    emailProps.get(CASE_NUMBER),
                     emailProps.get("solicitorName")
             ));
         }
@@ -159,9 +153,8 @@ public class SendgridService {
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)
             .servedParty(servedParty)
-            .docs(listOfAttachments.stream().map(s -> element(s)).collect(Collectors.toList()))
-            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).collect(
-                Collectors.toList())))
+            .docs(listOfAttachments.stream().map(s -> element(s)).toList())
+            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).toList()))
             .timeStamp(currentDate).build();
     }
 
@@ -171,7 +164,7 @@ public class SendgridService {
         String subject = emailProps.get("subject");
         Content content = new Content("text/html", String.format(
             TransferCaseTemplate.TRANSFER_CASE_EMAIL_BODY,
-            emailProps.get("caseNumber"),
+            emailProps.get(CASE_NUMBER),
             emailProps.get(CASE_NAME),
             emailProps.get("issueDate"),
             emailProps.get("applicationType"),
@@ -201,7 +194,7 @@ public class SendgridService {
     }
 
     private void attachFiles(String authorization, Mail mail, Map<String,
-        String> emailProps, List<Document> documents) throws IOException {
+        String> emailProps, List<Document> documents) {
         String s2sToken = authTokenGenerator.generate();
 
         for (Document d : documents) {
@@ -217,12 +210,6 @@ public class SendgridService {
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
             attachments.setContent(documentAsString);
-            /*attachments.setContent(Base64.getEncoder().encodeToString(documentGenService
-                                                                      .getDocumentBytes(
-                                                                          d.getDocumentUrl(),
-                                                                          authorization,
-                                                                          s2sToken
-                                                                      )));*/
             mail.addAttachments(attachments);
 
         }

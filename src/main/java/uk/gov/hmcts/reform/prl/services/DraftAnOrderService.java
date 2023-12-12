@@ -391,7 +391,7 @@ public class DraftAnOrderService {
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
                 caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().manageOrdersApplicant(
-                    CaseUtils.getApplicant(caseData))
+                        CaseUtils.getApplicant(caseData))
                                                                  .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
                                                                      caseData))
                                                                  .manageOrdersRespondent(CaseUtils.getRespondent(
@@ -620,21 +620,21 @@ public class DraftAnOrderService {
             try {
                 SdoDetails updatedSdoDetails = selectedOrder.getSdoDetails().toBuilder()
                     .sdoPreamblesList(editOrder ? caseData.getStandardDirectionOrder().getSdoPreamblesList()
-                                                                     : selectedOrder.getSdoDetails().getSdoPreamblesList())
+                                          : selectedOrder.getSdoDetails().getSdoPreamblesList())
                     .sdoHearingsAndNextStepsList(editOrder ? caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList()
-                        : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
+                                                     : selectedOrder.getSdoDetails().getSdoHearingsAndNextStepsList())
                     .sdoCafcassOrCymruList(editOrder ? caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList()
-                        : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
+                                               : selectedOrder.getSdoDetails().getSdoCafcassOrCymruList())
                     .sdoLocalAuthorityList(editOrder ? caseData.getStandardDirectionOrder().getSdoLocalAuthorityList()
-                        : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
+                                               : selectedOrder.getSdoDetails().getSdoLocalAuthorityList())
                     .sdoCourtList(editOrder ? caseData.getStandardDirectionOrder().getSdoCourtList()
-                        : selectedOrder.getSdoDetails().getSdoCourtList())
+                                      : selectedOrder.getSdoDetails().getSdoCourtList())
                     .sdoDocumentationAndEvidenceList(editOrder ? caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList()
-                        : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
+                                                         : selectedOrder.getSdoDetails().getSdoDocumentationAndEvidenceList())
                     .sdoFurtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoFurtherList()
-                        : selectedOrder.getSdoDetails().getSdoFurtherList())
+                                        : selectedOrder.getSdoDetails().getSdoFurtherList())
                     .sdoOtherList(editOrder ? caseData.getStandardDirectionOrder().getSdoOtherList()
-                        : selectedOrder.getSdoDetails().getSdoOtherList())
+                                      : selectedOrder.getSdoDetails().getSdoOtherList())
                     .build();
                 standardDirectionOrder = copyPropertiesToStandardDirectionOrder(updatedSdoDetails);
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
@@ -1017,7 +1017,7 @@ public class DraftAnOrderService {
                 .manageOrders(caseData.getManageOrders().toBuilder()
                                   .typeOfC21Order(caseData.getManageOrders().getC21OrderOptions() != null
                                                       ? BOLD_BEGIN + caseData.getManageOrders().getC21OrderOptions()
-                .getDisplayedValue() + BOLD_END : null)
+                                      .getDisplayedValue() + BOLD_END : null)
                                   .childOption(manageOrderService.getChildOption(caseData))
                                   .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();

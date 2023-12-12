@@ -291,7 +291,7 @@ public class DraftAnOrderControllerTest {
         )).thenReturn(caseData);
         stringObjectMap.put("selectedOrder", "Test order");
         when(draftAnOrderService.handleSelectedOrder(callbackRequest,authToken)).thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
-            .data(stringObjectMap).build());
+                                                                                                .data(stringObjectMap).build());
         Assert.assertEquals(
             stringObjectMap.get("selectedOrder"),
             draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getData().get("selectedOrder")
@@ -451,85 +451,85 @@ public class DraftAnOrderControllerTest {
     @Test
     public void testGenerateDocThrowError() throws Exception {
         CaseData caseData = CaseData.builder()
-                .id(123L)
-                .applicantCaseName("Jo Davis & Jon Smith")
-                .familymanCaseNumber("sd5454256756")
-                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
-                .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
-                .caseTypeOfApplication("fl401")
-                .build();
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
+            .caseTypeOfApplication("fl401")
+            .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
 
-                        .id(123L)
-                        .data(stringObjectMap)
-                        .build())
-                .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
-                .build();;
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .build();;
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
         Assert.assertEquals(MANDATORY_JUDGE,
-                response.getErrors().get(0));
+                            response.getErrors().get(0));
     }
 
     @Test
     public void testGenerateDocThrowErrorMagistrate() throws Exception {
         CaseData caseData = CaseData.builder()
-                .id(123L)
-                .applicantCaseName("Jo Davis & Jon Smith")
-                .familymanCaseNumber("sd5454256756")
-                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
-                .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate).build())
-                .caseTypeOfApplication("fl401")
-                .build();
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate).build())
+            .caseTypeOfApplication("fl401")
+            .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
 
-                        .id(123L)
-                        .data(stringObjectMap)
-                        .build())
-                .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
-                .build();;
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .build();;
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
         Assert.assertEquals(MANDATORY_MAGISTRATE,
-                response.getErrors().get(0));
+                            response.getErrors().get(0));
     }
 
     @Test
     public void testGenerateDocTMagistrate() throws Exception {
         MagistrateLastName magistrateLastName = MagistrateLastName.builder().lastName("Smith").build();
         Element<MagistrateLastName> magistrateLastNameElement = Element.<MagistrateLastName>builder()
-                .value(magistrateLastName).build();
+            .value(magistrateLastName).build();
         List<Element<MagistrateLastName>> lastNameList = Collections.singletonList(magistrateLastNameElement);
 
         CaseData caseData = CaseData.builder()
-                .id(123L)
-                .applicantCaseName("Jo Davis & Jon Smith")
-                .familymanCaseNumber("sd5454256756")
-                .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
-                .magistrateLastName(lastNameList)
-                .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate).build())
-                .caseTypeOfApplication("fl401")
-                .build();
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .magistrateLastName(lastNameList)
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate).build())
+            .caseTypeOfApplication("fl401")
+            .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
 
-                        .id(123L)
-                        .data(stringObjectMap)
-                        .build())
-                .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
-                .build();;
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .build();;
         AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
         Assert.assertEquals(draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest),
-                response);
+                            response);
     }
 
     @Test
