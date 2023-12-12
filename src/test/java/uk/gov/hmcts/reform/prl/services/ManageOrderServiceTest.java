@@ -1687,11 +1687,11 @@ public class ManageOrderServiceTest {
                                    .listItems(elements)
                                    .build())
             .childOption(DynamicMultiSelectList.builder()
-                                   .listItems(elements)
-                                   .build())
-            .otherParties(DynamicMultiSelectList.builder()
                              .listItems(elements)
                              .build())
+            .otherParties(DynamicMultiSelectList.builder()
+                              .listItems(elements)
+                              .build())
             .serveToRespondentOptions(YesOrNo.Yes)
             .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
@@ -1904,14 +1904,14 @@ public class ManageOrderServiceTest {
                                                        .build()))
             .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
             .recipientsOptionsOnlyC47a(DynamicMultiSelectList.builder()
-                                   .listItems(elements)
-                                   .build())
+                                           .listItems(elements)
+                                           .build())
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(elements)
                              .build())
             .otherPartiesOnlyC47a(DynamicMultiSelectList.builder()
-                              .listItems(elements)
-                              .build())
+                                      .listItems(elements)
+                                      .build())
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .deliveryByOptionsDA(DeliveryByEnum.post)
             .emailInformationCA(List.of(Element.<EmailInformation>builder()
@@ -2867,7 +2867,7 @@ public class ManageOrderServiceTest {
             .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
             .hearingID(98765L)
             .hearingDaySchedule(Collections.singletonList(
-                    HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(null).build()))
+                HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(null).build()))
             .build();
         Hearings hearings = Hearings.hearingsWith()
             .caseRef("123")
@@ -3364,7 +3364,7 @@ public class ManageOrderServiceTest {
     public void testGetGeneratedDocument() {
         GeneratedDocumentInfo generatedDocumentInfo1 = GeneratedDocumentInfo.builder().build();
         assertNotNull(manageOrderService.getGeneratedDocument(
-                                                       generatedDocumentInfo1, true, new HashMap<>())
+            generatedDocumentInfo1, true, new HashMap<>())
         );
     }
 

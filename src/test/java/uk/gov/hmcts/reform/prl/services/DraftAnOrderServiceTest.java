@@ -3770,7 +3770,6 @@ public class DraftAnOrderServiceTest {
             caseData,
             "testevent"
         );
-
         assertEquals(2, ((List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection")).size());
     }
 

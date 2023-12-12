@@ -139,6 +139,18 @@ public class HearingServiceTest {
     }
 
     @Test
+    @DisplayName("test case for HearingService getHearings no hearings returned.")
+    public void getHearingsTestNoHearingReturned() {
+
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
+        Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
+
+        assertEquals(null, hearingsResp);
+
+    }
+
+    @Test
     @DisplayName("test case for HearingService getHearings exception.")
     public void getHearingsTestException() {
         when(hearingApiClient.getHearingDetails(

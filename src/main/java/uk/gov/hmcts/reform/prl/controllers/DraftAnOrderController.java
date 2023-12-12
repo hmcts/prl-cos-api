@@ -88,8 +88,8 @@ public class DraftAnOrderController {
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
-                    callbackRequest.getCaseDetails().getData(),
-                    CaseData.class
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
             );
             List<String> errorList = ManageOrdersUtils.validateMandatoryJudgeOrMagistrate(caseData);
             if (isNotEmpty(errorList)) {

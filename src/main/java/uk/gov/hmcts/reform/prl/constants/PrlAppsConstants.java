@@ -764,7 +764,7 @@ public class PrlAppsConstants {
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 
-    public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
+    public static final String ENG_STATIC_DOCS_PATH = "staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
@@ -844,6 +844,8 @@ public class PrlAppsConstants {
     public static final String PM_LOWER_CASE = "pm";
     public static final String PM_UPPER_CASE = "PM";
 
+    public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
+    public static final String CAFCASS_PARTY = "CAFCASS";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
@@ -858,5 +860,4 @@ public class PrlAppsConstants {
     public static final String WA_PERFORMING_ACTION = "performingAction";
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
     public static final String WA_ORDER_NAME = "orderNameForWA";
-
 }

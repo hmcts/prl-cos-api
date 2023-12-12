@@ -805,16 +805,16 @@ public class HearingDataServiceTest {
             .build();
         Hearings hearings = Hearings.hearingsWith()
             .caseHearings(List.of(CaseHearing.caseHearingWith()
-                 .hearingID(123L)
-                 .hearingDaySchedule(List.of(HearingDaySchedule
-                                                 .hearingDayScheduleWith()
-                                                 .hearingStartDateTime(LocalDateTime.now())
-                                                 .hearingEndDateTime(LocalDateTime.now())
-                                                 .hearingVenueAddress("abc")
-                                                 .attendees(List.of(
-                                                     Attendee.attendeeWith().partyID(TEST_UUID)
-                                                         .hearingSubChannel("TEL").build()))
-                                                 .build()))
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
                                       .build())).build();
         assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, "testAuth"));
     }
