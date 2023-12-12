@@ -17,6 +17,7 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.CHILDREN_AND_RESPOND
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SuppressWarnings({"java:S6813"})
 public class ChildrenAndRespondentsChecker implements EventChecker {
 
     private final TaskErrorService taskErrorService;
