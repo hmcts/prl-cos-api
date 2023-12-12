@@ -448,9 +448,7 @@ public class ManageOrderEmailService {
             caseData.getApplicants().stream().forEach(partyDetailsElement -> {
                 log.info("VALUE -C100-> {}",partyDetailsElement.getValue().getUser().getSolicitorRepresented());
                 log.info("ADDRESS --> {}",partyDetailsElement.getValue().getAddress());
-
                 if (YesOrNo.No.equals(partyDetailsElement.getValue().getUser().getSolicitorRepresented())) {
-                    log.info("c1000--->");
                     serveOrdersToApplicantAddress(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, partyDetailsElement);
                 }
             });
@@ -596,8 +594,6 @@ public class ManageOrderEmailService {
         List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
         List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-        log.info("VALUE -C100-inside-> {}",applicantElement.getValue().getUser().getSolicitorRepresented());
-        log.info("ADDRESS inside--> {}",applicantElement.getValue().getAddress());
         orderCollection.stream().filter(orderDetailsElement ->
                                             selectedOrderIds.contains(orderDetailsElement.getId().toString()))
             .forEach(orderDetailsElement -> {
