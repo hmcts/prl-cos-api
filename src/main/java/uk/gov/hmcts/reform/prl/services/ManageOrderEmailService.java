@@ -444,10 +444,9 @@ public class ManageOrderEmailService {
                     );
                 }
             }
-            //some
 
             caseData.getApplicants().stream().forEach(partyDetailsElement -> {
-                log.info("VALUE --> {}",partyDetailsElement.getValue().getUser().getSolicitorRepresented());
+                log.info("VALUE -C100-> {}",partyDetailsElement.getValue().getUser().getSolicitorRepresented());
                 log.info("ADDRESS --> {}",partyDetailsElement.getValue().getAddress());
 
                 if (YesOrNo.No.equals(partyDetailsElement.getValue().getUser().getSolicitorRepresented())) {
@@ -477,7 +476,16 @@ public class ManageOrderEmailService {
                 listOfOtherAndCafcassEmails.add(getCafcassEmail(manageOrders));
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
-            //some
+
+            caseData.getApplicants().stream().forEach(partyDetailsElement -> {
+                log.info("VALUE FL401--> {}",partyDetailsElement.getValue().getUser().getSolicitorRepresented());
+                log.info("ADDRESS --> {}",partyDetailsElement.getValue().getAddress());
+
+                if (YesOrNo.No.equals(partyDetailsElement.getValue().getUser().getSolicitorRepresented())) {
+                    serveOrdersToApplicantAddress(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, partyDetailsElement);
+                }
+            });
+
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
             sendEmailForFlCaseType(caseData, isFinalOrder);
@@ -695,7 +703,6 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
-                    log.info("isSolicitorEmailExists");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
                                                      buildApplicantRespondentSolicitorEmail(
                                                              caseData,
@@ -704,7 +711,6 @@ public class ManageOrderEmailService {
                                                      caseData
                     );
                 } else if (isPartyProvidedWithEmail(partyData)) {
-                    log.info("isPartyProvidedWithEmail");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
                                                      buildApplicantRespondentEmail(
                                                              caseData,

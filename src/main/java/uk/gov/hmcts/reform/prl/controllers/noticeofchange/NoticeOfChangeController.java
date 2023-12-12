@@ -139,7 +139,6 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse aboutToStartAdminRemoveLegalRepresentative(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("AAAAAAAAAAa");
         List<String> errorList = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -159,7 +158,6 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse aboutToSubmitAdminRemoveLegalRepresentative(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("AAAAAAAAAAa1111");
         List<String> errorList = new ArrayList<>();
         return AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -177,7 +175,6 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> submittedAdminRemoveLegalRepresentative(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("aaaaaa111111");
         return ok(noticeOfChangePartiesService.submittedAdminRemoveLegalRepresentative(callbackRequest));
     }
 
