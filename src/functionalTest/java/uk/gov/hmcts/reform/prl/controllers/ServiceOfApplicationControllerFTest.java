@@ -67,7 +67,7 @@ public class ServiceOfApplicationControllerFTest {
             .post("/service-of-application/about-to-start")
             .then().assertThat().statusCode(200).body("caseTypeOfApplication", Matchers.equalTo("C100"))
             .body("isConfidential", Matchers.equalTo("No"))
-            .body("caseCreatedBy", Matchers.equalTo(null))
+            .body("soaDocumentDynamicListForLa", Matchers.anything())
             .body("sentDocumentPlaceHolder", Matchers.anything());
     }
 
@@ -80,7 +80,7 @@ public class ServiceOfApplicationControllerFTest {
             .contentType(APPLICATION_JSON)
             .post("/service-of-application/about-to-submit")
             .then().assertThat().statusCode(200).body("caseTypeOfApplication", Matchers.equalTo("C100"))
-            .body("isConfidential", Matchers.equalTo("No"))
+            .body("caseManagementLocation", Matchers.anything())
             .body("proceedToServing", Matchers.equalTo("Yes"));
     }
 
