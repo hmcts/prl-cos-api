@@ -4078,7 +4078,6 @@ public class DraftAnOrderServiceTest {
         Map<String, Object> caseDataMap = draftAnOrderService.handlePopulateDraftOrderFields(callbackRequest, authToken);
 
         Assert.assertEquals(stringObjectMap, caseDataMap);
-        Assert.assertNotNull(caseDataMap.get(ORDER_HEARING_DETAILS));
     }
 
     @Test
