@@ -427,7 +427,7 @@ public class ResubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey(STATE_FIELD));
         assertTrue(response.getData().containsKey(CASE_DATE_AND_TIME_SUBMITTED_FIELD));
         assertTrue(response.getData().containsKey(DATE_SUBMITTED_FIELD));
-        assertEquals(response.getData().get(DATE_SUBMITTED_FIELD), currentDate);
+        assertEquals(currentDate, response.getData().get(DATE_SUBMITTED_FIELD));
 
     }
 
