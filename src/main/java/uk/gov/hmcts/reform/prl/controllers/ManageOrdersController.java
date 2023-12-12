@@ -110,6 +110,7 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
+        log.info("callback request for /populate-preview-order - {}", objectMapper.writeValueAsString(callbackRequest));
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -275,6 +276,8 @@ public class ManageOrdersController {
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            log.info("*** recipientsOptions {}", caseData.getManageOrders().getRecipientsOptions());
+            log.info("*** ServeOrderAdditionalDocuments {}", caseData.getManageOrders().getServeOrderAdditionalDocuments());
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
@@ -298,6 +301,7 @@ public class ManageOrdersController {
                     && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                     caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                 }
+                log.info("*** Court seal 0 {}", caseData.getCourtSeal());
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
                     caseData
