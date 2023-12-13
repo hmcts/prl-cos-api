@@ -67,9 +67,9 @@ public class ServiceOfApplicationControllerFTest {
             .post("/service-of-application/about-to-start")
             .then().assertThat()
             .statusCode(200)
-            .body("isConfidential", Matchers.equalTo("No"))
-            .body("soaDocumentDynamicListForLa", Matchers.anything())
-            .body("sentDocumentPlaceHolder", Matchers.anything());
+            .body("data.isConfidential", Matchers.equalTo("No"))
+            .body("data.soaDocumentDynamicListForLa", Matchers.anything())
+            .body("data.sentDocumentPlaceHolder", Matchers.anything());
     }
 
     @Test
@@ -84,8 +84,8 @@ public class ServiceOfApplicationControllerFTest {
             .post("/service-of-application/about-to-submit")
             .then().assertThat()
             .statusCode(200)
-            .body("caseManagementLocation", Matchers.anything())
-            .body("proceedToServing", Matchers.equalTo("Yes"));
+            .body("data.proceedToServing", Matchers.equalTo("Yes"))
+            .body("data.caseManagementLocation", Matchers.anything());
     }
 
     @Test
@@ -100,6 +100,6 @@ public class ServiceOfApplicationControllerFTest {
             .post("/service-of-application/submitted")
             .then().assertThat()
             .statusCode(200)
-            .body("finalServedApplicationDetailsList", Matchers.anything());
+            .body("data.finalServedApplicationDetailsList", Matchers.anything());
     }
 }
