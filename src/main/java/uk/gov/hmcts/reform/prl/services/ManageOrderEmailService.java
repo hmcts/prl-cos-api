@@ -595,6 +595,9 @@ public class ManageOrderEmailService {
             .forEach(orderDetailsElement -> {
                 if ((isNotEmpty(applicantElement.getValue().getAddress()))
                     && isNotEmpty(applicantElement.getValue().getAddress().getAddressLine1())) {
+                    log.info("orderDetailsElementVALUE->>>> {}",orderDetailsElement);
+                    log.info("orderDetailsElementID->>>> {}",orderDetailsElement.getId());
+                    log.info("Docsssssssss->>>> {}",orderDocuments);
                     try {
                         UUID bulkPrintId = sendOrderDocumentViaPost(caseData, applicantElement.getValue().getAddress(),
                                                                     applicantElement.getValue().getLabelForDynamicList(),

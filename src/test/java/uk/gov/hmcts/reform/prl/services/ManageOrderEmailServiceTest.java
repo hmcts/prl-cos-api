@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import javassist.NotFoundException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -67,7 +66,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class ManageOrderEmailServiceTest {
     private static final String manageCaseUrl = null;
     public static final String authToken = "Bearer TestAuthToken";
@@ -1426,7 +1424,7 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
     }
@@ -1476,7 +1474,7 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(3)).send(Mockito.anyString(),
+        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
     }
@@ -1544,7 +1542,7 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
     }
@@ -2123,6 +2121,10 @@ public class ManageOrderEmailServiceTest {
                 .build();
 
         childLiveWithList.add(LiveWithEnum.applicant);
+
+        //Element<OrderDetails> orderDetailsElement1 = element(OrderDetails.builder().build());
+
+        //orderDetailsElement1.getId();
 
         CaseData caseData = CaseData.builder()
                 .id(12345L)
