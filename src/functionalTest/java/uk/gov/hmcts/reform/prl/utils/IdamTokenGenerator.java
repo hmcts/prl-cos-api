@@ -17,6 +17,12 @@ public class IdamTokenGenerator {
     @Value("${idam.solicitor.password}")
     private String solicitorPassword;
 
+    @Value("${idam.judge.username}")
+    private String judgeUsername;
+
+    @Value("${idam.judge.password}")
+    private String judgePassword;
+
     @Value("${idam.systemupdate.username}")
     private String systemUpdateUsername;
 
@@ -47,6 +53,11 @@ public class IdamTokenGenerator {
     public String generateIdamTokenForSolicitor() {
         return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
     }
+
+    public String generateIdamTokenForJudge() {
+        return idamClient.getAccessToken(judgeUsername, judgePassword);
+    }
+
 
     public String generateIdamTokenForSystem() {
         return idamClient.getAccessToken(systemUpdateUsername, systemUpdatePassword);

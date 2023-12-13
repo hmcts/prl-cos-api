@@ -793,8 +793,13 @@ public class DraftAnOrderService {
         );
         caseDataMap.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
         if (caseData.getManageOrders() != null) {
-            caseDataMap.put("whatToDoWithOrderCourtAdmin", caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin());
-            caseDataMap.put("whatToDoWithOrderSolicitor", caseData.getManageOrders().getWhatToDoWithOrderSolicitor());
+            if (Yes.equals(selectedOrder.getIsOrderCreatedBySolicitor())) {
+                caseDataMap.put("whatToDoWithOrderSolicitor", caseData.getManageOrders().getWhatToDoWithOrderSolicitor());
+                caseDataMap.put("whatToDoWithOrderCourtAdmin", null);
+            } else if (No.equals(selectedOrder.getIsOrderCreatedBySolicitor())) {
+                caseDataMap.put("whatToDoWithOrderCourtAdmin", caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin());
+                caseDataMap.put("whatToDoWithOrderSolicitor", null);
+            }
         }
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
