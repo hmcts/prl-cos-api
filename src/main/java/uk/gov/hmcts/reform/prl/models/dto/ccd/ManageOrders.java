@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.models.dto.ccd;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -265,10 +266,12 @@ public class ManageOrders implements MappableObject {
 
     @JsonProperty("ordersHearingDetails")
     @Builder.Default
+    @JsonUnwrapped
     private List<Element<HearingData>> ordersHearingDetails;
 
     @JsonProperty("solicitorOrdersHearingDetails")
     @Builder.Default
+    @JsonUnwrapped
     private List<Element<HearingData>> solicitorOrdersHearingDetails;
 
     @JsonProperty("hasJudgeProvidedHearingDetails")
