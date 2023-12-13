@@ -1716,9 +1716,7 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
-            GeneratedDocumentInfo generatedDocumentInfo;
             populateChildrenListForDocmosis(caseData);
-
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
                 caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
             }
@@ -2543,15 +2541,13 @@ public class ManageOrderService {
         String isTaskNeeded = "No";
         if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
             List<HearingData> hearingList = ordersHearingDetails.stream()
-                .map(Element::getValue).collect(Collectors.toList());
+                .map(Element::getValue).toList();
             for (HearingData hearing : hearingList) {
-                if (hearing.getHearingDateConfirmOptionEnum() != null) {
-                    log.info("**** Hearing option selected {}",hearing.getHearingDateConfirmOptionEnum());
-                    if (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
-                        || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
-                        || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum())) {
-                        isTaskNeeded = "Yes";
-                    }
+                if (hearing.getHearingDateConfirmOptionEnum() != null
+                    && (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
+                    || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
+                    || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum()))) {
+                    isTaskNeeded = "Yes";
                 }
             }
         }
@@ -2560,30 +2556,21 @@ public class ManageOrderService {
 
     public void setIsHearingTaskNeedFlag(CaseData caseData, Map<String,Object> caseDataUpdated) {
         String isHearingTaskNeeded = null;
-        log.info("*** Do you want to edit this order {}", caseData.getDoYouWantToEditTheOrder());
-        log.info("*** Draft order dynamic list {}", caseData.getDraftOrdersDynamicList());
-
         if (YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
             UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                 caseData.getDraftOrdersDynamicList(), objectMapper);
             for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                 DraftOrder draftOrder = e.getValue();
-                log.info("*** eid, Selected order id {} {}", e.getId(), selectedOrderId);
-                log.info("*** Equals {}", e.getId().equals(selectedOrderId));
-                if (e.getId().equals(selectedOrderId)) {
-                    if ("Yes".equalsIgnoreCase(checkIfHearingTaskNeeded(draftOrder.getManageOrderHearingDetails()))) {
-                        caseDataUpdated.put("isHearingTaskNeeded", "Yes");
-                    }
-                    log.info("*** Hearing task needed {}", caseDataUpdated.get("isHearingTaskNeeded"));
+                if (e.getId().equals(selectedOrderId)
+                    && "Yes".equalsIgnoreCase(checkIfHearingTaskNeeded(draftOrder.getManageOrderHearingDetails()))) {
+                    caseDataUpdated.put("isHearingTaskNeeded", "Yes");
                 }
             }
         } else if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-                log.info("*** Orders hearing details present: {}", caseData.getManageOrders().getOrdersHearingDetails());
                 isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
             }
             caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
-            log.info("*** Hearing task needed {}", caseDataUpdated.get("isHearingTaskNeeded"));
         }
     }
 

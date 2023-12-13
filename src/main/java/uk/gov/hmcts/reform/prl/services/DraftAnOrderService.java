@@ -236,7 +236,6 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-        log.info("** Draft order dynamic list : {}", caseDataMap.get("draftOrdersDynamicList"));
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -540,8 +539,6 @@ public class DraftAnOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
-        log.info("*** Orderhearing details present end : {}", caseDataMap.get("ordersHearingDetails"));
-
         return caseDataMap;
     }
 
@@ -1755,7 +1752,6 @@ public class DraftAnOrderService {
         } else {
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
-        log.info("*** Orderhearing details present start : {}", caseDataUpdated.get("ordersHearingDetails"));
         return caseDataUpdated;
     }
 
