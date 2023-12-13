@@ -267,8 +267,6 @@ public class ManageOrders implements MappableObject {
     @Builder.Default
     private List<Element<HearingData>> ordersHearingDetails;
 
-    private String ordersHearingDetailsTest;
-
     @JsonProperty("solicitorOrdersHearingDetails")
     @Builder.Default
     private List<Element<HearingData>> solicitorOrdersHearingDetails;

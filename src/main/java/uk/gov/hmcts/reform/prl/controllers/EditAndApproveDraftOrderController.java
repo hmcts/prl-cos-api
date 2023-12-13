@@ -101,8 +101,6 @@ public class EditAndApproveDraftOrderController {
             );
             log.info("*** Orderhearing details present start : {}", callbackRequest.getCaseDetails().getData()
                 .get("ordersHearingDetails"));
-            log.info("*** test field : {}", callbackRequest.getCaseDetails().getData()
-                .get("ordersHearingDetailsTest"));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderDocument(
                     caseData)).build();
@@ -199,7 +197,6 @@ public class EditAndApproveDraftOrderController {
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("*** Orderhearing details present start : {}", caseDataUpdated.get("ordersHearingDetails"));
-            log.info("*** test field : {}", caseDataUpdated.get("ordersHearingDetailsTest"));
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
@@ -210,7 +207,6 @@ public class EditAndApproveDraftOrderController {
                     .data(caseDataUpdated).build();
             }
             log.info("*** Orderhearing details present end : {}", caseDataUpdated.get("ordersHearingDetails"));
-            log.info("*** test field end: {}", caseDataUpdated.get("ordersHearingDetailsTest"));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, authorisation)).build();
         } else {
@@ -236,7 +232,6 @@ public class EditAndApproveDraftOrderController {
             );
             log.info("*** Orderhearing details present start : {}", callbackRequest.getCaseDetails().getData()
                 .get("ordersHearingDetails"));
-            log.info("*** test field : {}", callbackRequest.getCaseDetails().getData().get("ordersHearingDetailsTest"));
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
             return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(response).build();
