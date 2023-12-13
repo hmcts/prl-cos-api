@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsCourtAdminEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -63,6 +64,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -220,14 +222,16 @@ public class DraftAnOrderService {
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData, String eventId) {
-
+    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData,
+                                                        String eventId,
+                                                        String authorisation) {
+        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(
             draftOrderElement -> {
                 if (ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded())) {
-                    filterDraftOrderForNewCases(eventId, supportedDraftOrderList, draftOrderElement);
+                    filterDraftOrderForNewCases(eventId, supportedDraftOrderList, draftOrderElement, loggedInUserType);
                 } else {
                     filterDraftOrderForExistingCases(eventId, supportedDraftOrderList, draftOrderElement);
                 }
@@ -259,14 +263,50 @@ public class DraftAnOrderService {
     }
 
     private static void filterDraftOrderForNewCases(String eventId, List<Element<DraftOrder>> supportedDraftOrderList,
-                                                    Element<DraftOrder> draftOrderElement) {
-        if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && Yes.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))
-            || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && YesOrNo.No.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))) {
+                                                    Element<DraftOrder> draftOrderElement, String loggedInUserType) {
+        if (isJudgeReviewRequested(loggedInUserType, eventId, draftOrderElement.getValue())
+            || isManagerReviewRequested(loggedInUserType, eventId, draftOrderElement.getValue())
+            || isAdminEditAndApproveOrder(loggedInUserType, eventId, draftOrderElement.getValue())) {
             supportedDraftOrderList.add(draftOrderElement);
         }
     }
+
+    private static boolean isJudgeReviewRequested(String loggedInUserType,
+                                          String eventId,
+                                          DraftOrder draftOrder) {
+        return UserRoles.JUDGE.name().equals(loggedInUserType)
+            && Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && Yes.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
+            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
+    }
+
+    private static boolean isManagerReviewRequested(String loggedInUserType,
+                                                    String eventId,
+                                                    DraftOrder draftOrder) {
+        return !UserRoles.JUDGE.name().equals(loggedInUserType)
+            && Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && AmendOrderCheckEnum.managerCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
+    }
+
+    private static boolean isAdminEditAndApproveOrder(String loggedInUserType,
+                                                      String eventId,
+                                                      DraftOrder draftOrder) {
+        return UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+            && Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && YesOrNo.No.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded());
+    }
+
+    /*private boolean doesOrderNeedsReviewByJudgeOrManager(String loggedInUserType,
+                                                         String eventId,
+                                                         DraftOrder draftOrder) {
+        if (UserRoles.JUDGE.name().equals(loggedInUserType)
+            && Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && Yes.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
+            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy())) {
+            return true;
+        } else return Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+                && AmendOrderCheckEnum.managerCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
+    }*/
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
         Map<String, Object> updatedCaseData = new HashMap<>();
