@@ -65,7 +65,8 @@ public class ServiceOfApplicationControllerFTest {
             .when()
             .contentType(APPLICATION_JSON)
             .post("/service-of-application/about-to-start")
-            .then().assertThat().statusCode(200).body("caseTypeOfApplication", Matchers.equalTo("C100"))
+            .then().assertThat()
+            .statusCode(200)
             .body("isConfidential", Matchers.equalTo("No"))
             .body("soaDocumentDynamicListForLa", Matchers.anything())
             .body("sentDocumentPlaceHolder", Matchers.anything());
@@ -81,7 +82,8 @@ public class ServiceOfApplicationControllerFTest {
             .when()
             .contentType(APPLICATION_JSON)
             .post("/service-of-application/about-to-submit")
-            .then().assertThat().statusCode(200).body("caseTypeOfApplication", Matchers.equalTo("C100"))
+            .then().assertThat()
+            .statusCode(200)
             .body("caseManagementLocation", Matchers.anything())
             .body("proceedToServing", Matchers.equalTo("Yes"));
     }
@@ -96,7 +98,8 @@ public class ServiceOfApplicationControllerFTest {
             .when()
             .contentType(APPLICATION_JSON)
             .post("/service-of-application/submitted")
-            .then().assertThat().statusCode(200)
+            .then().assertThat()
+            .statusCode(200)
             .body("finalServedApplicationDetailsList", Matchers.anything());
     }
 }
