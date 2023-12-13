@@ -2209,11 +2209,22 @@ public class ManageOrderServiceTest {
     public void testOrderStatusReviewByJudge() {
         String status = manageOrderService.getOrderStatus(
             "createAnOrder",
-            "COURT_ADMIN",
+            "JUDGE",
             "editAndApproveAnOrder",
             "Created by Admin"
         );
         assertEquals(OrderStatusEnum.reviewedByJudge.getDisplayedValue(), status);
+    }
+
+    @Test
+    public void testOrderStatusReviewByManager() {
+        String status = manageOrderService.getOrderStatus(
+            "createAnOrder",
+            "COURT_ADMIN",
+            "editAndApproveAnOrder",
+            "Created by Admin"
+        );
+        assertEquals(OrderStatusEnum.reviewedByManager.getDisplayedValue(), status);
     }
 
     @Test
