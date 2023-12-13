@@ -584,44 +584,36 @@ public class ManageOrderEmailService {
     }
 
     private void serveOrdersToApplicantAddress(CaseData caseData, String authorisation,
-                                                List<Document> orderDocuments,
+                                               List<Document> orderDocuments,
                                                List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                Element<PartyDetails> applicantElement) {
-        List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
-        List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
-            .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-        orderCollection.stream().filter(orderDetailsElement ->
-                                            selectedOrderIds.contains(orderDetailsElement.getId().toString()))
-            .forEach(orderDetailsElement -> {
-                if ((isNotEmpty(applicantElement.getValue().getAddress()))
-                    && isNotEmpty(applicantElement.getValue().getAddress().getAddressLine1())) {
-                    log.info("orderDetailsElementVALUE->>>> {}",orderDetailsElement);
-                    log.info("orderDetailsElementID->>>> {}",orderDetailsElement.getId());
-                    log.info("Docsssssssss->>>> {}",orderDocuments);
-                    try {
-                        UUID bulkPrintId = sendOrderDocumentViaPost(caseData, applicantElement.getValue().getAddress(),
-                                                                    applicantElement.getValue().getLabelForDynamicList(),
-                                                                    authorisation, orderDocuments
-                        );
-                        log.info("bulkPrintOrderDetails Starttttt....");
+        if ((isNotEmpty(applicantElement.getValue().getAddress()))
+            && isNotEmpty(applicantElement.getValue().getAddress().getAddressLine1())) {
+            try {
+                UUID bulkPrintId = sendOrderDocumentViaPost(caseData, applicantElement.getValue().getAddress(),
+                                                            applicantElement.getValue().getLabelForDynamicList(),
+                                                            authorisation, orderDocuments
+                );
+                log.info("bulkPrintOrderDetails Starttttt11111....");
 
-                        //PRL-4225 save bulk print details
-                        bulkPrintOrderDetails.add(element(
-                            buildBulkPrintOrderDetail(bulkPrintId,
-                                                      String.valueOf(applicantElement.getId()),
-                                                      applicantElement.getValue().getLabelForDynamicList())));
-                        log.info("bulkPrintOrderDetails Endddd....{}",bulkPrintOrderDetails);
-                    } catch (Exception e) {
-                        log.error("Error in sending order docs to applicant address {}", applicantElement.getId());
-                        log.error("Exception occurred in sending order docs to applicant address", e);
-                    }
-                } else {
-                    log.info(
-                        "Couldn't send serve order details to applicant address, address is null/empty for {}",
-                        applicantElement.getId()
-                    );
-                }
-            });
+                //PRL-4225 save bulk print details
+                bulkPrintOrderDetails.add(element(
+                    buildBulkPrintOrderDetail(
+                        bulkPrintId,
+                        String.valueOf(applicantElement.getId()),
+                        applicantElement.getValue().getLabelForDynamicList()
+                    )));
+                log.info("bulkPrintOrderDetails Endddd2222....{}", bulkPrintOrderDetails);
+            } catch (Exception e) {
+                log.error("Error in sending order docs to applicant address {}", applicantElement.getId());
+                log.error("Exception occurred in sending order docs to applicant address", e);
+            }
+        } else {
+            log.info(
+                "Couldn't send serve order details to applicant address, address is null/empty for {}",
+                applicantElement.getId()
+            );
+        }
     }
 
     private void serveOrderToOtherPersons(String authorisation,
