@@ -108,7 +108,7 @@ public class ManageOrdersController {
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
-        ### What happens next \n\n We will send this order to admin.
+        ### What happens next \n We will send this order to admin.
         \n\n If you have included further directions, admin will also receive them.
         """;
 
@@ -547,13 +547,13 @@ public class ManageOrdersController {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             log.info("Solicitor created order options {}",caseDetails.getData().get("whatToDoWithOrderSolicitor"));
             log.info("Court admin created order options {}",caseDetails.getData().get("whatToDoWithOrderCourtAdmin"));
-            if (!(JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges
-                .equals(caseDetails.getData().get("whatToDoWithOrderSolicitor")))) {
-                return ResponseEntity.ok(SubmittedCallbackResponse.builder()
-                                             .confirmationHeader(CONFIRMATION_HEADER)
-                                             .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            if (JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString()
+                .equalsIgnoreCase(String.valueOf(caseDetails.getData().get("whatToDoWithOrderSolicitor")))) {
+                return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
             }
-            return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
+            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                         .confirmationHeader(CONFIRMATION_HEADER)
+                                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -2948,7 +2948,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void testHandleEditAndApproveSubmittedWhenAskLegalRepChoosen() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges);
+        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
