@@ -143,7 +143,6 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            manageOrderService.setIsHearingTaskNeedFlag(caseData, caseDataUpdated);
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -153,6 +152,7 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
+                manageOrderService.setIsHearingTaskNeedFlag(caseData, caseDataUpdated);
                 caseDataUpdated.put(WA_ORDER_NAME, draftAnOrderService.getDraftOrderNameForWA(caseData, true));
                 caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
                     caseData,
