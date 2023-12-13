@@ -41,6 +41,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -507,4 +508,54 @@ public class UpdatePartyDetailsServiceTest {
         assertNotNull("respondents");
     }
 
+    @Test
+    public void testSetDefaultEmptyForChildDetails_whenChildDetailsPresent() {
+        Child child1 = Child.builder()
+            .firstName("Test")
+            .lastName("Name1")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Child child2 = Child.builder()
+            .firstName("Test")
+            .lastName("Name2")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChild1 = Element.<Child>builder().value(child1).build();
+        Element<Child> wrappedChild2 = Element.<Child>builder().value(child2).build();
+
+        List<Element<Child>> childList = new ArrayList<>();
+        childList.add(wrappedChild1);
+        childList.add(wrappedChild2);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .children(childList)
+            .build();
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
+        assertEquals(childList, updatedCaseData.get("children"));
+    }
+
+    @Test
+    public void testSetDefaultEmptyChildDetails_whenNoChildDetailsPresent() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
+        List<Element<Child>> updatedChildDetails = (List<Element<Child>>) updatedCaseData.get("children");
+        assertEquals(1, updatedChildDetails.size());
+        assertEquals(Child.builder().build(), updatedChildDetails.get(0).getValue());
+    }
 }
