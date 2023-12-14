@@ -108,8 +108,10 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getLegalProfQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
                                                .build())
                                            .toList());
         }
@@ -118,8 +120,10 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
                                                .build())
                                            .toList());
         }
@@ -128,8 +132,10 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getCourtStaffQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
                                                .build())
                                            .toList());
         }
@@ -286,20 +292,29 @@ public class ReviewDocumentService {
             quarantineDocsList.remove(quarantineLegalDocElement);
             QuarantineLegalDoc uploadDoc;
             if (isReviewDecisionYes) {
-                Document document = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
-                UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
-                log.info(" DocumentId found {}", documentId);
-                Document newUploadedDocument = getNewUploadedDocument(document, documentId);
+                try {
+                    Document document = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
+                    UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
+                    log.info(" DocumentId found {}", documentId);
+                    Document newUploadedDocument = getNewUploadedDocument(document, documentId);
 
-                log.info("document uploaded {}", newUploadedDocument);
-                caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
-                                                  authTokenGenerator.generate(), documentId, true);
-                log.info("deleted document {}", documentId);
+                    log.info("document uploaded {}", newUploadedDocument);
+                    if (null != newUploadedDocument) {
+                        caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
+                                                          authTokenGenerator.generate(), documentId, true
+                        );
+                        log.info("deleted document {}", documentId);
 
-                uploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                    quarantineLegalDocElement.getValue().getCategoryId(),
-                    newUploadedDocument
-                );
+                        uploadDoc = DocumentUtils.getQuarantineUploadDocument(
+                            quarantineLegalDocElement.getValue().getCategoryId(),
+                            newUploadedDocument
+                        );
+                    } else {
+                        throw new RuntimeException("Failed to move document to confidential tab please retry");
+                    }
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to move document to confidential tab please retry");
+                }
             } else {
                 uploadDoc = DocumentUtils.getQuarantineUploadDocument(
                     quarantineLegalDocElement.getValue().getCategoryId(),
@@ -357,9 +372,9 @@ public class ReviewDocumentService {
     private String getDocumentId(String url) {
         Pattern pairRegex = Pattern.compile(DOCUMENT_UUID_REGEX);
         Matcher matcher = pairRegex.matcher(url);
-        String documentId = null;
+        String documentId = "";
         if (matcher.find()) {
-            documentId  = matcher.group(0);
+            documentId = matcher.group(0);
         }
         log.info("document id {}", documentId);
         return documentId;

@@ -730,8 +730,19 @@ public class ReviewDocumentServiceTest {
 
     }
 
-    @Test
-    public void testReviewProcessOfDocumentWhenNewUploadFailsForQuarantineDocsWhenYesIsSelected() {
+    @Test (expected = RuntimeException.class)
+    public void testReviewProcessOfDocumentWhenIdMatchFailsForQuarantineDocsWhenYesIsSelected() {
+        Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(QuarantineLegalDoc.builder()
+                       .categoryId("test")
+                       .notes("test")
+                       .documentUploadedDate(LocalDateTime.now())
+                       .cafcassQuarantineDocument(Document
+                                                      .builder()
+                                                      .documentUrl("http://dm-store-aat.service.core-compute-aat."
+                                                                       + "internal/documents/")
+                                                      .build())
+                       .build()).build();
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
         documentList.add(element);
@@ -756,14 +767,45 @@ public class ReviewDocumentServiceTest {
                                  .cafcassUploadDocListConfTab(documentList).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
-        Assert.assertNotNull(caseData.getReviewDocuments().getCafcassUploadDocListConfTab());
+    }
 
-        List<Element<QuarantineLegalDoc>>  listQuarantineLegalDoc = (List<Element<QuarantineLegalDoc>>)caseDataMap.get("cafcassUploadDocListConfTab");
+    @Test (expected = RuntimeException.class)
+    public void testReviewProcessOfDocumentWhenNewUploadFailsForQuarantineDocsWhenYesIsSelected() {
+        Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(QuarantineLegalDoc.builder()
+                       .categoryId("test")
+                       .notes("test")
+                       .documentUploadedDate(LocalDateTime.now())
+                       .cafcassQuarantineDocument(Document
+                                                      .builder()
+                                                      .documentUrl("http://dm-store-aat.service.core-compute-aat.internal"
+                                                                       + "/documents/"
+                                                                       + "6d664075-2166-43cf-a4cc-61058a3a0a99").build())
+                       .build()).build();
 
-        Assert.assertEquals(caseData.getReviewDocuments().getCafcassUploadDocListConfTab().get(0).getValue().getCategoryId(),
-                            listQuarantineLegalDoc.get(0).getValue().getCategoryId());
-        Assert.assertEquals(caseData.getReviewDocuments().getCafcassUploadDocListConfTab().get(0).getValue().getNotes(),
-                            listQuarantineLegalDoc.get(0).getValue().getNotes());
+        List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
+        documentList.add(element);
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TestConstants.TEST_SERVICE_AUTHORIZATION);
+        Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
+            .thenReturn(expectedResponse);
+        Mockito.when(caseDocumentClient.uploadDocuments(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(List.class)
+        )).thenReturn(new UploadResponse(new ArrayList<>()));
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CaseData caseData =  CaseData.builder()
+            .cafcassQuarantineDocsList(documentList)
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .cafcassUploadDocListConfTab(documentList).build())
+            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
     }
 
     private UploadResponse createDocumentUploadResponse() {
