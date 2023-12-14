@@ -100,6 +100,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
@@ -3380,7 +3382,30 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSetFieldsForWaTaskForCreateOrder() {
+    public void testSetFieldsForWaTaskForJudgeCreateOrder() {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .build();
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        assertNotNull(response);
+        assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
+        assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
+    }
+
+    @Test
+    public void testSetFieldsForWaTaskForCourtAdminCreateOrder() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
         CaseData caseData = CaseData.builder()
@@ -3398,8 +3423,8 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
         assertNotNull(response);
-        assertTrue(response.containsKey("orderNameForWA"));
-        assertNotNull(response.get("orderNameForWA"));
+        assertTrue(response.containsKey(WA_ORDER_NAME_ADMIN_CREATED));
+        assertNotNull(response.get(WA_ORDER_NAME_ADMIN_CREATED));
     }
 
     @Test
@@ -3421,8 +3446,8 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
         assertNotNull(response);
-        assertTrue(response.containsKey("orderNameForWA"));
-        assertNotNull(response.get("orderNameForWA"));
+        assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
+        assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
     }
 
     @Test
