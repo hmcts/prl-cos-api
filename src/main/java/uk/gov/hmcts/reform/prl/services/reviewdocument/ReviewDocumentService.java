@@ -310,10 +310,10 @@ public class ReviewDocumentService {
                             newUploadedDocument
                         );
                     } else {
-                        throw new RuntimeException("Failed to move document to confidential tab please retry");
+                        throw new IllegalStateException("Failed to move document to confidential tab please retry");
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException("Failed to move document to confidential tab please retry");
+                    throw new IllegalStateException("Failed to move document to confidential tab please retry");
                 }
             } else {
                 uploadDoc = DocumentUtils.getQuarantineUploadDocument(

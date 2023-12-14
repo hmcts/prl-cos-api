@@ -730,7 +730,7 @@ public class ReviewDocumentServiceTest {
 
     }
 
-    @Test (expected = RuntimeException.class)
+    @Test (expected = IllegalStateException.class)
     public void testReviewProcessOfDocumentWhenIdMatchFailsForQuarantineDocsWhenYesIsSelected() {
         Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
             .value(QuarantineLegalDoc.builder()
@@ -769,7 +769,7 @@ public class ReviewDocumentServiceTest {
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
     }
 
-    @Test (expected = RuntimeException.class)
+    @Test (expected = IllegalStateException.class)
     public void testReviewProcessOfDocumentWhenNewUploadFailsForQuarantineDocsWhenYesIsSelected() {
         Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
             .value(QuarantineLegalDoc.builder()
