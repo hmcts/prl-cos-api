@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -235,10 +236,10 @@ public class ManageOrdersController {
             //updating state in caseData so that caseSummaryTab is updated with latest state
             log.info("callbackRequest------>{}",callbackRequest);
             log.info("==================Cccccccccc============");
-            ObjectMapper mapper = new ObjectMapper();
-            //Converting the Object to JSONString
-            String jsonString = mapper.writeValueAsString(callbackRequest);
-            System.out.println(jsonString);
+            ObjectMapper om = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            String result = om.writeValueAsString(callbackRequest);
+            System.out.println(result);
             log.info("==================ENDDddd============");
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
