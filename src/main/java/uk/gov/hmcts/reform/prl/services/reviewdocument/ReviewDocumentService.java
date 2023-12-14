@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -66,6 +67,8 @@ public class ReviewDocumentService {
     private final CaseDocumentClient caseDocumentClient;
 
     private final AuthTokenGenerator authTokenGenerator;
+
+    private final SystemUserService systemUserService;
 
     public static final String DOCUMENT_UUID_REGEX = "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}";
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
@@ -274,7 +277,7 @@ public class ReviewDocumentService {
                                           boolean isReviewDecisionYes,
                                           List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
                                           String uploadDocListConfOrDocTabKey,
-                                          String uploadedBy,String authorisation) {
+                                          String uploadedBy) {
 
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
             getQuarantineDocumentById(quarantineDocsList, uuid);
@@ -287,10 +290,11 @@ public class ReviewDocumentService {
                 Document document = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
                 UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
                 log.info(" DocumentId found {}", documentId);
-                Document newUploadedDocument = getNewUploadedDocument(authorisation, document, documentId);
+                Document newUploadedDocument = getNewUploadedDocument(document, documentId);
 
                 log.info("document uploaded {}", newUploadedDocument);
-                caseDocumentClient.deleteDocument(authorisation, authTokenGenerator.generate(), documentId, true);
+                caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
+                                                  authTokenGenerator.generate(), documentId, true);
                 log.info("deleted document {}", documentId);
 
                 uploadDoc = DocumentUtils.getQuarantineUploadDocument(
@@ -321,17 +325,19 @@ public class ReviewDocumentService {
         }
     }
 
-    private Document getNewUploadedDocument(String authorisation, Document document, UUID documentId) {
+    private Document getNewUploadedDocument(Document document, UUID documentId) {
         byte[] docData;
         Document newUploadedDocument = null;
         try {
-            Resource resource = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(),
+            String sysUserToken = systemUserService.getSysUserToken();
+            String serviceToken = authTokenGenerator.generate();
+            Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
                                                                      documentId
             ).getBody();
             docData = IOUtils.toByteArray(resource.getInputStream());
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
-                authorisation,
-                authTokenGenerator.generate(),
+                sysUserToken,
+                serviceToken,
                 PrlAppsConstants.CASE_TYPE,
                 PrlAppsConstants.JURISDICTION,
                 List.of(
@@ -380,10 +386,9 @@ public class ReviewDocumentService {
         }
     }
 
-    public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid,
-                                      String authorisation) {
+    public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
         if (YesNoDontKnow.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-            forReviewDecisionYes(caseData, caseDataUpdated, uuid, authorisation);
+            forReviewDecisionYes(caseData, caseDataUpdated, uuid);
         } else if (YesNoDontKnow.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             forReviewDecisionNo(caseData, caseDataUpdated, uuid);
         }
@@ -394,8 +399,7 @@ public class ReviewDocumentService {
         caseDataUpdated.put("scannedDocuments", caseData.getScannedDocuments());
     }
 
-    private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid,
-                                      String authorisation) {
+    private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
 
         if (null != caseData.getLegalProfQuarantineDocsList()) {
             uploadDocForConfOrDocTab(
@@ -405,7 +409,7 @@ public class ReviewDocumentService {
                 true,
                 caseData.getReviewDocuments().getLegalProfUploadDocListConfTab(),
                 LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB,
-                SOLICITOR, authorisation
+                SOLICITOR
             );
         }
         //cafcass
@@ -418,7 +422,7 @@ public class ReviewDocumentService {
                 true,
                 caseData.getReviewDocuments().getCafcassUploadDocListConfTab(),
                 CAFCASS_UPLOAD_DOC_LIST_CONF_TAB,
-                CAFCASS, authorisation
+                CAFCASS
             );
         }
         //court staff
@@ -430,7 +434,7 @@ public class ReviewDocumentService {
                 true,
                 caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab(),
                 COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
-                COURT_STAFF, authorisation
+                COURT_STAFF
             );
         }
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
@@ -461,7 +465,7 @@ public class ReviewDocumentService {
                 true,
                 caseData.getReviewDocuments().getBulkScannedDocListConfTab(),
                 BULKSCAN_UPLOAD_DOC_LIST_CONF_TAB,
-                BULK_SCAN, authorisation
+                BULK_SCAN
             );
             removeFromScannedDocumentListAfterReview(caseData, uuid);
         }
@@ -515,7 +519,7 @@ public class ReviewDocumentService {
                 false,
                 caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
                 LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB,
-                SOLICITOR, null
+                SOLICITOR
             );
 
             log.info("*** legal prof docs tab ** {}", caseDataUpdated.get(LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB));
@@ -529,7 +533,7 @@ public class ReviewDocumentService {
                 false,
                 caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
                 CAFCASS_UPLOAD_DOC_LIST_DOC_TAB,
-                CAFCASS, null
+                CAFCASS
             );
 
             log.info("*** cafcass docs tab ** {}", caseDataUpdated.get(CAFCASS_UPLOAD_DOC_LIST_DOC_TAB));
@@ -543,7 +547,7 @@ public class ReviewDocumentService {
                 false,
                 caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
                 COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB,
-                COURT_STAFF, null
+                COURT_STAFF
             );
 
             log.info("*** court staff docs tab ** {}", caseDataUpdated.get(COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB));
@@ -577,7 +581,7 @@ public class ReviewDocumentService {
                 false,
                 caseData.getReviewDocuments().getBulkScannedDocListDocTab(),
                 BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB,
-                BULK_SCAN, null
+                BULK_SCAN
             );
             removeFromScannedDocumentListAfterReview(caseData, uuid);
             log.info("*** Bulk scan docs tab ** {}", caseDataUpdated.get(BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB));
