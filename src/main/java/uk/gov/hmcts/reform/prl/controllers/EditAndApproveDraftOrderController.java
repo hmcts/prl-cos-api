@@ -348,13 +348,7 @@ public class EditAndApproveDraftOrderController {
                 .ok(SubmittedCallbackResponse.builder()
                         .confirmationHeader(CONFIRMATION_HEADER)
                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
-            if (JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString()
-                .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
-                responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
-                                             .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
-                                             .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
-                                             .build());
-            } else if (JudgeApprovalDecisionsSolicitorEnum.sendToAdminToServe.toString()
+            if (JudgeApprovalDecisionsSolicitorEnum.sendToAdminToServe.toString()
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))
                 || JudgeApprovalDecisionsSolicitorEnum.sendToAdminToServe.toString()
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get("whatToDoWithOrderCourtAdmin")))) {
