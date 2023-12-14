@@ -755,10 +755,8 @@ public class DraftAnOrderService {
         if (caseData.getManageOrders() != null) {
             if (Yes.equals(selectedOrder.getIsOrderCreatedBySolicitor())) {
                 caseDataMap.put("whatToDoWithOrderSolicitor", caseData.getManageOrders().getWhatToDoWithOrderSolicitor());
-                caseDataMap.put("whatToDoWithOrderCourtAdmin", null);
             } else if (No.equals(selectedOrder.getIsOrderCreatedBySolicitor())) {
                 caseDataMap.put("whatToDoWithOrderCourtAdmin", caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin());
-                caseDataMap.put("whatToDoWithOrderSolicitor", null);
             }
         }
         //Set existing hearingsType from draft order

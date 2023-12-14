@@ -302,7 +302,9 @@ public enum ManageOrderFieldsEnum {
     nameOfLaToReviewOrder("nameOfLaToReviewOrder"),
     manageOrdersDocumentToAmend("manageOrdersDocumentToAmend"),
     draftOrderOptions("draftOrderOptions"),
-    orderNameForWA("orderNameForWA");
+    orderNameForWA("orderNameForWA"),
+    whatToDoWithOrderSolicitor("whatToDoWithOrderSolicitor"),
+    whatToDoWithOrderCourtAdmin("whatToDoWithOrderCourtAdmin");
 
     private final String value;
 
