@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -116,5 +119,36 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
+    }
+
+    @Test
+    public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+        String targetInstance =
+            StringUtils.defaultIfBlank(
+                System.getenv("TEST_URL"),
+                "http://localhost:4044"
+            );
+        RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
+        assert request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/edit-and-approve/submitted")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .response()
+            .body()
+            .print()
+            .toString()
+            .equals(
+                "{\"confirmation_header\":\"# Order approved\","
+                    + "\"confirmation_body\":\"### What happens next \\n We will send this order to admin."
+                    + "\\n\\n\\n If you have included further directions, admin will also receive them.\\n\"}"
+            );
     }
 }
