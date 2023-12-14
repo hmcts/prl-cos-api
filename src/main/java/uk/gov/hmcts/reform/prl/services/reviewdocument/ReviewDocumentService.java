@@ -27,7 +27,6 @@ import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -59,8 +58,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReviewDocumentService {
 
+    public static final String CONFIDENTIAL = "Confidential_";
     @Autowired
-    CoreCaseDataService coreCaseDataService;
+    private final CoreCaseDataService coreCaseDataService;
 
     @Autowired
     private final CaseDocumentClient caseDocumentClient;
@@ -100,7 +100,6 @@ public class ReviewDocumentService {
     public static final String COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB = "courtStaffUploadDocListDocTab";
     public static final String CITIZEN_UPLOADED_DOC_LIST_DOC_TAB = "citizenUploadedDocListDocTab";
     public static final String BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB = "bulkScannedDocListDocTab";
-    public static final String CONFIDENTIAL_CATEGORY_ID = "confidential";
 
     public List<DynamicListElement> getDynamicListElements(CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
@@ -287,40 +286,17 @@ public class ReviewDocumentService {
             QuarantineLegalDoc uploadDoc;
             if (isReviewDecisionYes) {
                 Document document = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
-                log.info("Document {}", document);
                 UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
                 log.info(" DocumentId found {}", documentId);
-                Resource resource = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(),
-                                                                         documentId
-                ).getBody();
-                byte[] docData = null;
-                try {
-                    docData = IOUtils.toByteArray(resource.getInputStream());
-                } catch (IOException ex) {
-                    log.error("Failed to get document binary");
-                }
-                UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
-                    authorisation,
-                    authTokenGenerator.generate(),
-                    PrlAppsConstants.CASE_TYPE,
-                    PrlAppsConstants.JURISDICTION,
-                    List.of(
-                        new InMemoryMultipartFile(
-                            SOA_MULTIPART_FILE,
-                            "Confidential_" + document.getDocumentFileName(),
-                            APPLICATION_PDF_VALUE,
-                            docData
-                        ))
-                );
-                Document document1 = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+                Document newUploadedDocument = getNewUploadedDocument(authorisation, document, documentId);
 
-                log.info("document uploaded {}", document1);
+                log.info("document uploaded {}", newUploadedDocument);
                 caseDocumentClient.deleteDocument(authorisation, authTokenGenerator.generate(), documentId, true);
                 log.info("deleted document {}", documentId);
 
                 uploadDoc = DocumentUtils.getQuarantineUploadDocument(
                     quarantineLegalDocElement.getValue().getCategoryId(),
-                    document1
+                    newUploadedDocument
                 );
             } else {
                 uploadDoc = DocumentUtils.getQuarantineUploadDocument(
@@ -344,6 +320,34 @@ public class ReviewDocumentService {
                 caseDataUpdated.put(uploadDocListConfOrDocTabKey, List.of(element(uploadDoc)));
             }
         }
+    }
+
+    private Document getNewUploadedDocument(String authorisation, Document document, UUID documentId) {
+        byte[] docData;
+        Document newUploadedDocument = null;
+        try {
+            Resource resource = caseDocumentClient.getDocumentBinary(authorisation, authTokenGenerator.generate(),
+                                                                     documentId
+            ).getBody();
+            docData = IOUtils.toByteArray(resource.getInputStream());
+            UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
+                authorisation,
+                authTokenGenerator.generate(),
+                PrlAppsConstants.CASE_TYPE,
+                PrlAppsConstants.JURISDICTION,
+                List.of(
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        CONFIDENTIAL + document.getDocumentFileName(),
+                        APPLICATION_PDF_VALUE,
+                        docData
+                    ))
+            );
+            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+        } catch (Exception ex) {
+            log.error("Failed to upload new document {}", ex.getMessage());
+        }
+        return newUploadedDocument;
     }
 
     private String getDocumentId(String url) {
