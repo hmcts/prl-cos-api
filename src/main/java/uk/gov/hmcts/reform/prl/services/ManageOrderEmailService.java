@@ -432,7 +432,6 @@ public class ManageOrderEmailService {
                 log.info("** CA case email notifications***");
                 DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
                 if (recipientsOptions != null) {
-                    log.info("inside sendEmailToApplicantOrSolicitor method call**");
                     //applicants
                     sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
                                                     caseData.getApplicants(),
@@ -561,8 +560,6 @@ public class ManageOrderEmailService {
                         postalInformation.forEach(organisationPostalInfo -> {
                             if ((isNotEmpty(organisationPostalInfo.getValue().getPostalAddress()))
                                     && isNotEmpty(organisationPostalInfo.getValue().getPostalAddress().getAddressLine1())) {
-                                log.info("getPostalName()-->{}",organisationPostalInfo.getValue().getPostalName());
-                                log.info("getPostalAddress()-->{}",organisationPostalInfo.getValue().getPostalAddress());
                                 try {
                                     UUID bulkPrintId = sendOrderDocumentViaPost(caseData, organisationPostalInfo.getValue().getPostalAddress(),
                                             organisationPostalInfo.getValue().getPostalName(), authorisation, orderDocuments);
@@ -790,10 +787,6 @@ public class ManageOrderEmailService {
                                           String authorisation,
                                           List<Document> orderDocuments) throws Exception {
         List<Document> documents = new ArrayList<>();
-        log.info("namee--{}",name);
-        orderDocuments.forEach(s -> {
-            log.info("filename {}", s.getDocumentFileName());
-        });
         //generate cover letter
         List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
                 caseData,
