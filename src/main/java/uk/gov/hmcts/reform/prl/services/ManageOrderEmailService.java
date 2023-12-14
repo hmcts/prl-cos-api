@@ -530,9 +530,6 @@ public class ManageOrderEmailService {
 
     private void addBulkPrintIdsInOrderCollection(CaseData caseData,
                                                   List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
-        log.info("bulkPrintOrderDetails here {}", bulkPrintOrderDetails);
-        log.info("caseData.getManageOrders().getServeOrderDynamicList() {}",caseData.getManageOrders().getServeOrderDynamicList());
-        log.info("caseData.getOrderCollection() bfr {}",caseData.getOrderCollection());
         caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .forEach(element -> nullSafeCollection(caseData.getOrderCollection())
                         .forEach(orderDetailsElement -> {
@@ -544,7 +541,6 @@ public class ManageOrderEmailService {
                                         .setBulkPrintOrderDetails(bulkPrints);
                             }
                         }));
-        log.info("caseData.getOrderCollection() after {}",caseData.getOrderCollection());
     }
 
     private void serveOrdersToOtherOrganisation(CaseData caseData, String authorisation,
@@ -598,8 +594,6 @@ public class ManageOrderEmailService {
                                                             applicantElement.getValue().getLabelForDynamicList(),
                                                             authorisation, orderDocuments
                 );
-                log.info("bulkPrintOrderDetails Starttttt11111...{}", bulkPrintId);
-                log.info("bulkPrintOrderDetails Bfr....{}", bulkPrintOrderDetails);
                 //PRL-4225 save bulk print details
                 bulkPrintOrderDetails.add(element(
                     buildBulkPrintOrderDetail(
@@ -607,7 +601,6 @@ public class ManageOrderEmailService {
                         String.valueOf(applicantElement.getId()),
                         applicantElement.getValue().getLabelForDynamicList()
                     )));
-                log.info("bulkPrintOrderDetails after....{}", bulkPrintOrderDetails);
             } catch (Exception e) {
                 log.error("Error in sending order docs to applicant address {}", applicantElement.getId());
                 log.error("Exception occurred in sending order docs to applicant address", e);
