@@ -157,7 +157,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .generateDraftOrderDropDown(authToken,s2sToken,"test", callbackRequest);
+            .generateDraftOrderDropDown(authToken,s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -195,7 +195,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .generateDraftOrderDropDown(authToken,s2sToken,"test",callbackRequest);
+            .generateDraftOrderDropDown(authToken,s2sToken,callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -1115,7 +1115,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
-            editAndApproveDraftOrderController.generateDraftOrderDropDown(authToken, s2sToken,"test", callbackRequest);
+            editAndApproveDraftOrderController.generateDraftOrderDropDown(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
     }
 
