@@ -57,7 +57,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@SuppressWarnings("java:S107")
 public class ReviewDocumentService {
 
     public static final String CONFIDENTIAL = "Confidential_";
