@@ -2122,10 +2122,6 @@ public class ManageOrderEmailServiceTest {
 
         childLiveWithList.add(LiveWithEnum.applicant);
 
-        //Element<OrderDetails> orderDetailsElement1 = element(OrderDetails.builder().build());
-
-        //orderDetailsElement1.getId();
-
         CaseData caseData = CaseData.builder()
                 .id(12345L)
                 .applicantCaseName("TestCaseName")
