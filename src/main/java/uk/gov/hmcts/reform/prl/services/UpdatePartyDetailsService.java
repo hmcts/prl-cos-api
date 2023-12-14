@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -35,6 +36,7 @@ import java.util.stream.Collectors;
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
@@ -209,19 +211,33 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> setDefaultEmptyChildDetails(CaseData caseData) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        List<Element<Child>> children = caseData.getChildren();
-        log.info("setDefaultEmptyChildDetails called");
-        log.info("Children in case: " + children);
-        if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
-            log.info("Children empty or < 1");
-            children = new ArrayList<Element<Child>>();
-            Element<Child> childDetails = element(Child.builder().build());
-            children.add(childDetails);
-            caseDataUpdated.put("children", children);
-            log.info("Updated case data: " + caseDataUpdated);
-            return caseDataUpdated;
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
+            log.info("Revised children in case: " + children);
+            if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+                log.info("Children empty or < 1");
+                children = new ArrayList<>();
+                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder().build());
+                children.add(childDetails);
+                caseDataUpdated.put("children", children);
+                log.info("Updated case data: " + caseDataUpdated);
+            } else {
+                caseDataUpdated.put("children", caseData.getNewChildDetails());
+            }
+        } else {
+            List<Element<Child>> children = caseData.getChildren();
+            log.info("Children in case: " + children);
+            if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+                log.info("Children empty or < 1");
+                children = new ArrayList<>();
+                Element<Child> childDetails = element(Child.builder().build());
+                children.add(childDetails);
+                caseDataUpdated.put("children", children);
+                log.info("Updated case data: " + caseDataUpdated);
+            } else {
+                caseDataUpdated.put("children", caseData.getChildren());
+            }
         }
-        caseDataUpdated.put("children", caseData.getChildren());
         return caseDataUpdated;
 
     }

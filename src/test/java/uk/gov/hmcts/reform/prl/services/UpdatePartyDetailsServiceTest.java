@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -556,5 +558,54 @@ public class UpdatePartyDetailsServiceTest {
         List<Element<Child>> updatedChildDetails = (List<Element<Child>>) updatedCaseData.get("children");
         assertEquals(1, updatedChildDetails.size());
         assertEquals(Child.builder().build(), updatedChildDetails.get(0).getValue());
+    }
+
+    @Test
+    public void testSetDefaultEmptyForChildDetails_whenRevisedChildDetailsPresent() {
+        ChildDetailsRevised child1 = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name1")
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        ChildDetailsRevised child2 = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name2")
+            .dateOfBirth(LocalDate.of(2000, 12, 22))
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChild1 = Element.<ChildDetailsRevised>builder().value(child1).build();
+        Element<ChildDetailsRevised> wrappedChild2 = Element.<ChildDetailsRevised>builder().value(child2).build();
+
+        List<Element<ChildDetailsRevised>> childList = new ArrayList<>();
+        childList.add(wrappedChild1);
+        childList.add(wrappedChild2);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
+            .newChildDetails(childList)
+            .build();
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
+        assertEquals(childList, updatedCaseData.get("children"));
+    }
+
+    @Test
+    public void testSetDefaultEmptyChildDetails_whenNoRevisedChildDetailsPresent() {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .taskListVersion(PrlAppsConstants.TASK_LIST_VERSION_V2)
+            .build();
+
+        Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
+        List<Element<ChildDetailsRevised>> updatedChildDetails = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("children");
+        assertEquals(1, updatedChildDetails.size());
+        assertEquals(ChildDetailsRevised.builder().build(), updatedChildDetails.get(0).getValue());
     }
 }
