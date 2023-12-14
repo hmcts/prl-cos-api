@@ -87,7 +87,6 @@ public class ManageOrdersControllerFunctionalTest {
             .then().assertThat().statusCode(200);
     }
 
-    @Ignore
     @Test
     public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
