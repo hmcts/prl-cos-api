@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.BulkPrintOrderDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -31,6 +32,8 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
@@ -44,6 +47,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -63,6 +67,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class ManageOrderEmailService {
 
+    public static final String NEW_AND_FINAL = "newAndFinal";
+    public static final String FINAL = "final";
+    public static final String NEW = "new";
     @Autowired
     private EmailService emailService;
 
@@ -418,8 +425,8 @@ public class ManageOrderEmailService {
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
 
+        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
                 || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
                 log.info("** CA case email notifications***");
@@ -440,13 +447,11 @@ public class ManageOrderEmailService {
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
-                manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
+                sendEmailToOtherOrganisation(caseData,manageOrders.getEmailInformationCA(),authorisation, orderDocuments);
             } else if (manageOrders.getServeOtherPartiesCaOnlyC47a() != null && manageOrders.getServeOtherPartiesCaOnlyC47a()
                 .contains(OtherOrganisationOptions.anotherOrganisation)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCaOnlyC47a())) {
-                manageOrders.getEmailInformationCaOnlyC47a().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
+                sendEmailToOtherOrganisation(caseData,manageOrders.getEmailInformationCaOnlyC47a(),authorisation, orderDocuments);
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties()) || isNotEmpty(manageOrders.getOtherPartiesOnlyC47a())) {
@@ -470,8 +475,7 @@ public class ManageOrderEmailService {
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsDA())) {
-                manageOrders.getEmailInformationDA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
+                sendEmailToOtherOrganisation(caseData,manageOrders.getEmailInformationDA(),authorisation, orderDocuments);
             }
         }
         // Send email notification to other organisations
@@ -484,6 +488,86 @@ public class ManageOrderEmailService {
                                                 )
         );
 
+    }
+
+    private void sendEmailToOtherOrganisation(CaseData caseData, List<Element<EmailInformation>> emailInformationCA,
+                                              String authorisation, List<Document> orderDocuments) {
+
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+
+        if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
+            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
+            AtomicBoolean newOrdersExists = new AtomicBoolean(false);
+            AtomicBoolean finalOrdersExists = new AtomicBoolean(false);
+            caseData.getOrderCollection().stream()
+                .filter(order -> selectedOrderIds.contains(order.getId().toString()))
+                .forEach(order -> {
+                    if (StringUtils.equals(
+                        order.getValue().getTypeOfOrder(),
+                        SelectTypeOfOrderEnum.interim.getDisplayedValue()
+                    ) || StringUtils.equals(
+                        order.getValue().getTypeOfOrder(),
+                        SelectTypeOfOrderEnum.general.getDisplayedValue()
+                    )) {
+                        log.info("New order is selected to serve {}",order.getId());
+                        newOrdersExists.set(true);
+                    } else if (StringUtils.equals(
+                        order.getValue().getTypeOfOrder(),
+                        SelectTypeOfOrderEnum.finl.getDisplayedValue()
+                    )) {
+                        log.info("Final order is selected to serve {}",order.getId());
+                        finalOrdersExists.set(true);
+                    }
+
+                });
+            setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
+        }
+        emailInformationCA.stream().map(Element::getValue).forEach(value -> {
+            try {
+                sendgridService.sendEmailUsingTemplateWithAttachments(
+                    SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
+                    authorisation,
+                    SendgridEmailConfig.builder().toEmailAddress(
+                        value.getEmailAddress()).dynamicTemplateData(
+                        dynamicData).listOfAttachments(
+                        orderDocuments).languagePreference(LanguagePreference.english).build()
+                );
+            } catch (IOException e) {
+                log.error("there is a failure in sending email for email {} with exception {}", value.getEmailAddress(),e.getMessage());
+            }
+        });
+
+
+    }
+
+    private void setOrderSpecificDynamicFields(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists,
+                                               AtomicBoolean finalOrdersExists, List<String> selectedOrderIds) {
+        setTypeOfOrderForEmail(dynamicData, newOrdersExists, finalOrdersExists);
+        setMultipleOrdersForEmail(dynamicData, selectedOrderIds);
+    }
+
+    private void setMultipleOrdersForEmail(Map<String, Object> dynamicData, List<String> selectedOrderIds) {
+        dynamicData.put("multipleOrders", CollectionUtils.size(selectedOrderIds) > 1);
+    }
+
+    private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {
+        if (newOrdersExists.get() && finalOrdersExists.get()) {
+            dynamicData.put(NEW_AND_FINAL, true);
+            dynamicData.put(FINAL, false);
+            dynamicData.put(NEW, false);
+
+        } else if (newOrdersExists.get()) {
+
+            dynamicData.put(NEW_AND_FINAL, false);
+            dynamicData.put(FINAL, false);
+            dynamicData.put(NEW, true);
+        } else if (finalOrdersExists.get()) {
+
+            dynamicData.put(NEW_AND_FINAL, false);
+            dynamicData.put(FINAL, true);
+            dynamicData.put(NEW, false);
+        }
     }
 
     private SelectTypeOfOrderEnum isOrderFinal(CaseData caseData) {
