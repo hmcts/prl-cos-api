@@ -19,6 +19,7 @@
           }
         }
       ],
+      "markedToServeEmailNotification": "Yes",
       "isCaseUrgent": "No",
       "id": 0,
       "applicantCaseName": "John Smith",
