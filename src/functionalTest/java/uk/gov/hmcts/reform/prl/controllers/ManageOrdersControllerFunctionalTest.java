@@ -104,7 +104,7 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBody_whenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
+    public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
         assert request
@@ -123,10 +123,8 @@ public class ManageOrdersControllerFunctionalTest {
             .toString()
             .equals(
                 "{\"confirmation_header\":\"# Order approved\","
-                    + "\"confirmation_body\":\"### What happens next \\n\\n We will send this order to admin."
+                    + "\"confirmation_body\":\"### What happens next \\n We will send this order to admin."
                     + "\\n\\n\\n If you have included further directions, admin will also receive them.\\n\"}"
             );
-
-
     }
 }
