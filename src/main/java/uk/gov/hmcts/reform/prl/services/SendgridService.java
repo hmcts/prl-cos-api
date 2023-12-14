@@ -16,6 +16,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.MapUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ResourceLoader;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -28,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -45,6 +45,8 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_END;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.EMAIL_START;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.FINAL_ORDER_TITLE;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.NEW_ORDER_TITLE;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.SPECIAL_INSTRUCTIONS_EMAIL_BODY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ATTACHMENT_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NUMBER;
@@ -165,6 +167,8 @@ public class SendgridService {
             subject = emailProps.get("orderSubject");
             emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get(CASE_NUMBER) + "#Orders");
             String title = emailProps.containsKey("finalOrder") ? FINAL_ORDER_TITLE : NEW_ORDER_TITLE;
+            String body = emailProps.containsKey("finalOrder")
+                ? RESPONDENT_SOLICITOR_FINAL_ORDER_EMAIL_BODY : RESPONDENT_SOLICITOR_SERVE_ORDER_EMAIL_BODY;
 
             String emailStart = String.format(
                 EMAIL_START,
@@ -178,7 +182,7 @@ public class SendgridService {
                 emailProps.get("orderUrLLink")
             );
 
-            content = new Content("text/html", String.format("%s%s%s", title, emailStart, emailEnd));
+            content = new Content("text/html", String.format("%s%s%s%s", title, emailStart, body, emailEnd));
         } else {
             content = new Content("text/plain", String.format(
                     (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
