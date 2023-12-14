@@ -235,10 +235,10 @@ public class ManageOrdersController {
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             log.info("callbackRequest------>{}",callbackRequest);
-            log.info("==================Cccccccccc============");
+            log.info("==================AAAAAAAAAAAA============");
             ObjectMapper om = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
-            String result = om.writeValueAsString(callbackRequest);
+            String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
             System.out.println(result);
             log.info("==================ENDDddd============");
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
