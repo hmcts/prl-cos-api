@@ -797,6 +797,7 @@ public class CallbackController {
                                                                          @RequestBody uk.gov.hmcts.reform
                                                                              .ccd.client.model.CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("populateChildInformation called");
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {

@@ -210,11 +210,15 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> setDefaultEmptyChildDetails(CaseData caseData) {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<Child>> children = caseData.getChildren();
+        log.info("setDefaultEmptyChildDetails called");
+        log.info("Children in case: ", children);
         if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+            log.info("Children empty or < 1");
             children = new ArrayList<Element<Child>>();
             Element<Child> childDetails = element(Child.builder().build());
             children.add(childDetails);
             caseDataUpdated.put("children", children);
+            log.info("Updated case data: ", caseDataUpdated);
             return caseDataUpdated;
         }
         caseDataUpdated.put("children", caseData.getChildren());
