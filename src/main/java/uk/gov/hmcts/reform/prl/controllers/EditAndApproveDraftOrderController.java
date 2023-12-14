@@ -12,14 +12,17 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -48,12 +51,24 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @RestController
 @RequiredArgsConstructor
 public class EditAndApproveDraftOrderController {
+    public static final String WHAT_TO_DO_WITH_ORDER_SOLICITOR = "whatToDoWithOrderSolicitor";
     private final ObjectMapper objectMapper;
     private final DraftAnOrderService draftAnOrderService;
     private final ManageOrderService manageOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
     private final CoreCaseDataService coreCaseDataService;
+
+    public static final String CONFIRMATION_HEADER = "# Order approved";
+    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
+        ### What happens next \n We will send this order to admin.
+        \n\n If you have included further directions, admin will also receive them.
+        """;
+    public static final String CONFIRMATION_HEADER_LEGAL_REP = "# Message sent to legal representative";
+    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP = """
+        ### What happens next \n Your message has been sent to the legal representative.
+        """;
+
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -281,7 +296,7 @@ public class EditAndApproveDraftOrderController {
         }
     }
 
-    @PostMapping(path = "/judge-or-admin-edit-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/edit-and-serve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Send Email Notification on Case order")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
@@ -312,6 +327,48 @@ public class EditAndApproveDraftOrderController {
                 caseDataUpdated
             );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/edit-and-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to display confirmation and send notifications")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public ResponseEntity<SubmittedCallbackResponse> handleEditAndApproveSubmitted(
+        @RequestHeader("Authorization")
+        @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("Solicitor created order options {}",caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR));
+            log.info("Court admin created order options {}",caseDataUpdated.get("whatToDoWithOrderCourtAdmin"));
+            ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
+                .ok(SubmittedCallbackResponse.builder()
+                        .confirmationHeader(CONFIRMATION_HEADER)
+                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            if (JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString()
+                .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
+                responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                             .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
+                                             .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
+                                             .build());
+            } else if (JudgeApprovalDecisionsSolicitorEnum.sendToAdminToServe.toString()
+                .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))
+                || JudgeApprovalDecisionsSolicitorEnum.sendToAdminToServe.toString()
+                .equalsIgnoreCase(String.valueOf(caseDataUpdated.get("whatToDoWithOrderCourtAdmin")))) {
+                responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
+            }
+            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            coreCaseDataService.triggerEvent(
+                JURISDICTION,
+                CASE_TYPE,
+                (Long) caseDataUpdated.get("id"),
+                "internal-update-all-tabs",
+                caseDataUpdated
+            );
+            return responseEntity;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

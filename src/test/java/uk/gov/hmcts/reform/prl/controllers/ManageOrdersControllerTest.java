@@ -12,11 +12,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -25,8 +23,6 @@ import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsCourtAdminEnum;
-import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -75,12 +71,10 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -2909,56 +2903,5 @@ public class ManageOrdersControllerTest {
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .populatePreviewOrderWhenOrderUploaded(authToken,s2sToken,callbackRequest);
         assertNotNull(callbackResponse);
-    }
-
-    @Test
-    public void testHandleEditAndApproveSubmitted() throws Exception {
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsCourtAdminEnum.editTheOrderAndServe);
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        ResponseEntity<SubmittedCallbackResponse> callbackResponse = manageOrdersController
-            .handleEditAndApproveSubmitted(authToken,s2sToken,callbackRequest);
-        assertNotNull(Objects.requireNonNull(callbackResponse.getBody()).getConfirmationHeader());
-    }
-
-    @Test
-    public void testHandleEditAndApproveSubmittedByCourtAdmin() throws Exception {
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
-        assertExpectedException(() -> {
-            manageOrdersController
-                .handleEditAndApproveSubmitted(authToken, s2sToken, callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-    }
-
-    @Test
-    public void testHandleEditAndApproveSubmittedWhenAskLegalRepChoosen() throws Exception {
-        Map<String, Object> stringObjectMap = new HashMap<>();
-        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString());
-        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(12345L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        ResponseEntity<SubmittedCallbackResponse> callbackResponse = manageOrdersController
-            .handleEditAndApproveSubmitted(authToken,s2sToken,callbackRequest);
-        assertNull(callbackResponse.getBody().getConfirmationHeader());
     }
 }
