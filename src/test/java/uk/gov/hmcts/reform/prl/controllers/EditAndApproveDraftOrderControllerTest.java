@@ -1359,7 +1359,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
             .handleEditAndApproveSubmitted(authToken,s2sToken,callbackRequest);
-        assertNull(callbackResponse.getBody().getConfirmationHeader());
+        assertNotNull(callbackResponse.getBody().getConfirmationHeader());
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
