@@ -56,16 +56,15 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SuppressWarnings("java:S107")
 public class ReviewDocumentService {
 
     public static final String CONFIDENTIAL = "Confidential_";
-    @Autowired
+
     private final CoreCaseDataService coreCaseDataService;
 
-    @Autowired
     private final CaseDocumentClient caseDocumentClient;
 
-    @Autowired
     private final AuthTokenGenerator authTokenGenerator;
 
     public static final String DOCUMENT_UUID_REGEX = "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}";
