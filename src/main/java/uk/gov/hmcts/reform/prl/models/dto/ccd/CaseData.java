@@ -615,11 +615,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        this.toBuilder()
+        return this.toBuilder()
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .build();
-
-        return this;
     }
 
     public CaseData setIssueDate() {
@@ -781,9 +779,12 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
 
-    //FPET-567 - Added for hiding fields for SDO
-    @JsonProperty("isSdoSelected")
-    private YesOrNo isSdoSelected;
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+
+    /**
+     * PRL-4260,4335,4301 - manage orders hearing screen fields show params.
+     */
+    @JsonUnwrapped
+    public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
 
 }

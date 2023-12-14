@@ -203,7 +203,8 @@ public class ReviewDocumentService {
                     element(QuarantineLegalDoc.builder()
                                 .url(caseData.getScannedDocuments().stream()
                                          .filter(element -> element.getId().equals(uuid))
-                                         .collect(Collectors.toList()).get(0).getValue().getUrl()).build()));
+                                         .collect(Collectors.toList()).stream().findFirst().map(Element::getValue).map(
+                                        ScannedDocument::getUrl).orElse(null)).build()));
                 if (quarantineBulkscanDocElement.isPresent()) {
                     updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                         caseDataUpdated,
