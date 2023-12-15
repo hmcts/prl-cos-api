@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
-import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.response.RoleAssignmentResponse;
 
 @FeignClient(name = "amRoleAssignment",
         url = "${amRoleAssignment.api.url}",
