@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -217,12 +218,13 @@ public class UpdatePartyDetailsService {
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
                 log.info("Children empty or < 1");
                 children = new ArrayList<>();
-                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder().build());
+                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder()
+                                                                        .firstName("test name").build());
                 children.add(childDetails);
-                caseDataUpdated.put("children", children);
+                caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
                 log.info("Updated case data: " + caseDataUpdated);
             } else {
-                caseDataUpdated.put("children", caseData.getNewChildDetails());
+                caseDataUpdated.put(PrlAppsConstants.CHILDREN, caseData.getNewChildDetails());
             }
         } else {
             List<Element<Child>> children = caseData.getChildren();
@@ -232,10 +234,10 @@ public class UpdatePartyDetailsService {
                 children = new ArrayList<>();
                 Element<Child> childDetails = element(Child.builder().build());
                 children.add(childDetails);
-                caseDataUpdated.put("children", children);
+                caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
                 log.info("Updated case data: " + caseDataUpdated);
             } else {
-                caseDataUpdated.put("children", caseData.getChildren());
+                caseDataUpdated.put(PrlAppsConstants.CHILDREN, caseData.getChildren());
             }
         }
         return caseDataUpdated;
