@@ -389,12 +389,9 @@ public class ManageOrderEmailService {
 
         cafcassEmails.addAll(otherEmails);
 
-        cafcassEmails.forEach(email -> emailService.send(
-            email,
-            EmailTemplateNames.CAFCASS_OTHER,
-            buildEmailToCafcassAndOtherParties(caseData),
-            LanguagePreference.english
-        ));
+        //TODO : replace this with sendgrid email notification
+        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
+        sendEmailToCafcassCymru(caseData,cafcassEmails,systemUserService.getSysUserToken(),orderDocuments);
     }
 
     public EmailTemplateVars buildEmailToCafcassAndOtherParties(CaseData caseData) {
@@ -479,20 +476,56 @@ public class ManageOrderEmailService {
             }
         }
         // Send email notification to other organisations
-        listOfOtherAndCafcassEmails.forEach(email ->
-                                                emailService.send(
-                                                    email,
-                                                    EmailTemplateNames.CAFCASS_OTHER,
-                                                    buildEmailToCafcassAndOtherParties(caseData),
-                                                    LanguagePreference.english
-                                                )
-        );
+        // TODO: replace this with sendgrid email notification
+        sendEmailToCafcassCymru(caseData,listOfOtherAndCafcassEmails,authorisation, orderDocuments);
 
+    }
+
+    private void sendEmailToCafcassCymru(CaseData caseData, List<String> cafcassEmailInformation,
+                                        String authorisation, List<Document> orderDocuments) {
+
+        Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+        dynamicData.put("dashBoardLink",manageCaseUrl + "/" + caseData.getId() + "#Orders");
+        cafcassEmailInformation.stream().forEach(emailAddress -> {
+            try {
+                sendgridService.sendEmailUsingTemplateWithAttachments(
+                    SendgridEmailTemplateNames.SERVER_ORDER_CAFCASS_CYMRU,
+                    authorisation,
+                    SendgridEmailConfig.builder().toEmailAddress(
+                        emailAddress).dynamicTemplateData(
+                        dynamicData).listOfAttachments(
+                        orderDocuments).languagePreference(LanguagePreference.english).build()
+                );
+            } catch (IOException e) {
+                log.error("there is a failure in sending email for email {} with exception {}",
+                          emailAddress,e.getMessage());
+            }
+        });
     }
 
     private void sendEmailToOtherOrganisation(CaseData caseData, List<Element<EmailInformation>> emailInformationCA,
                                               String authorisation, List<Document> orderDocuments) {
 
+        Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+        emailInformationCA.stream().map(Element::getValue).forEach(value -> {
+            try {
+                sendgridService.sendEmailUsingTemplateWithAttachments(
+                    SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
+                    authorisation,
+                    SendgridEmailConfig.builder().toEmailAddress(
+                        value.getEmailAddress()).dynamicTemplateData(
+                        dynamicData).listOfAttachments(
+                        orderDocuments).languagePreference(LanguagePreference.english).build()
+                );
+            } catch (IOException e) {
+                log.error("there is a failure in sending email for email {} with exception {}", value.getEmailAddress(),e.getMessage());
+            }
+        });
+
+
+    }
+
+    private Map<String, Object> getDynamicDataForEmail(CaseData caseData) {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
 
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
@@ -523,22 +556,7 @@ public class ManageOrderEmailService {
                 });
             setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
         }
-        emailInformationCA.stream().map(Element::getValue).forEach(value -> {
-            try {
-                sendgridService.sendEmailUsingTemplateWithAttachments(
-                    SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
-                    authorisation,
-                    SendgridEmailConfig.builder().toEmailAddress(
-                        value.getEmailAddress()).dynamicTemplateData(
-                        dynamicData).listOfAttachments(
-                        orderDocuments).languagePreference(LanguagePreference.english).build()
-                );
-            } catch (IOException e) {
-                log.error("there is a failure in sending email for email {} with exception {}", value.getEmailAddress(),e.getMessage());
-            }
-        });
-
-
+        return dynamicData;
     }
 
     private void setOrderSpecificDynamicFields(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists,
