@@ -15,18 +15,12 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
-import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.*;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
@@ -61,8 +55,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -82,6 +75,9 @@ public class ManageOrderEmailServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private DraftAnOrderService draftAnOrderService;
 
     @Mock
     private CourtFinderService courtFinderService;
@@ -1853,5 +1849,33 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+    }
+
+    @Test
+    public void testsendEmailToLegalRepresentativeOnRejection() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(ManageOrders.builder().instructionsToLegalRepresentaive("test").build())
+            .applicantSolicitorEmailAddress("test@test.com")
+            .issueDate(LocalDate.now())
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
+            .build();
+
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        EmailTemplateVars email = ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .build();
+        manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(caseDetails, DraftOrder.builder().otherDetails(
+            OtherDraftOrderDetails.builder().orderCreatedBy("Solicitor name").build()).build());
+        verify(emailService, times(1)).getCaseData(caseDetails);
     }
 }

@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -96,6 +97,8 @@ public class ManageOrderEmailService {
 
     @Autowired
     private BulkPrintService bulkPrintService;
+
+    private final DraftAnOrderService draftAnOrderService;
 
     private static final String ORDER_TYPE = "OrderPack";
 
@@ -820,4 +823,19 @@ public class ManageOrderEmailService {
         return StringUtils.isNotEmpty(party.getSolicitorEmail());
     }
 
+    public void sendEmailToLegalRepresentativeOnRejection(CaseDetails caseDetails, DraftOrder draftOrder) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        emailService.send(
+            draftOrder.getOtherDetails().getOrderCreatedByEmailId(),
+            EmailTemplateNames.EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER,
+            ManageOrderEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .fullName(draftOrder.getOtherDetails().getOrderCreatedBy())
+                .orderLink(manageCaseUrl + "/" + caseData.getId() + "#DraftOrders")
+                .instructions(caseData.getManageOrders().getInstructionsToLegalRepresentaive())
+                .build(),
+            LanguagePreference.english
+        );
+    }
 }
