@@ -803,6 +803,7 @@ public class CallbackController {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseDataUpdated.putAll(updatePartyDetailsService.setDefaultEmptyChildDetails(caseData));
         }
+        log.info("Case data with populated child details: " + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
