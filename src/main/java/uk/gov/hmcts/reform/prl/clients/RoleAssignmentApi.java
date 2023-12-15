@@ -16,7 +16,7 @@ public interface RoleAssignmentApi {
     RoleAssignmentResponse getRoleAssignment(
         @RequestHeader("Authorisation") String authorisation,
         @RequestHeader("serviceAuthorisation") String serviceAuthorisation,
-        @RequestHeader("x-correlation-id") String xCorrelationId,
+        @RequestHeader("x-correlation-id") String xcorrelationId,
         @RequestHeader("content-type") String contentType,
         @RequestBody Object roleAssignmentRequest);
 }
