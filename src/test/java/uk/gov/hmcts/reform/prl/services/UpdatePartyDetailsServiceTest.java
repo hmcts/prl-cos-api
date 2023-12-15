@@ -606,6 +606,6 @@ public class UpdatePartyDetailsServiceTest {
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
         List<Element<ChildDetailsRevised>> updatedChildDetails = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("children");
         assertEquals(1, updatedChildDetails.size());
-        assertEquals(ChildDetailsRevised.builder().build(), updatedChildDetails.get(0).getValue());
+        assertEquals(ChildDetailsRevised.builder().firstName("test name").build(), updatedChildDetails.get(0).getValue());
     }
 }
