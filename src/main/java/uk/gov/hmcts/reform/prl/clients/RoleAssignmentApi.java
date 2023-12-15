@@ -5,6 +5,7 @@ import org.springframework.cloud.openfeign.FeignClientProperties;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import uk.gov.hmcts.reform.prl.models.roleassignment.request.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.response.RoleAssignmentResponse;
 
 @FeignClient(name = "amRoleAssignment",
@@ -18,5 +19,5 @@ public interface RoleAssignmentApi {
         @RequestHeader("serviceAuthorisation") String serviceAuthorisation,
         @RequestHeader("x-correlation-id") String xcorrelationId,
         @RequestHeader("content-type") String contentType,
-        @RequestBody Object roleAssignmentRequest);
+        @RequestBody RoleAssignmentRequest roleAssignmentRequest);
 }
