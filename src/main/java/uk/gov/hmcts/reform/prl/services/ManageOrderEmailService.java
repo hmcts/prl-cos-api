@@ -70,6 +70,7 @@ public class ManageOrderEmailService {
     public static final String NEW_AND_FINAL = "newAndFinal";
     public static final String FINAL = "final";
     public static final String NEW = "new";
+    public static final String ORDERS = "#Orders";
     @Autowired
     private EmailService emailService;
 
@@ -285,7 +286,7 @@ public class ManageOrderEmailService {
             .caseName(caseData.getApplicantCaseName())
             .applicantName(name)
             .courtName(caseData.getCourtName())
-            .dashboardLink(manageCaseUrl + "/" + caseData.getId() + "#Orders")
+            .dashboardLink(manageCaseUrl + "/" + caseData.getId() + ORDERS)
             .build();
     }
 
@@ -389,7 +390,6 @@ public class ManageOrderEmailService {
 
         cafcassEmails.addAll(otherEmails);
 
-        //TODO : replace this with sendgrid email notification
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
         sendEmailToCafcassCymru(caseData,cafcassEmails,systemUserService.getSysUserToken(),orderDocuments);
     }
@@ -409,7 +409,7 @@ public class ManageOrderEmailService {
             .caseUrgency(typeOfHearing)
             .issueDate(caseData.getIssueDate().format(dateTimeFormatter))
             .familyManNumber(caseData.getFamilymanCaseNumber() != null ? caseData.getFamilymanCaseNumber() : "")
-            .orderLink(manageCaseUrl + "/" + caseData.getId() + "#Orders")
+            .orderLink(manageCaseUrl + "/" + caseData.getId() + ORDERS)
             .build();
     }
 
@@ -476,7 +476,6 @@ public class ManageOrderEmailService {
             }
         }
         // Send email notification to other organisations
-        // TODO: replace this with sendgrid email notification
         sendEmailToCafcassCymru(caseData,listOfOtherAndCafcassEmails,authorisation, orderDocuments);
 
     }
@@ -485,7 +484,7 @@ public class ManageOrderEmailService {
                                         String authorisation, List<Document> orderDocuments) {
 
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-        dynamicData.put("dashBoardLink",manageCaseUrl + "/" + caseData.getId() + "#Orders");
+        dynamicData.put("dashBoardLink",manageCaseUrl + "/" + caseData.getId() + ORDERS);
         cafcassEmailInformation.stream().forEach(emailAddress -> {
             try {
                 sendgridService.sendEmailUsingTemplateWithAttachments(
