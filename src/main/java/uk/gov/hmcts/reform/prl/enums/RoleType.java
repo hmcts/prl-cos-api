@@ -5,9 +5,7 @@ import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum Status {
-
-    LIVE,
-    REJECTED,
-    CREATE_REQUESTED
+public enum RoleType {
+    ORGANISATION,
+    CASE
 }
