@@ -48,6 +48,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseControllerTest {
@@ -506,5 +507,99 @@ public class CaseControllerTest {
         caseController.getAllHearingsForCitizenCase(authToken, servAuthToken, caseId);
 
         throw new RuntimeException("Invalid Client");
+    }
+
+    @Test
+    public void testRetrieveRaFlags() {
+        String caseId = "1234567891234567L";
+        String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
+
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        Mockito.when(caseService.getPartyCaseFlags(authToken, caseId, partyId)).thenReturn(Flags.builder().roleOnCase(
+            "Respondent 1").partyName("Respondent").details(
+            Collections.emptyList()).build());
+
+        Flags flag = caseController.getCaseFlags(caseId, partyId, authToken, servAuthToken);
+        Assert.assertNotNull(flag);
+    }
+
+    @Test
+    public void testRetrieveRaFlagsWhenAuthFails() throws IOException {
+        expectedEx.expect(RuntimeException.class);
+        expectedEx.expectMessage("Invalid Client");
+
+
+        String caseId = "1234567891234567L";
+        String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
+
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+
+        caseController.getCaseFlags(caseId, partyId, authToken, servAuthToken);
+
+        throw new RuntimeException("Invalid Client");
+    }
+
+    @Test
+    public void testUpdateCitizenRAflags() {
+        String caseId = "1234567891234567L";
+        String eventId = "c100RequestSupport";
+        String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
+        Element<FlagDetailRequest> flagDetailRequest = element(FlagDetailRequest.builder()
+            .name("Support filling in forms")
+            .name_cy("Cymorth i lenwi ffurflenni")
+            .hearingRelevant(YesOrNo.No)
+            .flagCode("RA0018")
+            .status("Requested")
+            .availableExternally(YesOrNo.Yes)
+            .build());
+        List<Element<FlagDetailRequest>> flagDetailsRequest = Collections.singletonList(flagDetailRequest);
+        CitizenPartyFlagsRequest partyRequestFlags = CitizenPartyFlagsRequest.builder()
+            .caseTypeOfApplication("C100")
+            .partyIdamId(partyId)
+            .partyExternalFlags(FlagsRequest.builder()
+                                    .details(flagDetailsRequest).build()).build();
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
+        Mockito.when(caseService.updateCitizenRAflags(
+            caseId,
+            eventId,
+            authToken,
+            partyRequestFlags
+        )).thenReturn(ResponseEntity.status(HttpStatus.OK).body("party flags updated"));
+
+        ResponseEntity<Object> updateResponse = caseController.updateCitizenRAflags(partyRequestFlags, eventId, caseId, authToken, servAuthToken);
+        assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void testUpdateCitizenRAflagsWhenAuthFails() {
+        String caseId = "1234567891234567L";
+        String eventId = "fl401RequestSupport";
+        String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
+        Element<FlagDetailRequest> flagDetailRequest = element(FlagDetailRequest.builder()
+            .name("Support filling in forms")
+            .name_cy("Cymorth i lenwi ffurflenni")
+            .hearingRelevant(YesOrNo.No)
+            .flagCode("RA0018")
+            .status("Requested")
+            .availableExternally(YesOrNo.Yes)
+            .build());
+        List<Element<FlagDetailRequest>> flagDetailsRequest = Collections.singletonList(flagDetailRequest);
+        CitizenPartyFlagsRequest partyRequestFlags = CitizenPartyFlagsRequest.builder()
+            .caseTypeOfApplication("FL401")
+            .partyIdamId(partyId)
+            .partyExternalFlags(FlagsRequest.builder()
+                                    .details(flagDetailsRequest).build()).build();
+
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+
+        ResponseEntity<Object> updateResponse = caseController.updateCitizenRAflags(partyRequestFlags, eventId, caseId, authToken, servAuthToken);
+
+        assertThat(updateResponse.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
     }
 }

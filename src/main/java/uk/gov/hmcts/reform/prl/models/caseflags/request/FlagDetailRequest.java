@@ -1,13 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.caseflags.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 
@@ -15,12 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-@Getter
-@Setter
-@Builder(toBuilder = true)
-@NoArgsConstructor
-@AllArgsConstructor
-@Jacksonized
+@Builder
 public class FlagDetailRequest {
     public String name;
     @SuppressWarnings(value = "MemberName")

@@ -35,6 +35,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -87,10 +88,11 @@ public class CaseUtils {
             .createdDate(caseDetails.getCreatedDate())
             .lastModifiedDate(caseDetails.getLastModified());
 
-        if ((State.SUBMITTED_PAID.equals(state))) {
+        if ((State.SUBMITTED_PAID.equals(state)) && caseDataBuilder.build().getDateSubmitted() == null) {
             ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
             caseDataBuilder.dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime));
         }
+
         return caseDataBuilder.build();
     }
 
@@ -454,7 +456,7 @@ public class CaseUtils {
 
     private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
         Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
-        if (isNotEmpty(caseData.getApplicantsFL401())
+        if (isNotEmpty(Collections.singleton(caseData.getApplicantsFL401()))
             && caseData.getApplicantsFL401().getPartyId().toString().equals(partyId)) {
             partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
                                                        .builder()
@@ -465,7 +467,7 @@ public class CaseUtils {
             return partyDetailsMeta;
         }
 
-        if (isNotEmpty(caseData.getRespondentsFL401())
+        if (isNotEmpty(Collections.singleton(caseData.getRespondentsFL401()))
             && caseData.getRespondentsFL401().getPartyId().toString().equals(partyId)) {
             partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
                                                        .builder()
@@ -479,18 +481,6 @@ public class CaseUtils {
         return partyDetailsMeta;
     }
 
-    private static int findPartyIndex(String partyId, List<Element<PartyDetails>> parties) {
-        return IntStream.range(0, parties.size())
-            .filter(index -> (ObjectUtils.isNotEmpty(parties.get(index))
-                && ObjectUtils.isNotEmpty(parties.get(index).getValue())
-                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser())
-                && ObjectUtils.isNotEmpty(parties.get(index).getValue().getUser().getIdamId())
-                && parties.get(index).getValue().getUser().getIdamId().toString().equals(
-                partyId)))
-            .findFirst()
-            .orElse(-1);
-    }
-  
     public static List<String> getPartyNameList(List<Element<PartyDetails>> parties) {
         List<String> applicantList = new ArrayList<>();
         if (isNotEmpty(parties)) {

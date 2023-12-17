@@ -392,4 +392,186 @@ public class CaseService {
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
+    public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {
+        CaseDetails caseDetails = getCase(authToken, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
+            partyId,
+            caseData.getCaseTypeOfApplication(),
+            caseData
+        );
+
+        if (partyDetailsMeta.isPresent()
+            && partyDetailsMeta.get().getPartyDetails() != null
+            && !StringUtils.isEmpty(partyDetailsMeta.get().getPartyDetails().getLabelForDynamicList())) {
+            Optional<String> partyExternalCaseFlagField = getPartyExternalCaseFlagField(
+                caseData.getCaseTypeOfApplication(),
+                partyDetailsMeta.get().getPartyType(),
+                partyDetailsMeta.get().getPartyIndex()
+            );
+
+            if (partyExternalCaseFlagField.isPresent()) {
+                return objectMapper.convertValue(
+                    caseDetails.getData().get(partyExternalCaseFlagField.get()),
+                    Flags.class
+                );
+            }
+        }
+
+        return null;
+    }
+
+    public ResponseEntity<Object> updateCitizenRAflags(
+        String caseId, String eventId, String authToken, CitizenPartyFlagsRequest citizenPartyFlagsRequest) {
+        log.info("Inside updateCitizenRAflags caseId {}", caseId);
+        log.info("Inside updateCitizenRAflags eventId {}", eventId);
+        log.info("Inside updateCitizenRAflags citizenPartyFlagsRequest {}", citizenPartyFlagsRequest);
+
+        if (StringUtils.isEmpty(citizenPartyFlagsRequest.getPartyIdamId()) || ObjectUtils.isEmpty(
+            citizenPartyFlagsRequest.getPartyExternalFlags())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("bad request");
+        }
+
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+            caseEvent,
+            userDetails.getId()
+        );
+
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+
+        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
+        Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
+            citizenPartyFlagsRequest.getPartyIdamId(),
+            caseData.getCaseTypeOfApplication(),
+            caseData
+        );
+
+        if (!partyDetailsMeta.isPresent()
+            || null == partyDetailsMeta.get().getPartyDetails()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party details not found");
+        }
+
+        Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
+        Optional<String> partyExternalCaseFlagField = getPartyExternalCaseFlagField(
+            caseData.getCaseTypeOfApplication(),
+            partyDetailsMeta.get().getPartyType(),
+            partyDetailsMeta.get().getPartyIndex()
+        );
+
+        if (!partyExternalCaseFlagField.isPresent() || !updatedCaseData.containsKey(partyExternalCaseFlagField.get()) || ObjectUtils.isEmpty(
+            updatedCaseData.get(
+                partyExternalCaseFlagField.get()))) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("party external flag details not found");
+        }
+        try {
+            log.info("partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(partyExternalCaseFlagField.get()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        Flags flags = objectMapper.convertValue(
+            updatedCaseData.get(partyExternalCaseFlagField.get()),
+            Flags.class
+        );
+        try {
+            log.info("Existing external Party flags  ===>" + objectMapper.writeValueAsString(flags));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        flags = flags.toBuilder()
+            .details(convertFlags(citizenPartyFlagsRequest.getPartyExternalFlags().getDetails()))
+            .build();
+        try {
+            log.info("Updated external Party flags  ===>" + objectMapper.writeValueAsString(flags));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        Map<String, Object> externalCaseFlagMap = new HashMap<>();
+        externalCaseFlagMap.put(partyExternalCaseFlagField.get(), flags);
+
+        CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            externalCaseFlagMap
+        );
+
+        try {
+            log.info("Case data content is  ===>" + objectMapper.writeValueAsString(caseDataContent));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+
+        coreCaseDataService.submitUpdate(
+            authToken,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
+        return ResponseEntity.status(HttpStatus.OK).body("party flags updated");
+    }
+
+    private List<Element<FlagDetail>> convertFlags(List<Element<FlagDetailRequest>> details) {
+        List<Element<FlagDetail>> flagDetails = new ArrayList<>();
+
+        for (Element<FlagDetailRequest> detail : details) {
+            FlagDetail flagDetail = FlagDetail.builder().name(detail.getValue().getName())
+                .name_cy(detail.getValue().getName_cy())
+                .subTypeValue(detail.getValue().getSubTypeValue())
+                .subTypeValue_cy(detail.getValue().getSubTypeValue_cy())
+                .subTypeKey(detail.getValue().getSubTypeKey())
+                .otherDescription(detail.getValue().getOtherDescription())
+                .otherDescription_cy(detail.getValue().getOtherDescription_cy())
+                .flagComment(detail.getValue().getFlagComment())
+                .flagComment_cy(detail.getValue().getFlagComment_cy())
+                .flagUpdateComment(detail.getValue().getFlagUpdateComment())
+                .dateTimeCreated(detail.getValue().getDateTimeCreated())
+                .dateTimeModified(detail.getValue().getDateTimeModified())
+                .path(detail.getValue().getPath())
+                .hearingRelevant(detail.getValue().getHearingRelevant())
+                .flagCode(detail.getValue().getFlagCode())
+                .status(detail.getValue().getStatus())
+                .availableExternally(detail.getValue().getAvailableExternally())
+                .build();
+
+            if (null != detail.getId()) {
+                flagDetails.add(element(detail.getId(), flagDetail));
+            } else {
+                flagDetails.add(element(flagDetail));
+            }
+        }
+
+        return flagDetails;
+    }
+
+    private Optional<String> getPartyExternalCaseFlagField(String caseType, PartyEnum partyType, Integer partyIndex) {
+
+        Optional<String> partyExternalCaseFlagField = Optional.empty();
+        boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseType);
+
+        if (PartyEnum.applicant == partyType) {
+            partyExternalCaseFlagField
+                = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                caseType,
+                isC100Case ? PartyRole.Representing.CAAPPLICANT : PartyRole.Representing.DAAPPLICANT,
+                partyIndex
+            ));
+        } else if (PartyEnum.respondent == partyType) {
+            partyExternalCaseFlagField
+                = Optional.ofNullable(partyLevelCaseFlagsService.getPartyCaseDataExternalField(
+                caseType,
+                isC100Case ? PartyRole.Representing.CARESPONDENT : PartyRole.Representing.DARESPONDENT,
+                partyIndex
+            ));
+        }
+
+        return partyExternalCaseFlagField;
+    }
 }
