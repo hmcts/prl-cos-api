@@ -128,6 +128,10 @@ public class CaseService {
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
                                           .courtName(C100_DEFAULT_COURT_NAME)
                                           .build());
+            updatedCaseData = partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(
+                updatedCaseData,
+                updatedCaseData
+            );
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
 

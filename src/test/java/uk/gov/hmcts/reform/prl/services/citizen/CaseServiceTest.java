@@ -366,6 +366,7 @@ public class CaseServiceTest {
             updatedCaseData,
             CITIZEN_CASE_SUBMIT
         )).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(updatedCaseData, updatedCaseData)).thenReturn(updatedCaseData);
 
         //When
         CaseDetails actualCaseDetails = caseService.updateCase(caseData, authToken, s2sToken, caseId,
@@ -399,6 +400,7 @@ public class CaseServiceTest {
         when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
         when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_SUBMIT_WITH_HWF)).thenReturn(
             caseDetails);
+        when(partyLevelCaseFlagsService.generateC100AllPartyCaseFlags(updatedCaseData, updatedCaseData)).thenReturn(updatedCaseData);
 
         //When
         CaseDetails actualCaseDetails = caseService.updateCase(caseData, authToken, s2sToken, caseId,
