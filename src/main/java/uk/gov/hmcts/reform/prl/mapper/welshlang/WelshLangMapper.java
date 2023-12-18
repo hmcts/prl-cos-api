@@ -720,6 +720,8 @@ public class WelshLangMapper {
         welshMap.put("isCurrentAddressKnown_No", WELSH_NO_NAC_YDW);
         welshMap.put("canYouProvidePhoneNumber_Yes", WELSH_YES_GALLAF);
         welshMap.put("canYouProvidePhoneNumber_No", WELSH_NO_NA_ALLAF);
+        welshMap.put("doTheyHaveLegalRepresentation_Yes", WELSH_YES_OES);
+        welshMap.put("doTheyHaveLegalRepresentation_No", WELSH_NO_NAC_OES);
 
         /**
          * Relationship to respondent.
