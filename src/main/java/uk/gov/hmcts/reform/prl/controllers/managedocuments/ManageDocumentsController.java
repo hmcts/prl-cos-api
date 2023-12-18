@@ -93,7 +93,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
         String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorisation));
         List<String> errorList = new ArrayList<>();
         if (SOLICITOR.equals(userRole)) {
-            errorList = manageDocumentsService.precheckDocumentField(callbackRequest, authorisation);
+            errorList = manageDocumentsService.precheckDocumentField(callbackRequest);
 
         }
         if (!errorList.isEmpty()) {

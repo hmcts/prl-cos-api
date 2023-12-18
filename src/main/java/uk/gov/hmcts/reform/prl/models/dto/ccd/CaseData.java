@@ -762,7 +762,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private String manageDocumentsTriggeredBy;
     private String manageDocumentsRestrictedFlag;
     //PRL-4320 - manage document redesign
-    //private boolean isC8DocumentPresent;
+    private boolean isC8DocumentPresent;
 
     @JsonProperty("legalProfQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;

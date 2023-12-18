@@ -78,6 +78,7 @@ public class ManageDocumentsService {
             .build();
 
         return caseData.toBuilder()
+            .isC8DocumentPresent(CaseUtils.isC8Present(caseData))
             .manageDocuments(Arrays.asList(element(manageDocuments)))
             .build();
     }
@@ -112,15 +113,14 @@ public class ManageDocumentsService {
             .value(DynamicListElement.EMPTY).build();
     }
 
-    public List<String> precheckDocumentField(CallbackRequest callbackRequest, String authorization) {
+    public List<String> precheckDocumentField(CallbackRequest callbackRequest) {
 
         List<String> errorList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
         for (Element<ManageDocuments> element : manageDocuments) {
-            boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
+            boolean restricted = element.getValue().getIsRestricted().getDisplayedValue().equals(YesOrNo.Yes);
             boolean restrictedReason = element.getValue().getRestrictedDetails().isEmpty();
             if (restricted && restrictedReason) {
                 errorList.add(DETAILS_ERROR_MESSAGE);
