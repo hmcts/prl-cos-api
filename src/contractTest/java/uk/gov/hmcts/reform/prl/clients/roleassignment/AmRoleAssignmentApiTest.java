@@ -56,7 +56,7 @@ public class AmRoleAssignmentApiTest {
     private static final String APPLICATION_JSON = "application/json";
 
 
-    @Pact(provider = "amRoleAssignment", consumer = "prl_cos")
+    @Pact(provider = "am_role_assignment_service", consumer = "prl_cos")
     public RequestResponsePact generatePactFragmentForRoleAssignment(PactDslWithProvider builder) throws Exception {
 
         RoleAssignmentRequest roleAssignmentRequest = RoleAssignmentRequest.roleAssignmentRequest().build();
