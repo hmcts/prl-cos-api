@@ -72,10 +72,10 @@ public class ManageOrderEmailService {
     public static final String NEW = "new";
     public static final String ORDERS = "#Orders";
     @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
 
     @Autowired
-    private CourtFinderService courtLocatorService;
+    private final CourtFinderService courtLocatorService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -93,10 +93,10 @@ public class ManageOrderEmailService {
     @Autowired
     private final ServiceOfApplicationService serviceOfApplicationService;
     @Autowired
-    private ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     @Autowired
-    private BulkPrintService bulkPrintService;
+    private final BulkPrintService bulkPrintService;
 
     private static final String ORDER_TYPE = "OrderPack";
 
@@ -108,7 +108,7 @@ public class ManageOrderEmailService {
     private final SendgridService sendgridService;
 
     @Autowired
-    private Time dateTime;
+    private final Time dateTime;
 
 
     public void sendEmail(CaseDetails caseDetails) {
