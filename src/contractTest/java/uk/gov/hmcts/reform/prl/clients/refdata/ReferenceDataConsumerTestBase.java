@@ -25,7 +25,7 @@ public class ReferenceDataConsumerTestBase {
 
     static final String AUTHORIZATION_HEADER = "Authorization";
     static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
-    static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    static final String serviceAuthorizationHeader = "ServiceAuthorization";
     static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
 
     protected DslPart buildOrganisationResponseDsl() {
