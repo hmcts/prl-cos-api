@@ -14,6 +14,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
@@ -1347,6 +1349,7 @@ public class EditAndApproveDraftOrderControllerTest {
     @Test
     public void testHandleEditAndApproveSubmittedWhenAskLegalRepChoosen() throws Exception {
         Map<String, Object> stringObjectMap = new HashMap<>();
+
         stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
@@ -1355,7 +1358,13 @@ public class EditAndApproveDraftOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(CaseData.builder().build());
+        when(CaseUtils.getCaseData(
+            callbackRequest.getCaseDetails(),
+            objectMapper
+        )).thenReturn(CaseData.builder().build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(CaseData.class))).thenReturn(DraftOrder.builder().build());
         ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
             .handleEditAndApproveSubmitted(authToken,s2sToken,callbackRequest);
         assertNotNull(callbackResponse.getBody().getConfirmationHeader());

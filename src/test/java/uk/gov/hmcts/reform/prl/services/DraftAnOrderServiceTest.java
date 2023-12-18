@@ -416,18 +416,7 @@ public class DraftAnOrderServiceTest {
 
     @Test
     public void testGenerateDraftOrderCollection() {
-        Child child = Child.builder()
-            .firstName("Test")
-            .lastName("Name")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
-            .parentalResponsibilityDetails("test")
-            .build();
 
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         MagistrateLastName magistrateLastName = MagistrateLastName.builder()
             .lastName("Magistrate last")
@@ -484,6 +473,18 @@ public class DraftAnOrderServiceTest {
             .build();
         List<Element<DraftOrder>> draftOrderList = Collections.singletonList(draftOrderElement);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2984,7 +2985,8 @@ public class DraftAnOrderServiceTest {
             .thenReturn(caseData);
         when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
         when(manageOrderService.getCurrentUploadDraftOrderDetails(Mockito.any(CaseData.class),Mockito.anyString(),
-                                                                  Mockito.any(UserDetails.class))).thenReturn(DraftOrder.builder().orderTypeId("abc").build());
+                                                                  Mockito.any(UserDetails.class)))
+            .thenReturn(DraftOrder.builder().orderTypeId("abc").build());
         Map<String, Object> response = draftAnOrderService.prepareDraftOrderCollection(authToken,callbackRequest);
         Assert.assertEquals(
             stringObjectMap.get("applicantCaseName"),
