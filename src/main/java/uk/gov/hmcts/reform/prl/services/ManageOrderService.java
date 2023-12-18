@@ -2223,19 +2223,17 @@ public class ManageOrderService {
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             log.info("---- C100 check ----");
             caseData.getApplicants().stream().findFirst().ifPresent(party ->
-                populateLegalRepFlag(party.getValue().getDoTheyHaveLegalRepresentation(), caseDataUpdated));
+                populateLegalRepFlag(party.getValue().getSolicitorEmail(), caseDataUpdated));
         } else {
-            if (org.apache.commons.lang3.StringUtils.isNotEmpty(caseData.getApplicantsFL401().getRepresentativeFirstName())) {
-                caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
-            }
+            populateLegalRepFlag(caseData.getApplicantsFL401().getSolicitorEmail(), caseDataUpdated);
         }
         log.info("---- display Legal rep ----{}", caseDataUpdated.get(DISPLAY_LEGAL_REP_OPTION));
         return caseDataUpdated;
     }
 
-    private void populateLegalRepFlag(YesNoDontKnow legalRepPresent, Map<String, Object> caseDataUpdated) {
-        log.info("---- Legal rep present ----{}", legalRepPresent);
-        if (YesNoDontKnow.yes.equals(legalRepPresent)) {
+    private void populateLegalRepFlag(String email, Map<String, Object> caseDataUpdated) {
+        log.info("---- Legal rep present ----{}", email);
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(email)) {
             log.info("---- Legal rep present ----");
             caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
         }
