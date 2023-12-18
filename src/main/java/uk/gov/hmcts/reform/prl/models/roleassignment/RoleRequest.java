@@ -1,11 +1,17 @@
 package uk.gov.hmcts.reform.prl.models.roleassignment;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.Status;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(builderMethodName = "roleRequest")
 public class RoleRequest {
 
     private String assignerId;

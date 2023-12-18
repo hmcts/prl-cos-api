@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.models.roleassignment;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.ccd.document.am.model.Classification;
 import uk.gov.hmcts.reform.prl.enums.GrantType;
 import uk.gov.hmcts.reform.prl.enums.RoleCategory;
@@ -11,6 +14,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder(builderMethodName = "requestedRoles")
 public class RequestedRoles {
 
     private String actorIdType;
