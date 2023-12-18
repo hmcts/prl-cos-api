@@ -218,8 +218,7 @@ public class UpdatePartyDetailsService {
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
                 log.info("Children empty or < 1");
                 children = new ArrayList<>();
-                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder()
-                                                                        .firstName("test name").build());
+                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder().build());
                 children.add(childDetails);
                 caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
                 log.info("Updated case data: " + caseDataUpdated);
