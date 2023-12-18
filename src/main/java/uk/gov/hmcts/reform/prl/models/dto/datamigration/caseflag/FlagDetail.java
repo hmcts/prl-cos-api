@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.dto.caseflag;
+package uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
