@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -39,7 +40,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
-import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
@@ -66,12 +66,15 @@ public class ManageDocumentsService {
     private final Time dateTime;
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
+    public static final String DETAILS_ERROR_MESSAGE
+        = "You must give a reason why the document should be restricted";
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
+            .documentRelatedToCaseLabel("Confirm the document is related to " + caseData.getApplicantCaseName())
             .build();
 
         return caseData.toBuilder()
@@ -109,6 +112,24 @@ public class ManageDocumentsService {
             .value(DynamicListElement.EMPTY).build();
     }
 
+    public List<String> precheckDocumentField(CallbackRequest callbackRequest, String authorization) {
+
+        List<String> errorList = new ArrayList<>();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
+        for (Element<ManageDocuments> element : manageDocuments) {
+            boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
+            boolean restrictedReason = element.getValue().getRestrictedDetails().isEmpty();
+            if (restricted && restrictedReason) {
+                errorList.add(DETAILS_ERROR_MESSAGE);
+            }
+        }
+        return errorList;
+    }
+
+
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -131,7 +152,7 @@ public class ManageDocumentsService {
             log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
 
             Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement -> manageDocumentsElement.getValue()
-                .getDocumentRestrictCheckbox().contains(restrictToGroup);
+                .getIsRestricted().equals(YesOrNo.Yes);
 
             boolean isRestrictedFlag = false;
             for (Element<ManageDocuments> element : manageDocuments) {

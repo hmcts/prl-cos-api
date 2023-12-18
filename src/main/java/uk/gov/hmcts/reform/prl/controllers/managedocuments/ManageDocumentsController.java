@@ -24,11 +24,17 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 
 
 @Slf4j
@@ -40,6 +46,8 @@ public class ManageDocumentsController extends AbstractCallbackController {
 
     @Autowired
     private ManageDocumentsService manageDocumentsService;
+    @Autowired
+    private final UserService userService;
 
     @Autowired
     @Qualifier("allTabsService")
@@ -47,6 +55,15 @@ public class ManageDocumentsController extends AbstractCallbackController {
 
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
+
+    @PostMapping("/about-to-start-mid")
+    public Boolean handleAboutToStartMid(
+        @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        return  CaseUtils.isC8Present(caseData);
+    }
 
     @PostMapping("/about-to-start")
     public CallbackResponse handleAboutToStart(
@@ -73,8 +90,20 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
+        String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorisation));
+        List<String> errorList = new ArrayList<>();
+        if (SOLICITOR.equals(userRole)) {
+            errorList = manageDocumentsService.precheckDocumentField(callbackRequest, authorisation);
+
+        }
+        if (!errorList.isEmpty()) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        } else {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
+        }
     }
 
     @PostMapping("/submitted")
