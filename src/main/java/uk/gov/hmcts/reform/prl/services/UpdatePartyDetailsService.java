@@ -220,10 +220,10 @@ public class UpdatePartyDetailsService {
                 children = new ArrayList<>();
                 Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder().build());
                 children.add(childDetails);
-                caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
+                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
                 log.info("Updated case data: " + caseDataUpdated);
             } else {
-                caseDataUpdated.put(PrlAppsConstants.CHILDREN, caseData.getNewChildDetails());
+                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, caseData.getNewChildDetails());
             }
         } else {
             List<Element<Child>> children = caseData.getChildren();

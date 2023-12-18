@@ -593,7 +593,7 @@ public class UpdatePartyDetailsServiceTest {
             .newChildDetails(childList)
             .build();
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
-        assertEquals(childList, updatedCaseData.get("children"));
+        assertEquals(childList, updatedCaseData.get("newChildDetails"));
     }
 
     @Test
@@ -604,7 +604,7 @@ public class UpdatePartyDetailsServiceTest {
             .build();
 
         Map<String, Object> updatedCaseData = updatePartyDetailsService.setDefaultEmptyChildDetails(caseData);
-        List<Element<ChildDetailsRevised>> updatedChildDetails = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("children");
+        List<Element<ChildDetailsRevised>> updatedChildDetails = (List<Element<ChildDetailsRevised>>) updatedCaseData.get("newChildDetails");
         assertEquals(1, updatedChildDetails.size());
         assertEquals(ChildDetailsRevised.builder().build(), updatedChildDetails.get(0).getValue());
     }
