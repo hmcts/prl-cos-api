@@ -57,7 +57,7 @@ public class ReferenceDataStaffUserConsumerTest {
 
     static final String AUTHORIZATION_HEADER = "Authorization";
     static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
-    static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
+    static final String serviceAuthorizationHeader = "ServiceAuthorization";
     static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
 
     private final String validResponseBody = "gatekeeping/StaffDetailsResponseBody.json";
@@ -69,7 +69,7 @@ public class ReferenceDataStaffUserConsumerTest {
             .given("Staff User details for given servicename")
             .uponReceiving("A Request to get staff details")
             .method("GET")
-            .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
+            .headers(serviceAuthorizationHeader, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .path("/refdata/internal/staff/usersByServiceName")
             .query("ccd_service_names=PRIVATELAW&sort_column=lastName&sort_direction=ASC&page_size=250&page_number=0")
             .willRespondWith()

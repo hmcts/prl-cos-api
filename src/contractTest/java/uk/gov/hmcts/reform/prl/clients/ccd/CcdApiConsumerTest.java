@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -41,8 +42,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class CcdApiConsumerTest {
 
-    private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
-    private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
+    @Value("${test.bearer-token}")
+    private String bearerToken;
+
+    @Value("${test.service-auth-token}")
+    private String serviceAuthorizationHeader;
 
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
@@ -53,8 +57,8 @@ public class CcdApiConsumerTest {
             .given("A request to create a case in CCD")
             .uponReceiving("a request to create a case in CCD with valid authorization")
             .method("POST")
-            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
-            .headers("Authorization", BEARER_TOKEN)
+            .headers("ServiceAuthorization", serviceAuthorizationHeader)
+            .headers("Authorization", bearerToken)
             .headers("Content-Type", "application/json")
             .path("/citizens/UserID/jurisdictions/jurisdictionId/case-types/caseType/cases")
             .matchQuery("ignore-warning", "true")
@@ -68,7 +72,7 @@ public class CcdApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "createCaseInCcd")
     public void verifyCreateCaseInCcd() {
-        CaseDetails caseDetails = coreCaseDataApi.submitForCitizen(BEARER_TOKEN, SERVICE_AUTHORIZATION_HEADER, "UserID",
+        CaseDetails caseDetails = coreCaseDataApi.submitForCitizen(bearerToken, serviceAuthorizationHeader, "UserID",
                                                                    "jurisdictionId", "caseType",
                                                                    true, buildCaseDataContent()
         );
