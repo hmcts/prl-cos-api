@@ -1,6 +1,6 @@
 {
   "provider": {
-    "name": "amRoleAssignment"
+    "name": "am_role_assignment_service"
   },
   "consumer": {
     "name": "prl_cos"
