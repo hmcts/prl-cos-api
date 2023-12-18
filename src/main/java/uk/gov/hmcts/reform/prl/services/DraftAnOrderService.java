@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
@@ -176,6 +177,7 @@ public class DraftAnOrderService {
     private final ObjectMapper objectMapper;
     private final ManageOrderService manageOrderService;
     private final DgsService dgsService;
+    private final UserService userService;
     private final DocumentLanguageService documentLanguageService;
     private final LocationRefDataService locationRefDataService;
     private final PartiesListGenerator partiesListGenerator;
@@ -194,11 +196,10 @@ public class DraftAnOrderService {
 
     private final WelshCourtEmail welshCourtEmail;
 
-
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
-        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
+        Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, authorisation));
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
             draftOrderList.add(orderDetails);
@@ -213,11 +214,12 @@ public class DraftAnOrderService {
         );
     }
 
-    public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
+    public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType,String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType);
+            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails);
         }
-        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType);
+        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails);
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData, String eventId) {
@@ -466,6 +468,8 @@ public class DraftAnOrderService {
             .judgeNotes(draftOrder.getJudgeNotes())
             .otherDetails(
                 OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
+                    .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
+                    .orderCreatedByEmailId(draftOrder.getOtherDetails().getOrderCreatedByEmailId())
                     .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                         PrlAppsConstants.D_MMM_YYYY,
                         Locale.ENGLISH
@@ -935,6 +939,7 @@ public class DraftAnOrderService {
             .orderDocumentWelsh(orderDocumentWelsh)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
                               .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
