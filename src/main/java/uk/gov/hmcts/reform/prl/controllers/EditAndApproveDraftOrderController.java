@@ -172,7 +172,6 @@ public class EditAndApproveDraftOrderController {
                 ));
             }
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
         } else {
