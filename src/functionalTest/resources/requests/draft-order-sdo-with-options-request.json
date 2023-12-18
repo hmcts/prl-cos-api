@@ -160,6 +160,7 @@
       "sdoPreamblesList": [
         "rightToAskCourt"
       ],
+      "draftOrderOptions": "draftAnOrder",
       "sdoDocumentationAndEvidenceList": [],
       "sdoHearingsAndNextStepsList": [],
       "sdoCourtList": [],

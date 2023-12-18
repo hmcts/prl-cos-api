@@ -201,6 +201,7 @@ public class DraftAnOrderService {
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
         //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
+            log.info("VVVVVv --->{}");
             orderDetails.getValue().getManageOrderHearingDetails()
                 .forEach(hearingDataElement -> hearingDataElement.getValue()
                     .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
@@ -1760,6 +1761,9 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> prepareDraftOrderCollection(String authorisation, CallbackRequest callbackRequest) {
+        log.info("=======START========");
+        log.info("CALLBACKKKKKKK {}", callbackRequest);
+        log.info("=======END========");
         manageOrderService.resetChildOptions(callbackRequest);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
