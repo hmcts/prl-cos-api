@@ -96,7 +96,15 @@ public class UserServiceTest {
         UserInfo userInfor = userService.getUserInfo(authToken, UserRoles.SOLICITOR);
 
         assertEquals(userInfor, userInfo);
-
     }
 
+    @Test
+    public void testToCheckGetUsersByUserId() {
+
+        when(idamClient.getUserByUserId(authToken,"")).thenReturn(userDetails);
+
+        UserDetails userDetails1 = userService.getUserByUserId(authToken, "");
+
+        assertEquals(userDetails, userDetails1);
+    }
 }

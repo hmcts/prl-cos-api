@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.clients.OrganisationApi;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -26,6 +27,7 @@ import static java.util.Optional.ofNullable;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class OrganisationService {
 
+    public static final String ACTIVE = "Active";
     @Autowired
     private final OrganisationApi organisationApi;
 
@@ -39,8 +41,8 @@ public class OrganisationService {
             String userToken = systemUserService.getSysUserToken();
             List<Element<PartyDetails>> applicants = caseData.getApplicants()
                 .stream()
-                .map(eachItem ->  Element.<PartyDetails>builder()
-                    .value(getApplicantWithOrg(eachItem.getValue(),userToken))
+                .map(eachItem -> Element.<PartyDetails>builder()
+                    .value(getApplicantWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
             caseData = caseData.toBuilder()
@@ -58,8 +60,8 @@ public class OrganisationService {
 
             List<Element<PartyDetails>> respondents = caseData.getRespondents()
                 .stream()
-                .map(eachItem ->  Element.<PartyDetails>builder()
-                    .value(getRespondentWithOrg(eachItem.getValue(),userToken))
+                .map(eachItem -> Element.<PartyDetails>builder()
+                    .value(getRespondentWithOrg(eachItem.getValue(), userToken))
                     .id(eachItem.getId()).build())
                 .collect(Collectors.toList());
 
@@ -76,7 +78,7 @@ public class OrganisationService {
             String organisationID = respondent.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
                 try {
-                    organisations = getOrganisationDetaiils(userToken, organisationID);
+                    organisations = getOrganisationDetails(userToken, organisationID);
                     respondent = respondent.toBuilder()
                         .organisations(organisations)
                         .build();
@@ -98,10 +100,18 @@ public class OrganisationService {
         return respondent;
     }
 
-    public Organisations getOrganisationDetaiils(String userToken, String organisationID) {
+    public Organisations getOrganisationDetails(String userToken, String organisationID) {
         log.trace("Fetching organisation details for organisation id: {}", organisationID);
-
         return organisationApi.findOrganisation(userToken, authTokenGenerator.generate(), organisationID);
+    }
+
+    public OrgSolicitors getOrganisationSolicitorDetails(String userToken, String organisationID) {
+        log.trace("Fetching all solicitor details for organisation id: {}", organisationID);
+        return organisationApi.findOrganisationSolicitors(
+            userToken,
+            authTokenGenerator.generate(),
+            organisationID
+        );
     }
 
     private PartyDetails getApplicantWithOrg(PartyDetails applicant, String userToken) {
@@ -111,8 +121,7 @@ public class OrganisationService {
             String organisationID = applicant.getSolicitorOrg().getOrganisationID();
             if (organisationID != null) {
                 try {
-                    organisations = getOrganisationDetaiils(userToken, organisationID);
-
+                    organisations = getOrganisationDetails(userToken, organisationID);
                     applicant = applicant.toBuilder()
                         .organisations(organisations)
                         .build();
@@ -136,12 +145,23 @@ public class OrganisationService {
         return applicant;
     }
 
-    public CaseData getApplicantOrganisationDetailsForFL401(CaseData caseData)  {
+    public CaseData getApplicantOrganisationDetailsForFL401(CaseData caseData) {
         if (Optional.ofNullable(caseData.getApplicantsFL401()).isPresent()) {
             String userToken = systemUserService.getSysUserToken();
             PartyDetails applicantWithOrg = getApplicantWithOrg(caseData.getApplicantsFL401(), userToken);
             caseData = caseData.toBuilder()
                 .applicantsFL401(applicantWithOrg)
+                .build();
+        }
+        return caseData;
+    }
+
+    public CaseData getRespondentOrganisationDetailsForFL401(CaseData caseData) {
+        if (Optional.ofNullable(caseData.getRespondentsFL401()).isPresent()) {
+            String userToken = systemUserService.getSysUserToken();
+            PartyDetails respondentWithOrg = getRespondentWithOrg(caseData.getRespondentsFL401(), userToken);
+            caseData = caseData.toBuilder()
+                .respondentsFL401(respondentWithOrg)
                 .build();
         }
         return caseData;
@@ -155,4 +175,12 @@ public class OrganisationService {
             return Optional.empty();
         }
     }
+
+    public List<Organisations> getAllActiveOrganisations(String userToken) {
+        log.trace("Fetching all active organisation details");
+        Object orgObject = organisationApi.findOrganisations(userToken, authTokenGenerator.generate(), ACTIVE);
+        log.info("Fetching all active organisation details ==> " + orgObject);
+        return (List<Organisations>) orgObject;
+    }
+
 }

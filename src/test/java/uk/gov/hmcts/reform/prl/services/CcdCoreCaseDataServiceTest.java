@@ -183,6 +183,12 @@ public class CcdCoreCaseDataServiceTest {
                                                     caseType, false, caseDataContent);
     }
 
+    @Test
+    public void findCaseById() {
+        coreCaseDataService.findCaseById(serviceAuthToken, String.valueOf(caseId));
+        verify(coreCaseDataApi).getCase(serviceAuthToken, serviceAuthToken, String.valueOf(caseId));
+    }
+
     private CaseDataContent buildCaseDataContent(String eventId, String eventToken, Object eventData) {
         return CaseDataContent.builder()
             .eventToken(eventToken)

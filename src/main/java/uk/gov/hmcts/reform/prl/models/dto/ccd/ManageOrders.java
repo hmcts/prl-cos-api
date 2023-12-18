@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.UnderTakingEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
@@ -41,7 +42,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ManageOrders {
+public class ManageOrders implements MappableObject {
 
     private final String childListForSpecialGuardianship;
     @JsonProperty("cafcassOfficeDetails")
@@ -138,6 +139,9 @@ public class ManageOrders {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate underTakingDateExpiry;
     private final String underTakingExpiryTime;
+    @JsonProperty("underTakingExpiryDateTime")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private final LocalDateTime underTakingExpiryDateTime;
     private final YesOrNo underTakingFormSign;
 
     private final YesOrNo isTheOrderByConsent;
@@ -174,7 +178,8 @@ public class ManageOrders {
     @Builder.Default
     @JsonProperty("childOption")
     private final DynamicMultiSelectList childOption;
-
+    @Builder.Default
+    @JsonProperty("serveOrderDynamicList")
     private DynamicMultiSelectList serveOrderDynamicList;
     @JsonProperty("serveOrderAdditionalDocuments")
     private final List<Element<Document>> serveOrderAdditionalDocuments;
@@ -262,12 +267,12 @@ public class ManageOrders {
     @JsonProperty("ordersHearingDetails")
     @JsonUnwrapped
     @Builder.Default
-    private final List<Element<HearingData>> ordersHearingDetails;
+    private List<Element<HearingData>> ordersHearingDetails;
 
     @JsonProperty("solicitorOrdersHearingDetails")
     @JsonUnwrapped
     @Builder.Default
-    private final List<Element<HearingData>> solicitorOrdersHearingDetails;
+    private List<Element<HearingData>> solicitorOrdersHearingDetails;
 
     @JsonProperty("hasJudgeProvidedHearingDetails")
     private YesOrNo hasJudgeProvidedHearingDetails;
@@ -278,4 +283,7 @@ public class ManageOrders {
     //PRL-3254 - Added for populating hearing dropdown
     private DynamicList hearingsType;
 
+    //PRL-4216 - serve order additional documents
+    @JsonProperty("additionalOrderDocuments")
+    private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
 }

@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.models.c100rebuild;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
@@ -23,7 +22,7 @@ public class OtherPersonDetail {
     private String lastName;
     @JsonProperty("personalDetails")
     private PersonalDetails personalDetails;
-    @JsonIgnore
+
     @JsonProperty("relationshipDetails")
     private RelationshipDetails relationshipDetails;
     @JsonProperty("address")

@@ -1,0 +1,6 @@
+{
+  "connectionString": "${file:/mnt/secrets/prl/app-insights-connection-string}",
+  "role": {
+    "name": "prl"
+  }
+}

@@ -6,6 +6,8 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
+import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesRequest;
+import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
 import uk.gov.hmcts.reform.prl.models.caseaccess.RemoveUserRolesRequest;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
@@ -56,5 +58,24 @@ public class CcdDataStoreService {
         return asList(
             buildCaseUser(caseId, "[CREATOR]", userId)
         );
+    }
+
+    public FindUserCaseRolesResponse findUserCaseRoles(String caseId, String authorisation) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String userId = userDetails.getId();
+
+        return caseRoleClient.findUserCaseRoles(
+            authorisation,
+            authTokenGenerator.generate(),
+            buildFindUserCaseRolesRequest(caseId, userId)
+        );
+    }
+
+    private FindUserCaseRolesRequest buildFindUserCaseRolesRequest(String caseId, String userId) {
+        return FindUserCaseRolesRequest
+            .builder()
+            .caseIds(List.of(caseId))
+            .userIds(List.of(userId))
+            .build();
     }
 }

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl;
 
 import io.restassured.response.Response;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.junit.runners.SerenityRunner;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationMethodRule;
@@ -19,7 +20,7 @@ import java.net.InetAddress;
 import java.net.URL;
 import java.util.Base64;
 import java.util.UUID;
-import javax.annotation.PostConstruct;
+
 
 @Slf4j
 @RunWith(SerenityRunner.class)
