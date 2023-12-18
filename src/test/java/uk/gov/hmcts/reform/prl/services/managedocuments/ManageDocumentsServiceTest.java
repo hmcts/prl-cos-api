@@ -195,7 +195,7 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -242,7 +242,7 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -292,7 +292,7 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -339,7 +339,7 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -388,7 +388,7 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -435,7 +435,7 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -484,7 +484,7 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.RESPONDENT)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
+            //.documentRestrictCheckbox(new ArrayList<>())
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
