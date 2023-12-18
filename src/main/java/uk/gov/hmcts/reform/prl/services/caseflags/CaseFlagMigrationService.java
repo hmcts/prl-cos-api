@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.dto.caseflag.CaseFlag;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -64,13 +64,10 @@ public class CaseFlagMigrationService {
 
 
     public Map<String, Object> migrateCaseForCaseFlags(Map<String, Object> caseDataMap) {
-
-
-
         log.info("making ref data call to get case flags");
         CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(systemUserService.getSysUserToken(), FLAG_TYPE);
-        List<uk.gov.hmcts.reform.prl.models.dto.caseflag.FlagDetail> flagDetail = caseFlag.getFlags().get(0).getFlagDetails();
-        log.info("ref data call for caseflags completed");
+        List<uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.FlagDetail> flagDetail = caseFlag.getFlags().get(0).getFlagDetails();
+        log.info("ref data call for case flags completed");
 
         CaseData caseData = objectMapper.convertValue(
             caseDataMap,
@@ -137,7 +134,7 @@ public class CaseFlagMigrationService {
     }
 
     private void setCaseFlagsToCaseFlagsNewDataModel(Flags partyLevelFlags,
-                                                     List<uk.gov.hmcts.reform.prl.models.dto.caseflag.FlagDetail> refDataCaseFlags,
+                                                     List<uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.FlagDetail> refDataCaseFlags,
                                                      String partyType, CaseData caseData) {
         if (Objects.nonNull(partyLevelFlags) && CollectionUtils.isNotEmpty(partyLevelFlags.getDetails())) {
             partyLevelFlags.getDetails().forEach(flag -> findMatchingRefDataFlagAndMigrate(refDataCaseFlags, partyType, caseData, flag));
@@ -145,7 +142,7 @@ public class CaseFlagMigrationService {
         }
     }
 
-    private void findMatchingRefDataFlagAndMigrate(List<uk.gov.hmcts.reform.prl.models.dto.caseflag.FlagDetail> refDataCaseFlags,
+    private void findMatchingRefDataFlagAndMigrate(List<uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.FlagDetail> refDataCaseFlags,
                                                    String partyType, CaseData caseData, Element<FlagDetail> flag) {
         refDataCaseFlags.forEach(refDataCaseFlag -> {
             if (refDataCaseFlag.getFlagCode().equals(flag.getValue().getFlagCode())) {

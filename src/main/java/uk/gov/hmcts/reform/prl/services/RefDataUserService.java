@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.dto.caseflag.CaseFlag;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -165,12 +163,9 @@ public class RefDataUserService {
                 SERVICE_ID,
                 flagType
             );
-            log.info("response for case flag {}",caseFlag);
-
         } catch (Exception e) {
-            log.error("Category Values look up failed {} ", e.getMessage());
+            log.error("Case flags Values look up failed {} ", e.getMessage());
         }
-        log.info("case flag response from refdata  {}",caseFlag);
         return caseFlag;
     }
 
