@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -59,8 +58,8 @@ public class CcdApiConsumerTest {
             .given("A request to create a case in CCD")
             .uponReceiving("a request to create a case in CCD with valid authorization")
             .method("POST")
-            .headers("ServiceAuthorization", serviceAuthorizationHeader)
-            .headers("Authorization", bearerToken)
+            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
+            .headers("Authorization", BEARER_TOKEN)
             .headers("Content-Type", "application/json")
             .path("/citizens/UserID/jurisdictions/jurisdictionId/case-types/caseType/cases")
             .matchQuery("ignore-warning", "true")
@@ -74,8 +73,6 @@ public class CcdApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "createCaseInCcd")
     public void verifyCreateCaseInCcd() {
-        System.out.println("bearer token is: " + bearerToken);
-        System.out.println("serviceAuthorizationHeader is: " + serviceAuthorizationHeader);
         CaseDetails caseDetails = coreCaseDataApi.submitForCitizen(bearerToken, serviceAuthorizationHeader, "UserID",
                                                                    "jurisdictionId", "caseType",
                                                                    true, buildCaseDataContent()

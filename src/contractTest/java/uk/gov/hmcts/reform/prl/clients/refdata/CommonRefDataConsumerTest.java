@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -69,8 +68,8 @@ public class CommonRefDataConsumerTest {
             .given("Common Data")
             .uponReceiving("A Request for Common Data API")
             .method("GET")
-            .headers("ServiceAuthorization", serviceAuthorizationHeader)
-            .headers("Authorization", bearerToken)
+            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
+            .headers("Authorization", BEARER_TOKEN)
             .headers("Content-Type", "application/json")
             .path("/refdata/commondata/lov/categories/hearingType")
             .query("serviceId=ABA5&isChildRequired=N")
@@ -83,8 +82,8 @@ public class CommonRefDataConsumerTest {
     @Test
     @PactTestFor(pactMethod = "generatePactFragmentForCategoryId")
     public void verifyCommonDataDetails() {
-        CommonDataResponse allCategoryValuesByCategoryId = commonDataRefApi.getAllCategoryValuesByCategoryId(bearerToken,
-                                                                                                             serviceAuthorizationHeader,
+        CommonDataResponse allCategoryValuesByCategoryId = commonDataRefApi.getAllCategoryValuesByCategoryId(BEARER_TOKEN,
+                                                                                                             SERVICE_AUTHORIZATION_HEADER,
                                                                                                              "hearingType",
                                                                                                              "ABA5",
                                                                                                              "N"
