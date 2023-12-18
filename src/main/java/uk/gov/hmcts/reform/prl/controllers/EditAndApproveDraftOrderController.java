@@ -347,6 +347,9 @@ public class EditAndApproveDraftOrderController {
             if (JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString()
                 .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
                 CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+                log.info("*** Draft order dynamic list : {}", caseData.getDraftOrdersDynamicList());
+                log.info("*** Draft order collection : {}", caseData.getDraftOrderCollection());
+
                 DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
                 manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(callbackRequest.getCaseDetails(), draftOrder);
                 responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
