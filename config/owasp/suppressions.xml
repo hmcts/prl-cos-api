@@ -71,5 +71,8 @@
     <cve>CVE-2023-34055</cve>
     <cve>CVE-2023-46589</cve>
     <cve>CVE-2023-6378</cve>
+    <cve>CVE-2022-41881</cve>
+    <cve>CVE-2022-41915</cve>
+    <cve>CVE-2023-34462</cve>
   </suppress>
 </suppressions>
