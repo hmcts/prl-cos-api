@@ -74,6 +74,8 @@ public class CcdApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "createCaseInCcd")
     public void verifyCreateCaseInCcd() {
+        System.out.println("bearer token is: " + bearerToken);
+        System.out.println("serviceAuthorizationHeader is: " + serviceAuthorizationHeader);
         CaseDetails caseDetails = coreCaseDataApi.submitForCitizen(bearerToken, serviceAuthorizationHeader, "UserID",
                                                                    "jurisdictionId", "caseType",
                                                                    true, buildCaseDataContent()
