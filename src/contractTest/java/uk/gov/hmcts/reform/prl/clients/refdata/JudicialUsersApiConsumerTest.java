@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -74,8 +75,8 @@ public class JudicialUsersApiConsumerTest {
             .given("Allocating Judge")
             .uponReceiving("A Request for allocating judge")
             .method("POST")
-            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
-            .headers("Authorization", BEARER_TOKEN)
+            .headers("ServiceAuthorization", serviceAuthorizationHeader)
+            .headers("Authorization", bearerToken)
             .headers("Content-Type", "application/json")
             .path("/refdata/judicial/users")
             .body(new ObjectMapper().writeValueAsString(judicialUsersApiRequest), "application/json")
@@ -89,7 +90,7 @@ public class JudicialUsersApiConsumerTest {
     @PactTestFor(pactMethod = "generatePactFragmentForAllocateJudge")
     public void verifyAllocatedJudgeDetails() {
         List<JudicialUsersApiResponse>
-            judicialUsersList = judicialUserDetailsApi.getAllJudicialUserDetails(BEARER_TOKEN,SERVICE_AUTHORIZATION_HEADER,judicialUsersApiRequest);
+            judicialUsersList = judicialUserDetailsApi.getAllJudicialUserDetails(bearerToken,serviceAuthorizationHeader,judicialUsersApiRequest);
 
         assertNotNull(judicialUsersList);
         JudicialUsersApiResponse judicialUsersApiResponse = judicialUsersList.get(0);

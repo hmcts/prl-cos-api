@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -82,8 +83,8 @@ public class PaymentApiConsumerTest {
             .given("A request to create a payment in payments api")
             .uponReceiving("a request to create a payment in payments api with valid authorization")
             .method("POST")
-            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
-            .headers("Authorization", BEARER_TOKEN)
+            .headers("ServiceAuthorization", serviceAuthorizationHeader)
+            .headers("Authorization", bearerToken)
             .headers("Content-Type", "application/json")
             .path("/service-request/2022-1662375472431/card-payments")
             .body(new ObjectMapper().writeValueAsString(onlineCardPaymentRequest), "application/json")
@@ -99,8 +100,8 @@ public class PaymentApiConsumerTest {
             .given("A request to retrieve the payment status")
             .uponReceiving("a request to retieve the payment status in payments api with valid authorization")
             .method("GET")
-            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
-            .headers("Authorization", BEARER_TOKEN)
+            .headers("ServiceAuthorization", serviceAuthorizationHeader)
+            .headers("Authorization", bearerToken)
             .headers("Content-Type", "application/json")
             .path("/card-payments/RC-1662-3761-4393-1823")
             .willRespondWith()
@@ -112,8 +113,8 @@ public class PaymentApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "createPayment")
     public void verifyCreatePayment() {
-        PaymentResponse paymentResponse = paymentApi.createPaymentRequest("2022-1662375472431", BEARER_TOKEN,
-                SERVICE_AUTHORIZATION_HEADER, onlineCardPaymentRequest
+        PaymentResponse paymentResponse = paymentApi.createPaymentRequest("2022-1662375472431", bearerToken,
+                serviceAuthorizationHeader, onlineCardPaymentRequest
         );
         assertNotNull(paymentResponse);
         assertEquals(PAYMENT_REFERENCE, paymentResponse.getPaymentReference());
@@ -126,8 +127,8 @@ public class PaymentApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "getPaymentStatus")
     public void retrievePaymentStatus() {
-        PaymentStatusResponse paymentStatusResponse = paymentApi.fetchPaymentStatus(BEARER_TOKEN,
-                                                                                    SERVICE_AUTHORIZATION_HEADER, PAYMENT_REFERENCE
+        PaymentStatusResponse paymentStatusResponse = paymentApi.fetchPaymentStatus(bearerToken,
+                                                                                    serviceAuthorizationHeader, PAYMENT_REFERENCE
         );
         assertNotNull(paymentStatusResponse);
         assertEquals(STATUS,paymentStatusResponse.getStatus());

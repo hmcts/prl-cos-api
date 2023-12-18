@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -84,8 +85,8 @@ public class CreateBundleConsumerTest {
             .given("A request to create a bundle in Bundling api")
             .uponReceiving("a request to create a bundle in bundling api with valid authorization")
             .method("POST")
-            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
-            .headers("Authorization", BEARER_TOKEN)
+            .headers("ServiceAuthorization", serviceAuthorizationHeader)
+            .headers("Authorization", bearerToken)
             .headers("Content-Type", "application/json")
             .path("/api/new-bundle")
             .body(new ObjectMapper().writeValueAsString(bundleCreateRequest), "application/json")
@@ -99,8 +100,8 @@ public class CreateBundleConsumerTest {
     @Test
     @PactTestFor(pactMethod = "generateCreateBundleResponse")
     public void verifyCreateBundle() {
-        BundleCreateResponse bundleCreateResponse = bundleApiClient.createBundleServiceRequest(BEARER_TOKEN,
-            SERVICE_AUTHORIZATION_HEADER, BundleCreateRequest.builder().build()
+        BundleCreateResponse bundleCreateResponse = bundleApiClient.createBundleServiceRequest(bearerToken,
+            serviceAuthorizationHeader, BundleCreateRequest.builder().build()
         );
         assertNotNull(bundleCreateResponse);
         assertEquals(4, bundleCreateResponse.getData().getCaseBundles().get(0).getValue().getFolders().size());

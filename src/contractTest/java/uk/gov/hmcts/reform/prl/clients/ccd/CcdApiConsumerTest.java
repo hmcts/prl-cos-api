@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -58,8 +59,8 @@ public class CcdApiConsumerTest {
             .given("A request to create a case in CCD")
             .uponReceiving("a request to create a case in CCD with valid authorization")
             .method("POST")
-            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
-            .headers("Authorization", BEARER_TOKEN)
+            .headers("ServiceAuthorization", serviceAuthorizationHeader)
+            .headers("Authorization", bearerToken)
             .headers("Content-Type", "application/json")
             .path("/citizens/UserID/jurisdictions/jurisdictionId/case-types/caseType/cases")
             .matchQuery("ignore-warning", "true")

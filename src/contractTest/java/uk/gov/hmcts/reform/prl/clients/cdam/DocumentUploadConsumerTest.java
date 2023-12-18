@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -67,8 +68,8 @@ public class DocumentUploadConsumerTest {
                 .given("A request to upload a document on cdam api")
                 .uponReceiving("a request to upload a document on cdam api with valid authorization")
                 .method("POST")
-                .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
-                .headers("Authorization", BEARER_TOKEN)
+                .headers("ServiceAuthorization", serviceAuthorizationHeader)
+                .headers("Authorization", bearerToken)
                 .path("/cases/documents")
                 .willRespondWith()
                 .status(HttpStatus.SC_OK)
@@ -79,7 +80,7 @@ public class DocumentUploadConsumerTest {
     @Test
     @PactTestFor(pactMethod = "uploadDocument")
     public void verifyUploadedDocument() throws Exception {
-        UploadResponse response = caseDocumentClientApi.uploadDocuments(BEARER_TOKEN, SERVICE_AUTHORIZATION_HEADER,
+        UploadResponse response = caseDocumentClientApi.uploadDocuments(bearerToken, serviceAuthorizationHeader,
                  buildDocumentUploadRequest());
         Assertions.assertNotNull(response);
         assertEquals(RESTRICTED, response.getDocuments().get(0).classification);
