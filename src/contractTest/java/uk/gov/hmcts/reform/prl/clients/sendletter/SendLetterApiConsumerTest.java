@@ -71,7 +71,7 @@ public class SendLetterApiConsumerTest {
     private static final String CASE_REFERENCE_NUMBER_KEY = "caseReferenceNumber";
     private static final String RECIPIENTS = "recipients";
     private static final String CASE_IDENTIFIER_KEY = "caseIdentifier";
-    private static final String SERVICE_AUTHORIZATION_HEADER = "test";
+    private static final String serviceAuthorizationHeader = "test";
 
     private static final String VALID_REQUEST_BODY_DOC = "requests/send-letter-request-body.json";
 
@@ -99,7 +99,7 @@ public class SendLetterApiConsumerTest {
             .uponReceiving("A request for send letter")
             .path("/letters")
             .method("POST")
-            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
+            .headers("ServiceAuthorization", serviceAuthorizationHeader)
             .headers("Content-Type", "application/vnd.uk.gov.hmcts.letter-service.in.letter.v2+json")
             .matchQuery("isAsync", "true", "true")
             .willRespondWith()
@@ -113,7 +113,7 @@ public class SendLetterApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "generateSendLetterPact")
     public void verifySendLetterPact() {
-        SendLetterResponse sendLetterResponse = sendLetterApiProxy.sendLetter(SERVICE_AUTHORIZATION_HEADER, isAsync, letterWithPdfsRequest);
+        SendLetterResponse sendLetterResponse = sendLetterApiProxy.sendLetter(serviceAuthorizationHeader, isAsync, letterWithPdfsRequest);
         assertNotNull(sendLetterResponse);
         assertEquals("24ab9066-a0d9-409e-862d-164ff6eba545",sendLetterResponse.letterId.toString());
     }
