@@ -57,6 +57,8 @@ public class CcdApiConsumerTest {
     private RequestResponsePact createCaseInCcd(PactDslWithProvider builder) throws JsonProcessingException {
         log.info("bearer token is: {}", bearerToken);
         log.info("serviceAuthorizationHeader is: {}", serviceAuthorizationHeader);
+        System.out.println("bearer token is: " + bearerToken);
+        System.out.println("serviceAuthorizationHeader is: " + serviceAuthorizationHeader);
         return builder
             .given("A request to create a case in CCD")
             .uponReceiving("a request to create a case in CCD with valid authorization")
