@@ -9,7 +9,6 @@ import au.com.dius.pact.core.model.annotations.Pact;
 import au.com.dius.pact.core.model.annotations.PactFolder;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -41,7 +40,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
-@Slf4j
 public class CcdApiConsumerTest {
 
     @Value("${test.bearer-token}")
@@ -55,8 +53,6 @@ public class CcdApiConsumerTest {
 
     @Pact(provider = "ccd", consumer = "prl_cos")
     private RequestResponsePact createCaseInCcd(PactDslWithProvider builder) throws JsonProcessingException {
-        log.info("bearer token is: {}", bearerToken);
-        log.info("serviceAuthorizationHeader is: {}", serviceAuthorizationHeader);
         System.out.println("bearer token is: " + bearerToken);
         System.out.println("serviceAuthorizationHeader is: " + serviceAuthorizationHeader);
         return builder
@@ -78,8 +74,6 @@ public class CcdApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "createCaseInCcd")
     public void verifyCreateCaseInCcd() {
-        log.info("bearer token is: {}", bearerToken);
-        log.info("serviceAuthorizationHeader is: {}", serviceAuthorizationHeader);
         CaseDetails caseDetails = coreCaseDataApi.submitForCitizen(bearerToken, serviceAuthorizationHeader, "UserID",
                                                                    "jurisdictionId", "caseType",
                                                                    true, buildCaseDataContent()
