@@ -231,7 +231,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
-    ) throws JsonProcessingException {
+    ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
@@ -316,9 +316,6 @@ public class EditAndApproveDraftOrderController {
             }
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             caseDataUpdated.put(STATE, caseData.getState());
-            /*if (!CollectionUtils.isEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
-                caseDataUpdated.put("serveOrderAdditionalDocuments", null);
-            }*/
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
