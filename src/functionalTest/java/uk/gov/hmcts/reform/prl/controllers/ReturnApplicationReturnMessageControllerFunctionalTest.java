@@ -34,6 +34,7 @@ public class ReturnApplicationReturnMessageControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .when()
             .contentType("application/json")
             .post("/return-application-return-message")
@@ -46,6 +47,7 @@ public class ReturnApplicationReturnMessageControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
             .header("Authorization", userToken)
+            .header("ServiceAuthorization", "s2sToken")
             .when()
             .contentType("application/json")
             .post("/return-application-notification")

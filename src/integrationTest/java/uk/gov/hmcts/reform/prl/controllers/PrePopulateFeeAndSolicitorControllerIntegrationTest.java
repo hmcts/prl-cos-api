@@ -33,6 +33,7 @@ public class PrePopulateFeeAndSolicitorControllerIntegrationTest extends Integra
         HttpPost httpPost = new HttpPost(baseUrl + "/getSolicitorAndFeeDetails");
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", "TestAuth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);

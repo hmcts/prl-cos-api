@@ -45,9 +45,11 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWitnessStatementsSentToEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoWrittenStatementEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.dio.SdoDioProvideOtherDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.AddNewPreamble;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.PartyNameDA;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoDisclosureOfPapersCaseNumber;
 import uk.gov.hmcts.reform.prl.models.complextypes.draftorder.sdo.SdoLanguageDialect;
@@ -117,6 +119,7 @@ public class SdoDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoCafcassCymruReportSentByDate;
     private final String sdoLocalAuthorityName;
+    private final String sdoLocalAuthorityTextArea;
     private final LocalDate sdoLocalAuthorityReportSubmitByDate;
     private final DynamicList sdoTransferApplicationCourtDynamicList;
     private final List<SdoTransferApplicationReasonEnum> sdoTransferApplicationReason;
@@ -202,4 +205,9 @@ public class SdoDetails {
     private final String sdoCrossExaminationEditContent;
     private final int sdoDocsEvidenceWitnessEvidence;
 
+    private final String sdoAfterSecondGatekeeping;
+    private final List<Element<AddNewPreamble>> sdoAddNewPreambleCollection;
+    private final String sdoNextStepsAfterGatekeeping;
+    private final DynamicMultiSelectList sdoNewPartnerPartiesCafcass;
+    private final DynamicMultiSelectList sdoNewPartnerPartiesCafcassCymru;
 }

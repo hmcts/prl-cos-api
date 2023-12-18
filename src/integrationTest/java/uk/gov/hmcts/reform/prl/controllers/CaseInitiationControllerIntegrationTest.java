@@ -51,6 +51,7 @@ public class CaseInitiationControllerIntegrationTest extends IntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + caseInitiationControllerEndpoint);
         String requestBody = ResourceLoader.loadJson(validBody);
         httpPost.addHeader("Authorization", "Bearer testauthtoken");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);

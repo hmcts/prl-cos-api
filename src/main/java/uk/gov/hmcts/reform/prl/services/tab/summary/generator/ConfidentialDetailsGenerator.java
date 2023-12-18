@@ -35,12 +35,13 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
 
         // Checking the Child details. It is only for C100 applications
         if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
-            && (validateChildrensDetails(caseData) || validateApplicantForCA(caseData))) {
+            && (validateChildrensDetails(caseData) || validateApplicantForCA(caseData) || validateRespondentConfidentialDetailsCA(caseData))) {
             return YesOrNo.Yes.getDisplayedValue();
         }
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())
-            && (validateApplicantForDA(caseData) || validateHomeConfidentialDetails(caseData))) {
+            && (validateApplicantForDA(caseData) || validateHomeConfidentialDetails(caseData)
+            || validateRespondentConfidentialDetailsDA(caseData))) {
             return YesOrNo.Yes.getDisplayedValue();
         }
 
@@ -130,4 +131,41 @@ public class ConfidentialDetailsGenerator implements FieldGenerator {
         }
         return false;
     }
+
+    private boolean validateRespondentConfidentialDetailsCA(CaseData caseData) {
+        // Checking the Respondent Details..
+        Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
+
+        if (!respondentsWrapped.isEmpty() && !respondentsWrapped.get().isEmpty()) {
+            List<PartyDetails> respondents = respondentsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .collect(Collectors.toList());
+
+            for (PartyDetails respondent : respondents) {
+                if (YesOrNo.Yes.equals(respondent.getIsAddressConfidential())
+                    || YesOrNo.Yes.equals(respondent.getIsPhoneNumberConfidential())
+                    || YesOrNo.Yes.equals(respondent.getIsEmailAddressConfidential())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private boolean validateRespondentConfidentialDetailsDA(CaseData caseData) {
+        // Checking the Respondent Details..
+        Optional<PartyDetails> flRespondents = ofNullable(caseData.getRespondentsFL401());
+        if (flRespondents.isPresent()) {
+            PartyDetails partyDetails = flRespondents.get();
+            if (YesOrNo.Yes.equals(partyDetails.getIsAddressConfidential())
+                || YesOrNo.Yes.equals(partyDetails.getIsPhoneNumberConfidential())
+                || YesOrNo.Yes.equals(partyDetails.getIsEmailAddressConfidential())) {
+                return true;
+            }
+
+        }
+        return false;
+    }
+
 }

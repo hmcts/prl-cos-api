@@ -5,7 +5,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.framework.context.DefaultTaskContext;
 import uk.gov.hmcts.reform.prl.framework.exceptions.TaskException;
 import uk.gov.hmcts.reform.prl.framework.exceptions.WorkflowException;
@@ -13,7 +13,7 @@ import uk.gov.hmcts.reform.prl.framework.task.Task;
 
 import static org.junit.Assert.assertEquals;
 
-@RunWith(SpringRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DefaultWorkflowTest {
 
     private DefaultWorkflow<String> defaultWorkflow;

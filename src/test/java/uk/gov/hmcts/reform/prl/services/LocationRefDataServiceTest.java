@@ -161,4 +161,59 @@ public class LocationRefDataServiceTest {
         List<DynamicListElement> test = locationRefDataService.getCourtLocations("test");
         assertNotNull(test);
     }
+
+    @Test
+    public void testFilteredCourtEmail() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
+        List<DynamicListElement> test = locationRefDataService.getFilteredCourtLocations("test");
+        assertNotNull(test);
+    }
+
+    @Test
+    public void testFilteredDaCourtEmail() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(CourtDetails.builder()
+                            .courtVenues(List.of(CourtVenue.builder().region("r").regionId("id").courtName("1")
+                                                     .region("test").siteName("test")
+                                                     .courtEpimmsId("2")
+                                                     .courtTypeId(FAMILY_COURT_TYPE_ID).build()))
+                            .build());
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test");
+        assertNotNull(test);
+    }
+
+    @Test
+    public void testFilteredCourtEmailWithEmptyList() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenThrow(NullPointerException.class);
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
+        List<DynamicListElement> test = locationRefDataService.getFilteredCourtLocations("test");
+        assertNotNull(test);
+    }
+
+    @Test
+    public void testFilteredDaCourtEmailWithEmptyList() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenThrow(NullPointerException.class);
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test");
+        assertNotNull(test);
+    }
+
+    @Test
+    public void testFilteredDaCourtEmailWithEmptyListWhenCourtListIsNull() {
+        when(locationRefDataApi.getCourtDetailsByService(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(null);
+        ReflectionTestUtils.setField(locationRefDataService,"courtsToFilter", "1:email,2,3:email,4:email");
+        List<DynamicListElement> test = locationRefDataService.getDaFilteredCourtLocations("test");
+        assertNotNull(test);
+    }
 }

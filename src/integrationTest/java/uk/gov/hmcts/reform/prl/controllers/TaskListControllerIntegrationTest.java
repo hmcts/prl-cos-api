@@ -42,6 +42,7 @@ public class TaskListControllerIntegrationTest extends IntegrationTest {
 
         HttpPost httpPost = new HttpPost(serviceUrl + taskListControllerEndPoint);
         String requestBody = ResourceLoader.loadJson(validBody);
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         httpPost.addHeader("Authorization", "TestAuth");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);

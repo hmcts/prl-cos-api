@@ -47,6 +47,7 @@ public class EditAndApproveDraftOrderControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + popualteDraftOrderDropdownEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -59,6 +60,7 @@ public class EditAndApproveDraftOrderControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + judgeOrAdminPopulateDraftOrderEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -83,6 +85,7 @@ public class EditAndApproveDraftOrderControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + judgeOrAdminPopulateDraftOrderCustomFieldsEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -95,6 +98,7 @@ public class EditAndApproveDraftOrderControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + judgeOrAdminPopulateDraftOrderCommonFieldsEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);

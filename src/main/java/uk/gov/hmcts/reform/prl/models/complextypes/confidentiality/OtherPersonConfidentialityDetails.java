@@ -12,5 +12,7 @@ public class OtherPersonConfidentialityDetails {
     private final String lastName;
     private final String relationshipToChildDetails;
     private final Address address;
+    private final String email;
+    private final String phoneNumber;
     private final YesOrNo isPersonIdentityConfidential;
 }

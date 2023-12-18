@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -55,6 +56,9 @@ public class CitizenCoreCaseDataServiceTest {
 
     @Mock
     CcdCoreCaseDataService ccdCoreCaseDataService;
+
+    @Mock
+    EventRequestData eventRequestData;
 
     private String serviceAuth = "serviceAuth";
     private CaseDetails caseDetails;
@@ -124,6 +128,8 @@ public class CitizenCoreCaseDataServiceTest {
                                              .build())))
             .build();
 
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
         when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -131,23 +137,12 @@ public class CitizenCoreCaseDataServiceTest {
         CaseDetails updatedDetails = citizenCoreCaseDataService.linkDefendant(
             bearerToken,
             12345L,
-            caseDataMock,
-            CaseEvent.LINK_CITIZEN,
-            startEventResponse
+            eventRequestData,
+            startEventResponse,
+            caseDataUpdated
         );
 
         Assert.assertEquals(caseDetails, updatedDetails);
-    }
-
-    @Test(expected = CoreCaseDataStoreException.class)
-    public void linkCitizenAccountThrowException() throws Exception {
-        citizenCoreCaseDataService.linkDefendant(
-            bearerToken,
-            12345L,
-            caseDataMock,
-            CaseEvent.LINK_CITIZEN,
-            startEventResponse
-        );
     }
 
     @Test

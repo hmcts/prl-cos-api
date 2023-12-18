@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.tab.summary;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -11,6 +10,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.CaseSummary;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.tab.TabService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmGenerator;
+import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllegationOfHarmRevisedGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.AllocatedJudgeDetailsGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.CaseStatusGenerator;
 import uk.gov.hmcts.reform.prl.services.tab.summary.generator.ConfidentialDetailsGenerator;
@@ -28,9 +28,9 @@ import java.util.Map;
 import java.util.Objects;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 
-@Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Qualifier("caseSummaryTab")
@@ -59,6 +59,10 @@ public class CaseSummaryTabService implements TabService {
 
     @Autowired
     AllegationOfHarmGenerator allegationOfHarmGenerator;
+
+    @Autowired
+    AllegationOfHarmRevisedGenerator allegationOfHarmRevisedGenerator;
+
 
     @Autowired
     DateOfSubmissionGenerator dateOfSubmissionGenerator;
@@ -97,18 +101,24 @@ public class CaseSummaryTabService implements TabService {
 
     @Override
     public List<FieldGenerator> getGenerators(CaseData caseData) {
-
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
 
             return List.of(allocatedJudgeDetailsGenerator,
-                           caseStatusGenerator, confidentialDetailsGenerator,urgencyGenerator,typeOfApplicationGenerator,
-                           specialArrangementsGenerator,dateOfSubmissionGenerator);
+                    caseStatusGenerator, confidentialDetailsGenerator, urgencyGenerator, typeOfApplicationGenerator,
+                    specialArrangementsGenerator, dateOfSubmissionGenerator);
 
         }
-        return List.of(allocatedJudgeDetailsGenerator,
-                       caseStatusGenerator, confidentialDetailsGenerator,
-                       orderAppliedForGenerator,
-                       specialArrangementsGenerator, urgencyGenerator, allegationOfHarmGenerator,dateOfSubmissionGenerator);
+
+        return List.of(
+                allocatedJudgeDetailsGenerator,
+                caseStatusGenerator,
+                confidentialDetailsGenerator,
+                orderAppliedForGenerator,
+                specialArrangementsGenerator,
+                urgencyGenerator,
+                TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationOfHarmRevisedGenerator : allegationOfHarmGenerator,
+                dateOfSubmissionGenerator
+        );
     }
 
     @Override

@@ -15,25 +15,41 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.authorisation.ServiceAuthorisationApi;
-import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@PropertySource(value = "classpath:application.yaml")
+@TestPropertySource(
+    properties = {"bundle.api.url=","idam.api.url=","commonData.api.url=",
+        "fis_hearing.api.url=",
+        "refdata.api.url=",
+        "courtfinder.api.url=",
+        "prl-dgs-api.url=",
+        "fees-register.api.url=",
+        "judicialUsers.api.url=",
+        "locationfinder.api.url=",
+        "rd_professional.api.url=",
+        "payments.api.url=",
+        "pba.validation.service.api.baseurl=",
+        "staffDetails.api.url=",
+        "idam.s2s-auth.url=localhost:5000"
+    }
+)
 @EnableAutoConfiguration
 @ExtendWith(PactConsumerTestExt.class)
 @ExtendWith(SpringExtension.class)
-@PactTestFor(providerName = "s2s_auth", port = "5050")
-@SpringBootTest(classes = {ServiceAuthorisationApi.class, IdamApiConsumerApplication.class})
+@PactTestFor(providerName = "s2s_auth", port = "5000")
+@SpringBootTest
+@EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.authorisation"})
 public class ServiceAuthConsumerTest {
 
     private static final String AUTHORISATION_TOKEN = "Bearer someAuthorisationToken";
@@ -51,10 +67,10 @@ public class ServiceAuthConsumerTest {
     @BeforeEach
     public void setUpTest() {
         jsonPayload.put("microservice", "prl_cos_api");
-        jsonPayload.put("oneTimePassword", "784467");
+        // jsonPayload.put("oneTimePassword", "784467");
     }
 
-    @Pact(consumer = "s2s_auth_client")
+    @Pact(consumer = "prl_cos_api")
     public RequestResponsePact executeLease(PactDslWithProvider builder) throws JsonProcessingException {
 
         return builder.given("microservice with valid credentials")
@@ -63,7 +79,7 @@ public class ServiceAuthConsumerTest {
             .method(HttpMethod.POST.toString())
             .body(buildJsonPayload())
             .willRespondWith()
-            .headers(Map.of(HttpHeaders.CONTENT_TYPE, "applica"))
+            .headers(Map.of(HttpHeaders.CONTENT_TYPE, "text/plain"))
             .status(HttpStatus.OK.value())
             .body(PactDslRootValue.stringType(SOME_MICRO_SERVICE_TOKEN))
             .toPact();

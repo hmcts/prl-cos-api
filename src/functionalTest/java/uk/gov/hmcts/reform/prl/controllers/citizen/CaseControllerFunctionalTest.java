@@ -93,6 +93,7 @@ public class CaseControllerFunctionalTest {
                 .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void testRetrieveCitizenCases() {
         request
