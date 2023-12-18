@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -49,11 +48,8 @@ import static uk.gov.hmcts.reform.ccd.document.am.model.Classification.RESTRICTE
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class DocumentUploadConsumerTest {
 
-    @Value("${test.bearer-token}")
-    private String bearerToken;
-
-    @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
+    private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
     private static final String DOCUMENT_NAME = "Test.pdf";
 
     @Autowired
@@ -67,8 +63,8 @@ public class DocumentUploadConsumerTest {
                 .given("A request to upload a document on cdam api")
                 .uponReceiving("a request to upload a document on cdam api with valid authorization")
                 .method("POST")
-                .headers("ServiceAuthorization", serviceAuthorizationHeader)
-                .headers("Authorization", bearerToken)
+                .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
+                .headers("Authorization", BEARER_TOKEN)
                 .path("/cases/documents")
                 .willRespondWith()
                 .status(HttpStatus.SC_OK)
@@ -79,7 +75,7 @@ public class DocumentUploadConsumerTest {
     @Test
     @PactTestFor(pactMethod = "uploadDocument")
     public void verifyUploadedDocument() throws Exception {
-        UploadResponse response = caseDocumentClientApi.uploadDocuments(bearerToken, serviceAuthorizationHeader,
+        UploadResponse response = caseDocumentClientApi.uploadDocuments(BEARER_TOKEN, SERVICE_AUTHORIZATION_HEADER,
                  buildDocumentUploadRequest());
         Assertions.assertNotNull(response);
         assertEquals(RESTRICTED, response.getDocuments().get(0).classification);

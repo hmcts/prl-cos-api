@@ -39,7 +39,7 @@ public class ReferenceDataOrganisationalInternalUsersConsumerTest extends Refere
             .given("Organisation exists for given Id")
             .uponReceiving("A Request to get organisation by Id")
             .method("GET")
-            .headers(serviceAuthorizationHeader, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
+            .headers(SERVICE_AUTHORIZATION_HEADER, SERVICE_AUTH_TOKEN, AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN)
             .path("/refdata/internal/v1/organisations")
             .query("id=orgId")
             .willRespondWith()

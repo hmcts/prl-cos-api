@@ -53,7 +53,7 @@ public class RefDataCategoryApiConsumerTest {
 
     static final String AUTHORIZATION_HEADER = "Authorization";
     static final String AUTHORIZATION_TOKEN = "Bearer some-access-token";
-    static final String serviceAuthorizationHeader = "ServiceAuthorization";
+    static final String SERVICE_AUTHORIZATION_HEADER = "ServiceAuthorization";
     static final String SERVICE_AUTH_TOKEN = "someServiceAuthToken";
 
     @Pact(provider = "referenceDataCategoryApi", consumer = "prl_cos_api")
@@ -65,7 +65,7 @@ public class RefDataCategoryApiConsumerTest {
                         "A Request to get list of values for a given service id and category id")
                 .method("GET")
                 .headers(
-                        serviceAuthorizationHeader,
+                        SERVICE_AUTHORIZATION_HEADER,
                         SERVICE_AUTH_TOKEN,
                         AUTHORIZATION_HEADER,
                         AUTHORIZATION_TOKEN)

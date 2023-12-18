@@ -14,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -45,8 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class IdamApiConsumerTest {
 
     public static final String TOKEN_REGEXP = "[a-zA-Z0-9._-]+";
-    @Value("${test.bearer-token}")
-    private String bearerToken;
+    public static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
 
     @Autowired
     private IdamApi idamClient;
@@ -73,7 +71,7 @@ public class IdamApiConsumerTest {
             .uponReceiving("IDAM returns user info to the client")
             .path(IDAM_OPENID_USERINFO_URL)
             .headerFromProviderState("Authorization", "Bearer ${access_token}",
-                                     bearerToken)
+                                     BEARER_TOKEN)
             .method(HttpMethod.GET.toString())
             .willRespondWith()
             .status(HttpStatus.SC_OK)
@@ -84,7 +82,7 @@ public class IdamApiConsumerTest {
     @Test
     @PactTestFor(pactMethod = "executeGetUserInfo")
     void verifyUserInfo() {
-        UserInfo actualUserInfo = idamClient.retrieveUserInfo(bearerToken);
+        UserInfo actualUserInfo = idamClient.retrieveUserInfo(BEARER_TOKEN);
 
         UserInfo expectedUserInfo = UserInfo.builder()
             .familyName("Smith")

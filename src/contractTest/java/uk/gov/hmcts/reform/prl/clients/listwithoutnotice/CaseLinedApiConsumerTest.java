@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -55,11 +54,8 @@ public class CaseLinedApiConsumerTest {
     @Autowired
     HearingApiClient hearingApiClient;
 
-    @Value("${test.bearer-token}")
-    private String bearerToken;
-
-    @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
+    private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
 
     private final String caseLinkedResponseBodyResponseBody = "listwithoutnotice/CaseLinkedResponseBody.json";
     private CaseLinkedRequest caseLinkedRequest;
@@ -75,8 +71,8 @@ public class CaseLinedApiConsumerTest {
             .given("Case Linked")
             .uponReceiving("A Request for Case Linked")
             .method("POST")
-            .headers("ServiceAuthorization", serviceAuthorizationHeader)
-            .headers("Authorization", bearerToken)
+            .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
+            .headers("Authorization", BEARER_TOKEN)
             .headers("Content-Type", "application/json")
             .path("/serviceLinkedCases")
             .body(new ObjectMapper().writeValueAsString(caseLinkedRequest), "application/json")
@@ -91,7 +87,7 @@ public class CaseLinedApiConsumerTest {
     public void verifyCaseLinkedDetails() {
         caseLinkedRequest = CaseLinkedRequest.caseLinkedRequestWith().caseReference("1677767515750127").build();
         List<CaseLinkedData>
-            caseLinkedData = hearingApiClient.getCaseLinkedData(bearerToken,serviceAuthorizationHeader,caseLinkedRequest);
+            caseLinkedData = hearingApiClient.getCaseLinkedData(BEARER_TOKEN,SERVICE_AUTHORIZATION_HEADER,caseLinkedRequest);
         assertNotNull(caseLinkedData);
         assertEquals(caseLinkedData.get(0).getCaseReference(),"1670601355422736");
         assertEquals(caseLinkedData.get(0).getCaseName(),"Case_Flag_9_Dec_6");
