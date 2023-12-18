@@ -35,6 +35,10 @@ public class ReviewDocuments {
     private List<Element<QuarantineLegalDoc>> bulkScannedDocListConfTab;
     private List<Element<QuarantineLegalDoc>> bulkScannedDocListDocTab;
 
+    //PRL-4320 - manage docs redesign
+    private List<Element<QuarantineLegalDoc>> restrictedDocuments;
+    private List<Element<QuarantineLegalDoc>> confidentialDocuments;
+
     public static String[] reviewDocTempFields() {
         return new String[]{
             "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc"

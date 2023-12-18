@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
@@ -89,6 +90,13 @@ public class QuarantineLegalDoc {
     public final Document url;
     public final LocalDateTime scannedDate;
     public final LocalDateTime deliveryDate;
+
+    //PRL-4320 - manage docs redesign
+    private final YesOrNo isConfidential;
+    private final YesOrNo isRestricted;
+    private final String restrictedDetails;
+    private final String uploadedBy;
+    private final String uploadedByIdamId;
 
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
