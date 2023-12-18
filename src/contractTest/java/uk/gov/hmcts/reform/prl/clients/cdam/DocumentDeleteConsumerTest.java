@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -33,11 +32,9 @@ import java.util.UUID;
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class DocumentDeleteConsumerTest {
-    @Value("${test.bearer-token}")
-    private String bearerToken;
 
-    @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    private static final String BEARER_TOKEN = "Bearer eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
+    private static final String SERVICE_AUTHORIZATION_HEADER = "eyJ0eXAiOiJKV1QiLCJraWQiOiJiL082T3ZWdeRre";
 
     @Autowired
     CaseDocumentClientApi caseDocumentClientApi;
@@ -48,8 +45,8 @@ public class DocumentDeleteConsumerTest {
                 .given("A request to delete a document from cdam api")
                 .uponReceiving("a request to delete a document from cdam api with valid authorization")
                 .method("DELETE")
-                .headers("ServiceAuthorization", serviceAuthorizationHeader)
-                .headers("Authorization", bearerToken)
+                .headers("ServiceAuthorization", SERVICE_AUTHORIZATION_HEADER)
+                .headers("Authorization", BEARER_TOKEN)
                 .path("/cases/documents/4f854707-91bf-4fa0-98ec-893ae0025cae")
                 .matchQuery("permanent", "true")
                 .willRespondWith()
@@ -60,8 +57,8 @@ public class DocumentDeleteConsumerTest {
     @Test
     @PactTestFor(pactMethod = "deleteDocument")
     public void verifyDeleteDocument() {
-        caseDocumentClientApi.deleteDocument(bearerToken,
-                serviceAuthorizationHeader, UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), true
+        caseDocumentClientApi.deleteDocument(BEARER_TOKEN,
+                SERVICE_AUTHORIZATION_HEADER, UUID.fromString("4f854707-91bf-4fa0-98ec-893ae0025cae"), true
         );
     }
 }
