@@ -47,10 +47,10 @@ public class PaymentApiConsumerTest {
 
     public static final int SLEEP_TIME = 2000;
     @Value("${test.bearer-token}")
-    private String bearerToken;
+    protected String bearerToken;
 
     @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    protected String serviceAuthorizationHeader;
     private final OnlineCardPaymentRequest onlineCardPaymentRequest = buildOnlineCardPaymentRequest();
     private static final String PAYMENT_REFERENCE = "RC-1662-3761-4393-1823";
     private static final String DATE_CREATED = "2022-09-05T11:09:04.308+00:00";

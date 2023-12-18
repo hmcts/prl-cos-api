@@ -46,10 +46,10 @@ public class IdamApiConsumerTest {
 
     public static final String TOKEN_REGEXP = "[a-zA-Z0-9._-]+";
     @Value("${test.bearer-token}")
-    private String bearerToken;
+    protected String bearerToken;
 
     @Autowired
-    private IdamApi idamClient;
+    protected IdamApi idamClient;
 
     private static final String IDAM_OPENID_USERINFO_URL = "/o/userinfo";
 

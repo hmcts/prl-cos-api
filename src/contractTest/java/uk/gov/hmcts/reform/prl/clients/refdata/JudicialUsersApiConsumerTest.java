@@ -56,10 +56,10 @@ public class JudicialUsersApiConsumerTest {
     JudicialUserDetailsApi judicialUserDetailsApi;
 
     @Value("${test.bearer-token}")
-    private String bearerToken;
+    protected String bearerToken;
 
     @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    protected String serviceAuthorizationHeader;
 
     private final String validResponseBody = "gatekeeping/JudgeDetailsResponseBody.json";
 

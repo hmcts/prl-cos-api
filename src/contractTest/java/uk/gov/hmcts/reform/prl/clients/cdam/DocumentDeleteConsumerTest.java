@@ -34,10 +34,10 @@ import java.util.UUID;
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
 public class DocumentDeleteConsumerTest {
     @Value("${test.bearer-token}")
-    private String bearerToken;
+    protected String bearerToken;
 
     @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    protected String serviceAuthorizationHeader;
 
     @Autowired
     CaseDocumentClientApi caseDocumentClientApi;

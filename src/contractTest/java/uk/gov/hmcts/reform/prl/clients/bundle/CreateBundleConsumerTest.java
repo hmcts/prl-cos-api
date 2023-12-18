@@ -63,10 +63,10 @@ public class CreateBundleConsumerTest {
     BundleApiClient bundleApiClient;
 
     @Value("${test.bearer-token}")
-    private String bearerToken;
+    protected String bearerToken;
 
     @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    protected String serviceAuthorizationHeader;
 
     private final BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder().build();
 

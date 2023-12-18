@@ -43,10 +43,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 public class CcdApiConsumerTest {
 
     @Value("${test.bearer-token}")
-    private String bearerToken;
+    protected String bearerToken;
 
     @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    protected String serviceAuthorizationHeader;
 
     @Autowired
     CoreCaseDataApi coreCaseDataApi;

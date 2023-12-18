@@ -50,10 +50,11 @@ import static uk.gov.hmcts.reform.ccd.document.am.model.Classification.RESTRICTE
 public class DocumentUploadConsumerTest {
 
     @Value("${test.bearer-token}")
-    private String bearerToken;
+    protected String bearerToken;
 
     @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    protected String serviceAuthorizationHeader;
+
     private static final String DOCUMENT_NAME = "Test.pdf";
 
     @Autowired

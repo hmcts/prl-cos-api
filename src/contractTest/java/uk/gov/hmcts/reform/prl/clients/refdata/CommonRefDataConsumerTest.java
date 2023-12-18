@@ -53,10 +53,10 @@ public class CommonRefDataConsumerTest {
     CommonDataRefApi commonDataRefApi;
 
     @Value("${test.bearer-token}")
-    private String bearerToken;
+    protected String bearerToken;
 
     @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    protected String serviceAuthorizationHeader;
 
     private final String validResponseBody = "commonrefdata/CommonRefData.json";
 

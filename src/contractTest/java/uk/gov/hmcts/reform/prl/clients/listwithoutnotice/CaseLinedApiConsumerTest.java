@@ -56,10 +56,10 @@ public class CaseLinedApiConsumerTest {
     HearingApiClient hearingApiClient;
 
     @Value("${test.bearer-token}")
-    private String bearerToken;
+    protected String bearerToken;
 
     @Value("${test.service-auth-token}")
-    private String serviceAuthorizationHeader;
+    protected String serviceAuthorizationHeader;
 
     private final String caseLinkedResponseBodyResponseBody = "listwithoutnotice/CaseLinkedResponseBody.json";
     private CaseLinkedRequest caseLinkedRequest;
