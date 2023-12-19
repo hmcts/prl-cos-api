@@ -249,6 +249,9 @@ public class CallbackControllerTest {
     private AssignCaseAccessClient assignCaseAccessClient;
 
     @Mock
+    private RoleAssignmentService roleAssignmentService;
+
+    @Mock
     private LocationRefDataService locationRefDataService;
     @Mock
     private ApplicantsListGenerator applicantsListGenerator;
@@ -2649,4 +2652,11 @@ public class CallbackControllerTest {
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
     }
 
+    @Test
+    public void testAllocateJudge() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build()).build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.allocateJudgeTest(authToken, callbackRequest);
+        assertEquals("Judge", aboutToStartOrSubmitCallbackResponse);
+    }
 }
