@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import uk.gov.hmcts.reform.prl.models.roleassignment.RequestedRoles;
 import uk.gov.hmcts.reform.prl.models.roleassignment.request.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.response.RoleAssignmentResponse;
+
+import java.util.List;
 
 @FeignClient(name = "amRoleAssignment",
         url = "${amRoleAssignment.api.url}",
@@ -24,7 +27,7 @@ public interface RoleAssignmentApi {
 
 
     @GetMapping(path = "/am/role-assignments/actors/", consumes = "application/json")
-    RoleAssignmentResponse getRoleAssignments(
+    List<RequestedRoles> getRoleAssignments(
         @RequestHeader("Authorization") String authorization,
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("x-correlation-id") String xcorrelationId,
