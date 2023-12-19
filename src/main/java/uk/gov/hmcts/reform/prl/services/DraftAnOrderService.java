@@ -715,6 +715,7 @@ public class DraftAnOrderService {
         log.info("*** draft order dynamic list: {}", caseData.getDraftOrdersDynamicList());
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         log.info("selected order: {}", selectedOrder);
+        caseDataMap.put("draftOrdersDynamicList", caseData.getDraftOrdersDynamicList());
         caseDataMap.put("orderName", getOrderName(selectedOrder));
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
