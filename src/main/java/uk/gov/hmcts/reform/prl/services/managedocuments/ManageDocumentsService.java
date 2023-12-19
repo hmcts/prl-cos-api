@@ -36,6 +36,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static java.lang.String.format;
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
@@ -67,6 +68,9 @@ public class ManageDocumentsService {
     private final Time dateTime;
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
+    public static final String D0C_RELATED_TO_CASE =
+        "<h3 class='govuk-heading-s'>Confirm the document is related to %s</h3>";
+
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
@@ -75,7 +79,7 @@ public class ManageDocumentsService {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
-            .documentRelatedToCaseLabel("Confirm the document is related to " + caseData.getApplicantCaseName())
+            .documentRelatedToCaseLabel(format(D0C_RELATED_TO_CASE, caseData.getApplicantCaseName()))
             .build();
 
         return caseData.toBuilder()
