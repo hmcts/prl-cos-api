@@ -15,6 +15,8 @@ public interface RoleAssignmentApi {
 
     @PostMapping(path = "/am/role-assignments", consumes = "application/json")
     RoleAssignmentResponse updateRoleAssignment(
+        @RequestHeader("Authorization") String authorization,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("x-correlation-id") String xcorrelationId,
         @RequestBody RoleAssignmentRequest roleAssignmentRequest);
 }
