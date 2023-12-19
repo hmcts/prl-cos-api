@@ -55,6 +55,9 @@ public class AmRoleAssignmentApiTest {
     private static final String X_CORRELATION_ID = "someXCorrelationId";
     private static final String APPLICATION_JSON = "application/json";
 
+    private static final String AUTH = "token";
+    private static final String S2S = "token";
+
 
     @Pact(provider = "am_role_assignment_service", consumer = "prl_cos")
     public RequestResponsePact generatePactFragmentForRoleAssignment(PactDslWithProvider builder) throws Exception {
@@ -80,8 +83,9 @@ public class AmRoleAssignmentApiTest {
     @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignment")
     public void verifyCaseLinkedDetails() {
         RoleAssignmentResponse roleAssignmentResponse = roleAssignmentApi
-            .updateRoleAssignment(X_CORRELATION_ID,
-                RoleAssignmentRequest.roleAssignmentRequest().build());
+            .updateRoleAssignment(AUTH, S2S, X_CORRELATION_ID,
+                                  RoleAssignmentRequest.roleAssignmentRequest().build()
+            );
 
         Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response");
     }

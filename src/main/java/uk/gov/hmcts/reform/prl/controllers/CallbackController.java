@@ -66,6 +66,7 @@ import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.UpdatePartyDetailsService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -86,6 +87,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -151,6 +153,8 @@ public class CallbackController {
     private final C100IssueCaseService c100IssueCaseService;
     private final AmendCourtService amendCourtService;
     private final EventService eventPublisher;
+
+    private final RoleAssignmentService roleAssignmentService;
 
     @PostMapping(path = "/validate-application-consideration-timetable", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(summary = "Callback to validate application consideration timetable. Returns error messages if validation fails.")
@@ -776,13 +780,35 @@ public class CallbackController {
         ).build());
     }
 
-    private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation,CaseData newCaseData,
+    private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation, CaseData newCaseData,
                                                                            String typeOfEvent) {
         return TransferToAnotherCourtEvent.builder()
             .authorisation(authorisation)
             .caseData(newCaseData)
             .typeOfEvent(typeOfEvent)
             .build();
+    }
+
+
+    @PostMapping(path = "/allocateJudgeTest",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to allocate judge ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse allocateJudgeTest(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        roleAssignmentService.createRoleAssignment(
+            authorisation,
+            callbackRequest.getCaseDetails(),
+            false,
+            Set.of("JUDGE")
+        );
+        return AboutToStartOrSubmitCallbackResponse.builder().build();
     }
 
 }
