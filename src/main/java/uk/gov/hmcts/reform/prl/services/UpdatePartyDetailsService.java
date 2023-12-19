@@ -214,27 +214,21 @@ public class UpdatePartyDetailsService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
             List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
-            log.info("Revised children in case: " + children);
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
-                log.info("Children empty or < 1");
                 children = new ArrayList<>();
                 Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder().build());
                 children.add(childDetails);
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
-                log.info("Updated case data: " + caseDataUpdated);
             } else {
                 caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, caseData.getNewChildDetails());
             }
         } else {
             List<Element<Child>> children = caseData.getChildren();
-            log.info("Children in case: " + children);
             if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
-                log.info("Children empty or < 1");
                 children = new ArrayList<>();
                 Element<Child> childDetails = element(Child.builder().build());
                 children.add(childDetails);
                 caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
-                log.info("Updated case data: " + caseDataUpdated);
             } else {
                 caseDataUpdated.put(PrlAppsConstants.CHILDREN, caseData.getChildren());
             }
