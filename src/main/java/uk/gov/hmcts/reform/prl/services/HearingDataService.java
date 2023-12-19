@@ -111,8 +111,6 @@ public class HearingDataService {
 
     private final HearingRequestDataMapper hearingRequestDataMapper;
 
-    private final CaseService caseService;
-
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
     DateTimeFormatter customDateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
 

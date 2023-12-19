@@ -69,11 +69,6 @@ public class ManageOrderEmailService {
     public static final String NEW_AND_FINAL = "newAndFinal";
     public static final String FINAL = "final";
     public static final String NEW = "new";
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private CourtFinderService courtLocatorService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -86,9 +81,6 @@ public class ManageOrderEmailService {
     private static final String URGENT_CASE = "Urgent ";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
     private static final String ORDER_TYPE = "OrderPack";
-    public static final String NEW_AND_FINAL = "newAndFinal";
-    public static final String FINAL = "final";
-    public static final String NEW = "new";
 
     private final EmailService emailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
