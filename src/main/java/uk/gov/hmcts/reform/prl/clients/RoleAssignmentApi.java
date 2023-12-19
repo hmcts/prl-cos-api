@@ -2,9 +2,11 @@ package uk.gov.hmcts.reform.prl.clients;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.cloud.openfeign.FeignClientProperties;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import uk.gov.hmcts.reform.prl.models.roleassignment.request.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.response.RoleAssignmentResponse;
 
@@ -19,4 +21,12 @@ public interface RoleAssignmentApi {
         @RequestHeader("ServiceAuthorization") String serviceAuthorization,
         @RequestHeader("x-correlation-id") String xcorrelationId,
         @RequestBody RoleAssignmentRequest roleAssignmentRequest);
+
+
+    @GetMapping(path = "/am/role-assignments/actors/", consumes = "application/json")
+    RoleAssignmentResponse getRoleAssignments(
+        @RequestHeader("Authorization") String authorization,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestHeader("x-correlation-id") String xcorrelationId,
+        @RequestParam("actorId") String actorId);
 }
