@@ -13,10 +13,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagMigrationService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+
+import java.util.Map;
 
 @Tag(name = "migration-controller")
 @Slf4j
@@ -29,6 +34,26 @@ public class MigrationController extends AbstractCallbackController {
     @Autowired
     @Qualifier("allTabsService")
     AllTabServiceImpl tabService;
+
+
+    @Autowired
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+
+    @Autowired
+    CaseFlagMigrationService caseFlagMigrationService;
+
+
+    @PostMapping("/about-to-submit")
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestHeader("Authorization")
+                                                                            @Parameter(hidden = true) String authorisation,
+                                                                            @RequestBody CallbackRequest callbackRequest) {
+
+        Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
+        caseDataMap.putAll(caseFlagMigrationService.migrateCaseForCaseFlags(caseDataMap));
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
+    }
 
     @PostMapping("/submitted")
     public void handleSubmitted(@RequestBody CallbackRequest callbackRequest,
