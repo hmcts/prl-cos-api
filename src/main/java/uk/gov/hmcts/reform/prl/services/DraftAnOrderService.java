@@ -2025,7 +2025,7 @@ public class DraftAnOrderService {
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
             errorList = validateDraftOrderDetails(caseData);
-            if (errorList.isEmpty()) {
+            if (!errorList.isEmpty()) {
                 return Map.of("errorList", errorList);
             }
             return generateOrderDocumentPostValidations(
@@ -2039,7 +2039,7 @@ public class DraftAnOrderService {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
             if (Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                 errorList = validateEditedOrderDetails(caseData, draftOrder);
-                if (errorList.isEmpty()) {
+                if (!errorList.isEmpty()) {
                     return Map.of("errorList", errorList);
                 }
                 return generateOrderDocumentPostValidations(
