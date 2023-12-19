@@ -79,6 +79,27 @@ public class ManageDocumentsController extends AbstractCallbackController {
             .build();
     }
 
+    @PostMapping(path = "/copy-manage-docs-mid", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Checking Error")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse copyManageDocsMid(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorisation));
+        List<String> errorList = new ArrayList<>();
+        if (SOLICITOR.equals(userRole)) {
+            errorList = manageDocumentsService.precheckDocumentField(callbackRequest);
+
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
+
+    }
+
     @PostMapping(path = "/copy-manage-docs", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Copy manage docs for tabs")
     @ApiResponses(value = {
@@ -90,20 +111,8 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorisation));
-        List<String> errorList = new ArrayList<>();
-        if (SOLICITOR.equals(userRole)) {
-            errorList = manageDocumentsService.precheckDocumentField(callbackRequest);
-
-        }
-        if (!errorList.isEmpty()) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        } else {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
-        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
     }
 
     @PostMapping("/submitted")
