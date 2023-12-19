@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -190,14 +191,19 @@ public class DocumentUtils {
     }
 
     public static QuarantineLegalDoc addQuarantineFields(QuarantineLegalDoc quarantineLegalDoc,
-                                                         ManageDocuments manageDocument) {
+                                                         ManageDocuments manageDocument,
+                                                         UserDetails userDetails) {
         return quarantineLegalDoc.toBuilder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            //  .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
-            // .notes(manageDocument.getDocumentDetails())
             .categoryId(manageDocument.getDocumentCategories().getValueCode())
             .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            //PRL-4320 - Manage documents redesign
+            .isConfidential(manageDocument.getIsConfidential())
+            .isRestricted(manageDocument.getIsRestricted())
+            .notes(manageDocument.getRestrictedDetails())
+            .uploadedBy(userDetails.getFullName())
+            .uploadedByIdamId(userDetails.getId())
             .build();
     }
 

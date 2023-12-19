@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -141,7 +142,8 @@ public class ManageDocumentsService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
-        String userRole = CaseUtils.getUserRole(userService.getUserDetails(authorization));
+        UserDetails userDetails = userService.getUserDetails(authorization);
+        String userRole = CaseUtils.getUserRole(userDetails);
 
         if (manageDocuments != null && !manageDocuments.isEmpty()) {
             List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
@@ -156,8 +158,10 @@ public class ManageDocumentsService {
             log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
             log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
 
-            Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement -> manageDocumentsElement.getValue()
-                .getIsRestricted().equals(YesOrNo.Yes);
+            //PRL-4320 - Updated for when documents need to put into quarantine
+            Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement ->
+                YesOrNo.Yes.equals(manageDocumentsElement.getValue().getIsConfidential())
+                    || YesOrNo.Yes.equals(manageDocumentsElement.getValue().getIsRestricted());
 
             boolean isRestrictedFlag = false;
             for (Element<ManageDocuments> element : manageDocuments) {
@@ -166,7 +170,8 @@ public class ManageDocumentsService {
                     restricted,
                     userRole,
                     quarantineDocs,
-                    tabDocuments
+                    tabDocuments,
+                    userDetails
                 )) {
                     isRestrictedFlag = true;
                 }
@@ -209,25 +214,25 @@ public class ManageDocumentsService {
                                                                          Predicate<Element<ManageDocuments>> restricted,
                                                                          String userRole,
                                                                          List<Element<QuarantineLegalDoc>> quarantineDocs,
-                                                                         List<Element<QuarantineLegalDoc>> tabDocuments) {
+                                                                         List<Element<QuarantineLegalDoc>> tabDocuments,
+                                                                         UserDetails userDetails) {
 
         ManageDocuments manageDocument = element.getValue();
         boolean confidentialityFlag = false;
-        // if restricted then add to quarantine docs list
+        // if restricted or confidential then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-            quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
+            quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument, userDetails);
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
         } else {
             final String categoryId = manageDocument.getDocumentCategories().getValueCode();
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
-                .getQuarantineUploadDocument(
-                    categoryId,
-                    manageDocument.getDocument().toBuilder()
-                        .documentCreatedOn(localZoneDate).build()
+                .getQuarantineUploadDocument(categoryId,
+                                             manageDocument.getDocument().toBuilder()
+                                                 .documentCreatedOn(localZoneDate).build()
                 );
-            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument);
+            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, userDetails);
 
             tabDocuments.add(element(quarantineUploadDoc));
         }
