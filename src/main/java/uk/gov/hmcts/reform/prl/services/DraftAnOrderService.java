@@ -240,6 +240,8 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+        log.info("*** draftoo dynamic list : {}", caseDataMap.get("draftOrdersDynamicList"));
+        log.info("*** draftoo order collection : {}", caseData.getDraftOrderCollection());
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
