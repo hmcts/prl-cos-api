@@ -347,12 +347,6 @@ public class EditAndApproveDraftOrderController {
                 .ok(SubmittedCallbackResponse.builder()
                         .confirmationHeader(CONFIRMATION_HEADER)
                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
-            if (JudgeApprovalDecisionsSolicitorEnum.sendToAdminToServe.toString()
-                .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))
-                || JudgeApprovalDecisionsSolicitorEnum.sendToAdminToServe.toString()
-                .equalsIgnoreCase(String.valueOf(caseDataUpdated.get("whatToDoWithOrderCourtAdmin")))) {
-                responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
-            }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
