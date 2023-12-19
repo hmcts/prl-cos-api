@@ -4,10 +4,17 @@ package uk.gov.hmcts.reform.prl.services.reviewdocument;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -17,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -25,9 +33,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
@@ -38,6 +49,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.formatDateTime;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -47,9 +59,17 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReviewDocumentService {
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
+    public static final String CONFIDENTIAL = "Confidential_";
 
+    private final CoreCaseDataService coreCaseDataService;
+
+    private final CaseDocumentClient caseDocumentClient;
+
+    private final AuthTokenGenerator authTokenGenerator;
+
+    private final SystemUserService systemUserService;
+
+    public static final String DOCUMENT_UUID_REGEX = "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}";
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -81,7 +101,6 @@ public class ReviewDocumentService {
     public static final String COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB = "courtStaffUploadDocListDocTab";
     public static final String CITIZEN_UPLOADED_DOC_LIST_DOC_TAB = "citizenUploadedDocListDocTab";
     public static final String BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB = "bulkScannedDocListDocTab";
-    public static final String CONFIDENTIAL_CATEGORY_ID = "confidential";
 
     public List<DynamicListElement> getDynamicListElements(CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
@@ -89,8 +108,10 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getLegalProfQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
                                                .build())
                                            .toList());
         }
@@ -99,8 +120,10 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
                                                .build())
                                            .toList());
         }
@@ -109,8 +132,10 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getCourtStaffQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
                                                .build())
                                            .toList());
         }
@@ -265,11 +290,37 @@ public class ReviewDocumentService {
             Element<QuarantineLegalDoc> quarantineLegalDocElement = quarantineLegalDocElementOptional.get();
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElement);
+            QuarantineLegalDoc uploadDoc;
+            if (isReviewDecisionYes) {
+                try {
+                    Document document = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
+                    UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
+                    log.info(" DocumentId found {}", documentId);
+                    Document newUploadedDocument = getNewUploadedDocument(document, documentId);
 
-            QuarantineLegalDoc uploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                isReviewDecisionYes ? CONFIDENTIAL_CATEGORY_ID : quarantineLegalDocElement.getValue().getCategoryId(),
-                getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
-            );
+                    log.info("document uploaded {}", newUploadedDocument);
+                    if (null != newUploadedDocument) {
+                        caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
+                                                          authTokenGenerator.generate(), documentId, true
+                        );
+                        log.info("deleted document {}", documentId);
+
+                        uploadDoc = DocumentUtils.getQuarantineUploadDocument(
+                            quarantineLegalDocElement.getValue().getCategoryId(),
+                            newUploadedDocument
+                        );
+                    } else {
+                        throw new IllegalStateException("Failed to move document to confidential tab please retry");
+                    }
+                } catch (Exception e) {
+                    throw new IllegalStateException("Failed to move document to confidential tab please retry");
+                }
+            } else {
+                uploadDoc = DocumentUtils.getQuarantineUploadDocument(
+                    quarantineLegalDocElement.getValue().getCategoryId(),
+                    getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
+                );
+            }
 
             uploadDoc = addQuarantineDocumentFields(
                 uploadDoc,
@@ -286,6 +337,47 @@ public class ReviewDocumentService {
                 caseDataUpdated.put(uploadDocListConfOrDocTabKey, List.of(element(uploadDoc)));
             }
         }
+    }
+
+    private Document getNewUploadedDocument(Document document, UUID documentId) {
+        byte[] docData;
+        Document newUploadedDocument = null;
+        try {
+            String sysUserToken = systemUserService.getSysUserToken();
+            String serviceToken = authTokenGenerator.generate();
+            Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
+                                                                     documentId
+            ).getBody();
+            docData = IOUtils.toByteArray(resource.getInputStream());
+            UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
+                sysUserToken,
+                serviceToken,
+                PrlAppsConstants.CASE_TYPE,
+                PrlAppsConstants.JURISDICTION,
+                List.of(
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        CONFIDENTIAL + document.getDocumentFileName(),
+                        APPLICATION_PDF_VALUE,
+                        docData
+                    ))
+            );
+            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+        } catch (Exception ex) {
+            log.error("Failed to upload new document {}", ex.getMessage());
+        }
+        return newUploadedDocument;
+    }
+
+    private String getDocumentId(String url) {
+        Pattern pairRegex = Pattern.compile(DOCUMENT_UUID_REGEX);
+        Matcher matcher = pairRegex.matcher(url);
+        String documentId = "";
+        if (matcher.find()) {
+            documentId = matcher.group(0);
+        }
+        log.info("document id {}", documentId);
+        return documentId;
     }
 
     private Document getQuarantineDocument(String uploadedBy,
@@ -562,7 +654,7 @@ public class ReviewDocumentService {
 
     private QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
                                                            QuarantineLegalDoc quarantineLegalDoc) {
-
+        log.info("File name {}", quarantineLegalDoc.getFileName());
         return legalProfUploadDoc.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())

@@ -6,9 +6,16 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -20,7 +27,9 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.TestConstants;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,12 +39,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.springframework.http.HttpStatus.OK;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ReviewDocumentServiceTest {
 
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
+    String auth = "authorisation";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
         + System.lineSeparator()
@@ -55,6 +69,15 @@ public class ReviewDocumentServiceTest {
     @Mock
     CoreCaseDataService coreCaseDataService;
 
+    @Mock
+    CaseDocumentClient caseDocumentClient;
+
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    SystemUserService systemUserService;
+
     Element element;
 
     @Before
@@ -65,8 +88,29 @@ public class ReviewDocumentServiceTest {
                        .categoryId("test")
                        .notes("test")
                        .documentUploadedDate(LocalDateTime.now())
-                       .document(Document.builder().build())
+                       .document(Document
+                                     .builder()
+                                     .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/"
+                                                      + "6d664075-2166-43cf-a4cc-61058a3a0a99")
+                                     .build())
+                       .courtStaffQuarantineDocument(Document
+                                                         .builder()
+                                                         .documentUrl("http://dm-store-aat.service.core-compute-aat.internal"
+                                                                          + "/documents/"
+                                                                          + "6d664075-2166-43cf-a4cc-61058a3a0a99").build())
+                       .cafcassQuarantineDocument(Document
+                                                      .builder()
+                                                      .documentUrl("http://dm-store-aat.service.core-compute-aat.internal"
+                                                                       + "/documents/"
+                                                                       + "6d664075-2166-43cf-a4cc-61058a3a0a99").build())
+                       .legalProfQuarantineDocument(Document
+                                                        .builder()
+                                                        .documentUrl("http://dm-store-aat.service.core-compute-aat.internal"
+                                                                         + "/documents/"
+                                                                         + "6d664075-2166-43cf-a4cc-61058a3a0a99").build())
                        .build()).build();
+
+        Mockito.when(systemUserService.getSysUserToken()).thenReturn(auth);
 
     }
 
@@ -261,11 +305,24 @@ public class ReviewDocumentServiceTest {
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
         documentList.add(element);
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TestConstants.TEST_SERVICE_AUTHORIZATION);
+        Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
+            .thenReturn(expectedResponse);
+        Mockito.when(caseDocumentClient.uploadDocuments(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(List.class)
+        )).thenReturn(createDocumentUploadResponse());
         CaseData caseData =  CaseData.builder()
             .legalProfQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoDontKnow.yes)
-                                 .legalProfUploadDocListConfTab(new ArrayList<>()).build())
+                                 .legalProfUploadDocListConfTab(documentList).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
@@ -285,11 +342,24 @@ public class ReviewDocumentServiceTest {
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
         documentList.add(element);
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TestConstants.TEST_SERVICE_AUTHORIZATION);
+        Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
+            .thenReturn(expectedResponse);
+        Mockito.when(caseDocumentClient.uploadDocuments(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(List.class)
+        )).thenReturn(createDocumentUploadResponse());
         CaseData caseData =  CaseData.builder()
             .cafcassQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoDontKnow.yes)
-                                 .cafcassUploadDocListConfTab(new ArrayList<>()).build())
+                                 .cafcassUploadDocListConfTab(documentList).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
@@ -308,13 +378,27 @@ public class ReviewDocumentServiceTest {
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
         documentList.add(element);
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TestConstants.TEST_SERVICE_AUTHORIZATION);
+        Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
+            .thenReturn(expectedResponse);
+        Mockito.when(caseDocumentClient.uploadDocuments(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(List.class)
+        )).thenReturn(createDocumentUploadResponse());
+        Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData =  CaseData.builder()
             .courtStaffQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoDontKnow.yes)
-                                 .courtStaffUploadDocListConfTab(new ArrayList<>()).build())
+                                 .courtStaffUploadDocListConfTab(documentList).build())
+            .courtStaffQuarantineDocsList(documentList)
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
-        Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
         Assert.assertNotNull(caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab());
 
@@ -546,6 +630,11 @@ public class ReviewDocumentServiceTest {
                                  .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
+        Mockito.doNothing().when(coreCaseDataService).triggerEvent(Mockito.anyString(),
+                                                                  Mockito.anyString(),
+                                                                  Mockito.anyLong(),
+                                                                  Mockito.anyString(),
+                                                                  Mockito.any(Map.class));
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
         Assert.assertEquals(DOCUMENT_SUCCESSFULLY_REVIEWED, response.getBody().getConfirmationHeader());
@@ -594,11 +683,27 @@ public class ReviewDocumentServiceTest {
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
         documentList.add(element);
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TestConstants.TEST_SERVICE_AUTHORIZATION);
+        Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
+            .thenReturn(expectedResponse);
+        Mockito.when(caseDocumentClient.uploadDocuments(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(List.class)
+        )).thenReturn(createDocumentUploadResponse());
+        Map<String, Object> caseDataMap = new HashMap<>();
         CaseData caseData =  CaseData.builder()
             .scannedDocuments(List.of(ElementUtils.element(
                 ScannedDocument.builder()
                     .scannedDate(LocalDateTime.now())
-                    .url(Document.builder().build())
+                    .url(Document.builder()
+                             .documentUrl("http://dm-store-aat.service.core-compute-aat.internal/documents/"
+                                              + "6d664075-2166-43cf-a4cc-61058a3a0a99").build())
                     .controlNumber("123")
                     .deliveryDate(LocalDateTime.now())
                     .exceptionRecordReference("EXREF")
@@ -610,9 +715,8 @@ public class ReviewDocumentServiceTest {
             )))
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoDontKnow.yes)
-                                 .legalProfUploadDocListConfTab(new ArrayList<>()).build())
+                                 .legalProfUploadDocListConfTab(documentList).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
-        Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
         Assert.assertNotNull(caseDataMap.get("scannedDocuments"));
         List<Element<ScannedDocument>>  listScannedDocuments =
@@ -626,5 +730,99 @@ public class ReviewDocumentServiceTest {
 
     }
 
+    @Test (expected = IllegalStateException.class)
+    public void testReviewProcessOfDocumentWhenIdMatchFailsForQuarantineDocsWhenYesIsSelected() {
+        Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(QuarantineLegalDoc.builder()
+                       .categoryId("test")
+                       .notes("test")
+                       .documentUploadedDate(LocalDateTime.now())
+                       .cafcassQuarantineDocument(Document
+                                                      .builder()
+                                                      .documentUrl("http://dm-store-aat.service.core-compute-aat."
+                                                                       + "internal/documents/")
+                                                      .build())
+                       .build()).build();
 
+        List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
+        documentList.add(element);
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TestConstants.TEST_SERVICE_AUTHORIZATION);
+        Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
+            .thenReturn(expectedResponse);
+        Mockito.when(caseDocumentClient.uploadDocuments(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(List.class)
+        )).thenReturn(new UploadResponse(new ArrayList<>()));
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CaseData caseData =  CaseData.builder()
+            .cafcassQuarantineDocsList(documentList)
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .cafcassUploadDocListConfTab(documentList).build())
+            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+    }
+
+    @Test (expected = IllegalStateException.class)
+    public void testReviewProcessOfDocumentWhenNewUploadFailsForQuarantineDocsWhenYesIsSelected() {
+        Element element =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(QuarantineLegalDoc.builder()
+                       .categoryId("test")
+                       .notes("test")
+                       .documentUploadedDate(LocalDateTime.now())
+                       .cafcassQuarantineDocument(Document
+                                                      .builder()
+                                                      .documentUrl("http://dm-store-aat.service.core-compute-aat.internal"
+                                                                       + "/documents/"
+                                                                       + "6d664075-2166-43cf-a4cc-61058a3a0a99").build())
+                       .build()).build();
+
+        List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
+        documentList.add(element);
+        Resource expectedResource = new ClassPathResource("documents/document.pdf");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, OK);
+        Mockito.when(authTokenGenerator.generate()).thenReturn(TestConstants.TEST_SERVICE_AUTHORIZATION);
+        Mockito.when(caseDocumentClient.getDocumentBinary(anyString(), anyString(), any(UUID.class)))
+            .thenReturn(expectedResponse);
+        Mockito.when(caseDocumentClient.uploadDocuments(
+            Mockito.anyString(),
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(List.class)
+        )).thenReturn(new UploadResponse(new ArrayList<>()));
+        Map<String, Object> caseDataMap = new HashMap<>();
+        CaseData caseData =  CaseData.builder()
+            .cafcassQuarantineDocsList(documentList)
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .cafcassUploadDocListConfTab(documentList).build())
+            .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+    }
+
+    private UploadResponse createDocumentUploadResponse() {
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        binaryLink.href = randomAlphanumeric(10);
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Link selfLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
+        selfLink.href = randomAlphanumeric(10);
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document.Links links = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Links();
+        links.binary = binaryLink;
+        links.self = selfLink;
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document document = uk.gov.hmcts.reform.ccd.document.am.model.Document.builder().build();
+        document.links = links;
+        document.originalDocumentName = randomAlphanumeric(10);
+
+
+        return new UploadResponse(List.of(document));
+    }
 }
