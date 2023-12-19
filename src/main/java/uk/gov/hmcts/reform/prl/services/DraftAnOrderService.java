@@ -712,11 +712,9 @@ public class DraftAnOrderService {
 
     public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
-
+        log.info("*** draft order dynamic list: {}", caseData.getDraftOrdersDynamicList());
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-
         log.info("selected order: {}", selectedOrder);
-
         caseDataMap.put("orderName", getOrderName(selectedOrder));
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
