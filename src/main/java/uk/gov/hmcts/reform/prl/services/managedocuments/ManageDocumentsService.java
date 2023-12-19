@@ -121,8 +121,9 @@ public class ManageDocumentsService {
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
         for (Element<ManageDocuments> element : manageDocuments) {
             boolean restricted = element.getValue().getIsRestricted().getDisplayedValue().equals(YesOrNo.Yes);
-            boolean restrictedReason = element.getValue().getRestrictedDetails().isEmpty();
-            if (restricted && restrictedReason) {
+            boolean restrictedReasonEmpty = (null == element.getValue().getRestrictedDetails()
+                || element.getValue().getRestrictedDetails().isEmpty()) ? true : false;
+            if (restricted && restrictedReasonEmpty) {
                 errorList.add(DETAILS_ERROR_MESSAGE);
             }
         }
