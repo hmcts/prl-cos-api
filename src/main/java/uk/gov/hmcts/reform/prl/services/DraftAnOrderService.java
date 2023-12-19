@@ -870,7 +870,7 @@ public class DraftAnOrderService {
                 }
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
-                    element(draftOrder)
+                    element(selectedOrderId, draftOrder)
                 );
                 break;
             }
@@ -941,6 +941,7 @@ public class DraftAnOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
+                              .orderCreatedByEmailId(draftOrder.getOtherDetails().getOrderCreatedByEmailId())
                               .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
