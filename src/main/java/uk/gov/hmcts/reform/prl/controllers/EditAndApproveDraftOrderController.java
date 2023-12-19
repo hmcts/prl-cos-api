@@ -351,9 +351,12 @@ public class EditAndApproveDraftOrderController {
                 CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
                 log.info("*** Draft order dynamic list : {}", caseData.getDraftOrdersDynamicList());
                 log.info("*** Draft order collection : {}", caseData.getDraftOrderCollection());
-
-                DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
-                manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(callbackRequest.getCaseDetails(), draftOrder);
+                try {
+                    DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                    manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(callbackRequest.getCaseDetails(), draftOrder);
+                } catch (Exception e) {
+                    log.error("Failed to send email to solicitor : {}", e.getMessage());
+                }
                 responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                              .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
                                              .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
