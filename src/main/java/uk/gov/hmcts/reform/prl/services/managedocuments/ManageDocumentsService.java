@@ -78,7 +78,7 @@ public class ManageDocumentsService {
             .build();
 
         return caseData.toBuilder()
-            .isC8DocumentPresent(CaseUtils.isC8Present(caseData))
+            //.isC8DocumentPresent(CaseUtils.isC8Present(caseData))
             .manageDocuments(Arrays.asList(element(manageDocuments)))
             .build();
     }
