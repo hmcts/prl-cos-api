@@ -195,7 +195,6 @@ public class DraftAnOrderService {
 
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
-        log.info("generateDraftOrderCollection------->");
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
@@ -220,7 +219,6 @@ public class DraftAnOrderService {
     }
 
     public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
-        log.info("getCurrentOrderDetails------>");
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
             return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType);
         }
@@ -716,7 +714,6 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData) {
-        log.info("populateCommonDraftOrderFields------> ");
         Map<String, Object> caseDataMap = new HashMap<>();
 
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
@@ -778,7 +775,6 @@ public class DraftAnOrderService {
 
     public void populateOrderHearingDetails(String authorization, CaseData caseData, Map<String, Object> caseDataMap,
                                             List<Element<HearingData>> manageOrderHearingDetail) {
-        log.info("populateOrderHearingDetails------->");
         String caseReferenceNumber = String.valueOf(caseData.getId());
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
@@ -895,8 +891,6 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
-        log.info("OrdersHearingDetails --> {} ", caseData.getManageOrders().getOrdersHearingDetails());
-        log.info("SolicitorOrdersHearingDetails --> {}", caseData.getManageOrders().getSolicitorOrdersHearingDetails());
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
@@ -1715,7 +1709,6 @@ public class DraftAnOrderService {
 
     public Map<String, Object> generateOrderDocument(String authorisation, CallbackRequest callbackRequest,
                                                      List<Element<HearingData>> ordersHearingDetails) throws Exception {
-        log.info("generateOrderDocument------->");
         log.info("DraftOrderService::existingOrderHearingDetails -> {}", ordersHearingDetails);
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         caseData = updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
@@ -2009,7 +2002,6 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> handleDocumentGeneration(String authorisation, CallbackRequest callbackRequest) throws Exception {
-        log.info("handleDocumentGeneration --->");
         List<String> errorList = null;
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -2059,7 +2051,6 @@ public class DraftAnOrderService {
 
 
     public Map<String, Object> handleDocumentGenerationForaDraftOrder(String authorisation, CallbackRequest callbackRequest) throws Exception {
-        log.info("handleDocumentGenerationForaDraftOrder --->");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
