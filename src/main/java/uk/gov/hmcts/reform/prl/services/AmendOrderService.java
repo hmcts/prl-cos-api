@@ -88,9 +88,7 @@ public class AmendOrderService {
                                          ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : LocalDateTime.now())
                         .orderType(order.getValue().getOrderType())
                         .typeOfOrder(order.getValue().getTypeOfOrder())
-                        .serveOrderDetails(null)
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
-                                          .orderServedDate(null)
                                           .orderCreatedDate(time.now().format(DateTimeFormatter.ofPattern(
                                               PrlAppsConstants.D_MMM_YYYY,
                                               Locale.ENGLISH
@@ -150,6 +148,7 @@ public class AmendOrderService {
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
+
         String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
 
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);

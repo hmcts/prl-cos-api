@@ -66,6 +66,15 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class ManageOrderEmailService {
+    public static final String NEW_AND_FINAL = "newAndFinal";
+    public static final String FINAL = "final";
+    public static final String NEW = "new";
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private CourtFinderService courtLocatorService;
+
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
     @Value("${xui.url}")
