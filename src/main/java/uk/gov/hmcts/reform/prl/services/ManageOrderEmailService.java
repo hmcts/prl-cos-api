@@ -451,9 +451,6 @@ public class ManageOrderEmailService {
                     );
                 }
             }
-
-            serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
-
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
                 .contains(OtherOrganisationOptions.anotherOrganisation)) {
                 manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
@@ -474,9 +471,6 @@ public class ManageOrderEmailService {
                 listOfOtherAndCafcassEmails.add(getCafcassEmail(manageOrders));
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
-
-            serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
-
             sendEmailForFlCaseType(caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)) {
@@ -487,6 +481,7 @@ public class ManageOrderEmailService {
                 });
             }
         }
+        serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
         //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
         addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);

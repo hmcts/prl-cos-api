@@ -1417,6 +1417,7 @@ public class ManageOrderService {
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
+        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
 
         updateServedOrderDetails(
             servedOrderDetails,
