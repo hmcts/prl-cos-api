@@ -825,16 +825,19 @@ public class ManageOrderEmailService {
 
     public void sendEmailToLegalRepresentativeOnRejection(CaseDetails caseDetails, DraftOrder draftOrder) {
         CaseData caseData = emailService.getCaseData(caseDetails);
+        EmailTemplateVars emailTemplateVars = ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .fullName(draftOrder.getOtherDetails().getOrderCreatedBy())
+            .orderLink(manageCaseUrl + "/" + caseData.getId() + "#DraftOrders")
+            .instructions(caseData.getManageOrders().getInstructionsToLegalRepresentaive())
+            .build();
+        log.info("** Email tempplate vars : {}", emailTemplateVars);
+        log.info("*** Draft oder {}", draftOrder);
         emailService.send(
             draftOrder.getOtherDetails().getOrderCreatedByEmailId(),
             EmailTemplateNames.EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER,
-            ManageOrderEmail.builder()
-                .caseReference(String.valueOf(caseData.getId()))
-                .caseName(caseData.getApplicantCaseName())
-                .fullName(draftOrder.getOtherDetails().getOrderCreatedBy())
-                .orderLink(manageCaseUrl + "/" + caseData.getId() + "#DraftOrders")
-                .instructions(caseData.getManageOrders().getInstructionsToLegalRepresentaive())
-                .build(),
+            emailTemplateVars,
             LanguagePreference.english
         );
     }
