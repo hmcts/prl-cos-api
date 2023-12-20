@@ -32,19 +32,18 @@ import java.util.Map;
 public class MigrationController extends AbstractCallbackController {
     @Qualifier("allTabsService")
     private final AllTabServiceImpl tabService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final CaseFlagMigrationService caseFlagMigrationService;
 
     @Autowired
-    public MigrationController(ObjectMapper objectMapper, EventService eventPublisher, AllTabServiceImpl tabService) {
+    public MigrationController(ObjectMapper objectMapper, EventService eventPublisher, AllTabServiceImpl tabService, PartyLevelCaseFlagsService partyLevelCaseFlagsService, CaseFlagMigrationService caseFlagMigrationService) {
         super(objectMapper, eventPublisher);
         this.tabService = tabService;
+        this.partyLevelCaseFlagsService = partyLevelCaseFlagsService;
+        this.caseFlagMigrationService = caseFlagMigrationService;
     }
 
 
-    @Autowired
-    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
-
-    @Autowired
-    CaseFlagMigrationService caseFlagMigrationService;
 
 
     @PostMapping("/about-to-submit")

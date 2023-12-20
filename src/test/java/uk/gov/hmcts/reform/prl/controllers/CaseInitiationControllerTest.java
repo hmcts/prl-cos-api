@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -19,7 +18,6 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -40,7 +38,6 @@ public class CaseInitiationControllerTest {
     public static final String s2sToken = "s2s AuthToken";
 
     Map<String, Object> caseDataMap;
-    CaseDetails caseDetails;
     CaseData caseData;
     CallbackRequest callbackRequest;
 
@@ -50,28 +47,7 @@ public class CaseInitiationControllerTest {
         caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
-    }
-
-    @Test
-    public void testHandleSubmitted() {
-
-        Map<String, Object> caseDataMap = new HashMap<>();
-        caseDataMap.put("applicantCaseName", "testCaseName");
-        String userID = "12345";
-
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(caseDataMap)
             .build();
-        caseDetails = CaseDetails.builder()
-            .id(12345678L)
-            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
-            .data(caseDataMap)
-            .build();
-        callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
     }
 
     @Test
