@@ -622,11 +622,12 @@ public class ManageOrderEmailService {
         List<Element<OrderDetails>> orderCollection = caseData.getOrderCollection();
         List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-        log.info("selectedOrderIds:", selectedOrderIds);
-        log.info("orderCollectionIds:", orderCollection);
+        log.info("selectedOrderIds: {}", selectedOrderIds);
+        log.info("orderCollectionIds: {}", orderCollection);
         orderCollection.stream().filter(orderDetailsElement ->
                         selectedOrderIds.contains(orderDetailsElement.getId().toString()))
                 .forEach(orderDetailsElement -> {
+                    log.info("*** Serve order details {}", orderDetailsElement.getValue().getServeOrderDetails());
                     if ((orderDetailsElement.getValue().getServeOrderDetails() != null)
                             && (YesOrNo.Yes.equals(orderDetailsElement.getValue().getServeOrderDetails().getOtherPartiesServed())
                             && isNotEmpty(orderDetailsElement.getValue().getServeOrderDetails().getPostalInformation()))) {
@@ -638,6 +639,7 @@ public class ManageOrderEmailService {
                                 try {
                                     UUID bulkPrintId = sendOrderDocumentViaPost(caseData, organisationPostalInfo.getValue().getPostalAddress(),
                                             organisationPostalInfo.getValue().getPostalName(), authorisation, orderDocuments);
+                                    log.info("** bulk print id {}", bulkPrintId);
                                     //PRL-4225 save bulk print details
                                     bulkPrintOrderDetails.add(element(
                                             buildBulkPrintOrderDetail(bulkPrintId, String.valueOf(organisationPostalInfo.getId()),
