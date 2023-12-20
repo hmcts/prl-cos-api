@@ -475,18 +475,6 @@ public class ManageOrderEmailService {
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
 
-            /**
-             * Need to check Applicant LiP for DA case applicable or not, for Postal delivery
-             */
-            //caseData.getApplicants().stream().forEach(partyDetailsElement -> {
-            //   log.info("VALUE FL401--> {}",partyDetailsElement.getValue().getUser().getSolicitorRepresented());
-            //   log.info("ADDRESS --> {}",partyDetailsElement.getValue().getAddress());
-
-            //   if (YesOrNo.No.equals(partyDetailsElement.getValue().getUser().getSolicitorRepresented())) {
-            //       serveOrdersToApplicantAddress(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, partyDetailsElement);
-            //   }
-            //});
-
             serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails);
 
             sendEmailForFlCaseType(caseData, isFinalOrder);
@@ -784,7 +772,16 @@ public class ManageOrderEmailService {
                                                      ),
                                                      caseData
                     );
-                } else if (!isSolicitorEmailExists(partyData)) {
+                } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
+                    && isPartyProvidedWithEmail(partyData)) {
+                    log.info("Contact preference set as email");
+                    sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
+                                                     buildApplicantRespondentEmail(caseData,
+                                                                                   partyData.getLabelForDynamicList()
+                                                     ),
+                                                     caseData
+                    );
+                } else {
                     log.info("inside calling serveOrdersToApplicantAddress start");
                     serveOrdersToApplicantAddress(
                         caseData,
@@ -792,14 +789,6 @@ public class ManageOrderEmailService {
                         orderDocuments,
                         bulkPrintOrderDetails,
                         partyDataOptional.get()
-                    );
-                } else if (isPartyProvidedWithEmail(partyData)) {
-                    sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
-                                                     buildApplicantRespondentEmail(
-                                                         caseData,
-                                                         partyData.getLabelForDynamicList()
-                                                     ),
-                                                     caseData
                     );
                 }
             }
