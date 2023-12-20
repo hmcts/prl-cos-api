@@ -79,11 +79,11 @@ public class ManageDocumentsService {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
-            .documentRelatedToCaseLabel(String.join(format(D0C_RELATED_TO_CASE, caseData.getApplicantCaseName(),"<br/>")))
+            .documentRelatedToCaseLabel(format(D0C_RELATED_TO_CASE, caseData.getApplicantCaseName()))
             .build();
 
         return caseData.toBuilder()
-            //.isC8DocumentPresent(CaseUtils.isC8Present(caseData))
+            .isC8DocumentPresent(CaseUtils.isC8Present(caseData))
             .manageDocuments(Arrays.asList(element(manageDocuments)))
             .build();
     }
@@ -125,14 +125,10 @@ public class ManageDocumentsService {
 
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
         for (Element<ManageDocuments> element : manageDocuments) {
-            boolean restricted = element.getValue().getIsRestricted().getDisplayedValue().equals(YesOrNo.Yes);
-            boolean restricted1 = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
+            boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
             boolean restrictedReasonEmpty = (element.getValue().getRestrictedDetails() == null
                 || element.getValue().getRestrictedDetails().isEmpty()) ? true : false;
-            log.info("restricted {}", restricted);
-            log.info("restricted1 {}", restricted1);
-            log.info("restrictedReasonEmpty {}", restrictedReasonEmpty);
-            if (restricted1 && restrictedReasonEmpty) {
+            if (restricted && restrictedReasonEmpty) {
                 errorList.add(DETAILS_ERROR_MESSAGE);
             }
         }
