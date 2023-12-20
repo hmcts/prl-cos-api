@@ -17,9 +17,9 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.caseflags.CaseFlagMigrationService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
-import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.Map;
@@ -34,9 +34,9 @@ public class MigrationController extends AbstractCallbackController {
     private final AllTabServiceImpl tabService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final CaseFlagMigrationService caseFlagMigrationService;
-
     @Autowired
-    public MigrationController(ObjectMapper objectMapper, EventService eventPublisher, AllTabServiceImpl tabService, PartyLevelCaseFlagsService partyLevelCaseFlagsService, CaseFlagMigrationService caseFlagMigrationService) {
+    public MigrationController(ObjectMapper objectMapper, EventService eventPublisher, AllTabServiceImpl tabService,
+                               PartyLevelCaseFlagsService partyLevelCaseFlagsService, CaseFlagMigrationService caseFlagMigrationService) {
         super(objectMapper, eventPublisher);
         this.tabService = tabService;
         this.partyLevelCaseFlagsService = partyLevelCaseFlagsService;
