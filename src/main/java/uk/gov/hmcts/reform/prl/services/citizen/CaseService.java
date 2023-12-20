@@ -128,6 +128,9 @@ public class CaseService {
                 .buildUpdatedCaseData(caseData.toBuilder().userInfo(wrapElements(userInfo))
                                           .courtName(C100_DEFAULT_COURT_NAME)
                                           .build());
+            CaseData caseDataPartyFlags = objectMapper.convertValue(partyLevelCaseFlagsService.generatePartyCaseFlags(
+                updatedCaseData), CaseData.class);
+            updatedCaseData.setAllPartyFlags(caseDataPartyFlags.getAllPartyFlags());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
 
@@ -565,7 +568,7 @@ public class CaseService {
         return flagDetails;
     }
 
-    private Optional<String> getPartyExternalCaseFlagField(String caseType, PartyEnum partyType, Integer partyIndex) {
+    public Optional<String> getPartyExternalCaseFlagField(String caseType, PartyEnum partyType, Integer partyIndex) {
 
         Optional<String> partyExternalCaseFlagField = Optional.empty();
         boolean isC100Case = C100_CASE_TYPE.equalsIgnoreCase(caseType);
