@@ -20,8 +20,8 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
-import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsCourtAdminEnum;
-import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -891,8 +891,8 @@ public class DraftAnOrderService {
             }
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(eventId)) {
-            if (caseData.getManageOrders() != null && (JudgeApprovalDecisionsCourtAdminEnum.editTheOrderAndServe
-                .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()) || JudgeApprovalDecisionsSolicitorEnum.editTheOrderAndServe
+            if (caseData.getManageOrders() != null && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
+                .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()) || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()))) {
                 isOrderEdited = true;
             }
