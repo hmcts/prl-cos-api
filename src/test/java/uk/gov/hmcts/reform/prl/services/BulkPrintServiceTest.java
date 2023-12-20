@@ -188,6 +188,35 @@ public class BulkPrintServiceTest {
     }
 
     @Test
+    public void sendLetterServiceBulkPrintFails() {
+        Document finalDoc = Document.builder()
+                .documentUrl("finalDoc")
+                .documentBinaryUrl("finalDoc")
+                .documentHash("finalDoc")
+                .build();
+
+        Document coverSheet = Document.builder()
+                .documentUrl("coverSheet")
+                .documentBinaryUrl("coverSheet")
+                .documentHash("coverSheet")
+                .build();
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+
+        when(documentGenService.convertToPdf(authToken,finalDoc)).thenThrow(new RuntimeException());
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+
+        assertThrows(
+                Exception.class,
+                () -> bulkPrintService.send("123",
+                        authToken,
+                        "abc",
+                        documentList,
+                        "test"
+                ));
+
+    }
+
+    @Test
     public void sendLetterServiceWithInValidInput() {
         assertThrows(
             NullPointerException.class,
