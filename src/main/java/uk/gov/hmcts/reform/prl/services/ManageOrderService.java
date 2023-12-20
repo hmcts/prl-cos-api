@@ -1438,6 +1438,7 @@ public class ManageOrderService {
             servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
 
+
         updateServedOrderDetails(
             servedOrderDetails,
             null,
