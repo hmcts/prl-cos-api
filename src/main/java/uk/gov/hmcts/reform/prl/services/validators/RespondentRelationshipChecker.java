@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
@@ -17,10 +18,10 @@ import static uk.gov.hmcts.reform.prl.enums.EventErrorsEnum.RELATIONSHIP_TO_RESP
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentRelationshipChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
