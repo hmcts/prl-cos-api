@@ -97,7 +97,7 @@ public class FL401SubmitApplicationControllerFT {
                             .content(requestBody)
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("data.caseData.isNotificationSent").value("Yes"))
+            .andExpect(jsonPath("data.isNotificationSent").value("Yes"))
             .andReturn();
 
     }
