@@ -48,13 +48,7 @@ public class BulkPrintService {
 
         String s2sToken = authTokenGenerator.generate();
         final List<String> stringifiedDocuments = documents.stream()
-            .map(docInfo -> {
-                try {
-                    return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            })
+            .map(docInfo -> getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
             .toList();
         log.info("Sending {} for case {}", letterType, caseId);
@@ -86,7 +80,7 @@ public class BulkPrintService {
         return additionalData;
     }
 
-    private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) throws IOException {
+    private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) {
         return getDocumentBytes(docUrl, authToken, s2sToken);
     }
 
