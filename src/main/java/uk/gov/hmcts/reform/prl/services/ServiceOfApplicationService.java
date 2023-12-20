@@ -129,7 +129,7 @@ public class ServiceOfApplicationService {
         collapsible.add(
             "This includes");
         collapsible.add(
-            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass)</li>");
+            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (if applicable)</li><li>C8 (Cafcass/Cafcass Cymru, if applicable)</li>");
         collapsible.add("<li>Any orders and"
                             + " hearing notices created at the initial gatekeeping stage</li></ul>");
         collapsible.add(
