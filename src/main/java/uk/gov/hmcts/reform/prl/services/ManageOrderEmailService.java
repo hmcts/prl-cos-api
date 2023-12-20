@@ -70,11 +70,6 @@ public class ManageOrderEmailService {
     public static final String FINAL = "final";
     public static final String NEW = "new";
     public static final String ORDERS = "#Orders";
-    @Autowired
-    private final EmailService emailService;
-
-    @Autowired
-    private final CourtFinderService courtLocatorService;
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -86,25 +81,14 @@ public class ManageOrderEmailService {
     private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
-
-    @Autowired
-    private final ServiceOfApplicationService serviceOfApplicationService;
-    @Autowired
-    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
-
-    @Autowired
-    private final BulkPrintService bulkPrintService;
-
     private static final String ORDER_TYPE = "OrderPack";
 
     private final EmailService emailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final BulkPrintService bulkPrintService;
     private final SendgridService sendgridService;
-
-    @Autowired
     private final Time dateTime;
-
+    private final CourtFinderService courtLocatorService;
 
     public void sendEmail(CaseDetails caseDetails) {
         List<String> emailList = new ArrayList<>();
