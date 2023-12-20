@@ -342,10 +342,6 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Solicitor created order options {}",caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR));
             log.info("Court admin created order options {}",caseDataUpdated.get("whatToDoWithOrderCourtAdmin"));
-            ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
-                .ok(SubmittedCallbackResponse.builder()
-                        .confirmationHeader(CONFIRMATION_HEADER)
-                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             log.info("Case reference : {}", caseDataUpdated.get("id"));
             coreCaseDataService.triggerEvent(
@@ -355,6 +351,10 @@ public class EditAndApproveDraftOrderController {
                 "internal-update-all-tabs",
                 caseDataUpdated
             );
+            ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
+                .ok(SubmittedCallbackResponse.builder()
+                        .confirmationHeader(CONFIRMATION_HEADER)
+                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
             return responseEntity;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
