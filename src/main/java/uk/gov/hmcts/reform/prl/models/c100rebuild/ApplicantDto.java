@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -34,4 +37,5 @@ public class ApplicantDto {
     private String detailsKnown;
     private String start;
     private String startAlternative;
+    private List<FlagDetail> reasonableAdjustmentsFlags;
 }

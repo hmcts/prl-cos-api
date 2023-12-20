@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.mapper.citizen.ReasonableAdjustmentsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -40,6 +41,8 @@ import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 
 @Slf4j
 @RestController
@@ -60,6 +63,9 @@ public class CaseController {
 
     @Autowired
     ConfidentialDetailsMapper confidentialDetailsMapper;
+
+    @Autowired
+    ReasonableAdjustmentsMapper reasonableAdjustmentsMapper;
 
     @Autowired
     AuthTokenGenerator authTokenGenerator;
@@ -111,6 +117,15 @@ public class CaseController {
             );
             CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
+            if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
+                || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) {
+                updatedCaseData = reasonableAdjustmentsMapper.mapRAforC100MainApplicant(
+                    caseData.getC100RebuildData().getC100RebuildApplicantDetails(),
+                    updatedCaseData,
+                    authorisation
+                );
+            }
+
             return updatedCaseData
                 .toBuilder().id(caseDetails.getId()).build();
         } else {
