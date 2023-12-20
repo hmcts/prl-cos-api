@@ -94,6 +94,14 @@ public class ReviewDocumentService {
         "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
+    public static final String  CONFIDENTIAL_INFO_LABEL =
+        "<h3 class='govuk-heading-s'>Confidential information included</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
+
+    public static final String  RESTRICTED_INFO_LABEL =
+        "<h3 class='govuk-heading-s'>Request to restrict access</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
+    public static final String  RESTRICTION_REASON_LABEL =
+        "<h3 class='govuk-heading-s'>Reasons to restrict access</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
+
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
     public static final String REVIEW_DOC = "reviewDoc";
     public static final String LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB = "legalProfUploadDocListConfTab";
@@ -219,6 +227,9 @@ public class ReviewDocumentService {
                 String docTobeReviewed = formatDocumentTobeReviewed(
                     document.getPartyName(),
                     document.getDocumentType(),
+                    "",
+                    YesOrNo.Yes,
+                    YesOrNo.Yes,
                     ""
                 );
 
@@ -253,7 +264,10 @@ public class ReviewDocumentService {
         String docTobeReviewed = formatDocumentTobeReviewed(
             submittedBy,
             document.getCategoryName(),
-            document.getNotes()
+            document.getNotes(),
+            document.getIsRestricted(),
+            document.getIsConfidential(),
+            document.getRestrictedDetails()
         );
 
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
@@ -553,7 +567,10 @@ public class ReviewDocumentService {
 
     private String formatDocumentTobeReviewed(String submittedBy,
                                               String category,
-                                              String notes) {
+                                              String notes,
+                                              YesOrNo isRestricted,
+                                              YesOrNo isConfidential,
+                                              String getRestrictedDetails) {
         if (BULK_SCAN.equals(submittedBy)) {
             return String.join(
                 format(SUBMITTED_BY_LABEL, submittedBy)
@@ -562,7 +579,10 @@ public class ReviewDocumentService {
         return String.join(
             format(SUBMITTED_BY_LABEL, submittedBy),
             format(DOCUMENT_CATEGORY_LABEL, category),
-            format(DOCUMENT_COMMENTS_LABEL, notes, "<br/>")
+            format(DOCUMENT_COMMENTS_LABEL, notes, "<br/>"),
+            format(CONFIDENTIAL_INFO_LABEL, isRestricted, "<br/>"),
+            format(RESTRICTED_INFO_LABEL, isConfidential, "<br/>"),
+            format(RESTRICTION_REASON_LABEL, getRestrictedDetails, "<br/>")
         );
     }
 
