@@ -87,7 +87,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 public class NoticeOfChangePartiesService {
     public static final String NO_REPRESENTATION_FOUND_ERROR = "You do not represent anyone in this case.";
-    public static final String INVALID_REPRESENTATION_ERROR = "You do not represent selected party";
     public static final String CASE_NOT_REPRESENTED_BY_SOLICITOR_ERROR = "This case is not represented by solicitor anymore.";
     public static final String SOL_STOP_REP_CHOOSE_PARTIES = "solStopRepChooseParties";
 

@@ -17,10 +17,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessService;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
@@ -31,22 +27,15 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 @SecurityRequirement(name = "Bearer Authentication")
 public class CaseInitiationController extends AbstractCallbackController {
     private final CaseInitiationService caseInitiationService;
-    private final AssignCaseAccessService assignCaseAccessService;
-    private final CoreCaseDataApi coreCaseDataApi;
-    private final AuthTokenGenerator authTokenGenerator;
     private final AuthorisationService authorisationService;
 
     @Autowired
     public CaseInitiationController(ObjectMapper objectMapper,
                                     EventService eventPublisher,
-                                    AssignCaseAccessService assignCaseAccessService,
-                                    CoreCaseDataApi coreCaseDataApi,
-                                    AuthTokenGenerator authTokenGenerator,
+                                    CaseInitiationService caseInitiationService,
                                     AuthorisationService authorisationService) {
         super(objectMapper, eventPublisher);
-        this.assignCaseAccessService = assignCaseAccessService;
-        this.coreCaseDataApi = coreCaseDataApi;
-        this.authTokenGenerator = authTokenGenerator;
+        this.caseInitiationService = caseInitiationService;
         this.authorisationService = authorisationService;
     }
 

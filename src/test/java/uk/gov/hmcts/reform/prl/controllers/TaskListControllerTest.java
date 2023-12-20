@@ -14,9 +14,6 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.TaskListService;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -64,14 +61,5 @@ public class TaskListControllerTest {
 
         Assert.assertNotNull(response);
         verify(taskListService, times(1)).updateTaskList(callbackRequest,auth);
-    }
-
-    @Test
-    public void testUpdateTaskListWhenSubmitted() {
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        caseData = caseData.toBuilder().dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
-        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
-        taskListController.updateTaskListWhenSubmitted(callbackRequest, "testAuth");
-        verify(eventPublisher, times(1)).publishEvent(Mockito.any());
     }
 }
