@@ -873,7 +873,7 @@ public class FL401SubmitApplicationServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         doNothing().when(eventPublisher).publishEvent(Mockito.any());
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(eventPublisher, times(2)).publishEvent(
+        verify(eventPublisher, times(3)).publishEvent(
             Mockito.any()
         );
     }
