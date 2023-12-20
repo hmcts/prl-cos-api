@@ -3767,4 +3767,22 @@ public class ManageOrderServiceTest {
 
     }
 
+    @Test
+    public void testPopulateServeOrderDetailsr() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .fl401FamilymanCaseNumber("familyman12345")
+            .familymanCaseNumber("familyman6789")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .build();
+
+        Map<String, Object> responseMap = manageOrderService.populateHeader(caseData);
+        manageOrderService.populateServeOrderDetails(caseData,responseMap);
+        assertNotNull(responseMap);
+        assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
+        assertEquals(FL401_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
+    }
 }
