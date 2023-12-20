@@ -347,6 +347,7 @@ public class EditAndApproveDraftOrderController {
                         .confirmationHeader(CONFIRMATION_HEADER)
                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            log.info("Case reference : {}", caseDataUpdated.get("id"));
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
