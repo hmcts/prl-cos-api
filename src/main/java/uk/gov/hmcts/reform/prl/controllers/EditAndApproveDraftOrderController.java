@@ -351,7 +351,7 @@ public class EditAndApproveDraftOrderController {
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
-                (Long) caseDataUpdated.get("id"),
+                Long.getLong(String.valueOf(caseDataUpdated.get("id"))),
                 "internal-update-all-tabs",
                 caseDataUpdated
             );
