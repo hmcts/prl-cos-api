@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -160,7 +161,7 @@ public class ManageOrderService {
     public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
     public static final String PREVIEW_ORDER_DOC = "previewOrderDoc";
 
-  @Autowired
+    @Autowired
     LocationRefDataService locationRefDataService;
 
     public static final String CAFCASS_SERVED = "cafcassServed";
