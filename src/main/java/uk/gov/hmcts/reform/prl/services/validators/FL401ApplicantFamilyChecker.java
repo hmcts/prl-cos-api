@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.FL401_APPLICANT_FAMILY_DETAILS;
@@ -23,10 +23,10 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401ApplicantFamilyChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -85,7 +85,7 @@ public class FL401ApplicantFamilyChecker implements EventChecker {
                 List<ApplicantChild> applicantChildren = applicantChildrenWrapped.get()
                     .stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
 
                 for (ApplicantChild ac : applicantChildren) {
                     if (!(validateMandatoryFieldsCompleted(ac))) {

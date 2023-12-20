@@ -63,10 +63,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class ManageOrderEmailService {
-
     public static final String NEW_AND_FINAL = "newAndFinal";
     public static final String FINAL = "final";
     public static final String NEW = "new";
@@ -79,10 +78,8 @@ public class ManageOrderEmailService {
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
-
     @Value("${xui.url}")
     private String manageCaseUrl;
-
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
@@ -100,11 +97,9 @@ public class ManageOrderEmailService {
 
     private static final String ORDER_TYPE = "OrderPack";
 
-    @Autowired
-    private final OrganisationService organisationService;
-    @Autowired
-    private final SystemUserService systemUserService;
-    @Autowired
+    private final EmailService emailService;
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final BulkPrintService bulkPrintService;
     private final SendgridService sendgridService;
 
     @Autowired
