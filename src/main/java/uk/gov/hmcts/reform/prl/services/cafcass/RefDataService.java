@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefDataService {
 
-    @Autowired
     private final ReferenceDataApi referenceDataApiefDataApi;
 
     public Map<String, String> getRefDataCategoryValueMap(
