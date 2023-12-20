@@ -922,6 +922,66 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void testPopulateFinalOrderFromCaseDataWithNoCheck() throws Exception {
+
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
+                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+        manageOrders = ManageOrders.builder()
+            .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
+            .isCaseWithdrawn(YesOrNo.No)
+            .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+            .childOption(
+                dynamicMultiSelectList
+            )
+            .build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(manageOrders)
+            .build();
+
+        assertNotNull(manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData));
+
+    }
+
+    @Test
     public void testPopulateFinalWelshOrderFromCaseData() throws Exception {
 
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
