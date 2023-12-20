@@ -79,7 +79,7 @@ public class ManageDocumentsService {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
-            .documentRelatedToCaseLabel(format(D0C_RELATED_TO_CASE, caseData.getApplicantCaseName()))
+            .documentRelatedToCaseLabel(String.join(format(D0C_RELATED_TO_CASE, caseData.getApplicantCaseName(),"<br/>")))
             .build();
 
         return caseData.toBuilder()
@@ -132,7 +132,7 @@ public class ManageDocumentsService {
             log.info("restricted {}", restricted);
             log.info("restricted1 {}", restricted1);
             log.info("restrictedReasonEmpty {}", restrictedReasonEmpty);
-            if (restricted && restrictedReasonEmpty) {
+            if (restricted1 && restrictedReasonEmpty) {
                 errorList.add(DETAILS_ERROR_MESSAGE);
             }
         }
