@@ -680,6 +680,7 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
+                    log.info("to applicant......");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
                                                      buildApplicantRespondentSolicitorEmail(
                                                              caseData,
@@ -688,6 +689,7 @@ public class ManageOrderEmailService {
                                                      caseData
                     );
                 } else if (isPartyProvidedWithEmail(partyData)) {
+                    log.info("to solicitorrr......");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
                                                      buildApplicantRespondentEmail(
                                                              caseData,

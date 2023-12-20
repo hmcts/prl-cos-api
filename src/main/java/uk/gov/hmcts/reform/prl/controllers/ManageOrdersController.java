@@ -229,6 +229,7 @@ public class ManageOrdersController {
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("case-order-email-notification calledddd......");
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
