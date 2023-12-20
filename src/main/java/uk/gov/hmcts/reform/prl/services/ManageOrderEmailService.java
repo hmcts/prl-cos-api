@@ -730,7 +730,7 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
                     try {
-                        log.info("Trying to send email to {} via send grid service", partyData.getSolicitorEmail());
+                        log.info("Trying to send email to {} via send grid service.", partyData.getSolicitorEmail());
                         sendgridService.sendEmailWithAttachments(authorisation,
                             EmailUtils.getEmailProps(isFinalOrder, true,
                                     partyData,
