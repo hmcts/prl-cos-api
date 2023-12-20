@@ -34,6 +34,7 @@ public class MigrationController extends AbstractCallbackController {
     private final AllTabServiceImpl tabService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final CaseFlagMigrationService caseFlagMigrationService;
+
     @Autowired
     public MigrationController(ObjectMapper objectMapper, EventService eventPublisher, AllTabServiceImpl tabService,
                                PartyLevelCaseFlagsService partyLevelCaseFlagsService, CaseFlagMigrationService caseFlagMigrationService) {
@@ -44,12 +45,10 @@ public class MigrationController extends AbstractCallbackController {
     }
 
 
-
-
     @PostMapping("/about-to-submit")
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(@RequestHeader("Authorization")
-                                                                            @Parameter(hidden = true) String authorisation,
-                                                                            @RequestBody CallbackRequest callbackRequest) {
+                                                                    @Parameter(hidden = true) String authorisation,
+                                                                    @RequestBody CallbackRequest callbackRequest) {
 
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
@@ -63,7 +62,7 @@ public class MigrationController extends AbstractCallbackController {
                                 @RequestHeader(HttpHeaders.AUTHORIZATION)
                                 @Parameter(hidden = true) String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        log.info("updating tabs migration data for the case id: {}",caseData.getId());
+        log.info("updating tabs migration data for the case id: {}", caseData.getId());
         tabService.updateAllTabsIncludingConfTab(caseData);
     }
 }
