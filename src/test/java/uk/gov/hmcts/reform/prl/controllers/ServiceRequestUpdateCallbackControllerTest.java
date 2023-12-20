@@ -53,6 +53,8 @@ public class ServiceRequestUpdateCallbackControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String serviceAuthToken = "Bearer TestServiceAuthToken";
+    public static final String serviceAuthTokenWithOutBearer = "TestServiceAuthToken";
+
 
     @Before
     public void setUp() {
@@ -75,6 +77,22 @@ public class ServiceRequestUpdateCallbackControllerTest {
         when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
 
         serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthToken,serviceRequestUpdateDto);
+
+        verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
+        verifyNoMoreInteractions(requestUpdateCallbackService);
+
+    }
+
+    @Test
+    public void testServiceRequestCallBackDetailsServiceAuthWithoutBearer() throws Exception {
+
+        FeeType feeType = null;
+
+        when(authorisationService.authoriseService(any())).thenReturn(Boolean.TRUE);
+        when(launchDarklyClient.isFeatureEnabled(any())).thenReturn(Boolean.TRUE);
+        when(feesService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+
+        serviceRequestUpdateCallbackController.serviceRequestUpdate(serviceAuthTokenWithOutBearer,serviceRequestUpdateDto);
 
         verify(requestUpdateCallbackService).processCallback(serviceRequestUpdateDto);
         verifyNoMoreInteractions(requestUpdateCallbackService);
