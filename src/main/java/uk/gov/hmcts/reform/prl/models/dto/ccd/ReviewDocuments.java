@@ -25,19 +25,20 @@ public class ReviewDocuments {
     private Document reviewDoc;
     private List<Element<UploadedDocuments>> citizenUploadDocListConfTab;
     private List<Element<UploadedDocuments>> citizenUploadedDocListDocTab;
+    //NOT IN USE
     private List<Element<QuarantineLegalDoc>> legalProfUploadDocListConfTab;
-    private List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> cafcassUploadDocListConfTab;
-    private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListConfTab;
-    private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
-
     private List<Element<QuarantineLegalDoc>> bulkScannedDocListConfTab;
+
+    private List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab;
+    private List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTab;
     private List<Element<QuarantineLegalDoc>> bulkScannedDocListDocTab;
 
     //PRL-4320 - manage docs redesign
-    //private List<Element<QuarantineLegalDoc>> restrictedDocuments;
-    //private List<Element<QuarantineLegalDoc>> confidentialDocuments;
+    private List<Element<QuarantineLegalDoc>> restrictedDocuments;
+    private List<Element<QuarantineLegalDoc>> confidentialDocuments;
 
     public static String[] reviewDocTempFields() {
         return new String[]{
