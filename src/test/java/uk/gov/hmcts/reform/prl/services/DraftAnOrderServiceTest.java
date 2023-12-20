@@ -356,7 +356,6 @@ public class DraftAnOrderServiceTest {
             .thenReturn(List.of(element(HearingData.builder().build())));
         uuid = UUID.fromString(TEST_UUID);
         when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(caseData);
-
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
     }

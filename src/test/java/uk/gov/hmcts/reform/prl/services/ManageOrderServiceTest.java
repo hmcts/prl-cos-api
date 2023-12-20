@@ -3434,6 +3434,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testSetFieldsForWaTaskForUploadOrder() {
+
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
         CaseData caseData = CaseData.builder()
@@ -3451,8 +3452,8 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
         assertNotNull(response);
-        assertTrue(response.containsKey("orderNameForWA"));
-        assertNotNull(response.get("orderNameForWA"));
+        assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
+        assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
     }
 
     @Test
@@ -3541,8 +3542,6 @@ public class ManageOrderServiceTest {
 
         assertNotNull(manageOrderService.serveOrder(caseData,orderList));
 
-        assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
-        assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
     }
 
     @Test

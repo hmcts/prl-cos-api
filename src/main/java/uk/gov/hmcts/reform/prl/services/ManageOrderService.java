@@ -1496,7 +1496,6 @@ public class ManageOrderService {
         }
 
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
-
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
         servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
@@ -1727,7 +1726,6 @@ public class ManageOrderService {
     }
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
-
         return otherDetails.toBuilder()
             .orderCreatedBy(otherDetails.getOrderCreatedBy())
             .orderServedDate(LocalDate.now().format(DateTimeFormatter.ofPattern(
@@ -2787,7 +2785,6 @@ public class ManageOrderService {
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
         waFieldsMap.put(WA_JUDGE_LA_REVIEW_REQUIRED, judgeLaReviewRequired);
-      
         return waFieldsMap;
     }
 
