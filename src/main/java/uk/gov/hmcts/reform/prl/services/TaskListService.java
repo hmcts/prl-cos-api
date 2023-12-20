@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.Respo
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -102,7 +103,7 @@ public class TaskListService {
                 .event(event)
                 .state(getTaskState(caseData, event))
                 .build())
-            .collect(toList());
+            .toList();
     }
 
     public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty) {
@@ -111,7 +112,7 @@ public class TaskListService {
                 .event(event)
                 .state(getRespondentTaskState(event, respondingParty))
                 .build())
-            .collect(toList());
+            .toList();
     }
 
     private TaskState getTaskState(CaseData caseData, Event event) {

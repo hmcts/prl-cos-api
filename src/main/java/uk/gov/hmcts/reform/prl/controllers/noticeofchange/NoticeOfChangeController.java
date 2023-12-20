@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.noticeofchange;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -7,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 
 import java.util.ArrayList;
@@ -34,15 +35,19 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/noc")
 public class NoticeOfChangeController extends AbstractCallbackController {
-
-    @Autowired
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final AuthorisationService authorisationService;
 
     @Autowired
-    private final AuthorisationService authorisationService;
+    protected NoticeOfChangeController(ObjectMapper objectMapper, EventService eventPublisher,
+                                       NoticeOfChangePartiesService
+        noticeOfChangePartiesService, AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.noticeOfChangePartiesService = noticeOfChangePartiesService;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/aboutToSubmitNoCRequest", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "About to submit NoC Request")
