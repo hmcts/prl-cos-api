@@ -3711,13 +3711,14 @@ public class ManageOrderServiceTest {
                               .listItems(elements)
                               .build())
             .serveToRespondentOptions(YesOrNo.Yes)
-            .servingRespondentsOptionsCA(ServingRespondentsEnum.applicantLegalRepresentative)
+            .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
+            .servingRespondentsOptionsDA(ServingRespondentsEnum.applicantLegalRepresentative)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
             .cafcassCymruEmail("test")
             .deliveryByOptionsCA(DeliveryByEnum.post)
-            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+            .emailInformationDA(List.of(Element.<EmailInformation>builder()
                                             .value(EmailInformation.builder().emailAddress("test").build()).build()))
-            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+            .postalInformationDA(List.of(Element.<PostalInformation>builder()
                                              .value(PostalInformation.builder().postalAddress(
                                                  Address.builder().postCode("NE65LA").build()).build()).build()))
             .build();
@@ -3737,14 +3738,14 @@ public class ManageOrderServiceTest {
 
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
+            .representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
             .build();
-        Element<PartyDetails> partyDetailsElement = element(details);
-        partyDetails.add(partyDetailsElement);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .applicants(partyDetails)
+            .applicantsFL401(details)
             .caseTypeOfApplication("FL401")
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
