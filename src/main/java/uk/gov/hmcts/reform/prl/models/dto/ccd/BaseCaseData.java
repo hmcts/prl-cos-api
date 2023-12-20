@@ -62,5 +62,5 @@ public class BaseCaseData {
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
     //temporary added for now for PRL-4320
-    private boolean isC8DocumentPresent;
+    private String isC8DocumentPresent;
 }
