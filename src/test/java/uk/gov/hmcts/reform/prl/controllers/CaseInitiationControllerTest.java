@@ -50,6 +50,18 @@ public class CaseInitiationControllerTest {
         caseData = CaseData.builder()
             .id(12345678L)
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
+    }
+
+    @Test
+    public void testHandleSubmitted() {
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put("applicantCaseName", "testCaseName");
+        String userID = "12345";
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(caseDataMap)
             .build();
         caseDetails = CaseDetails.builder()
             .id(12345678L)
