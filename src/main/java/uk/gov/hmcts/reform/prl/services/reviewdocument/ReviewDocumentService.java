@@ -81,10 +81,12 @@ public class ReviewDocumentService {
         + System.lineSeparator()
         + "If you are not sure, you can use Send and reply to messages to get further information about whether "
         + "the document needs to be restricted.";
+    public static final String LABEL_WITH_HINT =
+        "<h3 class='govuk-heading-s'>Document</h3><div id='more-detail-hint' class='govuk-hint'>The document will open in a new tab.</div>";
     public static final String SUBMITTED_BY_LABEL =
-        "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
+        "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'>&emsp<li>%s</li></label>";
     public static final String DOCUMENT_CATEGORY_LABEL =
-        "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
+        "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
     public static final String  CONFIDENTIAL_INFO_LABEL =
@@ -96,6 +98,7 @@ public class ReviewDocumentService {
         "<h3 class='govuk-heading-s'>Reasons to restrict access</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
 
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
+    public static final String DOC_LABEL = "docLabel";
     public static final String REVIEW_DOC = "reviewDoc";
     public static final String LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB = "legalProfUploadDocListConfTab";
     public static final String CAFCASS_UPLOAD_DOC_LIST_CONF_TAB = "cafcassUploadDocListConfTab";
@@ -261,6 +264,7 @@ public class ReviewDocumentService {
             );
 
             caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
+            caseDataUpdated.put(DOC_LABEL,LABEL_WITH_HINT );
             caseDataUpdated.put(REVIEW_DOC, document.getCitizenDocument());
         }
         if (isNotEmpty(caseData.getScannedDocuments())) {
@@ -295,6 +299,7 @@ public class ReviewDocumentService {
         );
 
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
+        caseDataUpdated.put(DOC_LABEL,LABEL_WITH_HINT );
 
         switch (submittedBy) {
             case LEGAL_PROFESSIONAL:
