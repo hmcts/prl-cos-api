@@ -86,7 +86,8 @@ public class ReviewDocumentService {
     public static final String SUBMITTED_BY_LABEL =
         "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'>&emsp<li>%s</li></label>";
     public static final String DOCUMENT_CATEGORY_LABEL =
-        "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
+        "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'>" +
+            "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
     public static final String  CONFIDENTIAL_INFO_LABEL =
@@ -264,7 +265,7 @@ public class ReviewDocumentService {
             );
 
             caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
-            caseDataUpdated.put(DOC_LABEL,LABEL_WITH_HINT );
+            caseDataUpdated.put(DOC_LABEL,LABEL_WITH_HINT);
             caseDataUpdated.put(REVIEW_DOC, document.getCitizenDocument());
         }
         if (isNotEmpty(caseData.getScannedDocuments())) {
@@ -299,7 +300,7 @@ public class ReviewDocumentService {
         );
 
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
-        caseDataUpdated.put(DOC_LABEL,LABEL_WITH_HINT );
+        caseDataUpdated.put(DOC_LABEL,LABEL_WITH_HINT);
 
         switch (submittedBy) {
             case LEGAL_PROFESSIONAL:
