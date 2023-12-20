@@ -84,10 +84,10 @@ public class ReviewDocumentService {
     public static final String LABEL_WITH_HINT =
         "<h3 class='govuk-heading-s'>Document</h3><div id='more-detail-hint' class='govuk-hint'>The document will open in a new tab.</div>";
     public static final String SUBMITTED_BY_LABEL =
-        "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'>&emsp<li>%s</li></label>";
+        "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
     public static final String DOCUMENT_CATEGORY_LABEL =
-        "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'>" +
-            "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
+        "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'>"
+            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'><li>%s</li></label>";
     public static final String  CONFIDENTIAL_INFO_LABEL =
