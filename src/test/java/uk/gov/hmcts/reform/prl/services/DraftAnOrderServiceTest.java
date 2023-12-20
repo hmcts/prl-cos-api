@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -4888,58 +4887,6 @@ public class DraftAnOrderServiceTest {
                               .build())
             .doYouWantToEditTheOrder(Yes)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
-            .build();
-        when(elementUtils.getDynamicListSelectedValue(
-            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .eventId(EDIT_AND_APPROVE_ORDER.getId())
-            .build();
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
-    }
-
-    @Test
-    @Ignore
-    public void testHandleDocumentGenerationEditOrderWithSdo() throws Exception {
-        DraftOrder draftOrder = DraftOrder.builder()
-            .parentName("test")
-            .otherDetails(OtherDraftOrderDetails.builder()
-                              .createdBy("test")
-                              .build())
-            .isOrderCreatedBySolicitor(Yes)
-            .orderType(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
-            .c21OrderOptions(C21OrderOptionsEnum.c21other)
-            .build();
-
-        Element<DraftOrder> draftOrderElement = element(draftOrder);
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
-        PartyDetails partyDetails = PartyDetails.builder()
-            .solicitorOrg(Organisation.builder().organisationName("test").build())
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-            .build();
-        Element<PartyDetails> respondents = element(partyDetails);
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .draftOrderCollection(draftOrderCollection)
-            .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
-            .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
-            .respondents(List.of(respondents))
-            .manageOrders(ManageOrders.builder()
-                              .fl404CustomFields(FL404.builder().fl404bApplicantName("test").build())
-                              .ordersHearingDetails(List.of(element(HearingData.builder().build())))
-                              .build())
-            .doYouWantToEditTheOrder(Yes)
-            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
-            .standardDirectionOrder(StandardDirectionOrder.builder()
-                                        .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.miamAttendance))
-                                        .build())
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());

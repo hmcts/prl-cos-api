@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import feign.FeignException;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -375,30 +374,6 @@ public class FeeServiceTest {
         assertNotNull(response);
         assertEquals(FeeType.C2_WITHOUT_NOTICE.toString(),response.getFeeType());
         assertEquals("167.0",response.getAmount());
-    }
-
-    @Test
-    @Ignore
-    public void testFetchFeeCodeWhenIsHearingDate14DaysAwayTrueAndOtherPartyConsentYes() throws Exception {
-        FeeRequest feeRequest = FeeRequest.builder().caseId(TEST_CASE_ID)
-            .applicationType(AwpApplicationTypeEnum.C2.toString()).otherPartyConsent(YES)
-            .applicationReason(DELAY_CANCEL_HEARING_DATE.getId())
-            .hearingDate("27/12/2023").build();
-
-        when(feesConfig.getFeeParametersByFeeType(FeeType.NO_FEE)).thenReturn(feeParameters);
-        FeeResponse feeResponse1 = FeeResponse.builder()
-            .code("FEE0324").feeType(FeeType.NO_FEE.toString())
-            .amount(BigDecimal.valueOf(167.00))
-            .build();
-        when(feeService.fetchFeeDetails(FeeType.NO_FEE)).thenReturn(feeResponse1);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(newCaseData);
-        when(coreCaseDataApi.getCase(authToken, serviceAuthToken, feeRequest
-            .getCaseId())).thenReturn(caseDetails);
-
-        FeeResponseForCitizen response = feeService.fetchFeeCode(feeRequest, authToken, serviceAuthToken);
-
-        assertNotNull(response);
-        assertEquals(ZERO_AMOUNT,response.getAmount());
     }
 
     @Test
