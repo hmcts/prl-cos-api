@@ -37,5 +37,6 @@ public class ApplicantDto {
     private String detailsKnown;
     private String start;
     private String startAlternative;
+    @JsonProperty("reasonableAdjustmentsFlags")
     private List<FlagDetail> reasonableAdjustmentsFlags;
 }
