@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -737,6 +738,7 @@ public class ReviewDocumentService {
                                                 String confidentialOrRestrictedKey) {
         if (null != confidentialOrRestrictedDocuments) {
             confidentialOrRestrictedDocuments.add(element(uploadDoc));
+            confidentialOrRestrictedDocuments.sort(Comparator.comparing(doc -> doc.getValue().getDocumentUploadedDate(), Comparator.reverseOrder()));
             caseDataUpdated.put(confidentialOrRestrictedKey, confidentialOrRestrictedDocuments);
         } else {
             caseDataUpdated.put(confidentialOrRestrictedKey, element(uploadDoc));

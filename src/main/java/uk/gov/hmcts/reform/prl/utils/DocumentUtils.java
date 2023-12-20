@@ -198,10 +198,11 @@ public class DocumentUtils {
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .categoryId(manageDocument.getDocumentCategories().getValueCode())
             .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            .notes(manageDocument.getDocumentDetails())
             //PRL-4320 - Manage documents redesign
             .isConfidential(manageDocument.getIsConfidential())
             .isRestricted(manageDocument.getIsRestricted())
-            .notes(manageDocument.getRestrictedDetails())
+            .restrictedDetails(manageDocument.getRestrictedDetails())
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
             .build();
