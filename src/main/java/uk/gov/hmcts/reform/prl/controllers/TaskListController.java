@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -37,23 +37,24 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE
 @Slf4j
 @RestController
 @RequestMapping("/update-task-list")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SecurityRequirement(name = "Bearer Authentication")
-
 public class TaskListController extends AbstractCallbackController {
-
-    @Autowired
     @Qualifier("allTabsService")
-    AllTabServiceImpl tabService;
+    private final AllTabServiceImpl tabService;
+    private final UserService userService;
+    private final DocumentGenService dgsService;
 
     @Autowired
-    UserService userService;
-
-    @Autowired
-    DocumentGenService dgsService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    public TaskListController(ObjectMapper objectMapper,
+                              EventService eventPublisher,
+                              AllTabServiceImpl tabService,
+                              UserService userService,
+                              DocumentGenService dgsService) {
+        super(objectMapper, eventPublisher);
+        this.tabService = tabService;
+        this.userService = userService;
+        this.dgsService = dgsService;
+    }
 
     @PostMapping("/submitted")
     public AboutToStartOrSubmitCallbackResponse handleSubmitted(@RequestBody CallbackRequest callbackRequest,
@@ -71,14 +72,7 @@ public class TaskListController extends AbstractCallbackController {
         String state = callbackRequest.getCaseDetails().getState();
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
             try {
-                log.info("Private law monitoring: TaskListController - handleSubmitted Generating documents for case id {} at {} ",
-                         callbackRequest.getCaseDetails().getId(), LocalDate.now()
-                );
-                log.info("Generating documents for the amended details");
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
-                log.info("Private law monitoring: TaskListController - handleSubmitted Generating documents completed for case id {} at {} ",
-                         callbackRequest.getCaseDetails().getId(), LocalDate.now()
-                );
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())
@@ -93,13 +87,7 @@ public class TaskListController extends AbstractCallbackController {
             }
         }
 
-        log.info("Private law monitoring: TaskListController - updateAllTabsIncludingConfTab started for case id {} at {} ",
-                 callbackRequest.getCaseDetails().getId(), LocalDate.now()
-        );
         tabService.updateAllTabsIncludingConfTab(caseData);
-        log.info("Private law monitoring: TaskListController - updateAllTabsIncludingConfTab completed for case id {} at {} ",
-                 callbackRequest.getCaseDetails().getId(), LocalDate.now()
-        );
 
         if (!isCourtStaff) {
             log.info("Private law monitoring: TaskListController - case data changed started for case id {} at {} ",
@@ -112,5 +100,13 @@ public class TaskListController extends AbstractCallbackController {
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping("/updateTaskListOnly")
+    public void updateTaskListWhenSubmitted(@RequestBody CallbackRequest callbackRequest,
+                                            @RequestHeader(HttpHeaders.AUTHORIZATION)
+                                            @Parameter(hidden = true) String authorisation) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+        publishEvent(new CaseDataChanged(caseData));
     }
 }

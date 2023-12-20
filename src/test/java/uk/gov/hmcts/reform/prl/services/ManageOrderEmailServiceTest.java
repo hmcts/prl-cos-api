@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -41,8 +40,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -58,6 +60,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -132,7 +135,6 @@ public class ManageOrderEmailServiceTest {
     @Before
     public void setUp() {
 
-        MockitoAnnotations.openMocks(this);
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
@@ -1194,7 +1196,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServed() {
+    public void testSendEmailWhenOrderServed() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1216,6 +1218,7 @@ public class ManageOrderEmailServiceTest {
                                  .cafcassEmailAddress(List.of(element("test")))
                                  .serveToRespondentOptions(YesOrNo.No)
                                  .recipientsOptions(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
                               .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
                               .deliveryByOptionsCA(DeliveryByEnum.email)
                               .emailInformationCA(List.of(Element.<EmailInformation>builder()
@@ -1228,17 +1231,200 @@ public class ManageOrderEmailServiceTest {
                               .otherParties(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
                                                          .build())
-                .orderCollection(List.of(element(OrderDetails.builder().typeOfOrder("Final").build())))
-                .build();
+            .orderCollection(List.of(Element.<OrderDetails>builder()
+                                         .id(uuid)
+                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                                                 List.of(element(Document.builder().build()))).build())
+                                                    .typeOfOrder("Final").build())
+                                         .build()))
+            .build();
         Map<String, Object> dataMap = new HashMap<>();
-
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                                                anyString(),
+                                                                                any(SendgridEmailConfig.class));
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
                                                            Mockito.any(),
                                                            Mockito.any(),Mockito.any());
     }
+
+    @Test
+    public void testSendEmailWhenOrderServed_General_Order() throws IOException {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .issueDate(LocalDate.now())
+            .othersToNotify(List.of(Element.<PartyDetails>builder().id(uuid)
+                                        .value(PartyDetails.builder()
+                                                   .canYouProvideEmailAddress(YesOrNo.Yes)
+                                                   .email("test")
+                                                   .build()).build()))
+            .manageOrders(ManageOrders.builder()
+                              .cafcassCymruServedOptions(YesOrNo.Yes)
+                              .cafcassEmailAddress(List.of(element("test")))
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                              .deliveryByOptionsCA(DeliveryByEnum.email)
+                              .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                                              .id(uuid)
+                                                              .value(EmailInformation
+                                                                         .builder()
+                                                                         .emailAddress("test")
+                                                                         .build())
+                                                              .build()))
+                              .otherParties(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .orderCollection(List.of(Element.<OrderDetails>builder()
+                                         .id(uuid)
+                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                                                 List.of(element(Document.builder().build()))).build())
+                                                    .typeOfOrder(SelectTypeOfOrderEnum.general.getDisplayedValue()).build())
+                                         .build()))
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                                                anyString(),
+                                                                                any(SendgridEmailConfig.class));
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
+                                                           Mockito.any(),
+                                                           Mockito.any(),Mockito.any());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderServed_two_Orders() throws IOException {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiselectListElement dynamicMultiselectListElementTwo = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000001")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement,dynamicMultiselectListElementTwo))
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .issueDate(LocalDate.now())
+            .othersToNotify(List.of(Element.<PartyDetails>builder().id(uuid)
+                                        .value(PartyDetails.builder()
+                                                   .canYouProvideEmailAddress(YesOrNo.Yes)
+                                                   .email("test")
+                                                   .build()).build()))
+            .manageOrders(ManageOrders.builder()
+                              .cafcassCymruServedOptions(YesOrNo.Yes)
+                              .cafcassEmailAddress(List.of(element("test")))
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                              .deliveryByOptionsCA(DeliveryByEnum.email)
+                              .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                                              .id(uuid)
+                                                              .value(EmailInformation
+                                                                         .builder()
+                                                                         .emailAddress("test")
+                                                                         .build())
+                                                              .build()))
+                              .otherParties(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .orderCollection(List.of(Element.<OrderDetails>builder()
+                                         .id(uuid)
+                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                                                 List.of(element(Document.builder().build()))).build())
+                                                    .typeOfOrder(SelectTypeOfOrderEnum.general.getDisplayedValue()).build())
+                                         .build(),Element.<OrderDetails>builder()
+                .id(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+                .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                        List.of(element(Document.builder().build()))).build())
+                           .typeOfOrder(SelectTypeOfOrderEnum.finl.getDisplayedValue()).build())
+                .build()))
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                                                anyString(),
+                                                                                any(SendgridEmailConfig.class));
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
+                                                           Mockito.any(),
+                                                           Mockito.any(),Mockito.any());
+    }
+
+
+    @Test
+    public void testSendEmailWhenOrderServed_Interim_Order() throws IOException {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .issueDate(LocalDate.now())
+            .othersToNotify(List.of(Element.<PartyDetails>builder().id(uuid)
+                                        .value(PartyDetails.builder()
+                                                   .canYouProvideEmailAddress(YesOrNo.Yes)
+                                                   .email("test")
+                                                   .build()).build()))
+            .manageOrders(ManageOrders.builder()
+                              .cafcassCymruServedOptions(YesOrNo.Yes)
+                              .cafcassEmailAddress(List.of(element("test")))
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+                              .deliveryByOptionsCA(DeliveryByEnum.email)
+                              .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                                              .id(uuid)
+                                                              .value(EmailInformation
+                                                                         .builder()
+                                                                         .emailAddress("test")
+                                                                         .build())
+                                                              .build()))
+                              .otherParties(dynamicMultiSelectList)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .orderCollection(List.of(Element.<OrderDetails>builder()
+                                         .id(uuid)
+                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
+                                                 List.of(element(Document.builder().build()))).build())
+                                                    .typeOfOrder(SelectTypeOfOrderEnum.interim.getDisplayedValue()).build())
+                                         .build()))
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                                                anyString(),
+                                                                                any(SendgridEmailConfig.class));
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
+                                                           Mockito.any(),
+                                                           Mockito.any(),Mockito.any());
+    }
+
 
     @Test
     public void testSendEmailWhenOrderServedShouldInvoke() throws Exception {
@@ -1665,5 +1851,74 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+    }
+
+    @Test
+    public void testSendEmailWhenOrderServedC100() throws Exception {
+        CaseDetails caseDetails = CaseDetails.builder().build();
+        LocalDateTime now = LocalDateTime.of(2023,8, 23, 0, 0, 0);
+        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(dynamicMultiselectListElement))
+            .build();
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(serveOrderDynamicMultiselectListElement))
+            .build();
+        applicant = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .build();
+        PartyDetails respondent = applicant.toBuilder()
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeLastName("")
+            .representativeFirstName("")
+            .solicitorEmail("")
+            .user(User.builder().idamId("abc123").build())
+            .contactPreferences(ContactPreferences.post)
+            .build();
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderTypeId("abc")
+            .dateCreated(now)
+            .orderDocument(Document.builder().build())
+            .orderDocumentWelsh(Document.builder().build())
+            .serveOrderDetails(ServeOrderDetails.builder()
+                                   .additionalDocuments(List.of(element(Document.builder().build())))
+                                   .build())
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(Element.<PartyDetails>builder().id(uuid).value(applicant).build()))
+            .respondents(List.of(Element.<PartyDetails>builder().id(uuid).value(respondent).build()))
+            .issueDate(LocalDate.now())
+            .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
+                              .serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(dynamicMultiSelectList)
+                              .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+                              .serveOrderAdditionalDocuments(List.of(element(Document.builder().build())))
+                              .cafcassEmailId("test").build())
+            .orderCollection(List.of(element(uuid,orderDetails)))
+            .build();
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        when(serviceOfApplicationPostService
+                 .getCoverLetterGeneratedDocInfo(any(CaseData.class), anyString(),
+                                                 any(Address.class),
+                                                 anyString()
+                 )).thenReturn(GeneratedDocumentInfo.builder().build());
+        Map<String, Object> dataMap = new HashMap<>();
+
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+
+        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
+                                                           Mockito.any(),
+                                                           Mockito.any(),Mockito.any());
     }
 }
