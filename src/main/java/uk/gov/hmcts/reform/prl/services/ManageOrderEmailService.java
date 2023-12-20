@@ -366,34 +366,6 @@ public class ManageOrderEmailService {
             .collect(Collectors.toList());
     }
 
-
-    public void sendEmailToCafcassAndOtherParties(CaseDetails caseDetails) {
-
-        CaseData caseData = emailService.getCaseData(caseDetails);
-
-        ManageOrders manageOrders = caseData.getManageOrders();
-
-        List<String> cafcassEmails = new ArrayList<>();
-        List<String> otherEmails = new ArrayList<>();
-        if (manageOrders.getCafcassEmailAddress() != null) {
-            cafcassEmails = manageOrders.getCafcassEmailAddress()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-        }
-        if (manageOrders.getOtherEmailAddress() != null) {
-            otherEmails = manageOrders.getOtherEmailAddress()
-                .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
-        }
-
-        cafcassEmails.addAll(otherEmails);
-
-        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
-        sendEmailToCafcassCymru(caseData,cafcassEmails,systemUserService.getSysUserToken(),orderDocuments);
-    }
-
     public EmailTemplateVars buildEmailToCafcassAndOtherParties(CaseData caseData) {
 
         String typeOfHearing = " ";
@@ -466,18 +438,21 @@ public class ManageOrderEmailService {
             //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
             addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
             caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
+            sendEmailToCafcassCymru(caseData,listOfOtherAndCafcassEmails,authorisation, orderDocuments);
 
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
             sendEmailForFlCaseType(caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)
                 && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsDA())) {
-                sendEmailToOtherOrganisation(caseData,manageOrders.getEmailInformationDA(),authorisation, orderDocuments);
+                sendEmailToOtherOrganisation(
+                    caseData,
+                    manageOrders.getEmailInformationDA(),
+                    authorisation,
+                    orderDocuments
+                );
             }
         }
-        // Send email notification to other organisations
-        sendEmailToCafcassCymru(caseData,listOfOtherAndCafcassEmails,authorisation, orderDocuments);
-
     }
 
     private void sendEmailToCafcassCymru(CaseData caseData, List<String> cafcassEmailInformation,
@@ -488,7 +463,7 @@ public class ManageOrderEmailService {
         cafcassEmailInformation.stream().forEach(emailAddress -> {
             try {
                 sendgridService.sendEmailUsingTemplateWithAttachments(
-                    SendgridEmailTemplateNames.SERVER_ORDER_CAFCASS_CYMRU,
+                    SendgridEmailTemplateNames.SERVE_ORDER_CAFCASS_CYMRU,
                     authorisation,
                     SendgridEmailConfig.builder().toEmailAddress(
                         emailAddress).dynamicTemplateData(

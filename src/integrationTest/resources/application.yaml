@@ -165,10 +165,10 @@ send-grid:
       templates:
         english:
           SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
-          SERVER_ORDER_CAFCASS_CYMRU: d-f117f63372a3466aae1eb08120ed1fd0
+          SERVE_ORDER_CAFCASS_CYMRU: d-f117f63372a3466aae1eb08120ed1fd0
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
-          SERVER_ORDER_CAFCASS_CYMRU: d-f117f63372a3466aae1eb08120ed1fd0
+          SERVE_ORDER_CAFCASS_CYMRU: d-f117f63372a3466aae1eb08120ed1fd0
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
