@@ -343,11 +343,11 @@ public class EditAndApproveDraftOrderController {
             log.info("Solicitor created order options {}",caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR));
             log.info("Court admin created order options {}",caseDataUpdated.get("whatToDoWithOrderCourtAdmin"));
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
-            log.info("Case reference : {}", caseDataUpdated.get("id"));
+            log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
-                Long.getLong(String.valueOf(caseDataUpdated.get("id"))),
+                callbackRequest.getCaseDetails().getId(),
                 "internal-update-all-tabs",
                 caseDataUpdated
             );
