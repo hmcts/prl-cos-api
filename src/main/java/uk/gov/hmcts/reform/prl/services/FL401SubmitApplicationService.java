@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.enums.solicitoremailnotification.SolicitorEmailNotificationEventEnum;
-import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.events.SolicitorNotificationEmailEvent;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -121,7 +120,6 @@ public class FL401SubmitApplicationService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
 
         try {
-            log.trace("Trying out async solution - this is the main method");
             SolicitorNotificationEmailEvent event = prepareFl401SolNotificationEvent(callbackRequest, userDetails);
             eventPublisher.publishEvent(event);
             if (null != caseData.getCourtEmailAddress()) {
@@ -131,8 +129,7 @@ public class FL401SubmitApplicationService {
             caseData = caseData.toBuilder()
                 .isNotificationSent("Yes")
                 .build();
-            eventPublisher.publishEvent(new CaseDataChanged(caseData));
-            log.trace("Trying out async solution - closing the api call");
+
         } catch (Exception e) {
             log.error("Notification could not be sent due to {} ", e.getMessage());
             caseData = caseData.toBuilder()
