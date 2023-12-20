@@ -579,9 +579,9 @@ public class ReviewDocumentService {
         return String.join(
             format(SUBMITTED_BY_LABEL, submittedBy),
             format(DOCUMENT_CATEGORY_LABEL, category),
-            format(DOCUMENT_COMMENTS_LABEL, notes, "<br/>"),
-            format(CONFIDENTIAL_INFO_LABEL, isRestricted, "<br/>"),
-            format(RESTRICTED_INFO_LABEL, isConfidential, "<br/>"),
+            format(DOCUMENT_COMMENTS_LABEL, notes),
+            format(CONFIDENTIAL_INFO_LABEL, isRestricted.toString()),
+            format(RESTRICTED_INFO_LABEL, isConfidential.toString()),
             format(RESTRICTION_REASON_LABEL, getRestrictedDetails, "<br/>")
         );
     }
