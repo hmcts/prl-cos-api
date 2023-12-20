@@ -902,16 +902,22 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
+        String status = manageOrderService.getOrderStatus(
+            draftOrder.getOrderSelectionType(),
+            loggedInUserType,
+            eventId,
+            draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
+        );
+        if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId) && OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
+            .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())) {
+            status = OrderStatusEnum.rejectedByJudge.getDisplayedValue();
+        }
+
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
-                              .status(manageOrderService.getOrderStatus(
-                                  draftOrder.getOrderSelectionType(),
-                                  loggedInUserType,
-                                  eventId,
-                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
-                              ))
+                              .status(status)
                               .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
                                                          ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
                               .build())
