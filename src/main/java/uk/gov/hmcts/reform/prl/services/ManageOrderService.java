@@ -25,11 +25,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -157,9 +158,9 @@ public class ManageOrderService {
     public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
     public static final String OTHER_PEOPLE_PRESENT_IN_CASE_FLAG = "otherPeoplePresentInCaseFlag";
     public static final String C_47_A = "C47A";
-    public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
-    public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
+    public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
     public static final String PREVIEW_ORDER_DOC = "previewOrderDoc";
+
     @Autowired
     LocationRefDataService locationRefDataService;
 
@@ -629,11 +630,6 @@ public class ManageOrderService {
             RECIPIENTS_OPTIONS, DynamicMultiSelectList.builder()
                 .listItems(applicantRespondentList)
                 .build());
-        headerMap.put(
-            RECIPIENTS_OPTIONS_ONLY_C_47_A, DynamicMultiSelectList.builder()
-                .listItems(applicantRespondentList)
-                .build());
-
     }
 
     public List<DynamicMultiselectListElement> getPartyDynamicMultiselectList(CaseData caseData) {
@@ -658,10 +654,6 @@ public class ManageOrderService {
             .getOtherPeopleMultiSelectList(caseData);
         headerMap.put(
             OTHER_PARTIES, DynamicMultiSelectList.builder()
-                .listItems(otherPeopleList)
-                .build());
-        headerMap.put(
-            OTHER_PARTIES_ONLY_C_47_A, DynamicMultiSelectList.builder()
                 .listItems(otherPeopleList)
                 .build());
         if (otherPeopleList.isEmpty()) {
@@ -1409,17 +1401,17 @@ public class ManageOrderService {
     }
 
     private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
-        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
+        YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
-            if (caseData.getManageOrders().getEmailInformationDA() != null) {
-                emailInformation = caseData.getManageOrders().getEmailInformationDA();
-            }
-            if (caseData.getManageOrders().getPostalInformationDA() != null) {
-                postalInformation = caseData.getManageOrders().getPostalInformationDA();
-            }
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesDA())) {
+            otherPartiesServed = Yes;
+            Map<String, Object> emailOrPostalInfo = new HashMap<>();
+            getEmailAndPostalInfoOfOrg(caseData, emailOrPostalInfo);
+            postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get("post");
+            emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get("email");
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
@@ -1438,11 +1430,10 @@ public class ManageOrderService {
 
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
-        YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
-        ServingRespondentsEnum servingRespondentsOptions = null;
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
         String otherParties;
-        if (Yes.equals(serveOnRespondent) || Yes.equals(serveOnRespondentOnly47a)) {
+        if (Yes.equals(serveOnRespondent)) {
             servingRespondentsOptions = getServingRespondentsOptions(caseData);
         } else {
             recipients = getRecipients(caseData);
@@ -1451,16 +1442,12 @@ public class ManageOrderService {
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if ((ObjectUtils.isNotEmpty(caseData.getManageOrders().getOtherParties())
-            && isNotEmpty(caseData.getManageOrders().getOtherParties().getValue()))
-            || (ObjectUtils.isNotEmpty(caseData.getManageOrders().getOtherPartiesOnlyC47a())
-            && isNotEmpty(caseData.getManageOrders().getOtherPartiesOnlyC47a().getValue()))) {
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())) {
             otherPartiesServed = Yes;
-        }
-        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())
-            || isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCaOnlyC47a())) {
-            emailInformation = getEmailInformationCA(caseData);
-            postalInformation = getPostalInformationCA(caseData);
+            Map<String, Object> emailOrPostalInfo = new HashMap<>();
+            getEmailAndPostalInfoOfOrg(caseData, emailOrPostalInfo);
+            postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get("post");
+            emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get("email");
         }
         YesOrNo cafcassServedOptions = No;
         YesOrNo cafcassCymruServedOptions = No;
@@ -1503,11 +1490,6 @@ public class ManageOrderService {
                 .getServedPartyDetailsFromDynamicSelectList(caseData
                                                                 .getManageOrders()
                                                                 .getRecipientsOptions());
-        } else if (caseData.getManageOrders()
-            .getRecipientsOptionsOnlyC47a() != null) {
-            servedParties = dynamicMultiSelectListService
-                .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
-                                                         .getRecipientsOptionsOnlyC47a());
         }
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
@@ -1520,47 +1502,36 @@ public class ManageOrderService {
                 servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
                     caseData.getManageOrders().getOtherParties()
                 ));
-            } else if (caseData.getManageOrders().getOtherPartiesOnlyC47a() != null) {
-                servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
-                    caseData.getManageOrders().getOtherPartiesOnlyC47a()
-                ));
             }
         }
         return servedParties;
     }
 
-    private static ServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
-        ServingRespondentsEnum servingRespondentsOptions = null;
+    private static SoaSolicitorServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         if (caseData.getManageOrders()
             .getServingRespondentsOptionsCA() != null) {
             servingRespondentsOptions = caseData.getManageOrders()
                 .getServingRespondentsOptionsCA();
-        } else if (caseData.getManageOrders()
-            .getServingRespondentsOptionsCaOnlyC47a() != null) {
-            servingRespondentsOptions = caseData.getManageOrders()
-                .getServingRespondentsOptionsCaOnlyC47a();
         }
         return servingRespondentsOptions;
     }
 
-    private static List<Element<PostalInformation>> getPostalInformationCA(CaseData caseData) {
-        List<Element<PostalInformation>> postalInformation = null;
-        if (caseData.getManageOrders().getPostalInformationCA() != null) {
-            postalInformation = caseData.getManageOrders().getPostalInformationCA();
-        } else if (caseData.getManageOrders().getPostalInformationCaOnlyC47a() != null) {
-            postalInformation = caseData.getManageOrders().getPostalInformationCaOnlyC47a();
+    private static void getEmailAndPostalInfoOfOrg(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
+        List<Element<PostalInformation>> postalInformation = new ArrayList<>();
+        List<Element<EmailInformation>> emailInformation = new ArrayList<>();
+        if (null != caseData.getManageOrders().getServeOrgDetailsList()) {
+            caseData.getManageOrders().getServeOrgDetailsList().stream().map(Element::getValue)
+                .forEach(serveOther -> {
+                    if (DeliveryByEnum.post.equals(serveOther.getServeByPostOrEmail())) {
+                        postalInformation.add(element(serveOther.getPostalInformation()));
+                    } else if (DeliveryByEnum.email.equals(serveOther.getServeByPostOrEmail())) {
+                        emailInformation.add(element(serveOther.getEmailInformation()));
+                    }
+                });
         }
-        return postalInformation;
-    }
-
-    private static List<Element<EmailInformation>> getEmailInformationCA(CaseData caseData) {
-        List<Element<EmailInformation>> emailInformation = null;
-        if (caseData.getManageOrders().getEmailInformationCA() != null) {
-            emailInformation = caseData.getManageOrders().getEmailInformationCA();
-        } else if (caseData.getManageOrders().getEmailInformationCaOnlyC47a() != null) {
-            emailInformation = caseData.getManageOrders().getEmailInformationCaOnlyC47a();
-        }
-        return emailInformation;
+        emailOrPostalInfo.put("email", emailInformation);
+        emailOrPostalInfo.put("post", postalInformation);
     }
 
     private static String getOtherParties(CaseData caseData) {
@@ -1571,13 +1542,6 @@ public class ManageOrderService {
             .getOtherParties().getValue() != null) {
             for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
                 .getOtherParties().getValue()) {
-                otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
-            }
-        } else if (caseData.getManageOrders()
-            .getOtherPartiesOnlyC47a() != null && caseData.getManageOrders()
-            .getOtherPartiesOnlyC47a().getValue() != null) {
-            for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
-                .getOtherPartiesOnlyC47a().getValue()) {
                 otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
             }
         }
@@ -1592,11 +1556,6 @@ public class ManageOrderService {
             recipients = dynamicMultiSelectListService
                 .getStringFromDynamicMultiSelectList(caseData.getManageOrders().getRecipientsOptions());
 
-        } else if (caseData.getManageOrders()
-            .getRecipientsOptionsOnlyC47a() != null) {
-            recipients = dynamicMultiSelectListService
-                .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                         .getRecipientsOptionsOnlyC47a());
         }
         return recipients;
     }
@@ -1609,7 +1568,7 @@ public class ManageOrderService {
         String cafcassEmail = null;
         YesOrNo serveOnRespondent = null;
         YesOrNo otherPartiesServed = null;
-        ServingRespondentsEnum servingRespondentsOptions = null;
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
         String otherParties = null;
         List<Element<ServedParties>> servedParties = new ArrayList<>();
@@ -1631,7 +1590,7 @@ public class ManageOrderService {
             otherPartiesServed = (YesOrNo) servedOrderDetails.get(OTHER_PARTIES_SERVED);
         }
         if (servedOrderDetails.containsKey(SERVING_RESPONDENTS_OPTIONS)) {
-            servingRespondentsOptions = (ServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
+            servingRespondentsOptions = (SoaSolicitorServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
         }
         if (servedOrderDetails.containsKey(RECIPIENTS_OPTIONS)) {
             recipients = (String) servedOrderDetails.get(RECIPIENTS_OPTIONS);
@@ -1648,6 +1607,9 @@ public class ManageOrderService {
         } else {
             tempServeOrderDetails = ServeOrderDetails.builder().build();
         }
+        log.info("*** EMail info {}", emailInformation);
+        log.info("*** Postal info {}", postalInformation);
+
         ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .recipientsOptions(recipients)
@@ -1661,6 +1623,7 @@ public class ManageOrderService {
             .emailInformation(emailInformation)
             .servedParties(servedParties)
             .build();
+        log.info("*** Serve order details {}", servedOrderDetails);
 
         OrderDetails amended = order.getValue().toBuilder()
             .orderDocument(order.getValue().getOrderDocument())
@@ -1671,7 +1634,11 @@ public class ManageOrderService {
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
+        log.info("*** order details {}", order);
+
         orders.set(orders.indexOf(order), element(order.getId(), amended));
+        log.info("*** orders details {}", orders);
+
     }
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
@@ -2254,10 +2221,32 @@ public class ManageOrderService {
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
+        log.info(" serve order dynamic select listoo {}", caseDataUpdated.get("serveOrderDynamicList"));
+        log.info("end OrdersHearingDetails {}",
+                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
+                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
+        caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
+        log.info("---- Check display legal rep options  ----");
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            log.info("---- C100 check ----");
+            caseData.getApplicants().stream().findFirst().ifPresent(party ->
+                populateLegalRepFlag(party.getValue().getSolicitorEmail(), caseDataUpdated));
+        } else {
+            populateLegalRepFlag(caseData.getApplicantsFL401().getSolicitorEmail(), caseDataUpdated);
+        }
+        log.info("---- display Legal rep ----{}", caseDataUpdated.get(DISPLAY_LEGAL_REP_OPTION));
         return caseDataUpdated;
     }
 
-    //Needs reverting, changed for testing purposes. case reference number is wrong
+    private void populateLegalRepFlag(String email, Map<String, Object> caseDataUpdated) {
+        log.info("---- Legal rep present ----{}", email);
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(email)) {
+            log.info("---- Legal rep present ----");
+            caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
+        }
+    }
+
+
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
@@ -2337,8 +2326,9 @@ public class ManageOrderService {
     }
 
     public void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if ((null != caseData.getManageOrders() && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed()))
+        if (servedSavedOrders.equals(caseData.getManageOrdersOptions())
             || (null != caseData.getServeOrderData() && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+            log.info("inside Mark to serve email notification");
             caseDataUpdated.put("markedToServeEmailNotification", Yes);
         } else {
             caseDataUpdated.put("markedToServeEmailNotification", No);
