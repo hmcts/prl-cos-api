@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -250,34 +251,31 @@ public class ReviewDocumentService {
             UploadedDocuments document = quarantineCitizenDocElement.get().getValue();
             log.info("** citizen document ** {}", document);
 
-                String docTobeReviewed = formatDocumentTobeReviewed(
-                    document.getPartyName(),
-                    document.getDocumentType(),
-                    "",
-                    YesOrNo.Yes,
-                    YesOrNo.Yes,
-                    ""
-                );
+            String docTobeReviewed = formatDocumentTobeReviewed(
+                document.getPartyName(),
+                document.getDocumentType(),
+                "",
+                null,
+                null,
+                ""
+            );
 
-                caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
-                caseDataUpdated.put(REVIEW_DOC, document.getCitizenDocument());
-            }
-            if (isNotEmpty(caseData.getScannedDocuments())) {
-                Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement = Optional.empty();
-                quarantineBulkscanDocElement = Optional.of(
-                    element(QuarantineLegalDoc.builder()
-                                .url(caseData.getScannedDocuments().stream()
-                                         .filter(element -> element.getId().equals(uuid))
-                                         .collect(Collectors.toList()).stream().findFirst().map(Element::getValue).map(
-                                        ScannedDocument::getUrl).orElse(null)).build()));
-                if (quarantineBulkscanDocElement.isPresent()) {
-                    updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                        caseDataUpdated,
-                        quarantineBulkscanDocElement,
-                        BULK_SCAN
-                    );
-                }
-            }
+            caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
+            caseDataUpdated.put(REVIEW_DOC, document.getCitizenDocument());
+        }
+        if (isNotEmpty(caseData.getScannedDocuments())) {
+            Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement;
+            quarantineBulkscanDocElement = Optional.of(
+                element(QuarantineLegalDoc.builder()
+                            .url(caseData.getScannedDocuments().stream()
+                                     .filter(element -> element.getId().equals(uuid))
+                                     .toList().stream().findFirst().map(Element::getValue).map(
+                                    ScannedDocument::getUrl).orElse(null)).build()));
+            updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
+                caseDataUpdated,
+                quarantineBulkscanDocElement,
+                BULK_SCAN
+            );
         }
     }
 
@@ -593,20 +591,37 @@ public class ReviewDocumentService {
                                               String notes,
                                               YesOrNo isRestricted,
                                               YesOrNo isConfidential,
-                                              String getRestrictedDetails) {
+                                              String restrictedDetails) {
         if (BULK_SCAN.equals(submittedBy)) {
             return String.join(
                 format(SUBMITTED_BY_LABEL, submittedBy)
             );
         }
-        return String.join(
+        StringBuilder reviewDetailsBuilder = new StringBuilder();
+        reviewDetailsBuilder.append(format(SUBMITTED_BY_LABEL, submittedBy));
+        reviewDetailsBuilder.append(format(DOCUMENT_CATEGORY_LABEL, category));
+        if (StringUtils.isNotEmpty(notes)) {
+            reviewDetailsBuilder.append(format(DOCUMENT_COMMENTS_LABEL, notes));
+        }
+        if (null != isConfidential) {
+            reviewDetailsBuilder.append(format(CONFIDENTIAL_INFO_LABEL, isConfidential.getDisplayedValue()));
+        }
+        if (null != isRestricted) {
+            reviewDetailsBuilder.append(format(RESTRICTED_INFO_LABEL, isRestricted.getDisplayedValue()));
+        }
+        if (StringUtils.isNotEmpty(restrictedDetails)) {
+            reviewDetailsBuilder.append(format(RESTRICTION_REASON_LABEL, restrictedDetails));
+        }
+        reviewDetailsBuilder.append("<br/>");
+        return reviewDetailsBuilder.toString();
+        /*return String.join(
             format(SUBMITTED_BY_LABEL, submittedBy),
             format(DOCUMENT_CATEGORY_LABEL, category),
             format(DOCUMENT_COMMENTS_LABEL, notes),
             format(CONFIDENTIAL_INFO_LABEL, isRestricted.toString()),
             format(RESTRICTED_INFO_LABEL, isConfidential.toString()),
-            format(RESTRICTION_REASON_LABEL, getRestrictedDetails, "<br/>")
-        );
+            format(RESTRICTION_REASON_LABEL, restrictedDetails, "<br/>")
+        );*/
     }
 
     private QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,

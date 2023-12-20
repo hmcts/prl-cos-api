@@ -53,10 +53,13 @@ public class ManageDocumentsController extends AbstractCallbackController {
 
     @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
-                                        ManageDocumentsService manageDocumentsService, AllTabServiceImpl tabService) {
+                                        ManageDocumentsService manageDocumentsService,
+                                        AllTabServiceImpl tabService,
+                                        UserService userService) {
         super(objectMapper, eventPublisher);
         this.manageDocumentsService = manageDocumentsService;
         this.tabService = tabService;
+        this.userService = userService;
     }
 
     @PostMapping("/about-to-start")
