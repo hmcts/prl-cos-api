@@ -92,7 +92,7 @@ public class ReviewDocumentService {
             + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'>"
-            +"<ul class='govuk-list govuk-list--bullet'> <li>%s</li></label>";
+            + "<ul class='govuk-list govuk-list--bullet'> <li>%s</li></label>";
     public static final String  CONFIDENTIAL_INFO_LABEL =
         "<h3 class='govuk-heading-s'>Confidential information included</h3><label class='govuk-label' for='more-detail'>"
             + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></label>";
