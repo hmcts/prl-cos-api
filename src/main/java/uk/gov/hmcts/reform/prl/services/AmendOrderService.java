@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -41,23 +40,18 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class AmendOrderService {
-    private static final String MEDIA_TYPE = "application/pdf";
+
     private static final String FILE_NAME_PREFIX = "amended_";
 
-    private final AmendedOrderStamper stamper;
-    private final  UploadDocumentService uploadService;
     private final Time time;
     private final ManageOrderService manageOrderService;
     private final UserService userService;
 
-    public Map<String, Object> updateOrder(CaseData caseData, String authorisation) throws IOException {
+    public Map<String, Object> updateOrder(CaseData caseData, String authorisation) {
         ManageOrders eventData = caseData.getManageOrders();
         //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
         // Hence needs to revisit the logic, once XUI issue is resolved
-        //byte[] stampedBinaries = stamper.amendDocument(eventData.getManageOrdersAmendedOrder(), authorisation);
         String amendedFileName = updateFileName(eventData.getManageOrdersDocumentToAmend());
-        //Document stampedDocument = uploadService.uploadDocument(stampedBinaries, amendedFileName, MEDIA_TYPE, authorisation);
-
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
 
         uk.gov.hmcts.reform.prl.models.documents.Document updatedDocument = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -98,7 +92,6 @@ public class AmendOrderService {
                                          ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : LocalDateTime.now())
                         .orderType(order.getValue().getOrderType())
                         .typeOfOrder(order.getValue().getTypeOfOrder())
-                        .serveOrderDetails(null)
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
                                           .orderServedDate(null)
                                           .createdBy(order.getValue().getOtherDetails().getCreatedBy())
@@ -162,6 +155,7 @@ public class AmendOrderService {
         Optional<Element<OrderDetails>> orderDetails  = orders.stream()
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
+
         String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
 
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);

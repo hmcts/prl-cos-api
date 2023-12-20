@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,9 +21,9 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentMiamChecker implements RespondentEventChecker {
-    @Autowired
-    RespondentTaskErrorService respondentTaskErrorService;
+    private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
@@ -42,13 +43,13 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-
+        boolean isFinished = false;
         if (response.isPresent()) {
             Optional<Miam> miam
                 = Optional.ofNullable(response.get().getMiam());
             if (miam.isPresent() && checkMiamManadatoryCompleted(miam)) {
                 respondentTaskErrorService.removeError(MIAM_ERROR);
-                return true;
+                isFinished = true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -56,7 +57,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             MIAM_ERROR,
             MIAM_ERROR.getError()
         );
-        return false;
+        return isFinished;
     }
 
     private boolean checkMiamManadatoryCompleted(Optional<Miam> miam) {
