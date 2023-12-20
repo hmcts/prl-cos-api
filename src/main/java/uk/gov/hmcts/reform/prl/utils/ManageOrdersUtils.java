@@ -102,7 +102,7 @@ public class ManageOrdersUtils {
                         .equals(hearingData.getHearingDateConfirmOptionEnum())
                         && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
                         || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
-                        errorList.add("HearingType cannot be empty, please select a hearingType");
+                        errorList.add("You must select a hearing type");
                     }
                     //numeric estimated timings validation
                     validateHearingEstimatedTimings(errorList, hearingData);
