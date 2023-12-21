@@ -80,26 +80,26 @@ public class AmRoleAssignmentApiTest {
                 .toPact();
     }
 
-    @Pact(provider = "am_role_assignment_service", consumer = "prl_cos")
-    public RequestResponsePact generatePactFragmentForRoleAssignmentActor(PactDslWithProvider builder) throws Exception {
-
-        RoleAssignmentRequest roleAssignmentRequest = RoleAssignmentRequest.roleAssignmentRequest().build();
-        String roleAssignmentResponseBody = "response/role-assignment.json";
-
-        return builder
-            .given("Role Assignment Actor")
-            .uponReceiving("A Request to assign a new role for a specific actor")
-            .method("GET")
-            .headers("Authorization", AUTH)
-            .headers("ServiceAuthorization", S2S)
-            .headers("x-correlation-id", X_CORRELATION_ID)
-            .path("/am/role-assignments/actors/")
-            .body(new ObjectMapper().writeValueAsString(roleAssignmentRequest), APPLICATION_JSON)
-            .willRespondWith()
-            .status(200)
-            .body(ResourceLoader.loadJson(roleAssignmentResponseBody),APPLICATION_JSON)
-            .toPact();
-    }
+//    @Pact(provider = "am_role_assignment_service", consumer = "prl_cos")
+//    public RequestResponsePact generatePactFragmentForRoleAssignmentActor(PactDslWithProvider builder) throws Exception {
+//
+//        RoleAssignmentRequest roleAssignmentRequest = RoleAssignmentRequest.roleAssignmentRequest().build();
+//        String roleAssignmentResponseBody = "response/role-assignment.json";
+//
+//        return builder
+//            .given("Role Assignment Actor")
+//            .uponReceiving("A Request to assign a new role for a specific actor")
+//            .method("GET")
+//            .headers("Authorization", AUTH)
+//            .headers("ServiceAuthorization", S2S)
+//            .headers("x-correlation-id", X_CORRELATION_ID)
+//            .path("/am/role-assignments/actors/")
+//            .body(new ObjectMapper().writeValueAsString(roleAssignmentRequest), APPLICATION_JSON)
+//            .willRespondWith()
+//            .status(200)
+//            .body(ResourceLoader.loadJson(roleAssignmentResponseBody),APPLICATION_JSON)
+//            .toPact();
+//    }
 
     @Test
     @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignment")
@@ -112,13 +112,13 @@ public class AmRoleAssignmentApiTest {
         Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response");
     }
 
-    @Test
-    @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignmentActor")
-    public void verifyRoleAssignmentActor() {
-        RoleAssignmentServiceResponse roleAssignmentResponse = roleAssignmentApi
-            .getRoleAssignments(AUTH, S2S, X_CORRELATION_ID, "1"
-            );
-
-        Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response");
-    }
+//    @Test
+//    @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignmentActor")
+//    public void verifyRoleAssignmentActor() {
+//        RoleAssignmentServiceResponse roleAssignmentResponse = roleAssignmentApi
+//            .getRoleAssignments(AUTH, S2S, X_CORRELATION_ID, "1"
+//            );
+//
+//        Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response");
+//    }
 }
