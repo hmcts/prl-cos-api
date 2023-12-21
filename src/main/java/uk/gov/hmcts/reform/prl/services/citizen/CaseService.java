@@ -37,7 +37,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
@@ -64,32 +63,19 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseService {
-
     public static final String LINK_CASE = "linkCase";
     public static final String INVALID = "Invalid";
     public static final String VALID = "Valid";
     public static final String LINKED = "Linked";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
-    @Autowired
     private final CoreCaseDataApi coreCaseDataApi;
-
-    @Autowired
     private final CaseRepository caseRepository;
-
     private final IdamClient idamClient;
-
-    @Autowired
     private final ObjectMapper objectMapper;
-
-    @Autowired
     private final SystemUserService systemUserService;
-
-    @Autowired
     private final CaseDataMapper caseDataMapper;
-
     private final CcdCoreCaseDataService coreCaseDataService;
-
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
@@ -213,7 +199,7 @@ public class CaseService {
         return caseDetails
             .stream()
             .map(caseDetail -> CaseUtils.getCaseData(caseDetail, objectMapper))
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<CaseDetails> performSearch(String authToken, UserDetails user, Map<String, String> searchCriteria,
@@ -354,7 +340,7 @@ public class CaseService {
             .stream()
             .map(Element::getValue)
             .filter(x -> accessCode.equals(x.getAccessCode()))
-            .collect(Collectors.toList());
+            .toList();
 
         if (!matchingCaseInvite.isEmpty()) {
             accessCodeStatus = VALID;
