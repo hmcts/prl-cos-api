@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
@@ -20,7 +20,7 @@ import java.util.List;
 public class ReviewDocuments {
 
     private DynamicList reviewDocsDynamicList;
-    private YesNoDontKnow reviewDecisionYesOrNo;
+    private YesNoNotSure reviewDecisionYesOrNo;
     private String docToBeReviewed;
     private Document reviewDoc;
     private List<Element<UploadedDocuments>> citizenUploadDocListConfTab;
