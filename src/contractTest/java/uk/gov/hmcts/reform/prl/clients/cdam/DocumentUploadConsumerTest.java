@@ -43,7 +43,9 @@ import static uk.gov.hmcts.reform.ccd.document.am.model.Classification.RESTRICTE
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "case-document-am-client-api", port = "5004")
-@TestPropertySource(properties = {"case_document_am.url=http://localhost:5004"})
+@TestPropertySource(properties = {"case_document_am.url=http://localhost:5004",
+    "test.bearer-token=i",
+    "test.service-auth-token=i"})
 @PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})

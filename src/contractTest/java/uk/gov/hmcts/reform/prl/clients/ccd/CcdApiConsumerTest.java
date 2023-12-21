@@ -36,7 +36,9 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @ExtendWith(SpringExtension.class)
 @PactTestFor(providerName = "ccd", port = "5001")
-@TestPropertySource(properties = {"core_case_data.api.url=http://localhost:5001"})
+@TestPropertySource(properties = {"core_case_data.api.url=http://localhost:5001",
+    "test.bearer-token=i",
+    "test.service-auth-token=i"})
 @PactFolder("pacts")
 @SpringBootTest
 @ImportAutoConfiguration({FeignAutoConfiguration.class})
@@ -47,14 +49,11 @@ public class CcdApiConsumerTest {
 
     @Value("${test.service-auth-token}")
     protected String serviceAuthorizationHeader;
-
     @Autowired
     CoreCaseDataApi coreCaseDataApi;
 
     @Pact(provider = "ccd", consumer = "prl_cos")
     private RequestResponsePact createCaseInCcd(PactDslWithProvider builder) throws JsonProcessingException {
-        System.out.println("bearer token is: " + bearerToken);
-        System.out.println("serviceAuthorizationHeader is: " + serviceAuthorizationHeader);
         return builder
             .given("A request to create a case in CCD")
             .uponReceiving("a request to create a case in CCD with valid authorization")
