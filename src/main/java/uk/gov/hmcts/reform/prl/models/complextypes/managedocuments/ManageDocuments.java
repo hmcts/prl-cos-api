@@ -28,6 +28,5 @@ public class ManageDocuments {
     private final YesOrNo isConfidential;
     private final YesOrNo isRestricted;
     private final String restrictedDetails;
-    private String documentRelatedToCaseLabel;
     private final List<DocumentRelatedToCase> documentRelatedToCaseCheckbox;
 }

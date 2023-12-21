@@ -69,7 +69,6 @@ public class ManageDocumentsService {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
-            .documentRelatedToCaseLabel(format(D0C_RELATED_TO_CASE, caseData.getApplicantCaseName()))
             .build();
 
         return caseData.toBuilder()
