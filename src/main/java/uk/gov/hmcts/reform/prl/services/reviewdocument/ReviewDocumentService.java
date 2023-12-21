@@ -79,7 +79,7 @@ public class ReviewDocumentService {
         + " This document is visible to all parties and can be viewed in the case documents tab.";
     private static final String REVIEW_NOT_SURE = "### You need to confirm if the uploaded document needs to be restricted"
         + System.lineSeparator()
-        + "If you are not sure, you can use Send and reply to messages to get further information about whether "
+        + "If you are not sure, you can use %s to get further information about whether "
         + "the document needs to be restricted.";
     public static final String LABEL_WITH_HINT =
         "<h3 class='govuk-heading-s'>Document</h3><label class='govuk-label' for='more-detail'>"
@@ -583,9 +583,15 @@ public class ReviewDocumentService {
                                          .confirmationHeader(DOCUMENT_SUCCESSFULLY_REVIEWED)
                                          .confirmationBody(REVIEW_NO).build());
         } else {
+            String sendReplyUrl = "<a href=\"" + "/cases/case-details/"
+                + caseData.getId()
+                + "/trigger/sendOrReplyToMessages/sendOrReplyToMessages1"
+                + "\">Send and reply to messages</a>";
+            log.info("Send & reply link {}", sendReplyUrl);
             return ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                          .confirmationHeader(DOCUMENT_IN_REVIEW)
-                                         .confirmationBody(REVIEW_NOT_SURE).build());
+                                         .confirmationBody(String.format(REVIEW_NOT_SURE, sendReplyUrl))
+                                         .build());
         }
     }
 
