@@ -80,16 +80,12 @@ public class RoleAssignmentService {
             .roleRequest(roleRequest)
             .requestedRoles(requestedRoles)
             .build();
-        try {
-            roleAssignmentApi.updateRoleAssignment(
-                authorization,
-                authTokenGenerator.generate(),
-                null,
-                assignmentRequest
-            );
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        roleAssignmentApi.updateRoleAssignment(
+            authorization,
+            authTokenGenerator.generate(),
+            null,
+            assignmentRequest
+        );
     }
 
 
