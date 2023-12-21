@@ -404,7 +404,7 @@ public class ManageOrderEmailService {
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
         log.info("inside SendEmailWhenOrderIsServed**");
-
+        Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA non personal service email notifications ***");
@@ -426,7 +426,6 @@ public class ManageOrderEmailService {
                 log.info("*** CA personal service email notifications ***");
                 Map<String,String> applicantSolicitors = CaseUtils.getApplicantSolicitorsToNotify(caseData);
                 Map.Entry<String,String> firstApplicantSolicitor = applicantSolicitors.entrySet().iterator().next();
-                Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
                 dynamicDataForEmail.put("name", firstApplicantSolicitor.getValue());
                 log.info("*** Dynamic content {}", dynamicDataForEmail);
                 try {
@@ -478,7 +477,7 @@ public class ManageOrderEmailService {
             }
         }
         // Send email notification to other organisations
-        sendEmailToOtherOrganisation(caseData, otherOrganisationEmailList, authorisation, orderDocuments);
+        sendEmailToOtherOrganisation(otherOrganisationEmailList, authorisation, orderDocuments, dynamicDataForEmail);
         // Send post to other organisations
         serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, otherOrganisationPostList);
 
@@ -487,10 +486,9 @@ public class ManageOrderEmailService {
         caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
     }
 
-    private void sendEmailToOtherOrganisation(CaseData caseData, List<EmailInformation> emailInformation,
-                                              String authorisation, List<Document> orderDocuments) {
+    private void sendEmailToOtherOrganisation(List<EmailInformation> emailInformation,
+                                              String authorisation, List<Document> orderDocuments, Map<String, Object> dynamicData) {
 
-        Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
         emailInformation.forEach(value -> {
             try {
                 sendgridService.sendEmailUsingTemplateWithAttachments(
