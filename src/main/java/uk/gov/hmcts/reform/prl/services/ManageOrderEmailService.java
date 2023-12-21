@@ -367,7 +367,6 @@ public class ManageOrderEmailService {
     public void sendEmailWhenOrderIsServed(String authorisation,
                                            CaseData caseData,
                                            Map<String, Object> caseDataMap) {
-        List<String> listOfOtherAndCafcassEmails = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
@@ -409,16 +408,14 @@ public class ManageOrderEmailService {
                                          otherParties, caseData, orderDocuments, bulkPrintOrderDetails
                 );
             }
-            //Send email notification to Cafcass or Cafcass cymru based on selection
-            if (getCafcassEmail(manageOrders) != null) {
-                listOfOtherAndCafcassEmails.add(getCafcassEmail(manageOrders));
-            }
-
             //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
             addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
             caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
-            sendEmailToCafcassCymru(caseData,listOfOtherAndCafcassEmails,authorisation, orderDocuments);
-
+            //Send email notification to Cafcass or Cafcass cymru based on selection
+            String cafcassEmailId = getCafcassEmail(manageOrders);
+            if (cafcassEmailId != null) {
+                sendEmailToCafcassCymru(caseData,cafcassEmailId,authorisation, orderDocuments);
+            }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
             sendEmailForFlCaseType(caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
@@ -434,26 +431,26 @@ public class ManageOrderEmailService {
         }
     }
 
-    private void sendEmailToCafcassCymru(CaseData caseData, List<String> cafcassEmailInformation,
-                                        String authorisation, List<Document> orderDocuments) {
+    private void sendEmailToCafcassCymru(CaseData caseData, String cafcassEmailInformation,
+                                         String authorisation, List<Document> orderDocuments) {
 
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-        dynamicData.put("dashBoardLink",manageCaseUrl + "/" + caseData.getId() + ORDERS);
-        cafcassEmailInformation.stream().forEach(emailAddress -> {
-            try {
-                sendgridService.sendEmailUsingTemplateWithAttachments(
-                    SendgridEmailTemplateNames.SERVE_ORDER_CAFCASS_CYMRU,
-                    authorisation,
-                    SendgridEmailConfig.builder().toEmailAddress(
-                        emailAddress).dynamicTemplateData(
-                        dynamicData).listOfAttachments(
-                        orderDocuments).languagePreference(LanguagePreference.english).build()
-                );
-            } catch (IOException e) {
-                log.error("there is a failure in sending email for email {} with exception {}",
-                          emailAddress,e.getMessage());
-            }
-        });
+        dynamicData.put("dashBoardLink", manageCaseUrl + "/" + caseData.getId() + ORDERS);
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                SendgridEmailTemplateNames.SERVE_ORDER_CAFCASS_CYMRU,
+                authorisation,
+                SendgridEmailConfig.builder().toEmailAddress(
+                    cafcassEmailInformation).dynamicTemplateData(
+                    dynamicData).listOfAttachments(
+                    orderDocuments).languagePreference(LanguagePreference.english).build()
+            );
+        } catch (IOException e) {
+            log.error("there is a failure in sending email for email {} with exception {}",
+                      cafcassEmailInformation, e.getMessage()
+            );
+        }
+
     }
 
     private void sendEmailToOtherOrganisation(CaseData caseData, List<Element<EmailInformation>> emailInformationCA,
