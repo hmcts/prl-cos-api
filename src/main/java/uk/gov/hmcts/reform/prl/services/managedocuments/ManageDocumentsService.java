@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -54,7 +53,6 @@ public class ManageDocumentsService {
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final UserService userService;
-    private final Time dateTime;
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 

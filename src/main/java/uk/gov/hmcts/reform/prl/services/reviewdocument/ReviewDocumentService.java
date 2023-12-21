@@ -99,16 +99,6 @@ public class ReviewDocumentService {
                                                .build())
                                            .toList());
         }
-        //court staff
-        if (CollectionUtils.isNotEmpty(caseData.getCourtStaffQuarantineDocsList())) {
-            dynamicListElements.addAll(caseData.getCourtStaffQuarantineDocsList().stream()
-                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
-                                               .build())
-                                           .toList());
-        }
         if (CollectionUtils.isNotEmpty(caseData.getCitizenUploadQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
@@ -147,21 +137,12 @@ public class ReviewDocumentService {
             if (null != caseData.getCafcassQuarantineDocsList()) {
                 cafcassQuarantineDocElement = getQuarantineDocumentById(caseData.getCafcassQuarantineDocsList(), uuid);
             }
-            //court staff
-            Optional<Element<QuarantineLegalDoc>> courtStaffQuarantineDocElement = Optional.empty();
-            if (null != caseData.getCourtStaffQuarantineDocsList()) {
-                courtStaffQuarantineDocElement = getQuarantineDocumentById(
-                    caseData.getCourtStaffQuarantineDocsList(),
-                    uuid
-                );
-            }
             updateReviewdocs(
                 caseData,
                 caseDataUpdated,
                 uuid,
                 quarantineLegalDocElement,
-                cafcassQuarantineDocElement,
-                courtStaffQuarantineDocElement
+                cafcassQuarantineDocElement
             );
             if (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())) {
                 Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement;
@@ -174,7 +155,7 @@ public class ReviewDocumentService {
                 if (quarantineBulkscanDocElement.isPresent()) {
                     updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                         caseDataUpdated,
-                        quarantineBulkscanDocElement,
+                        quarantineBulkscanDocElement.get(),
                         BULK_SCAN
                     );
                 }
@@ -184,8 +165,7 @@ public class ReviewDocumentService {
 
     private void updateReviewdocs(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid,
                                   Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement,
-                                  Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement,
-                                  Optional<Element<QuarantineLegalDoc>> courtStaffQuarantineDocElement) {
+                                  Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement) {
         Optional<Element<UploadedDocuments>> quarantineCitizenDocElement = Optional.empty();
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
             quarantineCitizenDocElement = caseData.getCitizenUploadQuarantineDocsList().stream()
@@ -195,20 +175,14 @@ public class ReviewDocumentService {
         if (quarantineLegalDocElement.isPresent()) {
             updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
-                quarantineLegalDocElement,
+                quarantineLegalDocElement.get(),
                 LEGAL_PROFESSIONAL
             );
         } else if (cafcassQuarantineDocElement.isPresent()) {
             updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
-                cafcassQuarantineDocElement,
+                cafcassQuarantineDocElement.get(),
                 CAFCASS
-            );
-        } else if (courtStaffQuarantineDocElement.isPresent()) {
-            updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                caseDataUpdated,
-                courtStaffQuarantineDocElement,
-                COURT_STAFF
             );
         } else if (quarantineCitizenDocElement.isPresent()) {
             UploadedDocuments document = quarantineCitizenDocElement.get().getValue();
