@@ -53,6 +53,8 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+  main:
+    allow-circular-references: true
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
@@ -171,6 +173,13 @@ notify:
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  notification:
+    email:
+      templates:
+        english:
+          SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
+        welsh:
+          SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
@@ -387,6 +396,8 @@ document:
       prl_fl404b_draft_template: PRL-GOR-ENG-FL404B-Common-Draft.docx
       prl_fl404b_draft_filename: amended_discharged_or_varied_order_fl404b_draft.pdf
       prl_fl404b_welsh_draft_template: PRL-GOR-WEL-FL404B-Common-Draft.docx
+      prl_fl404b_blank_welsh_draft_filename: welsh_blank_order_fl404b_draft.pdf
+      prl_fl404b_blank_welsh_final_filename: welsh_blank_order_fl404b_final.pdf
       prl_n117_draft_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Draft.docx
       prl_n117_draft_filename: N117CreateOrderDraft.pdf
       prl_n117_template: PRL-GOR-ENG-N117-General-Undertaking-Form-Final.docx
