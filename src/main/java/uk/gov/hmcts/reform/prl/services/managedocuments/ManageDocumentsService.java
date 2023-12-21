@@ -11,6 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -30,12 +32,14 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts.restrictToGroup;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
@@ -171,6 +175,14 @@ public class ManageDocumentsService {
         }
     }
 
+    public boolean checkIfUserIsCourtStaff(String authorisation, CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Optional<Element<ManageDocuments>> courtUserSelected = caseData.getManageDocuments().stream()
+            .filter(element -> DocumentPartyEnum.COURT.equals(element.getValue().getDocumentParty())).findFirst();
+        return userService.getUserDetails(authorisation).getRoles().stream().anyMatch(ROLES::contains)
+            && courtUserSelected.isPresent();
+    }
+
     private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {
 
         if (SOLICITOR.equals(userRole)) {
@@ -197,7 +209,11 @@ public class ManageDocumentsService {
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
         } else {
-            final String categoryId = manageDocument.getDocumentCategories().getValueCode();
+            String categoryId = manageDocument.getDocumentCategories().getValueCode();
+            if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
+                categoryId = ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE;
+            }
+            log.info("CategoryId {}", categoryId);
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
                 .getQuarantineUploadDocument(
                     categoryId,
