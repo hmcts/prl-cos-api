@@ -67,13 +67,6 @@
               "orderServedDate": "20 Dec 2023",
               "orderCreatedDate": "20 Dec 2023"
             },
-            "orderDocument": {
-              "category_id": null,
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/016a9ec1-e3f3-4e67-a605-10c9e7549c76",
-              "document_filename": "Blank_Order_Directions_C21.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/016a9ec1-e3f3-4e67-a605-10c9e7549c76/binary",
-              "document_creation_date": null
-            },
             "c21OrderOptions": "c21WithdrawApplication",
             "isOrderUploaded": "No",
             "orderClosesCase": "No",
@@ -117,13 +110,6 @@
               "otherPartiesServed": "No",
               "cafcassOrCymruNeedToProvideReport": "No",
               "orderEndsInvolvementOfCafcassOrCymru": "No"
-            },
-            "orderDocumentWelsh": {
-              "category_id": null,
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0b0b3acd-c150-4893-8aea-6c12bd846921",
-              "document_filename": "Blank_Order_Directions_C21_Welsh.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0b0b3acd-c150-4893-8aea-6c12bd846921/binary",
-              "document_creation_date": null
             },
             "bulkPrintOrderDetails": [
 
@@ -183,13 +169,6 @@
               "orderServedDate": "20 Dec 2023",
               "orderCreatedDate": "20 Dec 2023"
             },
-            "orderDocument": {
-              "category_id": null,
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0c389d21-6bf4-49c3-b8de-8bea39607c38",
-              "document_filename": "Blank_Order_Directions_C21.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0c389d21-6bf4-49c3-b8de-8bea39607c38/binary",
-              "document_creation_date": null
-            },
             "c21OrderOptions": "c21ApplicationRefused",
             "isOrderUploaded": "No",
             "serveOrderDetails": {
@@ -232,13 +211,6 @@
               "otherPartiesServed": "No",
               "cafcassOrCymruNeedToProvideReport": "No",
               "orderEndsInvolvementOfCafcassOrCymru": "No"
-            },
-            "orderDocumentWelsh": {
-              "category_id": null,
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/62582263-0708-44d3-aa1e-bf15f1a3a225",
-              "document_filename": "Blank_Order_Directions_C21_Welsh.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/62582263-0708-44d3-aa1e-bf15f1a3a225/binary",
-              "document_creation_date": null
             },
             "bulkPrintOrderDetails": [
 
