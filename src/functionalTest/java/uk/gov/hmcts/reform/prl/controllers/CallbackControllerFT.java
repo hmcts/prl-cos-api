@@ -359,7 +359,7 @@ public class CallbackControllerFT {
     public void testGatekeepingDetailsWhenLegalAdvisorOptionSelected_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPER);
 
-        when(gatekeepingDetailsService.getGatekeepingDetails(Mockito.any(Map.class), Mockito.any(DynamicList.class), Mockito.any(
+        when(gatekeepingDetailsService.getGatekeepingDetails(Mockito.anyString(), Mockito.any(Map.class), Mockito.any(DynamicList.class), Mockito.any(
             RefDataUserService.class))).thenReturn(
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.legalAdviser).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -375,7 +375,7 @@ public class CallbackControllerFT {
     @Test
     public void testGatekeepingDetailsWhenJudgeOptionSelected_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPERJUDGE);
-        when(gatekeepingDetailsService.getGatekeepingDetails(Mockito.any(Map.class), Mockito.any(DynamicList.class), Mockito.any(
+        when(gatekeepingDetailsService.getGatekeepingDetails(Mockito.anyString(), Mockito.any(Map.class), Mockito.any(DynamicList.class), Mockito.any(
             RefDataUserService.class))).thenReturn(
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);

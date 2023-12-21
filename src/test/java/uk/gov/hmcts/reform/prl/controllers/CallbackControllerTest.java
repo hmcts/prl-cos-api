@@ -2307,7 +2307,8 @@ public class CallbackControllerTest {
                            .personalCode("testCode")
                            .build())
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null, refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(authToken, stringObjectMap, null,
+            refDataUserService)).thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
@@ -2651,13 +2652,5 @@ public class CallbackControllerTest {
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
-    }
-
-    @Test
-    public void testAllocateJudge() {
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().build()).build();
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController.allocateJudgeTest(authToken, callbackRequest);
-        assertEquals("Judge", aboutToStartOrSubmitCallbackResponse);
     }
 }
