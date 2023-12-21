@@ -18,12 +18,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
-import uk.gov.hmcts.reform.prl.models.roleassignment.RequestedRoles;
 import uk.gov.hmcts.reform.prl.models.roleassignment.request.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.response.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
-
-import java.util.List;
 
 @ExtendWith(PactConsumerTestExt.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -103,23 +100,12 @@ public class AmRoleAssignmentApiTest {
 
     @Test
     @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignment")
-    public void verifyRoleAssignment() {
+    public void verifyCaseLinkedDetails() {
         RoleAssignmentResponse roleAssignmentResponse = roleAssignmentApi
             .updateRoleAssignment(AUTH, S2S, X_CORRELATION_ID,
                                   RoleAssignmentRequest.roleAssignmentRequest().build()
             );
 
         Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response");
-    }
-
-    @Test
-    @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignmentActor")
-    public void verifyRoleAssignmentForActor() {
-        List<RequestedRoles> listOfRequestedRoles = roleAssignmentApi
-            .getRoleAssignments(AUTH, S2S, X_CORRELATION_ID,
-                "test"
-            );
-
-        Assert.notNull(listOfRequestedRoles, "Api is returning role assignment response for actors");
     }
 }

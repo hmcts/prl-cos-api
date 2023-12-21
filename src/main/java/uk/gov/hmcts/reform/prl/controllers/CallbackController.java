@@ -497,8 +497,6 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("authtoken from functional test: {}", authorisation);
-        log.info("Service authtoken from functional test: {} ", s2sToken);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             log.info("Gatekeeping details for the case id : {}", caseData.getId());
@@ -506,6 +504,7 @@ public class CallbackController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
             GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(
+                authorisation,
                 caseDataUpdated,
                 caseData.getLegalAdviserList(),
                 refDataUserService
@@ -802,12 +801,30 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        roleAssignmentService.createRoleAssignment(
+
+
+        return AboutToStartOrSubmitCallbackResponse.builder().build();
+    }
+
+    @PostMapping(path = "/fetchRoleAssignmentForUser",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to allocate judge ")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json",
+                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    public AboutToStartOrSubmitCallbackResponse fetchRoleAssignmentForUser(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest
+    ) {
+        if (!roleAssignmentService.validateIfUserHasRightRoles(
             authorisation,
-            callbackRequest.getCaseDetails(),
-            false,
-            Set.of("JUDGE")
-        );
+            callbackRequest
+        )) {
+            return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
+                "The selected user does not have right roles to assign this case")).build();
+        }
         return AboutToStartOrSubmitCallbackResponse.builder().build();
     }
 

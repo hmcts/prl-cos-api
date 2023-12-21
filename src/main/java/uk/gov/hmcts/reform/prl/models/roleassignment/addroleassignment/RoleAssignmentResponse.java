@@ -1,11 +1,9 @@
-package uk.gov.hmcts.reform.prl.models.roleassignment.response;
+package uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.models.roleassignment.RequestedRoles;
-import uk.gov.hmcts.reform.prl.models.roleassignment.RoleRequest;
 
 import java.util.List;
 
