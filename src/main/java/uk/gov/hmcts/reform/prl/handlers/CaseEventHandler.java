@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
@@ -99,23 +100,31 @@ public class CaseEventHandler {
     }
 
     public String getUpdatedTaskList(CaseData caseData) {
-        final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
+        String taskList = "";
+        if (caseData.getState() != null
+            && (caseData.getState().equals(State.AWAITING_SUBMISSION_TO_HMCTS)
+            || caseData.getState().equals(State.AWAITING_RESUBMISSION_TO_HMCTS))) {
+            final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
+            List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
+            if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+                List<Event> events = taskListService.getC100Events(caseData);
+                eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+            }
 
-        List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
+            if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
+                List<Event> events = taskListService.getFL401Events(caseData);
+                eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+            }
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
-            List<Event> events = taskListService.getC100Events(caseData);
-            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+            taskList = taskListRenderer
+                .render(
+                    tasks,
+                    eventErrors,
+                    caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE),
+                    caseData
+                );
         }
-
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
-            List<Event> events = taskListService.getFL401Events(caseData);
-            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-        }
-
-        return taskListRenderer
-            .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE), caseData);
-
+        return taskList;
     }
 
     public String getRespondentTaskList(CaseData caseData, String respondent) {
@@ -124,7 +133,6 @@ public class CaseEventHandler {
             && !caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
-
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
                 if (respondingParty.getValue() != null
                     && respondingParty.getValue().getUser() != null
@@ -149,7 +157,6 @@ public class CaseEventHandler {
 
                         List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
                         eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-
                         return respondentSolicitorTaskListRenderer
                             .render(
                                 tasks,
