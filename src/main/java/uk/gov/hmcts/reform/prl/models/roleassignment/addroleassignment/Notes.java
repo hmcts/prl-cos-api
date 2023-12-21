@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.prl.models.roleassignment;
+package uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment;
 
 import lombok.Data;
 
