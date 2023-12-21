@@ -279,9 +279,11 @@ public class ManageOrdersController {
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
+                log.info("amend 111......");
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                 || caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
+                log.info("amend 2222......");
                 Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                 if (caseData.getManageOrdersOptions().equals(createAnOrder)
                     && isHearingPageNeeded(
@@ -303,6 +305,7 @@ public class ManageOrdersController {
                     caseData
                 ));
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
+                log.info("saved order srve 111......");
                 caseDataUpdated.put(ORDER_COLLECTION, manageOrderService.serveOrder(caseData, caseData.getOrderCollection()));
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);

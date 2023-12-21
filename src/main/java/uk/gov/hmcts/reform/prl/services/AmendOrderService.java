@@ -48,6 +48,7 @@ public class AmendOrderService {
     private final UserService userService;
 
     public Map<String, Object> updateOrder(CaseData caseData, String authorisation) {
+        log.info("updateOrderrrrrrrr......");
         ManageOrders eventData = caseData.getManageOrders();
         //Currently unable to amend uploaded document unless the event is submitted due to XUI limitations,
         // Hence needs to revisit the logic, once XUI issue is resolved
@@ -117,6 +118,7 @@ public class AmendOrderService {
                     orderMap.put("currentOrderCreatedDateTime", currentOrderCreatedDateTime);
                 });
             if (YesOrNo.Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
+                log.info("During amend getDoYouWantToServeOrder");
                 updatedOrders =  manageOrderService.serveOrder(caseData,orders);
             } else {
                 updatedOrders = orders;
