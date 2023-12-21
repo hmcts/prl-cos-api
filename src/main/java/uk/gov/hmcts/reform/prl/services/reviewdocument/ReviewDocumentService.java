@@ -790,7 +790,7 @@ public class ReviewDocumentService {
             confidentialOrRestrictedDocuments.sort(Comparator.comparing(doc -> doc.getValue().getDocumentUploadedDate(), Comparator.reverseOrder()));
             caseDataUpdated.put(confidentialOrRestrictedKey, confidentialOrRestrictedDocuments);
         } else {
-            caseDataUpdated.put(confidentialOrRestrictedKey, element(uploadDoc));
+            caseDataUpdated.put(confidentialOrRestrictedKey, List.of(element(uploadDoc)));
         }
     }
 }
