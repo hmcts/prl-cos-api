@@ -84,32 +84,30 @@ public class ReviewDocumentService {
     public static final String LABEL_WITH_HINT =
         "<h3 class='govuk-heading-s'>Document</h3><label class='govuk-label' for='more-detail'>"
             + "<div id='more-detail-hint' class='govuk-hint'>The document will open in a new tab.</div></label>";
+    public static final String GOVUK_LIST_BULLET_LABEL = "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String SUBMITTED_BY_LABEL =
         "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
+            + GOVUK_LIST_BULLET_LABEL;
     public static final String DOCUMENT_CATEGORY_LABEL =
         "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
+            + GOVUK_LIST_BULLET_LABEL;
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'>"
             + "<ul class='govuk-list govuk-list--bullet'> <li>%s</li></ul></label>";
     public static final String  CONFIDENTIAL_INFO_LABEL =
         "<h3 class='govuk-heading-s'>Confidential information included</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
+            + GOVUK_LIST_BULLET_LABEL;
 
     public static final String  RESTRICTED_INFO_LABEL =
         "<h3 class='govuk-heading-s'>Request to restrict access</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
+            + GOVUK_LIST_BULLET_LABEL;
     public static final String  RESTRICTION_REASON_LABEL =
         "<h3 class='govuk-heading-s'>Reasons to restrict access</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
+            + GOVUK_LIST_BULLET_LABEL;
 
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
     public static final String DOC_LABEL = "docLabel";
     public static final String REVIEW_DOC = "reviewDoc";
-    public static final String LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB = "legalProfUploadDocListConfTab";
-    public static final String CAFCASS_UPLOAD_DOC_LIST_CONF_TAB = "cafcassUploadDocListConfTab";
-    public static final String COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB = "courtStaffUploadDocListConfTab";
     public static final String CITIZEN_UPLOAD_DOC_LIST_CONF_TAB = "citizenUploadDocListConfTab";
     public static final String BULKSCAN_UPLOAD_DOC_LIST_CONF_TAB = "bulkScannedDocListConfTab";
     public static final String LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB = "legalProfUploadDocListDocTab";
@@ -122,7 +120,6 @@ public class ReviewDocumentService {
     public static final String RESTRICTED_DOCUMENTS = "restrictedDocuments";
     public static final String CONFIDENTIAL_DOCUMENTS = "confidentialDocuments";
     public static final String CONFIDENTIAL = "Confidential_";
-    public static final String RESTRICTED = "Restricted_";
 
     public List<DynamicListElement> getDynamicListElements(CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
@@ -674,36 +671,28 @@ public class ReviewDocumentService {
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElement);
 
-            String restrictedOrConfidential = getRestrictedOrConfidential(quarantineLegalDocElement.getValue());
+            String restrictedOrConfidentialKey = getRestrictedOrConfidentialKey(quarantineLegalDocElement.getValue());
             QuarantineLegalDoc uploadDoc = downloadAndDeleteDocument(uploadedBy,
-                                                                     quarantineLegalDocElement,
-                                                                     restrictedOrConfidential);
+                                                                     quarantineLegalDocElement);
             uploadDoc = addQuarantineDocumentFields(uploadDoc, quarantineLegalDocElement.getValue());
 
-            if (CONFIDENTIAL.equals(restrictedOrConfidential)) {
-                moveToConfidentialOrRestricted(caseDataUpdated,
-                                               caseData.getReviewDocuments().getConfidentialDocuments(),
-                                               uploadDoc,
-                                               CONFIDENTIAL_DOCUMENTS);
-            } else {
-                moveToConfidentialOrRestricted(caseDataUpdated,
-                                               caseData.getReviewDocuments().getRestrictedDocuments(),
-                                               uploadDoc,
-                                               RESTRICTED_DOCUMENTS);
-            }
+            moveToConfidentialOrRestricted(caseDataUpdated,
+                                           CONFIDENTIAL_DOCUMENTS.equals(restrictedOrConfidentialKey)
+                                               ? caseData.getReviewDocuments().getConfidentialDocuments()
+                                               : caseData.getReviewDocuments().getRestrictedDocuments(),
+                                           uploadDoc,
+                                           restrictedOrConfidentialKey);
         }
     }
 
     private QuarantineLegalDoc downloadAndDeleteDocument(String uploadedBy,
-                                                         Element<QuarantineLegalDoc> quarantineLegalDocElement,
-                                                         String restrictedOrConfidential) {
+                                                         Element<QuarantineLegalDoc> quarantineLegalDocElement) {
         try {
             Document document = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
             UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
             log.info(" DocumentId found {}", documentId);
             Document newUploadedDocument = getNewUploadedDocument(document,
-                                                                  documentId,
-                                                                  restrictedOrConfidential);
+                                                                  documentId);
 
             log.info("document uploaded {}", newUploadedDocument);
             if (null != newUploadedDocument) {
@@ -725,8 +714,7 @@ public class ReviewDocumentService {
     }
 
     private Document getNewUploadedDocument(Document document,
-                                            UUID documentId,
-                                            String restrictedOrConfidential) {
+                                            UUID documentId) {
         byte[] docData;
         Document newUploadedDocument = null;
         try {
@@ -744,7 +732,7 @@ public class ReviewDocumentService {
                 List.of(
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
-                        restrictedOrConfidential + document.getDocumentFileName(),
+                        CONFIDENTIAL + document.getDocumentFileName(),
                         APPLICATION_PDF_VALUE,
                         docData
                     ))
@@ -767,16 +755,16 @@ public class ReviewDocumentService {
         return documentId;
     }
 
-    private String getRestrictedOrConfidential(QuarantineLegalDoc quarantineLegalDoc) {
+    private String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
         if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
             && YesOrNo.Yes.equals(quarantineLegalDoc.getIsRestricted())) {
-            return RESTRICTED;
+            return RESTRICTED_DOCUMENTS;
         } else if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
             && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
-            return CONFIDENTIAL;
+            return CONFIDENTIAL_DOCUMENTS;
         } else if (YesOrNo.No.equals(quarantineLegalDoc.getIsConfidential())
             && YesOrNo.Yes.equals(quarantineLegalDoc.getIsRestricted())) {
-            return RESTRICTED;
+            return RESTRICTED_DOCUMENTS;
         }
         return null;
     }
