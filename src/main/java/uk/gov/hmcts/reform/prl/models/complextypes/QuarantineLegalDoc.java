@@ -93,9 +93,10 @@ public class QuarantineLegalDoc {
     public final LocalDateTime scannedDate;
     public final LocalDateTime deliveryDate;
 
+    //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
-            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "applicationsWithinProceedings"
+            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential", "applicationsWithinProceedings"
         };
     }
 }

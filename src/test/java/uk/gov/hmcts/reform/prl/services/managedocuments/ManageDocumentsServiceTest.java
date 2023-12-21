@@ -120,11 +120,11 @@ public class ManageDocumentsServiceTest {
 
         document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
 
-        subCategory1 = new Category("subCategory1Id", "subCategory1Name", 1, List.of(document), null);
-        subCategory2 = new Category("subCategory2Id", "subCategory2Name", 1, List.of(document), List.of(subCategory1));
+        subCategory1 = new Category("confidential", "confidentialName", 1, List.of(document), null);
+        subCategory2 = new Category("subCategory2Id", "subCategory2Name", 1, List.of(document), null);
 
-        category = new Category("categoryId", "categoryName", 2, List.of(document), List.of(subCategory2));
-        categoriesToExclude = Arrays.asList("citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine");
+        category = new Category("categoryId", "categoryName", 2, List.of(document), List.of(subCategory1,subCategory2));
+        categoriesToExclude = Arrays.asList("citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential");
 
         categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
 
@@ -174,7 +174,32 @@ public class ManageDocumentsServiceTest {
 
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
         String docCode  = updatedCaseData.getManageDocuments().get(0).getValue().getDocumentCategories().getListItems().get(0).getCode();
-        assertEquals("subCategory1Id",docCode);
+        assertEquals(subCategory2.getCategoryId(),docCode);
+    }
+
+    @Test
+    public void testPopulateDocumentCategoriesExcludeCategory() {
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+
+        Document document = new Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+
+        Category confidentialCate = new Category("confidential", "confidentialName", 1, List.of(document), null);
+
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), List.of(confidentialCate));
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+
+        when(coreCaseDataApi.getCategoriesAndDocuments(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenReturn(categoriesAndDocuments);
+
+        CaseData caseData = CaseData.builder().build();
+
+        CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
+        List categoryList  = updatedCaseData.getManageDocuments().get(0).getValue().getDocumentCategories().getListItems();
+        assertEquals(0,categoryList.size());
     }
 
     @Test
