@@ -38,7 +38,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
@@ -120,6 +119,9 @@ public class ReviewDocumentService {
     public static final String RESTRICTED_DOCUMENTS = "restrictedDocuments";
     public static final String CONFIDENTIAL_DOCUMENTS = "confidentialDocuments";
     public static final String CONFIDENTIAL = "Confidential_";
+    public static final String CASE_DETAILS_URL = "/cases/case-details/";
+    public static final String SEND_AND_REPLY_URL = "/trigger/sendOrReplyToMessages/sendOrReplyToMessages1";
+    public static final String SEND_AND_REPLY_MESSAGE_LABEL = "\">Send and reply to messages</a>";
 
     public List<DynamicListElement> getDynamicListElements(CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
@@ -213,7 +215,7 @@ public class ReviewDocumentService {
                     element(QuarantineLegalDoc.builder()
                                 .url(caseData.getScannedDocuments().stream()
                                          .filter(element -> element.getId().equals(uuid))
-                                         .collect(Collectors.toList()).stream().findFirst().map(Element::getValue).map(
+                                         .toList().stream().findFirst().map(Element::getValue).map(
                                         ScannedDocument::getUrl).orElse(null)).build()));
                 if (quarantineBulkscanDocElement.isPresent()) {
                     updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
@@ -477,7 +479,7 @@ public class ReviewDocumentService {
                             .scannedDate(scannedDocument.getScannedDate())
                             .deliveryDate(scannedDocument.getDeliveryDate())
                             .build());
-                }).collect(Collectors.toList());
+                }).toList();
     }
 
     private void forReviewDecisionNo(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
@@ -583,14 +585,13 @@ public class ReviewDocumentService {
                                          .confirmationHeader(DOCUMENT_SUCCESSFULLY_REVIEWED)
                                          .confirmationBody(REVIEW_NO).build());
         } else {
-            String sendReplyUrl = "<a href=\"" + "/cases/case-details/"
+            String sendReplyLink = "<a href=\"" + CASE_DETAILS_URL
                 + caseData.getId()
-                + "/trigger/sendOrReplyToMessages/sendOrReplyToMessages1"
-                + "\">Send and reply to messages</a>";
-            log.info("Send & reply link {}", sendReplyUrl);
+                + SEND_AND_REPLY_URL
+                + SEND_AND_REPLY_MESSAGE_LABEL;
             return ResponseEntity.ok(SubmittedCallbackResponse.builder()
                                          .confirmationHeader(DOCUMENT_IN_REVIEW)
-                                         .confirmationBody(String.format(REVIEW_NOT_SURE, sendReplyUrl))
+                                         .confirmationBody(String.format(REVIEW_NOT_SURE, sendReplyLink))
                                          .build());
         }
     }
@@ -629,14 +630,6 @@ public class ReviewDocumentService {
         }
         reviewDetailsBuilder.append("<br/>");
         return reviewDetailsBuilder.toString();
-        /*return String.join(
-            format(SUBMITTED_BY_LABEL, submittedBy),
-            format(DOCUMENT_CATEGORY_LABEL, category),
-            format(DOCUMENT_COMMENTS_LABEL, notes),
-            format(CONFIDENTIAL_INFO_LABEL, isRestricted.toString()),
-            format(RESTRICTED_INFO_LABEL, isConfidential.toString()),
-            format(RESTRICTION_REASON_LABEL, restrictedDetails, "<br/>")
-        );*/
     }
 
     private QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
