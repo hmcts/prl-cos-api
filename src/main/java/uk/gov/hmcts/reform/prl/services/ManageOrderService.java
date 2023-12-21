@@ -1508,8 +1508,6 @@ public class ManageOrderService {
 
         log.info("serve c1000001 {}", serveRecipientName);
         log.info("serve c1000002{}", servingRespondentsOptions);
-        log.info("serve c1000003 {}", servingRespondentsOptions.toString()
-            .equals(ServingRespondentsEnum.applicantLegalRepresentative.toString()));
 
         if (null != serveRecipientName
             && null != servingRespondentsOptions
@@ -1517,6 +1515,7 @@ public class ManageOrderService {
             log.info("innnnnn....");
             servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
+        log.info("serve c1000004{}", servedOrderDetails.get(SERVE_RECIPIENT_NAME));
 
         updateServedOrderDetails(
             servedOrderDetails,
