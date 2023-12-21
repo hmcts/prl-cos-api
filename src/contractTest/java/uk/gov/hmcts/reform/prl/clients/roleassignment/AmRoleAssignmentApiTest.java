@@ -18,8 +18,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.Assert;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
-import uk.gov.hmcts.reform.prl.models.roleassignment.request.RoleAssignmentRequest;
-import uk.gov.hmcts.reform.prl.models.roleassignment.response.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 
 @ExtendWith(PactConsumerTestExt.class)

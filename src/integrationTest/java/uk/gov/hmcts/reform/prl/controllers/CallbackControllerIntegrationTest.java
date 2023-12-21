@@ -42,6 +42,7 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
     private static final String PRE_POPULATE_COURT_DETAILS_END_POINT = "/pre-populate-court-details";
 
     private static final String ALLOCATE_JUDGE_ENDPOINT = "/allocateJudgeTest";
+
     @Test
     public void testDocumentGenerate_return200() throws Exception {
 

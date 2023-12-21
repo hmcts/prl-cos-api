@@ -11,8 +11,6 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
-import java.util.List;
-
 @FeignClient(name = "amRoleAssignment",
         url = "${amRoleAssignment.api.url}",
         configuration = FeignClientProperties.FeignClientConfiguration.class)

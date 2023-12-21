@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,8 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class GatekeepingDetailsServiceTest {
@@ -34,6 +37,9 @@ public class GatekeepingDetailsServiceTest {
 
     @Mock
     RefDataUserService refDataUserService;
+
+    @Mock
+    RoleAssignmentService roleAssignmentService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -49,7 +55,7 @@ public class GatekeepingDetailsServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
                                                                        .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
-        GatekeepingDetails expectedResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,legalAdviserList,null);
+        GatekeepingDetails expectedResponse = gatekeepingDetailsService.getGatekeepingDetails("", stringObjectMap,legalAdviserList,null);
         assertEquals(SendToGatekeeperTypeEnum.legalAdviser,expectedResponse.getIsJudgeOrLegalAdviserGatekeeping());
         assertNotNull(expectedResponse.getLegalAdviserList());
     }
@@ -65,10 +71,12 @@ public class GatekeepingDetailsServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        stringObjectMap.put(JURISDICTION, JURISDICTION);
+        stringObjectMap.put(CASE_TYPE, CASE_TYPE);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
                                                               .personalCode(personalCodes).build())).thenReturn(apiResponseList);
-        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap,null,refDataUserService);
+        GatekeepingDetails actualResponse = gatekeepingDetailsService.getGatekeepingDetails("", stringObjectMap,null,refDataUserService);
         assertNotNull(actualResponse);
         assertEquals(SendToGatekeeperTypeEnum.judge,actualResponse.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificGateKeeperNeeded());
