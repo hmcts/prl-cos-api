@@ -95,6 +95,8 @@ public class GatekeepingDetailsServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        stringObjectMap.put(JURISDICTION, JURISDICTION);
+        stringObjectMap.put(CASE_TYPE, CASE_TYPE);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
                                                               .personalCode(personalCodes).build())).thenReturn(null);
@@ -114,6 +116,8 @@ public class GatekeepingDetailsServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
         stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        stringObjectMap.put(JURISDICTION, JURISDICTION);
+        stringObjectMap.put(CASE_TYPE, CASE_TYPE);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
                                                               .personalCode(personalCodes).build())).thenReturn(new ArrayList<>());
