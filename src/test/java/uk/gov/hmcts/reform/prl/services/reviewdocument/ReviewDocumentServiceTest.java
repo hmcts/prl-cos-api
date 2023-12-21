@@ -10,7 +10,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -164,7 +164,7 @@ public class ReviewDocumentServiceTest {
                                      DynamicListElement.builder()
                                          .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
                                  ).build())
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -182,7 +182,7 @@ public class ReviewDocumentServiceTest {
                                      DynamicListElement.builder()
                                          .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
                                  ).build())
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -200,7 +200,7 @@ public class ReviewDocumentServiceTest {
                                      DynamicListElement.builder()
                                          .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
                                  ).build())
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -223,7 +223,7 @@ public class ReviewDocumentServiceTest {
                                      DynamicListElement.builder()
                                          .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
                                  ).build())
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
             .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -251,7 +251,7 @@ public class ReviewDocumentServiceTest {
                                      DynamicListElement.builder()
                                          .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
                                  ).build())
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build()).build();
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes).build()).build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
         reviewDocumentService.getReviewedDocumentDetails(caseData,caseDataMap);
@@ -266,7 +266,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .legalProfQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .legalProfUploadDocListConfTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -290,7 +290,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .cafcassQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .cafcassUploadDocListConfTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -313,7 +313,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .courtStaffQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .courtStaffUploadDocListConfTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -340,7 +340,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .citizenUploadQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .citizenUploadDocListConfTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -361,7 +361,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .legalProfQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.no)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .legalProfUploadDocListDocTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -384,7 +384,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .cafcassQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.no)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .cafcassUploadDocListDocTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -406,7 +406,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .courtStaffQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.no)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .courtStaffUploadDocListDocTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -432,7 +432,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .citizenUploadQuarantineDocsList(documentList)
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.no)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .citizenUploadedDocListDocTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -459,7 +459,7 @@ public class ReviewDocumentServiceTest {
                                                                                                        .build())
                                                                         .build())))
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
@@ -481,7 +481,7 @@ public class ReviewDocumentServiceTest {
                                                                                                        .build())
                                                                         .build())))
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.no).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.no).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
         Assert.assertNotNull(response);
@@ -494,7 +494,7 @@ public class ReviewDocumentServiceTest {
 
         CaseData caseData =  CaseData.builder()
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.dontKnow).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .legalProfQuarantineDocsList(List.of(element))
             .citizenUploadQuarantineDocsList(List.of(ElementUtils.element(UploadedDocuments.builder()
                                                                               .dateCreated(LocalDate.now())
@@ -521,7 +521,7 @@ public class ReviewDocumentServiceTest {
 
         CaseData caseData =  CaseData.builder().caseTypeOfApplication(C100_CASE_TYPE)
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.dontKnow).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .legalProfQuarantineDocsList(List.of(element))
             .citizenUploadQuarantineDocsList(new ArrayList<>())
             .cafcassQuarantineDocsList(List.of(ElementUtils.element(QuarantineLegalDoc.builder()
@@ -545,7 +545,7 @@ public class ReviewDocumentServiceTest {
 
         CaseData caseData =  CaseData.builder()
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes).build())
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
@@ -574,7 +574,7 @@ public class ReviewDocumentServiceTest {
 
             )))
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.no)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .legalProfUploadDocListDocTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -611,7 +611,7 @@ public class ReviewDocumentServiceTest {
 
             )))
             .reviewDocuments(ReviewDocuments.builder()
-                                 .reviewDecisionYesOrNo(YesNoDontKnow.yes)
+                                 .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .legalProfUploadDocListConfTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(ElementUtils.element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
