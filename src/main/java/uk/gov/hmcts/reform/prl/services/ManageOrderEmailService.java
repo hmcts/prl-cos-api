@@ -473,6 +473,7 @@ public class ManageOrderEmailService {
         caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
 
         // Send email notification to other organisations
+        sendEmailToOtherOrganisation(caseData, otherOrganisationEmailList, authorisation, orderDocuments);
         otherOrganisationEmailList.forEach(emailObject ->
                                                 emailService.send(
                                                     emailObject.getEmailAddress(),
@@ -481,10 +482,9 @@ public class ManageOrderEmailService {
                                                     LanguagePreference.english
                                                 )
         );
-
     }
 
-    private void sendEmailToOtherOrganisation(CaseData caseData, List<Element<EmailInformation>> emailInformationCA,
+    private void sendEmailToOtherOrganisation(CaseData caseData, List<EmailInformation> emailInformation,
                                               String authorisation, List<Document> orderDocuments) {
 
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
@@ -513,19 +513,17 @@ public class ManageOrderEmailService {
                         log.info("Final order is selected to serve {}",order.getId());
                         finalOrdersExists.set(true);
                     }
-
                 });
             setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
         }
-        emailInformationCA.stream().map(Element::getValue).forEach(value -> {
+        emailInformation.forEach(value -> {
             try {
                 sendgridService.sendEmailUsingTemplateWithAttachments(
                     SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
                     authorisation,
                     SendgridEmailConfig.builder().toEmailAddress(
-                        value.getEmailAddress()).dynamicTemplateData(
-                        dynamicData).listOfAttachments(
-                        orderDocuments).languagePreference(LanguagePreference.english).build()
+                        value.getEmailAddress()).dynamicTemplateData(dynamicData)
+                        .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
                 );
             } catch (IOException e) {
                 log.error("there is a failure in sending email for email {} with exception {}", value.getEmailAddress(),e.getMessage());
