@@ -1,14 +1,22 @@
 package uk.gov.hmcts.reform.prl.models.caseflags.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.util.List;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Jacksonized
 public class C100FlagDetailRequest {
     public String name;
     @SuppressWarnings(value = "MemberName")
