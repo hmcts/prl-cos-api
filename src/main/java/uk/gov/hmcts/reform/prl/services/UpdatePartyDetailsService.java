@@ -81,12 +81,12 @@ public class UpdatePartyDetailsService {
 
             if (Objects.nonNull(fl401Applicant)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
+                updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
             }
 
             if (Objects.nonNull(fl401respondent)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
+                updatedCaseData.put("respondentName", fl401respondent.getLabelForDynamicList());
             }
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
@@ -103,6 +103,9 @@ public class UpdatePartyDetailsService {
                     updatedCaseData.put("applicantName",applicant1.getFirstName() + " " + applicant1.getLastName());
                 }
             }
+            // set applicant and respondent case flag
+            setApplicantSolicitorUuid(caseData, updatedCaseData);
+            setRespondentSolicitorUuid(caseData, updatedCaseData);
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             if (applicantList.isPresent()) {
                 setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
@@ -214,5 +217,35 @@ public class UpdatePartyDetailsService {
             applicantOrganisationPolicy.setOrgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]");
         }
         updatedCaseData.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
+    }
+
+    private void setApplicantSolicitorUuid(CaseData caseData, Map<String, Object> caseDetails) {
+        Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
+        if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
+            List<PartyDetails> applicants = applicantsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .toList();
+
+            for (PartyDetails applicant : applicants) {
+                CommonUtils.generatePartyUuidForC100(applicant);
+            }
+            caseDetails.put("applicants", applicantsWrapped);
+        }
+    }
+
+    private void setRespondentSolicitorUuid(CaseData caseData, Map<String, Object> caseDetails) {
+        Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
+        if (respondentsWrapped.isPresent() && !respondentsWrapped.get().isEmpty()) {
+            List<PartyDetails> respondents = respondentsWrapped.get()
+                .stream()
+                .map(Element::getValue)
+                .toList();
+
+            for (PartyDetails respondent : respondents) {
+                CommonUtils.generatePartyUuidForC100(respondent);
+            }
+            caseDetails.put("respondents", respondentsWrapped);
+        }
     }
 }
