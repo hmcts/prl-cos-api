@@ -615,11 +615,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     public CaseData setDateSubmittedDate() {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-        this.toBuilder()
+        return this.toBuilder()
             .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
             .build();
-
-        return this;
     }
 
     public CaseData setIssueDate() {
@@ -768,6 +766,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
     @JsonProperty("cafcassQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+    //PRL-4328 - To be deleted
     @JsonProperty("courtStaffQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
     @JsonProperty("citizenUploadQuarantineDocsList")
@@ -780,6 +779,13 @@ public class CaseData extends BaseCaseData implements MappableObject {
      */
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
+
     private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+
+    /**
+     * PRL-4260,4335,4301 - manage orders hearing screen fields show params.
+     */
+    @JsonUnwrapped
+    public OrdersHearingPageFieldShowParams ordersHearingPageFieldShowParams;
 
 }
