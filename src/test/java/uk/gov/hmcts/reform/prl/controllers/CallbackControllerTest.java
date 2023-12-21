@@ -2653,4 +2653,13 @@ public class CallbackControllerTest {
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
     }
+
+    @Test
+    public void fetchRoleAssignmentUserDoesntHaveRightRoles() {
+        when(roleAssignmentService.validateIfUserHasRightRoles(authToken, CallbackRequest.builder().build())).thenReturn(false);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
+        assertEquals("The selected user does not have right roles to assign this case",
+            aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+    }
 }
