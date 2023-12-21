@@ -1453,6 +1453,7 @@ public class ManageOrderService {
         Element<PartyDetails> partyDetailsElement = caseData.getApplicants().get(0);
         String serveRecipientName = null;
         if (null != partyDetailsElement.getValue().getRepresentativeFullName()) {
+            log.info("inreppppp");
             serveRecipientName =  partyDetailsElement.getValue().getRepresentativeFullName();
         }
         YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
@@ -1505,9 +1506,15 @@ public class ManageOrderService {
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
+        log.info("serve c1000001 {}", serveRecipientName);
+        log.info("serve c1000002{}", servingRespondentsOptions);
+        log.info("serve c1000003 {}", servingRespondentsOptions.toString()
+            .equals(ServingRespondentsEnum.applicantLegalRepresentative.toString()));
+
         if (null != serveRecipientName
             && null != servingRespondentsOptions
             && servingRespondentsOptions.toString().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
+            log.info("innnnnn....");
             servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
 
@@ -1630,6 +1637,8 @@ public class ManageOrderService {
     private static void updateServedOrderDetails(Map<String, Object> servedOrderDetails, String cafcassCymruEmail, List<Element<OrderDetails>> orders,
                                                  Element<OrderDetails> order, List<Element<PostalInformation>> postalInformation,
                                                  List<Element<EmailInformation>> emailInformation) {
+        log.info("AAAAAAAAAa {}",servedOrderDetails);
+        log.info("BBBBBBBB {}",SERVE_RECIPIENT_NAME);
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
         String cafcassEmail = null;
@@ -1670,6 +1679,7 @@ public class ManageOrderService {
             servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVED_PARTIES);
         }
         if (servedOrderDetails.containsKey(SERVE_RECIPIENT_NAME)) {
+            log.info("insideeeee.....");
             serveRecipientName = (String) servedOrderDetails.get(SERVE_RECIPIENT_NAME);
         }
         ServeOrderDetails tempServeOrderDetails;
