@@ -20,13 +20,17 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.C100FlagDetailRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -104,7 +108,8 @@ public class ReasonableAdjustmentsMapper {
                         log.info("error");
                     }
                     List<Element<FlagDetail>> flagDetails = new ArrayList<>();
-                    for (FlagDetail flag : applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags()) {
+                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ENGLISH);
+                    for (C100FlagDetailRequest flag : applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags()) {
                         FlagDetail flagDetail = FlagDetail.builder().name(flag.getName()).name_cy(flag.getName_cy())
                             .subTypeValue(flag.getSubTypeValue())
                             .subTypeValue_cy(flag.getSubTypeValue_cy())
@@ -114,8 +119,8 @@ public class ReasonableAdjustmentsMapper {
                             .flagComment(flag.getFlagComment())
                             .flagComment_cy(flag.getFlagComment_cy())
                             .flagUpdateComment(flag.getFlagUpdateComment())
-                            .dateTimeCreated(flag.getDateTimeCreated())
-                            .dateTimeModified(flag.getDateTimeModified())
+                            .dateTimeCreated(LocalDateTime.parse(flag.getDateTimeCreated(), dateTimeFormatter))
+                            .dateTimeModified(null != flag.getDateTimeModified() ? LocalDateTime.parse(flag.getDateTimeModified(), dateTimeFormatter) : null)
                             .path(flag.getPath())
                             .hearingRelevant(flag.getHearingRelevant())
                             .flagCode(flag.getFlagCode())

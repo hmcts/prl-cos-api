@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
+import uk.gov.hmcts.reform.prl.models.caseflags.request.C100FlagDetailRequest;
 
 import java.util.List;
 
@@ -39,5 +40,5 @@ public class ApplicantDto {
     private String start;
     private String startAlternative;
     @JsonProperty("reasonableAdjustmentsFlags")
-    private List<FlagDetail> reasonableAdjustmentsFlags;
+    private List<C100FlagDetailRequest> reasonableAdjustmentsFlags;
 }
