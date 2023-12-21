@@ -52,6 +52,7 @@ public class QuarantineLegalDoc {
     private final Document lettersOfComplaintDocument;
     private final Document spipReferralRequestsDocument;
     private final Document homeOfficeDwpResponsesDocument;
+    private final Document internalCorrespondenceDocument;
     private final Document medicalReportsDocument;
     private final Document dnaReportsExpertReportDocument;
     private final Document resultsOfHairStrandBloodTestsDocument;
@@ -79,6 +80,7 @@ public class QuarantineLegalDoc {
     private final Document caseSummaryDocument;
     private final Document legalProfQuarantineDocument;
     private final Document cafcassQuarantineDocument;
+    //PRL-4328 - To be deleted
     private final Document courtStaffQuarantineDocument;
 
     // Adding Bulk scan attributes

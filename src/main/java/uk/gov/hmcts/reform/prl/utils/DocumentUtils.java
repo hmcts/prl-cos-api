@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -182,6 +185,7 @@ public class DocumentUtils {
             .respondentStatementsDocument(getDocumentByCategoryId(RESPONDENT_STATEMENTS, categoryId, document))
             .otherWitnessStatementsDocument(getDocumentByCategoryId(OTHER_WITNESS_STATEMENTS, categoryId, document))
             .caseSummaryDocument(getDocumentByCategoryId(CASE_SUMMARY, categoryId, document))
+            .internalCorrespondenceDocument(getDocumentByCategoryId(ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE, categoryId, document))
             .build();
     }
 
@@ -198,8 +202,12 @@ public class DocumentUtils {
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
             .notes(manageDocument.getDocumentDetails())
-            .categoryId(manageDocument.getDocumentCategories().getValueCode())
-            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            .categoryId(DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
+                            ? ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE
+                            : manageDocument.getDocumentCategories().getValueCode())
+            .categoryName(DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
+                              ? PrlAppsConstants.INTERNAL_CORRESPONDENCE_LABEL
+                              : manageDocument.getDocumentCategories().getValueLabel())
             .build();
     }
 

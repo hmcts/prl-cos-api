@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
@@ -82,7 +83,7 @@ public class ManageDocumentsControllerTest {
     @Before
     public void setup() {
         caseDataMap = new HashMap<>();
-
+        caseDataMap.put("id", 12345678L);
         caseData = CaseData.builder()
             .id(12345678L)
             .build();
@@ -163,4 +164,21 @@ public class ManageDocumentsControllerTest {
 
     }
 
+    @Test
+    public void testValidateCourtUserShouldReturnError() {
+        when(manageDocumentsService.checkIfUserIsCourtStaff(auth,callbackRequest)).thenReturn(false);
+        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
+        Assert.assertNotNull(response.getErrors());
+        Assert.assertTrue(!response.getErrors().isEmpty());
+        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'", response.getErrors().get(0));
+    }
+
+    @Test
+    public void testValidateCourtUserShouldAllowToProcess() {
+        when(manageDocumentsService.checkIfUserIsCourtStaff(auth,callbackRequest)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
+        Assert.assertNotNull(response.getData());
+        Assert.assertEquals(12345678L, response.getData().get("id"));
+
+    }
 }
