@@ -32,7 +32,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
@@ -71,12 +70,10 @@ public class ReviewDocumentService {
     public static final String REVIEW_DOC = "reviewDoc";
     public static final String LEGAL_PROF_UPLOAD_DOC_LIST_CONF_TAB = "legalProfUploadDocListConfTab";
     public static final String CAFCASS_UPLOAD_DOC_LIST_CONF_TAB = "cafcassUploadDocListConfTab";
-    public static final String COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB = "courtStaffUploadDocListConfTab";
     public static final String CITIZEN_UPLOAD_DOC_LIST_CONF_TAB = "citizenUploadDocListConfTab";
     public static final String BULKSCAN_UPLOAD_DOC_LIST_CONF_TAB = "bulkScannedDocListConfTab";
     public static final String LEGAL_PROF_UPLOAD_DOC_LIST_DOC_TAB = "legalProfUploadDocListDocTab";
     public static final String CAFCASS_UPLOAD_DOC_LIST_DOC_TAB = "cafcassUploadDocListDocTab";
-    public static final String COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB = "courtStaffUploadDocListDocTab";
     public static final String CITIZEN_UPLOADED_DOC_LIST_DOC_TAB = "citizenUploadedDocListDocTab";
     public static final String BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB = "bulkScannedDocListDocTab";
     public static final String CONFIDENTIAL_CATEGORY_ID = "confidential";
@@ -97,16 +94,6 @@ public class ReviewDocumentService {
             dynamicListElements.addAll(caseData.getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
-                                               .build())
-                                           .toList());
-        }
-        //court staff
-        if (CollectionUtils.isNotEmpty(caseData.getCourtStaffQuarantineDocsList())) {
-            dynamicListElements.addAll(caseData.getCourtStaffQuarantineDocsList().stream()
-                                           .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
                                                                                    element.getValue().getDocumentUploadedDate()))
                                                .build())
@@ -150,21 +137,12 @@ public class ReviewDocumentService {
             if (null != caseData.getCafcassQuarantineDocsList()) {
                 cafcassQuarantineDocElement = getQuarantineDocumentById(caseData.getCafcassQuarantineDocsList(), uuid);
             }
-            //court staff
-            Optional<Element<QuarantineLegalDoc>> courtStaffQuarantineDocElement = Optional.empty();
-            if (null != caseData.getCourtStaffQuarantineDocsList()) {
-                courtStaffQuarantineDocElement = getQuarantineDocumentById(
-                    caseData.getCourtStaffQuarantineDocsList(),
-                    uuid
-                );
-            }
             updateReviewdocs(
                 caseData,
                 caseDataUpdated,
                 uuid,
                 quarantineLegalDocElement,
-                cafcassQuarantineDocElement,
-                courtStaffQuarantineDocElement
+                cafcassQuarantineDocElement
             );
             if (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())) {
                 Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement;
@@ -177,7 +155,7 @@ public class ReviewDocumentService {
                 if (quarantineBulkscanDocElement.isPresent()) {
                     updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                         caseDataUpdated,
-                        quarantineBulkscanDocElement,
+                        quarantineBulkscanDocElement.get(),
                         BULK_SCAN
                     );
                 }
@@ -187,8 +165,7 @@ public class ReviewDocumentService {
 
     private void updateReviewdocs(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid,
                                   Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement,
-                                  Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement,
-                                  Optional<Element<QuarantineLegalDoc>> courtStaffQuarantineDocElement) {
+                                  Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement) {
         Optional<Element<UploadedDocuments>> quarantineCitizenDocElement = Optional.empty();
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
             quarantineCitizenDocElement = caseData.getCitizenUploadQuarantineDocsList().stream()
@@ -198,20 +175,14 @@ public class ReviewDocumentService {
         if (quarantineLegalDocElement.isPresent()) {
             updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
-                quarantineLegalDocElement,
+                quarantineLegalDocElement.get(),
                 LEGAL_PROFESSIONAL
             );
         } else if (cafcassQuarantineDocElement.isPresent()) {
             updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
-                cafcassQuarantineDocElement,
+                cafcassQuarantineDocElement.get(),
                 CAFCASS
-            );
-        } else if (courtStaffQuarantineDocElement.isPresent()) {
-            updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
-                caseDataUpdated,
-                courtStaffQuarantineDocElement,
-                COURT_STAFF
             );
         } else if (quarantineCitizenDocElement.isPresent()) {
             UploadedDocuments document = quarantineCitizenDocElement.get().getValue();
@@ -229,10 +200,11 @@ public class ReviewDocumentService {
     }
 
     private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String, Object> caseDataUpdated,
-                                                                      Optional<Element<QuarantineLegalDoc>> quarantineDocElement,
+                                                                      Element<QuarantineLegalDoc> quarantineDocElement,
                                                                       String submittedBy) {
 
-        QuarantineLegalDoc document = quarantineDocElement.get().getValue();
+        QuarantineLegalDoc document = quarantineDocElement.getValue();
+        log.info("** Quarantine Doc ** {}", document);
 
         String docTobeReviewed = formatDocumentTobeReviewed(
             submittedBy,
@@ -250,10 +222,6 @@ public class ReviewDocumentService {
             case CAFCASS:
                 caseDataUpdated.put(REVIEW_DOC, document.getCafcassQuarantineDocument());
                 log.info(REVIEW_DOC + " {}", document.getCafcassQuarantineDocument());
-                break;
-            case COURT_STAFF:
-                caseDataUpdated.put(REVIEW_DOC, document.getCourtStaffQuarantineDocument());
-                log.info(REVIEW_DOC + " {}", document.getCourtStaffQuarantineDocument());
                 break;
             case BULK_SCAN:
                 caseDataUpdated.put(REVIEW_DOC, document.getUrl());
@@ -302,22 +270,12 @@ public class ReviewDocumentService {
 
     private Document getQuarantineDocument(String uploadedBy,
                                            QuarantineLegalDoc quarantineLegalDoc) {
-        switch (uploadedBy) {
-            case SOLICITOR:
-                return quarantineLegalDoc.getDocument();
-
-            case CAFCASS:
-                return quarantineLegalDoc.getCafcassQuarantineDocument();
-
-            case COURT_STAFF:
-                return quarantineLegalDoc.getCourtStaffQuarantineDocument();
-
-            case BULK_SCAN:
-                return quarantineLegalDoc.getUrl();
-
-            default:
-                return null;
-        }
+        return switch (uploadedBy) {
+            case SOLICITOR -> quarantineLegalDoc.getDocument();
+            case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
+            case BULK_SCAN -> quarantineLegalDoc.getUrl();
+            default -> null;
+        };
     }
 
     public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
@@ -329,7 +287,6 @@ public class ReviewDocumentService {
         caseDataUpdated.put("legalProfQuarantineDocsList", caseData.getLegalProfQuarantineDocsList());
         caseDataUpdated.put("cafcassQuarantineDocsList", caseData.getCafcassQuarantineDocsList());
         caseDataUpdated.put("citizenUploadQuarantineDocsList", caseData.getCitizenUploadQuarantineDocsList());
-        caseDataUpdated.put("courtStaffQuarantineDocsList", caseData.getCourtStaffQuarantineDocsList());
         caseDataUpdated.put("scannedDocuments", caseData.getScannedDocuments());
     }
 
@@ -357,18 +314,6 @@ public class ReviewDocumentService {
                 caseData.getReviewDocuments().getCafcassUploadDocListConfTab(),
                 CAFCASS_UPLOAD_DOC_LIST_CONF_TAB,
                 CAFCASS
-            );
-        }
-        //court staff
-        if (null != caseData.getCourtStaffQuarantineDocsList()) {
-            uploadDocForConfOrDocTab(
-                caseDataUpdated,
-                caseData.getCourtStaffQuarantineDocsList(),
-                uuid,
-                true,
-                caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab(),
-                COURT_STAFF_UPLOAD_DOC_LIST_CONF_TAB,
-                COURT_STAFF
             );
         }
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
@@ -469,20 +414,6 @@ public class ReviewDocumentService {
 
             log.info("*** cafcass docs tab ** {}", caseDataUpdated.get(CAFCASS_UPLOAD_DOC_LIST_DOC_TAB));
         }
-        //court staff
-        if (null != caseData.getCourtStaffQuarantineDocsList()) {
-            uploadDocForConfOrDocTab(
-                caseDataUpdated,
-                caseData.getCourtStaffQuarantineDocsList(),
-                uuid,
-                false,
-                caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB,
-                COURT_STAFF
-            );
-
-            log.info("*** court staff docs tab ** {}", caseDataUpdated.get(COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB));
-        }
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
             Optional<Element<UploadedDocuments>> quarantineCitizenDocElementOptional = caseData.getCitizenUploadQuarantineDocsList().stream()
                 .filter(element -> element.getId().equals(uuid)).findFirst();
@@ -521,7 +452,6 @@ public class ReviewDocumentService {
 
     public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
         if (CollectionUtils.isEmpty(caseData.getLegalProfQuarantineDocsList())
-            && (CollectionUtils.isEmpty(caseData.getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getCitizenUploadQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getCafcassQuarantineDocsList())) {
             coreCaseDataService.triggerEvent(
