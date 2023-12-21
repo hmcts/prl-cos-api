@@ -86,23 +86,23 @@ public class ReviewDocumentService {
             + "<div id='more-detail-hint' class='govuk-hint'>The document will open in a new tab.</div></label>";
     public static final String SUBMITTED_BY_LABEL =
         "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></label>";
+            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String DOCUMENT_CATEGORY_LABEL =
         "<h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'>"
             + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String DOCUMENT_COMMENTS_LABEL =
         "<h3 class='govuk-heading-s'>Details/comments</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'> <li>%s</li></label>";
+            + "<ul class='govuk-list govuk-list--bullet'> <li>%s</li></ul></label>";
     public static final String  CONFIDENTIAL_INFO_LABEL =
         "<h3 class='govuk-heading-s'>Confidential information included</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></label>";
+            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
 
     public static final String  RESTRICTED_INFO_LABEL =
         "<h3 class='govuk-heading-s'>Request to restrict access</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></label>";
+            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
     public static final String  RESTRICTION_REASON_LABEL =
         "<h3 class='govuk-heading-s'>Reasons to restrict access</h3><label class='govuk-label' for='more-detail'>"
-            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></label>";
+            + "<ul class='govuk-list govuk-list--bullet'><li>%s</li></ul></label>";
 
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
     public static final String DOC_LABEL = "docLabel";
