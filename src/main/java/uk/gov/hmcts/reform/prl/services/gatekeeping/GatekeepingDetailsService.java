@@ -59,7 +59,7 @@ public class GatekeepingDetailsService {
                                                                          JUDGE_NAME))).build());
                 gatekeepingDetailsBuilder.isSpecificGateKeeperNeeded(YesOrNo.Yes);
                 gatekeepingDetailsBuilder.isJudgeOrLegalAdviserGatekeeping((SendToGatekeeperTypeEnum.judge));
-                if (null != judgeDetails && judgeDetails.size() > 0) {
+                if (null != judgeDetails && !judgeDetails.isEmpty()) {
                     gatekeepingDetailsBuilder.judgeName(JudicialUser.builder()
                                                             .personalCode(getPersonalCode(caseDataUpdated.get(JUDGE_NAME))[0]).build());
                     gatekeepingDetailsBuilder.judgePersonalCode(judgePersonalCode[0]);

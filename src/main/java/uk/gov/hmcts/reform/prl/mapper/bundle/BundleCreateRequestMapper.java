@@ -31,7 +31,6 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS_STATEMENTS;
@@ -90,7 +89,7 @@ public class BundleCreateRequestMapper {
     private BundleHearingInfo mapHearingDetails(Hearings hearingDetails) {
         if (null != hearingDetails && null != hearingDetails.getCaseHearings()) {
             List<CaseHearing> listedCaseHearings = hearingDetails.getCaseHearings().stream()
-                .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).collect(Collectors.toList());
+                .filter(caseHearing -> LISTED.equalsIgnoreCase(caseHearing.getHmcStatus())).toList();
             if (null != listedCaseHearings && !listedCaseHearings.isEmpty()) {
                 List<HearingDaySchedule> hearingDaySchedules = listedCaseHearings.get(0).getHearingDaySchedule();
                 if (null != hearingDaySchedules && !hearingDaySchedules.isEmpty()) {
