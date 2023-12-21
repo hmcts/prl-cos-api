@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 
 @ExtendWith(PactConsumerTestExt.class)
@@ -89,6 +90,8 @@ public class AmRoleAssignmentApiTest {
             .given("Role Assignment Actor")
             .uponReceiving("A Request to assign a new role for a specific actor")
             .method("GET")
+            .headers("Authorization", AUTH)
+            .headers("ServiceAuthorization", S2S)
             .headers("x-correlation-id", X_CORRELATION_ID)
             .path("/am/role-assignments/actors/")
             .body(new ObjectMapper().writeValueAsString(roleAssignmentRequest), APPLICATION_JSON)
@@ -100,10 +103,20 @@ public class AmRoleAssignmentApiTest {
 
     @Test
     @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignment")
-    public void verifyCaseLinkedDetails() {
+    public void verifyRoleAssignment() {
         RoleAssignmentResponse roleAssignmentResponse = roleAssignmentApi
             .updateRoleAssignment(AUTH, S2S, X_CORRELATION_ID,
                                   RoleAssignmentRequest.roleAssignmentRequest().build()
+            );
+
+        Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response");
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignmentActor")
+    public void verifyRoleAssignmentActor() {
+        RoleAssignmentServiceResponse roleAssignmentResponse = roleAssignmentApi
+            .getRoleAssignments(AUTH, S2S, X_CORRELATION_ID, "1"
             );
 
         Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response");
