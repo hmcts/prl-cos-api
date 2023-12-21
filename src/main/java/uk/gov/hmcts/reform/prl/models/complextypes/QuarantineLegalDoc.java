@@ -30,6 +30,7 @@ public class QuarantineLegalDoc {
     private final Document miamCertificateDocument;
     private final Document previousOrdersSubmittedWithApplicationDocument;
     private final Document respondentApplicationDocument;
+    private final Document ordersFromOtherProceedingsDocument;
     private final Document respondentC1AApplicationDocument;
     private final Document respondentC1AResponseDocument;
     private final Document applicationsFromOtherProceedingsDocument;
@@ -94,7 +95,7 @@ public class QuarantineLegalDoc {
 
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
-            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine"
+            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "applicationsWithinProceedings"
         };
     }
 }
