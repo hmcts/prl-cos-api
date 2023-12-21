@@ -102,7 +102,7 @@ public class BulkPrintService {
         return additionalData;
     }
 
-    private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) throws IOException {
+    private byte[] getDocumentsAsBytes(String docUrl, String authToken, String s2sToken) {
         return getDocumentBytes(docUrl, authToken, s2sToken);
     }
 
