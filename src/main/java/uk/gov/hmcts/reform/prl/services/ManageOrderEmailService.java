@@ -474,14 +474,6 @@ public class ManageOrderEmailService {
 
         // Send email notification to other organisations
         sendEmailToOtherOrganisation(caseData, otherOrganisationEmailList, authorisation, orderDocuments);
-        otherOrganisationEmailList.forEach(emailObject ->
-                                                emailService.send(
-                                                    emailObject.getEmailAddress(),
-                                                    EmailTemplateNames.CAFCASS_OTHER,
-                                                    buildEmailToCafcassAndOtherParties(caseData),
-                                                    LanguagePreference.english
-                                                )
-        );
     }
 
     private void sendEmailToOtherOrganisation(CaseData caseData, List<EmailInformation> emailInformation,
