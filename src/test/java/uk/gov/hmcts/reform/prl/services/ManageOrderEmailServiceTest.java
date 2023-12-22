@@ -1484,9 +1484,7 @@ public class ManageOrderEmailServiceTest {
                                                                                 any(SendgridEmailConfig.class));
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+        Mockito.verifyNoInteractions(emailService);
     }
 
     @Test
@@ -1552,10 +1550,7 @@ public class ManageOrderEmailServiceTest {
                                                                                 anyString(),
                                                                                 any(SendgridEmailConfig.class));
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+        Mockito.verifyNoInteractions(emailService);
     }
 
 
@@ -1614,9 +1609,7 @@ public class ManageOrderEmailServiceTest {
                                                                                 any(SendgridEmailConfig.class));
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+        Mockito.verifyNoInteractions(emailService);
     }
 
 
@@ -2378,10 +2371,6 @@ public class ManageOrderEmailServiceTest {
         CaseDetails caseDetails = CaseDetails.builder()
                 .id(caseData.getId())
                 .data(dataMap)
-                .build();
-        UserDetails userDetails = UserDetails.builder()
-                .forename("userFirst")
-                .surname("userLast")
                 .build();
         String applicantNames = "TestFirst TestLast";
 
