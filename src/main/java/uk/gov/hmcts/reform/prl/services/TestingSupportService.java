@@ -114,6 +114,7 @@ public class TestingSupportService {
 
     public Map<String, Object> initiateCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
+            log.info("test creation request===> {}",callbackRequest);
             String requestBody;
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
