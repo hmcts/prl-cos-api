@@ -63,8 +63,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
@@ -1440,7 +1439,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServedFl401() {
+    public void testSendEmailWhenOrderServedFl401() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
             .builder()
@@ -1485,11 +1484,12 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.any(), any(), any(), any());
+        Mockito.verify(sendgridService,Mockito.times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
     }
 
     @Test
-    public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNull() {
+    public void testSendEmailWhenOrderServedFl401ServeOtherPartiesDaNull() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
                 .builder()
@@ -1531,11 +1531,12 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.any(), any(), any(), any());
+        Mockito.verify(sendgridService,Mockito.times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
     }
 
     @Test
-    public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOther() {
+    public void testSendEmailWhenOrderServedFl40ServeOtherPartiesNotSetToOther() throws IOException {
         CaseDetails caseDetails = CaseDetails.builder().build();
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
                 .builder()
@@ -1577,7 +1578,8 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.any(), any(), any(), any());
+        Mockito.verify(sendgridService,Mockito.times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
     }
 
     @Test
@@ -1957,7 +1959,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedEmailOptionIsEmpty() {
+    public void sendEmailWhenOrderIsServedEmailOptionIsEmpty() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2019,6 +2021,8 @@ public class ManageOrderEmailServiceTest {
             .applicantsFL401(PartyDetails.builder()
                                  .lastName("test")
                                  .firstName("test1")
+                                 .solicitorEmail("t")
+                                 .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
                                  .email("test@ree.com").build())
             .respondents(listOfRespondents)
             .respondentsFL401(PartyDetails.builder()
@@ -2040,16 +2044,7 @@ public class ManageOrderEmailServiceTest {
         String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-
-        EmailTemplateVars email = ManageOrderEmail.builder()
-                .caseReference(String.valueOf(caseData.getId()))
-                .caseName(emailService.getCaseData(caseDetails).getApplicantCaseName())
-                .applicantName(applicantNames)
-                .courtName(court.getCourtName())
-                .caseLink("/dummyURL")
-                .build();
-
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        assertEquals("test@test.com", caseDetails.getData().get("applicantSolicitorEmailAddress").toString());
+        verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 }
