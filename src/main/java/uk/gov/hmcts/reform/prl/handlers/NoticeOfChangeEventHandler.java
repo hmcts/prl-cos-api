@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
@@ -30,7 +29,6 @@ public class NoticeOfChangeEventHandler {
     private final EmailService emailService;
     private final NoticeOfChangeContentProvider noticeOfChangeContentProvider;
 
-    @Async
     @EventListener(condition = "#event.typeOfEvent eq 'Add Legal Representation'")
     public void notifyLegalRepresentative(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
