@@ -3498,4 +3498,49 @@ public class ManageOrderServiceTest {
         assertNotNull(response);
         assertEquals("cccc", response);
     }
+
+    @Test
+    public void testServeOrder() {
+        List<DynamicMultiselectListElement> dynamicMultiselectListElements = new ArrayList<>();
+        DynamicMultiselectListElement partyDynamicMultiselectListElement = DynamicMultiselectListElement.builder()
+            .code("00000000-0000-0000-0000-000000000000")
+            .label("John Doe")
+            .build();
+        dynamicMultiselectListElements.add(partyDynamicMultiselectListElement);
+        DynamicMultiSelectList partyDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .listItems(dynamicMultiselectListElements)
+            .value(dynamicMultiselectListElements)
+            .build();
+
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+            .builder()
+            .orderDocument(Document
+                .builder()
+                .build())
+            .dateCreated(now)
+            .orderTypeId("00000000-0000-0000-0000-000000000000")
+            .otherDetails(
+                OtherOrderDetails.builder().build())
+            .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(ManageOrders.builder().serveOrderDynamicList(partyDynamicMultiSelectList)
+                .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other)).build())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .build();
+
+        List<Element<OrderDetails>> listOfOrders = manageOrderService.serveOrder(caseData, orderList);
+        assertNotNull(listOfOrders);
+    }
 }
