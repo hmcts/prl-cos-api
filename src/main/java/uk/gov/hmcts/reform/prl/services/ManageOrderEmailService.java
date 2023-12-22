@@ -466,14 +466,18 @@ public class ManageOrderEmailService {
                 });
             }
         }
-        serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, otherOrganisationPostList);
+        if (!otherOrganisationPostList.isEmpty()) {
+            serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, otherOrganisationPostList);
+        }
 
         //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
         addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
         caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
 
         // Send email notification to other organisations
-        sendEmailToOtherOrganisation(caseData, otherOrganisationEmailList, authorisation, orderDocuments);
+        if (!otherOrganisationEmailList.isEmpty()) {
+            sendEmailToOtherOrganisation(caseData, otherOrganisationEmailList, authorisation, orderDocuments);
+        }
     }
 
     private void sendEmailToOtherOrganisation(CaseData caseData, List<EmailInformation> emailInformation,
