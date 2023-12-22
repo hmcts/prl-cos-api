@@ -50,6 +50,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body("data.caseTypeOfApplication", equalTo("C100"))
             .assertThat().statusCode(200);
     }
+
     @Test
     public void givenManageDocuments_whenContinueButtonIsClicked() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
