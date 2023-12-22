@@ -65,11 +65,7 @@ public class BulkPrintService {
 
         final List<String> stringifiedDocuments = pdfDocuments.stream()
             .map(docInfo -> {
-                try {
-                    return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
             })
             .map(getEncoder()::encodeToString)
             .toList();
