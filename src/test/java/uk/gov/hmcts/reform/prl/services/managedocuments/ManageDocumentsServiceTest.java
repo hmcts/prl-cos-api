@@ -42,8 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
@@ -51,7 +50,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class ManageDocumentsServiceTest {
 
     @InjectMocks
@@ -530,6 +529,68 @@ public class ManageDocumentsServiceTest {
         assertEquals(1,legalProfUploadDocListDocTab.size());
 
     }
+
+    @Test
+    public void testCopyDocumentMidEventIfRestrictedWithSoliRole_whenTriedWithOutReason() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.precheckDocumentField(callbackRequest);
+
+        assertNotNull(caseDataMapUpdated);
+        assertTrue(!caseDataMapUpdated.isEmpty());
+
+    }
+
+    @Test
+    public void testCopyDocumentMidEventIfRestrictedWithSoliRole() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .restrictedDetails("Reason")
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.precheckDocumentField(callbackRequest);
+
+        assertNotNull(caseDataMapUpdated);
+        assertTrue(caseDataMapUpdated.isEmpty());
+    }
+
 
 }
 
