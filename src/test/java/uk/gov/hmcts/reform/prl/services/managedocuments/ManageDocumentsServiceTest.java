@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -21,6 +20,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -52,7 +52,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class ManageDocumentsServiceTest {
 
     @InjectMocks
@@ -195,7 +194,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -242,7 +242,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -292,7 +293,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -339,7 +341,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -388,7 +391,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -435,7 +439,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            //.documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -484,7 +489,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.RESPONDENT)
             .documentCategories(dynamicList)
-            //.documentRestrictCheckbox(new ArrayList<>())
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
