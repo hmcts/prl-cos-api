@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.controllers.listwithoutnotice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
@@ -20,6 +19,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -49,7 +50,6 @@ import static org.mockito.Mockito.when;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class ListWithoutNoticeControllerTest {
 
     @InjectMocks
@@ -72,6 +72,9 @@ public class ListWithoutNoticeControllerTest {
 
     @Mock
     AllocatedJudgeService allocatedJudgeService;
+
+    @Mock
+    RoleAssignmentService roleAssignmentService;
 
     @Mock
     @Qualifier("caseSummaryTab")
@@ -248,6 +251,7 @@ public class ListWithoutNoticeControllerTest {
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
             .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.judge)
             .build();
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
