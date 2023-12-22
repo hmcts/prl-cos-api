@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
@@ -34,7 +35,10 @@ import java.util.Map;
 import javax.ws.rs.NotFoundException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 
 @Slf4j
 @RestController
@@ -47,18 +51,22 @@ public class AllocateJudgeController extends AbstractCallbackController {
     private final AllocatedJudgeService allocatedJudgeService;
     private final AuthorisationService authorisationService;
 
+    private final RoleAssignmentService roleAssignmentService;
+
     @Autowired
     protected AllocateJudgeController(ObjectMapper objectMapper,
                                       EventService eventPublisher,
                                       CaseSummaryTabService caseSummaryTabService,
                                       RefDataUserService refDataUserService,
                                       AllocatedJudgeService allocatedJudgeService,
-                                      AuthorisationService authorisationService) {
+                                      AuthorisationService authorisationService,
+                                      RoleAssignmentService roleAssignmentService) {
         super(objectMapper, eventPublisher);
         this.caseSummaryTabService = caseSummaryTabService;
         this.refDataUserService = refDataUserService;
         this.allocatedJudgeService = allocatedJudgeService;
         this.authorisationService = authorisationService;
+        this.roleAssignmentService = roleAssignmentService;
     }
 
     @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -94,12 +102,23 @@ public class AllocateJudgeController extends AbstractCallbackController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
-                                                                                           caseData.getLegalAdviserList(),
-                                                                                           refDataUserService
+            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
+                caseDataUpdated,
+                caseData.getLegalAdviserList(),
+                refDataUserService
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+
+            String actorId = null != caseDataUpdated.get(JUDGE_NAME) ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0] :
+                getIdamId(caseDataUpdated.get(JUDGE_NAME))[0];
+            roleAssignmentService.createRoleAssignment(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                false,
+                actorId,
+                ALLOCATE_JUDGE_ROLE
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

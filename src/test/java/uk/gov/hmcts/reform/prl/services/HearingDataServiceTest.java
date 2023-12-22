@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -264,7 +265,7 @@ public class HearingDataServiceTest {
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
             .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
+        when(getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -361,7 +362,7 @@ public class HearingDataServiceTest {
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
             .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
+        when(getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -453,7 +454,7 @@ public class HearingDataServiceTest {
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
             .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
+        when(getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
