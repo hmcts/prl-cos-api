@@ -113,6 +113,11 @@ public class ReasonableAdjustmentsMapper {
                         Locale.ENGLISH
                     );
                     for (C100FlagDetailRequest flag : applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags()) {
+                        List<Element<String>> path = new ArrayList<>();
+                        for (String pathDetail : flag.getPath()) {
+                            path.add(element(pathDetail));
+                        }
+
                         FlagDetail flagDetail = FlagDetail.builder().name(flag.getName()).name_cy(flag.getName_cy())
                             .subTypeValue(flag.getSubTypeValue())
                             .subTypeValue_cy(flag.getSubTypeValue_cy())
@@ -127,7 +132,7 @@ public class ReasonableAdjustmentsMapper {
                                 flag.getDateTimeModified(),
                                 dateTimeFormatter
                             ) : null)
-                            .path(flag.getPath())
+                            .path(path)
                             .hearingRelevant(flag.getHearingRelevant())
                             .flagCode(flag.getFlagCode())
                             .status(flag.getStatus())
