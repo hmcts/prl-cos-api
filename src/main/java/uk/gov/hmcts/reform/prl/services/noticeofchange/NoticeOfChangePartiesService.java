@@ -8,13 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
-import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.*;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
@@ -45,11 +39,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
-import uk.gov.hmcts.reform.prl.services.CaseEventService;
-import uk.gov.hmcts.reform.prl.services.EventService;
-import uk.gov.hmcts.reform.prl.services.OrganisationService;
-import uk.gov.hmcts.reform.prl.services.SystemUserService;
-import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.*;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
@@ -61,20 +51,10 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
-import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.*;
 import static uk.gov.hmcts.reform.prl.models.noticeofchange.DecisionRequest.decisionRequest;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.BLANK;
 import static uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService.NoticeOfChangeAnswersPopulationStrategy.POPULATE;
@@ -93,6 +73,17 @@ public class NoticeOfChangePartiesService {
     public static final String REMOVE_LEGAL_REPRESENTATIVE_AND_PARTIES_LIST = "removeLegalRepAndPartiesList";
     public static final String IS_NO_LONGER_REPRESENTING = " is no longer representing ";
     public static final String IN_THIS_CASE = " in this case.";
+
+    public static final String C100_RESPONDENT_EVENTS_A = "A";
+    public static final String C100_RESPONDENT_EVENTS_B = "B";
+    public static final String C100_RESPONDENT_EVENTS_C = "C";
+    public static final String C100_RESPONDENT_EVENTS_D = "D";
+    public static final String C100_RESPONDENT_EVENTS_E = "E";
+    public static final String C100_RESPONDENT_TASK_LIST_A = "respondentTaskListA";
+    public static final String C100_RESPONDENT_TASK_LIST_B = "respondentTaskListB";
+    public static final String C100_RESPONDENT_TASK_LIST_C = "respondentTaskListC";
+    public static final String C100_RESPONDENT_TASK_LIST_D = "respondentTaskListD";
+    public static final String C100_RESPONDENT_TASK_LIST_E = "respondentTaskListE";
     public static final String ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE = " All other parties have been notified about this change\n\n";
     public final NoticeOfChangePartiesConverter partiesConverter;
     public final RespondentPolicyConverter policyConverter;
@@ -295,13 +286,15 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateCaseData
         );
 
+        //TODO: We must avoid this ccd call and use the response from line 280 as the latest
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(
             systemAuthorisation,
             String.valueOf(allTabsUpdateCaseData.getId())
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
-        eventPublisher.publishEvent(new CaseDataChanged(caseData));
+        //TODO: this event call we will avoid
+        //eventPublisher.publishEvent(new CaseDataChanged(caseData));
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         sendEmailOnAddLegalRepresentative(
             caseData,
@@ -405,11 +398,46 @@ public class NoticeOfChangePartiesService {
                     .element(partyDetailsElement.getId(), updPartyDetails);
             }
             caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
+            //TODO: Find the task list and set it to appropriate section of the casedata
+            //Finding is done - need to set it now
+            // next step is remove the case data event change event
+            caseEventHandlerService.getRespondentTaskList(caseData, findRespondentIndex(partyIndex));
+
         } else if (CAAPPLICANT.equals(representing)) {
             updatedRepresentedRespondentElement = ElementUtils
                 .element(partyDetailsElement.getId(), updPartyDetails);
             caseData.getApplicants().set(partyIndex, updatedRepresentedRespondentElement);
         }
+    }
+
+    private String findRespondentIndex(int partyIndex) {
+        String respondent = "";
+        switch (partyIndex) {
+            case 0: {
+                respondent = C100_RESPONDENT_EVENTS_A;
+                break;
+            }
+            case 1: {
+                respondent = C100_RESPONDENT_EVENTS_B;
+                break;
+            }
+            case 2: {
+                respondent = C100_RESPONDENT_EVENTS_C;
+                break;
+            }
+            case 3: {
+                respondent = C100_RESPONDENT_EVENTS_D;
+                break;
+            }
+            case 4: {
+                respondent = C100_RESPONDENT_EVENTS_E;
+                break;
+            }
+            default: {
+                break;
+            }
+        }
+        return respondent;
     }
 
     private CaseData updateFl401PartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
@@ -1041,7 +1069,7 @@ public class NoticeOfChangePartiesService {
             .append(IN_THIS_CASE)
         );
         String representativeRemovedBodyPrefix = legalRepAndLipNames.append(
-            ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE)
+                ALL_OTHER_PARTIES_HAVE_BEEN_NOTIFIED_ABOUT_THIS_CHANGE)
             .append(REPRESENTATIVE_REMOVED_STATUS_LABEL).toString();
         return SubmittedCallbackResponse.builder().confirmationHeader(
             REPRESENTATIVE_REMOVED_LABEL).confirmationBody(
