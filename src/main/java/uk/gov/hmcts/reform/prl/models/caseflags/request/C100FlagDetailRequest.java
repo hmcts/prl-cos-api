@@ -1,11 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.caseflags.request;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
@@ -13,9 +10,6 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Jacksonized
 public class C100FlagDetailRequest {
