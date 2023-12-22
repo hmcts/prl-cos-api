@@ -421,7 +421,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
-        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, caseData));
+        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "C100"));
 
 
     }
@@ -504,7 +504,7 @@ public class ServiceOfApplicationPostServiceTest {
 
         when(authTokenGenerator.generate()).thenReturn(s2sToken);
 
-        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, caseData));
+        assertNotNull(serviceOfApplicationPostService.getStaticDocs(AUTH, "FL401"));
 
 
     }

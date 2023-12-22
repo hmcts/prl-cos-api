@@ -181,6 +181,28 @@ public class PartyLevelCaseFlagsGenerator {
                         partyInternalFlag).build()).build();
                     break;
                 }
+
+                case "daApplicantInternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daApplicantInternalFlags(
+                        partyInternalFlag).build()).build();
+                    break;
+                }
+                case "daApplicantSolicitorInternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daApplicantSolicitorInternalFlags(
+                        partyInternalFlag).build()).build();
+                    break;
+                }
+                case "daRespondentInternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daRespondentInternalFlags(
+                        partyInternalFlag).build()).build();
+                    break;
+                }
+                case "daRespondentSolicitorInternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daRespondentSolicitorInternalFlags(
+                        partyInternalFlag).build()).build();
+                    break;
+                }
+
                 default: {
                     break;
                 }
@@ -319,6 +341,28 @@ public class PartyLevelCaseFlagsGenerator {
                         partyExternalFlag).build()).build();
                     break;
                 }
+
+                case "daApplicantExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daApplicantExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "daApplicantSolicitorExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daApplicantSolicitorExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "daRespondentExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daRespondentExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+                case "daRespondentSolicitorExternalFlags": {
+                    caseData = caseData.toBuilder().allPartyFlags(caseData.getAllPartyFlags().toBuilder().daRespondentSolicitorExternalFlags(
+                        partyExternalFlag).build()).build();
+                    break;
+                }
+
                 default: {
                     break;
                 }
