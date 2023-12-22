@@ -93,6 +93,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -103,6 +104,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
@@ -114,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.SUBMITTED_PAID;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 
 @Slf4j
 @RestController
@@ -514,6 +517,16 @@ public class CallbackController {
 
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
+
+            String actorId = null != caseDataUpdated.get(JUDGE_NAME) ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0] :
+                getIdamId(caseDataUpdated.get(JUDGE_NAME))[0];
+            roleAssignmentService.createRoleAssignment(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                false,
+                actorId,
+                ALLOCATE_JUDGE_ROLE
+            );
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {

@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -36,6 +37,7 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -47,8 +49,11 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 
 @Slf4j
 @RestController
@@ -60,6 +65,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     private final AllocatedJudgeService allocatedJudgeService;
     private final AuthorisationService authorisationService;
     private final HearingService hearingService;
+    private final RoleAssignmentService roleAssignmentService;
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
     public static final String CONFIRMATION_HEADER = "# Listing directions sent";
@@ -78,6 +84,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                                        AllocatedJudgeService allocatedJudgeService,
                                        AuthorisationService authorisationService,
                                        HearingService hearingService,
+                                       RoleAssignmentService roleAssignmentService,
                                        CaseSummaryTabService caseSummaryTabService) {
         super(objectMapper, eventPublisher);
         this.hearingDataService = hearingDataService;
@@ -85,6 +92,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         this.allocatedJudgeService = allocatedJudgeService;
         this.authorisationService = authorisationService;
         this.hearingService = hearingService;
+        this.roleAssignmentService = roleAssignmentService;
         this.caseSummaryTabService = caseSummaryTabService;
     }
 
@@ -150,14 +158,26 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
-                                                                                           caseData.getLegalAdviserList(),
-                                                                                           refDataUserService
+            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
+                caseDataUpdated,
+                caseData.getLegalAdviserList(),
+                refDataUserService
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
             caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
                 .getHearingDataForOtherOrders(caseData.getListWithoutNoticeHearingDetails(), null, caseData));
+
+            String actorId = allocatedJudge.getIsJudgeOrLegalAdviser().equals(AllocatedJudgeTypeEnum.legalAdviser)
+                ? allocatedJudge.getLegalAdviserList().getValueCode()
+                : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
+            roleAssignmentService.createRoleAssignment(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                false,
+                actorId,
+                ALLOCATE_JUDGE_ROLE
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

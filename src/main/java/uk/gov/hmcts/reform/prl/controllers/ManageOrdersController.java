@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -49,6 +50,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -96,6 +98,9 @@ public class ManageOrdersController {
 
     @Autowired
     CoreCaseDataService coreCaseDataService;
+
+    @Autowired
+    private RoleAssignmentService roleAssignmentService;
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
@@ -303,7 +308,10 @@ public class ManageOrdersController {
                     caseData
                 ));
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-                caseDataUpdated.put(ORDER_COLLECTION, manageOrderService.serveOrder(caseData, caseData.getOrderCollection()));
+                caseDataUpdated.put(
+                    ORDER_COLLECTION,
+                    manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
+                );
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
@@ -313,6 +321,21 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
+            String actorId = null != caseData.getManageOrders().getNameOfJudgeToReviewOrder()
+                ? caseData.getManageOrders().getNameOfJudgeToReviewOrder().getIdamId()
+                : null != caseData.getManageOrders().getNameOfLaToReviewOrder().getValueCode()
+                ? caseData.getManageOrders().getNameOfLaToReviewOrder().getValueCode() : null;
+            if (actorId != null) {
+                roleAssignmentService.createRoleAssignment(
+                    authorisation,
+                    callbackRequest.getCaseDetails(),
+                    false,
+                    actorId,
+                    ALLOCATE_JUDGE_ROLE
+                );
+            }
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
