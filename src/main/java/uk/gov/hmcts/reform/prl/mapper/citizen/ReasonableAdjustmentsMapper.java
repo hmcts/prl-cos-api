@@ -35,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.C100_REQUEST_SUPPORT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -69,7 +68,7 @@ public class ReasonableAdjustmentsMapper {
                     applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags()
                 );
                 UserDetails userDetails = idamClient.getUserDetails(authToken);
-                CaseEvent caseEvent = CaseEvent.fromValue(String.valueOf(C100_REQUEST_SUPPORT));
+                CaseEvent caseEvent = CaseEvent.fromValue("c100RequestSupport");
                 EventRequestData eventRequestData = coreCaseDataService.eventRequest(
                     caseEvent,
                     userDetails.getId()
