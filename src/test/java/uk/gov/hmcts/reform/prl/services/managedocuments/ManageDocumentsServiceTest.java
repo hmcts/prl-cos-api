@@ -595,6 +595,35 @@ public class ManageDocumentsServiceTest {
         assertTrue(caseDataMapUpdated.isEmpty());
     }
 
+    @Test
+    public void testCopyDocumentMidEventIfNotRestrictedWithSoliRole() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.precheckDocumentField(callbackRequest);
+
+        assertNotNull(caseDataMapUpdated);
+        assertTrue(caseDataMapUpdated.isEmpty());
+    }
+
 
 }
 
