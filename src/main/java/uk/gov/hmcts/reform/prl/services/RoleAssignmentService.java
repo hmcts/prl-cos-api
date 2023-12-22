@@ -106,14 +106,11 @@ public class RoleAssignmentService {
             null,
             judgeIdamIds[0]
         );
-        if (roleAssignmentServiceResponse.getRoleAssignmentResponse()
+        return roleAssignmentServiceResponse.getRoleAssignmentResponse()
             .stream()
-            .filter(
+            .anyMatch(
                 roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(ALLOCATE_JUDGE_ROLE)
-            ).findFirst().isPresent()) {
-            return true;
-        }
-        return false;
+            );
     }
 
     private String[] getIdamId(Object judgeDetails) {

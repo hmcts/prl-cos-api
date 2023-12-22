@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,6 +39,9 @@ public class RoleAssignmentServiceTest {
 
     @Mock
     RoleAssignmentApi roleAssignmentApi;
+
+    @Mock
+    ObjectMapper objectMapper;
 
     String auth = "auth-token";
 
