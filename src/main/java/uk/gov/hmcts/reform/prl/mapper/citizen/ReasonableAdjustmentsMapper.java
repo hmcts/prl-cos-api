@@ -35,6 +35,9 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.C100_REQUEST_SUPPORT;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -43,15 +46,16 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class ReasonableAdjustmentsMapper {
     private final IdamClient idamClient;
     private final CcdCoreCaseDataService coreCaseDataService;
-    @Autowired
     private final ObjectMapper objectMapper;
     private final CaseService caseService;
 
-    public CaseData mapRAforC100MainApplicant(String applicants, CaseData caseData, String authToken) throws JsonProcessingException {
-        log.info("Inside mapReasonableAdjustmentsForC100MainApplicant applicants {}", applicants);
-        log.info("Inside mapReasonableAdjustmentsForC100MainApplicant caseData {}", caseData);
+    public CaseData mapRAforC100MainApplicant(String applicants, CaseData caseData, String eventId, String authToken) throws JsonProcessingException {
+        log.info("Inside mapRAforC100MainApplicant applicants {}", applicants);
+        log.info("Inside mapRAforC100MainApplicant caseData {}", caseData);
 
-        if (isNotEmpty(applicants)) {
+        if ((CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
+            || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) && isNotEmpty(applicants)) {
+
             String caseId = String.valueOf(caseData.getId());
             C100RebuildApplicantDetailsElements applicantDetails = new ObjectMapper()
                 .readValue(
@@ -59,16 +63,16 @@ public class ReasonableAdjustmentsMapper {
                     C100RebuildApplicantDetailsElements.class
                 );
 
-            log.info("Inside mapReasonableAdjustmentsForC100MainApplicant applicantDetails {}", applicantDetails);
+            log.info("Inside mapRAforC100MainApplicant applicantDetails {}", applicantDetails);
 
             if (CollectionUtils.isNotEmpty(applicantDetails.getApplicants()) && CollectionUtils.isNotEmpty(
                 applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags())) {
                 log.info(
-                    "Inside mapReasonableAdjustmentsForC100MainApplicant RAFlags {}",
+                    "Inside mapRAforC100MainApplicant RAFlags {}",
                     applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags()
                 );
                 UserDetails userDetails = idamClient.getUserDetails(authToken);
-                CaseEvent caseEvent = CaseEvent.fromValue("c100RequestSupport");
+                CaseEvent caseEvent = CaseEvent.fromValue(C100_REQUEST_SUPPORT.getValue());
                 EventRequestData eventRequestData = coreCaseDataService.eventRequest(
                     caseEvent,
                     userDetails.getId()
@@ -90,22 +94,16 @@ public class ReasonableAdjustmentsMapper {
                 );
 
                 if (partyExternalCaseFlagField.isPresent()) {
-                    try {
-                        log.info("partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(
-                            partyExternalCaseFlagField.get()));
-                    } catch (JsonProcessingException e) {
-                        log.info("error");
-                    }
+                    log.info("Inside mapRAforC100MainApplicant partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(
+                        partyExternalCaseFlagField.get()));
 
                     Flags flags = objectMapper.convertValue(
                         updatedCaseData.get(partyExternalCaseFlagField.get()),
                         Flags.class
                     );
-                    try {
-                        log.info("Existing external Party flags  ===>" + objectMapper.writeValueAsString(flags));
-                    } catch (JsonProcessingException e) {
-                        log.info("error");
-                    }
+                    log.info("Inside mapRAforC100MainApplicant Existing external Party flags  ===>" + objectMapper.writeValueAsString(
+                        flags));
+
                     List<Element<FlagDetail>> flagDetails = new ArrayList<>();
                     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
                         "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
@@ -143,11 +141,9 @@ public class ReasonableAdjustmentsMapper {
                     flags = flags.toBuilder()
                         .details(flagDetails)
                         .build();
-                    try {
-                        log.info("Updated external Party flags  ===>" + objectMapper.writeValueAsString(flags));
-                    } catch (JsonProcessingException e) {
-                        log.info("error");
-                    }
+                    log.info("Inside mapRAforC100MainApplicant Updated external Party flags  ===>" + objectMapper.writeValueAsString(
+                        flags));
+
                     Map<String, Object> externalCaseFlagMap = new HashMap<>();
                     externalCaseFlagMap.put(partyExternalCaseFlagField.get(), flags);
 
@@ -155,11 +151,9 @@ public class ReasonableAdjustmentsMapper {
                         startEventResponse,
                         externalCaseFlagMap
                     );
-                    try {
-                        log.info("Case data content is  ===>" + objectMapper.writeValueAsString(caseDataContent));
-                    } catch (JsonProcessingException e) {
-                        log.info("error");
-                    }
+
+                    log.info("Inside mapRAforC100MainApplicant Case data content is  ===>" + objectMapper.writeValueAsString(
+                        caseDataContent));
 
                     CaseDetails updatedCaseDetails = coreCaseDataService.submitUpdate(
                         authToken,
@@ -168,11 +162,9 @@ public class ReasonableAdjustmentsMapper {
                         caseId,
                         false
                     );
-                    try {
-                        log.info("updatedCaseDetails is  ===>" + objectMapper.writeValueAsString(updatedCaseDetails));
-                    } catch (JsonProcessingException e) {
-                        log.info("error");
-                    }
+
+                    log.info("Inside mapRAforC100MainApplicant updatedCaseDetails is  ===>" + objectMapper.writeValueAsString(
+                        updatedCaseDetails));
 
                     return CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
                 }

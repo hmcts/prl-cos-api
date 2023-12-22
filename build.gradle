@@ -346,7 +346,6 @@ dependencies {
   implementation group: 'org.springframework.security', name: 'spring-security-core', version: '5.7.5'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
 //  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
-  implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310'
 
   implementation(group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: versions.springCloud)
     {
@@ -608,8 +607,7 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java',
   '**/uk/gov/hmcts/reform/prl/controllers/DraftAnOrderController.java',
   '**/uk/gov/hmcts/reform/prl/services/HearingDataService.java',
-  '**/uk/gov/hmcts/reform/prl/mapper/citizen/ReasonableAdjustmentsMapper.java',
-  '**/uk/gov/hmcts/reform/prl/controllers/citizen/CaseController.java'
+  '**/uk/gov/hmcts/reform/prl/mapper/citizen/ReasonableAdjustmentsMapper.java'
 ]
 
 sonarqube {
