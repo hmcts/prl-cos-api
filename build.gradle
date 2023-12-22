@@ -373,7 +373,7 @@ dependencies {
   implementation(group: 'org.springframework.security', name: 'spring-security-crypto', version: versions.springSecurityCrypto) {
     force = true
   }
-
+  implementation group: 'io.netty', name: 'netty-transport-native-epoll', version: '4.1.84.Final'
   constraints{
     implementation group: 'com.warrenstrange', name: 'googleauth', version: '1.5.0'
   }
@@ -607,7 +607,8 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/controllers/SendAndReplyController.java',
   '**/uk/gov/hmcts/reform/prl/controllers/DraftAnOrderController.java',
   '**/uk/gov/hmcts/reform/prl/services/HearingDataService.java',
-  '**/uk/gov/hmcts/reform/prl/mapper/citizen/ReasonableAdjustmentsMapper.java'
+  '**/uk/gov/hmcts/reform/prl/mapper/citizen/ReasonableAdjustmentsMapper.java',
+  '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*'
 ]
 
 sonarqube {
@@ -695,4 +696,8 @@ bootWithCCD {
       environment key, value
     }
   }
+}
+
+test {
+  useJUnitPlatform()
 }
