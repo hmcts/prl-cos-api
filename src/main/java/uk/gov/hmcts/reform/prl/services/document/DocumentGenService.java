@@ -244,14 +244,26 @@ public class DocumentGenService {
         this.authTokenGenerator = authTokenGenerator;
     }
 
-    private final DgsService dgsService;
-    private final DocumentLanguageService documentLanguageService;
-    private final OrganisationService organisationService;
-    private final UploadDocumentService uploadService;
-    private final CaseDocumentClient caseDocumentClient;
-    private final IdamClient idamClient;
-    private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
-    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    @Autowired
+    DocumentLanguageService documentLanguageService;
+
+    @Autowired
+    OrganisationService organisationService;
+
+    @Autowired
+    UploadDocumentService uploadService;
+
+    @Autowired
+    CaseDocumentClient caseDocumentClient;
+
+    @Autowired
+    IdamClient idamClient;
+
+    @Autowired
+    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+
+    @Autowired
+    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @Autowired
     private DgsApiClient dgsApiClient;
