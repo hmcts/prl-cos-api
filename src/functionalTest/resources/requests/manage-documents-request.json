@@ -24,12 +24,6 @@
           },
           "documentRestrictCheckbox": [
             "restrictToGroup"
-          ],
-          "isConfidential": "Yes",
-          "isRestricted": "Yes",
-          "restrictedDetails": "Reason",
-          "documentRelatedToCaseCheckbox": [
-            "relatedToCase"
           ]
         }
       }],
