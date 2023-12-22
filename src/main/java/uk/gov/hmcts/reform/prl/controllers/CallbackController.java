@@ -518,8 +518,7 @@ public class CallbackController {
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
 
-            String actorId = null != caseDataUpdated.get(JUDGE_NAME) ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0] :
-                getIdamId(caseDataUpdated.get(JUDGE_NAME))[0];
+            String actorId = getIdamId(caseDataUpdated.get(JUDGE_NAME))[0];
             roleAssignmentService.createRoleAssignment(
                 authorisation,
                 callbackRequest.getCaseDetails(),
