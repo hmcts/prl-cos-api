@@ -411,7 +411,7 @@ public class ManageOrderEmailService {
                 DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
                 if (recipientsOptions != null) {
                     //applicants
-                    sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
+                    sendEmailToApplicantOrRespondentSolicitor(recipientsOptions.getValue(),
                                                     caseData.getApplicants(),
                                                     isFinalOrder, caseData
                     );
@@ -690,7 +690,7 @@ public class ManageOrderEmailService {
         return null;
     }
 
-    private void sendEmailToApplicantOrSolicitor(List<DynamicMultiselectListElement> value,
+    private void sendEmailToApplicantOrRespondentSolicitor(List<DynamicMultiselectListElement> value,
                                              List<Element<PartyDetails>> partyDetails,
                                              SelectTypeOfOrderEnum isFinalOrder,
                                              CaseData caseData) {
