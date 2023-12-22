@@ -300,6 +300,8 @@ public class TestingSupportService {
 
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
+            log.info("callback request-->> {}", callbackRequest);
+            log.info("Case details--> {}", callbackRequest.getCaseDetails());
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
