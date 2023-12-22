@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -24,25 +25,21 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @RunWith(MockitoJUnitRunner.class)
-@Ignore
 public class ManageDocumentsControllerTest {
 
     @InjectMocks
@@ -50,6 +47,8 @@ public class ManageDocumentsControllerTest {
 
     @Mock
     ManageDocumentsService manageDocumentsService;
+    @Mock
+    UserService userService;
 
     @Mock
     AllTabServiceImpl tabService;
@@ -162,6 +161,23 @@ public class ManageDocumentsControllerTest {
         verify(tabService).updateAllTabsIncludingConfTab(caseData);
         Assert.assertEquals("# Documents submitted",abc.getBody().getConfirmationHeader());
         verifyNoMoreInteractions(tabService);
+
+    }
+    @Test
+    public void testCopyManageDocsMid() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        UserDetails userDetailsSolicitorRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(SOLICITOR_ROLE))
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        manageDocumentsController.copyManageDocsMid(auth, callbackRequest);
+        verify(manageDocumentsService).precheckDocumentField(callbackRequest);
+        verifyNoMoreInteractions(manageDocumentsService);
 
     }
 
