@@ -118,7 +118,8 @@ public class CaseDataMapper {
                     .readValue(c100RebuildData.getC100RebuildOtherChildrenDetails(), C100RebuildOtherChildrenDetailsElements.class);
             updateOtherChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildOtherChildrenDetailsElements);
         }
-
+        
+        //TODO: Ensure lang preference is captured in C100 application creation journey and mapped accordingly and remove the below condition.
         if (isNotEmpty(c100RebuildData.getC100RebuildReasonableAdjustments())) {
             C100RebuildReasonableAdjustmentsElements c100RebuildReasonableAdjustmentsElements = mapper
                     .readValue(c100RebuildData.getC100RebuildReasonableAdjustments(), C100RebuildReasonableAdjustmentsElements.class);
