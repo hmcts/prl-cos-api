@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -499,8 +500,9 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
-    ) {
+    ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            log.info("/send-to-gatekeeper::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
