@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.TypeOfNocEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
+import uk.gov.hmcts.reform.prl.handlers.service.CaseEventHandlerService;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -113,6 +114,7 @@ public class NoticeOfChangePartiesService {
     private final OrganisationService organisationService;
 
     private final CaseEventService caseEventService;
+    private final CaseEventHandlerService caseEventHandlerService;
 
     public static final String REPRESENTATIVE_REMOVED_LABEL = "# Representative removed";
 
@@ -284,7 +286,6 @@ public class NoticeOfChangePartiesService {
                 changeOrganisationRequest.getOrganisationToAdd().getOrganisationID()
             );
         }
-
         tabService.updatePartyDetailsForNoc(
             null,
             systemAuthorisation,
