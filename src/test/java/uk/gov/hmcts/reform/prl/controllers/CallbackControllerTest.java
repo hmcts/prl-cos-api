@@ -2662,4 +2662,12 @@ public class CallbackControllerTest {
         assertEquals("The selected user does not have right roles to assign this case",
             aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
     }
+
+    @Test
+    public void fetchRoleAssignmentUserHasRightRoles() {
+        when(roleAssignmentService.validateIfUserHasRightRoles(authToken, CallbackRequest.builder().build())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
 }

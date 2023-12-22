@@ -110,8 +110,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
 
-            String actorId = null != caseDataUpdated.get(JUDGE_NAME) ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0] :
-                getIdamId(caseDataUpdated.get(JUDGE_NAME))[0];
+            String actorId = getIdamId(caseDataUpdated.get(JUDGE_NAME))[0];
             roleAssignmentService.createRoleAssignment(
                 authorisation,
                 callbackRequest.getCaseDetails(),
