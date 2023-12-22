@@ -50,6 +50,18 @@ public class ManageDocumentsControllerFunctionalTest {
             .body("data.caseTypeOfApplication", equalTo("C100"))
             .assertThat().statusCode(200);
     }
+    @Test
+    public void givenManageDocuments_whenContinueButtonIsClicked() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/copy-manage-docs-mid")
+            .then()
+            .assertThat().statusCode(200);
+    }
 
     @Test
     public void givenManageDocuments_whenCopy_manage_docsEndPoint_thenRespWithCopiedDocuments() throws Exception {
