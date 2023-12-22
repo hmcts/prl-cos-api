@@ -45,6 +45,8 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+  main:
+    allow-circular-references: true
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
@@ -160,6 +162,13 @@ notify:
 
 send-grid:
   api-key: ${SEND_GRID_API_KEY:xxxxxxxx}
+  notification:
+    email:
+      templates:
+        english:
+          SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
+        welsh:
+          SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}

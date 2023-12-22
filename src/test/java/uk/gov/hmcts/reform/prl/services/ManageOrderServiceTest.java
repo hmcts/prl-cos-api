@@ -15,12 +15,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
@@ -100,6 +102,8 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
@@ -1691,11 +1695,11 @@ public class ManageOrderServiceTest {
                                                        .emailInformation(EmailInformation.builder().emailName("").build())
                                                        .build())))
             .childOption(DynamicMultiSelectList.builder()
-                                   .listItems(elements)
-                                   .build())
-            .otherParties(DynamicMultiSelectList.builder()
                              .listItems(elements)
                              .build())
+            .otherParties(DynamicMultiSelectList.builder()
+                              .listItems(elements)
+                              .build())
             .serveToRespondentOptions(YesOrNo.Yes)
             .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
@@ -2655,6 +2659,7 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders.toBuilder()
                               .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
                               .build())
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.No).build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
@@ -2808,7 +2813,7 @@ public class ManageOrderServiceTest {
             .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
             .hearingID(98765L)
             .hearingDaySchedule(Collections.singletonList(
-                    HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(null).build()))
+                HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(null).build()))
             .build();
         Hearings hearings = Hearings.hearingsWith()
             .caseRef("123")
@@ -3280,7 +3285,7 @@ public class ManageOrderServiceTest {
     public void testGetGeneratedDocument() {
         GeneratedDocumentInfo generatedDocumentInfo1 = GeneratedDocumentInfo.builder().build();
         assertNotNull(manageOrderService.getGeneratedDocument(
-                                                       generatedDocumentInfo1, true, new HashMap<>())
+            generatedDocumentInfo1, true, new HashMap<>())
         );
     }
 
@@ -3293,7 +3298,30 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testSetFieldsForWaTaskForCreateOrder() {
+    public void testSetFieldsForWaTaskForJudgeCreateOrder() {
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .roles(List.of(Roles.JUDGE.getValue())).build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
+            .manageOrders(ManageOrders.builder().build())
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .build();
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        assertNotNull(response);
+        assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
+        assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
+    }
+
+    @Test
+    public void testSetFieldsForWaTaskForCourtAdminCreateOrder() {
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
         CaseData caseData = CaseData.builder()
@@ -3311,8 +3339,8 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
         assertNotNull(response);
-        assertTrue(response.containsKey("orderNameForWA"));
-        assertNotNull(response.get("orderNameForWA"));
+        assertTrue(response.containsKey(WA_ORDER_NAME_ADMIN_CREATED));
+        assertNotNull(response.get(WA_ORDER_NAME_ADMIN_CREATED));
     }
 
     @Test
@@ -3334,8 +3362,141 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
         assertNotNull(response);
-        assertTrue(response.containsKey("orderNameForWA"));
-        assertNotNull(response.get("orderNameForWA"));
+        assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
+        assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
+    }
+
+    @Test
+    public void testGetAdditionalRequirementsForHearingReqForOtherOrderDraft() {
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalDetailsForHearingDateOptions("aaaa")
+            .build();
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalDetailsForHearingDateOptions("bbbb")
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalDetailsForHearingDateOptions("cccc")
+            .build();
+        ordersHearingDetails.add(element(hearingData));
+        ordersHearingDetails.add(element(hearingData1));
+        ordersHearingDetails.add(element(hearingData2));
+
+        String response = manageOrderService.getAdditionalRequirementsForHearingReq(
+            ordersHearingDetails,
+            true,
+            null,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections,
+            C21OrderOptionsEnum.c21other
+        );
+        assertNotNull(response);
+        assertEquals("bbbb, cccc", response);
+    }
+
+    @Test
+    public void testGetAdditionalRequirementsForHearingReqForOtherOrderFinal() {
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalDetailsForHearingDateOptions("aaaa")
+            .build();
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalDetailsForHearingDateOptions("bbbb")
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalDetailsForHearingDateOptions("cccc")
+            .build();
+        ordersHearingDetails.add(element(hearingData));
+        ordersHearingDetails.add(element(hearingData1));
+        ordersHearingDetails.add(element(hearingData2));
+
+        String response = manageOrderService.getAdditionalRequirementsForHearingReq(
+            ordersHearingDetails,
+            false,
+            null,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections,
+            C21OrderOptionsEnum.c21other
+        );
+        assertNotNull(response);
+        assertEquals("cccc", response);
+    }
+
+    @Test
+    public void testGetAdditionalRequirementsForHearingReqForSdoDraft() {
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalDetailsForHearingDateOptions("aaaa")
+            .build();
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalDetailsForHearingDateOptions("bbbb")
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalDetailsForHearingDateOptions("cccc")
+            .build();
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoUrgentHearingDetails(hearingData)
+            .sdoFhdraHearingDetails(hearingData1)
+            .sdoDraHearingDetails(hearingData2)
+            .sdoSettlementHearingDetails(hearingData)
+            .sdoPermissionHearingDetails(hearingData)
+            .sdoSecondHearingDetails(hearingData)
+            .build();
+
+
+        String response = manageOrderService.getAdditionalRequirementsForHearingReq(
+            ordersHearingDetails,
+            true,
+            standardDirectionOrder,
+            CreateSelectOrderOptionsEnum.standardDirectionsOrder,
+            null
+        );
+        assertNotNull(response);
+        assertEquals("bbbb, cccc", response);
+    }
+
+    @Test
+    public void testGetAdditionalRequirementsForHearingReqForSdoFinal() {
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalDetailsForHearingDateOptions("aaaa")
+            .build();
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalDetailsForHearingDateOptions("bbbb")
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalDetailsForHearingDateOptions("cccc")
+            .build();
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoUrgentHearingDetails(hearingData)
+            .sdoFhdraHearingDetails(hearingData1)
+            .sdoDraHearingDetails(hearingData2)
+            .sdoSettlementHearingDetails(hearingData)
+            .sdoPermissionHearingDetails(hearingData)
+            .sdoSecondHearingDetails(hearingData)
+            .build();
+
+        String response = manageOrderService.getAdditionalRequirementsForHearingReq(
+            ordersHearingDetails,
+            false,
+            standardDirectionOrder,
+            CreateSelectOrderOptionsEnum.standardDirectionsOrder,
+            null
+        );
+        assertNotNull(response);
+        assertEquals("cccc", response);
     }
 
     @Test
