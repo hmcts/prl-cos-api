@@ -1354,10 +1354,10 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService, Mockito.times(1)).send(Mockito.anyString(),
-                                                            Mockito.any(),
-                                                            Mockito.any(), Mockito.any()
-        );
+        Mockito.verify(sendgridService, Mockito.times(1))
+            .sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                   anyString(),
+                                                   any(SendgridEmailConfig.class));
     }
 
     @Test
@@ -1405,10 +1405,10 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService, Mockito.times(2)).send(Mockito.anyString(),
-                                                            Mockito.any(),
-                                                            Mockito.any(), Mockito.any()
-        );
+        Mockito.verify(sendgridService, Mockito.times(2))
+            .sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                   anyString(),
+                                                   any(SendgridEmailConfig.class));
     }
 
     @Test
@@ -1474,10 +1474,10 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService, Mockito.times(1)).send(Mockito.anyString(),
-                                                            Mockito.any(),
-                                                            Mockito.any(), Mockito.any()
-        );
+        Mockito.verify(sendgridService, Mockito.times(1))
+            .sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                   anyString(),
+                                                   any(SendgridEmailConfig.class));
     }
 
     @Test
@@ -1817,9 +1817,10 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+        Mockito.verify(sendgridService, Mockito.times(1))
+            .sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+                                                   anyString(),
+                                                   any(SendgridEmailConfig.class));
     }
 
     @Test
