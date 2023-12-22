@@ -142,10 +142,10 @@ send-grid:
       templates:
         english:
           SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
-          SERVER_ORDER_APPLICANT_RESPONDENT: d-0dec5ed3abd84dbeb935dc2319a66fee
+          SERVE_ORDER_APPLICANT_RESPONDENT: d-0dec5ed3abd84dbeb935dc2319a66fee
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
-          SERVER_ORDER_APPLICANT_RESPONDENT: d-0dec5ed3abd84dbeb935dc2319a66fee
+          SERVE_ORDER_APPLICANT_RESPONDENT: d-0dec5ed3abd84dbeb935dc2319a66fee
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
