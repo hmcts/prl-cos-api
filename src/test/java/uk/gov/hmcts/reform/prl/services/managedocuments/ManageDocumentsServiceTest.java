@@ -541,6 +541,7 @@ public class ManageDocumentsServiceTest {
             .documentCategories(dynamicList)
             .isRestricted(YesOrNo.Yes)
             .isConfidential(YesOrNo.Yes)
+            .restrictedDetails(null)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
