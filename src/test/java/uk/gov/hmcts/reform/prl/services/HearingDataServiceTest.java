@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -65,12 +64,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_HEARINGCHILD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class HearingDataServiceTest {
 
     @InjectMocks
@@ -246,11 +243,6 @@ public class HearingDataServiceTest {
             listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
-        JudicialUser judicialUser = JudicialUser.builder()
-            .personalCode("Test")
-            .idamId("Test")
-            .build();
-
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
             .label("In Person")
@@ -267,7 +259,6 @@ public class HearingDataServiceTest {
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
             .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -286,6 +277,10 @@ public class HearingDataServiceTest {
                 .retrievedCourtLocations(dynamicList)
                 .hearingListedLinkedCases(dynamicList)
                 .build();
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .idamId("Test")
+            .build();
         HearingData hearingData = HearingData.builder()
             .hearingTypes(dynamicList)
             .confirmedHearingDates(dynamicList)
@@ -343,11 +338,6 @@ public class HearingDataServiceTest {
             listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
-        JudicialUser judicialUser = JudicialUser.builder()
-            .personalCode("Test")
-            .idamId("Test")
-            .build();
-
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
             .label("In Person")
@@ -364,7 +354,6 @@ public class HearingDataServiceTest {
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
             .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -383,6 +372,10 @@ public class HearingDataServiceTest {
                 .retrievedCourtLocations(dynamicList)
                 .hearingListedLinkedCases(dynamicList)
                 .build();
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .idamId("Test")
+            .build();
         HearingData hearingData = HearingData.builder()
             .hearingTypes(dynamicList)
             .confirmedHearingDates(dynamicList)
@@ -436,10 +429,6 @@ public class HearingDataServiceTest {
             listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
-        JudicialUser judicialUser = JudicialUser.builder()
-            .personalCode("Test")
-            .build();
-
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
             .label("In Person")
@@ -448,15 +437,14 @@ public class HearingDataServiceTest {
         dynamicListElementsList.add(dynamicListElement2);
         List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
         JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
-            //.emailId("Test")
-            //.fullName("Test")
-            //.surname("Test")
+            .emailId("Test")
+            .fullName("Test")
+            .surname("Test")
             .personalCode("Test")
             .build();
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
-            .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
+            .personalCode(new String[]{"Test", null, null}).build();
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -475,6 +463,9 @@ public class HearingDataServiceTest {
                 .retrievedCourtLocations(dynamicList)
                 .hearingListedLinkedCases(dynamicList)
                 .build();
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .build();
         HearingData hearingData = HearingData.builder()
             .hearingTypes(dynamicList)
             .confirmedHearingDates(dynamicList)
@@ -495,6 +486,7 @@ public class HearingDataServiceTest {
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
             .hearingEstimatedHours("5")
+            .hearingJudgeNameAndEmail(JudicialUser.builder().personalCode("Test").build())
             .hearingEstimatedMinutes("40")
             .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
