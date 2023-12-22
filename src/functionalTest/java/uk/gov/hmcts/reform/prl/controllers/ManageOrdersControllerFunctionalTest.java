@@ -41,6 +41,9 @@ public class ManageOrdersControllerFunctionalTest {
     private static final String VALID_CAFCASS_REQUEST_JSON
         = "requests/cafcass-cymru-send-email-request.json";
 
+    private static final String VALID_SERVER_ORDER_REQUEST_JSON
+        = "requests/serve-order-send-email-to-app-and-resp-request.json";
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -119,4 +122,20 @@ public class ManageOrdersControllerFunctionalTest {
             .post("/case-order-email-notification")
             .then().assertThat().statusCode(500);
     }
+
+    @Test
+    public void givenRequestBody_WhenServeOrderTestSendEmailToApplicantOrRespLip() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_SERVER_ORDER_REQUEST_JSON);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case-order-email-notification")
+            .then().assertThat().statusCode(500);
+    }
+
 }
