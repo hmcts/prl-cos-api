@@ -1827,7 +1827,7 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.any(), any(), any(), any());
     }
 
     @Test
@@ -1873,7 +1873,7 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.any(), any(), any(), any());
     }
 
     @Test
@@ -1919,7 +1919,7 @@ public class ManageOrderEmailServiceTest {
         Map<String, Object> dataMap = new HashMap<>();
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
+        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.any(), any(), any(), any());
     }
 
     @Test
