@@ -404,7 +404,8 @@ public class ManageOrderEmailService {
         caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
     }
 
-    private void handlePersonalServiceNotifications(String authorisation, CaseData caseData, List<Document> orderDocuments, Map<String, Object> dynamicDataForEmail) {
+    private void handlePersonalServiceNotifications(String authorisation, CaseData caseData, List<Document> orderDocuments,
+                                                    Map<String, Object> dynamicDataForEmail) {
         Map<String,String> applicantSolicitors = CaseUtils.getApplicantSolicitorsToNotify(caseData);
         Map.Entry<String,String> firstApplicantSolicitor = applicantSolicitors.entrySet().iterator().next();
         dynamicDataForEmail.put("name", firstApplicantSolicitor.getValue());
