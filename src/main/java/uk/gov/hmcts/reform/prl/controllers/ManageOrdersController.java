@@ -326,7 +326,7 @@ public class ManageOrdersController {
 
             if (null != caseData.getManageOrders().getNameOfJudgeToReviewOrder()) {
                 actorId = caseData.getManageOrders().getNameOfJudgeToReviewOrder().getIdamId();
-            } else if (null != caseData.getManageOrders().getNameOfLaToReviewOrder().getValueCode()) {
+            } else if (null != caseData.getManageOrders().getNameOfLaToReviewOrder()) {
                 actorId = caseData.getManageOrders().getNameOfLaToReviewOrder().getValueCode();
             }
 
