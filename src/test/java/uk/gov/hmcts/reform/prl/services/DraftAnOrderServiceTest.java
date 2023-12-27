@@ -2752,8 +2752,7 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest,
-                                                                    List.of(element(HearingData.builder().build())),
-                                                                    false
+                                                                    List.of(element(HearingData.builder().build()))
         );
         assertNotNull(stringObjectMap);
     }
@@ -2810,9 +2809,7 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest,
-                                                                    List.of(element(HearingData.builder().build())),
-                                                                    true
-        );
+                                                                    List.of(element(HearingData.builder().build())));
         assertNotNull(stringObjectMap);
     }
 
@@ -4222,8 +4219,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest,
-                                                                    null, false
-        );
+                                                                    null);
         assertNotNull(stringObjectMap);
     }
 
@@ -4763,7 +4759,7 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
     }
-  
+
     @Test
     public void testHandleDocumentGenerationYesToEditOrder() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
