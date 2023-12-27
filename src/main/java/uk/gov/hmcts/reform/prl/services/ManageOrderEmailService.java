@@ -452,6 +452,7 @@ public class ManageOrderEmailService {
 
         emailInformation.forEach(value -> {
             try {
+                log.info("** dynamicDataForEmail : {}", dynamicData);
                 sendgridService.sendEmailUsingTemplateWithAttachments(
                     SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
                     authorisation,
@@ -659,6 +660,7 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
                     try {
+                        log.info("** dynamicDataForEmail : {}", dynamicDataForEmail);
                         sendgridService.sendEmailUsingTemplateWithAttachments(
                             SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR,
                             authorisation,
@@ -697,6 +699,7 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
                     try {
+                        log.info("** dynamicDataForEmail : {}", dynamicDataForEmail);
                         sendgridService.sendEmailUsingTemplateWithAttachments(
                             SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR,
                             authorisation,
