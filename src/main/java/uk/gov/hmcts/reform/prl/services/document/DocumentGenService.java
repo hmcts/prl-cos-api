@@ -236,13 +236,8 @@ public class DocumentGenService {
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_filename}")
     protected String daListOnNoticeFl404bFile;
 
-    private DgsService dgsService;
-
     @Autowired
-    public DocumentGenService(DgsService dgsService, AuthTokenGenerator authTokenGenerator) {
-        this.dgsService = dgsService;
-        this.authTokenGenerator = authTokenGenerator;
-    }
+    DgsService dgsService;
 
     @Autowired
     DocumentLanguageService documentLanguageService;
