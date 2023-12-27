@@ -87,6 +87,7 @@ public class ReviewDocumentServiceTest {
     QuarantineLegalDoc quarantineLegalDoc;
     private String authToken;
     private String s2sToken;
+
     @Before
     public void init() {
 
