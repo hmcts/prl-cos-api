@@ -198,7 +198,7 @@ public class ManageOrders implements MappableObject {
     private final String cafcassCymruEmail;
     @JsonProperty("serveOtherPartiesCA")
     private final List<OtherOrganisationOptions> serveOtherPartiesCA;
-    @JsonProperty("serveOptionsCaDaOther")
+    @JsonProperty("serveOrgDetailsList")
     private final List<Element<ServeOrgDetails>> serveOrgDetailsList;
 
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA;
