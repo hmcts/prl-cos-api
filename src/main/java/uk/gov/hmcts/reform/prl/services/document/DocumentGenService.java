@@ -239,12 +239,6 @@ public class DocumentGenService {
     private DgsService dgsService;
 
     @Autowired
-    public DocumentGenService(DgsService dgsService, AuthTokenGenerator authTokenGenerator) {
-        this.dgsService = dgsService;
-        this.authTokenGenerator = authTokenGenerator;
-    }
-
-    @Autowired
     DocumentLanguageService documentLanguageService;
 
     @Autowired
