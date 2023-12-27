@@ -253,8 +253,10 @@ public class BundleCreateRequestMapper {
         ordersFromCaseData.forEach(orderDetailsElement -> {
             OrderDetails orderDetails = orderDetailsElement.getValue();
             Document document = orderDetails.getOrderDocument();
-            orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
-                .documentFileName(document.getDocumentFileName()).documentLink(document).build());
+            if (document != null) {
+                orders.add(BundlingRequestDocument.builder().documentGroup(BundlingDocGroupEnum.ordersSubmittedWithApplication)
+                        .documentFileName(document.getDocumentFileName()).documentLink(document).build());
+            }
         });
         return ElementUtils.wrapElements(orders);
     }
