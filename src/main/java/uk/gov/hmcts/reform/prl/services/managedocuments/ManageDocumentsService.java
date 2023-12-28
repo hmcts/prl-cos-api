@@ -32,7 +32,6 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -175,12 +174,14 @@ public class ManageDocumentsService {
         }
     }
 
-    public boolean checkIfUserIsCourtStaff(String authorisation, CallbackRequest callbackRequest) {
+    public boolean checkIfUserIsCourtStaff(String authorisation) {
+        return userService.getUserDetails(authorisation).getRoles().stream().anyMatch(ROLES::contains);
+    }
+
+    public boolean isCourtSelectedInDocumentParty(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Optional<Element<ManageDocuments>> courtUserSelected = caseData.getManageDocuments().stream()
-            .filter(element -> DocumentPartyEnum.COURT.equals(element.getValue().getDocumentParty())).findFirst();
-        return userService.getUserDetails(authorisation).getRoles().stream().anyMatch(ROLES::contains)
-            && courtUserSelected.isPresent();
+        return caseData.getManageDocuments().stream()
+            .anyMatch(element -> DocumentPartyEnum.COURT.equals(element.getValue().getDocumentParty()));
     }
 
     private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {

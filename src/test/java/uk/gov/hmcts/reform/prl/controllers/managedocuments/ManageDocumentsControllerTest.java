@@ -166,7 +166,8 @@ public class ManageDocumentsControllerTest {
 
     @Test
     public void testValidateCourtUserShouldReturnError() {
-        when(manageDocumentsService.checkIfUserIsCourtStaff(auth,callbackRequest)).thenReturn(false);
+        when(manageDocumentsService.checkIfUserIsCourtStaff(auth)).thenReturn(false);
+        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
         Assert.assertNotNull(response.getErrors());
         Assert.assertTrue(!response.getErrors().isEmpty());
@@ -175,7 +176,27 @@ public class ManageDocumentsControllerTest {
 
     @Test
     public void testValidateCourtUserShouldAllowToProcess() {
-        when(manageDocumentsService.checkIfUserIsCourtStaff(auth,callbackRequest)).thenReturn(true);
+        when(manageDocumentsService.checkIfUserIsCourtStaff(auth)).thenReturn(true);
+        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
+        Assert.assertNotNull(response.getData());
+        Assert.assertEquals(12345678L, response.getData().get("id"));
+
+    }
+
+    @Test
+    public void testValidateOtherUserShouldReturnError() {
+        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
+        when(manageDocumentsService.checkIfUserIsCourtStaff(auth)).thenReturn(false);
+        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
+        Assert.assertNotNull(response.getErrors());
+        Assert.assertTrue(!response.getErrors().isEmpty());
+        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'", response.getErrors().get(0));
+    }
+
+    @Test
+    public void testValidateOtherUserShouldAllowToProcess() {
+        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(false);
         AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
         Assert.assertNotNull(response.getData());
         Assert.assertEquals(12345678L, response.getData().get("id"));

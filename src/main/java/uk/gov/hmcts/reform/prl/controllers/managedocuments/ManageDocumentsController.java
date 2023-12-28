@@ -104,7 +104,8 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        if (!manageDocumentsService.checkIfUserIsCourtStaff(authorisation, callbackRequest)) {
+        if (manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)
+            && !manageDocumentsService.checkIfUserIsCourtStaff(authorisation)) {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
                 .build();

@@ -547,131 +547,6 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void returnTrueIfUserIsCourtAdminAndSelectedOnBehalfOfCourt() {
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.RESPONDENT)
-            .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-        ManageDocuments manageDocumentWithCourtUser = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.COURT)
-            .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-
-        Element<ManageDocuments> manageDocumentsElement1 = element(manageDocuments);
-        Element<ManageDocuments> manageDocumentsElement2 = element(manageDocumentWithCourtUser);
-        List<Element<ManageDocuments>> manageDocumentsList = List.of(manageDocumentsElement1,manageDocumentsElement2);
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments",manageDocumentsList);
-        CaseData caseData = CaseData.builder()
-            .manageDocuments(manageDocumentsList).build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        Assert.assertTrue(manageDocumentsService.checkIfUserIsCourtStaff(auth, callbackRequest));
-
-    }
-
-    @Test
-    public void returnFalseIfUserIsCourtAdminAndSelectedOnBehalfOfOtherUsers() {
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.RESPONDENT)
-            .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-        ManageDocuments manageDocumentWithCourtUser = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.APPLICANT)
-            .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-
-        Element<ManageDocuments> manageDocumentsElement1 = element(manageDocuments);
-        Element<ManageDocuments> manageDocumentsElement2 = element(manageDocumentWithCourtUser);
-        List<Element<ManageDocuments>> manageDocumentsList = List.of(manageDocumentsElement1,manageDocumentsElement2);
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments",manageDocumentsList);
-        CaseData caseData = CaseData.builder()
-            .manageDocuments(manageDocumentsList).build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        Assert.assertFalse(manageDocumentsService.checkIfUserIsCourtStaff(auth, callbackRequest));
-
-    }
-
-    @Test
-    public void returnFalseIfUserIsSolicitorUserAndSelectedCourt() {
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.RESPONDENT)
-            .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-        ManageDocuments manageDocumentWithCourtUser = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.COURT)
-            .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-
-        Element<ManageDocuments> manageDocumentsElement1 = element(manageDocuments);
-        Element<ManageDocuments> manageDocumentsElement2 = element(manageDocumentWithCourtUser);
-        List<Element<ManageDocuments>> manageDocumentsList = List.of(manageDocumentsElement1,manageDocumentsElement2);
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments",manageDocumentsList);
-        CaseData caseData = CaseData.builder()
-            .manageDocuments(manageDocumentsList).build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        Assert.assertFalse(manageDocumentsService.checkIfUserIsCourtStaff(auth, callbackRequest));
-
-    }
-
-    @Test
-    public void returnFalseIfUserIsSolicitorUserAndSelectedOnBehalfOfOtherUser() {
-        ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.RESPONDENT)
-            .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-        ManageDocuments manageDocumentWithCourtUser = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.APPLICANT)
-            .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
-            .build();
-
-        Element<ManageDocuments> manageDocumentsElement1 = element(manageDocuments);
-        Element<ManageDocuments> manageDocumentsElement2 = element(manageDocumentWithCourtUser);
-        List<Element<ManageDocuments>> manageDocumentsList = List.of(manageDocumentsElement1,manageDocumentsElement2);
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        caseDataMapInitial.put("manageDocuments",manageDocumentsList);
-        CaseData caseData = CaseData.builder()
-            .manageDocuments(manageDocumentsList).build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        Assert.assertFalse(manageDocumentsService.checkIfUserIsCourtStaff(auth, callbackRequest));
-
-    }
-
-
-    @Test
     public void testCopyDocumentIfNotRestrictedAndUploadedOnBehalfOfCourt() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -712,6 +587,68 @@ public class ManageDocumentsServiceTest {
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
         assertEquals(1,courtStaffUploadDocListDocTab.size());
+    }
+
+    @Test
+    public void returnTrueIfUserIsCourtStaff() {
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
+
+        Assert.assertTrue(manageDocumentsService.checkIfUserIsCourtStaff(auth));
+    }
+
+    @Test
+    public void returnFalseIfUserIsOtherThanCourtStaff() {
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        Assert.assertFalse(manageDocumentsService.checkIfUserIsCourtStaff(auth));
+    }
+
+    @Test
+    public void returnTrueIfCourtSelectedInDocumentParty() {
+        ManageDocuments manageDocument = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.COURT)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(new ArrayList<>())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+        List<Element<ManageDocuments>> manageDocumentsList = List.of(element(manageDocument));
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocumentsList);
+        CaseData caseData = CaseData.builder()
+            .manageDocuments(manageDocumentsList).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        Assert.assertTrue(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest));
+    }
+
+    @Test
+    public void returnFalseIfCourtNotSelectedInDocumentParty() {
+        ManageDocuments manageDocument1 = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.APPLICANT)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(new ArrayList<>())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+        ManageDocuments manageDocument2 = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.RESPONDENT)
+            .documentCategories(dynamicList)
+            .documentRestrictCheckbox(new ArrayList<>())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+        List<Element<ManageDocuments>> manageDocumentsList = List.of(element(manageDocument1), element(manageDocument2));
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocumentsList);
+        CaseData caseData = CaseData.builder()
+            .manageDocuments(manageDocumentsList).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        Assert.assertFalse(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest));
     }
 }
 
