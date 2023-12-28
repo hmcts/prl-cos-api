@@ -62,12 +62,14 @@ public class DgsService {
         //Populate applicants/respondents & representing solicitors names
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
-            log.info("Party names case data map {}", tempCaseDetails);
         }
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
+        log.info("Applicant name 1 {}", tempCaseDetails.get("applicantName1"));
+        log.info("Case data map {}", tempCaseDetails);
+        tempCaseDetails.put("tempKey", "tempValue");
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =
