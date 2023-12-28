@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
-import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
