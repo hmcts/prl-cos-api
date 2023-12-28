@@ -239,7 +239,7 @@ public class EditAndApproveDraftOrderController {
             boolean isOrderEdited = false;
             isOrderEdited = draftAnOrderService.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited);
             if (isOrderEdited) {
-                response.put("doYouWantToEditTheOrder", caseData.getDoYouWantToEditTheOrder());
+                response.put("doYouWantToEditTheOrder", Yes);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(response).build();
@@ -314,9 +314,6 @@ public class EditAndApproveDraftOrderController {
             }
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             caseDataUpdated.put(STATE, caseData.getState());
-            /*if (!CollectionUtils.isEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
-                caseDataUpdated.put("serveOrderAdditionalDocuments", null);
-            }*/
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
