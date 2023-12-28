@@ -407,20 +407,22 @@ public class ManageOrderEmailService {
     private void handlePersonalServiceNotifications(String authorisation, CaseData caseData, List<Document> orderDocuments,
                                                     Map<String, Object> dynamicDataForEmail) {
         Map<String,String> applicantSolicitors = CaseUtils.getApplicantSolicitorsToNotify(caseData);
-        Map.Entry<String,String> firstApplicantSolicitor = applicantSolicitors.entrySet().iterator().next();
-        dynamicDataForEmail.put("name", firstApplicantSolicitor.getValue());
-        log.info("*** Dynamic content {}", dynamicDataForEmail);
-        try {
-            sendgridService.sendEmailUsingTemplateWithAttachments(
-                SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR,
-                authorisation,
-                SendgridEmailConfig.builder().toEmailAddress(firstApplicantSolicitor.getKey())
-                    .dynamicTemplateData(dynamicDataForEmail)
-                    .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
-            );
-        } catch (IOException e) {
-            log.error("There is a failure in sending email to solicitor on {} with exception {}",
-                      firstApplicantSolicitor.getKey(),e.getMessage());
+        if (!applicantSolicitors.isEmpty()) {
+            Map.Entry<String,String> firstApplicantSolicitor = applicantSolicitors.entrySet().iterator().next();
+            dynamicDataForEmail.put("name", firstApplicantSolicitor.getValue());
+            log.info("*** Dynamic content {}", dynamicDataForEmail);
+            try {
+                sendgridService.sendEmailUsingTemplateWithAttachments(
+                    SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR,
+                    authorisation,
+                    SendgridEmailConfig.builder().toEmailAddress(firstApplicantSolicitor.getKey())
+                        .dynamicTemplateData(dynamicDataForEmail)
+                        .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
+                );
+            } catch (IOException e) {
+                log.error("There is a failure in sending email to solicitor on {} with exception {}",
+                          firstApplicantSolicitor.getKey(),e.getMessage());
+            }
         }
     }
 
@@ -801,5 +803,4 @@ public class ManageOrderEmailService {
     private boolean isSolicitorEmailExists(PartyDetails party) {
         return StringUtils.isNotEmpty(party.getSolicitorEmail());
     }
-
 }
