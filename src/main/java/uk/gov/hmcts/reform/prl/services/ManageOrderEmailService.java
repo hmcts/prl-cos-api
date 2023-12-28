@@ -338,6 +338,7 @@ public class ManageOrderEmailService {
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
         List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
         log.info("inside SendEmailWhenOrderIsServed**");
+        log.info("*** Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
@@ -378,6 +379,7 @@ public class ManageOrderEmailService {
                 });
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
+            log.info("*** Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
             handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)) {
