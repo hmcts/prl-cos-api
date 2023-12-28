@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -38,9 +37,6 @@ public class DgsServiceTest {
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
-    @Mock
-    private HearingDataService hearingDataService;
-
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
     private CaseData caseData;
@@ -70,11 +66,8 @@ public class DgsServiceTest {
             .build();
         when(dgsApiClient.generateDocument(Mockito.anyString(), Mockito.any(GenerateDocumentRequest.class)))
             .thenReturn(generatedDocumentInfo);
-        //Map<String, Object> caseDataMap = new HashMap<>();
-        //Mockito.doNothing().when(hearingDataService).populatePartiesAndSolicitorsNames(caseData, caseDataMap);
     }
 
-    @Ignore
     @Test
     public void testToGenerateDocument() throws Exception {
         generatedDocumentInfo = GeneratedDocumentInfo.builder()
@@ -121,7 +114,6 @@ public class DgsServiceTest {
         assertEquals("Error generating and storing document for case", exception.getMessage());
     }
 
-    @Ignore
     @Test
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
         dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE);
