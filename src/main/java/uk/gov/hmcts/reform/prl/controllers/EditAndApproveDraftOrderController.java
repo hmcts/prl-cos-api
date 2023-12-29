@@ -370,10 +370,6 @@ public class EditAndApproveDraftOrderController {
                 "internal-update-all-tabs",
                 caseDataUpdated
             );
-            ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
-                .ok(SubmittedCallbackResponse.builder()
-                        .confirmationHeader(CONFIRMATION_HEADER)
-                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
             return responseEntity;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
