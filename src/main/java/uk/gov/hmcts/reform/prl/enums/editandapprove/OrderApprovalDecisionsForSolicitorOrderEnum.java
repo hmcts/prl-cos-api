@@ -10,13 +10,15 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum JudgeApprovalDecisionsCourtAdminEnum {
+public enum OrderApprovalDecisionsForSolicitorOrderEnum {
     @JsonProperty("sendToAdminToServe")
     sendToAdminToServe("sendToAdminToServe", "Send to admin to serve"),
     @JsonProperty("giveAdminFurtherDirectionsAndServe")
     giveAdminFurtherDirectionsAndServe("giveAdminFurtherDirectionsAndServe", "Give admin further directions then serve"),
     @JsonProperty("editTheOrderAndServe")
-    editTheOrderAndServe("editTheOrderAndServe", "Edit the order myself and send to admin to serve");
+    editTheOrderAndServe("editTheOrderAndServe", "Edit the order myself and send to admin to serve"),
+    @JsonProperty("askLegalRepToMakeChanges")
+    askLegalRepToMakeChanges("askLegalRepToMakeChanges", "Ask the legal representative to make changes");
 
     private final String id;
     private final String displayedValue;
@@ -27,7 +29,7 @@ public enum JudgeApprovalDecisionsCourtAdminEnum {
     }
 
     @JsonCreator
-    public static JudgeApprovalDecisionsCourtAdminEnum getValue(String key) {
-        return JudgeApprovalDecisionsCourtAdminEnum.valueOf(key);
+    public static OrderApprovalDecisionsForSolicitorOrderEnum getValue(String key) {
+        return OrderApprovalDecisionsForSolicitorOrderEnum.valueOf(key);
     }
 }

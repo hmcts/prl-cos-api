@@ -10,8 +10,8 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsCourtAdminEnum;
-import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -290,9 +290,9 @@ public class ManageOrders implements MappableObject {
     private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
 
     @JsonProperty("whatToDoWithOrderSolicitor")
-    private JudgeApprovalDecisionsSolicitorEnum whatToDoWithOrderSolicitor;
+    private OrderApprovalDecisionsForSolicitorOrderEnum whatToDoWithOrderSolicitor;
     @JsonProperty("whatToDoWithOrderCourtAdmin")
-    private JudgeApprovalDecisionsCourtAdminEnum whatToDoWithOrderCourtAdmin;
+    private OrderApprovalDecisionsForCourtAdminOrderEnum whatToDoWithOrderCourtAdmin;
     @JsonProperty("instructionsToLegalRepresentaive")
     private String instructionsToLegalRepresentaive;
 
