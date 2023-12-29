@@ -12,8 +12,11 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
+import uk.gov.hmcts.reform.prl.models.Element;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data
@@ -61,4 +64,7 @@ public class BaseCaseData {
     //FPET-567 - Added for hiding fields for SDO
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
+
+    @JsonProperty("appSolDraftOrderCollection")
+    private List<Element<DraftOrder>> appSolDraftOrderCollection;
 }

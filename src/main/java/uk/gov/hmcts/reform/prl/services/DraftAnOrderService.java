@@ -195,6 +195,7 @@ public class DraftAnOrderService {
 
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
+        Map<String, Object> draftCollectionMap = new HashMap<>();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType));
@@ -208,8 +209,27 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
+        draftCollectionMap.put(DRAFT_ORDER_COLLECTION, draftOrderList);
+        draftCollectionMap.put("appSolDraftOrderCollection",
+                               getSpecificSolicitorDraftOrderList(
+                                   orderDetails,
+                                   caseData.getAppSolDraftOrderCollection()
+                               )
         );
+
+        return draftCollectionMap;
+    }
+
+    private List<Element<DraftOrder>> getSpecificSolicitorDraftOrderList(Element<DraftOrder> orderDetails,
+                                                                         List<Element<DraftOrder>> appSolDraftOrderCollection) {
+        List<Element<DraftOrder>> appSolicitorDraftOrderList = new ArrayList<>();
+        if (appSolDraftOrderCollection != null) {
+            appSolicitorDraftOrderList.addAll(appSolDraftOrderCollection);
+            appSolicitorDraftOrderList.add(orderDetails);
+        } else {
+            appSolicitorDraftOrderList.add(orderDetails);
+        }
+        return appSolicitorDraftOrderList;
     }
 
     public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType) {
