@@ -58,8 +58,8 @@ public class EditAndApproveDraftOrderController {
     private final AuthorisationService authorisationService;
     private final CoreCaseDataService coreCaseDataService;
 
-    public static final String CONFIRMATION_HEADER = "# Order approved";
-    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
+    private static final String CONFIRMATION_HEADER = "# Order approved";
+    private static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
         ### What happens next \n We will send this order to admin.
         \n\n If you have included further directions, admin will also receive them.
         """;
@@ -370,10 +370,6 @@ public class EditAndApproveDraftOrderController {
                 "internal-update-all-tabs",
                 caseDataUpdated
             );
-            ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
-                .ok(SubmittedCallbackResponse.builder()
-                        .confirmationHeader(CONFIRMATION_HEADER)
-                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
             return responseEntity;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
