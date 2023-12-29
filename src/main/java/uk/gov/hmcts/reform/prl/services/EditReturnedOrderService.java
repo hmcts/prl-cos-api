@@ -58,7 +58,6 @@ public class EditReturnedOrderService {
 
 
     public Map<String, Object> getReturnedOrdersDynamicList(CaseData caseData) {
-
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(

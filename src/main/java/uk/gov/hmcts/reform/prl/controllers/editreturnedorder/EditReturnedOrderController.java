@@ -34,9 +34,10 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import javax.ws.rs.core.HttpHeaders;
+
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -96,8 +97,9 @@ public class EditReturnedOrderController {
             );
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
+                Map<String, Object> caseDataUpdated = editReturnedOrderService.getReturnedOrdersDynamicList(caseData);
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(editReturnedOrderService.getReturnedOrdersDynamicList(caseData)).build();
+                    .data(caseDataUpdated).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
             }
@@ -139,11 +141,6 @@ public class EditReturnedOrderController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Court admin created order options {}",caseDataUpdated.get("whatToDoWithOrderCourtAdmin"));
-            ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
-                .ok(SubmittedCallbackResponse.builder()
-                        .confirmationHeader(CONFIRMATION_HEADER)
-                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
-
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
             coreCaseDataService.triggerEvent(
@@ -153,7 +150,10 @@ public class EditReturnedOrderController {
                 "internal-update-all-tabs",
                 caseDataUpdated
             );
-            return responseEntity;
+            return ResponseEntity
+                .ok(SubmittedCallbackResponse.builder()
+                        .confirmationHeader(CONFIRMATION_HEADER)
+                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
