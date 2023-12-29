@@ -685,6 +685,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private final List<Element<DraftOrder>> draftOrderCollection;
     private Object draftOrdersDynamicList;
+    private Object rejectedOrdersDynamicList;
 
     @JsonUnwrapped
     private final NoticeOfChangeAnswersData noticeOfChangeAnswersData = NoticeOfChangeAnswersData.builder().build();

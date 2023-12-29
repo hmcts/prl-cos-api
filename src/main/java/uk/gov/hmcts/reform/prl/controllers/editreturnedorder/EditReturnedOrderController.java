@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-
 import java.util.List;
 import java.util.Map;
 import javax.ws.rs.core.HttpHeaders;
@@ -86,7 +85,7 @@ public class EditReturnedOrderController {
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse populatePreviewOrderWhenOrderUploaded(
+    public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
@@ -108,17 +107,42 @@ public class EditReturnedOrderController {
         }
     }
 
+    @PostMapping(path = "/mid-event/populate-instructions", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to show preview order in next screen for upload order")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse populateInstructionsToSolicitor(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            if (caseData.getDraftOrderCollection() != null
+                && !caseData.getDraftOrderCollection().isEmpty()) {
+                Map<String, Object> caseDataUpdated = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(caseDataUpdated).build();
+            } else {
+                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
     @PostMapping(path = "/about-to-submit", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
     @SecurityRequirement(name = "Bearer Authentication")
-    public AboutToStartOrSubmitCallbackResponse saveOrderDetails(
+    public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
-    ) throws Exception {
+    ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -133,7 +157,7 @@ public class EditReturnedOrderController {
     @PostMapping(path = "/edit-and-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to display confirmation and send notifications")
     @SecurityRequirement(name = "Bearer Authentication")
-    public ResponseEntity<SubmittedCallbackResponse> handleEditAndApproveSubmitted(
+    public ResponseEntity<SubmittedCallbackResponse> handleEditAndReturnedSubmitted(
         @RequestHeader("Authorization")
         @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,

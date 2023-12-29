@@ -3,11 +3,13 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -15,10 +17,11 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Slf4j
 @Service
@@ -55,6 +58,7 @@ public class EditReturnedOrderService {
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
+    private final DraftAnOrderService draftAnOrderService;
 
 
     public Map<String, Object> getReturnedOrdersDynamicList(CaseData caseData) {
@@ -79,4 +83,33 @@ public class EditReturnedOrderService {
         return caseDataMap;
     }
 
+    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getRejectedOrdersDynamicList());
+        caseDataMap.put(ORDER_NAME, draftAnOrderService.getOrderName(selectedOrder));
+        caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
+        caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
+        caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
+        caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
+        if (selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative() != null) {
+            caseDataMap.put("instructionsToLegalRepresentative", selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative());
+        }
+        caseDataMap.put(
+            IS_HEARING_PAGE_NEEDED,
+            isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
+        );
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+        return caseDataMap;
+    }
+
+    public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
+        UUID orderId = elementUtils.getDynamicListSelectedValue(
+            dynamicList, objectMapper);
+        log.info("** Order id {}", orderId);
+        return draftOrderCollection.stream()
+            .filter(element -> element.getId().equals(orderId))
+            .map(Element::getValue)
+            .findFirst()
+            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
+    }
 }

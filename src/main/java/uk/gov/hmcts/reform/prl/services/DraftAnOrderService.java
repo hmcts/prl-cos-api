@@ -2178,7 +2178,7 @@ public class DraftAnOrderService {
         );
     }
 
-    private String getOrderName(DraftOrder selectedOrder) {
+    public String getOrderName(DraftOrder selectedOrder) {
         if (null != selectedOrder.getC21OrderOptions()) {
             return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
         } else if (null != selectedOrder.getOrderType()) {
