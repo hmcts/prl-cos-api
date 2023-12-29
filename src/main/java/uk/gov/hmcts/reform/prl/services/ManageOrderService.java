@@ -160,7 +160,6 @@ public class ManageOrderService {
     public static final String C_47_A = "C47A";
     public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
     public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
-    public static final String PREVIEW_ORDER_DOC = "previewOrderDoc";
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
     public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
