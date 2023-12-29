@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -85,7 +86,8 @@ public class EditReturnedOrderService {
 
     public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getRejectedOrdersDynamicList());
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getManageOrders()
+            .getRejectedOrdersDynamicList());
         caseDataMap.put(ORDER_NAME, draftAnOrderService.getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
@@ -99,6 +101,11 @@ public class EditReturnedOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+        if (YesOrNo.Yes.equals(selectedOrder.getIsOrderUploadedByJudgeOrAdmin())) {
+            caseDataMap.put("editOrderTextInstructions", "Open the draft order and edit it to include the judge's instructions");
+        } else {
+            caseDataMap.put("editOrderTextInstructions", "Use continue to edit the order");
+        }
         return caseDataMap;
     }
 

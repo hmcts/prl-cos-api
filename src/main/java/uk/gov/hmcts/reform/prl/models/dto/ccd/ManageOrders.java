@@ -296,4 +296,6 @@ public class ManageOrders implements MappableObject {
     @JsonProperty("instructionsToLegalRepresentaive")
     private String instructionsToLegalRepresentaive;
 
+    private Object rejectedOrdersDynamicList;
+    private String editOrderTextInstructions;
 }
