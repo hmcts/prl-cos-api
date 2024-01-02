@@ -54,6 +54,7 @@ public class RoleAssignmentService {
                                      boolean replaceExisting,
                                      String roleName) {
         String actorId = populateActorId(authorization, (HashMap<String, Object>) caseDetails.getData());
+        log.info("actor id is {}", actorId);
         UserDetails userDetails = userService.getUserDetails(authorization);
         var roleCategory = CaseUtils.getUserRole(userDetails);
         log.debug("user: {} has roleCategory: {}", userDetails.getFullName(), roleCategory);
@@ -87,6 +88,7 @@ public class RoleAssignmentService {
             .roleRequest(roleRequest)
             .requestedRoles(requestedRoles)
             .build();
+        log.info("assignmentRequest----{}", assignmentRequest);
         roleAssignmentApi.updateRoleAssignment(
             authorization,
             authTokenGenerator.generate(),
