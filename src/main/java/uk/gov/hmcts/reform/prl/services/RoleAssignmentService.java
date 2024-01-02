@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.enums.GrantType;
 import uk.gov.hmcts.reform.prl.enums.RoleCategory;
 import uk.gov.hmcts.reform.prl.enums.RoleType;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Attributes;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RequestedRoles;
@@ -24,11 +28,15 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssig
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
 
 @Slf4j
 @Service
@@ -39,13 +47,13 @@ public class RoleAssignmentService {
     private final UserService userService;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
+    private final ObjectMapper objectMapper;
 
     public void createRoleAssignment(String authorization,
                                      CaseDetails caseDetails,
                                      boolean replaceExisting,
-                                     String actorId,
                                      String roleName) {
-
+        String actorId = populateActorId(authorization, (HashMap<String, Object>) caseDetails.getData());
         UserDetails userDetails = userService.getUserDetails(authorization);
         var roleCategory = CaseUtils.getUserRole(userDetails);
         log.debug("user: {} has roleCategory: {}", userDetails.getFullName(), roleCategory);
@@ -56,7 +64,6 @@ public class RoleAssignmentService {
             .reference(createRoleRequestReference(caseDetails, userDetails.getId()))
             .replaceExisting(replaceExisting)
             .build();
-
 
         List<RequestedRoles> requestedRoles = List.of(RequestedRoles.requestedRoles()
                                                           .actorIdType("IDAM")
@@ -88,6 +95,46 @@ public class RoleAssignmentService {
         );
     }
 
+    private String populateActorId(String authorization, HashMap<String, Object> caseDataUpdated) {
+
+        if (null != caseDataUpdated.get(
+            IS_JUDGE_OR_LEGAL_ADVISOR)) {
+            if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
+                IS_JUDGE_OR_LEGAL_ADVISOR)))) {
+                return caseDataUpdated.get(JUDGE_NAME) != null ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
+                    : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
+            } else {
+                return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
+            }
+        } else if (null != caseDataUpdated.get(
+            IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
+            if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
+                IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))) {
+                return caseDataUpdated.get(JUDGE_NAME) != null ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
+                    : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
+            } else {
+                return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
+            }
+        } else {
+            if (null != caseDataUpdated.get("nameOfJudgeToReviewOrder")) {
+                return getIdamId(caseDataUpdated.get("nameOfJudgeToReviewOrder"))[0];
+            } else if (null != caseDataUpdated.get("nameOfLaToReviewOrder")) {
+                return fetchActorIdFromSelectedLegalAdviser(
+                    authorization,
+                    caseDataUpdated.get("nameOfLaToReviewOrder")
+                );
+            }
+        }
+        return null;
+    }
+
+    private String fetchActorIdFromSelectedLegalAdviser(String authorization, Object legalAdviserList) {
+        String laEmailId = StringUtils.substringBetween(objectMapper.convertValue(
+            legalAdviserList,
+            DynamicList.class
+        ).getValue().getCode(), "(", ")");
+        return userService.getUserByUserId(authorization, laEmailId).getId();
+    }
 
     private String createRoleRequestReference(final CaseDetails caseDetails, final String userId) {
         return caseDetails.getId() + "-" + userId;

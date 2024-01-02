@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -51,9 +50,7 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 
 @Slf4j
 @RestController
@@ -168,14 +165,10 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
                 .getHearingDataForOtherOrders(caseData.getListWithoutNoticeHearingDetails(), null, caseData));
 
-            String actorId = allocatedJudge.getIsJudgeOrLegalAdviser().equals(AllocatedJudgeTypeEnum.legalAdviser)
-                ? allocatedJudge.getLegalAdviserList().getValueCode()
-                : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
             roleAssignmentService.createRoleAssignment(
                 authorisation,
                 callbackRequest.getCaseDetails(),
                 false,
-                actorId,
                 ALLOCATE_JUDGE_ROLE
             );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

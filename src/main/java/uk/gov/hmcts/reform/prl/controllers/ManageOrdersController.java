@@ -323,17 +323,12 @@ public class ManageOrdersController {
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
-            String actorId = null != caseData.getManageOrders().getNameOfJudgeToReviewOrder()
-                ? caseData.getManageOrders().getNameOfJudgeToReviewOrder().getIdamId()
-                : null != caseData.getManageOrders().getNameOfLaToReviewOrder().getValueCode()
-                ? caseData.getManageOrders().getNameOfLaToReviewOrder().getValueCode() : null;
-            log.info("actor id is  {}", actorId);
-            if (actorId != null) {
+            if (null != caseData.getManageOrders().getNameOfJudgeToReviewOrder()
+                || null != caseData.getManageOrders().getNameOfLaToReviewOrder()) {
                 roleAssignmentService.createRoleAssignment(
                     authorisation,
                     callbackRequest.getCaseDetails(),
                     false,
-                    actorId,
                     ALLOCATE_JUDGE_ROLE
                 );
             }
