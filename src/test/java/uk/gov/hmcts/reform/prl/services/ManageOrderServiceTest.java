@@ -15,12 +15,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
@@ -1689,11 +1691,11 @@ public class ManageOrderServiceTest {
                                    .listItems(elements)
                                    .build())
             .childOption(DynamicMultiSelectList.builder()
-                                   .listItems(elements)
-                                   .build())
-            .otherParties(DynamicMultiSelectList.builder()
                              .listItems(elements)
                              .build())
+            .otherParties(DynamicMultiSelectList.builder()
+                              .listItems(elements)
+                              .build())
             .serveToRespondentOptions(YesOrNo.Yes)
             .servingRespondentsOptionsCA(ServingRespondentsEnum.courtAdmin)
             .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
@@ -1906,14 +1908,14 @@ public class ManageOrderServiceTest {
                                                        .build()))
             .servingRespondentsOptionsDA(ServingRespondentsEnum.courtAdmin)
             .recipientsOptionsOnlyC47a(DynamicMultiSelectList.builder()
-                                   .listItems(elements)
-                                   .build())
+                                           .listItems(elements)
+                                           .build())
             .childOption(DynamicMultiSelectList.builder()
                              .listItems(elements)
                              .build())
             .otherPartiesOnlyC47a(DynamicMultiSelectList.builder()
-                              .listItems(elements)
-                              .build())
+                                      .listItems(elements)
+                                      .build())
             .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
             .deliveryByOptionsDA(DeliveryByEnum.post)
             .emailInformationCA(List.of(Element.<EmailInformation>builder()
@@ -2870,7 +2872,7 @@ public class ManageOrderServiceTest {
             .hmcStatus(PrlAppsConstants.HMC_STATUS_COMPLETED)
             .hearingID(98765L)
             .hearingDaySchedule(Collections.singletonList(
-                    HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(null).build()))
+                HearingDaySchedule.hearingDayScheduleWith().hearingStartDateTime(null).build()))
             .build();
         Hearings hearings = Hearings.hearingsWith()
             .caseRef("123")
@@ -3368,7 +3370,7 @@ public class ManageOrderServiceTest {
     public void testGetGeneratedDocument() {
         GeneratedDocumentInfo generatedDocumentInfo1 = GeneratedDocumentInfo.builder().build();
         assertNotNull(manageOrderService.getGeneratedDocument(
-                                                       generatedDocumentInfo1, true, new HashMap<>())
+            generatedDocumentInfo1, true, new HashMap<>())
         );
     }
 
@@ -3447,5 +3449,138 @@ public class ManageOrderServiceTest {
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
+    }
+
+    @Test
+    public void testGetAdditionalRequirementsForHearingReqForOtherOrderDraft() {
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalDetailsForHearingDateOptions("aaaa")
+            .build();
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalDetailsForHearingDateOptions("bbbb")
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalDetailsForHearingDateOptions("cccc")
+            .build();
+        ordersHearingDetails.add(element(hearingData));
+        ordersHearingDetails.add(element(hearingData1));
+        ordersHearingDetails.add(element(hearingData2));
+
+        String response = manageOrderService.getAdditionalRequirementsForHearingReq(
+            ordersHearingDetails,
+            true,
+            null,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections,
+            C21OrderOptionsEnum.c21other
+        );
+        assertNotNull(response);
+        assertEquals("bbbb, cccc", response);
+    }
+
+    @Test
+    public void testGetAdditionalRequirementsForHearingReqForOtherOrderFinal() {
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalDetailsForHearingDateOptions("aaaa")
+            .build();
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalDetailsForHearingDateOptions("bbbb")
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalDetailsForHearingDateOptions("cccc")
+            .build();
+        ordersHearingDetails.add(element(hearingData));
+        ordersHearingDetails.add(element(hearingData1));
+        ordersHearingDetails.add(element(hearingData2));
+
+        String response = manageOrderService.getAdditionalRequirementsForHearingReq(
+            ordersHearingDetails,
+            false,
+            null,
+            CreateSelectOrderOptionsEnum.blankOrderOrDirections,
+            C21OrderOptionsEnum.c21other
+        );
+        assertNotNull(response);
+        assertEquals("cccc", response);
+    }
+
+    @Test
+    public void testGetAdditionalRequirementsForHearingReqForSdoDraft() {
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalDetailsForHearingDateOptions("aaaa")
+            .build();
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalDetailsForHearingDateOptions("bbbb")
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalDetailsForHearingDateOptions("cccc")
+            .build();
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoUrgentHearingDetails(hearingData)
+            .sdoFhdraHearingDetails(hearingData1)
+            .sdoDraHearingDetails(hearingData2)
+            .sdoSettlementHearingDetails(hearingData)
+            .sdoPermissionHearingDetails(hearingData)
+            .sdoSecondHearingDetails(hearingData)
+            .build();
+
+
+        String response = manageOrderService.getAdditionalRequirementsForHearingReq(
+            ordersHearingDetails,
+            true,
+            standardDirectionOrder,
+            CreateSelectOrderOptionsEnum.standardDirectionsOrder,
+            null
+        );
+        assertNotNull(response);
+        assertEquals("bbbb, cccc", response);
+    }
+
+    @Test
+    public void testGetAdditionalRequirementsForHearingReqForSdoFinal() {
+        List<Element<HearingData>> ordersHearingDetails = new ArrayList<>();
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .additionalDetailsForHearingDateOptions("aaaa")
+            .build();
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .additionalDetailsForHearingDateOptions("bbbb")
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .additionalDetailsForHearingDateOptions("cccc")
+            .build();
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoUrgentHearingDetails(hearingData)
+            .sdoFhdraHearingDetails(hearingData1)
+            .sdoDraHearingDetails(hearingData2)
+            .sdoSettlementHearingDetails(hearingData)
+            .sdoPermissionHearingDetails(hearingData)
+            .sdoSecondHearingDetails(hearingData)
+            .build();
+
+        String response = manageOrderService.getAdditionalRequirementsForHearingReq(
+            ordersHearingDetails,
+            false,
+            standardDirectionOrder,
+            CreateSelectOrderOptionsEnum.standardDirectionsOrder,
+            null
+        );
+        assertNotNull(response);
+        assertEquals("cccc", response);
     }
 }

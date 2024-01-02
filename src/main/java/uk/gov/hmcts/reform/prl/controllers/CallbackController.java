@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -86,7 +87,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.ofNullable;
@@ -186,8 +186,6 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws WorkflowException {
-        log.info("Auth token in functional tests in miam :: {}", authorisation);
-        log.info("Service Auth token in functional tests in miam:: {}", s2sToken);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             WorkflowResult workflowResult = validateMiamApplicationOrExemptionWorkflow.run(callbackRequest);
 
@@ -301,10 +299,9 @@ public class CallbackController {
                             caseData.getApplicants().stream()
                                 .map(
                                     Element::getValue)
-                                .collect(
-                                    Collectors.toList())))
+                                .toList()))
                 .childrenConfidentialDetails(confidentialityTabService.getChildrenConfidentialDetails(
-                caseData)).state(
+                    caseData)).state(
                     State.SUBMITTED_NOT_PAID)
                 .dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime))
                 .build();
@@ -354,7 +351,7 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
 
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -406,7 +403,7 @@ public class CallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             amendCourtService.handleAmendCourtSubmission(authorisation, callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -457,27 +454,31 @@ public class CallbackController {
             WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
             Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-                if (previousState.isPresent() && !stateList.contains(previousState.get())) {
-                    caseDataUpdated.put("isWithdrawRequestSent", "Pending");
-                    log.info("Case is updated as WithdrawRequestSent");
-                } else {
-                    if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                        // Refreshing the page in the same event. Hence no external event call needed.
-                        // Getting the tab fields and add it to the casedetails..
-                        Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
-                        caseDataUpdated.putAll(allTabsFields);
-                    }
-                    if (!State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
-                        caseDataUpdated.put("state", WITHDRAWN_STATE);
-                        caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-                        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-                    }
-                }
-            }
+            updateTabsOrWithdrawFlag(caseData, previousState, stateList, withdrawApplication, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void updateTabsOrWithdrawFlag(CaseData caseData, Optional<String> previousState, List<String> stateList,
+                                          Optional<YesOrNo> withdrawApplication, Map<String, Object> caseDataUpdated) {
+        if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
+            if (previousState.isPresent() && !stateList.contains(previousState.get())) {
+                caseDataUpdated.put("isWithdrawRequestSent", "Pending");
+            } else {
+                if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                    // Refreshing the page in the same event. Hence no external event call needed.
+                    // Getting the tab fields and add it to the casedetails..
+                    Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
+                    caseDataUpdated.putAll(allTabsFields);
+                }
+                if (!State.AWAITING_RESUBMISSION_TO_HMCTS.equals(caseData.getState())) {
+                    caseDataUpdated.put("state", WITHDRAWN_STATE);
+                    caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+                    caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+                }
+            }
         }
     }
 
@@ -493,11 +494,8 @@ public class CallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        log.info("authtoken from functional test: {}", authorisation);
-        log.info("Service authtoken from functional test: {} ", s2sToken);
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            log.info("Gatekeeping details for the case id : {}", caseData.getId());
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -583,7 +581,6 @@ public class CallbackController {
             if (caseDataUpdated.get(APPLICANT_CASE_NAME) != null) {
                 caseDataUpdated.put("caseNameHmctsInternal", caseDataUpdated.get(APPLICANT_CASE_NAME));
             }
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             // Updating the case name for FL401
             if (caseDataUpdated.get(APPLICANT_OR_RESPONDENT_CASE_NAME) != null) {
@@ -593,13 +590,12 @@ public class CallbackController {
             }
             if (caseDataUpdated.get(CASE_TYPE_OF_APPLICATION) != null) {
                 caseDataUpdated.put("selectedCaseTypeID", caseDataUpdated.get(CASE_TYPE_OF_APPLICATION));
-                if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
-                    if (C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
-                        caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
-                    }
+                if (launchDarklyClient.isFeatureEnabled("task-list-v2")
+                    && C100_CASE_TYPE.equals(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION))) {
+                    caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
                 }
             }
-
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             // Saving the logged-in Solicitor and Org details for the docs..
             return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(
                 authorisation,
@@ -669,9 +665,7 @@ public class CallbackController {
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
         List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getLegalProfQuarantineDocsList() != null
             ? caseData.getLegalProfQuarantineDocsList() : new ArrayList<>();
-        log.info("*** Category *** {}", caseData.getDocumentCategoryChecklist());
         if (furtherEvidencesList != null) {
-            log.info("*** further evidences *** {}", furtherEvidencesList);
             quarantineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
                     .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
                                .documentType(element.getValue().getTypeOfDocumentFurtherEvidence().toString())
@@ -680,8 +674,7 @@ public class CallbackController {
                                .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue1.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
-                                      .collect(Collectors.toList()));
-            log.info("*** test evidences *** {}", quarantineDocs);
+                                      .toList());
         }
         if (correspondenceList != null) {
             quarantineDocs.addAll(correspondenceList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
@@ -692,7 +685,7 @@ public class CallbackController {
                                .categoryId(DocumentCategoryEnum.documentCategoryChecklistEnumValue2.getDisplayedValue())
                                .build())
                     .id(element.getId()).build())
-                                      .collect(Collectors.toList()));
+                                      .toList());
         }
         List<Element<OtherDocuments>> otherDocumentsList = caseData.getOtherDocuments();
         if (otherDocumentsList != null) {
@@ -705,7 +698,7 @@ public class CallbackController {
                                .restrictCheckboxCorrespondence(element.getValue().getRestrictCheckboxOtherDocuments())
                                .build())
                     .id(element.getId()).build())
-                                      .collect(Collectors.toList()));
+                                      .toList());
         }
         caseData.setLegalProfQuarantineDocsList(quarantineDocs);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -719,14 +712,11 @@ public class CallbackController {
     }
 
     private Map<String, Object> getSolicitorDetails(String authorisation, Map<String, Object> caseDataUpdated, CaseData caseData) {
-
-        log.info("Fetching the user and Org Details ");
         try {
             UserDetails userDetails = userService.getUserDetails(authorisation);
             Optional<Organisations> userOrganisation = organisationService.findUserOrganisation(authorisation);
             caseDataUpdated.put("caseSolicitorName", userDetails.getFullName());
             if (userOrganisation.isPresent()) {
-                log.info("Got the Org Details");
                 caseDataUpdated.put("caseSolicitorOrgName", userOrganisation.get().getName());
                 if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
                     OrganisationPolicy applicantOrganisationPolicy = OrganisationPolicy.builder()
@@ -734,13 +724,21 @@ public class CallbackController {
                                           .organisationID(userOrganisation.get().getOrganisationIdentifier())
                                           .organisationName(userOrganisation.get().getName())
                                           .build())
-                        .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
-                        .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
                         .build();
+                    if (caseData.getApplicantOrganisationPolicy() != null) {
+                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                            .orgPolicyReference(caseData.getApplicantOrganisationPolicy().getOrgPolicyReference())
+                            .orgPolicyCaseAssignedRole(caseData.getApplicantOrganisationPolicy().getOrgPolicyCaseAssignedRole())
+                            .build();
+                    } else {
+                        applicantOrganisationPolicy = applicantOrganisationPolicy.toBuilder()
+                            .orgPolicyReference(StringUtils.EMPTY)
+                            .orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]")
+                            .build();
+                    }
                     caseDataUpdated.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
                 }
             }
-            log.info("SUCCESSFULLY fetched user and Org Details ");
         } catch (Exception e) {
             log.error("Error while fetching User or Org details for the logged in user ", e);
         }
@@ -767,7 +765,8 @@ public class CallbackController {
 
         TransferToAnotherCourtEvent event =
             prepareTransferToAnotherCourtEvent(authorisation, caseData,
-                                               Event.TRANSFER_TO_ANOTHER_COURT.getName());
+                                               Event.TRANSFER_TO_ANOTHER_COURT.getName()
+            );
         eventPublisher.publishEvent(event);
         return ok(SubmittedCallbackResponse.builder().confirmationHeader(
             CONFIRMATION_HEADER).confirmationBody(
@@ -776,7 +775,7 @@ public class CallbackController {
         ).build());
     }
 
-    private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation,CaseData newCaseData,
+    private TransferToAnotherCourtEvent prepareTransferToAnotherCourtEvent(String authorisation, CaseData newCaseData,
                                                                            String typeOfEvent) {
         return TransferToAnotherCourtEvent.builder()
             .authorisation(authorisation)
