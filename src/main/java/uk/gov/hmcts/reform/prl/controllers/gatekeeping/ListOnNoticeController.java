@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -40,12 +39,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 
 @Slf4j
 @RestController
@@ -142,14 +139,10 @@ public class ListOnNoticeController {
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
 
-            String actorId = allocatedJudge.getIsJudgeOrLegalAdviser().equals(AllocatedJudgeTypeEnum.legalAdviser)
-                ? allocatedJudge.getLegalAdviserList().getValueCode()
-                : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
             roleAssignmentService.createRoleAssignment(
                 authorisation,
                 callbackRequest.getCaseDetails(),
                 false,
-                actorId,
                 ALLOCATE_JUDGE_ROLE
             );
 

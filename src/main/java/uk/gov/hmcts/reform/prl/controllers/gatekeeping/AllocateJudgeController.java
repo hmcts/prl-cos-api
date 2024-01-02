@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -37,8 +38,6 @@ import javax.ws.rs.NotFoundException;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
-import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 
 @Slf4j
 @RestController
@@ -98,8 +97,8 @@ public class AllocateJudgeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse allocateJudge(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("/allocatedJudgeDetails::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -111,14 +110,10 @@ public class AllocateJudgeController extends AbstractCallbackController {
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
 
-            String actorId = null != caseDataUpdated.get(JUDGE_NAME) ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0] :
-                getIdamId(caseDataUpdated.get(JUDGE_NAME))[0];
-            log.info("actor id is  {}", actorId);
             roleAssignmentService.createRoleAssignment(
                 authorisation,
                 callbackRequest.getCaseDetails(),
                 false,
-                actorId,
                 ALLOCATE_JUDGE_ROLE
             );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
