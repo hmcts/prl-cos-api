@@ -355,7 +355,7 @@ public class ManageOrderEmailService {
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(manageOrders.getServingRespondentsOptionsCA())) {
                 log.info("*** CA personal service email notifications ***");
-                handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail);
+                handleSolicitorPersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail);
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties())) {
@@ -381,7 +381,7 @@ public class ManageOrderEmailService {
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
             log.info("*** Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
-            handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail);
+            handleSolicitorPersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)) {
                 manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
@@ -407,8 +407,8 @@ public class ManageOrderEmailService {
         caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
     }
 
-    private void handlePersonalServiceNotifications(String authorisation, CaseData caseData, List<Document> orderDocuments,
-                                                    Map<String, Object> dynamicDataForEmail) {
+    private void handleSolicitorPersonalServiceNotifications(String authorisation, CaseData caseData, List<Document> orderDocuments,
+                                                             Map<String, Object> dynamicDataForEmail) {
         Map<String,String> applicantSolicitors = CaseUtils.getApplicantSolicitorsToNotify(caseData);
         if (!applicantSolicitors.isEmpty()) {
             Map.Entry<String,String> firstApplicantSolicitor = applicantSolicitors.entrySet().iterator().next();
