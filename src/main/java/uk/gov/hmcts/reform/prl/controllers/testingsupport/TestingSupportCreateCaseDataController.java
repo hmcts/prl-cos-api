@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,19 +38,14 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RequiredArgsConstructor
 public class TestingSupportCreateCaseDataController {
 
-    @Autowired
     private final ObjectMapper objectMapper;
 
-    @Autowired
     private final IdamClient idamClient;
 
-    @Autowired
     private final CcdCoreCaseDataService coreCaseDataService;
 
-    @Autowired
     private final AuthTokenGenerator authTokenGenerator;
 
-    @Autowired
     private final CourtNavCaseService courtNavCaseService;
 
     @PostMapping(path = "/testing-support/create-ccd-case-data",
