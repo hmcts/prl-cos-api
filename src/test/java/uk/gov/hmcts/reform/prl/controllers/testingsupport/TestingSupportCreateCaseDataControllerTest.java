@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
@@ -65,9 +64,9 @@ public class TestingSupportCreateCaseDataControllerTest {
             .caseDetails(CaseDetails.builder().id(
                 1234567891234567L).data(stringObjectMap).build())
             .build();
-        AboutToStartOrSubmitCallbackResponse response = testingSupportCreateCaseDataController
+        CaseDetails caseDetails = testingSupportCreateCaseDataController
             .createCcdTestCase("Bearer:test", "s2s token", callbackRequest);
-        assertNotNull(response);
+        assertNotNull(caseDetails);
 
     }
 }

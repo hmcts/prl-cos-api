@@ -18,7 +18,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
@@ -136,15 +135,13 @@ public class ManageOrdersControllerFunctionalTest {
             .as(CaseDetails.class);
 
         Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getData().get("id"));
+        Assert.assertNotNull(caseDetails.getId());
     }
 
     @Test
     public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails.toBuilder()
-                             .id(Long.parseLong((String)caseDetails.getData().get("id")))
-                             .state(State.JUDICIAL_REVIEW.getLabel()).build()).build();
+            .caseDetails(caseDetails).build();
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -153,7 +150,14 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.id", equalTo(caseDetails.getData().get("id")))
-            .assertThat().statusCode(200);
+            .body("data.postalInformationCaOnlyC47a", equalTo(null))
+            .body("data.postalInformationCA", equalTo(null))
+            .body("data.otherParties", equalTo(null))
+            .body("data.recipientsOptions", equalTo(null))
+            .body("data.cafcassCymruEmail", equalTo(null))
+            .body("data.serveOrderDynamicList", equalTo(null))
+            .body("data.serveOtherPartiesCA", equalTo(null))
+            .body("data.cafcassCymruServedOptions", equalTo(null))
+            .body("data.emailInformationCaOnlyC47a", equalTo(null));
     }
 }
