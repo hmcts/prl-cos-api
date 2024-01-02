@@ -114,6 +114,7 @@ public class TestingSupportService {
 
     public Map<String, Object> initiateCaseCreation(String authorisation, CallbackRequest callbackRequest) throws Exception {
         if (isAuthorized(authorisation)) {
+            log.info("test creation request===> {}",callbackRequest);
             String requestBody;
             CaseDetails initialCaseDetails = callbackRequest.getCaseDetails();
             CaseData initialCaseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -300,6 +301,8 @@ public class TestingSupportService {
 
     public Map<String, Object> submittedCaseCreation(CallbackRequest callbackRequest, String authorisation) {
         if (isAuthorized(authorisation)) {
+            log.info("callback request-->> {}", callbackRequest);
+            log.info("Case details--> {}", callbackRequest.getCaseDetails());
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();

@@ -11,6 +11,7 @@
     "case_data": {
       "manageOrderHeader1": null,
       "caseTypeOfApplication": "C100",
+      "applicantOrRespondentCaseName": "C100 test case",
       "manageOrdersOptions": "servedSavedOrders",
       "performingUser": null,
       "performingAction": null,
