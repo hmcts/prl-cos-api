@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.Instant;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,7 +104,8 @@ public class RoleAssignmentService {
             IS_JUDGE_OR_LEGAL_ADVISOR)) {
             if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
                 IS_JUDGE_OR_LEGAL_ADVISOR)))) {
-                return caseDataUpdated.get(JUDGE_NAME) != null ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
+                return ((LinkedHashMap) (caseDataUpdated.get(JUDGE_NAME))).size() > 0 ? getIdamId(caseDataUpdated.get(
+                    JUDGE_NAME))[0]
                     : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
             } else {
                 return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
