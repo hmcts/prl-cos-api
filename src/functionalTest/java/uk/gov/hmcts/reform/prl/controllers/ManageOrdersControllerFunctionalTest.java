@@ -165,16 +165,20 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_WhenServeOrderTestSendEmailToApplicantOrRespLip() throws Exception {
 
-        String requestBody = ResourceLoader.loadJson(VALID_SERVER_ORDER_REQUEST_JSON);
-
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails.toBuilder()
+                             .id(Long.parseLong((String)caseDetails.getData().get("id")))
+                             .state(State.JUDICIAL_REVIEW.getLabel()).build()).build();
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(callbackRequest)
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
-            .then().assertThat().statusCode(500);
+            .then()
+            .body("data.id", equalTo(caseDetails.getData().get("id")))
+            .assertThat().statusCode(200);
     }
 
 }
