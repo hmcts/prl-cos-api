@@ -747,8 +747,10 @@ public class HearingDataService {
             String applicantSolicitor = getFL401SolicitorName(caseData.getApplicantsFL401());
             String respondentSolicitor = getFL401SolicitorName(caseData.getRespondentsFL401());
 
-            tempPartyNamesMap.put("applicantName", concat(caseData.getApplicantName(), " (Applicant)"));
-            tempPartyNamesMap.put("respondentName", concat(caseData.getRespondentName(), " (Respondent)"));
+            tempPartyNamesMap.put("applicantName", null != caseData.getApplicantName()
+                ? concat(caseData.getApplicantName(), " (Applicant)") : null);
+            tempPartyNamesMap.put("respondentName", null != caseData.getRespondentName()
+                ? concat(caseData.getRespondentName(), " (Respondent)") : null);
             tempPartyNamesMap.put("applicantSolicitor", null != applicantSolicitor
                 ? concat(applicantSolicitor, " (Applicant solicitor)") : null);
             tempPartyNamesMap.put("respondentSolicitor", null != respondentSolicitor

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -45,12 +46,14 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -111,6 +114,29 @@ public class HearingDataServiceTest {
 
     @Mock
     Hearings hearingDetails;
+
+    private PartyDetails applicant;
+    private PartyDetails respondent;
+
+    @Before
+    public void init() {
+        applicant = PartyDetails.builder()
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .email("app1@test.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("AppSolFN")
+            .representativeLastName("AppSolLN")
+            .build();
+        respondent = PartyDetails.builder()
+            .firstName("RespFN")
+            .lastName("RespLN")
+            .email("resp1@test.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("RespSolFN")
+            .representativeLastName("RespSolLN")
+            .build();
+    }
 
     @Test()
     public void testPopulateHearingDynamicLists() {
@@ -1175,5 +1201,54 @@ public class HearingDataServiceTest {
                                       .build())).build();
         when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
         assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData));
+    }
+
+    @Test
+    public void testPopulatePartiesNamesForC100() {
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .applicants(Collections.singletonList(element(applicant)))
+            .respondents(Collections.singletonList(element(respondent)))
+            .caseTypeOfApplication("C100")
+            .build();
+
+        //invoke service
+        hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+
+        //validate
+        assertFalse(tempCaseDetails.isEmpty());
+        Map<String, Object> tempPartyNamesMap = (Map<String, Object>) tempCaseDetails.get("tempPartyNamesForDocGen");
+        assertNotNull(tempPartyNamesMap);
+        assertEquals("AppFN AppLN (Applicant1)", tempPartyNamesMap.get("applicantName1"));
+        assertEquals("AppSolFN AppSolLN (Applicant1 solicitor)", tempPartyNamesMap.get("applicantSolicitor1"));
+        assertEquals("RespFN RespLN (Respondent1)", tempPartyNamesMap.get("respondentName1"));
+        assertEquals("RespSolFN RespSolLN (Respondent1 solicitor)", tempPartyNamesMap.get("respondentSolicitor1"));
+    }
+
+    @Test
+    public void testPopulatePartiesNamesForFl401() {
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .applicantName("App")
+            .respondentName("Resp")
+            .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
+            .caseTypeOfApplication("FL401")
+            .build();
+
+        //invoke service
+        hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+
+        //validate
+        //validate
+        assertFalse(tempCaseDetails.isEmpty());
+        Map<String, Object> tempPartyNamesMap = (Map<String, Object>) tempCaseDetails.get("tempPartyNamesForDocGen");
+        assertNotNull(tempPartyNamesMap);
+        assertEquals("App (Applicant)", tempPartyNamesMap.get("applicantName"));
+        assertEquals("AppSolFN AppSolLN (Applicant solicitor)", tempPartyNamesMap.get("applicantSolicitor"));
+        assertEquals("Resp (Respondent)", tempPartyNamesMap.get("respondentName"));
+        assertEquals("RespSolFN RespSolLN (Respondent solicitor)", tempPartyNamesMap.get("respondentSolicitor"));
     }
 }
