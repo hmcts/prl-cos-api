@@ -308,19 +308,23 @@ public class EditAndApproveDraftOrderController {
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-            ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             caseDataUpdated.put(STATE, caseData.getState());
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-all-tabs",
-                caseDataUpdated
-            );
+            ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+            updateTabs(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void updateTabs(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
+        coreCaseDataService.triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            callbackRequest.getCaseDetails().getId(),
+            "internal-update-all-tabs",
+            caseDataUpdated
+        );
     }
 
     @PostMapping(path = "/edit-and-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -337,13 +341,7 @@ public class EditAndApproveDraftOrderController {
             log.info("Court admin created order options {}",caseDataUpdated.get("whatToDoWithOrderCourtAdmin"));
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                callbackRequest.getCaseDetails().getId(),
-                "internal-update-all-tabs",
-                caseDataUpdated
-            );
+            updateTabs(callbackRequest, caseDataUpdated);
             return ResponseEntity
                 .ok(SubmittedCallbackResponse.builder()
                         .confirmationHeader(CONFIRMATION_HEADER)
