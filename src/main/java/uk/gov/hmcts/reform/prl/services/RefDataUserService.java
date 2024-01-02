@@ -116,7 +116,7 @@ public class RefDataUserService {
         if (null != listOfStaffResponse) {
             return listOfStaffResponse.stream()
                 .filter(response -> response.getStaffProfile().getUserType().equalsIgnoreCase(LEGALOFFICE))
-                .map(this::getDisplayEntry).toList();
+                .map(this::getDisplayEntry).collect(Collectors.toList());
         }
         return List.of(DynamicListElement.builder().build());
     }
