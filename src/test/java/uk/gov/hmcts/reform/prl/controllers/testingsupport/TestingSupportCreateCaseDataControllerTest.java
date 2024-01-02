@@ -26,7 +26,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class TestingSupporCreateCaseDatatControllerTest {
+public class TestingSupportCreateCaseDataControllerTest {
 
     @InjectMocks
     private TestingSupportCreateCaseDataController testingSupportCreateCaseDataController;
