@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -47,37 +46,21 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILEN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S6204"})
 public class ServiceOfApplicationPostService {
-
-    @Autowired
     private final BulkPrintService bulkPrintService;
-
-    @Autowired
     private final DocumentGenService documentGenService;
-
-    @Autowired
     private final DocumentLanguageService documentLanguageService;
-
-    @Autowired
     private final DgsService dgsService;
-
-    @Autowired
     private final CaseDocumentClient caseDocumentClient;
-
-    @Autowired
     private final AuthTokenGenerator authTokenGenerator;
-
-    @Autowired
     private final LaunchDarklyClient launchDarklyClient;
-
     private static final String LETTER_TYPE = "ApplicationPack";
-
 
     public BulkPrintDetails sendPostNotificationToParty(CaseData caseData,
                                                         String authorisation,
@@ -154,10 +137,10 @@ public class ServiceOfApplicationPostService {
         return coverLetterDocs;
     }
 
-    public List<Document> getStaticDocs(String auth, CaseData caseData) {
+    public List<Document> getStaticDocs(String auth, String caseType) {
         List<Document> generatedDocList = new ArrayList<>();
         UploadResponse uploadResponse = null;
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
             uploadResponse = caseDocumentClient.uploadDocuments(
                 auth,
                 authTokenGenerator.generate(),
@@ -168,37 +151,37 @@ public class ServiceOfApplicationPostService {
                         SOA_MULTIPART_FILE,
                         PRIVACY_DOCUMENT_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
                     ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         SOA_MEDIATION_VOUCHER_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_MEDIATION_VOUCHER_FILENAME)
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_MEDIATION_VOUCHER_FILENAME)
                     ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         SOA_NOTICE_SAFETY,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_NOTICE_SAFETY)
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_NOTICE_SAFETY)
                     ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         C7_BLANK_DOCUMENT_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C7_BLANK_DOCUMENT_FILENAME)
                     ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         SOA_C9_PERSONAL_SERVICE_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_C9_PERSONAL_SERVICE_FILENAME)
                     ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         C1A_BLANK_DOCUMENT_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_FILENAME)
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + C1A_BLANK_DOCUMENT_FILENAME)
                     )
                 )
             );
@@ -214,19 +197,19 @@ public class ServiceOfApplicationPostService {
                         SOA_MULTIPART_FILE,
                         PRIVACY_DOCUMENT_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + PRIVACY_DOCUMENT_FILENAME)
                     ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         SOA_FL416_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_FL416_FILENAME)
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL416_FILENAME)
                     ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
                         SOA_FL415_FILENAME,
                         APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
+                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
                     )
                 )
             );
