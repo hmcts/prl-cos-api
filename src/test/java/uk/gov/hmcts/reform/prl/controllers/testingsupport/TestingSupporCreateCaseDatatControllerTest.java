@@ -23,15 +23,10 @@ import java.util.Map;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class TestingSupporCreateCaseDatatControllerTest {
-
-    private static final String FILE_NAME = "fileName";
-    private static final String CONTENT_TYPE = "application/json";
-    private static final String AUTH = "auth";
 
     @InjectMocks
     private TestingSupportCreateCaseDataController testingSupportCreateCaseDataController;
