@@ -56,9 +56,9 @@ public class TestingSupportCreateCaseDataController {
 
     @PostMapping(path = "/testing-support/create-ccd-case-data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create test ccd case")
-    public AboutToStartOrSubmitCallbackResponse createCCDTestCase(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-                                                                   @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                                                   @RequestBody CallbackRequest callbackRequest) throws  Exception{
+    public AboutToStartOrSubmitCallbackResponse createCcdTestCase(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+                                                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                                                  @RequestBody CallbackRequest callbackRequest) throws  Exception{
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails().toBuilder()
                                                       .id(0L)

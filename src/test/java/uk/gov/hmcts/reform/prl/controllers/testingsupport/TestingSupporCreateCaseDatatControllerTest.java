@@ -66,7 +66,7 @@ public class TestingSupporCreateCaseDatatControllerTest {
                 1234567891234567L).data(stringObjectMap).build())
             .build();
         AboutToStartOrSubmitCallbackResponse response = testingSupportCreateCaseDataController
-            .createCCDTestCase("Bearer:test", "s2s token", callbackRequest);
+            .createCcdTestCase("Bearer:test", "s2s token", callbackRequest);
         assertNotNull(response);
 
     }
