@@ -899,8 +899,7 @@ public class DraftAnOrderService {
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
             || JudgeApprovalDecisionsSolicitorEnum.editTheOrderAndServe
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
-                isOrderEdited = true;
-
+            isOrderEdited = true;
         }
         return isOrderEdited;
     }
