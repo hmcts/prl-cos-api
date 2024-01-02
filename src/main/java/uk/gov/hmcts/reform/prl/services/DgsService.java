@@ -59,17 +59,16 @@ public class DgsService {
             caseDetails.setCaseData(allegationOfHarmService.updateChildAbusesForDocmosis(caseData));
         }
         Map<String, Object> tempCaseDetails = new HashMap<>();
-        //Populate applicants/respondents & representing solicitors names
+        //PRL-4981 - Populate applicants/respondents & representing solicitors names
         if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
             hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+            log.info("Party names map {}", tempCaseDetails.get("tempPartyNamesForDocGen"));
         }
         tempCaseDetails.put(
             CASE_DETAILS_STRING,
             AppObjectMapper.getObjectMapper().convertValue(caseDetails, Map.class)
         );
-        log.info("Applicant name 1 {}", tempCaseDetails.get("applicantName1"));
         log.info("Case data map {}", tempCaseDetails);
-        tempCaseDetails.put("tempKey", "tempValue");
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
             generatedDocumentInfo =

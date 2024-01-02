@@ -739,18 +739,19 @@ public class HearingDataService {
     }
 
     public void populatePartiesAndSolicitorsNames(CaseData caseData,
-                                                  Map<String, Object> caseDataMap) {
+                                                  Map<String, Object> tempCaseDetails) {
+        Map<String, Object> tempPartyNamesMap = new HashMap<>();
         log.info("Inside populatePartiesAndSolicitorsNames for {}", caseData.getCaseTypeOfApplication());
         if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             log.info("Populating party names for FL401");
             String applicantSolicitor = getFL401SolicitorName(caseData.getApplicantsFL401());
             String respondentSolicitor = getFL401SolicitorName(caseData.getRespondentsFL401());
 
-            caseDataMap.put("applicantName", concat(caseData.getApplicantName(), " (Applicant)"));
-            caseDataMap.put("respondentName", concat(caseData.getRespondentName(), " (Respondent)"));
-            caseDataMap.put("applicantSolicitor", null != applicantSolicitor
+            tempPartyNamesMap.put("applicantName", concat(caseData.getApplicantName(), " (Applicant)"));
+            tempPartyNamesMap.put("respondentName", concat(caseData.getRespondentName(), " (Respondent)"));
+            tempPartyNamesMap.put("applicantSolicitor", null != applicantSolicitor
                 ? concat(applicantSolicitor, " (Applicant solicitor)") : null);
-            caseDataMap.put("respondentSolicitor", null != respondentSolicitor
+            tempPartyNamesMap.put("respondentSolicitor", null != respondentSolicitor
                 ? concat(respondentSolicitor, " (Respondent solicitor)") : null);
         } else {
             log.info("Populating party names for C100");
@@ -763,39 +764,42 @@ public class HearingDataService {
             int numberOfApplicantSolicitors = applicantSolicitorNames.size();
             int numberOfRespondentSolicitors = respondentSolicitorNames.size();
             //applicants
-            caseDataMap.put("applicantName1", 0 < numberOfApplicant ? concat(applicantNames.get(0), " (Applicant1)") : null);
-            caseDataMap.put("applicantName2", 1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : null);
-            caseDataMap.put("applicantName3", 2 < numberOfApplicant ? concat(applicantNames.get(2), " (Applicant3)") : null);
-            caseDataMap.put("applicantName4", 3 < numberOfApplicant ? concat(applicantNames.get(3), " (Applicant4)") : null);
-            caseDataMap.put("applicantName5", 4 < numberOfApplicant ? concat(applicantNames.get(4), " (Applicant5)") : null);
+            tempPartyNamesMap.put("applicantName1", 0 < numberOfApplicant ? concat(applicantNames.get(0), " (Applicant1)") : null);
+            tempPartyNamesMap.put("applicantName2", 1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : null);
+            tempPartyNamesMap.put("applicantName3", 2 < numberOfApplicant ? concat(applicantNames.get(2), " (Applicant3)") : null);
+            tempPartyNamesMap.put("applicantName4", 3 < numberOfApplicant ? concat(applicantNames.get(3), " (Applicant4)") : null);
+            tempPartyNamesMap.put("applicantName5", 4 < numberOfApplicant ? concat(applicantNames.get(4), " (Applicant5)") : null);
             //applicant solicitors
-            caseDataMap.put("applicantSolicitor1", 0 < numberOfApplicantSolicitors
+            tempPartyNamesMap.put("applicantSolicitor1", 0 < numberOfApplicantSolicitors
                 ? concat(applicantSolicitorNames.get(0), " (Applicant1 solicitor)") : null);
-            caseDataMap.put("applicantSolicitor2", 1 < numberOfApplicantSolicitors
+            tempPartyNamesMap.put("applicantSolicitor2", 1 < numberOfApplicantSolicitors
                 ? concat(applicantSolicitorNames.get(1), " (Applicant2 solicitor)") : null);
-            caseDataMap.put("applicantSolicitor3", 2 < numberOfApplicantSolicitors
+            tempPartyNamesMap.put("applicantSolicitor3", 2 < numberOfApplicantSolicitors
                 ? concat(applicantSolicitorNames.get(2), " (Applicant3 solicitor)") : null);
-            caseDataMap.put("applicantSolicitor4", 3 < numberOfApplicantSolicitors
+            tempPartyNamesMap.put("applicantSolicitor4", 3 < numberOfApplicantSolicitors
                 ? concat(applicantSolicitorNames.get(3), " (Applicant4 solicitor)") : null);
-            caseDataMap.put("applicantSolicitor5", 4 < numberOfApplicantSolicitors
+            tempPartyNamesMap.put("applicantSolicitor5", 4 < numberOfApplicantSolicitors
                 ? concat(applicantSolicitorNames.get(4), " (Applicant5 solicitor)") : null);
             //respondents
-            caseDataMap.put("respondentName1", 0 < numberOfRespondents ? concat(respondentNames.get(0), " (Respondent1)") : null);
-            caseDataMap.put("respondentName2", 1 < numberOfRespondents ? concat(respondentNames.get(1), " (Respondent2)") : null);
-            caseDataMap.put("respondentName3", 2 < numberOfRespondents ? concat(respondentNames.get(2), " (Respondent3)") : null);
-            caseDataMap.put("respondentName4", 3 < numberOfRespondents ? concat(respondentNames.get(3), " (Respondent4)") : null);
-            caseDataMap.put("respondentName5", 4 < numberOfRespondents ? concat(respondentNames.get(4), " (Respondent5)") : null);
+            tempPartyNamesMap.put("respondentName1", 0 < numberOfRespondents ? concat(respondentNames.get(0), " (Respondent1)") : null);
+            tempPartyNamesMap.put("respondentName2", 1 < numberOfRespondents ? concat(respondentNames.get(1), " (Respondent2)") : null);
+            tempPartyNamesMap.put("respondentName3", 2 < numberOfRespondents ? concat(respondentNames.get(2), " (Respondent3)") : null);
+            tempPartyNamesMap.put("respondentName4", 3 < numberOfRespondents ? concat(respondentNames.get(3), " (Respondent4)") : null);
+            tempPartyNamesMap.put("respondentName5", 4 < numberOfRespondents ? concat(respondentNames.get(4), " (Respondent5)") : null);
             //respondent solicitors
-            caseDataMap.put("respondentSolicitor1", 0 < numberOfRespondentSolicitors
+            tempPartyNamesMap.put("respondentSolicitor1", 0 < numberOfRespondentSolicitors
                 ? concat(respondentSolicitorNames.get(0), " (Respondent1 solicitor)") : null);
-            caseDataMap.put("respondentSolicitor2", 1 < numberOfRespondentSolicitors
+            tempPartyNamesMap.put("respondentSolicitor2", 1 < numberOfRespondentSolicitors
                 ? concat(respondentSolicitorNames.get(1), " (Respondent2 solicitor)") : null);
-            caseDataMap.put("respondentSolicitor3", 2 < numberOfRespondentSolicitors
+            tempPartyNamesMap.put("respondentSolicitor3", 2 < numberOfRespondentSolicitors
                 ? concat(respondentSolicitorNames.get(2), " (Respondent3 solicitor)") : null);
-            caseDataMap.put("respondentSolicitor4", 3 < numberOfRespondentSolicitors
+            tempPartyNamesMap.put("respondentSolicitor4", 3 < numberOfRespondentSolicitors
                 ? concat(respondentSolicitorNames.get(3), " (Respondent4 solicitor)") : null);
-            caseDataMap.put("respondentSolicitor5", 4 < numberOfRespondentSolicitors
+            tempPartyNamesMap.put("respondentSolicitor5", 4 < numberOfRespondentSolicitors
                 ? concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)") : null);
         }
+
+        //EXUI-1144 - Added a temp key for hearing party names map for document generation. This is consumed in DGS
+        tempCaseDetails.put("tempPartyNamesForDocGen", tempPartyNamesMap);
     }
 }
