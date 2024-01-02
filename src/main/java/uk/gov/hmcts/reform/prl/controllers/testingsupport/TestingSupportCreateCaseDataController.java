@@ -65,7 +65,7 @@ public class TestingSupportCreateCaseDataController {
                                                       .build(), objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
-            CaseEvent.COURTNAV_CASE_CREATION,
+            CaseEvent.TS_ADMIN_APPLICATION_NOC,
             idamClient.getUserInfo(authorisation).getUid()
         );
         StartEventResponse startEventResponse = coreCaseDataService.startSubmitCreate(
@@ -82,14 +82,13 @@ public class TestingSupportCreateCaseDataController {
                        .build())
             .data(caseDataMap).build();
 
-        CaseDetails caseDetails =  coreCaseDataService.submitCreate(
+        return coreCaseDataService.submitCreate(
             authorisation,
             authTokenGenerator.generate(),
             idamClient.getUserInfo(authorisation).getUid(),
             caseDataContent,
             true
         );
-        return caseDetails;
     }
 
 }
