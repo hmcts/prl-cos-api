@@ -120,7 +120,7 @@ public class ManageOrdersControllerFunctionalTest {
 
 
     @Test
-    public void createCCDTestCase() throws Exception {
+    public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         caseDetails =  request
