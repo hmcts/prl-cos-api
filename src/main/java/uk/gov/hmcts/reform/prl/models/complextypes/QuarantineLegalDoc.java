@@ -96,7 +96,8 @@ public class QuarantineLegalDoc {
     //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
-            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential", "applicationsWithinProceedings", "applicationsFromOtherProceedings"
+            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential", 
+            "applicationsWithinProceedings", "applicationsFromOtherProceedings"
         };
     }
 }
