@@ -156,7 +156,7 @@ public class ManageDocumentsControllerTest {
 
         when(manageDocumentsService.copyDocument(callbackRequest, auth)).thenReturn(caseDataUpdated);
 
-        //manageDocumentsController.copyManageDocs(auth, callbackRequest);
+        manageDocumentsController.copyManageDocs(auth, callbackRequest);
         verify(manageDocumentsService).copyDocument(callbackRequest, auth);
         verifyNoMoreInteractions(manageDocumentsService);
 
