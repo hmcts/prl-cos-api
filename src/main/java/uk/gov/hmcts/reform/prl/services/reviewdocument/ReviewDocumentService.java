@@ -232,12 +232,12 @@ public class ReviewDocumentService {
     }
 
     private void uploadDocForConfOrDocTab(Map<String, Object> caseDataUpdated,
-                                          List<Element<QuarantineLegalDoc>> quarantineDocsList,
-                                          UUID uuid,
-                                          boolean isReviewDecisionYes,
-                                          List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
-                                          String uploadDocListConfOrDocTabKey,
-                                          String uploadedBy) {
+                                         List<Element<QuarantineLegalDoc>> quarantineDocsList,
+                                         UUID uuid,
+                                         boolean isReviewDecisionYes,
+                                         List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
+                                         String uploadDocListConfOrDocTabKey,
+                                         String uploadedBy) {
 
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
             getQuarantineDocumentById(quarantineDocsList, uuid);

@@ -36,6 +36,7 @@ import java.util.function.Predicate;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
@@ -100,17 +101,6 @@ public class ManageDocumentsService {
             .value(DynamicListElement.EMPTY).build();
     }
 
-    /**
-     * This is move the documents to quarantine/confidential/case documents based on.
-     * isRestricted flag & uploaded by.
-     * Legal rep/Cafcass(or Cafcass Cymru) -> isRestricted ? Quarantine : Case documents.
-     * Court admin/Judge/Legal adviser -> isRestricted ? Confidential : Case documents.
-     *
-     * @param callbackRequest - CCD callback request
-     * @param authorization - logged in user auth token
-     *
-     * @return - caseDataMap
-     */
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -206,7 +196,11 @@ public class ManageDocumentsService {
         // if restricted then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-            quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
+            if (userRole.equals(COURT_ADMIN)) {
+                quarantineLegalDoc = DocumentUtils.addConfFields(quarantineLegalDoc, manageDocument);
+            } else {
+                quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
+            }
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
         } else {
@@ -227,7 +221,6 @@ public class ManageDocumentsService {
         }
         return confidentialityFlag;
     }
-
 
     private void updateQuarantineDocs(Map<String, Object> caseDataUpdated,
                                       List<Element<QuarantineLegalDoc>> quarantineDocs,
@@ -255,6 +248,14 @@ public class ManageDocumentsService {
                 break;
 
             case COURT_STAFF:
+                if (isDocumentTab) {
+                    caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
+                } else {
+                    caseDataUpdated.put("courtStaffQuarantineDocsList", quarantineDocs);
+                }
+                break;
+
+            case COURT_ADMIN:
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
@@ -289,6 +290,11 @@ public class ManageDocumentsService {
             case COURT_STAFF -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                    caseData.getCourtStaffQuarantineDocsList()
+            );
+            case COURT_ADMIN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
+                    isDocumentTab,
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
                     caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()
             );
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
@@ -311,8 +317,9 @@ public class ManageDocumentsService {
                 .documentCreatedOn(localZoneDate).build() : null)
             .cafcassQuarantineDocument(CAFCASS.equals(userRole) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
-            .confidentialDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
+            .courtStaffQuarantineDocument((COURT_STAFF.equals(userRole)) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
+            //.confidentialDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
             .build();
     }
 }

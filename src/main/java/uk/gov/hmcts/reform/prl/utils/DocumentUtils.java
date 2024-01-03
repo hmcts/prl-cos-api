@@ -211,4 +211,17 @@ public class DocumentUtils {
             .build();
     }
 
+    public static QuarantineLegalDoc addConfFields(QuarantineLegalDoc quarantineLegalDoc,
+                                                         ManageDocuments manageDocument) {
+        return quarantineLegalDoc.toBuilder()
+            .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .notes(manageDocument.getDocumentDetails())
+            .categoryId(manageDocument.getDocumentCategories().getValueCode())
+            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            //move document into confidential category/folder
+            .confidentialDocument(manageDocument.getDocument())
+            .build();
+    }
+
 }
