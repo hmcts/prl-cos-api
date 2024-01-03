@@ -137,7 +137,7 @@ public class RoleAssignmentService {
             legalAdviserList,
             DynamicList.class
         ).getValue().getCode(), "(", ")");
-        return userService.getUserByUserId(authorization, laEmailId).getId();
+        return userService.getUserByEmailId(authorization, laEmailId).get(0).getId();
     }
 
     private String createRoleRequestReference(final CaseDetails caseDetails, final String userId) {
