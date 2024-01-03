@@ -293,8 +293,8 @@ public class ManageOrders implements MappableObject {
     private OrderApprovalDecisionsForSolicitorOrderEnum whatToDoWithOrderSolicitor;
     @JsonProperty("whatToDoWithOrderCourtAdmin")
     private OrderApprovalDecisionsForCourtAdminOrderEnum whatToDoWithOrderCourtAdmin;
-    @JsonProperty("instructionsToLegalRepresentaive")
-    private String instructionsToLegalRepresentaive;
+    @JsonProperty("instructionsToLegalRepresentative")
+    private String instructionsToLegalRepresentative;
 
     private Object rejectedOrdersDynamicList;
     private String editOrderTextInstructions;

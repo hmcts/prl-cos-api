@@ -942,7 +942,7 @@ public class DraftAnOrderService {
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(status)
-                              .instructionsToLegalRepresentative(caseData.getManageOrders().getInstructionsToLegalRepresentaive())
+                              .instructionsToLegalRepresentative(caseData.getManageOrders().getInstructionsToLegalRepresentative())
                               .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
                                                          ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
                               .build())
