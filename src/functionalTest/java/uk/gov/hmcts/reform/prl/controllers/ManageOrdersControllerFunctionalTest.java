@@ -167,7 +167,6 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruServed",
                   equalTo("Yes"))
             .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail",
-                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
-        ;
+                  equalTo(caseDetails.getData().get("cafcassCymruEmail")));
     }
 }
