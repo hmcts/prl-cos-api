@@ -543,7 +543,7 @@ public class DraftAnOrderService {
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-        caseDataMap.put(ORDER_NAME, getOrderName(selectedOrder));
+        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
@@ -733,7 +733,7 @@ public class DraftAnOrderService {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         log.info("selected order: {}", selectedOrder);
 
-        caseDataMap.put(ORDER_NAME, getOrderName(selectedOrder));
+        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("draftOrdersDynamicList", caseData.getDraftOrdersDynamicList());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
@@ -2208,15 +2208,6 @@ public class DraftAnOrderService {
             existingOrderHearingDetails,
             isSolicitorOrdersHearings
         );
-    }
-
-    public String getOrderName(DraftOrder selectedOrder) {
-        if (null != selectedOrder.getC21OrderOptions()) {
-            return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
-        } else if (null != selectedOrder.getOrderType()) {
-            return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
-        }
-        return null;
     }
 
     private boolean populateAndReturnIfErrors(List<String> errorList,

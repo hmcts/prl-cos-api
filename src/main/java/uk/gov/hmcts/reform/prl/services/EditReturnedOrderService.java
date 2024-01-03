@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
+import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 import uk.gov.hmcts.reform.prl.utils.PartiesListGenerator;
 
 import java.util.ArrayList;
@@ -61,8 +62,6 @@ public class EditReturnedOrderService {
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
-    private final DraftAnOrderService draftAnOrderService;
-
 
     public Map<String, Object> getReturnedOrdersDynamicList(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
@@ -90,7 +89,7 @@ public class EditReturnedOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getManageOrders()
             .getRejectedOrdersDynamicList());
-        caseDataMap.put(ORDER_NAME, draftAnOrderService.getOrderName(selectedOrder));
+        caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());

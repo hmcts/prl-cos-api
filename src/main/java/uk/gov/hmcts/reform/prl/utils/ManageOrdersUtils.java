@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -55,6 +56,8 @@ public class ManageOrdersUtils {
 
     private static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
         "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
+    private static final String BOLD_END = "</span>";
 
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
                                                            CreateSelectOrderOptionsEnum selectedOrderType,
@@ -330,5 +333,14 @@ public class ManageOrdersUtils {
             );
         }
         return " ";
+    }
+
+    public static String getOrderName(DraftOrder selectedOrder) {
+        if (null != selectedOrder.getC21OrderOptions()) {
+            return BOLD_BEGIN + selectedOrder.getC21OrderOptions().getDisplayedValue() + BOLD_END;
+        } else if (null != selectedOrder.getOrderType()) {
+            return BOLD_BEGIN + selectedOrder.getOrderType().getDisplayedValue() + BOLD_END;
+        }
+        return null;
     }
 }
