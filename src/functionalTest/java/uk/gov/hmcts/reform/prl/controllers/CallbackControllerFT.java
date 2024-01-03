@@ -60,6 +60,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK, classes = { Application.class })
+@SuppressWarnings("unchecked")
 public class CallbackControllerFT {
 
     private MockMvc mockMvc;
