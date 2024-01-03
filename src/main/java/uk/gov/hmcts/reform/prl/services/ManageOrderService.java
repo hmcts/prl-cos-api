@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
@@ -2838,5 +2839,42 @@ public class ManageOrderService {
                 standardDirectionOrder.getSdoSettlementHearingDetails()
             );
         }
+    }
+
+    public List<String> validateRespondentLipAndOtherPersonAddress(CaseData caseData) {
+        List<String> selectedRespondentIds = caseData.getManageOrders().getRecipientsOptions().getValue()
+            .stream().map(DynamicMultiselectListElement::getCode).toList();
+        List<String> errorList = new ArrayList<>();
+        if (No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
+            validateAddressForParty(caseData.getRespondents(), selectedRespondentIds, errorList, true);
+        }
+        List<String> selectedOtherPartyIds = caseData.getManageOrders().getOtherParties().getValue()
+            .stream().map(DynamicMultiselectListElement::getCode).toList();
+        validateAddressForParty(caseData.getOtherPartyInTheCaseRevised(), selectedOtherPartyIds, errorList, false);
+        return errorList;
+    }
+
+    private void validateAddressForParty(List<Element<PartyDetails>> partyDetails,
+                                         List<String> selectedPartyId, List<String> errorList,
+                                         Boolean isRespondent) {
+        partyDetails.stream()
+            .filter(party -> selectedPartyId.contains(party.getId().toString()))
+            .forEach(party -> {
+                         if ((isRespondent
+                             && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation())) &&
+                             (null == party.getValue().getContactPreferences() ||
+                                 party.getValue().getContactPreferences().equals(ContactPreferences.post) ||
+                                 null == party.getValue().getEmail())) {
+                             errorList.add("This order cannot be served by post until the respondent's " +
+                                               "address is given.");
+                             return;
+                         } else if (!isRespondent) {
+                             if (null == party.getValue().getAddress()) {
+                                 errorList.add("This order cannot be served by post until the other people's address is given.");
+                               return;
+                             }
+                         }
+                     }
+            );
     }
 }

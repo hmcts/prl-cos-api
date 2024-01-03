@@ -523,4 +523,30 @@ public class ManageOrdersController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping(path = "/manage-orders/validate-respondent-and-other-person-address",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to validate respondent Lip and other person address")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateRespondentAndOtherPersonAddress(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            List<String> errorList = null;
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(caseData);
+            if (isNotEmpty(errorList)) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(callbackRequest.getCaseDetails().getData())
+                .build();
+        }
+        else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 }
