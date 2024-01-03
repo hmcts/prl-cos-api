@@ -856,14 +856,19 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> updateDraftOrderCollection(CaseData caseData, String authorisation, String eventId) {
-
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
-        UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
-            caseData.getDraftOrdersDynamicList(), objectMapper);
+        UUID selectedOrderId;
+        if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
+            selectedOrderId = elementUtils.getDynamicListSelectedValue(
+                caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper);
+        } else {
+            selectedOrderId = elementUtils.getDynamicListSelectedValue(
+                caseData.getDraftOrdersDynamicList(), objectMapper);
+        }
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
-            DraftOrder draftOrder = e.getValue();
             if (e.getId().equals(selectedOrderId)) {
+                DraftOrder draftOrder = e.getValue();
                 boolean isOrderEdited = false;
                 isOrderEdited = isOrderEdited(caseData, eventId, isOrderEdited);
                 if (isOrderEdited || (caseData.getManageOrders() != null

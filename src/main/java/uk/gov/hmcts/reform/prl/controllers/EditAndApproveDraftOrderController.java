@@ -165,8 +165,13 @@ public class EditAndApproveDraftOrderController {
                     callbackRequest
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
-                caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService.getDraftOrderNameForWA(caseData, true));
+                if (Event.EDIT_AND_APPROVE_ORDER.getId()
+                    .equalsIgnoreCase(callbackRequest.getEventId())) {
+                    caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
+                        .getDraftOrderNameForWA(caseData, true));
+                }
                 caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
                     caseData,
                     authorisation,
