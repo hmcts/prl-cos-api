@@ -6,7 +6,6 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -104,7 +103,6 @@ public class ManageDocumentsControllerFunctionalTest {
 
 
     @Test
-    @Ignore
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
