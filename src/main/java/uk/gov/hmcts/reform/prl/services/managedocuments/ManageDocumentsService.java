@@ -318,8 +318,8 @@ public class ManageDocumentsService {
             .cafcassQuarantineDocument(CAFCASS.equals(userRole) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
             .courtStaffQuarantineDocument((COURT_STAFF.equals(userRole)) ? manageDocument.getDocument().toBuilder()
-            //.confidentialDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
+            //.confidentialDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
             .build();
     }
 }
