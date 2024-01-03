@@ -21,7 +21,58 @@ import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ANY_OTHER_DOC;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_C1A_RESPONSE;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_FROM_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICATIONS_WITHIN_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPROVED_ORDERS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CASE_SUMMARY;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.COURT_BUNDLE;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_EXPERT_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DNA_REPORTS_OTHER_DOCS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.DRUG_AND_ALCOHOL_TEST;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.GUARDIAN_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.HOME_OFFICE_DWP_RESPONSES;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.IMPORTANT_INFO_ABOUT_ADDRESS_AND_CONTACT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.JUDGE_NOTES_FROM_HEARING;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.LETTERS_OF_COMPLAINTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MAGISTRATES_FACTS_AND_REASONS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MEDICAL_RECORDS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MEDICAL_REPORTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.NOTICES_OF_ACTING_DISCHARGE;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.NOTICE_OF_HEARING;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_SUBMITTED_WITH_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_DOCS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_WITNESS_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POLICE_DISCLOSURES;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POLICE_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.POSITION_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PRIVACY_NOTICE;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PUBLIC_FUNDING_CERTIFICATES;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.REQUEST_FOR_FAS_FORMS_TO_BE_CHANGED;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_C1A_RESPONSE;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESPONDENT_STATEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.RESULTS_OF_HAIR_STRAND_BLOOD_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SAFEGUARDING_LETTER;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SEC37_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION7_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SECTION_37_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SIXTEEN_A_RISK_ASSESSMENT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_GUARDIANSHIP_REPORT;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPECIAL_MEASURES;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.SPIP_REFERRAL_REQUESTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.STANDARD_DIRECTIONS_ORDER;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.TRANSCRIPTS_OF_JUDGEMENTS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.WITNESS_AVAILABILITY;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.DETAILS_ERROR_MESSAGE;
 
 @Slf4j
@@ -70,7 +121,61 @@ public class ManageDocumentsControllerFunctionalTest {
                   "data.manageDocuments[0].value.documentRestrictCheckbox", equalTo(null),
                   "data.manageDocuments[0].value.documentCategories.value.code", equalTo(null),
                   "data.manageDocuments[0].value.documentCategories.value.label",equalTo(null),
-                  "data.manageDocuments[0].value.documentCategories.list_items[0].code", equalTo(APPLICANT_APPLICATION)
+                  "data.manageDocuments[0].value.documentCategories.list_items[0].code", equalTo(APPLICANT_APPLICATION),
+                  "data.manageDocuments[0].value.documentCategories.list_items[1].code", equalTo(APPLICANT_C1A_APPLICATION),
+                  "data.manageDocuments[0].value.documentCategories.list_items[2].code", equalTo(APPLICANT_C1A_RESPONSE),
+                  "data.manageDocuments[0].value.documentCategories.list_items[3].code", equalTo(APPLICATIONS_WITHIN_PROCEEDINGS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[4].code", equalTo(MIAM_CERTIFICATE),
+                  "data.manageDocuments[0].value.documentCategories.list_items[5].code", equalTo(PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION),
+                  "data.manageDocuments[0].value.documentCategories.list_items[6].code", equalTo(RESPONDENT_APPLICATION),
+                  "data.manageDocuments[0].value.documentCategories.list_items[7].code", equalTo(RESPONDENT_C1A_APPLICATION),
+                  "data.manageDocuments[0].value.documentCategories.list_items[8].code", equalTo(RESPONDENT_C1A_RESPONSE),
+                  "data.manageDocuments[0].value.documentCategories.list_items[9].code", equalTo(APPLICATIONS_FROM_OTHER_PROCEEDINGS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[10].code", equalTo(NOTICE_OF_HEARING),
+                  "data.manageDocuments[0].value.documentCategories.list_items[11].code", equalTo(COURT_BUNDLE),
+                  "data.manageDocuments[0].value.documentCategories.list_items[12].code", equalTo(CASE_SUMMARY),
+                  "data.manageDocuments[0].value.documentCategories.list_items[13].code", equalTo(SAFEGUARDING_LETTER),
+                  "data.manageDocuments[0].value.documentCategories.list_items[14].code", equalTo(SECTION7_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[15].code", equalTo(SECTION_37_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[16].code", equalTo(SIXTEEN_A_RISK_ASSESSMENT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[17].code", equalTo(GUARDIAN_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[18].code", equalTo(SPECIAL_GUARDIANSHIP_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[19].code", equalTo(OTHER_DOCS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[20].code", equalTo(CONFIDENTIAL),
+                  "data.manageDocuments[0].value.documentCategories.list_items[21].code", equalTo(EMAILS_TO_COURT_TO_REQUEST_HEARINGS_ADJOURNED),
+                  "data.manageDocuments[0].value.documentCategories.list_items[22].code", equalTo(PUBLIC_FUNDING_CERTIFICATES),
+                  "data.manageDocuments[0].value.documentCategories.list_items[23].code", equalTo(NOTICES_OF_ACTING_DISCHARGE),
+                  "data.manageDocuments[0].value.documentCategories.list_items[24].code", equalTo(REQUEST_FOR_FAS_FORMS_TO_BE_CHANGED),
+                  "data.manageDocuments[0].value.documentCategories.list_items[25].code", equalTo(WITNESS_AVAILABILITY),
+                  "data.manageDocuments[0].value.documentCategories.list_items[26].code", equalTo(LETTERS_OF_COMPLAINTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[27].code", equalTo(SPIP_REFERRAL_REQUESTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[28].code", equalTo(HOME_OFFICE_DWP_RESPONSES),
+                  "data.manageDocuments[0].value.documentCategories.list_items[29].code", equalTo("bulkScanQuarantine"),
+                  "data.manageDocuments[0].value.documentCategories.list_items[30].code", equalTo(MEDICAL_REPORTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[31].code", equalTo(DNA_REPORTS_EXPERT_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[32].code", equalTo(RESULTS_OF_HAIR_STRAND_BLOOD_TESTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[33].code", equalTo(POLICE_DISCLOSURES),
+                  "data.manageDocuments[0].value.documentCategories.list_items[34].code", equalTo(MEDICAL_RECORDS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[35].code", equalTo(DRUG_AND_ALCOHOL_TEST),
+                  "data.manageDocuments[0].value.documentCategories.list_items[36].code", equalTo(POLICE_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[37].code", equalTo(SEC37_REPORT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[38].code", equalTo(ORDERS_SUBMITTED_WITH_APPLICATION),
+                  "data.manageDocuments[0].value.documentCategories.list_items[39].code", equalTo(APPROVED_ORDERS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[40].code", equalTo(STANDARD_DIRECTIONS_ORDER),
+                  "data.manageDocuments[0].value.documentCategories.list_items[41].code", equalTo(TRANSCRIPTS_OF_JUDGEMENTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[42].code", equalTo(MAGISTRATES_FACTS_AND_REASONS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[43].code", equalTo(JUDGE_NOTES_FROM_HEARING),
+                  "data.manageDocuments[0].value.documentCategories.list_items[44].code", equalTo(IMPORTANT_INFO_ABOUT_ADDRESS_AND_CONTACT),
+                  "data.manageDocuments[0].value.documentCategories.list_items[45].code", equalTo(DNA_REPORTS_OTHER_DOCS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[46].code", equalTo(PRIVACY_NOTICE),
+                  "data.manageDocuments[0].value.documentCategories.list_items[47].code", equalTo(SPECIAL_MEASURES),
+                  "data.manageDocuments[0].value.documentCategories.list_items[48].code", equalTo(ANY_OTHER_DOC),
+                  "data.manageDocuments[0].value.documentCategories.list_items[49].code", equalTo(POSITION_STATEMENTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[50].code", equalTo(APPLICANT_STATEMENTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[51].code", equalTo(RESPONDENT_STATEMENTS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[52].code", equalTo(OTHER_WITNESS_STATEMENTS)
+
+
             )
             .assertThat().statusCode(200);
 
