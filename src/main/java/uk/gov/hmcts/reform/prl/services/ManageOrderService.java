@@ -1391,18 +1391,13 @@ public class ManageOrderService {
     }
 
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
-        log.info("SERVE ORDERR...");
-
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-            log.info("selected order ids..{}", selectedOrderIds);
-            log.info("orders..{}", orders);
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
                     if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                        log.info("Serve c1000....");
                         servedC100Order(caseData, orders, order);
                     } else {
                         servedFL401Order(caseData, orders, order);
@@ -1511,17 +1506,11 @@ public class ManageOrderService {
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
-        log.info("serve c1000001 {}", serveRecipientName);
-        log.info("serve c1000002{}", servingRespondentsOptions);
-
         if (null != serveRecipientName
             && null != servingRespondentsOptions
             && servingRespondentsOptions.toString().equals(ServingRespondentsEnum.applicantLegalRepresentative.toString())) {
-            log.info("innnnnn....");
             servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
         }
-        log.info("serve c1000004{}", servedOrderDetails.get(SERVE_RECIPIENT_NAME));
-
         updateServedOrderDetails(
             servedOrderDetails,
             cafcassCymruEmail,
@@ -1641,8 +1630,6 @@ public class ManageOrderService {
     private static void updateServedOrderDetails(Map<String, Object> servedOrderDetails, String cafcassCymruEmail, List<Element<OrderDetails>> orders,
                                                  Element<OrderDetails> order, List<Element<PostalInformation>> postalInformation,
                                                  List<Element<EmailInformation>> emailInformation) {
-        log.info("AAAAAAAAAa {}",servedOrderDetails);
-        log.info("BBBBBBBB {}",SERVE_RECIPIENT_NAME);
         YesOrNo cafcassServed = null;
         YesOrNo cafcassCymruServed = null;
         String cafcassEmail = null;
@@ -1683,7 +1670,6 @@ public class ManageOrderService {
             servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVED_PARTIES);
         }
         if (servedOrderDetails.containsKey(SERVE_RECIPIENT_NAME)) {
-            log.info("insideeeee.....");
             serveRecipientName = (String) servedOrderDetails.get(SERVE_RECIPIENT_NAME);
         }
         ServeOrderDetails tempServeOrderDetails;
@@ -2146,7 +2132,6 @@ public class ManageOrderService {
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
         String currentUserFullName = userDetails.getFullName();
-        log.info("orderDetails-----> {}", orderDetails);
 
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
