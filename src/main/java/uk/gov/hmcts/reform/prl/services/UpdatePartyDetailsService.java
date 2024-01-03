@@ -60,10 +60,8 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("Updated case data: " + updatedCaseData);
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
-        log.info("Respondent details: " + caseData.getRespondents());
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
@@ -119,7 +117,6 @@ public class UpdatePartyDetailsService {
             }
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
-        log.info("Respondent details after clean up: " + updatedCaseData.get(RESPONDENTS));
         return updatedCaseData;
     }
 
