@@ -196,6 +196,7 @@ public class DraftAnOrderService {
     private static final String BOLD_END = "</span>";
 
     private final WelshCourtEmail welshCourtEmail;
+    private final EditReturnedOrderService editReturnedOrderService;
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
@@ -298,7 +299,7 @@ public class DraftAnOrderService {
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
-                    caseData = updateCaseDataForFinalOrderDocument(caseData, authorisation, draftOrder.getOrderType());
+                    caseData = updateCaseDataForFinalOrderDocument(caseData, authorisation, draftOrder.getOrderType(), eventId);
                 }
 
                 updatedCaseData.put(
@@ -321,7 +322,8 @@ public class DraftAnOrderService {
 
     }
 
-    private CaseData updateCaseDataForFinalOrderDocument(CaseData caseData, String authorisation, CreateSelectOrderOptionsEnum orderType) {
+    private CaseData updateCaseDataForFinalOrderDocument(CaseData caseData, String authorisation, CreateSelectOrderOptionsEnum orderType,
+                                                         String eventId) {
         Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, Map.class);
         caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData));
         StandardDirectionOrder standardDirectionOrder = null;
@@ -331,7 +333,7 @@ public class DraftAnOrderService {
         } else if (!(CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(orderType))) {
-            caseDataMap.putAll(populateDraftOrderCustomFields(caseData));
+            caseDataMap.putAll(populateDraftOrderCustomFields(caseData, eventId));
         }
         caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
         caseData = caseData.toBuilder().standardDirectionOrder(null != standardDirectionOrder ? standardDirectionOrder : null).build();
@@ -567,9 +569,14 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData) {
+    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData, String eventId) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
+            selectedOrder = editReturnedOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                                             caseData.getManageOrders()
+                                                                                                 .getRejectedOrdersDynamicList());
+        }
         if (!CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(selectedOrder.getOrderType())) {
             caseDataMap.put("fl404CustomFields", selectedOrder.getFl404CustomFields());
             caseDataMap.put("parentName", selectedOrder.getParentName());
@@ -894,7 +901,10 @@ public class DraftAnOrderService {
     }
 
     public boolean isOrderEdited(CaseData caseData, String eventId, boolean isOrderEdited) {
-        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+        if (Event.EDIT_RETURNED_ORDER.getId()
+            .equalsIgnoreCase(eventId)) {
+            isOrderEdited = true;
+        } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(eventId)) {
             if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
                 isOrderEdited = true;
@@ -1056,7 +1066,6 @@ public class DraftAnOrderService {
         }
         if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData = caseData.toBuilder()
-                .standardDirectionOrder(caseData.getStandardDirectionOrder())
                 .manageOrders(caseData.getManageOrders().toBuilder()
                                   .manageOrdersFl402CaseNo(caseData.getManageOrders().getManageOrdersCaseNo())
                                   .childOption(manageOrderService.getChildOption(caseData))
@@ -1066,8 +1075,13 @@ public class DraftAnOrderService {
                                   .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
             CreateSelectOrderOptionsEnum orderType = caseData.getCreateSelectOrderOptions();
-            if (ObjectUtils.isEmpty(orderType)) {
+            if (ObjectUtils.isEmpty(orderType) && !Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
                 DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+                orderType = draftOrder.getOrderType();
+            } else {
+                DraftOrder draftOrder = editReturnedOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                                              caseData.getManageOrders()
+                                                                                                  .getRejectedOrdersDynamicList());
                 orderType = draftOrder.getOrderType();
             }
             caseData = manageOrderService.populateCustomOrderFields(caseData, orderType);
@@ -1655,8 +1669,13 @@ public class DraftAnOrderService {
             "dioDisclosureOfPapersCaseNumbers", elementList);
     }
 
-    public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData) throws Exception {
+    public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData, String eventId) throws Exception {
         DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+        if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
+            draftOrder = editReturnedOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                               caseData.getManageOrders()
+                                                                                   .getRejectedOrdersDynamicList());
+        }
         Map<String, Object> caseDataMap = getDraftOrderData(authorisation, caseData, draftOrder.getOrderType());
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, draftOrder.getIsOrderCreatedBySolicitor());
         caseDataMap.put(
@@ -1753,7 +1772,7 @@ public class DraftAnOrderService {
         }
 
         if (isOrderEdited) {
-            caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
+            caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData, callbackRequest.getEventId()));
         } else {
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, orderType));
         }
@@ -1805,7 +1824,7 @@ public class DraftAnOrderService {
         }
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())
             || Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-            caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData));
+            caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData, callbackRequest.getEventId()));
         } else {
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, caseData.getCreateSelectOrderOptions()));
         }
@@ -2079,6 +2098,11 @@ public class DraftAnOrderService {
             );
         } else {
             DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+            if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                draftOrder = editReturnedOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                                   caseData.getManageOrders()
+                                                                                       .getRejectedOrdersDynamicList());
+            }
             boolean isOrderEdited = false;
             if (isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited)) {
                 errorList = validateEditedOrderDetails(caseData, draftOrder);

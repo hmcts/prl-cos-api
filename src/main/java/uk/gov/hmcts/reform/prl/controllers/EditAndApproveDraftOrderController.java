@@ -209,12 +209,12 @@ public class EditAndApproveDraftOrderController {
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
-                caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
+                caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, callbackRequest.getEventId()));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData)).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, callbackRequest.getEventId())).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

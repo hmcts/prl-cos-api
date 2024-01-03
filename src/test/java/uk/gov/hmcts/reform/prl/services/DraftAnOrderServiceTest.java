@@ -1026,7 +1026,8 @@ public class DraftAnOrderServiceTest {
             .build();
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
-        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData,
+                                                                                             EDIT_AND_APPROVE_ORDER.getId());
         assertEquals("test", caseDataMap.get("parentName"));
     }
 
@@ -1067,7 +1068,8 @@ public class DraftAnOrderServiceTest {
             draftOrder.getSdoDetails(),
             Map.class
         )).thenReturn(new HashMap<String, Object>());
-        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData);
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData,
+                                                                                             EDIT_AND_APPROVE_ORDER.getId());
         assertEquals(null, caseDataMap.get("parentName"));
     }
 
@@ -1103,7 +1105,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(
-            caseData);
+            caseData, ADMIN_EDIT_AND_APPROVE_ORDER.getId());
 
         assertEquals("test", caseDataMap.get("parentName"));
     }
@@ -2514,7 +2516,8 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
 
-        Map<String, Object> stringObjectMap = draftAnOrderService.getDraftOrderInfo(authToken, caseData);
+        Map<String, Object> stringObjectMap = draftAnOrderService.getDraftOrderInfo(authToken, caseData,
+                                                                                    ADMIN_EDIT_AND_APPROVE_ORDER.getId());
         assertNotNull(stringObjectMap);
     }
 
@@ -2549,7 +2552,8 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
 
-        Map<String, Object> stringObjectMap = draftAnOrderService.getDraftOrderInfo(authToken, caseData);
+        Map<String, Object> stringObjectMap = draftAnOrderService.getDraftOrderInfo(authToken, caseData,
+                                                                                    ADMIN_EDIT_AND_APPROVE_ORDER.getId());
         assertNotNull(stringObjectMap);
     }
 
