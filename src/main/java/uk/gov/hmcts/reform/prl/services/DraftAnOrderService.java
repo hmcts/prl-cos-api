@@ -916,9 +916,9 @@ public class DraftAnOrderService {
             }
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
-            && (JudgeApprovalDecisionsCourtAdminEnum.editTheOrderAndServe
+            && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
-            || JudgeApprovalDecisionsSolicitorEnum.editTheOrderAndServe
+            || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
             isOrderEdited = true;
         }
