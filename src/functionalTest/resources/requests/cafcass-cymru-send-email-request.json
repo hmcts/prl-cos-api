@@ -104,7 +104,7 @@
                   }
                 }
               ],
-              "cafcassCymruEmail": "khurshed.khan@hmcts.net",
+              "cafcassCymruEmail": "test@hmcts.net",
               "recipientsOptions": "Jeremy Anderson, Martina Graham",
               "serveOnRespondent": "No",
               "cafcassCymruServed": "Yes",
@@ -205,7 +205,7 @@
                   }
                 }
               ],
-              "cafcassCymruEmail": "khurshed.khan@hmcts.net",
+              "cafcassCymruEmail": "test@hmcts.net",
               "recipientsOptions": "Jeremy Anderson, Martina Graham",
               "serveOnRespondent": "No",
               "cafcassCymruServed": "Yes",
@@ -296,7 +296,7 @@
         ]
       },
       "cafcassCymruServedOptions": "Yes",
-      "cafcassCymruEmail": "khurshed.khan@hmcts.net",
+      "cafcassCymruEmail": "test@hmcts.net",
       "serveOtherPartiesCA": [
       ]
     },
