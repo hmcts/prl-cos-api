@@ -1080,13 +1080,17 @@ public class DraftAnOrderService {
                                   .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
                                   .build()).build();
             CreateSelectOrderOptionsEnum orderType = caseData.getCreateSelectOrderOptions();
-            if (ObjectUtils.isEmpty(orderType) && !Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
-                orderType = draftOrder.getOrderType();
-            } else {
-                DraftOrder draftOrder = editReturnedOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                                                              caseData.getManageOrders()
-                                                                                                  .getRejectedOrdersDynamicList());
+            if (ObjectUtils.isEmpty(orderType)) {
+                DraftOrder draftOrder;
+                if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
+                    draftOrder = editReturnedOrderService.getSelectedDraftOrderDetails(
+                        caseData.getDraftOrderCollection(),
+                        caseData.getManageOrders()
+                            .getRejectedOrdersDynamicList()
+                    );
+                } else {
+                    draftOrder = getSelectedDraftOrderDetails(caseData);
+                }
                 orderType = draftOrder.getOrderType();
             }
             caseData = manageOrderService.populateCustomOrderFields(caseData, orderType);
