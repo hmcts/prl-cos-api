@@ -174,4 +174,15 @@ public class DgsServiceTest {
         dgsService.generateCitizenDocument(" ", generateAndUploadDocumentRequest, " ");
         assertEquals("test", generateAndUploadDocumentRequest.getValues().get("freeTextUploadStatements"));
     }
+
+    @Test
+    public void testToGenerateDocumentWithEmptyHearingsData() throws Exception {
+        CaseData caseData1 = CaseData.builder().manageOrders(ManageOrders.builder().build()).build();
+        CaseDetails caseDetails1 = CaseDetails.builder()
+            .caseId("123")
+            .caseData(caseData1)
+            .build();
+
+        assertEquals(dgsService.generateDocument(authToken, caseDetails1, PRL_DRAFT_TEMPLATE), generatedDocumentInfo);
+    }
 }

@@ -747,14 +747,8 @@ public class HearingDataService {
             String applicantSolicitor = getFL401SolicitorName(caseData.getApplicantsFL401());
             String respondentSolicitor = getFL401SolicitorName(caseData.getRespondentsFL401());
 
-            tempPartyNamesMap.put("applicantName", null != caseData.getApplicantName()
-                ? concat(caseData.getApplicantName(), " (Applicant)") : null);
-            tempPartyNamesMap.put("respondentName", null != caseData.getRespondentName()
-                ? concat(caseData.getRespondentName(), " (Respondent)") : null);
-            tempPartyNamesMap.put("applicantSolicitor", null != applicantSolicitor
-                ? concat(applicantSolicitor, " (Applicant solicitor)") : null);
-            tempPartyNamesMap.put("respondentSolicitor", null != respondentSolicitor
-                ? concat(respondentSolicitor, " (Respondent solicitor)") : null);
+            populateFl401PartiesNames(tempPartyNamesMap, caseData, applicantSolicitor, respondentSolicitor);
+
         } else {
             log.info("Populating party names for C100");
             List<String> applicantNames = getPartyNameList(caseData.getApplicants());
@@ -765,43 +759,115 @@ public class HearingDataService {
             int numberOfRespondents = respondentNames.size();
             int numberOfApplicantSolicitors = applicantSolicitorNames.size();
             int numberOfRespondentSolicitors = respondentSolicitorNames.size();
-            //applicants
-            tempPartyNamesMap.put("applicantName1", 0 < numberOfApplicant ? concat(applicantNames.get(0), " (Applicant1)") : null);
-            tempPartyNamesMap.put("applicantName2", 1 < numberOfApplicant ? concat(applicantNames.get(1), " (Applicant2)") : null);
-            tempPartyNamesMap.put("applicantName3", 2 < numberOfApplicant ? concat(applicantNames.get(2), " (Applicant3)") : null);
-            tempPartyNamesMap.put("applicantName4", 3 < numberOfApplicant ? concat(applicantNames.get(3), " (Applicant4)") : null);
-            tempPartyNamesMap.put("applicantName5", 4 < numberOfApplicant ? concat(applicantNames.get(4), " (Applicant5)") : null);
-            //applicant solicitors
-            tempPartyNamesMap.put("applicantSolicitor1", 0 < numberOfApplicantSolicitors
-                ? concat(applicantSolicitorNames.get(0), " (Applicant1 solicitor)") : null);
-            tempPartyNamesMap.put("applicantSolicitor2", 1 < numberOfApplicantSolicitors
-                ? concat(applicantSolicitorNames.get(1), " (Applicant2 solicitor)") : null);
-            tempPartyNamesMap.put("applicantSolicitor3", 2 < numberOfApplicantSolicitors
-                ? concat(applicantSolicitorNames.get(2), " (Applicant3 solicitor)") : null);
-            tempPartyNamesMap.put("applicantSolicitor4", 3 < numberOfApplicantSolicitors
-                ? concat(applicantSolicitorNames.get(3), " (Applicant4 solicitor)") : null);
-            tempPartyNamesMap.put("applicantSolicitor5", 4 < numberOfApplicantSolicitors
-                ? concat(applicantSolicitorNames.get(4), " (Applicant5 solicitor)") : null);
-            //respondents
-            tempPartyNamesMap.put("respondentName1", 0 < numberOfRespondents ? concat(respondentNames.get(0), " (Respondent1)") : null);
-            tempPartyNamesMap.put("respondentName2", 1 < numberOfRespondents ? concat(respondentNames.get(1), " (Respondent2)") : null);
-            tempPartyNamesMap.put("respondentName3", 2 < numberOfRespondents ? concat(respondentNames.get(2), " (Respondent3)") : null);
-            tempPartyNamesMap.put("respondentName4", 3 < numberOfRespondents ? concat(respondentNames.get(3), " (Respondent4)") : null);
-            tempPartyNamesMap.put("respondentName5", 4 < numberOfRespondents ? concat(respondentNames.get(4), " (Respondent5)") : null);
-            //respondent solicitors
-            tempPartyNamesMap.put("respondentSolicitor1", 0 < numberOfRespondentSolicitors
-                ? concat(respondentSolicitorNames.get(0), " (Respondent1 solicitor)") : null);
-            tempPartyNamesMap.put("respondentSolicitor2", 1 < numberOfRespondentSolicitors
-                ? concat(respondentSolicitorNames.get(1), " (Respondent2 solicitor)") : null);
-            tempPartyNamesMap.put("respondentSolicitor3", 2 < numberOfRespondentSolicitors
-                ? concat(respondentSolicitorNames.get(2), " (Respondent3 solicitor)") : null);
-            tempPartyNamesMap.put("respondentSolicitor4", 3 < numberOfRespondentSolicitors
-                ? concat(respondentSolicitorNames.get(3), " (Respondent4 solicitor)") : null);
-            tempPartyNamesMap.put("respondentSolicitor5", 4 < numberOfRespondentSolicitors
-                ? concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)") : null);
+
+            //applicants & applicant solicitors
+            populateC100ApplicantsAndSolicitorsNames(tempPartyNamesMap, numberOfApplicant, applicantNames,
+                                                     numberOfApplicantSolicitors, applicantSolicitorNames);
+
+            //respondents & respondent solicitors
+            populateC100RespondentsAndSolicitorsNames(tempPartyNamesMap, numberOfRespondents, respondentNames,
+                                                      numberOfRespondentSolicitors, respondentSolicitorNames);
         }
 
         //EXUI-1144 - Added a temp key for hearing party names map for document generation. This is consumed in DGS
         tempCaseDetails.put("tempPartyNamesForDocGen", tempPartyNamesMap);
+    }
+
+    private void populateFl401PartiesNames(Map<String, Object> tempPartyNamesMap,
+                                           CaseData caseData,
+                                           String applicantSolicitor,
+                                           String respondentSolicitor) {
+        if (null != caseData.getApplicantName()) {
+            tempPartyNamesMap.put("applicantName", concat(caseData.getApplicantName(), " (Applicant)"));
+        }
+        if (null != caseData.getRespondentName()) {
+            tempPartyNamesMap.put("respondentName", concat(caseData.getRespondentName(), " (Respondent)"));
+        }
+        if (null != applicantSolicitor) {
+            tempPartyNamesMap.put("applicantSolicitor", concat(applicantSolicitor, " (Applicant solicitor)"));
+        }
+        if (null != respondentSolicitor) {
+            tempPartyNamesMap.put("respondentSolicitor", concat(respondentSolicitor, " (Respondent solicitor)"));
+        }
+    }
+
+    private void populateC100ApplicantsAndSolicitorsNames(Map<String, Object> tempPartyNamesMap,
+                                                          int numberOfApplicant,
+                                                          List<String> applicantNames,
+                                                          int numberOfApplicantSolicitors,
+                                                          List<String> applicantSolicitorNames) {
+        //applicants
+        if (0 < numberOfApplicant) {
+            tempPartyNamesMap.put("applicantName1", concat(applicantNames.get(0), " (Applicant1)"));
+        }
+        if (1 < numberOfApplicant) {
+            tempPartyNamesMap.put("applicantName2", concat(applicantNames.get(1), " (Applicant2)"));
+        }
+        if (2 < numberOfApplicant) {
+            tempPartyNamesMap.put("applicantName3", concat(applicantNames.get(2), " (Applicant3)"));
+        }
+        if (3 < numberOfApplicant) {
+            tempPartyNamesMap.put("applicantName4", concat(applicantNames.get(3), " (Applicant4)"));
+        }
+        if (4 < numberOfApplicant) {
+            tempPartyNamesMap.put("applicantName5", concat(applicantNames.get(4), " (Applicant5)"));
+        }
+
+        //applicant solicitors
+        if (0 < numberOfApplicantSolicitors) {
+            tempPartyNamesMap.put("applicantSolicitor1", concat(applicantSolicitorNames.get(0), " (Applicant1 solicitor)"));
+        }
+        if (1 < numberOfApplicantSolicitors) {
+            tempPartyNamesMap.put("applicantSolicitor2", concat(applicantSolicitorNames.get(1), " (Applicant2 solicitor)"));
+        }
+        if (2 < numberOfApplicantSolicitors) {
+            tempPartyNamesMap.put("applicantSolicitor3", concat(applicantSolicitorNames.get(2), " (Applicant3 solicitor)"));
+        }
+        if (3 < numberOfApplicantSolicitors) {
+            tempPartyNamesMap.put("applicantSolicitor4", concat(applicantSolicitorNames.get(3), " (Applicant4 solicitor)"));
+        }
+        if (4 < numberOfApplicantSolicitors) {
+            tempPartyNamesMap.put("applicantSolicitor5", concat(applicantSolicitorNames.get(4), " (Applicant5 solicitor)"));
+        }
+    }
+
+    private void populateC100RespondentsAndSolicitorsNames(Map<String, Object> tempPartyNamesMap,
+                                                           int numberOfRespondents,
+                                                           List<String> respondentNames,
+                                                           int numberOfRespondentSolicitors,
+                                                           List<String> respondentSolicitorNames) {
+        //respondents
+        if (0 < numberOfRespondents) {
+            tempPartyNamesMap.put("respondentName1", concat(respondentNames.get(0), " (Respondent1)"));
+        }
+        if (1 < numberOfRespondents) {
+            tempPartyNamesMap.put("respondentName2", concat(respondentNames.get(1), " (Respondent2)"));
+        }
+        if (2 < numberOfRespondents) {
+            tempPartyNamesMap.put("respondentName3", concat(respondentNames.get(2), " (Respondent3)"));
+        }
+        if (3 < numberOfRespondents) {
+            tempPartyNamesMap.put("respondentName4", concat(respondentNames.get(3), " (Respondent4)"));
+        }
+        if (4 < numberOfRespondents) {
+            tempPartyNamesMap.put("respondentName5", concat(respondentNames.get(4), " (Respondent5)"));
+        }
+
+        //respondent solicitors
+        if (0 < numberOfRespondentSolicitors) {
+            tempPartyNamesMap.put("respondentSolicitor1", concat(respondentSolicitorNames.get(0), " (Respondent1 solicitor)"));
+        }
+        if (1 < numberOfRespondentSolicitors) {
+            tempPartyNamesMap.put("respondentSolicitor2", concat(respondentSolicitorNames.get(1), " (Respondent2 solicitor)"));
+        }
+        if (2 < numberOfRespondentSolicitors) {
+            tempPartyNamesMap.put("respondentSolicitor3", concat(respondentSolicitorNames.get(2), " (Respondent3 solicitor)"));
+        }
+        if (3 < numberOfRespondentSolicitors) {
+            tempPartyNamesMap.put("respondentSolicitor4", concat(respondentSolicitorNames.get(3), " (Respondent4 solicitor)"));
+        }
+        if (4 < numberOfRespondentSolicitors) {
+            tempPartyNamesMap.put("respondentSolicitor5", concat(respondentSolicitorNames.get(4), " (Respondent5 solicitor)"));
+        }
     }
 }
