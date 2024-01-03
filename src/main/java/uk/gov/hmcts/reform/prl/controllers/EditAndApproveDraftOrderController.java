@@ -59,14 +59,12 @@ public class EditAndApproveDraftOrderController {
     private final CoreCaseDataService coreCaseDataService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
-    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
-        ### What happens next \n We will send this order to admin.
-        \n\n If you have included further directions, admin will also receive them.
-        """;
+    public static final String WHAT_HAPPENS_NEXT = "### What happens next \n ";
+    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = String.join(WHAT_HAPPENS_NEXT,
+        "We will send this order to admin.\n\n", "If you have included further directions, admin will also receive them.");
     public static final String CONFIRMATION_HEADER_LEGAL_REP = "# Message sent to legal representative";
-    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP = """
-        ### What happens next \n Your message has been sent to the legal representative.
-        """;
+    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP = String
+        .join(WHAT_HAPPENS_NEXT,"Your message has been sent to the legal representative.");
 
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -314,19 +312,23 @@ public class EditAndApproveDraftOrderController {
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
-            ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             caseDataUpdated.put(STATE, caseData.getState());
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-all-tabs",
-                caseDataUpdated
-            );
+            ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
+            updateTabs(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private void updateTabs(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
+        coreCaseDataService.triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            callbackRequest.getCaseDetails().getId(),
+            "internal-update-all-tabs",
+            caseDataUpdated
+        );
     }
 
     @PostMapping(path = "/edit-and-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -363,14 +365,11 @@ public class EditAndApproveDraftOrderController {
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                callbackRequest.getCaseDetails().getId(),
-                "internal-update-all-tabs",
-                caseDataUpdated
-            );
-            return responseEntity;
+            updateTabs(callbackRequest, caseDataUpdated);
+            return ResponseEntity
+                .ok(SubmittedCallbackResponse.builder()
+                        .confirmationHeader(CONFIRMATION_HEADER)
+                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

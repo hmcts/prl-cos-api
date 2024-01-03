@@ -900,13 +900,12 @@ public class DraftAnOrderService {
                 isOrderEdited = true;
             }
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(eventId)) {
-            if (caseData.getManageOrders() != null && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
+            .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
+            && (JudgeApprovalDecisionsCourtAdminEnum.editTheOrderAndServe
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
-                || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
-                .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor()))) {
-                isOrderEdited = true;
-            }
+            || JudgeApprovalDecisionsSolicitorEnum.editTheOrderAndServe
+                .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
+            isOrderEdited = true;
         }
         return isOrderEdited;
     }
