@@ -175,6 +175,7 @@ public class ManageDocumentsService {
         }
         //remove manageDocuments from caseData
         caseDataUpdated.remove("manageDocuments");
+        log.info("22222222 {}",caseDataUpdated);
 
         return caseDataUpdated;
     }

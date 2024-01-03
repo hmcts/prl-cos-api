@@ -15,7 +15,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+
+import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
 import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.DETAILS_ERROR_MESSAGE;
@@ -37,7 +41,11 @@ public class ManageDocumentsControllerFunctionalTest {
 
     private static final String MANAGE_DOCUMENT_REQUEST = "requests/manage-documents-request.json";
 
-    private static final String MANAGE_DOCUMENT_REQUEST_CONF_RESTRICTED = "requests/manage-documents-ConfOrRest.json";
+    private static final String MANAGE_DOCUMENT_REQUEST_RESTRICTED = "requests/manage-documents-restricted.json";
+
+    private static final String MANAGE_DOCUMENT_REQUEST_NOT_RESTRICTED = "requests/manage-documents-not-restricted.json";
+
+    private static final String MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED = "requests/manage-documents-not-restricted.json";
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -84,8 +92,26 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
-    public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField() throws Exception {
-        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_CONF_RESTRICTED);
+    public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenNotRestricted() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NOT_RESTRICTED);
+        AboutToStartOrSubmitCallbackResponse response =  request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/copy-manage-docs-mid")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        Assert.assertEquals(0,response.getErrors().size());
+
+    }
+
+    @Test
+    public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenRestricted() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
         AboutToStartOrSubmitCallbackResponse response =  request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
@@ -99,12 +125,11 @@ public class ManageDocumentsControllerFunctionalTest {
 
         Assert.assertEquals(1,response.getErrors().size());
         Assert.assertEquals(DETAILS_ERROR_MESSAGE,response.getErrors().get(0));
-
     }
 
     @Test
-    public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenNeitherConfNorRestriced() throws Exception {
-        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
+    public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForSolicitor() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
         AboutToStartOrSubmitCallbackResponse response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -117,6 +142,83 @@ public class ManageDocumentsControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
+
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList
+            = (List<Element<QuarantineLegalDoc>>) response.getData().get("legalProfQuarantineDocsList");
+
+        Assert.assertNotNull(legalProfQuarantineDocsList);
+        Assert.assertEquals(1,legalProfQuarantineDocsList.size());
+
     }
+
+    @Test
+    public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenNeitherConfNorRestricedForSolicitor() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
+
+        AboutToStartOrSubmitCallbackResponse response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/copy-manage-docs")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab
+            = (List<Element<QuarantineLegalDoc>>) response.getData().get("legalProfUploadDocListDocTab");
+
+        Assert.assertNotNull(legalProfUploadDocListDocTab);
+        Assert.assertEquals(1,legalProfUploadDocListDocTab.size());
+
+    }
+
+    @Test
+    public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCafcass() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
+
+        AboutToStartOrSubmitCallbackResponse response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/copy-manage-docs")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList
+            = (List<Element<QuarantineLegalDoc>>) response.getData().get("cafcassQuarantineDocsList");
+
+        Assert.assertNotNull(cafcassQuarantineDocsList);
+        Assert.assertEquals(1,cafcassQuarantineDocsList.size());
+
+    }
+
+    @Test
+    public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenNeitherConfNorRestricedForCafcass() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
+
+        AboutToStartOrSubmitCallbackResponse response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/copy-manage-docs")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab
+            = (List<Element<QuarantineLegalDoc>>) response.getData().get("cafcassUploadDocListDocTab");
+
+        Assert.assertNotNull(cafcassUploadDocListDocTab);
+        Assert.assertEquals(1,cafcassUploadDocListDocTab.size());
+
+    }
+
 
 }
