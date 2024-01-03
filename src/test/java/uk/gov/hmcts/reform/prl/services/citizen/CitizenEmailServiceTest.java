@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
 import javassist.NotFoundException;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -43,11 +41,6 @@ public class CitizenEmailServiceTest {
     @InjectMocks
     private CitizenEmailService citizenEmailService;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
     public void sendCaseSubmissionEmail() throws NotFoundException {
 
@@ -65,7 +58,8 @@ public class CitizenEmailServiceTest {
 
         //Then
         verify(emailService).send(eq(emailId), eq(CITIZEN_CASE_SUBMISSION), any(),
-                eq(LanguagePreference.english));
+                                  eq(LanguagePreference.english)
+        );
     }
 
     @Test
@@ -87,7 +81,8 @@ public class CitizenEmailServiceTest {
 
         //Then
         verify(emailService).send(eq(emailId), eq(CA_DA_CASE_WITHDRAWN), any(),
-                                  eq(LanguagePreference.english));
+                                  eq(LanguagePreference.english)
+        );
     }
 
 }

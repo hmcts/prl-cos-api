@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -7,7 +8,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -24,8 +24,12 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+
+import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
@@ -33,20 +37,22 @@ import static org.springframework.http.ResponseEntity.ok;
 
 @Slf4j
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/manage-documents")
 @SecurityRequirement(name = "Bearer Authentication")
 public class ManageDocumentsController extends AbstractCallbackController {
-
-    @Autowired
-    private ManageDocumentsService manageDocumentsService;
-
-    @Autowired
+    private final ManageDocumentsService manageDocumentsService;
     @Qualifier("allTabsService")
-    AllTabServiceImpl tabService;
-
+    private final AllTabServiceImpl tabService;
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
+
+    @Autowired
+    protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
+                                        ManageDocumentsService manageDocumentsService, AllTabServiceImpl tabService) {
+        super(objectMapper, eventPublisher);
+        this.manageDocumentsService = manageDocumentsService;
+        this.tabService = tabService;
+    }
 
     @PostMapping("/about-to-start")
     public CallbackResponse handleAboutToStart(
@@ -91,5 +97,20 @@ public class ManageDocumentsController extends AbstractCallbackController {
                       .confirmationHeader(CONFIRMATION_HEADER)
                       .confirmationBody(CONFIRMATION_BODY)
                       .build());
+    }
+
+    @PostMapping("/validate-court-user")
+    public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        if (manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)
+            && !manageDocumentsService.checkIfUserIsCourtStaff(authorisation)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(updatedCaseData).build();
     }
 }

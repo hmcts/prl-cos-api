@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
@@ -33,6 +34,8 @@ public class ManageDocumentsControllerFunctionalTest {
         );
 
     private static final String MANAGE_DOCUMENT_REQUEST = "requests/manage-documents-request.json";
+    private static final String MANAGE_DOCUMENT_COURT_REQUEST =
+        "requests/manage-documents-request-with-court-as-party.json";
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -61,6 +64,35 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenManageDocuments_GiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/validate-court-user")
+            .then()
+            .body("errors",
+                  contains("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
+            .assertThat().statusCode(200);
+    }
+
+    @Test
+    public void givenManageDocuments_ShouldNotGiveErrorWhenCourtAdminUserSelectCourt() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_COURT_REQUEST);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/validate-court-user")
+            .then()
+            .body("data.caseTypeOfApplication", equalTo("C100"))
             .assertThat().statusCode(200);
     }
 
