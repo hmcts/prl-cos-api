@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
 
 @Slf4j
@@ -158,6 +159,15 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.serveOrderDynamicList", equalTo(null))
             .body("data.serveOtherPartiesCA", equalTo(null))
             .body("data.cafcassCymruServedOptions", equalTo(null))
-            .body("data.emailInformationCaOnlyC47a", equalTo(null));
+            .body("data.emailInformationCaOnlyC47a", equalTo(null))
+            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
+                  equalTo("Yes"))
+            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail",
+                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
+            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruServed",
+                  equalTo("Yes"))
+            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail",
+                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
+        ;
     }
 }
