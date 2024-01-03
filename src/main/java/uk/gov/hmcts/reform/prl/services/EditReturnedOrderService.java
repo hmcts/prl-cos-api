@@ -90,7 +90,6 @@ public class EditReturnedOrderService {
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getManageOrders()
             .getRejectedOrdersDynamicList());
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
-        caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
@@ -104,6 +103,7 @@ public class EditReturnedOrderService {
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
         if (YesOrNo.Yes.equals(selectedOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             caseDataMap.put("editOrderTextInstructions", "Open the draft order and edit it to include the judge's instructions");
+            caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         } else {
             caseDataMap.put("editOrderTextInstructions", "Use continue to edit the order");
         }
