@@ -806,7 +806,7 @@ public class ManageOrderEmailService {
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .fullName(draftOrder.getOtherDetails().getOrderCreatedBy())
-            .orderLink(manageCaseUrl + "/" + caseData.getId() + "#Draft orders")
+            .orderLink(manageCaseUrl + "/" + caseData.getId())
             .instructions(caseData.getManageOrders().getInstructionsToLegalRepresentaive())
             .build();
         log.info("** Email tempplate vars : {}", emailTemplateVars);
