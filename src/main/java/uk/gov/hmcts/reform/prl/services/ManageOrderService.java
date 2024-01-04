@@ -2942,7 +2942,7 @@ public class ManageOrderService {
                     && (null == party.getValue().getContactPreferences()
                     || party.getValue().getContactPreferences().equals(ContactPreferences.post)
                     || null == party.getValue().getEmail()) && !(null != party.getValue().getAddress()
-                && null != party.getValue().getAddress().getAddressLine1())) {
+                    && null != party.getValue().getAddress().getAddressLine1())) {
                     errorList.add(VALIDATION_ADDRESS_ERROR_RESPONDENT);
                     return;
                 } else if (Boolean.FALSE.equals(isRespondent) && !(null != party.getValue().getAddress()
