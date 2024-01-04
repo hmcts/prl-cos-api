@@ -366,10 +366,7 @@ public class EditAndApproveDraftOrderController {
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
             updateTabs(callbackRequest, caseDataUpdated);
-            return ResponseEntity
-                .ok(SubmittedCallbackResponse.builder()
-                        .confirmationHeader(CONFIRMATION_HEADER)
-                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            return responseEntity;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
