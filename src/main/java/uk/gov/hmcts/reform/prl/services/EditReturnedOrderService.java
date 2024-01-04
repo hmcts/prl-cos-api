@@ -101,7 +101,7 @@ public class EditReturnedOrderService {
             IS_HEARING_PAGE_NEEDED,
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
-        caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         if (YesOrNo.Yes.equals(selectedOrder.getIsOrderUploadedByJudgeOrAdmin())) {
             caseDataMap.put("editOrderTextInstructions", "Open the draft order and edit it to include the judge's instructions");
             caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
