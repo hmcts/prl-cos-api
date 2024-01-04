@@ -780,6 +780,7 @@ public class DraftAnOrderServiceTest {
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
                               .build())
+                .judgeNotes("test")
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .manageOrderHearingDetails(List.of(element(HearingData.builder()
@@ -985,6 +986,42 @@ public class DraftAnOrderServiceTest {
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(
             caseData
+        );
+        assertNotNull(caseDataMap.get("previewDraftOrder"));
+    }
+
+    @Test
+    public void testPopulateDraftOrderDocumentWithHearingPageEmptyJudgeNotes() {
+        DraftOrder draftOrder = DraftOrder.builder()
+                .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+                .otherDetails(OtherDraftOrderDetails.builder()
+                        .dateCreated(LocalDateTime.now())
+                        .createdBy("test")
+                        .build())
+                .c21OrderOptions(C21OrderOptionsEnum.c21other)
+                .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+                .build();
+
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+                .solicitorOrg(Organisation.builder().organisationName("test").build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("C100")
+                .draftOrderCollection(draftOrderCollection)
+                .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+                .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+                .respondents(List.of(respondents))
+                .build();
+        when(elementUtils.getDynamicListSelectedValue(
+                caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(
+                caseData
         );
         assertNotNull(caseDataMap.get("previewDraftOrder"));
     }
