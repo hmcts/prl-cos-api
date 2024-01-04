@@ -18,10 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
-import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.*;
 
 import java.util.List;
 import java.util.Map;
@@ -42,6 +39,9 @@ public class EditReturnedOrderController {
 
     @Autowired
     private ManageOrderService manageOrderService;
+
+    @Autowired
+    private DraftAnOrderService draftAnOrderService;
 
     @Autowired
     EditReturnedOrderService editReturnedOrderService;
@@ -97,6 +97,7 @@ public class EditReturnedOrderController {
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 Map<String, Object> caseDataUpdated = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
+                caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             } else {
