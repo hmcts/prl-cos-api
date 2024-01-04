@@ -340,8 +340,12 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             log.info("Solicitor created order options {}",caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR));
             log.info("Court admin created order options {}",caseDataUpdated.get("whatToDoWithOrderCourtAdmin"));
+            log.info("judgeDirectionsToAdmin : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
+            log.info("map size before: {}", caseDataUpdated.size());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
+            log.info("judgeDirectionsToAdmin : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
+            log.info("map size after : {}", caseDataUpdated.size());
             updateTabs(callbackRequest, caseDataUpdated);
             return ResponseEntity
                 .ok(SubmittedCallbackResponse.builder()
