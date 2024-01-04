@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -71,10 +70,6 @@ public class ReviewDocumentService {
     private final CaseDocumentClient caseDocumentClient;
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
-
-    @Value("${case_document_am.url}")
-    private String myurl;
-
 
     private final ObjectMapper objectMapper;
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
@@ -399,7 +394,6 @@ public class ReviewDocumentService {
     }
 
     private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
-        log.info("QQQQQQQQQQQQ {}",caseData.getLegalProfQuarantineDocsList());
 
         if (null != caseData.getLegalProfQuarantineDocsList()) {
             moveDocumentToConfidentialTab(caseDataUpdated,
@@ -697,7 +691,6 @@ public class ReviewDocumentService {
     private QuarantineLegalDoc downloadAndDeleteDocument(String uploadedBy,
                                                          Element<QuarantineLegalDoc> quarantineLegalDocElement) {
         try {
-            log.info("MYURLLL--> {}",myurl);
             Document document = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
             UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
             log.info(" DocumentId found {}", documentId);
