@@ -14,11 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
-
-import java.util.List;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.equalTo;
@@ -100,7 +96,7 @@ public class ManageDocumentsControllerFunctionalTest {
 
     private static final String MANAGE_DOCUMENT_REQUEST_NOT_RESTRICTED = "requests/manage-documents-not-restricted.json";
 
-    private static final String MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED = "requests/manage-documents-not-restricted.json";
+    private static final String MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED = "requests/manage-documents-neitherConfNorRestricted.json";
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -279,46 +275,36 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForSolicitor() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
-        AboutToStartOrSubmitCallbackResponse response = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
-
-        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList
-            = (List<Element<QuarantineLegalDoc>>) response.getData().get("legalProfQuarantineDocsList");
-
-        Assert.assertNotNull(legalProfQuarantineDocsList);
-        Assert.assertEquals(1,legalProfQuarantineDocsList.size());
-
+            .body("data.legalProfQuarantineDocsList[0].value.document.document_filename", equalTo("Test doc1.pdf"))
+            .assertThat().statusCode(200);
     }
 
     @Test
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenNeitherConfNorRestricedForSolicitor() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
 
-        AboutToStartOrSubmitCallbackResponse response = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTab
-            = (List<Element<QuarantineLegalDoc>>) response.getData().get("legalProfUploadDocListDocTab");
-
-        Assert.assertNotNull(legalProfUploadDocListDocTab);
-        Assert.assertEquals(1,legalProfUploadDocListDocTab.size());
+            .body("data.legalProfUploadDocListDocTab[0].value.categoryId",
+                  equalTo("applicantApplication"),
+                  "data.legalProfUploadDocListDocTab[0].value.categoryName",
+                  equalTo("Applicant Application"),
+                  "data.legalProfUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename",
+                  equalTo("Test doc2.pdf")
+            )
+            .assertThat().statusCode(200);
 
     }
 
@@ -326,45 +312,33 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCafcass() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
-        AboutToStartOrSubmitCallbackResponse response = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList
-            = (List<Element<QuarantineLegalDoc>>) response.getData().get("cafcassQuarantineDocsList");
-
-        Assert.assertNotNull(cafcassQuarantineDocsList);
-        Assert.assertEquals(1,cafcassQuarantineDocsList.size());
+            .body("data.cafcassQuarantineDocsList[0].value.cafcassQuarantineDocument.document_filename", equalTo("Test doc1.pdf"))
+            .assertThat().statusCode(200);
 
     }
 
     @Test
-    public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenNeitherConfNorRestricedForCafcass() throws Exception {
+    public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCafcass() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
 
-        AboutToStartOrSubmitCallbackResponse response = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        List<Element<QuarantineLegalDoc>> cafcassUploadDocListDocTab
-            = (List<Element<QuarantineLegalDoc>>) response.getData().get("cafcassUploadDocListDocTab");
-
-        Assert.assertNotNull(cafcassUploadDocListDocTab);
-        Assert.assertEquals(1,cafcassUploadDocListDocTab.size());
+            .body("data.cafcassUploadDocListDocTab[0].value.categoryId", equalTo("applicantApplication"),
+                  "data.cafcassUploadDocListDocTab[0].value.categoryName", equalTo("Applicant Application"),
+                  "data.cafcassUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc2.pdf"))
+            .assertThat().statusCode(200);
 
     }
 
