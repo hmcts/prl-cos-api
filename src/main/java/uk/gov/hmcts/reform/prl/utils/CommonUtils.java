@@ -132,10 +132,8 @@ public class CommonUtils {
                 caseData.getApplicantsFL401().setSolicitorOrgUuid(generateUuid());
             }
         }
-        if (caseData.getRespondentsFL401() != null) {
-            if (caseData.getRespondentsFL401().getPartyId() == null) {
-                caseData.getRespondentsFL401().setPartyId(generateUuid());
-            }
+        if (caseData.getRespondentsFL401() != null && caseData.getRespondentsFL401().getPartyId() == null) {
+            caseData.getRespondentsFL401().setPartyId(generateUuid());
         }
     }
 
