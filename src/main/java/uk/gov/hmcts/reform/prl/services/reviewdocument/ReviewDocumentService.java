@@ -395,6 +395,7 @@ public class ReviewDocumentService {
     }
 
     private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
+        log.info("QQQQQQQQQQQQ {}",caseData.getLegalProfQuarantineDocsList());
 
         if (null != caseData.getLegalProfQuarantineDocsList()) {
             moveDocumentToConfidentialTab(caseDataUpdated,

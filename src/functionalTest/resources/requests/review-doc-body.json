@@ -1,0 +1,637 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "reviewDecisionYesOrNo": "yes",
+      "reasonsForApplicationWithoutNotice": null,
+      "confidentialDetails": {
+        "isConfidentialDetailsAvailable": "Yes"
+      },
+      "c8WelshDocument": null,
+      "specialArrangement": {
+        "areAnySpecialArrangements": "No"
+      },
+      "newOrdersNonMolestationCaseNumber": null,
+      "taskList": "<div class='width-50'>\n\n<br/>\n\n## Add application details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/caseName/caseName1'>Case name</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/selectApplicationType/selectApplicationType1'>Type of application</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/hearingUrgency/hearingUrgency1'>Hearing urgency</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add people to the case\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>If children live with another party in the case (other than the applicant or respondent) you can add these details to 'Other people in the case.' if you do complete this section, you must keep it up to date.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childDetailsRevised/childDetailsRevised1'>Child details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/applicantsDetails/applicantsDetails1'>Applicant details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/information-added.png' title='Information added'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/respondentsDetails/respondentsDetails1'>Respondent details</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherPeopleInTheCaseRevised/otherPeopleInTheCaseRevised1'>Other people in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherChildNotInTheCase/otherChildNotInTheCase1'>Other children not in the case</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Relationships\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndApplicants/childrenAndApplicants1'>Children and applicants</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndRespondents/childrenAndRespondents1'>Children and respondents</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/childrenAndOtherPeople/childrenAndOtherPeople1'>Children and other people</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add required details\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/allegationsOfHarmRevised/allegationsOfHarmRevised1'>Allegations of harm</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## MIAM details\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>MIAM section is optional for final submit, if a consent order is uploaded and mandatory otherwise.</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/miam/miam1'>MIAM</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Add additional information\n\n<div class='panel panel-border-wide govuk-!-font-size-16'>Only complete if relevant</div>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/otherProceedings/otherProceedings1'>Other proceedings</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/attendingTheHearing/attendingTheHearing1'>Attending the hearing</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/internationalElement/internationalElement1'>International element</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/litigationCapacity/litigationCapacity1'>Litigation capacity</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/welshLanguageRequirements/welshLanguageRequirements1'>Welsh language requirements</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/finished.png' title='Finished'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## View PDF application\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/viewPdfDocument/viewPdfDocument1'>View PDF application</a>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<br/>\n\n## Submit and pay\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n<a href='/cases/case-details/${[CASE_REFERENCE]}/trigger/submitAndPay/submitAndPay1'>Submit and pay</a><img align='right' height='25px' src='https://raw.githubusercontent.com/hmcts/prl-cos-api/master/resources/not-started.png' title='Not started yet'/>\n\n<hr class='govuk-!-margin-top-3 govuk-!-margin-bottom-2'/>\n\n</div>",
+      "caseSolicitorOrgName": "FPRL-test-organisation",
+      "caseSolicitorName": "AAT Solicitor",
+      "newOrdersNonMolestation": "No",
+      "newOrdersForcedMarriageProtection": "No",
+      "newAllegationsOfHarmOtherConcerns": "Yes",
+      "urgencyDetails": {
+        "urgencyStatus": "Not urgent"
+      },
+      "newOrdersOtherInjunctiveEndDate": null,
+      "newOrdersUndertakingInPlaceCurrent": "Yes",
+      "caseUrgencyTimeAndReason": null,
+      "newAllegationsOfHarmSubstanceAbuseDetails": "Drugs, alcohol or substance",
+      "newOrdersRestrainingEndDate": null,
+      "newOrdersOtherInjunctiveCourtName": null,
+      "childAbuses": [
+        "physicalAbuse",
+        "financialAbuse"
+      ],
+      "childrenSubjectOfChildProtectionPlan": "no",
+      "newAgreeChildSupervisedTime": "No",
+      "paymentServiceRequestReferenceNumber": "2024-1704396937098",
+      "feeAmount": "£232.00",
+      "allegationsOfHarmRevisedChildContactTable": {
+        "newAgreeChildOtherContact": "No",
+        "newAgreeChildSupervisedTime": "No",
+        "newAgreeChildUnsupervisedTime": "No"
+      },
+      "applicantName": "John Doe",
+      "newOrdersOccupationDocument": null,
+      "newChildAbductionReasons": "Details about why children may be abducted",
+      "newOrdersRestrainingCurrent": null,
+      "newOrdersOccupationDateIssued": null,
+      "selectedCaseTypeID": "C100",
+      "respondentTaskListA": "",
+      "respondentTaskListB": "",
+      "otherProceedingEmptyTable": {
+        "otherProceedingEmptyField": " "
+      },
+      "newOrdersOtherInjunctiveDocument": null,
+      "legalProfQuarantineDocsList": [
+        {
+          "id": "a5e3c5f5-bfc5-414c-bdc4-3bfd1e94a755",
+          "value": {
+            "url": null,
+            "type": null,
+            "notes": null,
+            "subtype": null,
+            "document": {
+              "category_id": null,
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/150d20e2-e7ad-447c-a90f-12101bbf35a3",
+              "document_filename": "Test doc4.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/150d20e2-e7ad-447c-a90f-12101bbf35a3/binary",
+              "document_creation_date": "2024-01-04T18:35:45.344+00:00"
+            },
+            "fileName": null,
+            "categoryId": "applicantApplication",
+            "uploadedBy": "AAT Solicitor",
+            "scannedDate": null,
+            "categoryName": "Applicant application",
+            "deliveryDate": null,
+            "documentName": null,
+            "documentType": null,
+            "isRestricted": "Yes",
+            "controlNumber": null,
+            "documentParty": "Applicant",
+            "isConfidential": "Yes",
+            "uploadedByIdamId": "04cd097c-d159-4c30-9fae-8f6af307cdee",
+            "otherDocsDocument": null,
+            "restrictedDetails": "pppppppp",
+            "anyOtherDocDocument": null,
+            "caseSummaryDocument": null,
+            "courtBundleDocument": null,
+            "sec37ReportDocument": null,
+            "confidentialDocument": null,
+            "documentUploadedDate": "2024-01-04T19:37:43.226920",
+            "policeReportDocument": null,
+            "privacyNoticeDocument": null,
+            "approvedOrdersDocument": null,
+            "guardianReportDocument": null,
+            "medicalRecordsDocument": null,
+            "medicalReportsDocument": null,
+            "section7ReportDocument": null,
+            "miamCertificateDocument": null,
+            "noticeOfHearingDocument": null,
+            "section37ReportDocument": null,
+            "specialMeasuresDocument": null,
+            "exceptionRecordReference": null,
+            "cafcassQuarantineDocument": null,
+            "citizenQuarantineDocument": null,
+            "policeDisclosuresDocument": null,
+            "drugAndAlcoholTestDocument": null,
+            "lettersOfComplaintDocument": null,
+            "positionStatementsDocument": null,
+            "safeguardingLetterDocument": null,
+            "applicantStatementsDocument": null,
+            "legalProfQuarantineDocument": null,
+            "witnessAvailabilityDocument": null,
+            "applicantApplicationDocument": null,
+            "applicantC1AResponseDocument": null,
+            "courtStaffQuarantineDocument": null,
+            "respondentStatementsDocument": null,
+            "spipReferralRequestsDocument": null,
+            "judgeNotesFromHearingDocument": null,
+            "respondentApplicationDocument": null,
+            "respondentC1AResponseDocument": null,
+            "dnaReportsExpertReportDocument": null,
+            "homeOfficeDwpResponsesDocument": null,
+            "internalCorrespondenceDocument": null,
+            "otherWitnessStatementsDocument": null,
+            "restrictCheckboxCorrespondence": [
+
+            ],
+            "sixteenARiskAssessmentDocument": null,
+            "applicantC1AApplicationDocument": null,
+            "standardDirectionsOrderDocument": null,
+            "transcriptsOfJudgementsDocument": null,
+            "noticesOfActingDischargeDocument": null,
+            "respondentC1AApplicationDocument": null,
+            "publicFundingCertificatesDocument": null,
+            "specialGuardianshipReportDocument": null,
+            "magistratesFactsAndReasonsDocument": null,
+            "ordersFromOtherProceedingsDocument": null,
+            "applicationsWithinProceedingsDocument": null,
+            "requestForFasFormsToBeChangedDocument": null,
+            "resultsOfHairStrandBloodTestsDocument": null,
+            "ordersSubmittedWithApplicationDocument": null,
+            "applicationsFromOtherProceedingsDocument": null,
+            "importantInfoAboutAddressAndContactDocument": null,
+            "previousOrdersSubmittedWithApplicationDocument": null,
+            "emailsToCourtToRequestHearingsAdjournedDocument": null
+          }
+        }
+      ],
+      "caseStatus": {
+        "state": "Submitted"
+      },
+      "finalWelshDocument": null,
+      "newOrdersOtherInjunctiveCaseNumber": null,
+      "allegationsOfHarmRevisedOverviewTable": {
+        "newAllegationsOfHarmYesNo": "Yes",
+        "newAllegationsOfHarmOtherConcerns": "Yes",
+        "newAllegationsOfHarmChildAbuseYesNo": "Yes",
+        "newAllegationsOfHarmDomesticAbuseYesNo": "Yes",
+        "newAllegationsOfHarmChildAbductionYesNo": "Yes",
+        "newAllegationsOfHarmSubstanceAbuseYesNo": "Yes",
+        "newAllegationsOfHarmOtherConcernsDetails": "welfare",
+        "newAllegationsOfHarmSubstanceAbuseDetails": "Drugs, alcohol or substance"
+      },
+      "childrenKnownToLocalAuthority": "no",
+      "allegationsOfHarmRevisedOtherConcernsTable": {
+        "newAllegationsOfHarmOtherConcernsCourtActions": "Very very concerning"
+      },
+      "natureOfOrder": "Requesting for spending time with the child twice a week",
+      "jurisdictionIssueGiveReason": "Yes,",
+      "caRespondent3Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR3]"
+      },
+      "newPreviousAbductionThreatsDetails": null,
+      "daRespondentPolicy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[FL401RESPONDENTSOLICITOR]"
+      },
+      "typeOfApplicationTable": {
+        "natureOfOrder": "Requesting for spending time with the child twice a week",
+        "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
+        "typeOfChildArrangementsOrder": "Spend time with order",
+        "applicationPermissionRequired": "No, permission is not required",
+        "applicationPermissionRequiredReason": null
+      },
+      "c8Document": null,
+      "caRespondent4Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR4]"
+      },
+      "miamDomesticViolenceChecklist": [
+        "miamDomesticViolenceChecklistEnum_Value_22",
+        "miamDomesticViolenceChecklistEnum_Value_21"
+      ],
+      "helpWithFees": "No",
+      "allegationOfHarmRevised": {
+        "typesOfHarmRevised": "Domestic abuse, child abduction, child abuse, drugs, alcohol or substance abuse, safety or welfare concerns"
+      },
+      "newPreviousAbductionThreats": "No",
+      "buffChildAndApplicantRelations": [
+
+      ],
+      "newOrdersRestrainingDateIssued": null,
+      "finalDocument": null,
+      "newAbductionPreviousPoliceInvolvement": "No",
+      "newOrdersForcedMarriageProtectionDocument": null,
+      "welshLanguageRequirementApplicationNeedEnglish": null,
+      "respondentTable": [
+        {
+          "id": "e406bcc3-3c91-45db-9dcc-3a5c14930851",
+          "value": {
+            "email": "repondent1@example.net",
+            "gender": "female",
+            "address": {
+              "County": null,
+              "Country": null,
+              "PostCode": null,
+              "PostTown": null,
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null
+            },
+            "dxNumber": null,
+            "lastName": "Richards",
+            "firstName": "Mary",
+            "dateOfBirth": "1985-02-15",
+            "otherGender": null,
+            "phoneNumber": null,
+            "placeOfBirth": "London",
+            "previousName": null,
+            "solicitorOrg": {
+
+            },
+            "solicitorEmail": null,
+            "solicitorReference": null,
+            "isPlaceOfBirthKnown": "Yes",
+            "isAddressConfidential": null,
+            "isCurrentAddressKnown": "No",
+            "representativeLastName": null,
+            "representativeFirstName": null,
+            "canYouProvidePhoneNumber": "No",
+            "canYouProvideEmailAddress": "Yes",
+            "isPhoneNumberConfidential": null,
+            "isEmailAddressConfidential": null,
+            "doTheyHaveLegalRepresentation": "no",
+            "addressLivedLessThan5YearsDetails": null,
+            "isAtAddressLessThan5YearsWithDontKnow": "no"
+          }
+        },
+        {
+          "id": "8d5140d5-18eb-4278-b41c-2a6fabdf4491",
+          "value": {
+            "email": "respondent2@example.net",
+            "gender": "female",
+            "address": {
+              "County": null,
+              "Country": null,
+              "PostCode": null,
+              "PostTown": null,
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null
+            },
+            "dxNumber": null,
+            "lastName": "Lynn",
+            "firstName": "Elise",
+            "dateOfBirth": null,
+            "otherGender": null,
+            "phoneNumber": null,
+            "placeOfBirth": null,
+            "previousName": null,
+            "solicitorOrg": {
+
+            },
+            "solicitorEmail": null,
+            "solicitorReference": null,
+            "isPlaceOfBirthKnown": "No",
+            "isAddressConfidential": null,
+            "isCurrentAddressKnown": "No",
+            "representativeLastName": null,
+            "representativeFirstName": null,
+            "canYouProvidePhoneNumber": "No",
+            "canYouProvideEmailAddress": "Yes",
+            "isPhoneNumberConfidential": null,
+            "isEmailAddressConfidential": null,
+            "doTheyHaveLegalRepresentation": "no",
+            "addressLivedLessThan5YearsDetails": null,
+            "isAtAddressLessThan5YearsWithDontKnow": "no"
+          }
+        },
+        {
+          "id": "62614c4a-4faf-48c0-abfd-c579ef700fd4",
+          "value": {
+            "email": "respondent3@example.net",
+            "gender": "male",
+            "address": {
+              "County": null,
+              "Country": null,
+              "PostCode": null,
+              "PostTown": null,
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null
+            },
+            "dxNumber": null,
+            "lastName": "Carman",
+            "firstName": "David",
+            "dateOfBirth": null,
+            "otherGender": null,
+            "phoneNumber": null,
+            "placeOfBirth": null,
+            "previousName": null,
+            "solicitorOrg": {
+
+            },
+            "solicitorEmail": null,
+            "solicitorReference": null,
+            "isPlaceOfBirthKnown": "No",
+            "isAddressConfidential": null,
+            "isCurrentAddressKnown": "No",
+            "representativeLastName": null,
+            "representativeFirstName": null,
+            "canYouProvidePhoneNumber": "No",
+            "canYouProvideEmailAddress": "Yes",
+            "isPhoneNumberConfidential": null,
+            "isEmailAddressConfidential": null,
+            "doTheyHaveLegalRepresentation": "no",
+            "addressLivedLessThan5YearsDetails": null,
+            "isAtAddressLessThan5YearsWithDontKnow": "no"
+          }
+        }
+      ],
+      "isC8DocumentPresent": "No",
+      "welshLanguageRequirementsTable": {
+        "welshLanguageRequirement": "Yes",
+        "welshLanguageRequirementApplication": "english",
+        "languageRequirementApplicationNeedWelsh": "Yes",
+        "welshLanguageRequirementApplicationNeedEnglish": null
+      },
+      "welshLanguageRequirementApplication": "english",
+      "ordersApplyingFor": [
+        "childArrangementsOrder",
+        "prohibitedStepsOrder",
+        "specificIssueOrder"
+      ],
+      "caRespondent5Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR5]"
+      },
+      "caseSubmittedTimeStamp": "2024-01-04T19:35:30.038920593Z",
+      "caApplicant3": {
+        "lastName": "Graham",
+        "firstName": "Martina"
+      },
+      "caApplicant2": {
+        "lastName": "Anderson",
+        "firstName": "Jeremy"
+      },
+      "caApplicant1": {
+        "lastName": "Doe",
+        "firstName": "John"
+      },
+      "c100ConfidentialityStatementDisclaimer": [
+        "confidentialityStatementUnderstood"
+      ],
+      "c1ADraftDocument": {
+        "category_id": null,
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/30ed2f33-c346-4e2c-86ee-416a04aba43c",
+        "document_filename": "C1A_DocumentDraft.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/30ed2f33-c346-4e2c-86ee-416a04aba43c/binary",
+        "document_creation_date": null
+      },
+      "newAgreeChildOtherContact": "No",
+      "c1ADocument": null,
+      "effortsMadeWithRespondents": null,
+      "id": 1704396865663776,
+      "newAbductionPassportOfficeNotified": "No",
+      "courtId": "115",
+      "areRespondentsAwareOfProceedings": "No",
+      "newAllegationsOfHarmChildAbuseYesNo": "Yes",
+      "newAbductionPreviousPoliceInvolvementDetails": null,
+      "newOrdersOccupation": "No",
+      "newOrdersOtherInjunctive": "No",
+      "newOrdersNonMolestationEndDate": null,
+      "miamTable": {
+        "soleTraderName": null,
+        "familyMediatorMiam": "No",
+        "applicantAttendedMiam": "No",
+        "claimingExemptionMiam": "Yes",
+        "familyMediatorServiceName": null,
+        "mediatorRegistrationNumber": null
+      },
+      "childAndApplicantsRelationTable": [
+        {
+          "id": "a08a5086-2936-4ee0-8d1b-ad3002862c06",
+          "value": {
+            "childFullName": "Joe Doe",
+            "childLivesWith": "Yes",
+            "applicantFullName": "John Doe",
+            "childAndApplicantRelation": "father",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "7d0233d5-666e-45c6-aed9-c0d9656f7071",
+          "value": {
+            "childFullName": "Simon Anderson",
+            "childLivesWith": "No",
+            "applicantFullName": "John Doe",
+            "childAndApplicantRelation": "stepFather",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "ae778c5f-efb1-4d0d-bc69-798890058300",
+          "value": {
+            "childFullName": "Lilly Anderson",
+            "childLivesWith": "No",
+            "applicantFullName": "John Doe",
+            "childAndApplicantRelation": "stepFather",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "c4735532-ea60-4d70-93db-875e1b2aa85a",
+          "value": {
+            "childFullName": "Charlotte Saxon",
+            "childLivesWith": "No",
+            "applicantFullName": "John Doe",
+            "childAndApplicantRelation": "stepFather",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "7c9559c6-3ab1-4655-8480-68fb2c3cdc02",
+          "value": {
+            "childFullName": "Selena Lees",
+            "childLivesWith": "No",
+            "applicantFullName": "John Doe",
+            "childAndApplicantRelation": "stepFather",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "6d2c7e02-bdd0-448c-83a6-933940347cc3",
+          "value": {
+            "childFullName": "Joe Doe",
+            "childLivesWith": "No",
+            "applicantFullName": "Jeremy Anderson",
+            "childAndApplicantRelation": "stepFather",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "fbc56af9-d5d8-4a61-9b33-d1b90a5a3bef",
+          "value": {
+            "childFullName": "Simon Anderson",
+            "childLivesWith": "Yes",
+            "applicantFullName": "Jeremy Anderson",
+            "childAndApplicantRelation": "father",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "33acf7c7-0c89-46e9-80cb-1a206da93847",
+          "value": {
+            "childFullName": "Lilly Anderson",
+            "childLivesWith": "Yes",
+            "applicantFullName": "Jeremy Anderson",
+            "childAndApplicantRelation": "father",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "5cec208e-325c-4cff-b799-0cab44d6b32c",
+          "value": {
+            "childFullName": "Charlotte Saxon",
+            "childLivesWith": "No",
+            "applicantFullName": "Jeremy Anderson",
+            "childAndApplicantRelation": "stepFather",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "49316651-cd82-4dc4-b3d6-4d5842a26111",
+          "value": {
+            "childFullName": "Selena Lees",
+            "childLivesWith": "No",
+            "applicantFullName": "Jeremy Anderson",
+            "childAndApplicantRelation": "stepFather",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "b42c9eff-886d-4999-9475-08bd0b9e8736",
+          "value": {
+            "childFullName": "Joe Doe",
+            "childLivesWith": "No",
+            "applicantFullName": "Martina Graham",
+            "childAndApplicantRelation": "stepMother",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "11ac1519-daa9-4762-a2d1-135beb3bb75a",
+          "value": {
+            "childFullName": "Simon Anderson",
+            "childLivesWith": "No",
+            "applicantFullName": "Martina Graham",
+            "childAndApplicantRelation": "stepMother",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "d23ff70c-5bcc-47a9-9c4a-6e287fbac80e",
+          "value": {
+            "childFullName": "Lilly Anderson",
+            "childLivesWith": "No",
+            "applicantFullName": "Martina Graham",
+            "childAndApplicantRelation": "stepMother",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "bd6084a7-7584-40cd-97c0-a40b6816830d",
+          "value": {
+            "childFullName": "Charlotte Saxon",
+            "childLivesWith": "No",
+            "applicantFullName": "Martina Graham",
+            "childAndApplicantRelation": "stepMother",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        },
+        {
+          "id": "bca05666-6a05-4004-9d94-56c2fa4671c5",
+          "value": {
+            "childFullName": "Selena Lees",
+            "childLivesWith": "No",
+            "applicantFullName": "Martina Graham",
+            "childAndApplicantRelation": "mother",
+            "childAndApplicantRelationOtherDetails": null
+          }
+        }
+      ],
+      "miamExemptionsTable": {
+        "urgencyEvidence": "",
+        "otherGroundsEvidence": "",
+        "childProtectionEvidence": "The subject of enquiries by a local authority under section 47 of the Children Act 1989 Act",
+        "reasonsForMiamExemption": "Domestic violence, Child Protection Concern",
+        "domesticViolenceEvidence": "Evidence which demonstrates that a prospective party has been, or is at risk of being, the victim of domestic violence by another prospective party in the form of abuse which relates to financial matters.\nA letter from the Secretary of State for the Home Department confirming that a prospective party has been granted leave to remain in the United Kingdom under paragraph 289B of the Rules made by the Home Secretary under section 3(2) of the Immigration Act 1971, which can be found at https://www. gov.uk/guidance/immigration-rules/immigration-rules-index;",
+        "previousAttendenceEvidence": ""
+      },
+      "allChildrenAreRiskFinancialAbuse": "No",
+      "applicantCaseName": "John Doe Vs Mary Richards v2",
+      "caApplicant4Policy": {
+        "Organisation": {
+
+        },
+        "OrgPolicyReference": null,
+        "OrgPolicyCaseAssignedRole": "[C100APPLICANTSOLICITOR4]"
+      },
+      "summaryTabForOrderAppliedFor": {
+        "ordersApplyingFor": "Child Arrangements Order, Prohibited Steps Order, Specific Issue Order",
+        "typeOfChildArrangementsOrder": "Spend time with order"
+      },
+      "reviewDoc": {
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/150d20e2-e7ad-447c-a90f-12101bbf35a3",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/150d20e2-e7ad-447c-a90f-12101bbf35a3/binary",
+        "document_filename": "Test doc4.pdf",
+        "category_id": null,
+        "document_creation_date": "2024-01-04T18:35:45.344+00:00"
+      },
+      "reviewDocsDynamicList": {
+        "value": {
+          "code": "a5e3c5f5-bfc5-414c-bdc4-3bfd1e94a755",
+          "label": "Test doc4.pdf - 04 Jan 2024, 07:37:43 PM"
+        },
+        "list_items": [
+          {
+            "code": "a5e3c5f5-bfc5-414c-bdc4-3bfd1e94a755",
+            "label": "Test doc4.pdf - 04 Jan 2024, 07:37:43 PM"
+          }
+        ]
+      },
+      "doYouNeedAWithoutNoticeHearing": "No",
+      "c8WelshDraftDocument": {
+        "category_id": null,
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/38a8b593-5291-4631-8442-600205252855",
+        "document_filename": "C8Document_Draft_Welsh.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/38a8b593-5291-4631-8442-600205252855/binary",
+        "document_creation_date": null
+      },
+      "c8DraftDocument": {
+        "category_id": null,
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/49d9a04f-304f-4fae-950a-62be42ac545d",
+        "document_filename": "C8DocumentDraft.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/49d9a04f-304f-4fae-950a-62be42ac545d/binary",
+        "document_creation_date": null
+      }
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}
