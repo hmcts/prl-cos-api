@@ -236,7 +236,6 @@ public class ManageDocumentsService {
         // if restricted or confidential then add to quarantine docs list
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-            quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument, userDetails);
             if (userRole.equals(COURT_ADMIN)) {
                 quarantineLegalDoc = DocumentUtils.addConfFields(quarantineLegalDoc, manageDocument, userDetails);
             } else {
@@ -251,9 +250,10 @@ public class ManageDocumentsService {
             }
             log.info("CategoryId {}", categoryId);
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
-                .getQuarantineUploadDocument(categoryId,
-                                             manageDocument.getDocument().toBuilder()
-                                                 .documentCreatedOn(localZoneDate).build()
+                .getQuarantineUploadDocument(
+                    categoryId,
+                    manageDocument.getDocument().toBuilder()
+                        .documentCreatedOn(localZoneDate).build(), objectMapper
                 );
             quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, userDetails);
 

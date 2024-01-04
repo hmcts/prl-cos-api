@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,6 +71,8 @@ public class ReviewDocumentService {
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
 
+
+    private final ObjectMapper objectMapper;
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -216,7 +219,7 @@ public class ReviewDocumentService {
                     element(QuarantineLegalDoc.builder()
                                 .url(caseData.getScannedDocuments().stream()
                                          .filter(element -> element.getId().equals(uuid))
-                                         .toList().stream().findFirst().map(Element::getValue).map(
+                                         .collect(Collectors.toList()).stream().findFirst().map(Element::getValue).map(
                                         ScannedDocument::getUrl).orElse(null)).build()));
                 if (quarantineBulkscanDocElement.isPresent()) {
                     updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
@@ -347,7 +350,7 @@ public class ReviewDocumentService {
 
             QuarantineLegalDoc uploadDoc = DocumentUtils.getQuarantineUploadDocument(
                 isReviewDecisionYes ? CONFIDENTIAL_CATEGORY_ID : quarantineLegalDocElement.getValue().getCategoryId(),
-                getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
+                getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue()), objectMapper
             );
 
             uploadDoc = addQuarantineDocumentFields(
