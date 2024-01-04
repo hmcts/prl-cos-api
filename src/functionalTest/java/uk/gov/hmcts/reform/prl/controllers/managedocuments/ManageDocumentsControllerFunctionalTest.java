@@ -86,6 +86,10 @@ public class ManageDocumentsControllerFunctionalTest {
         );
 
     private static final String MANAGE_DOCUMENT_REQUEST = "requests/manage-documents-request.json";
+
+    private static final String APPLICANT_APPLICATION_NAME = "Applicant Application";
+
+
     private static final String MANAGE_DOCUMENT_COURT_REQUEST =
         "requests/manage-documents-request-with-court-as-party.json";
     //private static final String MANAGE_DOCUMENT_RESPONSE = "response/MangeDocument.json";
@@ -197,7 +201,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/validate-court-user")
+            .post("/manage-documents/mid-event")
             .then()
             .body("errors",
                   contains("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
@@ -212,9 +216,9 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/validate-court-user")
+            .post("/manage-documents/mid-event")
             .then()
-            .body("data.caseTypeOfApplication", equalTo("C100"))
+            .body("errors", equalTo(null))
             .assertThat().statusCode(200);
     }
 
@@ -239,9 +243,9 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs-mid")
+            .post("/manage-documents/mid-event")
             .then()
-            .body("errors.size()", equalTo(0))
+            .body("errors", equalTo(null))
             .assertThat().statusCode(200);
 
     }
@@ -254,7 +258,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs-mid")
+            .post("/manage-documents/mid-event")
             .then()
             .body("errors[0]", equalTo(DETAILS_ERROR_MESSAGE))
             .assertThat().statusCode(200);
@@ -288,9 +292,9 @@ public class ManageDocumentsControllerFunctionalTest {
             .post("/manage-documents/copy-manage-docs")
             .then()
             .body("data.legalProfUploadDocListDocTab[0].value.categoryId",
-                  equalTo("applicantApplication"),
+                  equalTo(APPLICANT_APPLICATION),
                   "data.legalProfUploadDocListDocTab[0].value.categoryName",
-                  equalTo("Applicant Application"),
+                  equalTo(APPLICANT_APPLICATION_NAME),
                   "data.legalProfUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename",
                   equalTo("Test doc2.pdf")
             )
@@ -325,8 +329,8 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .body("data.cafcassUploadDocListDocTab[0].value.categoryId", equalTo("applicantApplication"),
-                  "data.cafcassUploadDocListDocTab[0].value.categoryName", equalTo("Applicant Application"),
+            .body("data.cafcassUploadDocListDocTab[0].value.categoryId", equalTo(APPLICANT_APPLICATION),
+                  "data.cafcassUploadDocListDocTab[0].value.categoryName", equalTo(APPLICANT_APPLICATION_NAME),
                   "data.cafcassUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc2.pdf"))
             .assertThat().statusCode(200);
 
