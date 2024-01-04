@@ -233,8 +233,20 @@ public class ManageDocumentsService {
 
         ManageDocuments manageDocument = element.getValue();
         boolean confidentialityFlag = false;
-        // if restricted or confidential then add to quarantine docs list
-        if (restricted.test(element)) {
+
+        //if DocumentParty is selected as COURT - move documents directly into case documents under internalCorrespondence category
+        if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
+            QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
+                .getQuarantineUploadDocument(
+                    ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE,
+                    manageDocument.getDocument().toBuilder()
+                        .documentCreatedOn(localZoneDate).build(),
+                    objectMapper);
+            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, userDetails);
+            tabDocuments.add(element(quarantineUploadDoc));
+
+        } else if (restricted.test(element)) {
+            // if restricted or confidential then add to quarantine docs list
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
             if (userRole.equals(COURT_ADMIN)) {
                 quarantineLegalDoc = DocumentUtils.addConfFields(quarantineLegalDoc, manageDocument, userDetails);
@@ -243,20 +255,16 @@ public class ManageDocumentsService {
             }
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
+
         } else {
-            String categoryId = manageDocument.getDocumentCategories().getValueCode();
-            if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
-                categoryId = ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE;
-            }
-            log.info("CategoryId {}", categoryId);
+            //move documents to case documents if neither restricted nor confidential
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
                 .getQuarantineUploadDocument(
-                    categoryId,
+                    manageDocument.getDocumentCategories().getValueCode(),
                     manageDocument.getDocument().toBuilder()
                         .documentCreatedOn(localZoneDate).build(), objectMapper
                 );
             quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, userDetails);
-
             tabDocuments.add(element(quarantineUploadDoc));
         }
         return confidentialityFlag;
