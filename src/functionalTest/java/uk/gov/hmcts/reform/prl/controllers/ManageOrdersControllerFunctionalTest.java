@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @ContextConfiguration
 public class ManageOrdersControllerFunctionalTest {
 
+    public static final String MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT = "/manage-orders/validate-respondent-and-other-person-address";
     private final String userToken = "Bearer testToken";
 
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
@@ -175,7 +176,7 @@ public class ManageOrdersControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-orders/validate-respondent-and-other-person-address")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
             .then()
             .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT));
     }
@@ -189,7 +190,7 @@ public class ManageOrdersControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-orders/validate-respondent-and-other-person-address")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
             .then()
             .body("data.applicantCaseName",Matchers.equalTo("John Smith"))
             .body("data.caseTypeOfApplication",Matchers.equalTo("C100"));
@@ -204,7 +205,7 @@ public class ManageOrdersControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-orders/validate-respondent-and-other-person-address")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
             .then()
             .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
     }
@@ -218,7 +219,7 @@ public class ManageOrdersControllerFunctionalTest {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/manage-orders/validate-respondent-and-other-person-address")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
             .then()
             .body("data.applicantCaseName",Matchers.equalTo("John Smith"))
             .body("data.caseTypeOfApplication",Matchers.equalTo("C100"));
