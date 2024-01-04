@@ -61,7 +61,6 @@ public class ManageDocumentsService {
     private final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
     public CaseData populateDocumentCategories(String authorization, CaseData caseData) {
-        log.info("inside populateDocumentCategories 22222");
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
             .build();
@@ -73,14 +72,12 @@ public class ManageDocumentsService {
     }
 
     private DynamicList getCategoriesSubcategories(String authorisation, String caseReference) {
-        log.info("inside getCategoriesSubcategories 33333");
         try {
             CategoriesAndDocuments categoriesAndDocuments = coreCaseDataApi.getCategoriesAndDocuments(
                 authorisation,
                 authTokenGenerator.generate(),
                 caseReference
             );
-            log.info("inside getCategoriesSubcategories 444444");
             if (null != categoriesAndDocuments) {
                 List<Category> parentCategories = nullSafeCollection(categoriesAndDocuments.getCategories())
                     .stream()
@@ -93,9 +90,6 @@ public class ManageDocumentsService {
                     dynamicListElementList,
                     Arrays.asList(quarantineCategoriesToRemove())
                 );
-                log.info("inside getCategoriesSubcategories 55555");
-                log.info("i6666 {}",DynamicList.builder().value(DynamicListElement.EMPTY)
-                    .listItems(dynamicListElementList).build());
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
             }
