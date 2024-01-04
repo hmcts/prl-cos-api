@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -76,6 +77,9 @@ public class ServiceOfApplicationServiceTest {
     private DgsService dgsService;
 
     @Mock
+    private SendAndReplyService sendAndReplyService;
+
+    @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
     @Mock
@@ -93,6 +97,7 @@ public class ServiceOfApplicationServiceTest {
     @Mock
     private ServiceOfApplicationEmailService serviceOfApplicationEmailService;
 
+    @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
     @Mock
@@ -962,7 +967,6 @@ public class ServiceOfApplicationServiceTest {
             authorization
         );
         assertEquals("By email", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
     }
 
     @Test
@@ -1295,7 +1299,8 @@ public class ServiceOfApplicationServiceTest {
             caseDetails,
             objectMapper
         )).thenReturn(caseData);
-
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
         final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);

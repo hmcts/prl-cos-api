@@ -174,6 +174,7 @@ public class ServiceOfApplicationControllerTest {
                              .builder().data(caseData)
                              .build())
             .build();
+        when(authorisationService.isAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToSubmit("","", callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
