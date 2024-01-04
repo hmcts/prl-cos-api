@@ -24,7 +24,8 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 @ContextConfiguration
 public class ManageOrdersControllerFunctionalTest {
 
-    public static final String MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT = "/manage-orders/validate-respondent-and-other-person-address";
+    public static final String MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT
+        = "/manage-orders/validate-respondent-and-other-person-address";
     private final String userToken = "Bearer testToken";
 
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
