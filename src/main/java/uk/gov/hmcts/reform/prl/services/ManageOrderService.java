@@ -1362,7 +1362,7 @@ public class ManageOrderService {
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             currentOrderStatus = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
         } else if (Event.EDIT_RETURNED_ORDER.getId().equals(eventId)) {
-            currentOrderStatus = OrderStatusEnum.draftedByLR.getDisplayedValue();
+            return OrderStatusEnum.draftedByLR.getDisplayedValue();
         } else if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(
             orderSelectionType) || amendOrderUnderSlipRule.toString().equals(orderSelectionType)
             || draftAnOrder.toString().equals(orderSelectionType)) {
