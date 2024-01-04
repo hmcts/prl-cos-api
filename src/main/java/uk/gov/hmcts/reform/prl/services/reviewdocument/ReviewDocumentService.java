@@ -707,7 +707,8 @@ public class ReviewDocumentService {
 
                 return DocumentUtils.getQuarantineUploadDocument(
                     quarantineLegalDocElement.getValue().getCategoryId(),
-                    newUploadedDocument
+                    newUploadedDocument,
+                    objectMapper
                 );
             } else {
                 throw new IllegalStateException("Failed to move document to confidential tab please retry");
