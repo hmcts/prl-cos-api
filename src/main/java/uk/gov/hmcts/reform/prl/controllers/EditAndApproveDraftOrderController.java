@@ -59,12 +59,14 @@ public class EditAndApproveDraftOrderController {
     private final CoreCaseDataService coreCaseDataService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
-    public static final String WHAT_HAPPENS_NEXT = "### What happens next \n ";
-    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = String.join(WHAT_HAPPENS_NEXT,
-        "We will send this order to admin.\n\n", "If you have included further directions, admin will also receive them.");
+    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
+        ### What happens next \n We will send this order to admin.
+        \nIf you have included further directions, admin will also receive them.
+        """;
     public static final String CONFIRMATION_HEADER_LEGAL_REP = "# Message sent to legal representative";
-    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP = String
-        .join(WHAT_HAPPENS_NEXT,"Your message has been sent to the legal representative.");
+    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP = """
+        ### What happens next \nYour message has been sent to the legal representative.
+        """;
 
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
