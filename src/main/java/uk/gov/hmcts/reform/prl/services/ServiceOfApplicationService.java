@@ -114,10 +114,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.unwrapElements;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
-
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S3776","java:S6204","java:S112","java:S4144"})
 public class ServiceOfApplicationService {
     public static final String UNSERVED_APPLICANT_PACK = "unServedApplicantPack";
@@ -155,8 +154,6 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
-
-    @Autowired
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
 
     @Autowired
@@ -170,15 +167,11 @@ public class ServiceOfApplicationService {
 
     @Autowired
     private final ObjectMapper objectMapper;
-
-    @Autowired
     private final UserService userService;
 
     private final FL401CaseInviteService fl401CaseInviteService;
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Autowired
     private final WelshCourtEmail welshCourtEmail;
 
     @Autowired
@@ -212,7 +205,7 @@ public class ServiceOfApplicationService {
         collapsible.add(
             "This includes");
         collapsible.add(
-            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (blank)</li><li>C8 (Cafcass)</li>");
+            "<ul><li>C100</li><li>C1A</li><li>C7</li><li>C1A (if applicable)</li><li>C8 (Cafcass/Cafcass Cymru, if applicable)</li>");
         collapsible.add("<li>Any orders and"
                             + " hearing notices created at the initial gatekeeping stage</li></ul>");
         collapsible.add(
@@ -333,7 +326,7 @@ public class ServiceOfApplicationService {
                                                           List<Element<BulkPrintDetails>> bulkPrintDetails) {
         //CITIZEN SCENARIO
         String whoIsResponsibleForServing = "";
-        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
+        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             log.info("Sending service of application notifications to C100 citizens");
             //serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
@@ -396,7 +389,7 @@ public class ServiceOfApplicationService {
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                            List<Element<BulkPrintDetails>> bulkPrintDetails) throws Exception {
         String whoIsResponsibleForServing = COURT;
-        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
+        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
         if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
             && YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
@@ -476,7 +469,7 @@ public class ServiceOfApplicationService {
     private String handleNotificationsDaSolicitorCreatedCase(CaseData caseData, String authorization,
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         String whoIsResponsibleForServing;
-        List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
+        List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
 
 
         whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
@@ -1656,7 +1649,7 @@ public class ServiceOfApplicationService {
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
-        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
+        List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
         log.info(
             "caseData.getServiceOfApplication().getSoaServeToRespondentOptions() {}",
             caseData.getServiceOfApplication().getSoaServeToRespondentOptions()
@@ -1716,7 +1709,7 @@ public class ServiceOfApplicationService {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         Map<String, Object> caseDataUpdated = new HashMap<>();
         String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
-        List<Document> fl401StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, caseData);
+        List<Document> fl401StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
         log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())) {

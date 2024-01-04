@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.microsoft.applicationinsights.boot.dependencies.apachecommons.io.FileUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -40,14 +41,12 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ServiceOfApplicationEmailService {
 
     private final EmailService emailService;
-
     @Value("${xui.url}")
     private String manageCaseUrl;
-
     @Value("${citizen.url}")
     private String citizenUrl;
 

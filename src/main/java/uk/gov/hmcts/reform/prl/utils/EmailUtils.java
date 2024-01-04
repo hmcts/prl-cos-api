@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.utils;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -45,5 +46,14 @@ public class EmailUtils {
         emailProps.put("attachmentType", "pdf");
         emailProps.put("disposition", "attachment");
         return emailProps;
+    }
+
+    public static Map<String, Object> getCommonSendgridDynamicTemplateData(CaseData caseData) {
+        Map<String, Object> dynamicTemplateData = new HashMap<>();
+
+        dynamicTemplateData.put("caseName", caseData.getApplicantCaseName());
+        dynamicTemplateData.put("caseReference", String.valueOf(caseData.getId()));
+
+        return dynamicTemplateData;
     }
 }

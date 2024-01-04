@@ -58,6 +58,8 @@ public enum ManageOrderFieldsEnum {
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
     selectTypeOfOrder("selectTypeOfOrder"),
+    judgeNotesEmptyUplaodJourney("judgeNotesEmptyUploadJourney"),
+    judgeNotesEmptyDraftJourney("judgeNotesEmptyDraftJourney"),
 
     //Hearing screen field show params
     isCafcassCymru("isCafcassCymru"),
@@ -301,7 +303,8 @@ public enum ManageOrderFieldsEnum {
     nameOfJudgeToReviewOrder("nameOfJudgeToReviewOrder"),
     nameOfLaToReviewOrder("nameOfLaToReviewOrder"),
     manageOrdersDocumentToAmend("manageOrdersDocumentToAmend"),
-    draftOrderOptions("draftOrderOptions");
+    draftOrderOptions("draftOrderOptions"),
+    orderNameForWA("orderNameForWA");
 
     private final String value;
 
