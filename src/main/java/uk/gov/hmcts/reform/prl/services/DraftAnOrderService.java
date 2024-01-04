@@ -256,7 +256,8 @@ public class DraftAnOrderService {
                                                          Element<DraftOrder> draftOrderElement) {
         String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))
+            && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus)
+            && !OrderStatusEnum.rejectedByJudge.getDisplayedValue().equals(orderStatus))
             || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))) {
             supportedDraftOrderList.add(draftOrderElement);
@@ -265,8 +266,10 @@ public class DraftAnOrderService {
 
     private static void filterDraftOrderForNewCases(String eventId, List<Element<DraftOrder>> supportedDraftOrderList,
                                                     Element<DraftOrder> draftOrderElement) {
+        String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && Yes.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))
+            && Yes.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded())
+            && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))
             || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && YesOrNo.No.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))) {
             supportedDraftOrderList.add(draftOrderElement);
@@ -901,9 +904,9 @@ public class DraftAnOrderService {
             }
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
-            && (JudgeApprovalDecisionsCourtAdminEnum.editTheOrderAndServe
+            && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
-            || JudgeApprovalDecisionsSolicitorEnum.editTheOrderAndServe
+            || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
             isOrderEdited = true;
         }
