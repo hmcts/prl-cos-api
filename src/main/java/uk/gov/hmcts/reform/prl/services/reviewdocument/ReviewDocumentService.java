@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -47,6 +48,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 public class ReviewDocumentService {
 
     private final CoreCaseDataService coreCaseDataService;
+
+    private final ObjectMapper objectMapper;
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
@@ -248,7 +251,7 @@ public class ReviewDocumentService {
 
             QuarantineLegalDoc uploadDoc = DocumentUtils.getQuarantineUploadDocument(
                 isReviewDecisionYes ? CONFIDENTIAL_CATEGORY_ID : quarantineLegalDocElement.getValue().getCategoryId(),
-                getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
+                getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue()), objectMapper
             );
 
             uploadDoc = addQuarantineDocumentFields(
