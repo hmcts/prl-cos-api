@@ -108,7 +108,7 @@ public class ManageDocumentsControllerFunctionalTest {
     @Test
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
-        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST);
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
         //String response = ResourceLoader.loadJson(MANAGE_DOCUMENT_RESPONSE);
         //JSONObject jsObject = new JSONObject(response);
         request
