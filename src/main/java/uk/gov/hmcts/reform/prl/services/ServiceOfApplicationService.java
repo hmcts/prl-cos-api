@@ -1767,8 +1767,11 @@ public class ServiceOfApplicationService {
                                          List<Document> c100StaticDocs) {
         log.info("serving other people in case");
         log.info("Before caseData.getOthersToNotify {}", caseData.getOthersToNotify());
+        List<Element<PartyDetails>> otherPartiesToNotify = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? caseData.getOtherPartyInTheCaseRevised()
+            : caseData.getOthersToNotify();
         final List<DynamicMultiselectListElement> otherParties = getSelectedApplicantsOrRespondents(
-            caseData.getOthersToNotify(),
+            otherPartiesToNotify,
             caseData.getServiceOfApplication().getSoaOtherParties().getValue()
         );
 
