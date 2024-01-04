@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matchers;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,6 +44,18 @@ public class ManageOrdersControllerFunctionalTest {
     private static final String VALID_INPUT_JSON_FOR_DRAFT = "CallBackRequestForDraft.json";
 
     private static final String VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER = "CallBckReqForCreateOrUpdOrder.json";
+
+    private static final String VALID_REQUEST_RESPONDENT_LIP_WITH_NO_ADDRESS
+        = "requests/manage-orders/serve-order-request-respondent-lip-noaddress-present.json";
+
+    private static final String VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS
+        = "requests/manage-orders/serve-order-request-respondent-lip-address-present.json";
+
+    private static final String VALID_REQUEST_OTHER_PARTY_WITH_ADDRESS
+        = "requests/manage-orders/serve-order-request-otherParty-address-present.json";
+
+    private static final String VALID_REQUEST_OTHER_PARTY_WITHOUT_ADDRESS
+        = "requests/manage-orders/serve-order-request-otherParty-noaddress-present.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -153,7 +166,62 @@ public class ManageOrdersControllerFunctionalTest {
 
     }
 
+    @Test
+    public void givenBodyWhenAddressNotPresentForRespondentLipShouldGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_RESPONDENT_LIP_WITH_NO_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/validate-respondent-and-other-person-address")
+            .then()
+            .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
 
+    @Test
+    public void givenBodyWhenAddressPresentForRespondentLipShouldNotGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/validate-respondent-and-other-person-address")
+            .then()
+            .body("data.applicantCaseName",Matchers.equalTo("John Smith"))
+            .body("data.caseTypeOfApplication",Matchers.equalTo("C100"));
+    }
 
+    @Test
+    public void givenBodyWhenAddressNotPresentOtherPartyShouldGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_OTHER_PARTY_WITHOUT_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/validate-respondent-and-other-person-address")
+            .then()
+            .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+    }
+
+    @Test
+    public void givenBodyWhenAddressPresentForOtherPartyShouldNotGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_OTHER_PARTY_WITH_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/validate-respondent-and-other-person-address")
+            .then()
+            .body("data.applicantCaseName",Matchers.equalTo("John Smith"))
+            .body("data.caseTypeOfApplication",Matchers.equalTo("C100"));
+    }
 
 }
