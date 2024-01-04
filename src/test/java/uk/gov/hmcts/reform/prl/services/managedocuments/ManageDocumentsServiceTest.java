@@ -680,14 +680,14 @@ public class ManageDocumentsServiceTest {
     public void returnTrueIfUserIsCourtStaff() {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
 
-        Assert.assertTrue(manageDocumentsService.checkIfUserIsCourtStaff(auth));
+        Assert.assertTrue(manageDocumentsService.checkIfUserIsCourtStaff(userDetailsCourtStaffRole));
     }
 
     @Test
     public void returnFalseIfUserIsOtherThanCourtStaff() {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        Assert.assertFalse(manageDocumentsService.checkIfUserIsCourtStaff(auth));
+        Assert.assertFalse(manageDocumentsService.checkIfUserIsCourtStaff(userDetailsSolicitorRole));
     }
 
     @Test
@@ -763,7 +763,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        List<String>  caseDataMapUpdated = manageDocumentsService.precheckDocumentField(callbackRequest);
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
 
         assertNotNull(caseDataMapUpdated);
         assertTrue(!caseDataMapUpdated.isEmpty());
@@ -794,7 +794,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        List<String>  caseDataMapUpdated = manageDocumentsService.precheckDocumentField(callbackRequest);
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
 
         assertNotNull(caseDataMapUpdated);
         assertTrue(caseDataMapUpdated.isEmpty());
@@ -823,7 +823,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        List<String>  caseDataMapUpdated = manageDocumentsService.precheckDocumentField(callbackRequest);
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
 
         assertNotNull(caseDataMapUpdated);
         assertTrue(caseDataMapUpdated.isEmpty());

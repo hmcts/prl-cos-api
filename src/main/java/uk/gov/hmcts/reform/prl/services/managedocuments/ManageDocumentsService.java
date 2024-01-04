@@ -71,7 +71,7 @@ public class ManageDocumentsService {
 
         return caseData.toBuilder()
             .isC8DocumentPresent(CaseUtils.isC8Present(caseData) ? "Yes" : "No")
-            .manageDocuments(Collections.singletonList(element(manageDocuments)))
+            .manageDocuments(Arrays.asList(element(manageDocuments)))
             .build();
     }
 
@@ -105,18 +105,21 @@ public class ManageDocumentsService {
             .value(DynamicListElement.EMPTY).build();
     }
 
-    public List<String> precheckDocumentField(CallbackRequest callbackRequest) {
-
+    public List<String> validateRestrictedReason(CallbackRequest callbackRequest,
+                                                 UserDetails userDetails) {
         List<String> errorList = new ArrayList<>();
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        String userRole = CaseUtils.getUserRole(userDetails);
+        if (SOLICITOR.equals(userRole)) {
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-        List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
-        for (Element<ManageDocuments> element : manageDocuments) {
-            boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
-            boolean restrictedReasonEmpty = element.getValue().getRestrictedDetails() == null
+            List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
+            for (Element<ManageDocuments> element : manageDocuments) {
+                boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
+                boolean restrictedReasonEmpty = element.getValue().getRestrictedDetails() == null
                     || element.getValue().getRestrictedDetails().isEmpty();
-            if (restricted && restrictedReasonEmpty) {
-                errorList.add(DETAILS_ERROR_MESSAGE);
+                if (restricted && restrictedReasonEmpty) {
+                    errorList.add(DETAILS_ERROR_MESSAGE);
+                }
             }
         }
         return errorList;
@@ -152,7 +155,7 @@ public class ManageDocumentsService {
 
             boolean isRestrictedFlag = false;
             for (Element<ManageDocuments> element : manageDocuments) {
-                if (addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(
+                if (addToQuarantineDocsOrTabDocumentsAndReturnConfigFlag(
                     element,
                     restricted,
                     userRole,
@@ -190,8 +193,17 @@ public class ManageDocumentsService {
         }
     }
 
-    public boolean checkIfUserIsCourtStaff(String authorisation) {
-        return userService.getUserDetails(authorisation).getRoles().stream().anyMatch(ROLES::contains);
+    public List<String> validateCourtUser(CallbackRequest callbackRequest,
+                                          UserDetails userDetails) {
+        if (isCourtSelectedInDocumentParty(callbackRequest)
+            && !checkIfUserIsCourtStaff(userDetails)) {
+            return List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'");
+        }
+        return Collections.emptyList();
+    }
+
+    public boolean checkIfUserIsCourtStaff(UserDetails userDetails) {
+        return userDetails.getRoles().stream().anyMatch(ROLES::contains);
     }
 
     public boolean isCourtSelectedInDocumentParty(CallbackRequest callbackRequest) {
@@ -200,7 +212,8 @@ public class ManageDocumentsService {
             .anyMatch(element -> DocumentPartyEnum.COURT.equals(element.getValue().getDocumentParty()));
     }
 
-    private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {
+    private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,
+                                             String userRole) {
 
         if (SOLICITOR.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "SOLICITOR");
@@ -211,7 +224,7 @@ public class ManageDocumentsService {
         }
     }
 
-    private boolean addToQuarantineDocsOrTabDocumentsAndReturnConfidFlag(Element<ManageDocuments> element,
+    private boolean addToQuarantineDocsOrTabDocumentsAndReturnConfigFlag(Element<ManageDocuments> element,
                                                                          Predicate<Element<ManageDocuments>> restricted,
                                                                          String userRole,
                                                                          List<Element<QuarantineLegalDoc>> quarantineDocs,
@@ -346,7 +359,6 @@ public class ManageDocumentsService {
                 .documentCreatedOn(localZoneDate).build() : null)
             .courtStaffQuarantineDocument((COURT_STAFF.equals(userRole)) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
-            //.confidentialDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
             .build();
     }
 }

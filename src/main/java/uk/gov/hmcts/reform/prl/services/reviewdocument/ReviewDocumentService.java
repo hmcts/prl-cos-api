@@ -756,18 +756,19 @@ public class ReviewDocumentService {
         return documentId;
     }
 
+    /**
+     * Based on user input documents will be moved either to confidential or restricted documents.
+     * ifConfidential && isRestricted - RESTRICTED
+     * !ifConfidential && isRestricted - RESTRICTED
+     * ifConfidential && !isRestricted - CONFIDENTIAL
+     */
     private String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
         if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
-            && YesOrNo.Yes.equals(quarantineLegalDoc.getIsRestricted())) {
-            return RESTRICTED_DOCUMENTS;
-        } else if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
             && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
             return CONFIDENTIAL_DOCUMENTS;
-        } else if (YesOrNo.No.equals(quarantineLegalDoc.getIsConfidential())
-            && YesOrNo.Yes.equals(quarantineLegalDoc.getIsRestricted())) {
+        } else {
             return RESTRICTED_DOCUMENTS;
         }
-        return null;
     }
 
     private void moveToConfidentialOrRestricted(Map<String, Object> caseDataUpdated,
