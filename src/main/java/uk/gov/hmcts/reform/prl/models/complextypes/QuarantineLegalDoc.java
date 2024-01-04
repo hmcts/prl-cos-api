@@ -69,7 +69,6 @@ public class QuarantineLegalDoc {
     private final Document magistratesFactsAndReasonsDocument;
     private final Document judgeNotesFromHearingDocument;
     private final Document importantInfoAboutAddressAndContactDocument;
-    private final Document dnaReportsOtherDocsDocument;
     private final Document privacyNoticeDocument;
     private final Document specialMeasuresDocument;
     private final Document anyOtherDocDocument;
