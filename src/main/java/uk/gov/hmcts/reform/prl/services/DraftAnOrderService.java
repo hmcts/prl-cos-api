@@ -269,7 +269,7 @@ public class DraftAnOrderService {
         String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && Yes.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded())
-            && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))
+            && !OrderStatusEnum.rejectedByJudge.getDisplayedValue().equals(orderStatus))
             || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && YesOrNo.No.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))) {
             supportedDraftOrderList.add(draftOrderElement);
@@ -920,18 +920,22 @@ public class DraftAnOrderService {
             eventId,
             draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
         );
-        if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId) && OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
+        YesOrNo isJudgeApprovalNeeded =  draftOrder.getOtherDetails().getIsJudgeApprovalNeeded();
+        if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
+            if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
             .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())) {
-            status = OrderStatusEnum.rejectedByJudge.getDisplayedValue();
+                status = OrderStatusEnum.rejectedByJudge.getDisplayedValue();
+                isJudgeApprovalNeeded = Yes;
+            } else {
+                isJudgeApprovalNeeded = No;
+            }
         }
-
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(status)
-                              .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                                                         ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
+                              .isJudgeApprovalNeeded(isJudgeApprovalNeeded)
                               .build())
             .build();
     }
