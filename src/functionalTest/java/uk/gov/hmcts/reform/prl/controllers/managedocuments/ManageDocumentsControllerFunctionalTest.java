@@ -5,14 +5,12 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
@@ -105,8 +103,6 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
-        //String response = ResourceLoader.loadJson(MANAGE_DOCUMENT_RESPONSE);
-        //JSONObject jsObject = new JSONObject(response);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
@@ -238,37 +234,31 @@ public class ManageDocumentsControllerFunctionalTest {
     @Test
     public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenNotRestricted() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NOT_RESTRICTED);
-        AboutToStartOrSubmitCallbackResponse response =  request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs-mid")
             .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        Assert.assertEquals(0,response.getErrors().size());
+            .body("errors.size()", equalTo(0))
+            .assertThat().statusCode(200);
 
     }
 
     @Test
     public void givenManageDocuments_whenCopy_manage_docsMid_thenCheckDocumentField_WhenRestricted() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
-        AboutToStartOrSubmitCallbackResponse response =  request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs-mid")
             .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .body("errors[0]", equalTo(DETAILS_ERROR_MESSAGE))
+            .assertThat().statusCode(200);
 
-        Assert.assertEquals(1,response.getErrors().size());
-        Assert.assertEquals(DETAILS_ERROR_MESSAGE,response.getErrors().get(0));
     }
 
     @Test
