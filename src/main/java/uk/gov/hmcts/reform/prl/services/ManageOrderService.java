@@ -2916,13 +2916,14 @@ public class ManageOrderService {
             && No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
             List<String> selectedRespondentIds = caseData.getManageOrders().getRecipientsOptions().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-
+            log.info("selected respondent -ids {}", selectedRespondentIds);
             validateAddressForParty(caseData.getRespondents(), selectedRespondentIds, errorList, true);
 
         }
         if (null != caseData.getManageOrders().getOtherParties() && null != caseData.getOtherPartyInTheCaseRevised()) {
             List<String> selectedOtherPartyIds = caseData.getManageOrders().getOtherParties().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
+            log.info("selected other party -ids {}", selectedOtherPartyIds);
             validateAddressForParty(caseData.getOtherPartyInTheCaseRevised(), selectedOtherPartyIds, errorList, false);
         }
         return errorList;
@@ -2931,9 +2932,11 @@ public class ManageOrderService {
     private void validateAddressForParty(List<Element<PartyDetails>> partyDetails,
                                          List<String> selectedPartyIds, List<String> errorList,
                                          Boolean isRespondent) {
+        log.info("Party details {}", partyDetails);
         partyDetails.stream()
             .filter(party -> selectedPartyIds.contains(party.getId().toString()))
             .forEach(party -> {
+                log.info("found respondent id {}", party.getId().toString());
                 if ((isRespondent
                     && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
                     && (null == party.getValue().getContactPreferences()
@@ -2942,10 +2945,8 @@ public class ManageOrderService {
                     errorList.add(VALIDATION_ADDRESS_ERROR_RESPONDENT);
                     return;
                 } else if (Boolean.FALSE.equals(isRespondent) && null == party.getValue().getAddress()) {
-                    {
-                        errorList.add(VALIDATION_ADDRESS_ERROR_OTHER_PARTY);
-                        return;
-                    }
+                    errorList.add(VALIDATION_ADDRESS_ERROR_OTHER_PARTY);
+                    return;
                 }
             });
     }

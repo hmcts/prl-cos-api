@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
@@ -23,6 +24,7 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
 @SpringBootTest(classes = {Application.class, ManageOrderControllerIntegrationTest.class})
+@Slf4j
 public class ManageOrderControllerIntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
@@ -40,6 +42,8 @@ public class ManageOrderControllerIntegrationTest {
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
 
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY_REVISED = "requests/manage-order-fetch-children-request-integration.json";
+
+    private static final String VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS = "requests/manage-order-fetch-children-request-integration.json";
 
     @Autowired
     CaseService caseService;
@@ -117,7 +121,7 @@ public class ManageOrderControllerIntegrationTest {
 
     @Test
     public void testValidateAddressErrorMessageEndpoint() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY_REVISED);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS);
         HttpPost httpPost = new HttpPost(serviceUrl + addressValidationEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
