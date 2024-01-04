@@ -56,7 +56,7 @@ public class EditReturnedOrderController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    private static final String CONFIRMATION_HEADER = "Draft order resubmitted";
+    private static final String CONFIRMATION_HEADER = "# Draft order resubmitted";
     private static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
         ### What happens next \n The judge will review the edits you have made to this order.
         """;
