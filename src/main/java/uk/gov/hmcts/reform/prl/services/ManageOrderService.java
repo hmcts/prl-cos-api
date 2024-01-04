@@ -2933,23 +2933,32 @@ public class ManageOrderService {
                                          List<String> selectedPartyIds, List<String> errorList,
                                          Boolean isRespondent) {
         log.info("Party details {}", partyDetails);
-        partyDetails.stream()
+        List<Element<PartyDetails>> selectedPartyList = partyDetails.stream()
             .filter(party -> selectedPartyIds.contains(party.getId().toString()))
-            .forEach(party -> {
-                log.info("found respondent id {}", party.getId().toString());
-                if ((isRespondent
-                    && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
-                    && (null == party.getValue().getContactPreferences()
-                    || party.getValue().getContactPreferences().equals(ContactPreferences.post)
-                    || null == party.getValue().getEmail()) && !(null != party.getValue().getAddress()
-                    && null != party.getValue().getAddress().getAddressLine1())) {
-                    errorList.add(VALIDATION_ADDRESS_ERROR_RESPONDENT);
-                    return;
-                } else if (Boolean.FALSE.equals(isRespondent) && !(null != party.getValue().getAddress()
-                    && null != party.getValue().getAddress().getAddressLine1())) {
-                    errorList.add(VALIDATION_ADDRESS_ERROR_OTHER_PARTY);
-                    return;
-                }
-            });
+            .collect(Collectors.toList());
+        for (Element<PartyDetails> party : selectedPartyList) {
+            log.info("found respondent id {}", party.getId().toString());
+            if ((isRespondent
+                && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
+                && checkForContactPreference(party) && !checkIfAddressIPresent(party)) {
+                errorList.add(VALIDATION_ADDRESS_ERROR_RESPONDENT);
+            } else if (Boolean.FALSE.equals(isRespondent) && !(checkIfAddressIPresent(party))) {
+                errorList.add(VALIDATION_ADDRESS_ERROR_OTHER_PARTY);
+            }
+            if (!errorList.isEmpty()) {
+                break;
+            }
+        }
+    }
+
+    private boolean checkForContactPreference(Element<PartyDetails> party) {
+        return null == party.getValue().getContactPreferences()
+            || party.getValue().getContactPreferences().equals(ContactPreferences.post)
+            || null == party.getValue().getEmail();
+    }
+
+    private boolean checkIfAddressIPresent(Element<PartyDetails> party) {
+        return null != party.getValue().getAddress()
+            && null != party.getValue().getAddress().getAddressLine1();
     }
 }
