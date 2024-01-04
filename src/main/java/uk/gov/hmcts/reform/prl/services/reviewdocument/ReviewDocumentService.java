@@ -221,7 +221,7 @@ public class ReviewDocumentService {
                 if (quarantineBulkscanDocElement.isPresent()) {
                     updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                         caseDataUpdated,
-                        quarantineBulkscanDocElement,
+                        quarantineBulkscanDocElement.get(),
                         BULK_SCAN
                     );
                 }
@@ -231,8 +231,7 @@ public class ReviewDocumentService {
 
     private void updateReviewdocs(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid,
                                   Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement,
-                                  Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement,
-                                  Optional<Element<QuarantineLegalDoc>> courtStaffQuarantineDocElement) {
+                                  Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement) {
         Optional<Element<UploadedDocuments>> quarantineCitizenDocElement = Optional.empty();
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
             quarantineCitizenDocElement = caseData.getCitizenUploadQuarantineDocsList().stream()
@@ -242,13 +241,13 @@ public class ReviewDocumentService {
         if (quarantineLegalDocElement.isPresent()) {
             updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
-                quarantineLegalDocElement,
+                quarantineLegalDocElement.get(),
                 LEGAL_PROFESSIONAL
             );
         } else if (cafcassQuarantineDocElement.isPresent()) {
             updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
-                cafcassQuarantineDocElement,
+                cafcassQuarantineDocElement.get(),
                 CAFCASS
             );
         } else if (courtStaffQuarantineDocElement.isPresent()) {
@@ -291,10 +290,11 @@ public class ReviewDocumentService {
     }
 
     private void updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(Map<String, Object> caseDataUpdated,
-                                                                      Optional<Element<QuarantineLegalDoc>> quarantineDocElement,
+                                                                      Element<QuarantineLegalDoc> quarantineDocElement,
                                                                       String submittedBy) {
 
-        QuarantineLegalDoc document = quarantineDocElement.get().getValue();
+        QuarantineLegalDoc document = quarantineDocElement.getValue();
+        log.info("** Quarantine Doc ** {}", document);
 
         String docTobeReviewed = formatDocumentTobeReviewed(
             submittedBy,
@@ -330,12 +330,12 @@ public class ReviewDocumentService {
     }
 
     private void uploadDocForConfOrDocTab(Map<String, Object> caseDataUpdated,
-                                          List<Element<QuarantineLegalDoc>> quarantineDocsList,
-                                          UUID uuid,
-                                          boolean isReviewDecisionYes,
-                                          List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
-                                          String uploadDocListConfOrDocTabKey,
-                                          String uploadedBy) {
+                                         List<Element<QuarantineLegalDoc>> quarantineDocsList,
+                                         UUID uuid,
+                                         boolean isReviewDecisionYes,
+                                         List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
+                                         String uploadDocListConfOrDocTabKey,
+                                         String uploadedBy) {
 
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
             getQuarantineDocumentById(quarantineDocsList, uuid);

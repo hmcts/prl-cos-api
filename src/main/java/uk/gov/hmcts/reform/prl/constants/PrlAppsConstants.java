@@ -864,6 +864,7 @@ public class PrlAppsConstants {
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
 
+    public static final String INTERNAL_CORRESPONDENCE_LABEL = "Internal correspondence";
     public static final String RESTRICTED_DOCUMENTS = "restrictedDocuments";
     public static final String CONFIDENTIAL_DOCUMENTS = "confidentialDocuments";
 }

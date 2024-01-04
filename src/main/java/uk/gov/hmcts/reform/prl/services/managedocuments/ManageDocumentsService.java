@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
@@ -12,6 +11,8 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -22,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocumen
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.ZoneId;
@@ -37,8 +39,10 @@ import java.util.function.Predicate;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -90,6 +94,7 @@ public class ManageDocumentsService {
                     dynamicListElementList,
                     Arrays.asList(quarantineCategoriesToRemove())
                 );
+
                 return DynamicList.builder().value(DynamicListElement.EMPTY)
                     .listItems(dynamicListElementList).build();
             }
@@ -173,7 +178,6 @@ public class ManageDocumentsService {
         }
         //remove manageDocuments from caseData
         caseDataUpdated.remove("manageDocuments");
-        log.info("22222222 {}",caseDataUpdated);
 
         return caseDataUpdated;
     }
@@ -184,6 +188,16 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
+    }
+
+    public boolean checkIfUserIsCourtStaff(String authorisation) {
+        return userService.getUserDetails(authorisation).getRoles().stream().anyMatch(ROLES::contains);
+    }
+
+    public boolean isCourtSelectedInDocumentParty(CallbackRequest callbackRequest) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        return caseData.getManageDocuments().stream()
+            .anyMatch(element -> DocumentPartyEnum.COURT.equals(element.getValue().getDocumentParty()));
     }
 
     private void updateCaseDataUpdatedByRole(Map<String,Object> caseDataUpdated,String userRole) {
@@ -210,10 +224,19 @@ public class ManageDocumentsService {
         if (restricted.test(element)) {
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
             quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument, userDetails);
+            if (userRole.equals(COURT_ADMIN)) {
+                quarantineLegalDoc = DocumentUtils.addConfFields(quarantineLegalDoc, manageDocument);
+            } else {
+                quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument);
+            }
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
         } else {
-            final String categoryId = manageDocument.getDocumentCategories().getValueCode();
+            String categoryId = manageDocument.getDocumentCategories().getValueCode();
+            if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
+                categoryId = ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE;
+            }
+            log.info("CategoryId {}", categoryId);
             QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
                 .getQuarantineUploadDocument(categoryId,
                                              manageDocument.getDocument().toBuilder()
@@ -226,12 +249,11 @@ public class ManageDocumentsService {
         return confidentialityFlag;
     }
 
-
     private void updateQuarantineDocs(Map<String, Object> caseDataUpdated,
                                       List<Element<QuarantineLegalDoc>> quarantineDocs,
                                       String userRole,
                                       boolean isDocumentTab) {
-        if (StringUtils.isEmpty(userRole)) {
+        if (CommonUtils.isEmpty(userRole)) {
             throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
 
@@ -260,6 +282,14 @@ public class ManageDocumentsService {
                 }
                 break;
 
+            case COURT_ADMIN:
+                if (isDocumentTab) {
+                    caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
+                } else {
+                    caseDataUpdated.put("courtStaffUploadDocListConfTab", quarantineDocs);
+                }
+                break;
+
             default:
                 throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
 
@@ -269,7 +299,7 @@ public class ManageDocumentsService {
     private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
                                                                 String userRole,
                                                                 boolean isDocumentTab) {
-        if (StringUtils.isEmpty(userRole)) {
+        if (CommonUtils.isEmpty(userRole)) {
             throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
 
@@ -288,6 +318,11 @@ public class ManageDocumentsService {
                     isDocumentTab,
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
                     caseData.getCourtStaffQuarantineDocsList()
+            );
+            case COURT_ADMIN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
+                    isDocumentTab,
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()
             );
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         };
@@ -309,8 +344,9 @@ public class ManageDocumentsService {
                 .documentCreatedOn(localZoneDate).build() : null)
             .cafcassQuarantineDocument(CAFCASS.equals(userRole) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
-            .courtStaffQuarantineDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
+            .courtStaffQuarantineDocument((COURT_STAFF.equals(userRole)) ? manageDocument.getDocument().toBuilder()
                 .documentCreatedOn(localZoneDate).build() : null)
+            //.confidentialDocument(COURT_STAFF.equals(userRole) ? manageDocument.getDocument().toBuilder()
             .build();
     }
 }

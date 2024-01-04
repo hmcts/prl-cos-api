@@ -33,6 +33,9 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 
+import java.util.List;
+import java.util.Map;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
@@ -125,5 +128,20 @@ public class ManageDocumentsController extends AbstractCallbackController {
                       .confirmationHeader(CONFIRMATION_HEADER)
                       .confirmationBody(CONFIRMATION_BODY)
                       .build());
+    }
+
+    @PostMapping("/validate-court-user")
+    public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        if (manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)
+            && !manageDocumentsService.checkIfUserIsCourtStaff(authorisation)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(updatedCaseData).build();
     }
 }

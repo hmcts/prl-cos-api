@@ -31,6 +31,7 @@ public class QuarantineLegalDoc {
     private final Document miamCertificateDocument;
     private final Document previousOrdersSubmittedWithApplicationDocument;
     private final Document respondentApplicationDocument;
+    private final Document ordersFromOtherProceedingsDocument;
     private final Document respondentC1AApplicationDocument;
     private final Document respondentC1AResponseDocument;
     private final Document applicationsFromOtherProceedingsDocument;
@@ -52,6 +53,7 @@ public class QuarantineLegalDoc {
     private final Document lettersOfComplaintDocument;
     private final Document spipReferralRequestsDocument;
     private final Document homeOfficeDwpResponsesDocument;
+    private final Document internalCorrespondenceDocument;
     private final Document medicalReportsDocument;
     private final Document dnaReportsExpertReportDocument;
     private final Document resultsOfHairStrandBloodTestsDocument;
@@ -98,9 +100,11 @@ public class QuarantineLegalDoc {
     private final String uploadedBy;
     private final String uploadedByIdamId;
 
+    //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
-            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine"
+            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential",
+            "applicationsWithinProceedings", "applicationsFromOtherProceedings"
         };
     }
 }
