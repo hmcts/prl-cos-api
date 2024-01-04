@@ -1,10 +1,10 @@
 package uk.gov.hmcts.reform.prl.utils;
 
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -214,7 +214,8 @@ public class DocumentUtils {
     }
 
     public static QuarantineLegalDoc addConfFields(QuarantineLegalDoc quarantineLegalDoc,
-                                                         ManageDocuments manageDocument) {
+                                                   ManageDocuments manageDocument,
+                                                   UserDetails userDetails) {
         return quarantineLegalDoc.toBuilder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))

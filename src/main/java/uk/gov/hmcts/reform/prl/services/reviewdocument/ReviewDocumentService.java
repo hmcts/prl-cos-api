@@ -231,7 +231,8 @@ public class ReviewDocumentService {
 
     private void updateReviewdocs(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid,
                                   Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement,
-                                  Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement) {
+                                  Optional<Element<QuarantineLegalDoc>> cafcassQuarantineDocElement,
+                                  Optional<Element<QuarantineLegalDoc>> courtStaffQuarantineDocElement) {
         Optional<Element<UploadedDocuments>> quarantineCitizenDocElement = Optional.empty();
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
             quarantineCitizenDocElement = caseData.getCitizenUploadQuarantineDocsList().stream()
@@ -253,7 +254,7 @@ public class ReviewDocumentService {
         } else if (courtStaffQuarantineDocElement.isPresent()) {
             updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
-                courtStaffQuarantineDocElement,
+                courtStaffQuarantineDocElement.get(),
                 COURT_STAFF
             );
         } else if (quarantineCitizenDocElement.isPresent()) {
@@ -283,7 +284,7 @@ public class ReviewDocumentService {
                                     ScannedDocument::getUrl).orElse(null)).build()));
             updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
                 caseDataUpdated,
-                quarantineBulkscanDocElement,
+                quarantineBulkscanDocElement.get(),
                 BULK_SCAN
             );
         }

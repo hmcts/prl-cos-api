@@ -212,6 +212,7 @@ public class ManageDocumentsControllerTest {
         Assert.assertEquals(12345678L, response.getData().get("id"));
 
     }
+
     @Test
     public void testCopyManageDocsMid() {
 

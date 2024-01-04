@@ -481,7 +481,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -736,6 +737,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         Assert.assertFalse(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest));
     }
+
     @Test
     public void testCopyDocumentMidEventIfRestrictedWithSoliRole_whenTriedWithOutReason() {
 
