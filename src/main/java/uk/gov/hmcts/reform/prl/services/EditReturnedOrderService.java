@@ -79,9 +79,8 @@ public class EditReturnedOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-        log.info("*** draftoo dynamic list : {}", caseDataMap.get("rejectedOrdersDynamicList"));
+        log.info("*** rejected orders dynamic list : {}", caseDataMap.get("rejectedOrdersDynamicList"));
         log.info("*** draftoo order collection : {}", caseData.getDraftOrderCollection());
-        caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         return caseDataMap;
     }
 
@@ -91,6 +90,8 @@ public class EditReturnedOrderService {
             .getRejectedOrdersDynamicList());
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
+        caseDataMap.put("orderType", selectedOrder.getOrderType());
+        caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
         caseDataMap.put(IS_ORDER_CREATED_BY_SOLICITOR, selectedOrder.getIsOrderCreatedBySolicitor());
         if (selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative() != null) {
