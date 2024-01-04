@@ -68,7 +68,6 @@ public class QuarantineLegalDoc {
     private final Document magistratesFactsAndReasonsDocument;
     private final Document judgeNotesFromHearingDocument;
     private final Document importantInfoAboutAddressAndContactDocument;
-    private final Document dnaReportsOtherDocsDocument;
     private final Document privacyNoticeDocument;
     private final Document specialMeasuresDocument;
     private final Document anyOtherDocDocument;
@@ -96,7 +95,7 @@ public class QuarantineLegalDoc {
     //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {
         return new String [] {
-            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential", 
+            "citizenQuarantine", "legalProfQuarantine", "cafcassQuarantine", "courtStaffQuarantine", "confidential",
             "applicationsWithinProceedings", "applicationsFromOtherProceedings"
         };
     }
