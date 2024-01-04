@@ -251,6 +251,7 @@ public class AmendOrderServiceTest {
 
     @Test
     public void documentUpdateAndReturnedInMap1() throws IOException {
+
         originalOrder = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
             .documentFileName("amended_filename.pdf")
             .build();

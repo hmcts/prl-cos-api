@@ -132,6 +132,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SPIP_ATTENDANCE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SWANSEA_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_SOLICITOR_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
@@ -257,7 +258,8 @@ public class DraftAnOrderService {
                                                          Element<DraftOrder> draftOrderElement) {
         String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))
+            && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus)
+            && !OrderStatusEnum.rejectedByJudge.getDisplayedValue().equals(orderStatus))
             || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))) {
             supportedDraftOrderList.add(draftOrderElement);
@@ -266,8 +268,10 @@ public class DraftAnOrderService {
 
     private static void filterDraftOrderForNewCases(String eventId, List<Element<DraftOrder>> supportedDraftOrderList,
                                                     Element<DraftOrder> draftOrderElement) {
+        String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && Yes.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))
+            && Yes.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded())
+            && !OrderStatusEnum.rejectedByJudge.getDisplayedValue().equals(orderStatus))
             || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && YesOrNo.No.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))) {
             supportedDraftOrderList.add(draftOrderElement);
@@ -547,6 +551,8 @@ public class DraftAnOrderService {
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
             caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
+        } else {
+            caseDataMap.put("judgeNotesEmptyUploadJourney", YES);
         }
         caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put("manageOrderOptionType", selectedOrder.getOrderSelectionType());
@@ -560,6 +566,8 @@ public class DraftAnOrderService {
         }
         if (selectedOrder.getJudgeNotes() != null) {
             caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
+        } else {
+            caseDataMap.put("judgeNotesEmptyDraftJourney", YES);
         }
         caseDataMap.put(
             IS_HEARING_PAGE_NEEDED,
@@ -740,6 +748,11 @@ public class DraftAnOrderService {
         caseDataMap.put(DATE_ORDER_MADE, selectedOrder.getDateOrderMade());
         caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
         caseDataMap.put("judgeOrMagistrateTitle", selectedOrder.getJudgeOrMagistrateTitle());
+        if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
+            caseDataMap.put("uploadOrAmendDirectionsFromJudge", selectedOrder.getJudgeNotes());
+        } else {
+            caseDataMap.put("judgeNotesEmptyUploadJourney", YES);
+        }
         caseDataMap.put("judgeOrMagistratesLastName", selectedOrder.getJudgeOrMagistratesLastName());
         caseDataMap.put("justiceLegalAdviserFullName", selectedOrder.getJusticeLegalAdviserFullName());
         caseDataMap.put("magistrateLastName", selectedOrder.getMagistrateLastName());
@@ -757,6 +770,11 @@ public class DraftAnOrderService {
         caseDataMap.put("childArrangementsOrdersToIssue", selectedOrder.getChildArrangementsOrdersToIssue());
         caseDataMap.put("selectChildArrangementsOrder", selectedOrder.getSelectChildArrangementsOrder());
         caseDataMap.put("cafcassOfficeDetails", selectedOrder.getCafcassOfficeDetails());
+        if (selectedOrder.getJudgeNotes() != null) {
+            caseDataMap.put("instructionsFromJudge", selectedOrder.getJudgeNotes());
+        } else {
+            caseDataMap.put("judgeNotesEmptyDraftJourney", YES);
+        }
 
         populateOrderHearingDetails(
             authorization,
@@ -932,19 +950,23 @@ public class DraftAnOrderService {
             eventId,
             draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
         );
-        if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId) && OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
-            .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())) {
-            status = OrderStatusEnum.rejectedByJudge.getDisplayedValue();
+        YesOrNo isJudgeApprovalNeeded =  draftOrder.getOtherDetails().getIsJudgeApprovalNeeded();
+        if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
+            if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
+                .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())) {
+                status = OrderStatusEnum.rejectedByJudge.getDisplayedValue();
+                isJudgeApprovalNeeded = Yes;
+            } else {
+                isJudgeApprovalNeeded = No;
+            }
         }
-
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(status)
                               .instructionsToLegalRepresentative(caseData.getManageOrders().getInstructionsToLegalRepresentative())
-                              .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                                                         ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
+                              .isJudgeApprovalNeeded(isJudgeApprovalNeeded)
                               .build())
             .build();
     }

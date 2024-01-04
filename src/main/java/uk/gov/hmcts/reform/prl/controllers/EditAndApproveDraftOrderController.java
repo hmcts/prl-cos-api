@@ -318,6 +318,7 @@ public class EditAndApproveDraftOrderController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             caseDataUpdated.put(STATE, caseData.getState());
+            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             updateTabs(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -370,11 +371,10 @@ public class EditAndApproveDraftOrderController {
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
+            log.info("judgeDirectionsToAdmin : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
+            log.info("map size after : {}", caseDataUpdated.size());
             updateTabs(callbackRequest, caseDataUpdated);
-            return ResponseEntity
-                .ok(SubmittedCallbackResponse.builder()
-                        .confirmationHeader(CONFIRMATION_HEADER)
-                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            return responseEntity;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
