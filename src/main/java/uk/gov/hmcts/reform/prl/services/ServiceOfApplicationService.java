@@ -857,6 +857,8 @@ public class ServiceOfApplicationService {
     private List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondents(List<Element<PartyDetails>> applicantsOrRespondents,
                                                                                    List<DynamicMultiselectListElement> value) {
 
+        log.info("applicantsOrRespondents {}", applicantsOrRespondents);
+        log.info("value {}", value);
         return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
             element.getCode()))).collect(
             Collectors.toList());
@@ -1764,7 +1766,7 @@ public class ServiceOfApplicationService {
     private void buildUnservedOthersPack(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData, String dateCreated,
                                          List<Document> c100StaticDocs) {
         log.info("serving other people in case");
-
+        log.info("Before caseData.getOthersToNotify {}", caseData.getOthersToNotify());
         final List<DynamicMultiselectListElement> otherParties = getSelectedApplicantsOrRespondents(
             caseData.getOthersToNotify(),
             caseData.getServiceOfApplication().getSoaOtherParties().getValue()
