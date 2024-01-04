@@ -172,6 +172,10 @@ public class ManageOrderService {
 
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
+    public static final String VALIDATION_ADDRESS_ERROR_RESPONDENT = "This order cannot be served by post until the respondent's "
+        + "address is given.";
+    public static final String VALIDATION_ADDRESS_ERROR_OTHER_PARTY = "This order cannot be served by post until the other"
+        + " people's address is given.";
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
@@ -2842,39 +2846,42 @@ public class ManageOrderService {
     }
 
     public List<String> validateRespondentLipAndOtherPersonAddress(CaseData caseData) {
-        List<String> selectedRespondentIds = caseData.getManageOrders().getRecipientsOptions().getValue()
-            .stream().map(DynamicMultiselectListElement::getCode).toList();
         List<String> errorList = new ArrayList<>();
-        if (No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
+        if (null != caseData.getManageOrders().getRecipientsOptions()
+            && No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
+            List<String> selectedRespondentIds = caseData.getManageOrders().getRecipientsOptions().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
+
             validateAddressForParty(caseData.getRespondents(), selectedRespondentIds, errorList, true);
+
         }
-        List<String> selectedOtherPartyIds = caseData.getManageOrders().getOtherParties().getValue()
-            .stream().map(DynamicMultiselectListElement::getCode).toList();
-        validateAddressForParty(caseData.getOtherPartyInTheCaseRevised(), selectedOtherPartyIds, errorList, false);
+        if (null != caseData.getManageOrders().getOtherParties() && null != caseData.getOtherPartyInTheCaseRevised()) {
+            List<String> selectedOtherPartyIds = caseData.getManageOrders().getOtherParties().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
+            validateAddressForParty(caseData.getOtherPartyInTheCaseRevised(), selectedOtherPartyIds, errorList, false);
+        }
         return errorList;
     }
 
     private void validateAddressForParty(List<Element<PartyDetails>> partyDetails,
-                                         List<String> selectedPartyId, List<String> errorList,
+                                         List<String> selectedPartyIds, List<String> errorList,
                                          Boolean isRespondent) {
         partyDetails.stream()
-            .filter(party -> selectedPartyId.contains(party.getId().toString()))
+            .filter(party -> selectedPartyIds.contains(party.getId().toString()))
             .forEach(party -> {
-                         if ((isRespondent
-                             && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation())) &&
-                             (null == party.getValue().getContactPreferences() ||
-                                 party.getValue().getContactPreferences().equals(ContactPreferences.post) ||
-                                 null == party.getValue().getEmail())) {
-                             errorList.add("This order cannot be served by post until the respondent's " +
-                                               "address is given.");
-                             return;
-                         } else if (!isRespondent) {
-                             if (null == party.getValue().getAddress()) {
-                                 errorList.add("This order cannot be served by post until the other people's address is given.");
-                               return;
-                             }
-                         }
-                     }
-            );
+                if ((isRespondent
+                    && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
+                    && (null == party.getValue().getContactPreferences()
+                    || party.getValue().getContactPreferences().equals(ContactPreferences.post)
+                    || null == party.getValue().getEmail()) && null == party.getValue().getAddress()) {
+                    errorList.add(VALIDATION_ADDRESS_ERROR_RESPONDENT);
+                    return;
+                } else if (Boolean.FALSE.equals(isRespondent) && null == party.getValue().getAddress()) {
+                    {
+                        errorList.add(VALIDATION_ADDRESS_ERROR_OTHER_PARTY);
+                        return;
+                    }
+                }
+            });
     }
 }

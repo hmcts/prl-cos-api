@@ -3291,4 +3291,81 @@ public class ManageOrdersControllerTest {
             manageOrdersController.validateAndPopulateHearingData(authToken, s2sToken, callbackRequest); }, RuntimeException.class, "Invalid Client");
 
     }
+
+    @Test
+    public void testAddressValidationError() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .build();
+        List<String> errors = new ArrayList<>();
+        errors.add("This order cannot be served by post until the respondent's " + "address is given.");
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(caseData)).thenReturn(errors);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals(errors.get(0), callbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testCaseDataWhenNoValidationErrorReturned() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(caseData)).thenReturn(new ArrayList<>());
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
+            .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getData());
+        assertNotNull(callbackResponse.getData().get("id"));
+        assertEquals("123", callbackResponse.getData().get("id").toString());
+    }
+
+    @Test
+    public void testValidateAddressFailedToAuthorisation() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+
+        assertExpectedException(() -> {
+            manageOrdersController
+                .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest); },
+                                RuntimeException.class, "Invalid Client");
+
+    }
 }

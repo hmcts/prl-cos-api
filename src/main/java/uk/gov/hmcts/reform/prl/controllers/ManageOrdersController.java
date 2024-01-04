@@ -533,7 +533,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            List<String> errorList = null;
+            List<String> errorList;
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(caseData);
             if (isNotEmpty(errorList)) {
@@ -544,8 +544,7 @@ public class ManageOrdersController {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(callbackRequest.getCaseDetails().getData())
                 .build();
-        }
-        else {
+        } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }

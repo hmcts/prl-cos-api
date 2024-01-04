@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
@@ -109,6 +110,8 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -3582,5 +3585,208 @@ public class ManageOrderServiceTest {
         );
         assertNotNull(response);
         assertEquals("cccc", response);
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServicePrefPostShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .contactPreferences(ContactPreferences.post)
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                    .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData casedata = getCaseData();
+        casedata = casedata.toBuilder().respondents(respondents)
+            .otherPartyInTheCaseRevised(otherParties)
+            .build();
+
+        List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(casedata);
+        assertEquals(1,errorList.size());
+        assertTrue(errorList.contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServiceContactPrefNotPresentShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                    .email("test@test.com")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData casedata = getCaseData();
+        casedata = casedata.toBuilder().respondents(respondents)
+            .otherPartyInTheCaseRevised(otherParties).build();
+        List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(casedata);
+        assertEquals(1,errorList.size());
+        assertTrue(errorList.contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServiceEmailAddressNotPresentShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .contactPreferences(ContactPreferences.post)
+                    .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData casedata = getCaseData();
+        casedata = casedata.toBuilder().respondents(respondents)
+            .otherPartyInTheCaseRevised(otherParties).build();
+        List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(casedata);
+        assertEquals(1,errorList.size());
+        assertTrue(errorList.contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenRespondenNonPersonalServiceIfRepresentedShouldNotGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData casedata = getCaseData();
+        casedata = casedata.toBuilder().respondents(respondents)
+            .otherPartyInTheCaseRevised(otherParties).build();
+        List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(casedata);
+        assertEquals(0,errorList.size());
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServiceShouldNotGiveErrorIfAddressIsPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                    .email("test@test.com")
+                    .address(Address.builder().addressLine1("test address").build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .build()));
+        CaseData casedata = getCaseData();
+        casedata = casedata.toBuilder().respondents(respondents).build();
+        List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(casedata);
+        assertEquals(0,errorList.size());
+    }
+
+    @Test
+    public void givenRespondentLipPersonalServiceShouldNotGiveError() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        CaseData casedata = getCaseData();
+        casedata = casedata.toBuilder().respondents(respondents)
+            .manageOrders(casedata.getManageOrders().toBuilder()
+                              .serveToRespondentOptions(YesOrNo.Yes).build()).build();
+        List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(casedata);
+        assertEquals(0,errorList.size());
+    }
+
+    @Test
+    public void givenOtherPartyNonPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .build()));
+        CaseData casedata = getCaseData();
+        casedata = casedata.toBuilder().respondents(respondents)
+            .otherPartyInTheCaseRevised(otherParties)
+            .build();
+        List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(casedata);
+        assertEquals(2,errorList.size());
+        assertTrue(errorList.contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+        assertTrue(errorList.contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+    }
+
+    @Test
+    public void givenOtherPartyPersonalServiceShouldNotGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .build()));
+        CaseData casedata = getCaseData();
+        casedata = casedata.toBuilder().respondents(respondents)
+            .otherPartyInTheCaseRevised(otherParties)
+            .manageOrders(casedata.getManageOrders().toBuilder()
+                              .serveToRespondentOptions(YesOrNo.Yes).build())
+            .build();
+        List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(casedata);
+        assertEquals(1,errorList.size());
+        assertTrue(errorList.contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+    }
+
+    @Test
+    public void givenOtherPartyShouldNotGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                    .address(Address.builder()
+                                 .addressLine1("test address").build())
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                    .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData casedata = getCaseData();
+        casedata = casedata.toBuilder().respondents(respondents)
+            .otherPartyInTheCaseRevised(otherParties)
+            .build();
+        List<String> errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(casedata);
+        assertEquals(0, errorList.size());
+    }
+
+    private CaseData getCaseData() {
+        List<DynamicMultiselectListElement> elementList = new ArrayList<>();
+        elementList.add(DynamicMultiselectListElement.builder()
+                            .code("0016cff5-17f0-42af-bea4-0b04ca74c9ec")
+                            .label("Jeremy Anderson (Applicant 2)")
+                            .build());
+        elementList.add(DynamicMultiselectListElement.builder()
+                            .code("7e9028ba-534c-42bb-bb04-e67b6551b4bd")
+                            .label("Martina Graham (Applicant 3)")
+                            .build());
+        elementList.add(DynamicMultiselectListElement.builder()
+                            .code("e406bcc3-3c91-45db-9dcc-3a5c14930851")
+                            .label("Mary Richards (Respondent 1)")
+                            .build());
+
+        List<DynamicMultiselectListElement> otherPartiesList = new ArrayList<>();
+        otherPartiesList.add(DynamicMultiselectListElement.builder()
+                            .code("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1")
+                            .label("Sam Nolan")
+                            .build());
+        CaseData casedata = CaseData.builder()
+            .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(DynamicMultiSelectList.builder()
+                                                     .value(elementList)
+                                                     .listItems(elementList)
+                                                     .build())
+                              .otherParties(DynamicMultiSelectList.builder()
+                                                .value(otherPartiesList)
+                                                .listItems(otherPartiesList)
+                                                .build())
+                              .build())
+            .build();
+        return casedata;
     }
 }
