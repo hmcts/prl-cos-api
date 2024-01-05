@@ -908,6 +908,7 @@ public class DraftAnOrderService {
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
+                log.info("** check status of draft order : {}",draftOrder);
                 draftOrderCollection.set(
                     draftOrderCollection.indexOf(e),
                     element(selectedOrderId, draftOrder)
