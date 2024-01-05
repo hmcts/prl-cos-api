@@ -97,7 +97,7 @@ public class ReviewDocumentsController {
         ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("INSIDEEEEEEEEEE REVIEWWW 1111" + result);
+        log.info("/copy-manage-docs/about-to-submit::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);

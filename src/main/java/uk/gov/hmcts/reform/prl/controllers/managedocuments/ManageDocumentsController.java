@@ -117,7 +117,8 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws JsonProcessingException {
-        objectMapper.writeValueAsString(callbackRequest.getCaseDetails().getData());
+        log.info("/copy-manage-docs/about-to-submit::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
+
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageDocumentsService.copyDocumentNew(callbackRequest, authorisation)).build();
     }
