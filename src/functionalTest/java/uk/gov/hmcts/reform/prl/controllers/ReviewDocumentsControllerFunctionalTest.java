@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import java.util.List;
 
+import static org.hamcrest.Matchers.equalTo;
+
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -63,5 +65,21 @@ public class ReviewDocumentsControllerFunctionalTest {
 
     }
 
+    @Test
+    public void givenReviewDocuments_RestrictedAnConfidential_thenMoveToRestrictedDocuments() throws Exception {
+        String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.restrictedDocuments[0].value.isConfidential", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.isConfidential", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.documentFileName", equalTo("Confidential_Testdoc2.pdf"))
+            .assertThat().statusCode(200);
 
+    }
 }
