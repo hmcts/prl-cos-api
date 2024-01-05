@@ -243,8 +243,6 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
-        log.info("*** draftoo dynamic list : {}", caseDataMap.get("draftOrdersDynamicList"));
-        log.info("*** draftoo order collection : {}", caseData.getDraftOrderCollection());
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -954,7 +952,11 @@ public class DraftAnOrderService {
             draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
         );
         YesOrNo isJudgeApprovalNeeded =  draftOrder.getOtherDetails().getIsJudgeApprovalNeeded();
+        String judgeNotes = draftOrder.getJudgeNotes();
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
+            if (StringUtils.isNotEmpty(caseData.getJudgeDirectionsToAdmin())) {
+                judgeNotes = caseData.getJudgeDirectionsToAdmin();
+            }
             if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())) {
                 status = OrderStatusEnum.rejectedByJudge.getDisplayedValue();
@@ -963,10 +965,9 @@ public class DraftAnOrderService {
                 isJudgeApprovalNeeded = No;
             }
         }
-        log.info("*** Judge notes {}", draftOrder.getJudgeNotes());
-        log.info("*** Judge directions to admin {}", caseData.getJudgeDirectionsToAdmin());
+        log.info("*** Judge notes after conditional assignment {}", judgeNotes);
         return draftOrder.toBuilder()
-            .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
+            .judgeNotes(judgeNotes)
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(status)
@@ -979,6 +980,10 @@ public class DraftAnOrderService {
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
+        String judgeNotes = draftOrder.getJudgeNotes();
+        if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId) && StringUtils.isNotEmpty(caseData.getJudgeDirectionsToAdmin())) {
+            judgeNotes = caseData.getJudgeDirectionsToAdmin();
+        }
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
             orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
         } else {
@@ -1053,7 +1058,7 @@ public class DraftAnOrderService {
             .underTakingExpiryDateTime(caseData.getManageOrders().getUnderTakingExpiryDateTime())
             .underTakingFormSign(caseData.getManageOrders().getUnderTakingFormSign())
             .adminNotes(!StringUtils.isEmpty(draftOrder.getAdminNotes()) ? draftOrder.getAdminNotes() : caseData.getCourtAdminNotes())
-            .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
+            .judgeNotes(judgeNotes)
             .parentName(caseData.getManageOrders().getParentName())
             .dateOrderMade(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade() : draftOrder.getDateOrderMade())
             .childArrangementsOrdersToIssue(caseData.getManageOrders().getChildArrangementsOrdersToIssue())

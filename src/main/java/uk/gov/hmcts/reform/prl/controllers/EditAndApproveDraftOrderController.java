@@ -349,6 +349,7 @@ public class EditAndApproveDraftOrderController {
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("judgeDirectionsToAdmin 1 : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
             log.info("Solicitor created order options {}",caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR));
             log.info("Court admin created order options {}",caseDataUpdated.get("whatToDoWithOrderCourtAdmin"));
             ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
@@ -373,7 +374,7 @@ public class EditAndApproveDraftOrderController {
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
-            log.info("judgeDirectionsToAdmin : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
+            log.info("judgeDirectionsToAdmin 2 : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
             log.info("map size after : {}", caseDataUpdated.size());
             updateTabs(callbackRequest, caseDataUpdated);
             return responseEntity;
