@@ -132,4 +132,34 @@ public class DocumentUtils {
             .build();
     }
 
+    public static QuarantineLegalDoc addQuarantineFieldsWithConfidentialFlag(String categoryId,
+                                                                             Document document,
+                                                                             ObjectMapper objectMapper,
+                                                                             ManageDocuments manageDocument,
+                                                                             UserDetails userDetails,
+                                                                             boolean confidentialFlag) {
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put(categoryId + "Document", document);
+        objectMapper.registerModule(new ParameterNamesModule());
+        QuarantineLegalDoc quarantineLegalDoc = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
+
+        return quarantineLegalDoc.toBuilder()
+            .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .notes(manageDocument.getDocumentDetails())
+            .categoryId(manageDocument.getDocumentCategories().getValueCode())
+            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
+            //move document into confidential category/folder
+            .confidentialDocument(confidentialFlag ? manageDocument.getDocument() : null)
+            .notes(manageDocument.getDocumentDetails())
+            //PRL-4320 - Manage documents redesign
+            .isConfidential(confidentialFlag ? manageDocument.getIsConfidential() : null)
+            .isRestricted(confidentialFlag ? manageDocument.getIsRestricted() : null)
+            .restrictedDetails(confidentialFlag ? manageDocument.getRestrictedDetails() : null)
+            .uploadedBy(userDetails.getFullName())
+            .uploadedByIdamId(userDetails.getId())
+            .build();
+    }
+
 }

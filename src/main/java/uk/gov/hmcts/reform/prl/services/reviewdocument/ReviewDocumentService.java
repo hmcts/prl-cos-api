@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -28,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
@@ -70,6 +73,7 @@ public class ReviewDocumentService {
     private final CaseDocumentClient caseDocumentClient;
     private final AuthTokenGenerator authTokenGenerator;
     private final SystemUserService systemUserService;
+    private final ManageDocumentsService manageDocumentsService;
 
     private final ObjectMapper objectMapper;
     public static final String DOCUMENT_SUCCESSFULLY_REVIEWED = "# Document successfully reviewed";
@@ -380,6 +384,11 @@ public class ReviewDocumentService {
         };
     }
 
+    public void processReviewDocumentNew(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
+        forReviewDecisionYesNew(caseData, caseDataUpdated, uuid);
+
+    }
+
     public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
         if (YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             forReviewDecisionYes(caseData, caseDataUpdated, uuid);
@@ -393,14 +402,82 @@ public class ReviewDocumentService {
         caseDataUpdated.put("scannedDocuments", caseData.getScannedDocuments());
     }
 
+    private void forReviewDecisionYesNew(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
+        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional = null;
+        String userRole = null;
+        if (null != caseData.getLegalProfQuarantineDocsList()) {
+            quarantineLegalDocElementOptional =
+                getQuarantineDocumentById(caseData.getLegalProfQuarantineDocsList(), uuid);
+            userRole = SOLICITOR;
+        } else if (null != caseData.getCafcassQuarantineDocsList()) {
+            quarantineLegalDocElementOptional =
+                getQuarantineDocumentById(caseData.getCafcassQuarantineDocsList(), uuid);
+            userRole = CAFCASS;
+        } else if (null != caseData.getCourtStaffQuarantineDocsList()) {
+            quarantineLegalDocElementOptional =
+                getQuarantineDocumentById(caseData.getCourtStaffQuarantineDocsList(), uuid);
+            userRole = COURT_STAFF;
+        } else if (null != caseData.getCitizenUploadQuarantineDocsList()) {
+
+            Optional<Element<UploadedDocuments>> quarantineCitizenDocElementOptional = caseData.getCitizenUploadQuarantineDocsList().stream()
+                .filter(element -> element.getId().equals(uuid)).findFirst();
+            if (quarantineCitizenDocElementOptional.isPresent()) {
+                Element<UploadedDocuments> quarantineCitizenDocElement = quarantineCitizenDocElementOptional.get();
+                //remove from quarantine
+                caseData.getCitizenUploadQuarantineDocsList().remove(quarantineCitizenDocElement);
+
+                if (null != caseData.getReviewDocuments().getCitizenUploadDocListConfTab()) {
+                    caseData.getReviewDocuments().getCitizenUploadDocListConfTab().add(quarantineCitizenDocElement);
+                    caseDataUpdated.put(
+                        CITIZEN_UPLOAD_DOC_LIST_CONF_TAB,
+                        caseData.getReviewDocuments().getCitizenUploadDocListConfTab()
+                    );
+                } else {
+                    caseDataUpdated.put(CITIZEN_UPLOAD_DOC_LIST_CONF_TAB, List.of(quarantineCitizenDocElement));
+                }
+            }
+        } else if (null != caseData.getScannedDocuments()) {
+            uploadDocForConfOrDocTab(
+                caseDataUpdated, // casedataUpdated
+                convertScannedDocumentsToQuarantineDocList(caseData.getScannedDocuments(), uuid),
+                uuid,
+                true,
+                caseData.getReviewDocuments().getBulkScannedDocListConfTab(),
+                BULKSCAN_UPLOAD_DOC_LIST_CONF_TAB,
+                BULK_SCAN
+            );
+            removeFromScannedDocumentListAfterReview(caseData, uuid);
+        }
+        if (quarantineLegalDocElementOptional.isPresent()) {
+            QuarantineLegalDoc tempQuarantineDoe = quarantineLegalDocElementOptional.get().getValue();
+            if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+                tempQuarantineDoe = tempQuarantineDoe.toBuilder()
+                    .isConfidential(null)
+                    .isRestricted(null)
+                    .restrictedDetails(null)
+                    .build();
+            }
+
+            manageDocumentsService.moveDocumentsToRespectiveCategories(
+                tempQuarantineDoe,
+                caseData,
+                caseDataUpdated,
+                userRole
+            );
+        }
+
+    }
+
     private void forReviewDecisionYes(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
 
         if (null != caseData.getLegalProfQuarantineDocsList()) {
-            moveDocumentToConfidentialTab(caseDataUpdated,
-                                          caseData,
-                                          caseData.getLegalProfQuarantineDocsList(),
-                                          uuid,
-                                          SOLICITOR);
+            moveDocumentToConfidentialTab(
+                caseDataUpdated,
+                caseData,
+                caseData.getLegalProfQuarantineDocsList(),
+                uuid,
+                SOLICITOR
+            );
         }
         //cafcass
         if (null != caseData.getCafcassQuarantineDocsList()) {
@@ -420,23 +497,7 @@ public class ReviewDocumentService {
         }
         //NEED TO BE REVISITED
         if (null != caseData.getCitizenUploadQuarantineDocsList()) {
-            Optional<Element<UploadedDocuments>> quarantineCitizenDocElementOptional = caseData.getCitizenUploadQuarantineDocsList().stream()
-                .filter(element -> element.getId().equals(uuid)).findFirst();
-            if (quarantineCitizenDocElementOptional.isPresent()) {
-                Element<UploadedDocuments> quarantineCitizenDocElement = quarantineCitizenDocElementOptional.get();
-                //remove from quarantine
-                caseData.getCitizenUploadQuarantineDocsList().remove(quarantineCitizenDocElement);
 
-                if (null != caseData.getReviewDocuments().getCitizenUploadDocListConfTab()) {
-                    caseData.getReviewDocuments().getCitizenUploadDocListConfTab().add(quarantineCitizenDocElement);
-                    caseDataUpdated.put(
-                        CITIZEN_UPLOAD_DOC_LIST_CONF_TAB,
-                        caseData.getReviewDocuments().getCitizenUploadDocListConfTab()
-                    );
-                } else {
-                    caseDataUpdated.put(CITIZEN_UPLOAD_DOC_LIST_CONF_TAB, List.of(quarantineCitizenDocElement));
-                }
-            }
         }
         //NEED TO BE REVISITED
         if (null != caseData.getScannedDocuments()) {
@@ -765,25 +826,32 @@ public class ReviewDocumentService {
      * !ifConfidential && isRestricted - RESTRICTED
      * ifConfidential && !isRestricted - CONFIDENTIAL
      */
-    private String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
-        if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
-            && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
-            return CONFIDENTIAL_DOCUMENTS;
-        } else {
-            return RESTRICTED_DOCUMENTS;
+    public String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
+        if (quarantineLegalDoc.getIsConfidential() != null) {
+            if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
+                && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
+                return CONFIDENTIAL_DOCUMENTS;
+            } else {
+                return RESTRICTED_DOCUMENTS;
+            }
         }
+        return null;
     }
 
-    private void moveToConfidentialOrRestricted(Map<String, Object> caseDataUpdated,
-                                                List<Element<QuarantineLegalDoc>> confidentialOrRestrictedDocuments,
-                                                QuarantineLegalDoc uploadDoc,
-                                                String confidentialOrRestrictedKey) {
+    public void moveToConfidentialOrRestricted(Map<String, Object> caseDataUpdated,
+                                               List<Element<QuarantineLegalDoc>> confidentialOrRestrictedDocuments,
+                                               QuarantineLegalDoc uploadDoc,
+                                               String confidentialOrRestrictedKey) {
         if (null != confidentialOrRestrictedDocuments) {
             confidentialOrRestrictedDocuments.add(element(uploadDoc));
-            confidentialOrRestrictedDocuments.sort(Comparator.comparing(doc -> doc.getValue().getDocumentUploadedDate(), Comparator.reverseOrder()));
+            confidentialOrRestrictedDocuments.sort(Comparator.comparing(
+                doc -> doc.getValue().getDocumentUploadedDate(),
+                Comparator.reverseOrder()
+            ));
             caseDataUpdated.put(confidentialOrRestrictedKey, confidentialOrRestrictedDocuments);
         } else {
             caseDataUpdated.put(confidentialOrRestrictedKey, List.of(element(uploadDoc)));
         }
     }
+
 }

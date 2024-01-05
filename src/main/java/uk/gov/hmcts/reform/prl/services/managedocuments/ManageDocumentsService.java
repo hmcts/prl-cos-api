@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
@@ -39,8 +40,10 @@ import java.util.function.Predicate;
 
 import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_LABEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
@@ -59,6 +62,8 @@ public class ManageDocumentsService {
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final UserService userService;
+    private final ReviewDocumentService reviewDocumentService;
+
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
@@ -125,6 +130,87 @@ public class ManageDocumentsService {
         return errorList;
     }
 
+    public Map<String, Object> copyDocumentNew(CallbackRequest callbackRequest, String authorization) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        UserDetails userDetails = userService.getUserDetails(authorization);
+        transformManageDocumentsToQuarantineList(
+            caseData,
+            caseDataUpdated,
+            userDetails
+        );
+
+        return caseDataUpdated;
+    }
+
+    private void transformManageDocumentsToQuarantineList(CaseData caseData, Map<String, Object> caseDataUpdated,
+                                                          UserDetails userDetails) {
+
+        String userRole = CaseUtils.getUserRole(userDetails);
+        List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
+        for (Element<ManageDocuments> element : manageDocuments) {
+            ManageDocuments manageDocument = element.getValue();
+            String categoryId = formulateCategoryId(manageDocument);
+
+            QuarantineLegalDoc quarantineLegalDoc = DocumentUtils.addQuarantineFieldsWithConfidentialFlag(
+                categoryId,
+                manageDocument.getDocument().toBuilder()
+                    .documentCreatedOn(localZoneDate).build(),
+                objectMapper,
+                manageDocument,
+                userDetails,
+                YesOrNo.Yes.equals(manageDocument.getIsConfidential())
+                    || YesOrNo.Yes.equals(manageDocument.getIsRestricted())
+            );
+
+            if (userRole.equals(COURT_ADMIN)) {
+                moveDocumentsToRespectiveCategories(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
+            } else {
+                moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
+
+            }
+        }
+    }
+
+    public void moveDocumentsToQuarantineTab(
+        QuarantineLegalDoc quarantineLegalDoc,
+        CaseData caseData,
+        Map<String, Object> caseDataUpdated,
+        String userRole) {
+        List<Element<QuarantineLegalDoc>> existingQuarantineDocuments = getQuarantineDocs(caseData, userRole, true);
+        existingQuarantineDocuments.add(element(quarantineLegalDoc));
+    }
+
+    public void moveDocumentsToRespectiveCategories(
+        QuarantineLegalDoc quarantineLegalDoc,
+        CaseData caseData,
+        Map<String, Object> caseDataUpdated,
+        String userRole) {
+
+        String restrcitedKey = reviewDocumentService.getRestrictedOrConfidentialKey(quarantineLegalDoc);
+        if (restrcitedKey != null) {
+            reviewDocumentService.moveToConfidentialOrRestricted(
+                caseDataUpdated,
+                CONFIDENTIAL_DOCUMENTS.equals(restrcitedKey)
+                    ? caseData.getReviewDocuments().getConfidentialDocuments()
+                    : caseData.getReviewDocuments().getRestrictedDocuments(),
+                quarantineLegalDoc,
+                restrcitedKey
+            );
+        } else {
+            List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
+            existingCaseDocuments.add(element(quarantineLegalDoc));
+        }
+    }
+
+
+    private String formulateCategoryId(ManageDocuments manageDocument) {
+        if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
+            return INTERNAL_CORRESPONDENCE_LABEL;
+        }
+        return manageDocument.getDocumentCategories().getValueCode();
+
+    }
 
     public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
 
@@ -183,6 +269,10 @@ public class ManageDocumentsService {
         caseDataUpdated.remove("manageDocuments");
 
         return caseDataUpdated;
+    }
+
+    private void moveDocumentsToCaseDocumentsTab(QuarantineLegalDoc documentToBeMoved, List<Element<QuarantineLegalDoc>> tabDocuments) {
+        tabDocuments.add(element(documentToBeMoved));
     }
 
     private void updateRestrictedFlag(Map<String, Object> caseDataUpdated, boolean isRestrictedFlag) {
