@@ -97,14 +97,14 @@ public class ReviewDocumentsController {
         ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("REVIEWINGGGGGGG 11111111" + result);
+        System.out.println("REVIEWINGGGGGGG 22222222" + result);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*************************** BEFORE REVIEW ***************************");
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-        reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
+        //reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
         log.info("*************************** AFTER REVIEW ***************************");
 
         //clear fields

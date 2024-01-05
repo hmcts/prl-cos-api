@@ -15,11 +15,13 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import java.util.List;
 
 import static org.hamcrest.Matchers.equalTo;
+import static org.mockito.Mockito.mock;
 
 @Slf4j
 @SpringBootTest
@@ -44,11 +46,11 @@ public class ReviewDocumentsControllerFunctionalTest {
 
     @Test
     public void givenReviewDocuments_ShouldSegregateDocAccordingly() throws Exception {
+        ReviewDocumentService stock = mock(ReviewDocumentService.class);
         String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
         AboutToStartOrSubmitCallbackResponse response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
-            .when()
             .contentType("application/json")
             .post("/review-documents/about-to-submit")
             .then()

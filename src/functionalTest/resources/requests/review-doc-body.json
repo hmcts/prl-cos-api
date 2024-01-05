@@ -583,7 +583,7 @@
       "setOutReasonsBelow": null,
       "allegationsOfHarmRevisedDATable": [
         {
-          "id": "a12d57ba-d61b-410f-bb3c-0eea03eea919",
+          "id": "8df47646-0685-4af3-92b3-efdd0d85b07a",
           "value": {
             "typeOfAbuse": "Physical abuse",
             "newAbuseNatureDescription": "Suspicious behaviour",
@@ -595,9 +595,9 @@
       ],
       "submitAndPayDownloadApplicationLink": {
         "category_id": null,
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/947ae727-ec10-432f-8d69-550698eb4d7d",
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5766379a-b539-41b6-87c0-08912f9e7ce2",
         "document_filename": "Draft_C100_application.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/947ae727-ec10-432f-8d69-550698eb4d7d/binary",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/5766379a-b539-41b6-87c0-08912f9e7ce2/binary",
         "document_creation_date": null
       },
       "otherProceedingsTable": {
@@ -606,9 +606,6 @@
       "applicationTypeDetails": {
 
       },
-      "scannedDocuments": [
-
-      ],
       "childPassportDetails": {
 
       },
@@ -618,7 +615,7 @@
       "newOrdersForcedMarriageProtectionCourtName": null,
       "newOrdersForcedMarriageProtectionCaseNumber": null,
       "dateOfSubmission": {
-        "dateOfSubmission": "04 01 2024"
+        "dateOfSubmission": "05 01 2024"
       },
       "draftConsentOrderFile": null,
       "taskListVersion": "v2",
@@ -649,10 +646,10 @@
         "OrgPolicyReference": null,
         "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR2]"
       },
-      "reviewDecisionYesOrNo": "yes",
       "respondentConfidentialDetails": [
 
       ],
+      "reviewDecisionYesOrNo": "yes",
       "reasonsForApplicationWithoutNotice": null,
       "confidentialDetails": {
         "isConfidentialDetailsAvailable": "Yes"
@@ -817,7 +814,7 @@
       },
       "childAndOtherPeopleRelationsTable": [
         {
-          "id": "c5b1ca55-40a5-4e9e-86f2-fd14e7bb41c4",
+          "id": "9ca6a67a-e2da-4856-af0c-8cc5f38b86d7",
           "value": {
             "childFullName": "Joe Doe",
             "childLivesWith": "No",
@@ -828,7 +825,7 @@
           }
         },
         {
-          "id": "f1c93ecf-48c9-4132-9699-0fd29fee8767",
+          "id": "a6f4993c-91e9-4822-9169-d77181f435aa",
           "value": {
             "childFullName": "Simon Anderson",
             "childLivesWith": "No",
@@ -839,7 +836,7 @@
           }
         },
         {
-          "id": "14e84b89-8ad6-4b1a-81ef-e8a70adccdd7",
+          "id": "05cf98d6-8718-476c-a38e-2df28c875081",
           "value": {
             "childFullName": "Lilly Anderson",
             "childLivesWith": "No",
@@ -850,7 +847,7 @@
           }
         },
         {
-          "id": "7cc1d19c-1f6e-4077-bfa4-b19d413bea50",
+          "id": "a68079c8-a4d3-48a9-8dbb-ece3840f54d3",
           "value": {
             "childFullName": "Charlotte Saxon",
             "childLivesWith": "No",
@@ -861,7 +858,7 @@
           }
         },
         {
-          "id": "1ddcbe10-bd68-46d0-bd63-b36d6ccc59e1",
+          "id": "deff175a-4ca0-4f39-bc81-1178ea3e6966",
           "value": {
             "childFullName": "Selena Lees",
             "childLivesWith": "No",
@@ -888,7 +885,7 @@
       "SearchCriteria": {
         "SearchParties": [
           {
-            "id": "29f6e2ba-35ab-42e6-9a0f-707efa3cd4c8",
+            "id": "ec8a828f-c293-4c3f-b37d-3888bbddfbd9",
             "value": {
               "Name": "John",
               "EmailAddress": "applicant1@example.net",
@@ -898,7 +895,7 @@
             }
           },
           {
-            "id": "386a347d-4b2e-4478-a191-a030e94e2ab3",
+            "id": "bf327aae-e1f6-4e4d-928f-acf18030cb85",
             "value": {
               "Name": "Jeremy",
               "EmailAddress": "applicant2@example.net",
@@ -908,7 +905,7 @@
             }
           },
           {
-            "id": "8983b0bd-944a-4212-99d9-f59274726626",
+            "id": "f6ef9b93-9853-4da5-8f2c-9070fd607da5",
             "value": {
               "Name": "Martina",
               "EmailAddress": "applicant3@example.net",
@@ -918,7 +915,7 @@
             }
           },
           {
-            "id": "073d8eae-7107-47b9-ae7e-6a04d01dc547",
+            "id": "37feb703-a32a-4412-a0df-bd56c5494319",
             "value": {
               "Name": "Mary",
               "EmailAddress": "repondent1@example.net",
@@ -926,14 +923,14 @@
             }
           },
           {
-            "id": "3473fa42-1f34-424f-9949-d290e7586912",
+            "id": "b001de44-db91-4e5d-b4a1-359cdf731b05",
             "value": {
               "Name": "Elise",
               "EmailAddress": "respondent2@example.net"
             }
           },
           {
-            "id": "c68b2bd1-11f5-4f2e-9970-02ef48468012",
+            "id": "e32f6b66-865a-463a-a398-687c63828be9",
             "value": {
               "Name": "David",
               "EmailAddress": "respondent3@example.net"
@@ -943,7 +940,7 @@
       },
       "childrenSubjectOfChildProtectionPlan": "no",
       "newAgreeChildSupervisedTime": "No",
-      "paymentServiceRequestReferenceNumber": "2024-1704399868159",
+      "paymentServiceRequestReferenceNumber": "2024-1704460670627",
       "feeAmount": "£232.00",
       "allegationsOfHarmRevisedChildContactTable": {
         "newAgreeChildOtherContact": "No",
@@ -1009,9 +1006,6 @@
             "newBehavioursApplicantHelpSoughtWho": "did to help"
           }
         }
-      ],
-      "citizenUploadQuarantineDocsList": [
-
       ],
       "childAndOtherPeopleRelations": [
         {
@@ -1264,35 +1258,35 @@
       ],
       "childAndCafcassOfficers": [
         {
-          "id": "6af43014-dd3b-451b-82d3-c2d457dd170f",
+          "id": "3c6d13cb-8d58-4257-92e3-71618eb748ea",
           "value": {
             "childId": "ccd99bd3-29b8-4df5-93d6-b0a622ce033a",
             "childName": "Child name: Joe Doe"
           }
         },
         {
-          "id": "dc6b582c-585c-4017-bac2-3974942ce19d",
+          "id": "d650adf2-d988-49db-b4e6-81ef4769d1fe",
           "value": {
             "childId": "cbb66702-223f-42eb-93a0-b2146bc039e0",
             "childName": "Child name: Simon Anderson"
           }
         },
         {
-          "id": "96422eef-fad0-45dd-8fce-1ec8783f4536",
+          "id": "9d59edeb-c75d-46f8-bf1a-ff002a03fe5f",
           "value": {
             "childId": "55af15c9-d969-4a1a-8a72-657dcbe56d27",
             "childName": "Child name: Lilly Anderson"
           }
         },
         {
-          "id": "ab63bc9e-3c84-4ed1-85bf-e163ad899009",
+          "id": "462e0a98-059d-4af4-8881-adb20712a722",
           "value": {
             "childId": "2a147297-0dfc-467a-99d5-68db0e7e9411",
             "childName": "Child name: Charlotte Saxon"
           }
         },
         {
-          "id": "10f1e24c-fca3-47aa-a3a0-b149249b2c8a",
+          "id": "6d163e4f-575c-4761-a2b5-ef8a27e44700",
           "value": {
             "childId": "fe50ccdc-b7fd-48ce-9853-454e8c484a78",
             "childName": "Child name: Selena Lees"
@@ -1309,9 +1303,9 @@
       "newOrdersForcedMarriageProtectionCurrent": null,
       "c1AWelshDraftDocument": {
         "category_id": null,
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7dba41e5-a21c-4b01-80d8-2255ae561655",
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0cacc077-a58f-4081-967c-8a69f8cfec77",
         "document_filename": "C1A_Document_Draft_Welsh.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7dba41e5-a21c-4b01-80d8-2255ae561655/binary",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0cacc077-a58f-4081-967c-8a69f8cfec77/binary",
         "document_creation_date": null
       },
       "applicantName": "John Doe",
@@ -1327,7 +1321,7 @@
       },
       "otherChildNotInTheCaseTable": [
         {
-          "id": "176cee95-6183-4146-a765-ad591f9e194b",
+          "id": "8822a608-0c7e-414e-bf9d-36f967b25900",
           "value": {
             "gender": null,
             "lastName": null,
@@ -1342,11 +1336,11 @@
       "respondentTaskListD": "",
       "respondentTaskListE": "",
       "applicationPermissionRequiredReason": null,
-      "docToBeReviewed": "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Legal professional</li></ul></label><h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Applicant application</li></ul></label><h3 class='govuk-heading-s'>Confidential information included</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Yes</li></ul></label><h3 class='govuk-heading-s'>Request to restrict access</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Yes</li></ul></label><h3 class='govuk-heading-s'>Reasons to restrict access</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>sdsdsd</li></ul></label><br/>",
-      "dateSubmitted": "2024-01-04",
+      "docToBeReviewed": "<h3 class='govuk-heading-s'>Submitted by</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Legal professional</li></ul></label><h3 class='govuk-heading-s'>Document category</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Applicant application</li></ul></label><h3 class='govuk-heading-s'>Confidential information included</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>Yes</li></ul></label><h3 class='govuk-heading-s'>Request to restrict access</h3><label class='govuk-label' for='more-detail'><ul class='govuk-list govuk-list--bullet'><li>No</li></ul></label><br/>",
+      "dateSubmitted": "2024-01-05",
       "otherPeopleInTheCaseRevisedTable": [
         {
-          "id": "913c444d-abfd-4fe1-abe7-94962cd80ebd",
+          "id": "701c4223-b7ab-4ab3-9643-e84e457dfd13",
           "value": {
             "email": "This information is to be kept confidential",
             "gender": "male",
@@ -1382,7 +1376,7 @@
       "newOrdersOtherInjunctiveDocument": null,
       "legalProfQuarantineDocsList": [
         {
-          "id": "13c06604-cbd2-4c2b-9ff0-87544e726221",
+          "id": "f8edc54c-7f06-4974-93d6-72737ff28250",
           "value": {
             "url": null,
             "type": null,
@@ -1390,10 +1384,10 @@
             "subtype": null,
             "document": {
               "category_id": null,
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/139bbdeb-4b66-4ef7-a44b-79d98b3570c2",
-              "document_filename": "Test doc1.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/139bbdeb-4b66-4ef7-a44b-79d98b3570c2/binary",
-              "document_creation_date": "2024-01-04T21:30:51.703+00:00"
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e93c327a-1600-4df7-b8d5-3886f8741673",
+              "document_filename": "Test doc4.pdf",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e93c327a-1600-4df7-b8d5-3886f8741673/binary",
+              "document_creation_date": "2024-01-05T11:29:17.787+00:00"
             },
             "fileName": null,
             "categoryId": "applicantApplication",
@@ -1403,19 +1397,19 @@
             "deliveryDate": null,
             "documentName": null,
             "documentType": null,
-            "isRestricted": "Yes",
+            "isRestricted": "No",
             "controlNumber": null,
             "documentParty": "Applicant",
             "isConfidential": "Yes",
             "uploadedByIdamId": "04cd097c-d159-4c30-9fae-8f6af307cdee",
             "otherDocsDocument": null,
-            "restrictedDetails": "sdsdsd",
+            "restrictedDetails": null,
             "anyOtherDocDocument": null,
             "caseSummaryDocument": null,
             "courtBundleDocument": null,
             "sec37ReportDocument": null,
             "confidentialDocument": null,
-            "documentUploadedDate": "2024-01-04T21:37:06.307849",
+            "documentUploadedDate": "2024-01-05T13:19:15.265236",
             "policeReportDocument": null,
             "privacyNoticeDocument": null,
             "approvedOrdersDocument": null,
@@ -1819,7 +1813,7 @@
         "OrgPolicyReference": null,
         "OrgPolicyCaseAssignedRole": "[C100RESPONDENTSOLICITOR5]"
       },
-      "caseSubmittedTimeStamp": "2024-01-04T20:24:21.819294633Z",
+      "caseSubmittedTimeStamp": "2024-01-05T13:17:43.768394694Z",
       "caApplicant3": {
         "lastName": "Graham",
         "firstName": "Martina"
@@ -1837,9 +1831,9 @@
       ],
       "c1ADraftDocument": {
         "category_id": null,
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b3826fbd-564a-4be6-b8d5-f746d0a06054",
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ee3e41cd-0d6c-4b72-bd4c-4f06e55dffa5",
         "document_filename": "C1A_DocumentDraft.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b3826fbd-564a-4be6-b8d5-f746d0a06054/binary",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ee3e41cd-0d6c-4b72-bd4c-4f06e55dffa5/binary",
         "document_creation_date": null
       },
       "caseworkerEmailAddress": "aloknath.datta@hmcts.net",
@@ -2032,13 +2026,13 @@
       "newAgreeChildOtherContact": "No",
       "c1ADocument": null,
       "effortsMadeWithRespondents": null,
-      "id": 1704399797373423,
+      "id": 1704460605458820,
       "newAbductionPassportOfficeNotified": "No",
       "courtId": "115",
       "areRespondentsAwareOfProceedings": "No",
       "childDetailsRevisedTable": [
         {
-          "id": "48b26391-0ed5-46d3-b268-3d83fa6f25e8",
+          "id": "e2cc125e-3541-49a7-b39f-c1fa1bd9de53",
           "value": {
             "gender": "female",
             "lastName": "Doe",
@@ -2054,7 +2048,7 @@
           }
         },
         {
-          "id": "b6646ed6-7676-4b13-b83d-4c4046c6a75f",
+          "id": "e61a09c2-d025-496d-8ff9-e39357fc3f96",
           "value": {
             "gender": "male",
             "lastName": "Anderson",
@@ -2070,7 +2064,7 @@
           }
         },
         {
-          "id": "ef90e5f7-e20b-4c3c-a691-58f812ba5e14",
+          "id": "53fc193d-fa9c-47c9-92f4-cc841d934636",
           "value": {
             "gender": "female",
             "lastName": "Anderson",
@@ -2086,7 +2080,7 @@
           }
         },
         {
-          "id": "03b13004-aa52-4b16-bea4-28d8a6c69a4f",
+          "id": "51aa2345-53b7-4df1-ad97-b1dc541cfb86",
           "value": {
             "gender": "female",
             "lastName": "Saxon",
@@ -2102,7 +2096,7 @@
           }
         },
         {
-          "id": "83bb200a-19b5-424b-abbc-85d6d2ec8db2",
+          "id": "67361ded-eb8f-4f2a-8d9d-59cd0747b90c",
           "value": {
             "gender": "female",
             "lastName": "Lees",
@@ -2125,14 +2119,11 @@
         "declarationText": "I understand that proceedings for contempt of court may be brought against anyone who makes, or causes to be made, a false statement in a document verified by a statement of truth without an honest belief in its truth. The applicant believes that the facts stated in this form and any continuation sheets are true. AAT Solicitor is authorised by the applicant to sign this statement."
       },
       "newAbductionChildHasPassport": "No",
-      "courtStaffQuarantineDocsList": [
-
-      ],
       "newOrdersOccupationCaseNumber": null,
       "consentOrder": "No",
       "childAndRespondentRelationsTable": [
         {
-          "id": "6a75b9e5-10e1-4d59-bc69-db425aa21ddd",
+          "id": "160e9dee-9132-42e0-b26d-238d72ad1964",
           "value": {
             "childFullName": "Joe Doe",
             "childLivesWith": "Yes",
@@ -2142,7 +2133,7 @@
           }
         },
         {
-          "id": "754b185e-afde-4e95-b1bf-4547a6bdde38",
+          "id": "acbe53f2-49bd-49e0-aa26-37920267fb1f",
           "value": {
             "childFullName": "Simon Anderson",
             "childLivesWith": "No",
@@ -2152,7 +2143,7 @@
           }
         },
         {
-          "id": "da17cfbd-7e71-4675-975e-ea86ba28e86c",
+          "id": "e9800f4f-091c-4d2e-89b4-cb43fe94f98c",
           "value": {
             "childFullName": "Lilly Anderson",
             "childLivesWith": "No",
@@ -2162,7 +2153,7 @@
           }
         },
         {
-          "id": "0ba9bc03-2b34-4d6e-b2a0-cda537b0dfb1",
+          "id": "20bd81bb-ca59-40ec-9a8f-8a3cc3ee7e3e",
           "value": {
             "childFullName": "Charlotte Saxon",
             "childLivesWith": "No",
@@ -2172,7 +2163,7 @@
           }
         },
         {
-          "id": "bafcb301-98b8-444a-9a73-4b867c435d80",
+          "id": "04fc0bae-4bf0-4e5a-98e5-29aa5e7d92dc",
           "value": {
             "childFullName": "Selena Lees",
             "childLivesWith": "No",
@@ -2182,7 +2173,7 @@
           }
         },
         {
-          "id": "ddb48c0a-d82b-4784-801b-3fa343591abf",
+          "id": "4b411293-05f1-4892-82c8-3d6feef17cf5",
           "value": {
             "childFullName": "Joe Doe",
             "childLivesWith": "No",
@@ -2192,7 +2183,7 @@
           }
         },
         {
-          "id": "18b17160-0cd7-4f20-9f61-214c9cd51328",
+          "id": "837069c6-9074-489b-9ad2-7d3a53d93885",
           "value": {
             "childFullName": "Simon Anderson",
             "childLivesWith": "No",
@@ -2202,7 +2193,7 @@
           }
         },
         {
-          "id": "e9ad778f-3c8d-48e8-a05a-27e1bc3ecbd0",
+          "id": "3654724b-d033-44bf-b2b2-9358f16b5cf7",
           "value": {
             "childFullName": "Lilly Anderson",
             "childLivesWith": "No",
@@ -2212,7 +2203,7 @@
           }
         },
         {
-          "id": "e82e2653-b01b-4c49-a2b9-01283ce49d85",
+          "id": "a644dd70-2819-4a83-a411-e0c38b741991",
           "value": {
             "childFullName": "Charlotte Saxon",
             "childLivesWith": "No",
@@ -2222,7 +2213,7 @@
           }
         },
         {
-          "id": "10fcd60f-87ea-4161-a7ed-81abe7e0aad5",
+          "id": "1b99202d-2335-40ac-8ac7-af4aaa558cb1",
           "value": {
             "childFullName": "Selena Lees",
             "childLivesWith": "No",
@@ -2232,7 +2223,7 @@
           }
         },
         {
-          "id": "943d9dd8-51a8-4ba3-b525-715a06410397",
+          "id": "04b21a60-bbf1-41f2-b341-f80bb675209c",
           "value": {
             "childFullName": "Joe Doe",
             "childLivesWith": "No",
@@ -2242,7 +2233,7 @@
           }
         },
         {
-          "id": "f0f4c4fa-cf8d-4108-b610-8fd198eea1a1",
+          "id": "9d1a80f2-d21e-493a-9b21-00460806dc42",
           "value": {
             "childFullName": "Simon Anderson",
             "childLivesWith": "No",
@@ -2252,7 +2243,7 @@
           }
         },
         {
-          "id": "23c0549f-bb6f-4ba6-88ed-d7c940d72d8e",
+          "id": "9a16eef1-632d-4df2-a11f-cfd98bf74937",
           "value": {
             "childFullName": "Lilly Anderson",
             "childLivesWith": "No",
@@ -2262,7 +2253,7 @@
           }
         },
         {
-          "id": "4f2774bd-f393-44a6-a799-3a9c2ed5257b",
+          "id": "3c9c8196-7c34-43d5-8ae7-58ce7bc151bd",
           "value": {
             "childFullName": "Charlotte Saxon",
             "childLivesWith": "No",
@@ -2272,7 +2263,7 @@
           }
         },
         {
-          "id": "a001e6bd-fcdd-4cba-aadf-dfc762531963",
+          "id": "bb8763e5-9ff1-483e-ae91-d911bd4d6683",
           "value": {
             "childFullName": "Selena Lees",
             "childLivesWith": "No",
@@ -2298,11 +2289,11 @@
           "paymentMethod": null,
           "paymentReference": null
         },
-        "ccdCaseNumber": "1704399797373423",
+        "ccdCaseNumber": "1704460605458820",
         "serviceRequestAmount": null,
         "serviceRequestStatus": "Paid",
-        "callBackUpdateTimestamp": "2024-01-04T20:25:06.770955",
-        "serviceRequestReference": "2024-1704399868159"
+        "callBackUpdateTimestamp": "2024-01-05T13:18:22.207053",
+        "serviceRequestReference": "2024-1704460670627"
       },
       "claimingExemptionMiam": "Yes",
       "applicantOrganisationPolicy": {
@@ -2315,7 +2306,7 @@
       },
       "otherProceedingsDetailsTable": [
         {
-          "id": "8f82303d-610a-4283-951e-e38a0570ed58",
+          "id": "e269a0d7-8a80-40e2-8efa-099d54b7ca0a",
           "value": {
             "dateEnded": null,
             "caseNumber": null,
@@ -2380,7 +2371,7 @@
       },
       "childAndApplicantsRelationTable": [
         {
-          "id": "9a3b584d-1270-456b-8fea-52317b80c562",
+          "id": "c13de1e0-b17b-41e6-992d-a88375169c25",
           "value": {
             "childFullName": "Joe Doe",
             "childLivesWith": "Yes",
@@ -2390,7 +2381,7 @@
           }
         },
         {
-          "id": "1a94a864-efb7-49d5-b138-a868e617fa27",
+          "id": "4914de24-77e2-41f2-88a5-018d6d21b4ff",
           "value": {
             "childFullName": "Simon Anderson",
             "childLivesWith": "No",
@@ -2400,7 +2391,7 @@
           }
         },
         {
-          "id": "d83f39c5-8ac3-437d-b740-9295b58d8e6d",
+          "id": "2f731e69-4a33-4b3e-bad4-aaa6607c183a",
           "value": {
             "childFullName": "Lilly Anderson",
             "childLivesWith": "No",
@@ -2410,7 +2401,7 @@
           }
         },
         {
-          "id": "8ef4e972-c1cb-455b-9673-67fe02da2739",
+          "id": "498e1083-0804-4b07-a854-803b428daf49",
           "value": {
             "childFullName": "Charlotte Saxon",
             "childLivesWith": "No",
@@ -2420,7 +2411,7 @@
           }
         },
         {
-          "id": "2593261e-9fd2-437e-bbde-dbc3a2af1315",
+          "id": "be1d68d1-d187-4889-b400-ca24dde229f3",
           "value": {
             "childFullName": "Selena Lees",
             "childLivesWith": "No",
@@ -2430,7 +2421,7 @@
           }
         },
         {
-          "id": "43eddc70-5646-4ec9-a8dc-d403284e4cc7",
+          "id": "181f6891-1e5d-4ff9-8e3f-6bbaf8ee632d",
           "value": {
             "childFullName": "Joe Doe",
             "childLivesWith": "No",
@@ -2440,7 +2431,7 @@
           }
         },
         {
-          "id": "948f73f3-0035-49b7-9e93-8bf9ed07c257",
+          "id": "1cf6476a-0bcc-4cde-b851-43af829a410a",
           "value": {
             "childFullName": "Simon Anderson",
             "childLivesWith": "Yes",
@@ -2450,7 +2441,7 @@
           }
         },
         {
-          "id": "6fc7c7e4-10d6-4bd3-befb-4e760ce3ca9a",
+          "id": "0f5a5f3a-3baf-4532-8635-9be5abf6ae57",
           "value": {
             "childFullName": "Lilly Anderson",
             "childLivesWith": "Yes",
@@ -2460,7 +2451,7 @@
           }
         },
         {
-          "id": "47c8c675-0cff-44b6-a9aa-8a3391d51033",
+          "id": "64055f2f-2532-4f63-b756-407c41772d80",
           "value": {
             "childFullName": "Charlotte Saxon",
             "childLivesWith": "No",
@@ -2470,7 +2461,7 @@
           }
         },
         {
-          "id": "906e3074-4e6b-4386-a277-c47b1fa37a8e",
+          "id": "bc7095fb-8b0a-43ea-a6c8-987da829902f",
           "value": {
             "childFullName": "Selena Lees",
             "childLivesWith": "No",
@@ -2480,7 +2471,7 @@
           }
         },
         {
-          "id": "80e3e4b2-2c46-4f2e-b632-cccde113aeb9",
+          "id": "1b5572f3-b874-401c-b7fa-daf59506a179",
           "value": {
             "childFullName": "Joe Doe",
             "childLivesWith": "No",
@@ -2490,7 +2481,7 @@
           }
         },
         {
-          "id": "78f809b5-7202-4ced-bfe6-b88073ece970",
+          "id": "509d53bd-4457-4451-9f32-c8d47d9dd50a",
           "value": {
             "childFullName": "Simon Anderson",
             "childLivesWith": "No",
@@ -2500,7 +2491,7 @@
           }
         },
         {
-          "id": "d5d8da41-53e5-4d8c-a847-51d439e553d9",
+          "id": "5c00d30a-b43a-435d-af5f-a6137805ab41",
           "value": {
             "childFullName": "Lilly Anderson",
             "childLivesWith": "No",
@@ -2510,7 +2501,7 @@
           }
         },
         {
-          "id": "8c431e2b-717f-433c-baed-70cf8b978920",
+          "id": "2984d710-1e12-4025-ab15-4852c74fc0c6",
           "value": {
             "childFullName": "Charlotte Saxon",
             "childLivesWith": "No",
@@ -2520,7 +2511,7 @@
           }
         },
         {
-          "id": "d2fd4ea5-a61c-4d6a-9d83-1d3b982d1bee",
+          "id": "b874e004-14eb-4f09-9126-2a4e51d9fc48",
           "value": {
             "childFullName": "Selena Lees",
             "childLivesWith": "No",
@@ -4032,8 +4023,8 @@
           }
         }
       ],
-      "docLabel": "<h3 class='govuk-heading-s'>Document</h3><label class='govuk-label' for='more-detail'><div id='more-detail-hint' class='govuk-hint'>The document will open in a new tab.</div></label>",
       "languageRequirementApplicationNeedWelsh": "Yes",
+      "docLabel": "<h3 class='govuk-heading-s'>Document</h3><label class='govuk-label' for='more-detail'><div id='more-detail-hint' class='govuk-hint'>The document will open in a new tab.</div></label>",
       "newOrdersUndertakingInPlace": "Yes",
       "newOrdersOtherInjunctiveDateIssued": null,
       "respondentTaskList": "",
@@ -4041,20 +4032,17 @@
       "draftOrderDocWelsh": null,
       "jurisdictionIssue": "Yes",
       "isWelshDocGen": "Yes",
-      "cafcassQuarantineDocsList": [
-
-      ],
       "isEngDocGen": "Yes",
       "reviewDoc": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/139bbdeb-4b66-4ef7-a44b-79d98b3570c2",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/139bbdeb-4b66-4ef7-a44b-79d98b3570c2/binary",
-        "document_filename": "Test doc1.pdf",
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e93c327a-1600-4df7-b8d5-3886f8741673",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/e93c327a-1600-4df7-b8d5-3886f8741673/binary",
+        "document_filename": "Test doc4.pdf",
         "category_id": null,
-        "document_creation_date": "2024-01-04T21:30:51.703+00:00"
+        "document_creation_date": "2024-01-05T11:29:17.787+00:00"
       },
       "allegationsOfHarmRevisedCATable": [
         {
-          "id": "12d9e825-c304-4645-8bae-2e433598c608",
+          "id": "723f8a6c-462c-4ec9-bfd1-08e247361995",
           "value": {
             "typeOfAbuse": "Physical abuse",
             "allChildrenAreRisk": "Yes",
@@ -4066,7 +4054,7 @@
           }
         },
         {
-          "id": "810ad35d-2d7b-4e59-af3a-8715f9d29843",
+          "id": "d0c5e288-726d-4719-a842-0bb6d1470e07",
           "value": {
             "typeOfAbuse": "Financial  abuse",
             "allChildrenAreRisk": "No",
@@ -5569,7 +5557,7 @@
       "typeOfChildArrangementsOrder": "spendTimeWithOrder",
       "applicantsConfidentialDetails": [
         {
-          "id": "568fce4f-3a53-49a6-913e-405aeb70cb43",
+          "id": "94e11743-b54a-4c21-88e9-6975507f7633",
           "value": {
             "email": "applicant1@example.net",
             "address": {
@@ -5581,7 +5569,7 @@
           }
         },
         {
-          "id": "e08e4434-a5bf-407d-9db6-47e9ead4a691",
+          "id": "da0052c6-27f1-4616-b0ab-bb43839ca034",
           "value": {
             "email": "applicant2@example.net",
             "address": {
@@ -5599,7 +5587,7 @@
           }
         },
         {
-          "id": "b3b9b720-a099-4157-ad44-0753693bf328",
+          "id": "0d1302f6-e669-4beb-a474-d6294559e0f1",
           "value": {
             "email": "applicant3@example.net",
             "address": {
@@ -5619,29 +5607,29 @@
       ],
       "reviewDocsDynamicList": {
         "value": {
-          "code": "13c06604-cbd2-4c2b-9ff0-87544e726221",
-          "label": "Test doc1.pdf - 04 Jan 2024, 09:37:06 PM"
+          "code": "f8edc54c-7f06-4974-93d6-72737ff28250",
+          "label": "Test doc4.pdf - 05 Jan 2024, 01:19:15 PM"
         },
         "list_items": [
           {
-            "code": "13c06604-cbd2-4c2b-9ff0-87544e726221",
-            "label": "Test doc1.pdf - 04 Jan 2024, 09:37:06 PM"
+            "code": "f8edc54c-7f06-4974-93d6-72737ff28250",
+            "label": "Test doc4.pdf - 05 Jan 2024, 01:19:15 PM"
           }
         ]
       },
       "doYouNeedAWithoutNoticeHearing": "No",
       "c8WelshDraftDocument": {
         "category_id": null,
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1fefd65a-d2a1-4cce-b68e-438d9b40a641",
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0e48f07e-d053-4a16-98b5-7141e573cae7",
         "document_filename": "C8Document_Draft_Welsh.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/1fefd65a-d2a1-4cce-b68e-438d9b40a641/binary",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0e48f07e-d053-4a16-98b5-7141e573cae7/binary",
         "document_creation_date": null
       },
       "c8DraftDocument": {
         "category_id": null,
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/62fd35ad-51a7-434a-8d6d-7b4639c9911e",
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8aa55bf0-e177-4fd2-a860-5a3a038ab736",
         "document_filename": "C8DocumentDraft.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/62fd35ad-51a7-434a-8d6d-7b4639c9911e/binary",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8aa55bf0-e177-4fd2-a860-5a3a038ab736/binary",
         "document_creation_date": null
       },
       "newOrdersOccupationCurrent": null,
@@ -5675,98 +5663,6 @@
       "manageDocumentsRestrictedFlag": "True",
       "doYouRequireAHearingWithReducedNotice": "No",
       "newOrdersNonMolestationCurrent": null,
-      "restrictedDocuments": [
-        {
-          "id": "7cfbb4d1-e272-4ed0-a123-1cfd94bfeba3",
-          "value": {
-            "url": null,
-            "type": null,
-            "notes": "scs",
-            "subtype": null,
-            "document": null,
-            "fileName": null,
-            "categoryId": "applicantApplication",
-            "uploadedBy": "AAT Solicitor",
-            "scannedDate": null,
-            "categoryName": "Applicant application",
-            "deliveryDate": null,
-            "documentName": null,
-            "documentType": null,
-            "isRestricted": "Yes",
-            "controlNumber": null,
-            "documentParty": "Applicant",
-            "isConfidential": "Yes",
-            "uploadedByIdamId": "04cd097c-d159-4c30-9fae-8f6af307cdee",
-            "otherDocsDocument": null,
-            "restrictedDetails": null,
-            "anyOtherDocDocument": null,
-            "caseSummaryDocument": null,
-            "courtBundleDocument": null,
-            "sec37ReportDocument": null,
-            "confidentialDocument": null,
-            "documentUploadedDate": "2024-01-04T20:26:07.728985",
-            "policeReportDocument": null,
-            "privacyNoticeDocument": null,
-            "approvedOrdersDocument": null,
-            "guardianReportDocument": null,
-            "medicalRecordsDocument": null,
-            "medicalReportsDocument": null,
-            "section7ReportDocument": null,
-            "miamCertificateDocument": null,
-            "noticeOfHearingDocument": null,
-            "section37ReportDocument": null,
-            "specialMeasuresDocument": null,
-            "exceptionRecordReference": null,
-            "cafcassQuarantineDocument": null,
-            "citizenQuarantineDocument": null,
-            "policeDisclosuresDocument": null,
-            "drugAndAlcoholTestDocument": null,
-            "lettersOfComplaintDocument": null,
-            "positionStatementsDocument": null,
-            "safeguardingLetterDocument": null,
-            "applicantStatementsDocument": null,
-            "legalProfQuarantineDocument": null,
-            "witnessAvailabilityDocument": null,
-            "applicantApplicationDocument": {
-              "category_id": null,
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/bded5e99-bea0-4bd2-94a7-b48b2aa402b3",
-              "document_filename": "Confidential_Test doc4.pdf",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/bded5e99-bea0-4bd2-94a7-b48b2aa402b3/binary",
-              "document_creation_date": "2024-01-04T20:29:36.000+00:00"
-            },
-            "applicantC1AResponseDocument": null,
-            "courtStaffQuarantineDocument": null,
-            "respondentStatementsDocument": null,
-            "spipReferralRequestsDocument": null,
-            "judgeNotesFromHearingDocument": null,
-            "respondentApplicationDocument": null,
-            "respondentC1AResponseDocument": null,
-            "dnaReportsExpertReportDocument": null,
-            "homeOfficeDwpResponsesDocument": null,
-            "internalCorrespondenceDocument": null,
-            "otherWitnessStatementsDocument": null,
-            "restrictCheckboxCorrespondence": null,
-            "sixteenARiskAssessmentDocument": null,
-            "applicantC1AApplicationDocument": null,
-            "standardDirectionsOrderDocument": null,
-            "transcriptsOfJudgementsDocument": null,
-            "noticesOfActingDischargeDocument": null,
-            "respondentC1AApplicationDocument": null,
-            "publicFundingCertificatesDocument": null,
-            "specialGuardianshipReportDocument": null,
-            "magistratesFactsAndReasonsDocument": null,
-            "ordersFromOtherProceedingsDocument": null,
-            "applicationsWithinProceedingsDocument": null,
-            "requestForFasFormsToBeChangedDocument": null,
-            "resultsOfHairStrandBloodTestsDocument": null,
-            "ordersSubmittedWithApplicationDocument": null,
-            "applicationsFromOtherProceedingsDocument": null,
-            "importantInfoAboutAddressAndContactDocument": null,
-            "previousOrdersSubmittedWithApplicationDocument": null,
-            "emailsToCourtToRequestHearingsAdjournedDocument": null
-          }
-        }
-      ],
       "buffChildAndOtherPeopleRelations": [
 
       ],
@@ -5789,7 +5685,7 @@
       "newOrdersUndertakingInPlaceEndDate": "1978-09-01",
       "otherProceedingsForSummaryTab": [
         {
-          "id": "92ed5d08-dedc-4e68-b92a-3bcf303a8c7f",
+          "id": "8b355f06-afcf-448c-ae01-799bfcd53a3c",
           "value": {
             "caseNumber": null,
             "nameOfCourt": null,
