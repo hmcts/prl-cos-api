@@ -174,6 +174,7 @@ public class EditAndApproveDraftOrderController {
                     callbackRequest.getEventId()
                 ));
             }
+            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
