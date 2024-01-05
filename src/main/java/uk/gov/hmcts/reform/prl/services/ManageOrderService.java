@@ -2916,14 +2916,12 @@ public class ManageOrderService {
             && No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
             List<String> selectedRespondentIds = caseData.getManageOrders().getRecipientsOptions().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            log.info("selected respondent -ids {}", selectedRespondentIds);
             validateAddressForParty(caseData.getRespondents(), selectedRespondentIds, errorList, true);
 
         }
         if (null != caseData.getManageOrders().getOtherParties() && null != caseData.getOtherPartyInTheCaseRevised()) {
             List<String> selectedOtherPartyIds = caseData.getManageOrders().getOtherParties().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            log.info("selected other party -ids {}", selectedOtherPartyIds);
             validateAddressForParty(caseData.getOtherPartyInTheCaseRevised(), selectedOtherPartyIds, errorList, false);
         }
         return errorList;
@@ -2932,12 +2930,10 @@ public class ManageOrderService {
     private void validateAddressForParty(List<Element<PartyDetails>> partyDetails,
                                          List<String> selectedPartyIds, List<String> errorList,
                                          Boolean isRespondent) {
-        log.info("Party details {}", partyDetails);
         List<Element<PartyDetails>> selectedPartyList = partyDetails.stream()
             .filter(party -> selectedPartyIds.contains(party.getId().toString()))
             .collect(Collectors.toList());
         for (Element<PartyDetails> party : selectedPartyList) {
-            log.info("found respondent id {}", party.getId().toString());
             if ((isRespondent
                 && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
                 && checkForContactPreference(party) && !checkIfAddressIPresent(party)) {
