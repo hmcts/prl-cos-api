@@ -38,6 +38,12 @@ public class ManageOrdersControllerFunctionalTest {
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
+    private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER = "CallBckReqForFinaliseServeOrder.json";
+
+    private static final String VALID_INPUT_JSON_FOR_DRAFT = "CallBackRequestForDraft.json";
+
+    private static final String VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER = "CallBckReqForCreateOrUpdOrder.json";
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -101,4 +107,53 @@ public class ManageOrdersControllerFunctionalTest {
             .post("/case-order-email-notification")
             .then().assertThat().statusCode(500);
     }
+
+    @Test
+    public void givenBody_whenAboutToSubmitForServeOrder() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenBody_whenAboutToSubmitForDraft() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_DRAFT);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenBody_whenAboutToSubmitForCreateUpldOrder() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+
+
+
 }
