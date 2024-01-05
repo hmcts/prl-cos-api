@@ -358,7 +358,6 @@ public class DraftAnOrderServiceTest {
             .thenReturn(List.of(element(HearingData.builder().build())));
         uuid = UUID.fromString(TEST_UUID);
         when(manageOrderService.populateCustomOrderFields(Mockito.any(), Mockito.any())).thenReturn(caseData);
-
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
                                                                      .roles(List.of(Roles.JUDGE.getValue())).build());
     }
@@ -436,11 +435,21 @@ public class DraftAnOrderServiceTest {
 
         Element<MagistrateLastName> magistrateLastNameElement = Element.<MagistrateLastName>builder().value(
             magistrateLastName).build();
-        List<Element<MagistrateLastName>> magistrateElementList = Collections.singletonList(magistrateLastNameElement);
-
         List<OrderTypeEnum> orderType = new ArrayList<>();
         orderType.add(OrderTypeEnum.childArrangementsOrder);
-
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .parentalResponsibilityDetails("test")
+            .build();
+        List<Element<MagistrateLastName>> magistrateElementList = Collections.singletonList(magistrateLastNameElement);
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime now = LocalDateTime.now();
         System.out.println(dtf.format(now));
@@ -485,18 +494,6 @@ public class DraftAnOrderServiceTest {
             .build();
         List<Element<DraftOrder>> draftOrderList = Collections.singletonList(draftOrderElement);
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-        Child child = Child.builder()
-            .firstName("Test")
-            .lastName("Name")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .applicantsRelationshipToChild(specialGuardian)
-            .respondentsRelationshipToChild(father)
-            .parentalResponsibilityDetails("test")
-            .build();
-
-        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
-        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -785,6 +782,7 @@ public class DraftAnOrderServiceTest {
                               .createdBy("test")
                               .build())
             .isOrderCreatedBySolicitor(No)
+                .judgeNotes("test")
             .c21OrderOptions(C21OrderOptionsEnum.c21other)
             .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .manageOrderHearingDetails(List.of(element(HearingData.builder()
@@ -990,6 +988,42 @@ public class DraftAnOrderServiceTest {
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(
             caseData
+        );
+        assertNotNull(caseDataMap.get("previewDraftOrder"));
+    }
+
+    @Test
+    public void testPopulateDraftOrderDocumentWithHearingPageEmptyJudgeNotes() {
+        DraftOrder draftOrder = DraftOrder.builder()
+                .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+                .otherDetails(OtherDraftOrderDetails.builder()
+                        .dateCreated(LocalDateTime.now())
+                        .createdBy("test")
+                        .build())
+                .c21OrderOptions(C21OrderOptionsEnum.c21other)
+                .orderType(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+                .build();
+
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        PartyDetails partyDetails = PartyDetails.builder()
+                .solicitorOrg(Organisation.builder().organisationName("test").build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .build();
+        Element<PartyDetails> respondents = element(partyDetails);
+        CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .caseTypeOfApplication("C100")
+                .draftOrderCollection(draftOrderCollection)
+                .previewOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+                .orderRecipients(List.of(OrderRecipientsEnum.respondentOrRespondentSolicitor))
+                .respondents(List.of(respondents))
+                .build();
+        when(elementUtils.getDynamicListSelectedValue(
+                caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderDocument(
+                caseData
         );
         assertNotNull(caseDataMap.get("previewDraftOrder"));
     }

@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 
@@ -44,6 +45,9 @@ public class EditReturnedOrderController {
     private ManageOrderService manageOrderService;
 
     @Autowired
+    private DraftAnOrderService draftAnOrderService;
+
+    @Autowired
     EditReturnedOrderService editReturnedOrderService;
 
     @Autowired
@@ -52,7 +56,7 @@ public class EditReturnedOrderController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    private static final String CONFIRMATION_HEADER = "Draft order resubmitted";
+    private static final String CONFIRMATION_HEADER = "# Draft order resubmitted";
     private static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
         ### What happens next \n The judge will review the edits you have made to this order.
         """;
@@ -97,6 +101,7 @@ public class EditReturnedOrderController {
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 Map<String, Object> caseDataUpdated = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
+                caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             } else {
