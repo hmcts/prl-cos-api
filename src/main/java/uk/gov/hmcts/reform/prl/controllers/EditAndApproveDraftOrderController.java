@@ -317,7 +317,7 @@ public class EditAndApproveDraftOrderController {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
             }
             caseDataUpdated.put(STATE, caseData.getState());
-            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            ManageOrdersUtils.clearManageOrderFieldsOnSubmission(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             draftAnOrderService.updateCaseData(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
@@ -359,7 +359,7 @@ public class EditAndApproveDraftOrderController {
                                              .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
                                              .build());
             }
-            ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
+            ManageOrdersUtils.clearManageOrderFieldsOnSubmission(caseDataUpdated);
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
             log.info("judgeDirectionsToAdmin 2 : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
             log.info("map size after : {}", caseDataUpdated.size());
