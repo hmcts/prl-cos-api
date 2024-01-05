@@ -11,8 +11,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+
+import java.util.List;
 
 @Slf4j
 @SpringBootTest
@@ -38,14 +43,24 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_ShouldSegregateDocAccordingly() throws Exception {
         String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
-        request
+        AboutToStartOrSubmitCallbackResponse response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/review-documents/about-to-submit")
             .then()
-            .assertThat().statusCode(200);
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        log.info("RESULTTTTTT {}", response);
+
+        List<Element<QuarantineLegalDoc>> restrictedDocuments
+            = (List<Element<QuarantineLegalDoc>>) response.getData().get("restrictedDocuments");
+
+        log.info("NNNNNN {}", restrictedDocuments);
+
     }
 
 
