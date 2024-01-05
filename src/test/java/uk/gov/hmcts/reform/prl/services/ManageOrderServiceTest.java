@@ -3976,7 +3976,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void givenOtherPartyPersonalServiceShouldNotGiveErrorIfAddressIsNotPresent() {
+    public void givenOtherPartyPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
             List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
