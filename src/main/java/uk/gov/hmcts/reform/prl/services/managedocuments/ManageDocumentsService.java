@@ -4,15 +4,21 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -20,7 +26,9 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -35,9 +43,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Predicate;
 
+import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
@@ -46,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRES
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -62,6 +74,10 @@ public class ManageDocumentsService {
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final UserService userService;
+    private final CaseDocumentClient caseDocumentClient;
+    private final SystemUserService systemUserService;
+
+    public static final String CONFIDENTIAL = "Confidential_";
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     public static final String DETAILS_ERROR_MESSAGE
@@ -224,6 +240,7 @@ public class ManageDocumentsService {
                                                List<Element<QuarantineLegalDoc>> confidentialOrRestrictedDocuments,
                                                QuarantineLegalDoc uploadDoc,
                                                String confidentialOrRestrictedKey) {
+        uploadDoc = downloadAndDeleteDocumentNew(uploadDoc.getUploadedBy(), uploadDoc);
         if (null != confidentialOrRestrictedDocuments) {
             confidentialOrRestrictedDocuments.add(element(uploadDoc));
             confidentialOrRestrictedDocuments.sort(Comparator.comparing(
@@ -234,6 +251,110 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.put(confidentialOrRestrictedKey, List.of(element(uploadDoc)));
         }
+    }
+
+
+    private QuarantineLegalDoc downloadAndDeleteDocumentNew(String uploadedBy,
+                                                            QuarantineLegalDoc quarantineLegalDoc) {
+        try {
+            Document document = getQuarantineDocumentForUploader(uploadedBy, quarantineLegalDoc);
+            UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
+            log.info(" DocumentId found {}", documentId);
+            Document newUploadedDocument = getNewUploadedDocument(
+                document,
+                documentId
+            );
+
+            log.info("document uploaded {}", newUploadedDocument);
+            if (null != newUploadedDocument) {
+                caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
+                                                  authTokenGenerator.generate(),
+                                                  documentId, true
+                );
+                log.info("deleted document {}", documentId);
+
+                QuarantineLegalDoc newQuarantineLegalDoc = DocumentUtils.getQuarantineUploadDocument(
+                    quarantineLegalDoc.getCategoryId(),
+                    newUploadedDocument,
+                    objectMapper
+                );
+                return addQuarantineDocumentFields(newQuarantineLegalDoc, quarantineLegalDoc);
+
+
+            } else {
+                throw new IllegalStateException("Failed to move document to confidential tab please retry");
+            }
+        } catch (Exception e) {
+            throw new IllegalStateException("Failed to move document to confidential tab please retry", e);
+        }
+    }
+
+    public QuarantineLegalDoc addQuarantineDocumentFields(QuarantineLegalDoc legalProfUploadDoc,
+                                                           QuarantineLegalDoc quarantineLegalDoc) {
+
+        return legalProfUploadDoc.toBuilder()
+            .documentParty(quarantineLegalDoc.getDocumentParty())
+            .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
+            .notes(quarantineLegalDoc.getNotes())
+            .categoryId(quarantineLegalDoc.getCategoryId())
+            .categoryName(quarantineLegalDoc.getCategoryName())
+            .fileName(quarantineLegalDoc.getFileName())
+            .controlNumber(quarantineLegalDoc.getControlNumber())
+            .type(quarantineLegalDoc.getType())
+            .subtype(quarantineLegalDoc.getSubtype())
+            .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
+            .url(legalProfUploadDoc.getConfidentialDocument() == null ? quarantineLegalDoc.getUrl() : null)
+            .scannedDate(quarantineLegalDoc.getScannedDate())
+            .deliveryDate(quarantineLegalDoc.getDeliveryDate())
+            //PRL-4320 - Manage documents redesign
+            .isConfidential(quarantineLegalDoc.getIsConfidential())
+            .isRestricted(quarantineLegalDoc.getIsRestricted())
+            .notes(quarantineLegalDoc.getRestrictedDetails())
+            .uploadedBy(quarantineLegalDoc.getUploadedBy())
+            .uploadedByIdamId(quarantineLegalDoc.getUploadedByIdamId())
+            .build();
+    }
+
+    private Document getNewUploadedDocument(Document document,
+                                            UUID documentId) {
+        byte[] docData;
+        Document newUploadedDocument = null;
+        try {
+            String sysUserToken = systemUserService.getSysUserToken();
+            String serviceToken = authTokenGenerator.generate();
+            Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
+                                                                     documentId
+            ).getBody();
+            docData = IOUtils.toByteArray(resource.getInputStream());
+            UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
+                sysUserToken,
+                serviceToken,
+                PrlAppsConstants.CASE_TYPE,
+                PrlAppsConstants.JURISDICTION,
+                List.of(
+                    new InMemoryMultipartFile(
+                        SOA_MULTIPART_FILE,
+                        CONFIDENTIAL + document.getDocumentFileName(),
+                        APPLICATION_PDF_VALUE,
+                        docData
+                    ))
+            );
+            newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+        } catch (Exception ex) {
+            log.error("Failed to upload new document {}", ex.getMessage());
+        }
+        return newUploadedDocument;
+    }
+
+    private Document getQuarantineDocumentForUploader(String uploadedBy,
+                                                      QuarantineLegalDoc quarantineLegalDoc) {
+        return switch (uploadedBy) {
+            case SOLICITOR -> quarantineLegalDoc.getDocument();
+            case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
+            case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
+            case BULK_SCAN -> quarantineLegalDoc.getUrl();
+            default -> null;
+        };
     }
 
     private String formulateCategoryId(ManageDocuments manageDocument) {

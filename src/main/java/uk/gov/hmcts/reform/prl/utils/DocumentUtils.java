@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
@@ -19,12 +20,17 @@ import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 
 @Data
 @AllArgsConstructor
+@Slf4j
 public class DocumentUtils {
+
+    public static final String DOCUMENT_UUID_REGEX = "\\p{XDigit}{8}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{4}-\\p{XDigit}{12}";
 
     public static GeneratedDocumentInfo toGeneratedDocumentInfo(Document document) {
         return GeneratedDocumentInfo.builder()
@@ -160,6 +166,17 @@ public class DocumentUtils {
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
             .build();
+    }
+
+    public static String getDocumentId(String url) {
+        Pattern pairRegex = Pattern.compile(DOCUMENT_UUID_REGEX);
+        Matcher matcher = pairRegex.matcher(url);
+        String documentId = "";
+        if (matcher.find()) {
+            documentId = matcher.group(0);
+        }
+        log.info("document id {}", documentId);
+        return documentId;
     }
 
 }

@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -115,7 +116,8 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse copyManageDocs(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
-    ) {
+    ) throws JsonProcessingException {
+        objectMapper.writeValueAsString(callbackRequest.getCaseDetails().getData());
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageDocumentsService.copyDocumentNew(callbackRequest, authorisation)).build();
     }
