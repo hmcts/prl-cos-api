@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -99,16 +100,28 @@ public class RelationshipsController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildrenAndRespondentRelation>> applicantChildRelationsList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<ChildrenAndRespondentRelation>> existingChildrenAndRespondentRelations = caseData.getRelations() != null
+            ? caseData.getRelations().getChildAndRespondentRelations() : null;
         caseData.getRespondents().forEach(eachRespondent ->
                 caseData.getNewChildDetails().forEach(eachChild -> {
-                    ChildrenAndRespondentRelation applicantChildRelations = ChildrenAndRespondentRelation.builder()
+                    Optional<Element<ChildrenAndRespondentRelation>> childrenAndRespondentRelation = existingChildrenAndRespondentRelations != null
+                        ? existingChildrenAndRespondentRelations.stream().filter(childRelation ->
+                           childRelation.getValue().getChildId().equals(eachChild.getId().toString())
+                               && childRelation.getValue().getRespondentId().equals(eachRespondent.getId().toString())).findFirst()
+                        : Optional.empty();
+                    if (childrenAndRespondentRelation.isPresent()) {
+                        applicantChildRelationsList.add(Element.<ChildrenAndRespondentRelation>builder()
+                                                            .value(childrenAndRespondentRelation.get().getValue()).build());
+                    } else {
+                        ChildrenAndRespondentRelation applicantChildRelations = ChildrenAndRespondentRelation.builder()
                             .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
-                                    eachChild.getValue().getLastName()))
+                                                         eachChild.getValue().getLastName()))
                             .childId(eachChild.getId().toString())
                             .respondentId(eachRespondent.getId().toString())
                             .respondentFullName(String.format(PrlAppsConstants.FORMAT, eachRespondent.getValue().getFirstName(),
-                                    eachRespondent.getValue().getLastName())).build();
-                    applicantChildRelationsList.add(Element.<ChildrenAndRespondentRelation>builder().value(applicantChildRelations).build());
+                                                              eachRespondent.getValue().getLastName())).build();
+                        applicantChildRelationsList.add(Element.<ChildrenAndRespondentRelation>builder().value(applicantChildRelations).build());
+                    }
                 })
         );
         caseDataUpdated.put("buffChildAndRespondentRelations", applicantChildRelationsList);
