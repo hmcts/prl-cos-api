@@ -463,6 +463,8 @@ public class DraftAnOrderService {
     }
 
     private OrderDetails getOrderDetails(CaseData caseData, DraftOrder draftOrder, String eventId, String loggedInUserType) {
+        log.info("*** Judge notes 2 {}", draftOrder.getJudgeNotes());
+        log.info("*** Judge directions to admin 2 {}", caseData.getJudgeDirectionsToAdmin());
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         StandardDirectionOrder standardDirectionOrder = null;
@@ -473,8 +475,6 @@ public class DraftAnOrderService {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
             }
         }
-        log.info("*** Judge notes 2 {}", draftOrder.getJudgeNotes());
-        log.info("*** Judge directions to admin 2 {}", caseData.getJudgeDirectionsToAdmin());
         return OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .orderTypeId(draftOrder.getOrderTypeId())
