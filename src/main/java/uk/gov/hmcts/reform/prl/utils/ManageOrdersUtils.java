@@ -6,7 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
-import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsSubmittedEnum;
+import uk.gov.hmcts.reform.prl.enums.ApproveAndServeClearFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -345,8 +345,8 @@ public class ManageOrdersUtils {
         return null;
     }
 
-    public static void clearManageOrderFieldsOnSubmission(Map<String, Object> caseDataUpdated) {
-        for (ManageOrderFieldsSubmittedEnum field : ManageOrderFieldsSubmittedEnum.values()) {
+    public static void clearFieldsAfterApprovalAndServe(Map<String, Object> caseDataUpdated) {
+        for (ApproveAndServeClearFieldsEnum field : ApproveAndServeClearFieldsEnum.values()) {
             caseDataUpdated.remove(field.getValue());
         }
     }
