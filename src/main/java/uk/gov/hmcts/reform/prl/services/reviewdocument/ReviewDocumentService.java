@@ -3,8 +3,6 @@ package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micrometer.common.util.StringUtils;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -495,10 +493,7 @@ public class ReviewDocumentService {
                                           uuid,
                                           COURT_STAFF);
         }
-        //NEED TO BE REVISITED
-        if (null != caseData.getCitizenUploadQuarantineDocsList()) {
 
-        }
         //NEED TO BE REVISITED
         if (null != caseData.getScannedDocuments()) {
 
