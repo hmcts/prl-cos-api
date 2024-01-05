@@ -49,6 +49,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
@@ -374,7 +375,7 @@ public class ReviewDocumentService {
         return switch (uploadedBy) {
             case SOLICITOR -> quarantineLegalDoc.getDocument();
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
-            case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
+            case COURT_STAFF, COURT_ADMIN -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
             case BULK_SCAN -> quarantineLegalDoc.getUrl();
             default -> null;
         };
@@ -674,24 +675,35 @@ public class ReviewDocumentService {
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElement);
 
-            String restrictedOrConfidentialKey = getRestrictedOrConfidentialKey(quarantineLegalDocElement.getValue());
-            QuarantineLegalDoc uploadDoc = downloadAndDeleteDocument(uploadedBy,
-                                                                     quarantineLegalDocElement);
-            uploadDoc = addQuarantineDocumentFields(uploadDoc, quarantineLegalDocElement.getValue());
-
             moveToConfidentialOrRestricted(caseDataUpdated,
-                                           CONFIDENTIAL_DOCUMENTS.equals(restrictedOrConfidentialKey)
-                                               ? caseData.getReviewDocuments().getConfidentialDocuments()
-                                               : caseData.getReviewDocuments().getRestrictedDocuments(),
-                                           uploadDoc,
-                                           restrictedOrConfidentialKey);
+                                                            caseData,
+                                                            quarantineLegalDocElement.getValue(),
+                                                            uploadedBy);
         }
     }
 
+    public void moveToConfidentialOrRestricted(Map<String, Object> caseDataUpdated,
+                                                                CaseData caseData,
+                                                                QuarantineLegalDoc quarantineLegalDoc,
+                                                                String uploadedBy) {
+
+        String restrictedOrConfidentialKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
+        QuarantineLegalDoc uploadDoc = downloadAndDeleteDocument(uploadedBy, quarantineLegalDoc);
+        uploadDoc = addQuarantineDocumentFields(uploadDoc, quarantineLegalDoc);
+
+        moveToConfidentialOrRestrictedDocuments(caseDataUpdated,
+                                                CONFIDENTIAL_DOCUMENTS.equals(restrictedOrConfidentialKey)
+                                                    ? caseData.getReviewDocuments().getConfidentialDocuments()
+                                                    : caseData.getReviewDocuments().getRestrictedDocuments(),
+                                                uploadDoc,
+                                                restrictedOrConfidentialKey);
+
+    }
+
     private QuarantineLegalDoc downloadAndDeleteDocument(String uploadedBy,
-                                                         Element<QuarantineLegalDoc> quarantineLegalDocElement) {
+                                                         QuarantineLegalDoc quarantineLegalDoc) {
         try {
-            Document document = getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue());
+            Document document = getQuarantineDocument(uploadedBy, quarantineLegalDoc);
             UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
             log.info(" DocumentId found {}", documentId);
             Document newUploadedDocument = getNewUploadedDocument(document,
@@ -705,7 +717,7 @@ public class ReviewDocumentService {
                 log.info("deleted document {}", documentId);
 
                 return DocumentUtils.getQuarantineUploadDocument(
-                    quarantineLegalDocElement.getValue().getCategoryId(),
+                    quarantineLegalDoc.getCategoryId(),
                     newUploadedDocument,
                     objectMapper
                 );
@@ -774,7 +786,7 @@ public class ReviewDocumentService {
         }
     }
 
-    private void moveToConfidentialOrRestricted(Map<String, Object> caseDataUpdated,
+    private void moveToConfidentialOrRestrictedDocuments(Map<String, Object> caseDataUpdated,
                                                 List<Element<QuarantineLegalDoc>> confidentialOrRestrictedDocuments,
                                                 QuarantineLegalDoc uploadDoc,
                                                 String confidentialOrRestrictedKey) {

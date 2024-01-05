@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
@@ -59,6 +60,7 @@ public class ManageDocumentsService {
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final UserService userService;
+    private final ReviewDocumentService reviewDocumentService;
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     public static final String DETAILS_ERROR_MESSAGE
         = "You must give a reason why the document should be restricted";
@@ -155,7 +157,16 @@ public class ManageDocumentsService {
 
             boolean isRestrictedFlag = false;
             for (Element<ManageDocuments> element : manageDocuments) {
-                if (addToQuarantineDocsOrTabDocumentsAndReturnConfigFlag(
+                //Move documents either to restricted/confidential or case documents if uploaded by court admin
+                if (COURT_ADMIN.equals(userRole)) {
+                    moveToConfidentialTabOrCaseDocumentsTab(caseDataUpdated,
+                                                            caseData,
+                                                            element,
+                                                            restricted,
+                                                            userDetails,
+                                                            tabDocuments);
+
+                } else if (addToQuarantineDocsOrTabDocumentsAndReturnConfigFlag(
                     element,
                     restricted,
                     userRole,
@@ -183,6 +194,38 @@ public class ManageDocumentsService {
         caseDataUpdated.remove("manageDocuments");
 
         return caseDataUpdated;
+    }
+
+    private void moveToConfidentialTabOrCaseDocumentsTab(Map<String, Object> caseDataUpdated,
+                                                         CaseData caseData,
+                                                         Element<ManageDocuments> element,
+                                                         Predicate<Element<ManageDocuments>> restricted,
+                                                         UserDetails userDetails,
+                                                         List<Element<QuarantineLegalDoc>> tabDocuments) {
+        ManageDocuments manageDocument = element.getValue();
+        if (restricted.test(element)) {
+            reviewDocumentService.moveToConfidentialOrRestricted(caseDataUpdated,
+                                                                 caseData,
+                                                                 getTempQuarantineLegalDocForReview(manageDocument, userDetails),
+                                                                 COURT_ADMIN);
+        } else {
+            //move documents to case documents
+            getQuarantineLegalDocAndAddToCaseDocuments(
+                manageDocument.getDocumentCategories().getValueCode(),
+                manageDocument,
+                userDetails,
+                tabDocuments
+            );
+        }
+    }
+
+    private QuarantineLegalDoc getTempQuarantineLegalDocForReview(ManageDocuments manageDocument,
+                                                                  UserDetails userDetails) {
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .courtStaffQuarantineDocument(manageDocument.getDocument().toBuilder()
+                                              .documentCreatedOn(localZoneDate).build())
+            .build();
+        return DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument, userDetails);
     }
 
     private void updateRestrictedFlag(Map<String, Object> caseDataUpdated, boolean isRestrictedFlag) {
@@ -236,38 +279,42 @@ public class ManageDocumentsService {
 
         //if DocumentParty is selected as COURT - move documents directly into case documents under internalCorrespondence category
         if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
-            QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
-                .getQuarantineUploadDocument(
-                    ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE,
-                    manageDocument.getDocument().toBuilder()
-                        .documentCreatedOn(localZoneDate).build(),
-                    objectMapper);
-            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, userDetails);
-            tabDocuments.add(element(quarantineUploadDoc));
+            getQuarantineLegalDocAndAddToCaseDocuments(ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE,
+                                                       manageDocument,
+                                                       userDetails,
+                                                       tabDocuments);
 
         } else if (restricted.test(element)) {
+
             // if restricted or confidential then add to quarantine docs list
             QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-            if (userRole.equals(COURT_ADMIN)) {
-                quarantineLegalDoc = DocumentUtils.addConfFields(quarantineLegalDoc, manageDocument, userDetails);
-            } else {
-                quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument, userDetails);
-            }
+            quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument, userDetails);
+
             confidentialityFlag = true;
             quarantineDocs.add(element(quarantineLegalDoc));
 
         } else {
             //move documents to case documents if neither restricted nor confidential
-            QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
-                .getQuarantineUploadDocument(
-                    manageDocument.getDocumentCategories().getValueCode(),
-                    manageDocument.getDocument().toBuilder()
-                        .documentCreatedOn(localZoneDate).build(), objectMapper
-                );
-            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, userDetails);
-            tabDocuments.add(element(quarantineUploadDoc));
+            getQuarantineLegalDocAndAddToCaseDocuments(manageDocument.getDocumentCategories().getValueCode(),
+                                                       manageDocument,
+                                                       userDetails,
+                                                       tabDocuments);
+
         }
         return confidentialityFlag;
+    }
+
+    private void getQuarantineLegalDocAndAddToCaseDocuments(String categoryId,
+                                                           ManageDocuments manageDocument,
+                                                           UserDetails userDetails,
+                                                           List<Element<QuarantineLegalDoc>> tabDocuments) {
+        QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
+            .getQuarantineUploadDocument(categoryId,
+                                         manageDocument.getDocument().toBuilder().documentCreatedOn(localZoneDate).build(),
+                                         objectMapper);
+        quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, userDetails);
+
+        tabDocuments.add(element(quarantineUploadDoc));
     }
 
     private void updateQuarantineDocs(Map<String, Object> caseDataUpdated,
@@ -307,7 +354,7 @@ public class ManageDocumentsService {
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
                 } else {
-                    caseDataUpdated.put("courtStaffUploadDocListConfTab", quarantineDocs);
+                    caseDataUpdated.put("courtStaffUploadDocListConfTab", quarantineDocs);//TO BE DELETED
                 }
                 break;
 
@@ -343,7 +390,7 @@ public class ManageDocumentsService {
             case COURT_ADMIN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()//TO BE DELETED
             );
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         };
