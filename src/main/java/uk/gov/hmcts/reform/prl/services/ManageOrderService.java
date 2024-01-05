@@ -2936,9 +2936,9 @@ public class ManageOrderService {
         for (Element<PartyDetails> party : selectedPartyList) {
             if ((isRespondent
                 && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
-                && checkForContactPreference(party) && !checkIfAddressIPresent(party)) {
+                && checkForContactPreference(party) && !checkIfAddressIsPresent(party)) {
                 errorList.add(VALIDATION_ADDRESS_ERROR_RESPONDENT);
-            } else if (Boolean.FALSE.equals(isRespondent) && !(checkIfAddressIPresent(party))) {
+            } else if (Boolean.FALSE.equals(isRespondent) && !(checkIfAddressIsPresent(party))) {
                 errorList.add(VALIDATION_ADDRESS_ERROR_OTHER_PARTY);
             }
             if (!errorList.isEmpty()) {
@@ -2953,7 +2953,7 @@ public class ManageOrderService {
             || null == party.getValue().getEmail();
     }
 
-    private boolean checkIfAddressIPresent(Element<PartyDetails> party) {
+    private boolean checkIfAddressIsPresent(Element<PartyDetails> party) {
         return null != party.getValue().getAddress()
             && null != party.getValue().getAddress().getAddressLine1();
     }
