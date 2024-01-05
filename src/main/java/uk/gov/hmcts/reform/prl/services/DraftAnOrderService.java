@@ -473,6 +473,8 @@ public class DraftAnOrderService {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
             }
         }
+        log.info("*** Judge notes 2 {}", draftOrder.getJudgeNotes());
+        log.info("*** Judge directions to admin 2 {}", caseData.getJudgeDirectionsToAdmin());
         return OrderDetails.builder()
             .orderType(draftOrder.getOrderTypeId())
             .orderTypeId(draftOrder.getOrderTypeId())
@@ -961,6 +963,8 @@ public class DraftAnOrderService {
                 isJudgeApprovalNeeded = No;
             }
         }
+        log.info("*** Judge notes {}", draftOrder.getJudgeNotes());
+        log.info("*** Judge directions to admin {}", caseData.getJudgeDirectionsToAdmin());
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
@@ -988,6 +992,8 @@ public class DraftAnOrderService {
             }
         }
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
+        log.info("*** Judge notes 3 {}", draftOrder.getJudgeNotes());
+        log.info("*** Judge directions to admin 3 {}", caseData.getJudgeDirectionsToAdmin());
         return DraftOrder.builder().orderType(draftOrder.getOrderType())
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
             .orderTypeId(draftOrder.getOrderTypeId())
