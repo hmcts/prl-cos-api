@@ -372,6 +372,7 @@ public class ReviewDocumentService {
 
     private Document getQuarantineDocument(String uploadedBy,
                                            QuarantineLegalDoc quarantineLegalDoc) {
+        log.info("1111111--quarantineLegalDoc--{}", quarantineLegalDoc);
         return switch (uploadedBy) {
             case SOLICITOR -> quarantineLegalDoc.getDocument();
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
@@ -704,6 +705,7 @@ public class ReviewDocumentService {
                                                          QuarantineLegalDoc quarantineLegalDoc) {
         try {
             Document document = getQuarantineDocument(uploadedBy, quarantineLegalDoc);
+            log.info("2222222--document--{}", document);
             UUID documentId = UUID.fromString(getDocumentId(document.getDocumentUrl()));
             log.info(" DocumentId found {}", documentId);
             Document newUploadedDocument = getNewUploadedDocument(document,
@@ -739,7 +741,12 @@ public class ReviewDocumentService {
             Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
                                                                      documentId
             ).getBody();
+            log.info("AAAAA--sysUserToken--{}", sysUserToken);
+            log.info("<=================>");
+            log.info("BBBBB--serviceToken--{}", serviceToken);
+            log.info("333333--resource--{}", resource);
             docData = IOUtils.toByteArray(resource.getInputStream());
+            log.info("4444444--docData--{}", docData);
             UploadResponse uploadResponse = caseDocumentClient.uploadDocuments(
                 sysUserToken,
                 serviceToken,
@@ -753,7 +760,9 @@ public class ReviewDocumentService {
                         docData
                     ))
             );
+            log.info("5555555--uploadResponse--{}", uploadResponse);
             newUploadedDocument = Document.buildFromDocument(uploadResponse.getDocuments().get(0));
+            log.info("6666666--newUploadedDocument--{}", newUploadedDocument);
         } catch (Exception ex) {
             log.error("Failed to upload new document {}", ex.getMessage());
         }
