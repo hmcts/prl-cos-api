@@ -39,7 +39,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     public void givenReviewDocuments_ShouldSegregateDocAccordingly() throws Exception {
         String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
             .when()
             .contentType("application/json")

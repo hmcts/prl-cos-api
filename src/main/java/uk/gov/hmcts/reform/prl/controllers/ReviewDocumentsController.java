@@ -97,7 +97,7 @@ public class ReviewDocumentsController {
         ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("INSIDEEEEEEEEEE REVIEWWW 1111" + result);
+        System.out.println("REVIEWINGGGGGGG 1111" + result);
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -109,7 +109,7 @@ public class ReviewDocumentsController {
 
         //clear fields
         CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
-
+        System.out.println("AFTERRRRRR Update" + caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
