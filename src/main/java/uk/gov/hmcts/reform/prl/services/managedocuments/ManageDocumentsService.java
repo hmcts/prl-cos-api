@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
@@ -45,6 +44,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INTERNAL_CORRESPONDENCE_LABEL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 import static uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc.quarantineCategoriesToRemove;
@@ -62,7 +62,6 @@ public class ManageDocumentsService {
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
     private final UserService userService;
-    private final ReviewDocumentService reviewDocumentService;
 
     public static final String MANAGE_DOCUMENTS_TRIGGERED_BY = "manageDocumentsTriggeredBy";
     public static final String DETAILS_ERROR_MESSAGE
@@ -187,9 +186,9 @@ public class ManageDocumentsService {
         Map<String, Object> caseDataUpdated,
         String userRole) {
 
-        String restrcitedKey = reviewDocumentService.getRestrictedOrConfidentialKey(quarantineLegalDoc);
+        String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
         if (restrcitedKey != null) {
-            reviewDocumentService.moveToConfidentialOrRestricted(
+            moveToConfidentialOrRestricted(
                 caseDataUpdated,
                 CONFIDENTIAL_DOCUMENTS.equals(restrcitedKey)
                     ? caseData.getReviewDocuments().getConfidentialDocuments()
@@ -203,6 +202,39 @@ public class ManageDocumentsService {
         }
     }
 
+    /**
+     * Based on user input documents will be moved either to confidential or restricted documents.
+     * ifConfidential && isRestricted - RESTRICTED
+     * !ifConfidential && isRestricted - RESTRICTED
+     * ifConfidential && !isRestricted - CONFIDENTIAL
+     */
+    public String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
+        if (quarantineLegalDoc.getIsConfidential() != null) {
+            if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
+                && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
+                return CONFIDENTIAL_DOCUMENTS;
+            } else {
+                return RESTRICTED_DOCUMENTS;
+            }
+        }
+        return null;
+    }
+
+    public void moveToConfidentialOrRestricted(Map<String, Object> caseDataUpdated,
+                                               List<Element<QuarantineLegalDoc>> confidentialOrRestrictedDocuments,
+                                               QuarantineLegalDoc uploadDoc,
+                                               String confidentialOrRestrictedKey) {
+        if (null != confidentialOrRestrictedDocuments) {
+            confidentialOrRestrictedDocuments.add(element(uploadDoc));
+            confidentialOrRestrictedDocuments.sort(Comparator.comparing(
+                doc -> doc.getValue().getDocumentUploadedDate(),
+                Comparator.reverseOrder()
+            ));
+            caseDataUpdated.put(confidentialOrRestrictedKey, confidentialOrRestrictedDocuments);
+        } else {
+            caseDataUpdated.put(confidentialOrRestrictedKey, List.of(element(uploadDoc)));
+        }
+    }
 
     private String formulateCategoryId(ManageDocuments manageDocument) {
         if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {

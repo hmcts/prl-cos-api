@@ -730,12 +730,12 @@ public class ReviewDocumentService {
             //remove document from quarantine
             quarantineDocsList.remove(quarantineLegalDocElement);
 
-            String restrictedOrConfidentialKey = getRestrictedOrConfidentialKey(quarantineLegalDocElement.getValue());
+            String restrictedOrConfidentialKey = manageDocumentsService.getRestrictedOrConfidentialKey(quarantineLegalDocElement.getValue());
             QuarantineLegalDoc uploadDoc = downloadAndDeleteDocument(uploadedBy,
                                                                      quarantineLegalDocElement);
             uploadDoc = addQuarantineDocumentFields(uploadDoc, quarantineLegalDocElement.getValue());
 
-            moveToConfidentialOrRestricted(caseDataUpdated,
+            manageDocumentsService.moveToConfidentialOrRestricted(caseDataUpdated,
                                            CONFIDENTIAL_DOCUMENTS.equals(restrictedOrConfidentialKey)
                                                ? caseData.getReviewDocuments().getConfidentialDocuments()
                                                : caseData.getReviewDocuments().getRestrictedDocuments(),
@@ -815,38 +815,7 @@ public class ReviewDocumentService {
         return documentId;
     }
 
-    /**
-     * Based on user input documents will be moved either to confidential or restricted documents.
-     * ifConfidential && isRestricted - RESTRICTED
-     * !ifConfidential && isRestricted - RESTRICTED
-     * ifConfidential && !isRestricted - CONFIDENTIAL
-     */
-    public String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
-        if (quarantineLegalDoc.getIsConfidential() != null) {
-            if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
-                && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
-                return CONFIDENTIAL_DOCUMENTS;
-            } else {
-                return RESTRICTED_DOCUMENTS;
-            }
-        }
-        return null;
-    }
 
-    public void moveToConfidentialOrRestricted(Map<String, Object> caseDataUpdated,
-                                               List<Element<QuarantineLegalDoc>> confidentialOrRestrictedDocuments,
-                                               QuarantineLegalDoc uploadDoc,
-                                               String confidentialOrRestrictedKey) {
-        if (null != confidentialOrRestrictedDocuments) {
-            confidentialOrRestrictedDocuments.add(element(uploadDoc));
-            confidentialOrRestrictedDocuments.sort(Comparator.comparing(
-                doc -> doc.getValue().getDocumentUploadedDate(),
-                Comparator.reverseOrder()
-            ));
-            caseDataUpdated.put(confidentialOrRestrictedKey, confidentialOrRestrictedDocuments);
-        } else {
-            caseDataUpdated.put(confidentialOrRestrictedKey, List.of(element(uploadDoc)));
-        }
-    }
+
 
 }
