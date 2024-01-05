@@ -243,7 +243,6 @@ public class ManageOrderEmailService {
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
         dynamicData.put("name",serveParty);
 
-        log.info("SENDGRIDDDDDDDDDDpppppp.......{}",dynamicData);
         try {
             sendgridService.sendEmailUsingTemplateWithAttachments(
                 SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
@@ -667,7 +666,6 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
-                    log.info("to applicant. soli.....");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getSolicitorEmail(),
                                                      buildApplicantRespondentSolicitorEmail(
                                                          caseData,
@@ -676,7 +674,6 @@ public class ManageOrderEmailService {
                                                      caseData
                     );
                 } else if (isPartyProvidedWithEmail(partyData)) {
-                    log.info("to applicant himself.....");
                     sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 }
             }
@@ -716,7 +713,6 @@ public class ManageOrderEmailService {
                     }
                 } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
                             && isPartyProvidedWithEmail(partyData)) {
-                    log.info("Contact preference set as email");
                     sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 } else {
                     try {
