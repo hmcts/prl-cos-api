@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -39,9 +38,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -56,7 +53,6 @@ public class EditAndApproveDraftOrderController {
     private final ManageOrderService manageOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
-    private final CoreCaseDataService coreCaseDataService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -322,21 +318,11 @@ public class EditAndApproveDraftOrderController {
             caseDataUpdated.put(STATE, caseData.getState());
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
-            updateTabs(callbackRequest, caseDataUpdated);
+            draftAnOrderService.updateCaseData(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-    }
-
-    private void updateTabs(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
-        coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            callbackRequest.getCaseDetails().getId(),
-            "internal-update-all-tabs",
-            caseDataUpdated
-        );
     }
 
     @PostMapping(path = "/edit-and-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -376,7 +362,7 @@ public class EditAndApproveDraftOrderController {
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
             log.info("judgeDirectionsToAdmin 2 : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
             log.info("map size after : {}", caseDataUpdated.size());
-            updateTabs(callbackRequest, caseDataUpdated);
+            draftAnOrderService.updateCaseData(callbackRequest, caseDataUpdated);
             return responseEntity;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
