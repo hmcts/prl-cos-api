@@ -238,9 +238,12 @@ public class ManageOrderEmailService {
         );
     }
 
-    private void sendEmailToParty(String emailAddress, CaseData caseData, String authorisation, List<Document> orderDocuments) {
+    private void sendEmailToParty(String emailAddress, CaseData caseData, String authorisation,
+                                  List<Document> orderDocuments, String serveParty) {
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-        log.info("SENDGRIDDDDDDDDDD.......");
+        dynamicData.put("name",serveParty);
+
+        log.info("SENDGRIDDDDDDDDDDpppppp.......{}",dynamicData);
         try {
             sendgridService.sendEmailUsingTemplateWithAttachments(
                 SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
@@ -674,7 +677,7 @@ public class ManageOrderEmailService {
                     );
                 } else if (isPartyProvidedWithEmail(partyData)) {
                     log.info("to applicant himself.....");
-                    sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments);
+                    sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 }
             }
         });
@@ -714,7 +717,7 @@ public class ManageOrderEmailService {
                 } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
                             && isPartyProvidedWithEmail(partyData)) {
                     log.info("Contact preference set as email");
-                    sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments);
+                    sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
                 } else {
                     try {
                         if (isNotEmpty(partyData.getAddress()) && isNotEmpty(partyData.getAddress().getAddressLine1())) {
