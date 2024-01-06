@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -31,19 +32,24 @@ public class EditReturnedOrderService {
 
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
+    private final UserService userService;
 
     private static final String ORDER_NAME = "orderName";
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     private static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
 
-    public Map<String, Object> getReturnedOrdersDynamicList(CaseData caseData) {
+    public Map<String, Object> getReturnedOrdersDynamicList(String authorisation, CaseData caseData) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        log.info("** UserDetails {}", userDetails);
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(
             draftOrderElement -> {
+                log.info("** order created by email {}", draftOrderElement.getValue().getOtherDetails().getOrderCreatedByEmailId());
                 if (OrderStatusEnum.rejectedByJudge.getDisplayedValue()
-                    .equalsIgnoreCase(draftOrderElement.getValue().getOtherDetails().getStatus())) {
+                    .equalsIgnoreCase(draftOrderElement.getValue().getOtherDetails().getStatus())
+                && userDetails.getEmail().equalsIgnoreCase(draftOrderElement.getValue().getOtherDetails().getOrderCreatedByEmailId())) {
                     supportedDraftOrderList.add(draftOrderElement);
                 }
             }
