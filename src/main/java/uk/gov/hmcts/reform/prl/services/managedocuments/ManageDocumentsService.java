@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
@@ -45,7 +44,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Predicate;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -183,13 +181,13 @@ public class ManageDocumentsService {
                 moveDocumentsToRespectiveCategories(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
             } else {
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
-                setFlagsForWATask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                setFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
 
             }
         }
     }
 
-    private void setFlagsForWATask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
+    private void setFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
         //Setting this flag for WA task
         if (quarantineLegalDoc.getIsConfidential() != null) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
@@ -385,77 +383,6 @@ public class ManageDocumentsService {
 
     }
 
-    public Map<String, Object> copyDocument(CallbackRequest callbackRequest, String authorization) {
-
-        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-
-        List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
-        UserDetails userDetails = userService.getUserDetails(authorization);
-        String userRole = CaseUtils.getUserRole(userDetails);
-
-        if (manageDocuments != null && !manageDocuments.isEmpty()) {
-            List<Element<QuarantineLegalDoc>> quarantineDocs = getQuarantineDocs(caseData, userRole, false);
-
-            if (quarantineDocs.isEmpty()) {
-                updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
-            } else {
-                caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "NOTREQUIRED");
-            }
-            List<Element<QuarantineLegalDoc>> tabDocuments = getQuarantineDocs(caseData, userRole, true);
-            log.info("*** manageDocuments List *** {}", manageDocuments);
-            log.info("*** quarantineDocs -> before *** {}", quarantineDocs);
-            log.info("*** legalProfUploadDocListDocTab -> before *** {}", tabDocuments);
-
-            //PRL-4320 - Updated for when documents need to put into quarantine
-            Predicate<Element<ManageDocuments>> restricted = manageDocumentsElement ->
-                YesOrNo.Yes.equals(manageDocumentsElement.getValue().getIsConfidential())
-                    || YesOrNo.Yes.equals(manageDocumentsElement.getValue().getIsRestricted());
-
-            boolean isRestrictedFlag = false;
-            for (Element<ManageDocuments> element : manageDocuments) {
-                if (addToQuarantineDocsOrTabDocumentsAndReturnConfigFlag(
-                    element,
-                    restricted,
-                    userRole,
-                    quarantineDocs,
-                    tabDocuments,
-                    userDetails
-                )) {
-                    isRestrictedFlag = true;
-                }
-            }
-            //if any restricted docs
-            updateRestrictedFlag(caseDataUpdated, isRestrictedFlag);
-
-            log.info("quarantineDocs List ---> after {}", quarantineDocs);
-            log.info("legalProfUploadDocListDocTab List ---> after {}", tabDocuments);
-
-            if (!quarantineDocs.isEmpty()) {
-                updateQuarantineDocs(caseDataUpdated, quarantineDocs, userRole, false);
-            }
-            if (!tabDocuments.isEmpty()) {
-                updateQuarantineDocs(caseDataUpdated, tabDocuments, userRole, true);
-            }
-        }
-        //remove manageDocuments from caseData
-        caseDataUpdated.remove("manageDocuments");
-
-        return caseDataUpdated;
-    }
-
-    private void moveDocumentsToCaseDocumentsTab(QuarantineLegalDoc documentToBeMoved, List<Element<QuarantineLegalDoc>> tabDocuments) {
-        tabDocuments.add(element(documentToBeMoved));
-    }
-
-    private void updateRestrictedFlag(Map<String, Object> caseDataUpdated, boolean isRestrictedFlag) {
-        if (isRestrictedFlag) {
-            caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
-        } else {
-            caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
-        }
-    }
-
     public List<String> validateCourtUser(CallbackRequest callbackRequest,
                                           UserDetails userDetails) {
         if (isCourtSelectedInDocumentParty(callbackRequest)
@@ -485,52 +412,6 @@ public class ManageDocumentsService {
         } else if (COURT_STAFF.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
         }
-    }
-
-    private boolean addToQuarantineDocsOrTabDocumentsAndReturnConfigFlag(Element<ManageDocuments> element,
-                                                                         Predicate<Element<ManageDocuments>> restricted,
-                                                                         String userRole,
-                                                                         List<Element<QuarantineLegalDoc>> quarantineDocs,
-                                                                         List<Element<QuarantineLegalDoc>> tabDocuments,
-                                                                         UserDetails userDetails) {
-
-        ManageDocuments manageDocument = element.getValue();
-        boolean confidentialityFlag = false;
-
-        //if DocumentParty is selected as COURT - move documents directly into case documents under internalCorrespondence category
-        if (DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
-            QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
-                .getQuarantineUploadDocument(
-                    ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE,
-                    manageDocument.getDocument().toBuilder()
-                        .documentCreatedOn(localZoneDate).build(),
-                    objectMapper);
-            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, userDetails);
-            tabDocuments.add(element(quarantineUploadDoc));
-
-        } else if (restricted.test(element)) {
-            // if restricted or confidential then add to quarantine docs list
-            QuarantineLegalDoc quarantineLegalDoc = getQuarantineDocument(manageDocument, userRole);
-            if (userRole.equals(COURT_ADMIN)) {
-                quarantineLegalDoc = DocumentUtils.addConfFields(quarantineLegalDoc, manageDocument, userDetails);
-            } else {
-                quarantineLegalDoc = DocumentUtils.addQuarantineFields(quarantineLegalDoc, manageDocument, userDetails);
-            }
-            confidentialityFlag = true;
-            quarantineDocs.add(element(quarantineLegalDoc));
-
-        } else {
-            //move documents to case documents if neither restricted nor confidential
-            QuarantineLegalDoc quarantineUploadDoc = DocumentUtils
-                .getQuarantineUploadDocument(
-                    manageDocument.getDocumentCategories().getValueCode(),
-                    manageDocument.getDocument().toBuilder()
-                        .documentCreatedOn(localZoneDate).build(), objectMapper
-                );
-            quarantineUploadDoc = DocumentUtils.addQuarantineFields(quarantineUploadDoc, manageDocument, userDetails);
-            tabDocuments.add(element(quarantineUploadDoc));
-        }
-        return confidentialityFlag;
     }
 
     private void updateQuarantineDocs(Map<String, Object> caseDataUpdated,
@@ -620,16 +501,5 @@ public class ManageDocumentsService {
         } else {
             return !isEmpty(quarantineDocsList) ? quarantineDocsList : new ArrayList<>();
         }
-    }
-
-    private QuarantineLegalDoc getQuarantineDocument(ManageDocuments manageDocument, String userRole) {
-        return QuarantineLegalDoc.builder()
-            .document(SOLICITOR.equals(userRole) ? manageDocument.getDocument().toBuilder()
-                .documentCreatedOn(localZoneDate).build() : null)
-            .cafcassQuarantineDocument(CAFCASS.equals(userRole) ? manageDocument.getDocument().toBuilder()
-                .documentCreatedOn(localZoneDate).build() : null)
-            .courtStaffQuarantineDocument((COURT_STAFF.equals(userRole)) ? manageDocument.getDocument().toBuilder()
-                .documentCreatedOn(localZoneDate).build() : null)
-            .build();
     }
 }

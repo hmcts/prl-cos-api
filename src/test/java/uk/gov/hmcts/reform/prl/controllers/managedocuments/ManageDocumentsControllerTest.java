@@ -157,10 +157,10 @@ public class ManageDocumentsControllerTest {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
-        when(manageDocumentsService.copyDocument(callbackRequest, auth)).thenReturn(caseDataUpdated);
+        when(manageDocumentsService.copyDocumentNew(callbackRequest, auth)).thenReturn(caseDataUpdated);
 
         manageDocumentsController.copyManageDocs(auth, callbackRequest);
-        verify(manageDocumentsService).copyDocument(callbackRequest, auth);
+        verify(manageDocumentsService).copyDocumentNew(callbackRequest, auth);
         verifyNoMoreInteractions(manageDocumentsService);
 
     }
