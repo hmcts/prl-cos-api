@@ -157,6 +157,7 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentLegalProfQuarantineDocsList() {
+        HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData =  CaseData.builder()
             .legalProfQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
                                                                           .documentUploadedDate(LocalDateTime.now())
@@ -164,11 +165,12 @@ public class ReviewDocumentServiceTest {
                                                                           .build())))
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
-        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData, caseDataUpdated).isEmpty());
     }
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForCafcassQuarantineDocsList() {
+        HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData =  CaseData.builder()
             .cafcassQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
                                                                         .documentUploadedDate(LocalDateTime.now())
@@ -179,11 +181,12 @@ public class ReviewDocumentServiceTest {
                                                                         .build())))
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
-        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData, caseDataUpdated).isEmpty());
     }
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForBulkscanDocuments() {
+        HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData =  CaseData.builder()
             .scannedDocuments(List.of(element(
                 ScannedDocument.builder()
@@ -200,11 +203,12 @@ public class ReviewDocumentServiceTest {
             )))
             .build();
 
-        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData, caseDataUpdated).isEmpty());
     }
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForCourtStaffQuarantineDocsList() {
+        HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData =  CaseData.builder()
             .courtStaffQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
                                                                            .documentUploadedDate(LocalDateTime.now())
@@ -215,11 +219,12 @@ public class ReviewDocumentServiceTest {
                                                                            .build())))
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
-        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData, caseDataUpdated).isEmpty());
     }
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForCitizenUploadQuarantineDocsList() {
+        HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData =  CaseData.builder()
             .citizenUploadQuarantineDocsList(List.of(element(UploadedDocuments.builder()
                                                                               .dateCreated(LocalDate.now())
@@ -229,12 +234,13 @@ public class ReviewDocumentServiceTest {
                                                                               .build())))
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
-        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData).isEmpty());
+        Assert.assertTrue(!reviewDocumentService.getDynamicListElements(caseData, caseDataUpdated).isEmpty());
     }
 
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentsAreNotPresent() {
-        Assert.assertTrue(reviewDocumentService.getDynamicListElements(CaseData.builder().build()).isEmpty());
+        HashMap<String, Object> caseDataUpdated = new HashMap<>();
+        Assert.assertTrue(reviewDocumentService.getDynamicListElements(CaseData.builder().build(), caseDataUpdated).isEmpty());
     }
 
     @Test

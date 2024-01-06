@@ -10,20 +10,26 @@ import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 
 @Data
@@ -166,6 +172,7 @@ public class DocumentUtils {
             .restrictedDetails(confidentialFlag ? manageDocument.getRestrictedDetails() : null)
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
+            .uploaderRole(getLoggedInUserType(userDetails))
             .build();
     }
 
@@ -191,6 +198,25 @@ public class DocumentUtils {
         }
         log.info("document id {}", documentId);
         return documentId;
+    }
+
+    private static String getLoggedInUserType(UserDetails userDetails) {
+        String loggedInUserType;
+        List<String> roles = userDetails.getRoles();
+        if (roles.contains(Roles.JUDGE.getValue()) || roles.contains(Roles.LEGAL_ADVISER.getValue()) || roles.contains(
+            Roles.COURT_ADMIN.getValue())) {
+            loggedInUserType = COURT_STAFF;
+        } else if (roles.contains(Roles.SOLICITOR.getValue())) {
+            loggedInUserType = LEGAL_PROFESSIONAL;
+        } else if (roles.contains(Roles.CITIZEN.getValue())) {
+            loggedInUserType = UserRoles.CITIZEN.name();
+        } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
+            loggedInUserType = UserRoles.BULK_SCAN.name();
+        } else {
+            loggedInUserType = CAFCASS;
+        }
+
+        return loggedInUserType;
     }
 
 }

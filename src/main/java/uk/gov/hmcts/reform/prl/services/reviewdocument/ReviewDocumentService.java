@@ -126,36 +126,46 @@ public class ReviewDocumentService {
     public static final String SEND_AND_REPLY_URL = "/trigger/sendOrReplyToMessages/sendOrReplyToMessages1";
     public static final String SEND_AND_REPLY_MESSAGE_LABEL = "\">Send and reply to messages</a>";
 
-    public List<DynamicListElement> getDynamicListElements(CaseData caseData) {
+    public List<DynamicListElement> getDynamicListElements(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = new ArrayList<>();
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
         if (isNotEmpty(caseData.getLegalProfQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getLegalProfQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
                                                .build())
                                            .toList());
+            tempQuarantineDocumentList.addAll(caseData.getLegalProfQuarantineDocsList());
         }
         //added for cafcass
         if (isNotEmpty(caseData.getCafcassQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCafcassQuarantineDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
                                                .build())
                                            .toList());
+            tempQuarantineDocumentList.addAll(caseData.getCafcassQuarantineDocsList());
         }
         //court staff
         if (isNotEmpty(caseData.getCourtStaffQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCourtStaffQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
                                                .label(element.getValue().getCourtStaffQuarantineDocument().getDocumentFileName()
-                                                          + HYPHEN_SEPARATOR + formatDateTime(DATE_TIME_PATTERN,
-                                                                                   element.getValue().getDocumentUploadedDate()))
+                                                          + HYPHEN_SEPARATOR + formatDateTime(
+                                                   DATE_TIME_PATTERN,
+                                                   element.getValue().getDocumentUploadedDate()
+                                               ))
                                                .build())
                                            .toList());
+            tempQuarantineDocumentList.addAll(caseData.getCourtStaffQuarantineDocsList());
         }
         if (isNotEmpty(caseData.getCitizenUploadQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getCitizenUploadQuarantineDocsList().stream()
@@ -166,6 +176,7 @@ public class ReviewDocumentService {
                                                    element.getValue().getDateCreated()
                                                ))
                                                .build()).toList());
+            // TODO Handle Citizen Document management later
         }
         if (isNotEmpty(caseData.getScannedDocuments())) {
             dynamicListElements.addAll(caseData.getScannedDocuments().stream()
@@ -177,8 +188,49 @@ public class ReviewDocumentService {
                                                    element.getValue().getScannedDate().toLocalDate()
                                                ))
                                                .build()).toList());
+            // TODO Handle Scanned Document management later
         }
+        caseDataUpdated.put("tempQuarantineDocumentList", tempQuarantineDocumentList);
         return dynamicListElements;
+    }
+
+    public void getReviewedDocumentDetailsNew(CaseData caseData, Map<String, Object> caseDataUpdated) {
+        if (null != caseData.getReviewDocuments().getReviewDocsDynamicList() && null != caseData.getReviewDocuments()
+            .getReviewDocsDynamicList().getValue()) {
+            UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
+
+            List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = (List<Element<QuarantineLegalDoc>>) caseDataUpdated.get(
+                "tempQuarantineDocumentList");
+
+            Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement = Optional.empty();
+            quarantineLegalDocElement = getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
+
+            updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
+                caseDataUpdated,
+                quarantineLegalDocElement.get(),
+                quarantineLegalDocElement.get().getValue().getUploaderRole()
+            );
+
+
+            log.info("** uuid ** {}", uuid);
+
+            if (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())) {
+                Optional<Element<QuarantineLegalDoc>> quarantineBulkscanDocElement;
+                quarantineBulkscanDocElement = Optional.of(
+                    element(QuarantineLegalDoc.builder()
+                                .url(caseData.getScannedDocuments().stream()
+                                         .filter(element -> element.getId().equals(uuid))
+                                         .collect(Collectors.toList()).stream().findFirst().map(Element::getValue).map(
+                                        ScannedDocument::getUrl).orElse(null)).build()));
+                if (quarantineBulkscanDocElement.isPresent()) {
+                    updateCaseDataUpdatedWithDocToBeReviewedAndReviewDoc(
+                        caseDataUpdated,
+                        quarantineBulkscanDocElement.get(),
+                        BULK_SCAN
+                    );
+                }
+            }
+        }
     }
 
     public void getReviewedDocumentDetails(CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -296,16 +348,16 @@ public class ReviewDocumentService {
                                                                       Element<QuarantineLegalDoc> quarantineDocElement,
                                                                       String submittedBy) {
 
-        QuarantineLegalDoc document = quarantineDocElement.getValue();
-        log.info("** Quarantine Doc ** {}", document);
+        QuarantineLegalDoc quarantineLegalDoc = quarantineDocElement.getValue();
+        log.info("** Quarantine Doc ** {}", quarantineLegalDoc);
 
         String docTobeReviewed = formatDocumentTobeReviewed(
             submittedBy,
-            document.getCategoryName(),
-            document.getNotes(),
-            document.getIsRestricted(),
-            document.getIsConfidential(),
-            document.getRestrictedDetails()
+            quarantineLegalDoc.getCategoryName(),
+            quarantineLegalDoc.getNotes(),
+            quarantineLegalDoc.getIsRestricted(),
+            quarantineLegalDoc.getIsConfidential(),
+            quarantineLegalDoc.getRestrictedDetails()
         );
 
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
@@ -313,20 +365,20 @@ public class ReviewDocumentService {
 
         switch (submittedBy) {
             case LEGAL_PROFESSIONAL:
-                caseDataUpdated.put(REVIEW_DOC, document.getDocument());
-                log.info(REVIEW_DOC + " {}", document.getDocument());
+                caseDataUpdated.put(REVIEW_DOC, quarantineLegalDoc.getDocument());
+                log.info(REVIEW_DOC + " {}", quarantineLegalDoc.getDocument());
                 break;
             case CAFCASS:
-                caseDataUpdated.put(REVIEW_DOC, document.getCafcassQuarantineDocument());
-                log.info(REVIEW_DOC + " {}", document.getCafcassQuarantineDocument());
+                caseDataUpdated.put(REVIEW_DOC, quarantineLegalDoc.getCafcassQuarantineDocument());
+                log.info(REVIEW_DOC + " {}", quarantineLegalDoc.getCafcassQuarantineDocument());
                 break;
             case COURT_STAFF:
-                caseDataUpdated.put(REVIEW_DOC, document.getCourtStaffQuarantineDocument());
-                log.info(REVIEW_DOC + " {}", document.getCourtStaffQuarantineDocument());
+                caseDataUpdated.put(REVIEW_DOC, quarantineLegalDoc.getCourtStaffQuarantineDocument());
+                log.info(REVIEW_DOC + " {}", quarantineLegalDoc.getCourtStaffQuarantineDocument());
                 break;
             case BULK_SCAN:
-                caseDataUpdated.put(REVIEW_DOC, document.getUrl());
-                log.info(REVIEW_DOC + " {}", document.getUrl());
+                caseDataUpdated.put(REVIEW_DOC, quarantineLegalDoc.getUrl());
+                log.info(REVIEW_DOC + " {}", quarantineLegalDoc.getUrl());
                 break;
             default:
         }

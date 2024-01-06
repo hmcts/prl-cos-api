@@ -42,7 +42,7 @@ public class ReviewDocuments {
 
     public static String[] reviewDocTempFields() {
         return new String[]{
-            "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc"
+            "reviewDocsDynamicList", "docToBeReviewed", "reviewDoc", "tempQuarantineDocumentList"
         };
     }
 }

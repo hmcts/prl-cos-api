@@ -98,6 +98,7 @@ public class QuarantineLegalDoc {
     private final String restrictedDetails;
     private final String uploadedBy;
     private final String uploadedByIdamId;
+    private final String uploaderRole;
 
     //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {

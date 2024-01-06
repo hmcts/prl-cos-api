@@ -56,12 +56,13 @@ public class ReviewDocumentsController {
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
-        List<DynamicListElement> dynamicListElements = reviewDocumentService.getDynamicListElements(caseData);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        List<DynamicListElement> dynamicListElements = reviewDocumentService.getDynamicListElements(caseData, caseDataUpdated);
 
         if (dynamicListElements.isEmpty()) {
             errors = List.of("No documents to review");
         }
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
+
         caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
 
         //clear the previous decision
@@ -78,7 +79,7 @@ public class ReviewDocumentsController {
         @RequestBody CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        reviewDocumentService.getReviewedDocumentDetails(caseData, caseDataUpdated);
+        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
