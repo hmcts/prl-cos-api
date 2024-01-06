@@ -64,7 +64,6 @@ public class EditAndApproveDraftOrderController {
         ### What happens next \nYour message has been sent to the legal representative.
         """;
 
-
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
     @ApiResponses(value = {
