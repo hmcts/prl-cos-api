@@ -4,6 +4,7 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -154,7 +155,7 @@ public class ManageDocumentsService {
             caseDataUpdated,
             userDetails
         );
-
+        caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
     }
 
@@ -182,8 +183,25 @@ public class ManageDocumentsService {
                 moveDocumentsToRespectiveCategories(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
             } else {
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
+                setFlagsForWATask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
 
             }
+        }
+    }
+
+    private void setFlagsForWATask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
+        //Setting this flag for WA task
+        if (quarantineLegalDoc.getIsConfidential() != null) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
+        } else {
+            caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
+        }
+        if (CollectionUtils.isNotEmpty(caseData.getCourtStaffQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getCafcassQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getLegalProfQuarantineDocsList())) {
+            updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
+        } else {
+            caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
         }
     }
 
@@ -192,8 +210,9 @@ public class ManageDocumentsService {
         CaseData caseData,
         Map<String, Object> caseDataUpdated,
         String userRole) {
-        List<Element<QuarantineLegalDoc>> existingQuarantineDocuments = getQuarantineDocs(caseData, userRole, true);
+        List<Element<QuarantineLegalDoc>> existingQuarantineDocuments = getQuarantineDocs(caseData, userRole, false);
         existingQuarantineDocuments.add(element(quarantineLegalDoc));
+        updateQuarantineDocs(caseDataUpdated, existingQuarantineDocuments, userRole, false);
     }
 
     public void moveDocumentsToRespectiveCategories(
@@ -215,6 +234,7 @@ public class ManageDocumentsService {
         } else {
             List<Element<QuarantineLegalDoc>> existingCaseDocuments = getQuarantineDocs(caseData, userRole, true);
             existingCaseDocuments.add(element(quarantineLegalDoc));
+            updateQuarantineDocs(caseDataUpdated, existingCaseDocuments, userRole, true);
         }
     }
 

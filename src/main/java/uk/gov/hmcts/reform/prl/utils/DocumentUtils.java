@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -146,7 +147,8 @@ public class DocumentUtils {
                                                                              boolean confidentialFlag) {
 
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put(categoryId + "Document", document);
+
+        hashMap.put(populateAttributeNameFromCategoryId(categoryId) + "Document", document);
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc quarantineLegalDoc = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
 
@@ -157,7 +159,6 @@ public class DocumentUtils {
             .categoryId(manageDocument.getDocumentCategories().getValueCode())
             .categoryName(manageDocument.getDocumentCategories().getValueLabel())
             //move document into confidential category/folder
-            .confidentialDocument(confidentialFlag ? manageDocument.getDocument() : null)
             .notes(manageDocument.getDocumentDetails())
             //PRL-4320 - Manage documents redesign
             .isConfidential(confidentialFlag ? manageDocument.getIsConfidential() : null)
@@ -166,6 +167,19 @@ public class DocumentUtils {
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
             .build();
+    }
+
+    private static String populateAttributeNameFromCategoryId(String categoryId) {
+        String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
+        String finalCategory = "";
+        for (int i = 0; i < splittedCategory.length; i++) {
+            if (i == 0) {
+                finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
+            } else {
+                finalCategory = finalCategory.concat(splittedCategory[i]);
+            }
+        }
+        return finalCategory;
     }
 
     public static String getDocumentId(String url) {
