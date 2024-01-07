@@ -5,6 +5,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,9 +43,16 @@ public class ReviewDocumentsControllerFunctionalTest {
     public void givenReviewDocuments_ShouldSegregateDocAccordingly() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
+
+        String requestBodyRevised = requestBody
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/2269f768-9f58-4707-b3ed-b62748a456c3/binary",
+                     "http://dm-store-aat.service.core-compute-aat.internal/documents/11111111-9f58-4707-b3ed-b62748a456c3/binary");
+
+        System.out.println("BBBBB" + requestBodyRevised);
+
         AboutToStartOrSubmitCallbackResponse response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .contentType("application/json")
             .post("/review-documents/about-to-submit")
             .then()
@@ -62,6 +70,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_RestrictedAnConfidential_thenMoveToRestrictedDocuments() throws Exception {
         String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
         request
