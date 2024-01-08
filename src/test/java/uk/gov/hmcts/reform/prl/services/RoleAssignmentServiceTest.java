@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -52,10 +51,11 @@ public class RoleAssignmentServiceTest {
 
     @Before
     public void init() {
-        caseDetails = CaseDetails.builder().id(123L).build();
+
+        Map<String, Object> dataMap = new HashMap<>();
+        caseDetails = CaseDetails.builder().data(dataMap).id(123L).build();
     }
 
-    @Ignore
     @Test
     public void testCreateRoleAssignment() {
         List<String> roles = new ArrayList();

@@ -505,7 +505,6 @@ public class CallbackController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
             GatekeepingDetails gatekeepingDetails = gatekeepingDetailsService.getGatekeepingDetails(
-                authorisation,
                 caseDataUpdated,
                 caseData.getLegalAdviserList(),
                 refDataUserService
