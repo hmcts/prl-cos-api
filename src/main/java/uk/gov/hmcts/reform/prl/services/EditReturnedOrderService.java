@@ -49,7 +49,7 @@ public class EditReturnedOrderService {
                 log.info("** order created by email {}", draftOrderElement.getValue().getOtherDetails().getOrderCreatedByEmailId());
                 if (OrderStatusEnum.rejectedByJudge.getDisplayedValue()
                     .equalsIgnoreCase(draftOrderElement.getValue().getOtherDetails().getStatus())
-                && userDetails.getEmail().equalsIgnoreCase(draftOrderElement.getValue().getOtherDetails().getOrderCreatedByEmailId())) {
+                    && userDetails.getEmail().equalsIgnoreCase(draftOrderElement.getValue().getOtherDetails().getOrderCreatedByEmailId())) {
                     supportedDraftOrderList.add(draftOrderElement);
                 }
             }

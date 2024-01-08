@@ -338,7 +338,7 @@ public class DraftAnOrderService {
         } else if (!(CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(orderType))) {
-            caseDataMap.putAll(populateDraftOrderCustomFields(caseData, eventId));
+            caseDataMap.putAll(populateDraftOrderCustomFields(caseData, eventId, authorisation));
         }
         caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
         caseData = caseData.toBuilder().standardDirectionOrder(null != standardDirectionOrder ? standardDirectionOrder : null).build();
@@ -580,7 +580,9 @@ public class DraftAnOrderService {
         return caseDataMap;
     }
 
-    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData, String eventId) {
+    public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData,
+                                                              String eventId,
+                                                              String authorization) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
@@ -642,6 +644,14 @@ public class DraftAnOrderService {
                     selectedOrder.getOrderType(),
                     selectedOrder.getC21OrderOptions()
                 ) ? Yes : No
+            );
+            //PRL-4857 - populate orders hearings data
+            populateOrderHearingDetails(
+                authorization,
+                caseData,
+                caseDataMap,
+                selectedOrder.getManageOrderHearingDetails(),
+                selectedOrder.getIsOrderCreatedBySolicitor()
             );
         } else {
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));

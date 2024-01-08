@@ -1061,7 +1061,8 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData,
-                                                                                             EDIT_AND_APPROVE_ORDER.getId());
+                                                                                             EDIT_AND_APPROVE_ORDER.getId(),
+                                                                                             authToken);
         assertEquals("test", caseDataMap.get("parentName"));
     }
 
@@ -1103,7 +1104,8 @@ public class DraftAnOrderServiceTest {
             Map.class
         )).thenReturn(new HashMap<String, Object>());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(caseData,
-                                                                                             EDIT_AND_APPROVE_ORDER.getId());
+                                                                                             EDIT_AND_APPROVE_ORDER.getId(),
+                                                                                             authToken);
         assertEquals(null, caseDataMap.get("parentName"));
     }
 
@@ -1139,7 +1141,7 @@ public class DraftAnOrderServiceTest {
         when(elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
         Map<String, Object> caseDataMap = draftAnOrderService.populateDraftOrderCustomFields(
-            caseData, ADMIN_EDIT_AND_APPROVE_ORDER.getId());
+            caseData, ADMIN_EDIT_AND_APPROVE_ORDER.getId(), authToken);
 
         assertEquals("test", caseDataMap.get("parentName"));
     }
