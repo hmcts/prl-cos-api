@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.clients.idam.IdamApiConsumerApplication;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 
 @ExtendWith(PactConsumerTestExt.class)
@@ -58,7 +59,6 @@ public class AmRoleAssignmentApiTest {
     private static final String AUTH = "token";
     private static final String S2S = "token";
 
-
     @Pact(provider = "am_role_assignment_service", consumer = "prl_cos")
     public RequestResponsePact generatePactFragmentForRoleAssignment(PactDslWithProvider builder) throws Exception {
 
@@ -79,12 +79,39 @@ public class AmRoleAssignmentApiTest {
                 .toPact();
     }
 
+    @Pact(provider = "am_role_assignment_service", consumer = "prl_cos")
+    public RequestResponsePact generatePactFragmentForRoleAssignmentBasedOffId(PactDslWithProvider builder) throws Exception {
+        String roleAssignmentResponseBody = "response/role-assignment-service-response.json";
+
+        return builder
+            .given("Role Assignment With Actor Id")
+            .uponReceiving("A Request to assign a new role")
+            .method("GET")
+            .headers("x-correlation-id", X_CORRELATION_ID)
+            .path("/am/role-assignments/actors/3")
+            .willRespondWith()
+            .status(200)
+            .body(ResourceLoader.loadJson(roleAssignmentResponseBody),APPLICATION_JSON)
+            .toPact();
+    }
+
+    @Test
+    @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignmentBasedOffId")
+    public void verifyRoleAssignmentWithId() {
+        RoleAssignmentServiceResponse roleAssignmentResponse = roleAssignmentApi
+            .getRoleAssignments(AUTH, S2S, X_CORRELATION_ID,
+                                 "3"
+            );
+
+        Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response when actor id is given");
+    }
+
     @Test
     @PactTestFor(pactMethod = "generatePactFragmentForRoleAssignment")
     public void verifyRoleAssignment() {
         RoleAssignmentResponse roleAssignmentResponse = roleAssignmentApi
             .updateRoleAssignment(AUTH, S2S, X_CORRELATION_ID,
-                                  RoleAssignmentRequest.roleAssignmentRequest().build()
+                RoleAssignmentRequest.roleAssignmentRequest().build()
             );
 
         Assert.notNull(roleAssignmentResponse, "Api is returning role assignment response");
