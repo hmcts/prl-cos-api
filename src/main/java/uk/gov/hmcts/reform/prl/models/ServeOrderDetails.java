@@ -41,4 +41,6 @@ public class ServeOrderDetails {
     private final YesOrNo doYouWantToServeOrder;
     private final WhatToDoWithOrderEnum whatDoWithOrder;
     private final List<Element<ServedParties>> servedParties;
+    private final String servingRecipientName;
+    private final String organisationsName;
 }
