@@ -47,6 +47,8 @@ spring:
     multipart:
       max-file-size: 30MB
       max-request-size: 30MB
+  main:
+    allow-circular-references: true
 
 azure:
   application-insights:
@@ -193,9 +195,6 @@ idam:
   solicitor:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
-  judge:
-    username: ${IDAM_JUDGE_USERNAME:xxxxxxxxx}
-    password: ${IDAM_JUDGE_PASSWORD:xxxxxxxxx}
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}

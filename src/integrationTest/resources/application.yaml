@@ -45,6 +45,8 @@ spring:
     import: "optional:configtree:/mnt/secrets/"
   application:
     name: Prl cos api
+  main:
+    allow-circular-references: true
 #  datasource:
 #    driver-class-name: org.postgresql.Driver
 #    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
@@ -208,9 +210,6 @@ idam:
   solicitor:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxx}
-  judge:
-    username: ${IDAM_JUDGE_USERNAME:xxxxxxxxx}
-    password: ${IDAM_JUDGE_PASSWORD:xxxxxxxxx}
   system-update:
     username: ${SYSTEM_UPDATE_USER_USERNAME:xxxxxx}
     password: ${PRL_SYSTEM_UPDATE_PASSWORD:xxxxxxx}
@@ -242,9 +241,6 @@ core_case_data:
   solicitor:
     username: ${IDAM_SOLICITOR_USERNAME:xxxxxxx}
     password: ${IDAM_SOLICITOR_PASSWORD:xxxxxx}
-  judge:
-    username: ${IDAM_JUDGE_USERNAME:xxxxxxxxx}
-    password: ${IDAM_JUDGE_PASSWORD:xxxxxxxxx}
   system-update:
     username: ${IDAM_SOLICITOR_USERNAME:dummysolicitor@test.com}
     password: ${IDAM_SOLICITOR_PASSWORD:dummy}
