@@ -101,23 +101,10 @@ public class RoleAssignmentService {
 
         if (null != caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR)) {
-            if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
-                IS_JUDGE_OR_LEGAL_ADVISOR)))) {
-                return (null != caseDataUpdated.get(JUDGE_NAME)) ? getIdamId(caseDataUpdated.get(
-                    JUDGE_NAME))[0]
-                    : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
-            } else {
-                return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
-            }
+            return fetchActorIdIfJudge(authorization, caseDataUpdated);
         } else if (null != caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
-            if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
-                IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))) {
-                return caseDataUpdated.get(JUDGE_NAME) != null ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
-                    : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
-            } else {
-                return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
-            }
+            fetchActorIdIfJudgeIsGatekeeping(authorization, caseDataUpdated);
         } else {
             if (null != caseDataUpdated.get("nameOfJudgeToReviewOrder")) {
                 return getIdamId(caseDataUpdated.get("nameOfJudgeToReviewOrder"))[0];
@@ -129,6 +116,27 @@ public class RoleAssignmentService {
             }
         }
         return null;
+    }
+
+    private String fetchActorIdIfJudge(String authorization, HashMap<String, Object> caseDataUpdated) {
+        if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
+            IS_JUDGE_OR_LEGAL_ADVISOR)))) {
+            return (null != caseDataUpdated.get(JUDGE_NAME)) ? getIdamId(caseDataUpdated.get(
+                JUDGE_NAME))[0]
+                : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
+        } else {
+            return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
+        }
+    }
+
+    private String fetchActorIdIfJudgeIsGatekeeping(String authorization, HashMap<String, Object> caseDataUpdated) {
+        if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
+            IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))) {
+            return caseDataUpdated.get(JUDGE_NAME) != null ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
+                : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
+        } else {
+            return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
+        }
     }
 
     private String fetchActorIdFromSelectedLegalAdviser(String authorization, Object legalAdviserList) {
