@@ -149,6 +149,7 @@ public class ManageDocumentsService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
         transformManageDocumentsToQuarantineList(
+            authorization,
             caseData,
             caseDataUpdated,
             userDetails
@@ -157,7 +158,7 @@ public class ManageDocumentsService {
         return caseDataUpdated;
     }
 
-    private void transformManageDocumentsToQuarantineList(CaseData caseData, Map<String, Object> caseDataUpdated,
+    private void transformManageDocumentsToQuarantineList(String authorization, CaseData caseData, Map<String, Object> caseDataUpdated,
                                                           UserDetails userDetails) {
 
         String userRole = CaseUtils.getUserRole(userDetails);
@@ -183,7 +184,13 @@ public class ManageDocumentsService {
                 quarantineLegalDoc
             );
             if (userRole.equals(COURT_ADMIN) || !confidentialOrRestrictedFlag) {
-                moveDocumentsToRespectiveCategories(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
+                moveDocumentsToRespectiveCategories(
+                    authorization,
+                    quarantineLegalDoc,
+                    caseData,
+                    caseDataUpdated,
+                    userRole
+                );
             } else {
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
                 setFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
@@ -218,7 +225,9 @@ public class ManageDocumentsService {
         updateQuarantineDocs(caseDataUpdated, existingQuarantineDocuments, userRole, false);
     }
 
+    // Pass Authorisation only when called via Manage document service
     public void moveDocumentsToRespectiveCategories(
+        String authorization,
         QuarantineLegalDoc quarantineLegalDoc,
         CaseData caseData,
         Map<String, Object> caseDataUpdated,
@@ -226,6 +235,10 @@ public class ManageDocumentsService {
 
         String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
         if (restrcitedKey != null) {
+            quarantineLegalDoc = downloadAndDeleteDocumentNew(
+                authorization,
+                quarantineLegalDoc
+            );
             moveToConfidentialOrRestricted(
                 caseDataUpdated,
                 CONFIDENTIAL_DOCUMENTS.equals(restrcitedKey)
@@ -263,7 +276,6 @@ public class ManageDocumentsService {
                                                List<Element<QuarantineLegalDoc>> confidentialOrRestrictedDocuments,
                                                QuarantineLegalDoc uploadDoc,
                                                String confidentialOrRestrictedKey) {
-        uploadDoc = downloadAndDeleteDocumentNew(uploadDoc.getUploadedBy(), uploadDoc);
         if (null != confidentialOrRestrictedDocuments) {
             confidentialOrRestrictedDocuments.add(element(uploadDoc));
             confidentialOrRestrictedDocuments.sort(Comparator.comparing(
@@ -277,13 +289,15 @@ public class ManageDocumentsService {
     }
 
 
-    private QuarantineLegalDoc downloadAndDeleteDocumentNew(String uploadedBy,
-                                                            QuarantineLegalDoc quarantineLegalDoc) {
+    private QuarantineLegalDoc downloadAndDeleteDocumentNew(
+        String authorization,
+        QuarantineLegalDoc quarantineLegalDoc) {
         try {
             Document document = getDocumentFromQuarantineObject(quarantineLegalDoc);
             UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
             log.info(" DocumentId found {}", documentId);
             Document newUploadedDocument = getNewUploadedDocument(
+                authorization,
                 document,
                 documentId
             );
@@ -338,12 +352,12 @@ public class ManageDocumentsService {
             .build();
     }
 
-    private Document getNewUploadedDocument(Document document,
+    private Document getNewUploadedDocument(String authorization, Document document,
                                             UUID documentId) {
         byte[] docData;
         Document newUploadedDocument = null;
         try {
-            String sysUserToken = systemUserService.getSysUserToken();
+            String sysUserToken = null != authorization ? authorization : systemUserService.getSysUserToken();
             String serviceToken = authTokenGenerator.generate();
             Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
                                                                      documentId

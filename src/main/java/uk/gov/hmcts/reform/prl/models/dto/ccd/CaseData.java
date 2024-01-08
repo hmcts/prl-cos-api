@@ -775,6 +775,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
     @JsonProperty("scannedDocuments")
     private List<Element<ScannedDocument>> scannedDocuments;
+    @JsonProperty("tempQuarantineDocumentList")
+    List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList;
 
     /**
      * Review documents.
