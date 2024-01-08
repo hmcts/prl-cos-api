@@ -4849,6 +4849,8 @@ public class DraftAnOrderServiceTest {
         assertEquals("C100", caseDataMap.get(CASE_TYPE_OF_APPLICATION));
         assertNotNull(caseDataMap.get("draftOrdersDynamicList"));
     }
+
+    @Test
     public void testHandleDocumentGenerationYesToEditOrder() throws Exception {
         DraftOrder draftOrder = DraftOrder.builder()
             .parentName("test")
