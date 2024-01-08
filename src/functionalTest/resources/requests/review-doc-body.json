@@ -1385,9 +1385,9 @@
             "document": {
               "category_id": null,
               "document_creation_date": "2024-01-05T14:03:11.559+00:00",
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2269f768--4707-b3ed-b62748a456c3",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2269f768-9f58-4707-b3ed-b62748a456c3/binary",
-              "document_filename": "Test doc4.pdf"
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/docId/binary",
+              "document_filename": "Test.pdf"
             },
             "fileName": null,
             "categoryId": "applicantApplication",
@@ -1400,7 +1400,7 @@
             "isRestricted": "No",
             "controlNumber": null,
             "documentParty": "Applicant",
-            "isConfidential": "Yes",
+            "isConfidential": "No",
             "uploadedByIdamId": "04cd097c-d159-4c30-9fae-8f6af307cdee",
             "otherDocsDocument": null,
             "restrictedDetails": null,
@@ -4034,9 +4034,9 @@
       "isWelshDocGen": "Yes",
       "isEngDocGen": "Yes",
       "reviewDoc": {
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2269f768-9f58-4707-b3ed-b62748a456c3",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2269f768-9f58-4707-b3ed-b62748a456c3/binary",
-        "document_filename": "Test doc4.pdf",
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/docId/binary",
+        "document_filename": "Test.pdf",
         "category_id": null,
         "document_creation_date": "2024-01-05T14:03:11.559+00:00"
       },
@@ -5608,12 +5608,12 @@
       "reviewDocsDynamicList": {
         "value": {
           "code": "90b41774-79e1-4254-bd55-2afe21e3d471",
-          "label": "Test doc4.pdf - 05 Jan 2024, 03:49:24 PM"
+          "label": "Test.pdf - 05 Jan 2024, 03:49:24 PM"
         },
         "list_items": [
           {
             "code": "90b41774-79e1-4254-bd55-2afe21e3d471",
-            "label": "Test doc4.pdf - 05 Jan 2024, 03:49:24 PM"
+            "label": "Test.pdf - 05 Jan 2024, 03:49:24 PM"
           }
         ]
       },

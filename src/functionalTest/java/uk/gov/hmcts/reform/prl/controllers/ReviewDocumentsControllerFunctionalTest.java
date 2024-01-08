@@ -1,20 +1,29 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.restassured.RestAssured;
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import java.io.File;
 
 import static org.hamcrest.Matchers.equalTo;
 
@@ -27,6 +36,12 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
+    @Autowired
+    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    @Autowired
+    ObjectMapper objectMapper;
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -38,19 +53,36 @@ public class ReviewDocumentsControllerFunctionalTest {
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
+    private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
+    @Before
+    public void setUp() {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
+
 
     @Test
+    @Ignore
     public void givenReviewDocuments_ShouldSegregateDocAccordingly() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
 
+        Response uploadResponse = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .when()
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-document");
+
+        uploadResponse.then().assertThat().statusCode(200);
+        DocumentResponse docRes = objectMapper.readValue(uploadResponse.getBody().asString(), DocumentResponse.class);
+
         String requestBodyRevised = requestBody
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/2269f768-9f58-4707-b3ed-b62748a456c3/binary",
-                     "http://dm-store-aat.service.core-compute-aat.internal/documents/11111111-9f58-4707-b3ed-b62748a456c3/binary");
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl());
 
-        System.out.println("BBBBB" + requestBodyRevised);
-
-        AboutToStartOrSubmitCallbackResponse response = request
+        AboutToStartOrSubmitCallbackResponse response = request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBodyRevised)
             .contentType("application/json")
@@ -60,7 +92,26 @@ public class ReviewDocumentsControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        log.info("RESULTTTTTT {}", response);
+        System.out.println("VVVVV" + response);
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.restrictedDocuments[0].value.isConfidential", equalTo("No"),
+                  "data.restrictedDocuments[0].value.isConfidential", equalTo("No"),
+                  "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"))
+            .assertThat().statusCode(200);
+
+
+
+
+
+        //log.info("RESULT {}", response);
 
         //List<Element<QuarantineLegalDoc>> restrictedDocuments
         //    = (List<Element<QuarantineLegalDoc>>) response.getData().get("restrictedDocuments");
@@ -87,4 +138,155 @@ public class ReviewDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
 
     }
+
+
+
+    @Test
+    public void givenReviewDocuments_whenOnlyRestrictedNotConfidential() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
+
+        Response uploadResponse = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .when()
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-document");
+
+        uploadResponse.then().assertThat().statusCode(200);
+        DocumentResponse docRes = objectMapper.readValue(uploadResponse.getBody().asString(), DocumentResponse.class);
+
+        String requestBodyRevised = requestBody
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
+            .replace("\"isRestricted\": \"No\"",
+                     "\"isRestricted\": \"Yes\"");
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.restrictedDocuments[0].value.isConfidential", equalTo("No"),
+                  "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.confidentialDocuments", equalTo(null))
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenReviewDocuments_whenOnlyConfidentialNotRestricted() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
+
+        Response uploadResponse = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .when()
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-document");
+
+        uploadResponse.then().assertThat().statusCode(200);
+        DocumentResponse docRes = objectMapper.readValue(uploadResponse.getBody().asString(), DocumentResponse.class);
+
+        String requestBodyRevised = requestBody
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
+            .replace("\"isConfidential\": \"No\"",
+                     "\"isConfidential\": \"Yes\"");
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.confidentialDocuments[0].value.isConfidential", equalTo("Yes"),
+                  "data.confidentialDocuments[0].value.isRestricted", equalTo("No"),
+                  "data.confidentialDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.restrictedDocuments", equalTo(null))
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenReviewDocuments_whenBothConfidentialAndRestrictedYes() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
+
+        Response uploadResponse = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .when()
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-document");
+
+        uploadResponse.then().assertThat().statusCode(200);
+        DocumentResponse docRes = objectMapper.readValue(uploadResponse.getBody().asString(), DocumentResponse.class);
+
+        String requestBodyRevised = requestBody
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
+            .replace("\"isConfidential\": \"No\"",
+                     "\"isConfidential\": \"Yes\"")
+            .replace("\"isRestricted\": \"No\"",
+                     "\"isRestricted\": \"Yes\"");
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.restrictedDocuments[0].value.isConfidential", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.confidentialDocuments", equalTo(null))
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenReviewDocuments_whenBothConfidentialAndRestrictedNo() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(REVIEW_DOCUMENT_REQUEST);
+
+        Response uploadResponse = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
+            .when()
+            .contentType(MediaType.MULTIPART_FORM_DATA_VALUE)
+            .post("/upload-citizen-document");
+
+        uploadResponse.then().assertThat().statusCode(200);
+        DocumentResponse docRes = objectMapper.readValue(uploadResponse.getBody().asString(), DocumentResponse.class);
+
+        String requestBodyRevised = requestBody
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl());
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.restrictedDocuments[0].value.isConfidential", equalTo("No"),
+                  "data.restrictedDocuments[0].value.isRestricted", equalTo("No"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.confidentialDocuments", equalTo(null))
+            .assertThat().statusCode(200);
+
+    }
+
 }
