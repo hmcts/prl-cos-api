@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +28,9 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -51,16 +55,29 @@ public class RelationshipsController {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildrenAndApplicantRelation>> applicantChildRelationsList = new ArrayList<>();
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<ChildrenAndApplicantRelation>> existingApplicantChildRelations = caseData.getRelations().getChildAndApplicantRelations();
         caseData.getApplicants().forEach(eachApplicant ->
                 caseData.getNewChildDetails().forEach(eachChild -> {
-                    ChildrenAndApplicantRelation applicantChildRelations = ChildrenAndApplicantRelation.builder()
+                   ChildrenAndApplicantRelation existingRelation = CollectionUtils.isNotEmpty(
+                        existingApplicantChildRelations)
+                        ? existingApplicantChildRelations.stream().filter(
+                            childrenAndApplicantRelationElement -> childrenAndApplicantRelationElement.getValue().getApplicantId().equals(
+                                eachApplicant.getId()) && childrenAndApplicantRelationElement.getValue().getChildId().equals(
+                                eachChild.getId())).findFirst().map(Element::getValue).orElse(null) : null;
+                        ChildrenAndApplicantRelation applicantChildRelations = ChildrenAndApplicantRelation.builder()
                             .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
-                                    eachChild.getValue().getLastName()))
+                                                         eachChild.getValue().getLastName()
+                            ))
                             .childId(eachChild.getId().toString())
                             .applicantId(eachApplicant.getId().toString())
-                            .applicantFullName(String.format(PrlAppsConstants.FORMAT, eachApplicant.getValue().getFirstName(),
-                                    eachApplicant.getValue().getLastName())).build();
-                    applicantChildRelationsList.add(Element.<ChildrenAndApplicantRelation>builder().value(applicantChildRelations).build());
+                            .childAndApplicantRelation(Objects.nonNull(existingRelation) ? existingRelation.getChildAndApplicantRelation() : null)
+                            .childLivesWith(Objects.nonNull(existingRelation) ? existingRelation.getChildLivesWith() : null)
+                            .applicantFullName(String.format(PrlAppsConstants.FORMAT,
+                                                             eachApplicant.getValue().getFirstName(),
+                                                             eachApplicant.getValue().getLastName()
+                            )).build();
+                        applicantChildRelationsList.add(Element.<ChildrenAndApplicantRelation>builder().value(applicantChildRelations).build());
+
                 })
         );
         caseDataUpdated.put("buffChildAndApplicantRelations", applicantChildRelationsList);
