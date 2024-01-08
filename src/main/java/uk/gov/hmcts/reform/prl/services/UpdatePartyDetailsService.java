@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -17,6 +18,8 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -26,6 +29,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
@@ -282,5 +287,32 @@ public class UpdatePartyDetailsService {
         fl401respondent.setPartyLevelFlag(respondentFlag);
 
         caseDetails.put("respondentsFL401", fl401respondent);
+    }
+
+    public Map<String, Object> setDefaultEmptyChildDetails(CaseData caseData) {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            List<Element<ChildDetailsRevised>> children = caseData.getNewChildDetails();
+            if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+                children = new ArrayList<>();
+                Element<ChildDetailsRevised> childDetails = element(ChildDetailsRevised.builder().build());
+                children.add(childDetails);
+                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, children);
+            } else {
+                caseDataUpdated.put(PrlAppsConstants.NEW_CHILDREN, caseData.getNewChildDetails());
+            }
+        } else {
+            List<Element<Child>> children = caseData.getChildren();
+            if (CollectionUtils.isEmpty(children) || CollectionUtils.size(children) < 1) {
+                children = new ArrayList<>();
+                Element<Child> childDetails = element(Child.builder().build());
+                children.add(childDetails);
+                caseDataUpdated.put(PrlAppsConstants.CHILDREN, children);
+            } else {
+                caseDataUpdated.put(PrlAppsConstants.CHILDREN, caseData.getChildren());
+            }
+        }
+        return caseDataUpdated;
+
     }
 }
