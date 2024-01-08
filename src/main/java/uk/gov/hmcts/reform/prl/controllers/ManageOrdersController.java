@@ -524,7 +524,7 @@ public class ManageOrdersController {
         }
     }
 
-    @PostMapping(path = "/manage-orders/validate-respondent-and-other-person-address",
+    @PostMapping(path = "/manage-orders/recipients-validations",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to validate respondent Lip and other person address")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -533,17 +533,7 @@ public class ManageOrdersController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            List<String> errorList;
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            errorList = manageOrderService.validateRespondentLipAndOtherPersonAddress(caseData);
-            if (isNotEmpty(errorList)) {
-                return AboutToStartOrSubmitCallbackResponse.builder()
-                    .errors(errorList)
-                    .build();
-            }
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(callbackRequest.getCaseDetails().getData())
-                .build();
+            return manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

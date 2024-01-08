@@ -10,6 +10,7 @@ import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -2910,35 +2912,45 @@ public class ManageOrderService {
         }
     }
 
-    public List<String> validateRespondentLipAndOtherPersonAddress(CaseData caseData) {
+    public AboutToStartOrSubmitCallbackResponse validateRespondentLipAndOtherPersonAddress(CallbackRequest callbackRequest) {
         List<String> errorList = new ArrayList<>();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (null != caseData.getManageOrders().getRecipientsOptions()
             && No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
             List<String> selectedRespondentIds = caseData.getManageOrders().getRecipientsOptions().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            validateAddressForParty(caseData.getRespondents(), selectedRespondentIds, errorList, true);
+            checkPartyAddressAndReturnError(caseData.getRespondents(), selectedRespondentIds, errorList, true);
 
         }
         if (null != caseData.getManageOrders().getOtherParties() && null != caseData.getOtherPartyInTheCaseRevised()) {
             List<String> selectedOtherPartyIds = caseData.getManageOrders().getOtherParties().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            validateAddressForParty(caseData.getOtherPartyInTheCaseRevised(), selectedOtherPartyIds, errorList, false);
+            checkPartyAddressAndReturnError(caseData.getOtherPartyInTheCaseRevised(), selectedOtherPartyIds, errorList, false);
         }
-        return errorList;
+
+        if (isNotEmpty(errorList)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(callbackRequest.getCaseDetails().getData())
+            .build();
+
     }
 
-    private void validateAddressForParty(List<Element<PartyDetails>> partyDetails,
-                                         List<String> selectedPartyIds, List<String> errorList,
-                                         Boolean isRespondent) {
+    private void checkPartyAddressAndReturnError(List<Element<PartyDetails>> partyDetails,
+                                                 List<String> selectedPartyIds, List<String> errorList,
+                                                 Boolean isRespondent) {
         List<Element<PartyDetails>> selectedPartyList = partyDetails.stream()
             .filter(party -> selectedPartyIds.contains(party.getId().toString()))
             .collect(Collectors.toList());
         for (Element<PartyDetails> party : selectedPartyList) {
             if ((isRespondent
                 && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
-                && checkForContactPreference(party) && !checkIfAddressIsPresent(party)) {
+                && checkForContactPreference(party) && !checkIfAddressIsPresent(party.getValue().getAddress())) {
                 errorList.add(VALIDATION_ADDRESS_ERROR_RESPONDENT);
-            } else if (Boolean.FALSE.equals(isRespondent) && !(checkIfAddressIsPresent(party))) {
+            } else if (Boolean.FALSE.equals(isRespondent) && !(checkIfAddressIsPresent(party.getValue().getAddress()))) {
                 errorList.add(VALIDATION_ADDRESS_ERROR_OTHER_PARTY);
             }
             if (!errorList.isEmpty()) {
@@ -2953,8 +2965,8 @@ public class ManageOrderService {
             || null == party.getValue().getEmail();
     }
 
-    private boolean checkIfAddressIsPresent(Element<PartyDetails> party) {
-        return null != party.getValue().getAddress()
-            && null != party.getValue().getAddress().getAddressLine1();
+    private boolean checkIfAddressIsPresent(Address address) {
+        return null != address
+            && null != address.getAddressLine1();
     }
 }

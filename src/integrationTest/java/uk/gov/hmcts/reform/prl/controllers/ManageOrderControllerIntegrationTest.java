@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import net.serenitybdd.junit.spring.integration.SpringIntegrationSerenityRunner;
 import org.apache.http.HttpResponse;
@@ -7,6 +8,9 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONObject;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +40,7 @@ public class ManageOrderControllerIntegrationTest {
     private final String caseOrderEmailNotificationEndpoint = "/case-order-email-notification";
 
     private final String manageOrdersEndpoint = "/manage-orders/about-to-submit";
-    private final String addressValidationEndpoint = "/manage-orders/validate-respondent-and-other-person-address";
+    private final String addressValidationEndpoint = "/manage-orders/recipients-validations";
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
@@ -53,6 +57,9 @@ public class ManageOrderControllerIntegrationTest {
 
     @Autowired
     ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    @Autowired
+    ObjectMapper objectMapper;
 
     @Test
     public void testPopulatePreviewOrderEndpoint() throws Exception {
@@ -129,7 +136,11 @@ public class ManageOrderControllerIntegrationTest {
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+        String content = EntityUtils.toString(httpResponse.getEntity());
+        JSONObject jsonObj = new JSONObject(content);
+        Assert.assertNotNull(jsonObj.getJSONObject("data"));
+        Assert.assertNotNull("1647373355918192", jsonObj.getJSONObject("data").get("id"));
+        Assert.assertNotNull("John Smith", jsonObj.getJSONObject("data").get("applicantCaseName"));
     }
 
 }

@@ -3302,7 +3302,6 @@ public class ManageOrdersControllerTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(caseData)).thenReturn(errors);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -3310,6 +3309,11 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+
+        AboutToStartOrSubmitCallbackResponse response  = AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(errors).build();
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(response);
+
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
 
@@ -3332,10 +3336,14 @@ public class ManageOrdersControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
+
+        AboutToStartOrSubmitCallbackResponse response  = AboutToStartOrSubmitCallbackResponse.builder()
+            .data(stringObjectMap).build();
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(response);
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(caseData)).thenReturn(new ArrayList<>());
+        when(manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest)).thenReturn(response);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = manageOrdersController
             .validateRespondentAndOtherPersonAddress(authToken, s2sToken, callbackRequest);
