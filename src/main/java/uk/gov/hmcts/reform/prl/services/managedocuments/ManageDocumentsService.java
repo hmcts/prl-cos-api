@@ -134,7 +134,6 @@ public class ManageDocumentsService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
-        log.info("MMMMMMange Dcosss {}",manageDocuments);
         UserDetails userDetails = userService.getUserDetails(authorization);
         String userRole = CaseUtils.getUserRole(userDetails);
 

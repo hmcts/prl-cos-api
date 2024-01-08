@@ -144,7 +144,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
-    public void givenReviewDocuments_whenBothConfidentialAndRestrictedNo() throws Exception {
+    public void givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNo() throws Exception {
 
         DocumentResponse docRes = uploadDocument();
 
@@ -163,6 +163,37 @@ public class ReviewDocumentsControllerFunctionalTest {
             .then()
             .body("data.legalProfUploadDocListDocTab[0].value.isConfidential", equalTo("No"),
                   "data.legalProfUploadDocListDocTab[0].value.isRestricted", equalTo("No"),
+                  "data.legalProfUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
+                  "data.restrictedDocuments", equalTo(null),
+                  "data.confidentialDocuments", equalTo(null))
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecNo() throws Exception {
+
+        DocumentResponse docRes = uploadDocument();
+
+        String requestBodyRevised = requestBody
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
+            .replace("\"reviewDecisionYesOrNo\": \"yes\"",
+                     "\"reviewDecisionYesOrNo\": \"no\"")
+            .replace("\"isConfidential\": \"No\"",
+                     "\"isConfidential\": \"Yes\"")
+            .replace("\"isRestricted\": \"No\"",
+                     "\"isRestricted\": \"Yes\"");
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.legalProfUploadDocListDocTab[0].value.isConfidential", equalTo("Yes"),
+                  "data.legalProfUploadDocListDocTab[0].value.isRestricted", equalTo("Yes"),
                   "data.legalProfUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
                   "data.restrictedDocuments", equalTo(null),
                   "data.confidentialDocuments", equalTo(null))
