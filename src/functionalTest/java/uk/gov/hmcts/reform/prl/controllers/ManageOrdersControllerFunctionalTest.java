@@ -18,7 +18,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
@@ -42,6 +41,12 @@ public class ManageOrdersControllerFunctionalTest {
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
+
+    private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER = "CallBckReqForFinaliseServeOrder.json";
+
+    private static final String VALID_INPUT_JSON_FOR_DRAFT = "CallBackRequestForDraft.json";
+
+    private static final String VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER = "CallBckReqForCreateOrUpdOrder.json";
 
     private static final String VALID_CAFCASS_REQUEST_JSON
         = "requests/cafcass-cymru-send-email-request.json";
@@ -123,6 +128,55 @@ public class ManageOrdersControllerFunctionalTest {
             .then().assertThat().statusCode(500);
     }
 
+    @Test
+    public void givenBody_whenAboutToSubmitForServeOrder() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenBody_whenAboutToSubmitForDraft() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_DRAFT);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenBody_whenAboutToSubmitForCreateUpldOrder() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+
+
+
+
 
     @Test
     public void createCcdTestCase() throws Exception {
@@ -141,15 +195,13 @@ public class ManageOrdersControllerFunctionalTest {
             .as(CaseDetails.class);
 
         Assert.assertNotNull(caseDetails);
-        Assert.assertNotNull(caseDetails.getData().get("id"));
+        Assert.assertNotNull(caseDetails.getId());
     }
 
     @Test
     public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails.toBuilder()
-                             .id(Long.parseLong((String)caseDetails.getData().get("id")))
-                             .state(State.JUDICIAL_REVIEW.getLabel()).build()).build();
+            .caseDetails(caseDetails).build();
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -158,8 +210,23 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.id", equalTo(caseDetails.getData().get("id")))
-            .assertThat().statusCode(200);
+            .body("data.postalInformationCaOnlyC47a", equalTo(null))
+            .body("data.postalInformationCA", equalTo(null))
+            .body("data.otherParties", equalTo(null))
+            .body("data.recipientsOptions", equalTo(null))
+            .body("data.cafcassCymruEmail", equalTo(null))
+            .body("data.serveOrderDynamicList", equalTo(null))
+            .body("data.serveOtherPartiesCA", equalTo(null))
+            .body("data.cafcassCymruServedOptions", equalTo(null))
+            .body("data.emailInformationCaOnlyC47a", equalTo(null))
+            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
+                  equalTo("Yes"))
+            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail",
+                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
+            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruServed",
+                  equalTo("Yes"))
+            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail",
+                  equalTo(caseDetails.getData().get("cafcassCymruEmail")));
     }
 
     @Test

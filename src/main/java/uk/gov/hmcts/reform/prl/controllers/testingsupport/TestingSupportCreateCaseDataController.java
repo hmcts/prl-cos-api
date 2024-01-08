@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -51,10 +50,10 @@ public class TestingSupportCreateCaseDataController {
     @PostMapping(path = "/testing-support/create-ccd-case-data",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to create test ccd case")
-    public AboutToStartOrSubmitCallbackResponse createCcdTestCase(@RequestHeader(HttpHeaders.AUTHORIZATION)
+    public CaseDetails createCcdTestCase(@RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                       @Parameter(hidden = true) String authorisation,
                                                                   @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                                                  @RequestBody CallbackRequest callbackRequest) throws  Exception {
+                                                                  @RequestBody CallbackRequest callbackRequest) {
 
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails().toBuilder()
                                                       .id(0L)
@@ -66,7 +65,7 @@ public class TestingSupportCreateCaseDataController {
                                                       .build(), objectMapper);
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
-            CaseEvent.COURTNAV_CASE_CREATION,
+            CaseEvent.TS_ADMIN_APPLICATION_NOC,
             idamClient.getUserInfo(authorisation).getUid()
         );
         StartEventResponse startEventResponse = coreCaseDataService.startSubmitCreate(
@@ -83,15 +82,13 @@ public class TestingSupportCreateCaseDataController {
                        .build())
             .data(caseDataMap).build();
 
-        CaseDetails caseDetails =  coreCaseDataService.submitCreate(
+        return coreCaseDataService.submitCreate(
             authorisation,
             authTokenGenerator.generate(),
             idamClient.getUserInfo(authorisation).getUid(),
             caseDataContent,
             true
         );
-        courtNavCaseService.refreshTabs(authorisation,caseDetails.getData(),caseDetails.getId());
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDetails.getData()).build();
     }
 
 }
