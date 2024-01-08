@@ -104,7 +104,7 @@ public class RoleAssignmentService {
             IS_JUDGE_OR_LEGAL_ADVISOR)) {
             if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
                 IS_JUDGE_OR_LEGAL_ADVISOR)))) {
-                return ((LinkedHashMap) (caseDataUpdated.get(JUDGE_NAME))).size() > 0 ? getIdamId(caseDataUpdated.get(
+                return (null != caseDataUpdated.get(JUDGE_NAME)) ? getIdamId(caseDataUpdated.get(
                     JUDGE_NAME))[0]
                     : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
             } else {
