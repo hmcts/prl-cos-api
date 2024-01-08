@@ -11,10 +11,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsCourtAdminEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
@@ -44,8 +48,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -112,7 +118,6 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Test
     public void shouldGenerateDraftOrderDropdown() {
-
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         draftOrderCollection.add(draftOrderElement);
@@ -1304,9 +1309,116 @@ public class EditAndApproveDraftOrderControllerTest {
         }, RuntimeException.class, "Invalid Client");
     }
 
+    @Test
+    public void testHandleEditAndApproveSubmitted() throws Exception {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsCourtAdminEnum.editTheOrderAndServe);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
+            .handleEditAndApproveSubmitted(authToken,s2sToken,callbackRequest);
+        assertNotNull(Objects.requireNonNull(callbackResponse.getBody()).getConfirmationHeader());
+    }
+
+    @Test
+    public void testHandleEditAndApproveSubmittedByCourtAdmin() throws Exception {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
+        assertExpectedException(() -> {
+            editAndApproveDraftOrderController
+                .handleEditAndApproveSubmitted(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testHandleEditAndApproveSubmittedWhenAskLegalRepChoosen() throws Exception {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        stringObjectMap.put("whatToDoWithOrderSolicitor", JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(12345L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        ResponseEntity<SubmittedCallbackResponse> callbackResponse = editAndApproveDraftOrderController
+            .handleEditAndApproveSubmitted(authToken,s2sToken,callbackRequest);
+        assertNotNull(callbackResponse.getBody().getConfirmationHeader());
+    }
+
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testExceptionForpopulateJudgeOrAdminDraftOrderCustomFields() {
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .build())
+            .build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            editAndApproveDraftOrderController.populateJudgeOrAdminDraftOrderCustomFields(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForpopulateCommonFields() {
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .build())
+            .build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            editAndApproveDraftOrderController.populateCommonFields(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForeditAndServeOrderMidEvent() {
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .build())
+            .build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            editAndApproveDraftOrderController.editAndServeOrderMidEvent(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForpopulateSdoOtherFields() {
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .build())
+            .build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            editAndApproveDraftOrderController.editAndServeOrderMidEvent(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
     }
 }

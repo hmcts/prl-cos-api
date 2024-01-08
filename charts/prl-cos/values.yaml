@@ -59,8 +59,6 @@ java:
         - southampton-court-email-address
         - idam-solicitor-username
         - idam-solicitor-password
-        - judge-testuser-one
-        - judge-testpassword
         - filtered-court-ids
         - da-filtered-court-ids
         - postcode-lookup-token

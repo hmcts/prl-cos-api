@@ -39,6 +39,12 @@ public class ManageOrdersControllerFunctionalTest {
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
+    private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER = "CallBckReqForFinaliseServeOrder.json";
+
+    private static final String VALID_INPUT_JSON_FOR_DRAFT = "CallBackRequestForDraft.json";
+
+    private static final String VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER = "CallBckReqForCreateOrUpdOrder.json";
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -104,27 +110,51 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
-
-        assert request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
+    public void givenBody_whenAboutToSubmitForServeOrder() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/edit-and-approve/submitted")
+            .post("/manage-orders/about-to-submit")
             .then()
-            .assertThat().statusCode(200)
-            .extract()
-            .response()
-            .body()
-            .print()
-            .toString()
-            .equals(
-                "{\"confirmation_header\":\"# Order approved\","
-                    + "\"confirmation_body\":\"### What happens next \\n We will send this order to admin."
-                    + "\\n\\n\\n If you have included further directions, admin will also receive them.\\n\"}"
-            );
+            .assertThat().statusCode(200);
+
     }
+
+    @Test
+    public void givenBody_whenAboutToSubmitForDraft() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_DRAFT);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenBody_whenAboutToSubmitForCreateUpldOrder() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .assertThat().statusCode(200);
+
+    }
+
+
+
+
 }

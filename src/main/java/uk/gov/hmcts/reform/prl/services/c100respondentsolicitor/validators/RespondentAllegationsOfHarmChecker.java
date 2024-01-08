@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -14,7 +15,6 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskEr
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum.ALLEGATION_OF_HARM_ERROR;
@@ -22,9 +22,9 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.anyNonEmpty;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentAllegationsOfHarmChecker implements RespondentEventChecker {
-    @Autowired
-    RespondentTaskErrorService respondentTaskErrorService;
+    private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
@@ -157,7 +157,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 .getRespChildAbuseInfo()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
             for (Behaviours childAbuse : childAbuseBehaviour) {
                 fields.add(ofNullable(childAbuse.getTypesOfAbuse()));
                 fields.add(ofNullable(childAbuse.getNatureOfBehaviour()));
@@ -180,7 +180,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 .getRespDomesticAbuseInfo()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
             for (Behaviours domesticAbuse : domesticAbuseBehaviour) {
                 fields.add(ofNullable(domesticAbuse.getTypesOfAbuse()));
                 fields.add(ofNullable(domesticAbuse.getNatureOfBehaviour()));

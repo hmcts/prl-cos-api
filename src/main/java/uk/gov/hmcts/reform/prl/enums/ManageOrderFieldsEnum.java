@@ -47,7 +47,6 @@ public enum ManageOrderFieldsEnum {
     isHearingPageNeeded("isHearingPageNeeded"),
     postalInformationCA("postalInformationCA"),
     cafcassCymruDocuments("cafcassCymruDocuments"),
-    draftOrdersDynamicList("draftOrdersDynamicList"),
     previewDraftOrderWelsh("previewDraftOrderWelsh"),
     whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
@@ -58,6 +57,8 @@ public enum ManageOrderFieldsEnum {
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
     selectTypeOfOrder("selectTypeOfOrder"),
+    judgeNotesEmptyUplaodJourney("judgeNotesEmptyUploadJourney"),
+    judgeNotesEmptyDraftJourney("judgeNotesEmptyDraftJourney"),
 
     //Hearing screen field show params
     isCafcassCymru("isCafcassCymru"),

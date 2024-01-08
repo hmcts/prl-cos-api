@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -19,10 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.editandapprove.JudgeApprovalDecisionsSolicitorEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -106,12 +103,6 @@ public class ManageOrdersController {
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
 
-    public static final String CONFIRMATION_HEADER = "# Order approved";
-    public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
-        ### What happens next \n We will send this order to admin.
-        \n\n If you have included further directions, admin will also receive them.
-        """;
-
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
     @SecurityRequirement(name = "Bearer Authentication")
@@ -119,7 +110,6 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        log.info("callback request for /populate-preview-order - {}", objectMapper.writeValueAsString(callbackRequest));
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
@@ -255,6 +245,7 @@ public class ManageOrdersController {
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
+            cleanUpSelectedManageOrderOptions(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             caseDataUpdated.put(STATE, caseData.getState());
             coreCaseDataService.triggerEvent(
@@ -285,8 +276,6 @@ public class ManageOrdersController {
             manageOrderService.resetChildOptions(callbackRequest);
             CaseDetails caseDetails = callbackRequest.getCaseDetails();
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            log.info("*** recipientsOptions {}", caseData.getManageOrders().getRecipientsOptions());
-            log.info("*** ServeOrderAdditionalDocuments {}", caseData.getManageOrders().getServeOrderAdditionalDocuments());
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
@@ -310,7 +299,6 @@ public class ManageOrdersController {
                     && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                     caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                 }
-                log.info("*** Court seal 0 {}", caseData.getCourtSeal());
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
                     authorisation,
                     caseData
@@ -325,7 +313,6 @@ public class ManageOrdersController {
             //Added below fields for WA purpose
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-            cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -508,7 +495,6 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
-        log.info("request data from callback ->{}", objectMapper.writeValueAsString(callbackRequest));
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             List<String> errorList = null;
@@ -533,27 +519,6 @@ public class ManageOrdersController {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
                 .build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @PostMapping(path = "/edit-and-approve/submitted", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    public ResponseEntity<SubmittedCallbackResponse> handleEditAndApproveSubmitted(@RequestHeader("Authorization")
-                                                                     @Parameter(hidden = true) String authorisation,
-                                                                   @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                                                   @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseDetails caseDetails = callbackRequest.getCaseDetails();
-            log.info("Solicitor created order options {}",caseDetails.getData().get("whatToDoWithOrderSolicitor"));
-            log.info("Court admin created order options {}",caseDetails.getData().get("whatToDoWithOrderCourtAdmin"));
-            if (JudgeApprovalDecisionsSolicitorEnum.askLegalRepToMakeChanges.toString()
-                .equalsIgnoreCase(String.valueOf(caseDetails.getData().get("whatToDoWithOrderSolicitor")))) {
-                return ResponseEntity.ok(SubmittedCallbackResponse.builder().build());
-            }
-            return ResponseEntity.ok(SubmittedCallbackResponse.builder()
-                                         .confirmationHeader(CONFIRMATION_HEADER)
-                                         .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

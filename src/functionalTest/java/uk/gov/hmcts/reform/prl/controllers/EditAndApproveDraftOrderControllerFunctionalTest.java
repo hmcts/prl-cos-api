@@ -117,4 +117,17 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .andExpect(status().isOk())
             .andReturn();
     }
+
+    @Test
+    public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+        mockMvc.perform(post("/edit-and-approve/submitted")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
 }
