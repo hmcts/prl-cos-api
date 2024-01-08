@@ -588,7 +588,6 @@ def sonarExclusions = [
   '**uk/gov/hmcts/reform/prl/utils/*',
   '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
   '**uk/gov/hmcts/reform/prl/Application.*',
-  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentService.java',
   '**uk/gov/hmcts/reform/prl/controllers/CallbackController.java'
 ]
 
