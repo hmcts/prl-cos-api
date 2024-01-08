@@ -159,7 +159,7 @@ public class EditReturnedOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         caseDataMap.put("orderType", "test");
-        when(draftAnOrderService.populateDraftOrderDocument(caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(),Mockito.any())).thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
