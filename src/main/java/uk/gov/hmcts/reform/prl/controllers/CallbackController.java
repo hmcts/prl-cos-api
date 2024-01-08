@@ -795,22 +795,6 @@ public class CallbackController {
             .build();
     }
 
-
-    @PostMapping(path = "/allocateJudgeTest",
-        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to allocate judge ")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Callback processed.",
-            content = @Content(mediaType = "application/json",
-                schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
-        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse allocateJudgeTest(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest
-    ) {
-        return AboutToStartOrSubmitCallbackResponse.builder().build();
-    }
-
     @PostMapping(path = "/fetchRoleAssignmentForUser",
         consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to allocate judge ")
