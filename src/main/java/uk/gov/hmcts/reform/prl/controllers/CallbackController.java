@@ -499,7 +499,6 @@ public class CallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            //  log.info("/send-to-gatekeeper::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
