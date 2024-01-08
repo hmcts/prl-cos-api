@@ -380,7 +380,7 @@ public class ManageDocumentsService {
         };
     }
 
-    private Document getDocumentFromQuarantineObject(QuarantineLegalDoc quarantineLegalDoc) {
+    public Document getDocumentFromQuarantineObject(QuarantineLegalDoc quarantineLegalDoc) {
 
         String attributeName = quarantineLegalDoc.getCategoryId() + "Document";
         return objectMapper.convertValue(objectMapper.convertValue(quarantineLegalDoc, Map.class).get(attributeName), Document.class);

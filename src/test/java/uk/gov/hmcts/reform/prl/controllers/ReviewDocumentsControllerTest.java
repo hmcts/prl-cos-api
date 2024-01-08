@@ -105,7 +105,7 @@ public class ReviewDocumentsControllerTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         reviewDocumentsController.handleMidEvent(auth, callbackRequest);
-        verify(reviewDocumentService).getReviewedDocumentDetails(caseData,stringObjectMap);
+        verify(reviewDocumentService).getReviewedDocumentDetailsNew(caseData,stringObjectMap);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
@@ -115,7 +115,7 @@ public class ReviewDocumentsControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         reviewDocumentsController.handleAboutToSubmit(auth, callbackRequest);
-        verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid);
+        verify(reviewDocumentService).processReviewDocumentNew(stringObjectMap,caseData,uuid);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
