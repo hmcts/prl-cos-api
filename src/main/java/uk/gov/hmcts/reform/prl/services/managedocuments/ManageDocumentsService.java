@@ -165,7 +165,10 @@ public class ManageDocumentsService {
         for (Element<ManageDocuments> element : manageDocuments) {
             ManageDocuments manageDocument = element.getValue();
             String categoryId = formulateCategoryId(manageDocument);
+            log.info("Get Category ID - {}", categoryId);
 
+            boolean confidentialOrRestrictedFlag = YesOrNo.Yes.equals(manageDocument.getIsConfidential())
+                || YesOrNo.Yes.equals(manageDocument.getIsRestricted());
             QuarantineLegalDoc quarantineLegalDoc = DocumentUtils.addQuarantineFieldsWithConfidentialFlag(
                 categoryId,
                 manageDocument.getDocument().toBuilder()
@@ -173,11 +176,13 @@ public class ManageDocumentsService {
                 objectMapper,
                 manageDocument,
                 userDetails,
-                YesOrNo.Yes.equals(manageDocument.getIsConfidential())
-                    || YesOrNo.Yes.equals(manageDocument.getIsRestricted())
+                confidentialOrRestrictedFlag
             );
-
-            if (userRole.equals(COURT_ADMIN)) {
+            log.info(
+                "QuarantineLegalDoc quarantineLegalDoc = DocumentUtils.addQuarantineFieldsWithConfidentialFlag -->{}",
+                quarantineLegalDoc
+            );
+            if (userRole.equals(COURT_ADMIN) || !confidentialOrRestrictedFlag) {
                 moveDocumentsToRespectiveCategories(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
             } else {
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
