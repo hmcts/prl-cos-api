@@ -29,8 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -58,13 +56,13 @@ public class RelationshipsController {
         List<Element<ChildrenAndApplicantRelation>> existingApplicantChildRelations = caseData.getRelations().getChildAndApplicantRelations();
         caseData.getApplicants().forEach(eachApplicant ->
                 caseData.getNewChildDetails().forEach(eachChild -> {
-                   ChildrenAndApplicantRelation existingRelation = CollectionUtils.isNotEmpty(
+                    ChildrenAndApplicantRelation existingRelation = CollectionUtils.isNotEmpty(
                         existingApplicantChildRelations)
                         ? existingApplicantChildRelations.stream().filter(
                             childrenAndApplicantRelationElement -> childrenAndApplicantRelationElement.getValue().getApplicantId().equals(
                                 eachApplicant.getId()) && childrenAndApplicantRelationElement.getValue().getChildId().equals(
                                 eachChild.getId())).findFirst().map(Element::getValue).orElse(null) : null;
-                        ChildrenAndApplicantRelation applicantChildRelations = ChildrenAndApplicantRelation.builder()
+                    ChildrenAndApplicantRelation applicantChildRelations = ChildrenAndApplicantRelation.builder()
                             .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
                                                          eachChild.getValue().getLastName()
                             ))
@@ -76,7 +74,7 @@ public class RelationshipsController {
                                                              eachApplicant.getValue().getFirstName(),
                                                              eachApplicant.getValue().getLastName()
                             )).build();
-                        applicantChildRelationsList.add(Element.<ChildrenAndApplicantRelation>builder().value(applicantChildRelations).build());
+                    applicantChildRelationsList.add(Element.<ChildrenAndApplicantRelation>builder().value(applicantChildRelations).build());
 
                 })
         );
