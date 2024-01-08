@@ -99,14 +99,18 @@ public class ManageOrdersController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    @Autowired
     private RoleAssignmentService roleAssignmentService;
 
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
 
-    private final HearingService hearingService;
+    private HearingService hearingService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
+
+    @Autowired
+    ManageOrdersController(RoleAssignmentService roleAssignmentService) {
+        this.roleAssignmentService = roleAssignmentService;
+    }
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
