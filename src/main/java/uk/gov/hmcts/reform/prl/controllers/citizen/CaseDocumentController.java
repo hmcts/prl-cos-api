@@ -342,6 +342,8 @@ public class CaseDocumentController {
                                                    @RequestHeader("ServiceAuthorization") String serviceAuthorization,
                                                    @RequestParam("file") MultipartFile file) throws IOException {
 
+        log.info("FFFFFF {}",authorisation);
+        log.info("SERFFFFF {}",serviceAuthorization);
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
