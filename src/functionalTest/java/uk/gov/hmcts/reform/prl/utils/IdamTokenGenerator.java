@@ -52,10 +52,10 @@ public class IdamTokenGenerator {
     @Value("${idam.judge.password}")
     private String judgePassword;
 
-    @Value("${idam.courtadmin.username}")
+    @Value("${idam.admin.username}")
     private String courtAdminUsername;
 
-    @Value("${idam.courtadmin.password}")
+    @Value("${idam.admin.password}")
     private String courtAdminPassword;
 
     public String generateIdamTokenForSolicitor() {
