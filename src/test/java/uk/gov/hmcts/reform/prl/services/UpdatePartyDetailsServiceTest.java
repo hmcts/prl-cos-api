@@ -87,6 +87,7 @@ public class UpdatePartyDetailsServiceTest {
             .isAddressConfidential(YesOrNo.No)
             .isPhoneNumberConfidential(YesOrNo.No)
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
             .build();
 
         Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent).build();
