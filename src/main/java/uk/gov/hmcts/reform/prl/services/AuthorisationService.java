@@ -47,7 +47,6 @@ public class AuthorisationService {
             userInfo = idamClient.getUserInfo(authorisation);
             log.info("Logged in user roles", userInfo.getRoles());
             if (null != userInfo) {
-                log.info("trueUSer");
                 return true;
             }
         } catch (Exception ex) {
