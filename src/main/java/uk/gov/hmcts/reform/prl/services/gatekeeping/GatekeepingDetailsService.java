@@ -29,13 +29,13 @@ public class GatekeepingDetailsService {
 
     private final RoleAssignmentService roleAssignmentService;
 
-    public GatekeepingDetails getGatekeepingDetails(String authorisation, Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+    public GatekeepingDetails getGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                     RefDataUserService refDataUserService) {
-        return mapGatekeepingDetails(authorisation, caseDataUpdated, legalAdviserList, refDataUserService);
+        return mapGatekeepingDetails(caseDataUpdated, legalAdviserList, refDataUserService);
 
     }
 
-    private GatekeepingDetails mapGatekeepingDetails(String authorisation, Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
+    private GatekeepingDetails mapGatekeepingDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                      RefDataUserService refDataUserService) {
         GatekeepingDetails.GatekeepingDetailsBuilder gatekeepingDetailsBuilder = GatekeepingDetails.builder();
         if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {

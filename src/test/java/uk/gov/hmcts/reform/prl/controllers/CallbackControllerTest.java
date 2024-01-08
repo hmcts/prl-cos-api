@@ -2307,7 +2307,7 @@ public class CallbackControllerTest {
                            .personalCode("testCode")
                            .build())
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(authToken, stringObjectMap, null,
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
             refDataUserService)).thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
