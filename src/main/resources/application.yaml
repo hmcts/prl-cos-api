@@ -303,6 +303,9 @@ idam:
   judge:
     username: ${JUDGE_USER_NAME:xxxxxx}
     password: ${JUDGE_PASSWORD:xxxxxx}
+  courtadmin:
+    username: ${IDAM_COURT_ADMIN_USERNAME:xxxxxx}
+    password: ${IDAM_SOLICITOR_PASSWORD:xxxxxxx}
 
 aca:
   api:
