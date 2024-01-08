@@ -75,7 +75,7 @@ public class EditReturnedOrderController {
             );
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
-                Map<String, Object> caseDataUpdated = editReturnedOrderService.getReturnedOrdersDynamicList(caseData);
+                Map<String, Object> caseDataUpdated = editReturnedOrderService.getReturnedOrdersDynamicList(authorisation, caseData);
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             } else {
