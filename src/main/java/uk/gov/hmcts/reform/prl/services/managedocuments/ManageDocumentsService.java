@@ -275,7 +275,7 @@ public class ManageDocumentsService {
     private QuarantineLegalDoc downloadAndDeleteDocumentNew(String uploadedBy,
                                                             QuarantineLegalDoc quarantineLegalDoc) {
         try {
-            Document document = getQuarantineDocumentForUploader(uploadedBy, quarantineLegalDoc);
+            Document document = getDocumentFromQuarantineObject(quarantineLegalDoc);
             UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
             log.info(" DocumentId found {}", documentId);
             Document newUploadedDocument = getNewUploadedDocument(
@@ -373,6 +373,12 @@ public class ManageDocumentsService {
             case BULK_SCAN -> quarantineLegalDoc.getUrl();
             default -> null;
         };
+    }
+
+    private Document getDocumentFromQuarantineObject(QuarantineLegalDoc quarantineLegalDoc) {
+
+        String attributeName = quarantineLegalDoc.getCategoryId() + "Document";
+        return objectMapper.convertValue(objectMapper.convertValue(quarantineLegalDoc, Map.class).get(attributeName), Document.class);
     }
 
     private String formulateCategoryId(ManageDocuments manageDocument) {
