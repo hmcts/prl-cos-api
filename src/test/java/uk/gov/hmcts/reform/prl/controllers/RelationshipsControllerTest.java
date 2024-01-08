@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValida
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -94,10 +95,14 @@ public class RelationshipsControllerTest {
             Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
         List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
 
+        List<Element<ChildrenAndApplicantRelation>> childrenApplicantRelations = new ArrayList<Element<ChildrenAndApplicantRelation>>();
+        childrenApplicantRelations.add(Element.<ChildrenAndApplicantRelation>builder().value(
+            ChildrenAndApplicantRelation.builder().build()).build());
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(applicantList)
             .newChildDetails(listOfChildren)
+            .relations(Relations.builder().childAndApplicantRelations(childrenApplicantRelations).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
