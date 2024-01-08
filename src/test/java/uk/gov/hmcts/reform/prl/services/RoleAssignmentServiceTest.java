@@ -12,6 +12,8 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
@@ -63,6 +65,58 @@ public class RoleAssignmentServiceTest {
         userDetails = UserDetails.builder().id("1").roles(roles).build();
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn("test");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        assertEquals("1", userDetails.getId());
+    }
+
+    @Test
+    public void testCreateRoleAssignmentJudgeWithName() {
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("isJudgeOrLegalAdviser", "judge");
+        caseDetailsMap.put("judgeName", "test");
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        caseDetails.setData(caseDetailsMap);
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn("test");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        assertEquals("1", userDetails.getId());
+    }
+
+    @Test
+    public void testCreateRoleAssignmentJudgeWithEmail() {
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("isJudgeOrLegalAdviser", "judge");
+        caseDetailsMap.put("judgeNameAndEmail", "test");
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        caseDetails.setData(caseDetailsMap);
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn("test");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        assertEquals("1", userDetails.getId());
+    }
+
+    @Test
+    public void testCreateRoleAssignmentIsJudgeNotNull() {
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("isJudgeOrLegalAdviser", "");
+        caseDetailsMap.put("legalAdviserList", "");
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        caseDetails.setData(caseDetailsMap);
+        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(DynamicList
+            .builder()
+            .value(DynamicListElement.builder().code("(test)").build())
+            .build());
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(userService.getUserByEmailId(auth, "test")).thenReturn(List.of(userDetails));
         when(authTokenGenerator.generate()).thenReturn("test");
         roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
         assertEquals("1", userDetails.getId());
