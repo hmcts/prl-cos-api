@@ -323,19 +323,23 @@ public class ManageOrdersController {
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
 
-            if (null != caseData.getManageOrders().getNameOfJudgeToReviewOrder()
-                || null != caseData.getManageOrders().getNameOfLaToReviewOrder()) {
-                roleAssignmentService.createRoleAssignment(
-                    authorisation,
-                    callbackRequest.getCaseDetails(),
-                    false,
-                    ALLOCATE_JUDGE_ROLE
-                );
-            }
+            checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void checkNameOfJudgeToReviewOrder(CaseData caseData, String authorisation, CallbackRequest callbackRequest) {
+        if (null != caseData.getManageOrders().getNameOfJudgeToReviewOrder()
+            || null != caseData.getManageOrders().getNameOfLaToReviewOrder()) {
+            roleAssignmentService.createRoleAssignment(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                false,
+                ALLOCATE_JUDGE_ROLE
+            );
         }
     }
 
