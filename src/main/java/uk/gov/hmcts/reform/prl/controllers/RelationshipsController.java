@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -59,9 +60,10 @@ public class RelationshipsController {
                     ChildrenAndApplicantRelation existingRelation = CollectionUtils.isNotEmpty(
                         existingApplicantChildRelations)
                         ? existingApplicantChildRelations.stream().filter(
-                            childrenAndApplicantRelationElement -> childrenAndApplicantRelationElement.getValue().getApplicantId().equals(
-                                eachApplicant.getId()) && childrenAndApplicantRelationElement.getValue().getChildId().equals(
-                                eachChild.getId())).findFirst().map(Element::getValue).orElse(null) : null;
+                            childrenAndApplicantRelationElement -> StringUtils.equals(childrenAndApplicantRelationElement.getValue().getApplicantId(),
+                                                                                      String.valueOf(eachApplicant.getId()))
+                                && StringUtils.equals(childrenAndApplicantRelationElement.getValue().getChildId(),String.valueOf(eachChild.getId())))
+                        .findFirst().map(Element::getValue).orElse(null) : null;
                     ChildrenAndApplicantRelation applicantChildRelations = ChildrenAndApplicantRelation.builder()
                             .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
                                                          eachChild.getValue().getLastName()
