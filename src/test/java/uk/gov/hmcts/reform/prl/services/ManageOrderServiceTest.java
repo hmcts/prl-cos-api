@@ -3845,10 +3845,10 @@ public class ManageOrderServiceTest {
         assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
         assertEquals(FL401_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
     }
-  
-  @Test
+
+    @Test
     public void testWaHearingTaskCreationFlag() {
-        List<Element<HearingData>> hearingDataList  = new ArrayList<>();
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
             .hearingTypes(DynamicList.builder()
@@ -3865,7 +3865,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testWaHearingTaskCreationFlagShouldReturnNo() {
-        List<Element<HearingData>> hearingDataList  = new ArrayList<>();
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
             .hearingTypes(DynamicList.builder()
@@ -3882,7 +3882,7 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testWaHearingTaskCreationFlagShouldReturnYes() {
-        List<Element<HearingData>> hearingDataList  = new ArrayList<>();
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
             .hearingTypes(DynamicList.builder()
