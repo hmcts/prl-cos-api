@@ -71,6 +71,8 @@ public class ManageDocumentsService {
             .documentCategories(getCategoriesSubcategories(authorization, String.valueOf(caseData.getId())))
             .build();
 
+        log.info("CCCCCC {}",manageDocuments.getDocumentCategories());
+
         return caseData.toBuilder()
             .isC8DocumentPresent(CaseUtils.isC8Present(caseData) ? "Yes" : "No")
             .manageDocuments(Arrays.asList(element(manageDocuments)))
