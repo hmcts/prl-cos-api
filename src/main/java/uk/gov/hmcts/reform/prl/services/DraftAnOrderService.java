@@ -283,8 +283,8 @@ public class DraftAnOrderService {
     private static boolean isJudgeReviewRequested(String loggedInUserType,
                                           String eventId,
                                           DraftOrder draftOrder) {
-        return UserRoles.JUDGE.name().equals(loggedInUserType)
-            && Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+        return Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && UserRoles.JUDGE.name().equals(loggedInUserType)
             && Yes.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
             && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
     }
@@ -292,17 +292,18 @@ public class DraftAnOrderService {
     private static boolean isManagerReviewRequested(String loggedInUserType,
                                                     String eventId,
                                                     DraftOrder draftOrder) {
-        return !UserRoles.JUDGE.name().equals(loggedInUserType)
-            && Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+        return Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && !UserRoles.JUDGE.name().equals(loggedInUserType)
             && AmendOrderCheckEnum.managerCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
     }
 
     private static boolean isAdminEditAndApproveOrder(String loggedInUserType,
                                                       String eventId,
                                                       DraftOrder draftOrder) {
-        return UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
-            && Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && YesOrNo.No.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded());
+        return Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+            && YesOrNo.No.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
+            && !AmendOrderCheckEnum.managerCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
     }
 
     /*private boolean doesOrderNeedsReviewByJudgeOrManager(String loggedInUserType,
