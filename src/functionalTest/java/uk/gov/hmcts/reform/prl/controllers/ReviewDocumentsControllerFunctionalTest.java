@@ -222,7 +222,7 @@ public class ReviewDocumentsControllerFunctionalTest {
         String token = switch (uploadedBy) {
             case SOLICITOR -> idamTokenGenerator.generateIdamTokenForSolicitor();
             case CAFCASS -> idamTokenGenerator.generateIdamTokenForCafcass();
-            case COURT_STAFF, COURT_ADMIN -> idamTokenGenerator.generateIdamTokenForSystem();
+            case COURT_STAFF, COURT_ADMIN -> idamTokenGenerator.generateIdamTokenForCourtAdmin();
             default -> null;
         };
 
@@ -376,7 +376,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_whenOnlyConfidentialNotRestrictedForCourtAdmin() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+        DocumentResponse docRes = uploadDocument(SOLICITOR);
 
         String requestBodyRevised = requestBodyForCourtAdmin
             .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
@@ -402,7 +402,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForCourtAdmin() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+        DocumentResponse docRes = uploadDocument(SOLICITOR);
 
         String requestBodyRevised = requestBodyForCourtAdmin
             .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
@@ -429,7 +429,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoCourtAdmin() throws Exception {
 
         log.info("givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoCourtAdmin.......");
-        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+        DocumentResponse docRes = uploadDocument(SOLICITOR);
         String requestBodyRevised = requestBodyForCourtAdmin
             .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
                      docRes.getDocument().getDocumentUrl())
@@ -459,7 +459,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecNoCourtAdmin() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+        DocumentResponse docRes = uploadDocument(SOLICITOR);
         String requestBodyRevised = requestBodyForCourtAdmin
             .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
                      docRes.getDocument().getDocumentUrl())
@@ -489,7 +489,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecYesCourtAdmin() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+        DocumentResponse docRes = uploadDocument(SOLICITOR);
         String requestBodyRevised = requestBodyForCourtAdmin
             .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
                      docRes.getDocument().getDocumentUrl())
