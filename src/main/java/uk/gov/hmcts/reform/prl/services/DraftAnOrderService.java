@@ -210,7 +210,8 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, authorisation));
         //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
-        if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
+        if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
+            && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())) {
             orderDetails.getValue().getManageOrderHearingDetails()
                 .forEach(hearingDataElement -> hearingDataElement.getValue()
                     .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
