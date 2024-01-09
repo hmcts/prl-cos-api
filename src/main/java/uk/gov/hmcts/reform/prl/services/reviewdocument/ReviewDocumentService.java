@@ -242,17 +242,10 @@ public class ReviewDocumentService {
         caseDataUpdated.put(DOC_LABEL,LABEL_WITH_HINT);
 
         switch (submittedBy) {
-            case LEGAL_PROFESSIONAL:
-                caseDataUpdated.put(REVIEW_DOC, quarantineLegalDoc.getDocument());
-                log.info(REVIEW_DOC + " {}", quarantineLegalDoc.getDocument());
-                break;
-            case CAFCASS:
-                caseDataUpdated.put(REVIEW_DOC, quarantineLegalDoc.getCafcassQuarantineDocument());
-                log.info(REVIEW_DOC + " {}", quarantineLegalDoc.getCafcassQuarantineDocument());
-                break;
-            case COURT_STAFF:
-                caseDataUpdated.put(REVIEW_DOC, quarantineLegalDoc.getCourtStaffQuarantineDocument());
-                log.info(REVIEW_DOC + " {}", quarantineLegalDoc.getCourtStaffQuarantineDocument());
+            case LEGAL_PROFESSIONAL, CAFCASS, COURT_STAFF:
+                Document documentTobeReviewed = manageDocumentsService.getDocumentFromQuarantineObject(quarantineLegalDoc);
+                caseDataUpdated.put(REVIEW_DOC, documentTobeReviewed);
+                log.info(REVIEW_DOC + " {}", documentTobeReviewed);
                 break;
             case BULK_SCAN:
                 caseDataUpdated.put(REVIEW_DOC, quarantineLegalDoc.getUrl());
