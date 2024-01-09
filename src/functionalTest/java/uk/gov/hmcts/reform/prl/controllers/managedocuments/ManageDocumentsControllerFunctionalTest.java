@@ -283,5 +283,22 @@ public class ManageDocumentsControllerFunctionalTest {
 
     }
 
+    @Test
+    public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCA() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/copy-manage-docs")
+            .then()
+            .body("data.courtStaffUploadDocListDocTab[0].value.categoryId", equalTo(APPLICANT_APPLICATION),
+                  "data.courtStaffUploadDocListDocTab[0].value.categoryName", equalTo(APPLICANT_APPLICATION_NAME),
+                  "data.courtStaffUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc2.pdf"))
+            .assertThat().statusCode(200);
+
+    }
 
 }
