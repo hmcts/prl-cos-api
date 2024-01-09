@@ -222,7 +222,7 @@ public class ReviewDocumentsControllerFunctionalTest {
         String token = switch (uploadedBy) {
             case SOLICITOR -> idamTokenGenerator.generateIdamTokenForSolicitor();
             case CAFCASS -> idamTokenGenerator.generateIdamTokenForCafcass();
-            case COURT_STAFF, COURT_ADMIN -> idamTokenGenerator.generateIdamTokenForCourtAdmin();
+            case COURT_STAFF, COURT_ADMIN -> idamTokenGenerator.generateIdamTokenForSystem();
             default -> null;
         };
 
