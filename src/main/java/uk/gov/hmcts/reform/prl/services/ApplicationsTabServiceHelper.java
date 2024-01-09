@@ -52,6 +52,9 @@ public class ApplicationsTabServiceHelper {
         otherPeople = maskConfidentialDetails(otherPeople);
         for (PartyDetails p : otherPeople) {
             OtherPersonInTheCaseRevised other = objectMapper.convertValue(p, OtherPersonInTheCaseRevised.class);
+            if (other.getGender() != null) {
+                other.setGender(Gender.getDisplayedValueFromEnumString(other.getGender()).getDisplayedValue());
+            }
             Element<OtherPersonInTheCaseRevised> wrappedPerson = Element.<OtherPersonInTheCaseRevised>builder()
                 .value(other).build();
             otherPersonsInTheCase.add(wrappedPerson);
