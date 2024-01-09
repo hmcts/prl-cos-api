@@ -635,8 +635,8 @@ public class ApplicationsTabServiceTest {
             .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
-            .isAtAddressLessThan5YearsWithDontKnow("Don't know")
-            .doTheyHaveLegalRepresentation("Don't know")
+            .isAtAddressLessThan5YearsWithDontKnow("dontKnow")
+            .doTheyHaveLegalRepresentation("dontKnow")
             .email("test@test.com")
             .build();
 
