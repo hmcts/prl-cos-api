@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
@@ -445,6 +446,7 @@ public class ApplicationsTabService implements TabService {
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
         for (Element<PartyDetails> applicant : currentApplicants) {
             Applicant a = objectMapper.convertValue(applicant.getValue(), Applicant.class);
+            a.setGender(Gender.getDisplayedValueFromEnumString(a.getGender()).getDisplayedValue());
             Element<Applicant> app = Element.<Applicant>builder().id(applicant.getId()).value(a).build();
             applicants.add(app);
         }
@@ -504,6 +506,19 @@ public class ApplicationsTabService implements TabService {
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
         for (Element<PartyDetails> respondent : currentRespondents) {
             Respondent a = objectMapper.convertValue(respondent.getValue(), Respondent.class);
+
+            if (a.getGender() != null) {
+                a.setGender(Gender.getDisplayedValueFromEnumString(a.getGender()).getDisplayedValue());
+            }
+            if (a.getIsAtAddressLessThan5YearsWithDontKnow() != null) {
+                a.setIsAtAddressLessThan5YearsWithDontKnow(
+                    YesNoDontKnow.getDisplayedValueIgnoreCase(a.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue());
+            }
+            if (a.getDoTheyHaveLegalRepresentation() != null) {
+                a.setDoTheyHaveLegalRepresentation(
+                    YesNoDontKnow.getDisplayedValueIgnoreCase(a.getDoTheyHaveLegalRepresentation()).getDisplayedValue());
+            }
+
             Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
             respondents.add(app);
         }
@@ -1048,6 +1063,9 @@ public class ApplicationsTabService implements TabService {
             OtherPersonInTheCase other = objectMapper.convertValue(p, OtherPersonInTheCase.class);
             //field below is not mapping correctly with the object mapper
             other.setRelationshipToChild(p.getOtherPersonRelationshipToChildren());
+            if (other.getGender() != null) {
+                other.setGender(Gender.getDisplayedValueFromEnumString(other.getGender()).getDisplayedValue());
+            }
             Element<OtherPersonInTheCase> wrappedPerson = Element.<OtherPersonInTheCase>builder()
                 .value(other).build();
             otherPersonsInTheCase.add(wrappedPerson);
