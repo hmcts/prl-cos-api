@@ -204,7 +204,6 @@ public class DraftAnOrderService {
 
     private final WelshCourtEmail welshCourtEmail;
 
-
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
@@ -232,11 +231,10 @@ public class DraftAnOrderService {
 
     public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType,String authorisation) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserFullName = userDetails.getFullName();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, currentUserFullName);
+            return manageOrderService.getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails);
         }
-        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, currentUserFullName);
+        return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails);
     }
 
     public Map<String, Object> getDraftOrderDynamicList(CaseData caseData,
@@ -259,6 +257,8 @@ public class DraftAnOrderService {
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+        log.info("*** draftoo dynamic list : {}", caseDataMap.get("draftOrdersDynamicList"));
+        log.info("*** draftoo order collection : {}", caseData.getDraftOrderCollection());
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -272,7 +272,8 @@ public class DraftAnOrderService {
                                                          Element<DraftOrder> draftOrderElement) {
         String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
         if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))
+            && !OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus)
+            && !OrderStatusEnum.rejectedByJudge.getDisplayedValue().equals(orderStatus))
             || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(orderStatus))) {
             supportedDraftOrderList.add(draftOrderElement);
@@ -522,6 +523,7 @@ public class DraftAnOrderService {
             .otherDetails(
                 OtherOrderDetails.builder().createdBy(draftOrder.getOtherDetails().getCreatedBy())
                     .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
+                    .orderCreatedByEmailId(draftOrder.getOtherDetails().getOrderCreatedByEmailId())
                     .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                         PrlAppsConstants.D_MMM_YYYY,
                         Locale.ENGLISH
@@ -768,12 +770,11 @@ public class DraftAnOrderService {
 
     public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
-
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
-
         log.info("selected order: {}", selectedOrder);
 
         caseDataMap.put(ORDER_NAME, getOrderName(selectedOrder));
+        caseDataMap.put("draftOrdersDynamicList", caseData.getDraftOrdersDynamicList());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put(DATE_ORDER_MADE, selectedOrder.getDateOrderMade());
@@ -892,6 +893,7 @@ public class DraftAnOrderService {
     public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
         UUID orderId = elementUtils.getDynamicListSelectedValue(
             caseData.getDraftOrdersDynamicList(), objectMapper);
+        log.info("** Order id {}", orderId);
         return caseData.getDraftOrderCollection().stream()
             .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
@@ -952,9 +954,9 @@ public class DraftAnOrderService {
             }
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
-            && (JudgeApprovalDecisionsCourtAdminEnum.editTheOrderAndServe
+            && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
-            || JudgeApprovalDecisionsSolicitorEnum.editTheOrderAndServe
+            || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
             isOrderEdited = true;
         }
@@ -962,18 +964,28 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
+        String status = manageOrderService.getOrderStatus(
+            draftOrder.getOrderSelectionType(),
+            loggedInUserType,
+            eventId,
+            draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
+        );
+        YesOrNo isJudgeApprovalNeeded =  draftOrder.getOtherDetails().getIsJudgeApprovalNeeded();
+        if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
+            if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
+                .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())) {
+                status = OrderStatusEnum.rejectedByJudge.getDisplayedValue();
+                isJudgeApprovalNeeded = Yes;
+            } else {
+                isJudgeApprovalNeeded = No;
+            }
+        }
         return draftOrder.toBuilder()
             .judgeNotes(!StringUtils.isEmpty(draftOrder.getJudgeNotes()) ? draftOrder.getJudgeNotes() : caseData.getJudgeDirectionsToAdmin())
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
-                              .status(manageOrderService.getOrderStatus(
-                                  draftOrder.getOrderSelectionType(),
-                                  loggedInUserType,
-                                  eventId,
-                                  draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
-                              ))
-                              .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                                                         ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
+                              .status(status)
+                              .isJudgeApprovalNeeded(isJudgeApprovalNeeded)
                               //PRL-4857 - clear this field as order is reviewed by judge/manager already.
                               .reviewRequiredBy(null)
                               .build())
@@ -1006,6 +1018,7 @@ public class DraftAnOrderService {
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
                               .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
+                              .orderCreatedByEmailId(draftOrder.getOtherDetails().getOrderCreatedByEmailId())
                               .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
