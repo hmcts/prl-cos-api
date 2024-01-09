@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -146,10 +147,12 @@ public class EditAndApproveDraftOrderController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("*** draft order dynamic list: {}", caseDataUpdated.get("draftOrdersDynamicList"));
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            log.info("*** draft order dynamic list: {}", caseData.getDraftOrdersDynamicList());
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -230,6 +233,7 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            log.info("*** draft order dynamic list: {}", callbackRequest.getCaseDetails().getData().get("draftOrdersDynamicList"));
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
             boolean isOrderEdited = false;
             isOrderEdited = draftAnOrderService.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited);
@@ -330,17 +334,32 @@ public class EditAndApproveDraftOrderController {
             log.info("judgeDirectionsToAdmin 1 : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
             log.info("Solicitor created order options {}",caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR));
             log.info("Court admin created order options {}",caseDataUpdated.get("whatToDoWithOrderCourtAdmin"));
-            log.info("judgeDirectionsToAdmin : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
-            log.info("map size before: {}", caseDataUpdated.size());
+            ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
+                .ok(SubmittedCallbackResponse.builder()
+                        .confirmationHeader(CONFIRMATION_HEADER)
+                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
+                .equalsIgnoreCase(String.valueOf(caseDataUpdated.get(WHAT_TO_DO_WITH_ORDER_SOLICITOR)))) {
+                CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+                log.info("*** Draft order dynamic list : {}", caseData.getDraftOrdersDynamicList());
+                log.info("*** Draft order collection : {}", caseData.getDraftOrderCollection());
+                try {
+                    DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                    manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(callbackRequest.getCaseDetails(), draftOrder);
+                } catch (Exception e) {
+                    log.error("Failed to send email to solicitor : {}", e.getMessage());
+                }
+                responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
+                                             .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
+                                             .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
+                                             .build());
+            }
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
             log.info("judgeDirectionsToAdmin : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
             log.info("map size after : {}", caseDataUpdated.size());
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             draftAnOrderService.updateCaseData(callbackRequest, caseDataUpdated);
-            return ResponseEntity
-                .ok(SubmittedCallbackResponse.builder()
-                        .confirmationHeader(CONFIRMATION_HEADER)
-                        .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS).build());
+            return responseEntity;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
