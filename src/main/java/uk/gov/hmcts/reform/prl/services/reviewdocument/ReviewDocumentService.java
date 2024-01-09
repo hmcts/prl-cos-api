@@ -388,6 +388,7 @@ public class ReviewDocumentService {
 
     private void removeDocumentFromQuarantineList(List<Element<QuarantineLegalDoc>> quarantineList, UUID uuid,
                                                   Map<String, Object> caseDataUpdated, String caseDataObjectToBeModified) {
+        //new changes done
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
             getQuarantineDocumentById(quarantineList, uuid);
         if (quarantineLegalDocElementOptional.isPresent()) {
