@@ -320,7 +320,9 @@ public class ReviewDocumentService {
             processDocumentsAfterReview(caseData, caseDataUpdated, quarantineLegalDocElementOptional, userRole);
             removeDocumentFromQuarantineList(
                 caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
-                uuid
+                uuid,
+                caseDataUpdated,
+                "legalProfQuarantineDocsList"
             );
         } else if (null != caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()) {
             quarantineLegalDocElementOptional =
@@ -329,7 +331,9 @@ public class ReviewDocumentService {
             processDocumentsAfterReview(caseData, caseDataUpdated, quarantineLegalDocElementOptional, userRole);
             removeDocumentFromQuarantineList(
                 caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
-                uuid
+                uuid,
+                caseDataUpdated,
+                "cafcassQuarantineDocsList"
             );
         } else if (null != caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()) {
             quarantineLegalDocElementOptional =
@@ -341,7 +345,9 @@ public class ReviewDocumentService {
             processDocumentsAfterReview(caseData, caseDataUpdated, quarantineLegalDocElementOptional, userRole);
             removeDocumentFromQuarantineList(
                 caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
-                uuid
+                uuid,
+                caseDataUpdated,
+                "courtStaffQuarantineDocsList"
             );
         } else if (null != caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList()) {
 
@@ -380,13 +386,15 @@ public class ReviewDocumentService {
 
     }
 
-    private void removeDocumentFromQuarantineList(List<Element<QuarantineLegalDoc>> quarantineList, UUID uuid) {
+    private void removeDocumentFromQuarantineList(List<Element<QuarantineLegalDoc>> quarantineList, UUID uuid,
+                                                  Map<String, Object> caseDataUpdated, String caseDataObjectToBeModified) {
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
             getQuarantineDocumentById(quarantineList, uuid);
         if (quarantineLegalDocElementOptional.isPresent()) {
             Element<QuarantineLegalDoc> quarantineLegalDocElement = quarantineLegalDocElementOptional.get();
             //remove document from quarantine
             quarantineList.remove(quarantineLegalDocElement);
+            caseDataUpdated.put(caseDataObjectToBeModified, quarantineList);
         }
     }
 
