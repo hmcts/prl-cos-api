@@ -658,8 +658,7 @@ public class DraftAnOrderService {
                 authorization,
                 caseData,
                 caseDataMap,
-                selectedOrder.getManageOrderHearingDetails(),
-                selectedOrder.getIsOrderCreatedBySolicitor()
+                selectedOrder.getManageOrderHearingDetails()
             );
         } else {
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
