@@ -154,7 +154,7 @@ public class DocumentUtils {
 
         HashMap<String, Object> hashMap = new HashMap<>();
 
-        hashMap.put(populateAttributeNameFromCategoryId(categoryId) + "Document", document);
+        hashMap.put(populateAttributeNameFromCategoryId(categoryId), document);
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc quarantineLegalDoc = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
 
@@ -176,7 +176,7 @@ public class DocumentUtils {
             .build();
     }
 
-    private static String populateAttributeNameFromCategoryId(String categoryId) {
+    public static String populateAttributeNameFromCategoryId(String categoryId) {
         String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
         String finalCategory = "";
         for (int i = 0; i < splittedCategory.length; i++) {
@@ -186,7 +186,7 @@ public class DocumentUtils {
                 finalCategory = finalCategory.concat(splittedCategory[i]);
             }
         }
-        return finalCategory;
+        return finalCategory + "Document";
     }
 
     public static String getDocumentId(String url) {

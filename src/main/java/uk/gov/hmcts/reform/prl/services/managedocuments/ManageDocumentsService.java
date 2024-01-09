@@ -396,7 +396,7 @@ public class ManageDocumentsService {
 
     public Document getDocumentFromQuarantineObject(QuarantineLegalDoc quarantineLegalDoc) {
 
-        String attributeName = quarantineLegalDoc.getCategoryId() + "Document";
+        String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId());
         return objectMapper.convertValue(objectMapper.convertValue(quarantineLegalDoc, Map.class).get(attributeName), Document.class);
     }
 
