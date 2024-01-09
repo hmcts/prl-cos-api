@@ -310,21 +310,10 @@ public class DraftAnOrderService {
                                                       DraftOrder draftOrder) {
         return Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
-            && YesOrNo.No.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
-            && !AmendOrderCheckEnum.managerCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
+            && (AmendOrderCheckEnum.noCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy())
+            || OrderStatusEnum.reviewedByManager.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus())
+            || OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus()));
     }
-
-    /*private boolean doesOrderNeedsReviewByJudgeOrManager(String loggedInUserType,
-                                                         String eventId,
-                                                         DraftOrder draftOrder) {
-        if (UserRoles.JUDGE.name().equals(loggedInUserType)
-            && Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && Yes.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
-            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy())) {
-            return true;
-        } else return Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-                && AmendOrderCheckEnum.managerCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
-    }*/
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
         Map<String, Object> updatedCaseData = new HashMap<>();
@@ -985,6 +974,8 @@ public class DraftAnOrderService {
                               ))
                               .isJudgeApprovalNeeded(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
                                                          ? No : draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
+                              //PRL-4857 - clear this field as order is reviewed by judge/manager already.
+                              .reviewRequiredBy(null)
                               .build())
             .build();
     }
