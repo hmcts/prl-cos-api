@@ -18,20 +18,20 @@ public class Respondent {
     private final String previousName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
-    private final String gender;
+    private String gender;
     private final String otherGender;
     private final YesOrNo isPlaceOfBirthKnown;
     private final String placeOfBirth;
     private final YesOrNo isCurrentAddressKnown;
     private final Address address;
-    private final String isAtAddressLessThan5YearsWithDontKnow;
+    private String isAtAddressLessThan5YearsWithDontKnow;
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
     private final String email;
     private final YesOrNo canYouProvidePhoneNumber;
     private final String phoneNumber;
 
-    private final String doTheyHaveLegalRepresentation;
+    private String doTheyHaveLegalRepresentation;
     private final String representativeFirstName;
     private final String representativeLastName;
     private final String solicitorEmail;

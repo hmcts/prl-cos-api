@@ -343,7 +343,7 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender("Male") //the new POJOs use strings as the enums are causing errors
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
@@ -517,6 +517,10 @@ public class ApplicationsTabServiceTest {
 
     @Test
     public void testUpdateTab() {
+        when(objectMapper.convertValue(partyDetails, Applicant.class))
+            .thenReturn(Applicant.builder().gender("male").build());
+        when(objectMapper.convertValue(partyDetails, Respondent.class))
+            .thenReturn(Respondent.builder().build());
         when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
             .thenReturn(OtherPersonInTheCase.builder().build());
         when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOrders.class))
@@ -591,6 +595,10 @@ public class ApplicationsTabServiceTest {
             .thenReturn(allegationsOfHarmRevisedOrders);
         when(objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class))
             .thenReturn(revisedChildAbductionDetails);
+        when(objectMapper.convertValue(partyDetails, Applicant.class))
+            .thenReturn(Applicant.builder().gender("male").build());
+        when(objectMapper.convertValue(partyDetails, Respondent.class))
+            .thenReturn(Respondent.builder().build());
         Mockito.lenient().when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
             .thenReturn(YesOrNo.Yes);
         Mockito.lenient().when(allegationOfHarmRevisedService.getWhichChildrenAreInRisk(any(ChildAbuseEnum.class),any(AllegationOfHarmRevised.class)))
@@ -624,9 +632,11 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender("Male") //the new POJOs use strings as the enums are causing errors
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isAtAddressLessThan5YearsWithDontKnow("Dont know")
+            .doTheyHaveLegalRepresentation("Dont know")
             .email("test@test.com")
             .build();
 
@@ -999,7 +1009,7 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender("Male") //the new POJOs use strings as the enums are causing errors
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
@@ -1605,6 +1615,10 @@ public class ApplicationsTabServiceTest {
                 ChildAbductionDetails.builder().build());
         when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOtherConcerns.class))
             .thenReturn(AllegationsOfHarmOtherConcerns.builder().build());
+        when(objectMapper.convertValue(partyDetails, Applicant.class))
+            .thenReturn(Applicant.builder().gender("male").build());
+        when(objectMapper.convertValue(partyDetails, Respondent.class))
+            .thenReturn(Respondent.builder().build());
 
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
     }

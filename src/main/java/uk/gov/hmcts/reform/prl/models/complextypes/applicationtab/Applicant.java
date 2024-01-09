@@ -18,7 +18,7 @@ public class Applicant {
     private final String previousName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
-    private final String gender;
+    private String gender;
     private final String otherGender;
     private final String placeOfBirth;
     private final Address address;
