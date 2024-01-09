@@ -343,7 +343,7 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender(Gender.male) //the new POJOs use strings as the enums are causing errors
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
@@ -367,7 +367,7 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender(Gender.male) //the new POJOs use strings as the enums are causing errors
+            .gender("Male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
@@ -407,7 +407,7 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender(Gender.male)
+            .gender(Gender.male.getDisplayedValue())
             .address(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build())
             .isAddressConfidential(YesOrNo.Yes)
             .canYouProvideEmailAddress(YesOrNo.Yes)
@@ -518,7 +518,7 @@ public class ApplicationsTabServiceTest {
     @Test
     public void testUpdateTab() {
         when(objectMapper.convertValue(partyDetails, Applicant.class))
-            .thenReturn(Applicant.builder().gender(Gender.male).build());
+            .thenReturn(Applicant.builder().gender("male").build());
         when(objectMapper.convertValue(partyDetails, Respondent.class))
             .thenReturn(Respondent.builder().build());
         when(objectMapper.convertValue(partyDetails, OtherPersonInTheCase.class))
@@ -596,7 +596,7 @@ public class ApplicationsTabServiceTest {
         when(objectMapper.convertValue(caseData, RevisedChildAbductionDetails.class))
             .thenReturn(revisedChildAbductionDetails);
         when(objectMapper.convertValue(partyDetails, Applicant.class))
-            .thenReturn(Applicant.builder().gender(Gender.male).build());
+            .thenReturn(Applicant.builder().gender("male").build());
         when(objectMapper.convertValue(partyDetails, Respondent.class))
             .thenReturn(Respondent.builder().build());
         Mockito.lenient().when(allegationOfHarmRevisedService.getIfAllChildrenAreRisk(any(ChildAbuseEnum.class), any(AllegationOfHarmRevised.class)))
@@ -1616,7 +1616,7 @@ public class ApplicationsTabServiceTest {
         when(objectMapper.convertValue(caseDataWithParties, AllegationsOfHarmOtherConcerns.class))
             .thenReturn(AllegationsOfHarmOtherConcerns.builder().build());
         when(objectMapper.convertValue(partyDetails, Applicant.class))
-            .thenReturn(Applicant.builder().gender(Gender.male).build());
+            .thenReturn(Applicant.builder().gender("male").build());
         when(objectMapper.convertValue(partyDetails, Respondent.class))
             .thenReturn(Respondent.builder().build());
 
