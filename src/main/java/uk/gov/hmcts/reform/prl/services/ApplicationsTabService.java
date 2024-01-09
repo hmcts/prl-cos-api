@@ -511,10 +511,12 @@ public class ApplicationsTabService implements TabService {
                 a.setGender(Gender.getDisplayedValueFromEnumString(a.getGender()).getDisplayedValue());
             }
             if (a.getIsAtAddressLessThan5YearsWithDontKnow() != null) {
+                log.info("getIsAtAddressLessThan5YearsWithDontKnow value: " +  a.getIsAtAddressLessThan5YearsWithDontKnow());
                 a.setIsAtAddressLessThan5YearsWithDontKnow(
                     YesNoDontKnow.getDisplayedValueIgnoreCase(a.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue());
             }
             if (a.getDoTheyHaveLegalRepresentation() != null) {
+                log.info("getDoTheyHaveLegalRepresentation value: " +  a.getDoTheyHaveLegalRepresentation());
                 a.setDoTheyHaveLegalRepresentation(
                     YesNoDontKnow.getDisplayedValueIgnoreCase(a.getDoTheyHaveLegalRepresentation()).getDisplayedValue());
             }
