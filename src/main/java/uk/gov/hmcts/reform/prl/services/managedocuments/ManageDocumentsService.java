@@ -543,7 +543,7 @@ public class ManageDocumentsService {
             }
             if (caseData.getReviewDocuments().getRestrictedDocuments() != null) {
                 List<Element<QuarantineLegalDoc>> restrictedDocuments = renameConfidentialDocumentForCourtAdmin(
-                    caseData.getReviewDocuments().getConfidentialDocuments());
+                    caseData.getReviewDocuments().getRestrictedDocuments());
                 caseDataUpdated.put("restrictedDocuments", restrictedDocuments);
             }
         }
@@ -559,6 +559,7 @@ public class ManageDocumentsService {
                 quarantineLegalDoc[0] = downloadAndDeleteDocumentNew(
                     quarantineLegalDoc[0]
                 );
+                log.info("renameConfidentialDocumentForCourtAdmin -- {}", quarantineLegalDoc[0]);
                 return element(element.getId(), quarantineLegalDoc[0]);
             }
         ).collect(Collectors.toList());

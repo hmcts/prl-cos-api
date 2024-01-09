@@ -128,11 +128,12 @@ public class ManageDocumentsController extends AbstractCallbackController {
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation) {
 
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-
+        Map<String, Object> caseDataUpdated = manageDocumentsService.appendConfidentialDocumentNameForCourtAdmin(
+            callbackRequest,
+            authorisation
+        );
         //update all tabs
-        tabService.updateAllTabsIncludingConfTab(caseData);
-        manageDocumentsService.appendConfidentialDocumentNameForCourtAdmin(callbackRequest, authorisation);
+        tabService.updateAllTabsIncludingConfTab(objectMapper.convertValue(caseDataUpdated, CaseData.class));
 
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIRMATION_HEADER)
