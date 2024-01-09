@@ -93,9 +93,9 @@ public class ReviewDocumentsControllerTest {
     @Test
     public void testHandleAboutToStart() throws Exception {
 
-        when(reviewDocumentService.getDynamicListElements(caseData, caseDetails.getData())).thenReturn(dynamicListElements);
+        when(reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDetails.getData())).thenReturn(dynamicListElements);
         reviewDocumentsController.handleAboutToStart(auth, callbackRequest);
-        verify(reviewDocumentService).getDynamicListElements(caseData, caseDetails.getData());
+        verify(reviewDocumentService).fetchDocumentDynamicListElements(caseData, caseDetails.getData());
         verifyNoMoreInteractions(reviewDocumentService);
     }
 
