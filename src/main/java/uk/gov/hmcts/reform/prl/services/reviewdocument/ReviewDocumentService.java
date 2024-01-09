@@ -191,9 +191,7 @@ public class ReviewDocumentService {
             .getReviewDocsDynamicList().getValue()) {
             UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
 
-            List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = (List<Element<QuarantineLegalDoc>>) caseDataUpdated.get(
-                "tempQuarantineDocumentList");
-
+            List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = caseData.getDocumentManagementDetails().getTempQuarantineDocumentList();
             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElement = Optional.empty();
             quarantineLegalDocElement = getQuarantineDocumentById(tempQuarantineDocumentList, uuid);
 
@@ -202,7 +200,6 @@ public class ReviewDocumentService {
                 quarantineLegalDocElement.get(),
                 quarantineLegalDocElement.get().getValue().getUploaderRole()
             );
-
 
             log.info("** uuid ** {}", uuid);
 
