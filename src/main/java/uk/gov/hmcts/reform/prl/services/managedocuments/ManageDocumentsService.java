@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -44,6 +46,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -185,7 +188,6 @@ public class ManageDocumentsService {
             );
             if (userRole.equals(COURT_ADMIN) || !confidentialOrRestrictedFlag) {
                 moveDocumentsToRespectiveCategories(
-                    authorization,
                     quarantineLegalDoc,
                     caseData,
                     caseDataUpdated,
@@ -227,7 +229,6 @@ public class ManageDocumentsService {
 
     // Pass Authorisation only when called via Manage document service
     public void moveDocumentsToRespectiveCategories(
-        String authorization,
         QuarantineLegalDoc quarantineLegalDoc,
         CaseData caseData,
         Map<String, Object> caseDataUpdated,
@@ -235,10 +236,12 @@ public class ManageDocumentsService {
 
         String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
         if (restrcitedKey != null) {
-            quarantineLegalDoc = downloadAndDeleteDocumentNew(
-                authorization,
-                quarantineLegalDoc
-            );
+            if (!userRole.equals(COURT_ADMIN)) {
+                quarantineLegalDoc = downloadAndDeleteDocumentNew(
+                    quarantineLegalDoc
+                );
+            }
+
             moveToConfidentialOrRestricted(
                 caseDataUpdated,
                 CONFIDENTIAL_DOCUMENTS.equals(restrcitedKey)
@@ -290,34 +293,33 @@ public class ManageDocumentsService {
 
 
     private QuarantineLegalDoc downloadAndDeleteDocumentNew(
-        String authorization,
         QuarantineLegalDoc quarantineLegalDoc) {
         try {
             Document document = getDocumentFromQuarantineObject(quarantineLegalDoc);
-            UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
-            log.info(" DocumentId found {}", documentId);
-            Document newUploadedDocument = getNewUploadedDocument(
-                authorization,
-                document,
-                documentId
-            );
-
-            log.info("document uploaded {}", newUploadedDocument);
-            if (null != newUploadedDocument) {
-                caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
-                                                  authTokenGenerator.generate(),
-                                                  documentId, true
+            if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
+                UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
+                log.info(" DocumentId found {}", documentId);
+                Document newUploadedDocument = getNewUploadedDocument(
+                    document,
+                    documentId
                 );
-                log.info("deleted document {}", documentId);
 
-                QuarantineLegalDoc newQuarantineLegalDoc = DocumentUtils.getQuarantineUploadDocument(
-                    quarantineLegalDoc.getCategoryId(),
-                    newUploadedDocument,
-                    objectMapper
-                );
-                return addQuarantineDocumentFields(newQuarantineLegalDoc, quarantineLegalDoc);
+                log.info("document uploaded {}", newUploadedDocument);
+                if (null != newUploadedDocument) {
+                    caseDocumentClient.deleteDocument(systemUserService.getSysUserToken(),
+                                                      authTokenGenerator.generate(),
+                                                      documentId, true
+                    );
+                    log.info("deleted document {}", documentId);
 
-
+                    QuarantineLegalDoc newQuarantineLegalDoc = DocumentUtils.getQuarantineUploadDocument(
+                        quarantineLegalDoc.getCategoryId(),
+                        newUploadedDocument,
+                        objectMapper
+                    );
+                    return addQuarantineDocumentFields(newQuarantineLegalDoc, quarantineLegalDoc);
+                }
+                return quarantineLegalDoc;
             } else {
                 throw new IllegalStateException("Failed to move document to confidential tab please retry");
             }
@@ -352,12 +354,12 @@ public class ManageDocumentsService {
             .build();
     }
 
-    private Document getNewUploadedDocument(String authorization, Document document,
+    private Document getNewUploadedDocument(Document document,
                                             UUID documentId) {
         byte[] docData;
         Document newUploadedDocument = null;
         try {
-            String sysUserToken = null != authorization ? authorization : systemUserService.getSysUserToken();
+            String sysUserToken = systemUserService.getSysUserToken();
             String serviceToken = authTokenGenerator.generate();
             Resource resource = caseDocumentClient.getDocumentBinary(sysUserToken, serviceToken,
                                                                      documentId
@@ -526,5 +528,39 @@ public class ManageDocumentsService {
         } else {
             return !isEmpty(quarantineDocsList) ? quarantineDocsList : new ArrayList<>();
         }
+    }
+
+    public Map<String, Object> appendConfidentialDocumentNameForCourtAdmin(CallbackRequest callbackRequest, String authorization) {
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        UserDetails userDetails = userService.getUserDetails(authorization);
+        String userRole = CaseUtils.getUserRole(userDetails);
+        if (userRole.equals(COURT_ADMIN)) {
+            if (caseData.getReviewDocuments().getConfidentialDocuments() != null) {
+                List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
+                    caseData.getReviewDocuments().getConfidentialDocuments());
+                caseDataUpdated.put("confidentialDocuments", confidentialDocuments);
+            }
+            if (caseData.getReviewDocuments().getRestrictedDocuments() != null) {
+                List<Element<QuarantineLegalDoc>> restrictedDocuments = renameConfidentialDocumentForCourtAdmin(
+                    caseData.getReviewDocuments().getConfidentialDocuments());
+                caseDataUpdated.put("restrictedDocuments", restrictedDocuments);
+            }
+        }
+        caseDataUpdated.remove("manageDocuments");
+        return caseDataUpdated;
+    }
+
+    private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
+        final @NotNull @Valid QuarantineLegalDoc[] quarantineLegalDoc = new QuarantineLegalDoc[1];
+        return confidentialDocuments.stream().map(
+            element -> {
+                quarantineLegalDoc[0] = element.getValue();
+                quarantineLegalDoc[0] = downloadAndDeleteDocumentNew(
+                    quarantineLegalDoc[0]
+                );
+                return element(element.getId(), quarantineLegalDoc[0]);
+            }
+        ).collect(Collectors.toList());
     }
 }

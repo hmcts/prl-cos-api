@@ -413,7 +413,6 @@ public class ReviewDocumentService {
 
             // Pass Authorisation only when called via Manage document service
             manageDocumentsService.moveDocumentsToRespectiveCategories(
-                null,
                 tempQuarantineDoe,
                 caseData,
                 caseDataUpdated,

@@ -132,6 +132,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
 
         //update all tabs
         tabService.updateAllTabsIncludingConfTab(caseData);
+        manageDocumentsService.appendConfidentialDocumentNameForCourtAdmin(callbackRequest, authorisation);
 
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIRMATION_HEADER)
