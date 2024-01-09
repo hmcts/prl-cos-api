@@ -32,7 +32,7 @@ public class EditReturnedOrderControllerFunctionalTest {
     @MockBean
     private EditReturnedOrderService editReturnedOrderService;
 
-    private static final String VALID_INPUT_JSON_FOR_RETURNED_ORDER = "CallBackRequestEditReturnedOrder.json";
+    private static final String VALID_INPUT_JSON_FOR_RETURNED_ORDER = "requests/editreturnedorder/CallBackRequestEditReturnedOrder.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
