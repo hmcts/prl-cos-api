@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.models.complextypes.applicationtab;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -19,7 +18,7 @@ public class Applicant {
     private final String previousName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
-    private final Gender gender;
+    private String gender;
     private final String otherGender;
     private final String placeOfBirth;
     private final Address address;
