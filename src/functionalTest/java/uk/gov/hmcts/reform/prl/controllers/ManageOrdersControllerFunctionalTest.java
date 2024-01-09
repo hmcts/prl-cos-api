@@ -234,9 +234,7 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_WhenServeOrderTestSendEmailToApplicantOrRespLip() throws Exception {
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails.toBuilder()
-                             .id(Long.parseLong((String)caseDetails.getData().get("id")))
-                             .state(State.JUDICIAL_REVIEW.getLabel()).build()).build();
+            .caseDetails(caseDetails).build();
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
