@@ -103,6 +103,58 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
+    public void testCreateRoleAssignmentJudgeGatekeeping() {
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "test");
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        caseDetails.setData(caseDetailsMap);
+
+        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(DynamicList
+            .builder()
+            .value(DynamicListElement.builder().code("(test)").build())
+            .build());
+        when(userService.getUserByEmailId(auth, "test")).thenReturn(List.of(userDetails));
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn("test");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        assertEquals("1", userDetails.getId());
+    }
+
+    @Test
+    public void testCreateRoleAssignmentJudgeGatekeepingWithName() {
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "judge");
+        caseDetailsMap.put("judgeNameAndEmail", "test");
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        caseDetails.setData(caseDetailsMap);
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn("test");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        assertEquals("1", userDetails.getId());
+    }
+
+    @Test
+    public void testCreateRoleAssignmentJudgeGatekeepingWithEmail() {
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "judge");
+        caseDetailsMap.put("judgeName", "test");
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        caseDetails.setData(caseDetailsMap);
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn("test");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        assertEquals("1", userDetails.getId());
+    }
+
+    @Test
     public void testCreateRoleAssignmentIsJudgeNotNull() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviser", "");
