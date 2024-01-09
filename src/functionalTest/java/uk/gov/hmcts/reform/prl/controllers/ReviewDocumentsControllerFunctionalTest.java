@@ -359,7 +359,7 @@ public class ReviewDocumentsControllerFunctionalTest {
                      "\"isConfidential\": \"Yes\"");
 
         request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
             .body(requestBodyRevised)
             .when()
             .contentType("application/json")
