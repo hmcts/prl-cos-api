@@ -236,29 +236,14 @@ public class DocumentGenService {
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_filename}")
     protected String daListOnNoticeFl404bFile;
 
-    @Autowired
-    DgsService dgsService;
-
-    @Autowired
-    DocumentLanguageService documentLanguageService;
-
-    @Autowired
-    OrganisationService organisationService;
-
-    @Autowired
-    UploadDocumentService uploadService;
-
-    @Autowired
-    CaseDocumentClient caseDocumentClient;
-
-    @Autowired
-    IdamClient idamClient;
-
-    @Autowired
-    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
-
-    @Autowired
-    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final DgsService dgsService;
+    private final DocumentLanguageService documentLanguageService;
+    private final OrganisationService organisationService;
+    private final UploadDocumentService uploadService;
+    private final CaseDocumentClient caseDocumentClient;
+    private final IdamClient idamClient;
+    private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @Autowired
     private DgsApiClient dgsApiClient;
@@ -266,7 +251,6 @@ public class DocumentGenService {
     private final AuthTokenGenerator authTokenGenerator;
 
     protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
-
 
     public CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
