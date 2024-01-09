@@ -884,7 +884,7 @@ public class ManageOrderService {
         return selectedOrder.toString();
     }
 
-    private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData, String currentUserFullName)
+    private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData, UserDetails userDetails)
         throws Exception {
 
         String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
@@ -915,7 +915,7 @@ public class ManageOrderService {
 
             return orderCollection;
         } else {
-            return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId, currentUserFullName);
+            return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId, userDetails);
         }
     }
 
@@ -923,58 +923,59 @@ public class ManageOrderService {
                                                         CaseData caseData,
                                                         String flagSelectedOrder,
                                                         String flagSelectedOrderId,
-                                                        String currentUserFullName) {
+                                                        UserDetails userDetails) {
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrder)
-                                        .orderTypeId(flagSelectedOrderId)
-                                        .orderDocument(caseData.getUploadOrderDoc())
-                                        .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                                        .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
-                                        .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
-                                        .otherDetails(OtherOrderDetails.builder()
-                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                                          .orderCreatedBy(currentUserFullName)
-                                                          .orderCreatedDate(dateTime.now()
-                                                                                .format(DateTimeFormatter.ofPattern(
-                                                                                    PrlAppsConstants.D_MMM_YYYY,
-                                                                                    Locale.ENGLISH
-                                                                                )))
-                                                          .orderMadeDate(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(
-                                                              DateTimeFormatter.ofPattern(
-                                                                  PrlAppsConstants.D_MMM_YYYY,
-                                                                  Locale.ENGLISH
-                                                              )) : null)
-                                                          .approvalDate(caseData.getApprovalDate() != null ? caseData.getApprovalDate().format(
-                                                              DateTimeFormatter.ofPattern(
-                                                                  PrlAppsConstants.D_MMM_YYYY,
-                                                                  Locale.ENGLISH
-                                                              )) : null)
-                                                          .orderRecipients(caseData.getManageOrdersOptions().equals(
-                                                              ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
-                                                              caseData) : null)
-                                                          .status(getOrderStatus(
-                                                              orderSelectionType,
-                                                              loggedInUserType,
-                                                              null,
-                                                              null
-                                                          ))
-                                                          .build())
-                                        .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
-                                                         ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
-                                        .typeOfOrder(typeOfOrder != null
-                                                         ? typeOfOrder.getDisplayedValue() : null)
-                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                                             ? caseData.getDoesOrderClosesCase() : null)
-                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-                                        .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
-                                                                 ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
-                                        .childOption(getChildOption(caseData))
-                                        .isOrderUploaded(Yes)
-                                        .build()));
+                                   .orderTypeId(flagSelectedOrderId)
+                                   .orderDocument(caseData.getUploadOrderDoc())
+                                   .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                                   .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+                                   .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
+                                   .otherDetails(OtherOrderDetails.builder()
+                                                     .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                                     .orderCreatedBy(userDetails.getFullName())
+                                                     .orderCreatedByEmailId(userDetails.getEmail())
+                                                     .orderCreatedDate(dateTime.now()
+                                                                           .format(DateTimeFormatter.ofPattern(
+                                                                               PrlAppsConstants.D_MMM_YYYY,
+                                                                               Locale.ENGLISH
+                                                                           )))
+                                                     .orderMadeDate(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(
+                                                         DateTimeFormatter.ofPattern(
+                                                             PrlAppsConstants.D_MMM_YYYY,
+                                                             Locale.ENGLISH
+                                                         )) : null)
+                                                     .approvalDate(caseData.getApprovalDate() != null ? caseData.getApprovalDate().format(
+                                                         DateTimeFormatter.ofPattern(
+                                                             PrlAppsConstants.D_MMM_YYYY,
+                                                             Locale.ENGLISH
+                                                         )) : null)
+                                                     .orderRecipients(caseData.getManageOrdersOptions().equals(
+                                                         ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
+                                                         caseData) : null)
+                                                     .status(getOrderStatus(
+                                                         orderSelectionType,
+                                                         loggedInUserType,
+                                                         null,
+                                                         null
+                                                     ))
+                                                     .build())
+                                   .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
+                                                    ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
+                                   .typeOfOrder(typeOfOrder != null
+                                                    ? typeOfOrder.getDisplayedValue() : null)
+                                   .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
+                                                        ? caseData.getDoesOrderClosesCase() : null)
+                                   .serveOrderDetails(buildServeOrderDetails(serveOrderData))
+                                   .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
+                                                            ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
+                                   .childOption(getChildOption(caseData))
+                                   .isOrderUploaded(Yes)
+                                   .build()));
         return newOrderDetails;
     }
 
@@ -1083,26 +1084,25 @@ public class ManageOrderService {
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
         String loggedInUserType = getLoggedInUserType(authorisation);
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserFullName = userDetails.getFullName();
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            return setDraftOrderCollection(caseData, loggedInUserType,currentUserFullName);
+            return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
-                return setDraftOrderCollection(caseData, loggedInUserType,currentUserFullName);
+                return setDraftOrderCollection(caseData, loggedInUserType,userDetails);
             } else {
-                return setFinalOrderCollection(authorisation, caseData, currentUserFullName);
+                return setFinalOrderCollection(authorisation, caseData, userDetails);
             }
         }
         return new HashMap<>();
     }
 
-    private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData, String currentUserFullName) throws Exception {
+    private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData, UserDetails userDetails) throws Exception {
         List<Element<OrderDetails>> orderCollection;
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-        List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData, currentUserFullName);
+        List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData, userDetails);
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
@@ -1147,13 +1147,13 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,String currentUserFullName) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,UserDetails userDetails) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = null;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, currentUserFullName));
+            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, userDetails));
         } else {
-            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, currentUserFullName));
+            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails));
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -1169,7 +1169,7 @@ public class ManageOrderService {
         );
     }
 
-    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserFullName) {
+    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
@@ -1184,7 +1184,8 @@ public class ManageOrderService {
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
-                              .orderCreatedBy(currentUserFullName)
+                              .orderCreatedBy(userDetails.getFullName())
+                              .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
@@ -1307,7 +1308,7 @@ public class ManageOrderService {
         return null;
     }
 
-    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserFullName) {
+    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
@@ -1323,7 +1324,8 @@ public class ManageOrderService {
                               ? getSelectedChildInfoFromMangeOrder(caseData) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
-                              .orderCreatedBy(currentUserFullName)
+                              .orderCreatedBy(userDetails.getFullName())
+                              .orderCreatedByEmailId(userDetails.getEmail())
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
@@ -2129,7 +2131,6 @@ public class ManageOrderService {
         }
 
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        String currentUserFullName = userDetails.getFullName();
 
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
@@ -2137,7 +2138,12 @@ public class ManageOrderService {
                                              .orderCreatedBy(
                                                  (null != orderDetails.getOtherDetails()
                                                      && null != orderDetails.getOtherDetails().getOrderCreatedBy())
-                                                            ? orderDetails.getOtherDetails().getOrderCreatedBy() : currentUserFullName)
+                                                            ? orderDetails.getOtherDetails().getOrderCreatedBy() : userDetails.getFullName())
+                                             .orderCreatedByEmailId(
+                                                 (null != orderDetails.getOtherDetails()
+                                                     && null != orderDetails.getOtherDetails().getOrderCreatedByEmailId())
+                                                     ? orderDetails.getOtherDetails().getOrderCreatedByEmailId() : userDetails.getEmail()
+                                             )
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                                                  PrlAppsConstants.D_MMM_YYYY,
                                                  Locale.ENGLISH
