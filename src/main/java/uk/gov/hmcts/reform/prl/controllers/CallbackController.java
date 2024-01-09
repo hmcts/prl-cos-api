@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
@@ -663,8 +664,9 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         List<Element<FurtherEvidence>> furtherEvidencesList = caseData.getFurtherEvidences();
         List<Element<Correspondence>> correspondenceList = caseData.getCorrespondence();
-        List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getLegalProfQuarantineDocsList() != null
-            ? caseData.getLegalProfQuarantineDocsList() : new ArrayList<>();
+        List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getDocumentManagementDetails() != null
+            ? caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+            : DocumentManagementDetails.builder().legalProfQuarantineDocsList(new ArrayList<>()).build().getLegalProfQuarantineDocsList();
         if (furtherEvidencesList != null) {
             quarantineDocs.addAll(furtherEvidencesList.stream().map(element -> Element.<QuarantineLegalDoc>builder()
                     .value(QuarantineLegalDoc.builder().document(element.getValue().getDocumentFurtherEvidence())
@@ -700,9 +702,14 @@ public class CallbackController {
                     .id(element.getId()).build())
                                       .toList());
         }
-        caseData.setLegalProfQuarantineDocsList(quarantineDocs);
+        caseData.setDocumentManagementDetails(DocumentManagementDetails.builder()
+                                                  .legalProfQuarantineDocsList(quarantineDocs)
+                                                  .build());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("legalProfQuarantineDocsList", caseData.getLegalProfQuarantineDocsList());
+        caseDataUpdated.put(
+            "legalProfQuarantineDocsList",
+            caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+        );
         caseDataUpdated.remove("furtherEvidences");
         caseDataUpdated.remove("correspondence");
         caseDataUpdated.remove("otherDocuments");

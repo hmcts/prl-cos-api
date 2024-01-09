@@ -206,9 +206,9 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
-        if (CollectionUtils.isNotEmpty(caseData.getCourtStaffQuarantineDocsList())
-            || CollectionUtils.isNotEmpty(caseData.getCafcassQuarantineDocsList())
-            || CollectionUtils.isNotEmpty(caseData.getLegalProfQuarantineDocsList())) {
+        if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())) {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
@@ -497,17 +497,17 @@ public class ManageDocumentsService {
             case SOLICITOR -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,
                     caseData.getReviewDocuments().getLegalProfUploadDocListDocTab(),
-                    caseData.getLegalProfQuarantineDocsList()
+                    caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
             );
             case CAFCASS -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,
                     caseData.getReviewDocuments().getCafcassUploadDocListDocTab(),
-                    caseData.getCafcassQuarantineDocsList()
+                    caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()
             );
             case COURT_STAFF -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getCourtStaffQuarantineDocsList()
+                    caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()
             );
             case COURT_ADMIN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,

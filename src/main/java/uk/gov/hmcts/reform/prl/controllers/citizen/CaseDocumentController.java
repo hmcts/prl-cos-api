@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -150,7 +151,9 @@ public class CaseDocumentController {
 
             CaseData caseData = CaseData.builder().id(Long.parseLong(caseId))
                 .citizenUploadedDocumentList(uploadedDocumentsList)
-                .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                .documentManagementDetails(DocumentManagementDetails.builder()
+                                               .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                                               .build())
                 .build();
             caseService.updateCase(
                 caseData,
@@ -248,7 +251,10 @@ public class CaseDocumentController {
             CaseData caseData = CaseData.builder()
                 .id(Long.parseLong(caseId))
                 .citizenUploadedDocumentList(uploadedDocumentsList)
-                .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                .documentManagementDetails(DocumentManagementDetails.builder()
+                                               .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                                               .build())
+
                 .build();
 
             StartEventResponse startEventResponse =
@@ -316,7 +322,9 @@ public class CaseDocumentController {
         log.info("uploadedDocumentsList::" + uploadedDocumentsList.size());
         CaseData caseData = CaseData.builder().id(Long.parseLong(caseId))
             .citizenUploadedDocumentList(uploadedDocumentsList)
-            .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenUploadQuarantineDocsList(uploadedDocumentsList)
+                                           .build())
             .build();
         caseService.updateCase(
             caseData,

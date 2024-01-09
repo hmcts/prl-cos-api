@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.transfercase.TransferCaseContentProvider;
@@ -163,8 +164,10 @@ public class TransferToAnotherCourtEventHandlerTest {
                                                              .citizenDocument(document).build())))
             .citizenResponseC7DocumentList(List.of(element(ResponseDocuments.builder()
                                                                .citizenDocument(document).build())))
-            .courtStaffQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
-                                                              .document(document).build())))
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .courtStaffQuarantineDocsList(List.of(element(QuarantineLegalDoc.builder()
+                                                                                             .document(document).build())))
+                                           .build())
             .orderCollection(List.of(element(OrderDetails.builder()
                                                  .orderDocument(document)
                                                  .orderDocumentWelsh(document).build())))

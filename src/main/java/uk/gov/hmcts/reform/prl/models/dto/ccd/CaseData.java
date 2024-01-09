@@ -68,7 +68,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOr
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
@@ -653,6 +652,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonProperty("citizenResponseC7DocumentList")
     private final List<Element<ResponseDocuments>> citizenResponseC7DocumentList;
 
+    @JsonProperty("scannedDocuments")
+    private List<Element<ScannedDocument>> scannedDocuments;
+
     /**
      * Courtnav.
      */
@@ -764,19 +766,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     //PRL-4320 - manage document redesign
     //private boolean isC8DocumentPresent;
 
-    @JsonProperty("legalProfQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
-    @JsonProperty("cafcassQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
-    //PRL-4328 - To be deleted
-    @JsonProperty("courtStaffQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
-    @JsonProperty("citizenUploadQuarantineDocsList")
-    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
-    @JsonProperty("scannedDocuments")
-    private List<Element<ScannedDocument>> scannedDocuments;
-    @JsonProperty("tempQuarantineDocumentList")
-    List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList;
+    @JsonUnwrapped
+    private DocumentManagementDetails documentManagementDetails;
 
     /**
      * Review documents.
