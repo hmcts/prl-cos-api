@@ -708,6 +708,7 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
                     try {
+                        dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                         log.info("** dynamicDataForEmail : {}", dynamicDataForEmail);
                         sendgridService.sendEmailUsingTemplateWithAttachments(
                             SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR,
