@@ -17,7 +17,7 @@ public class FL401Applicant {
     private final String previousName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
-    private final String gender;
+    private String gender;
     private final Address address;
     private final YesOrNo isAddressConfidential;
     private final YesOrNo canYouProvideEmailAddress;

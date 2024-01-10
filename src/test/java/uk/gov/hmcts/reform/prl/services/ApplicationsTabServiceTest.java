@@ -71,6 +71,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401TypeOfApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
@@ -1112,6 +1113,7 @@ public class ApplicationsTabServiceTest {
             .applicantsFL401(PartyDetails.builder()
                                  .firstName("testUser")
                                  .lastName("last test")
+                                 .gender(Gender.male)
                                  .solicitorEmail("testing@courtadmin.com")
                                  .canYouProvideEmailAddress(YesOrNo.Yes)
                                  .isEmailAddressConfidential(YesOrNo.Yes)
@@ -1120,11 +1122,24 @@ public class ApplicationsTabServiceTest {
                                  .build())
             .build();
 
+        FL401Applicant expectedApplicant = FL401Applicant.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .gender("Male")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.Yes)
+            .build();
+
         Map<String, Object> expected = Map.of("isPhoneNumberConfidential", THIS_INFORMATION_IS_CONFIDENTIAL,
                                               "isEmailAddressConfidential",
                                               THIS_INFORMATION_IS_CONFIDENTIAL,
-                                              "isAddressConfidential", THIS_INFORMATION_IS_CONFIDENTIAL
+                                              "isAddressConfidential", THIS_INFORMATION_IS_CONFIDENTIAL,
+                                              "gender", "Male"
         );
+        when(objectMapper.convertValue(applicationsTabService.maskFl401ConfidentialDetails(caseData.getApplicantsFL401()), FL401Applicant.class))
+            .thenReturn(expectedApplicant);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
         Map<String, Object> result = applicationsTabService.getFl401ApplicantsTable(caseData);
         assertEquals(expected, result);
