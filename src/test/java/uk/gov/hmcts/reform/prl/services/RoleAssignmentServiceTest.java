@@ -175,6 +175,45 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
+    public void testCreateRoleAssignmentNameOfJudgeToReviewOrderNotNull() {
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("nameOfJudgeToReviewOrder", "");
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        caseDetails.setData(caseDetailsMap);
+        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(DynamicList
+            .builder()
+            .value(DynamicListElement.builder().code("(test)").build())
+            .build());
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(userService.getUserByEmailId(auth, "test")).thenReturn(List.of(userDetails));
+        when(authTokenGenerator.generate()).thenReturn("test");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        assertEquals("1", userDetails.getId());
+    }
+
+    @Test
+    public void testCreateRoleAssignmentNameOfLaToReviewOrderNotNull() {
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        caseDetailsMap.put("nameOfLaToReviewOrder", "");
+        caseDetailsMap.put("legalAdviserList", "");
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        caseDetails.setData(caseDetailsMap);
+        when(objectMapper.convertValue(caseDetailsMap.get("legalAdviserList"), DynamicList.class)).thenReturn(DynamicList
+            .builder()
+            .value(DynamicListElement.builder().code("(test)").build())
+            .build());
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(userService.getUserByEmailId(auth, "test")).thenReturn(List.of(userDetails));
+        when(authTokenGenerator.generate()).thenReturn("test");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        assertEquals("1", userDetails.getId());
+    }
+
+    @Test
     public void testValidateIfUserHasRightRole() {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
