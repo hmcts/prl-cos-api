@@ -1385,8 +1385,8 @@
             "applicantApplicationDocument": {
               "category_id": null,
               "document_creation_date": "2024-01-05T14:03:11.559+00:00",
-              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8eae3b1b-0d32-4802-a033-e73e65099555",
-              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/8eae3b1b-0d32-4802-a033-e73e65099555/binary",
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/docId/binary",
               "document_filename": "Test.pdf"
             },
             "fileName": null,
