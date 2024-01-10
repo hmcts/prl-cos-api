@@ -743,7 +743,6 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
         log.info("selected order: {}", selectedOrder);
-
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("draftOrdersDynamicList", caseData.getDraftOrdersDynamicList());
         caseDataMap.put("orderType", selectedOrder.getOrderType());

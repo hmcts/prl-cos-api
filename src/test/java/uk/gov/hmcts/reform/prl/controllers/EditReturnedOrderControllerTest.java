@@ -70,21 +70,11 @@ public class EditReturnedOrderControllerTest {
 
     @Test
     public void testGenerateReturnedOrdersDropdown() {
-        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
-        CaseData caseData = CaseData.builder()
-            .id(123L)
-            .draftOrderCollection(draftOrderCollection)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .state(State.CASE_ISSUED)
-            .build();
         Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         caseDataMap.put("rejectedOrdersDynamicList", DynamicList.builder().build());
-        when(editReturnedOrderService.getReturnedOrdersDynamicList(Mockito.anyString(), Mockito.any())).thenReturn(caseDataMap);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
+        when(editReturnedOrderService.handleAboutToStartCallback(Mockito.anyString(), Mockito.any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -94,30 +84,6 @@ public class EditReturnedOrderControllerTest {
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderController
             .handleAboutToStart(authToken,s2sToken,callbackRequest);
         Assert.assertTrue(response.getData().containsKey("rejectedOrdersDynamicList"));
-    }
-
-    @Test
-    public void testGenerateReturnedOrdersDropdownWithNoDraftOrders() {
-        CaseData caseData = CaseData.builder()
-            .id(123L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .state(State.CASE_ISSUED)
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        caseDataMap.put("rejectedOrdersDynamicList", DynamicList.builder().build());
-        when(editReturnedOrderService.getReturnedOrdersDynamicList(Mockito.anyString(), Mockito.any())).thenReturn(caseDataMap);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(caseDataMap)
-                             .build())
-            .build();
-        AboutToStartOrSubmitCallbackResponse response = editReturnedOrderController
-            .handleAboutToStart(authToken,s2sToken,callbackRequest);
-        Assert.assertTrue(response.getErrors().size() > 0);
     }
 
     @Test

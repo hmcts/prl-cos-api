@@ -69,18 +69,7 @@ public class EditReturnedOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            if (caseData.getDraftOrderCollection() != null
-                && !caseData.getDraftOrderCollection().isEmpty()) {
-                Map<String, Object> caseDataUpdated = editReturnedOrderService.getReturnedOrdersDynamicList(authorisation, caseData);
-                return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(caseDataUpdated).build();
-            } else {
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
-            }
+            return editReturnedOrderService.handleAboutToStartCallback(authorisation, callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
