@@ -2,6 +2,7 @@
   "case_details": {
     "callback_response_status": "string",
     "case_data": {
+      "id": 1704738155348016,
       "caseTypeOfApplication": "C100",
       "isAddCaseNumberAdded": "Yes",
       "draftOrderCollection": [
