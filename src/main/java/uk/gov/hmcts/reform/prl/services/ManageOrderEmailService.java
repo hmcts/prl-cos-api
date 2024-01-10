@@ -410,6 +410,7 @@ public class ManageOrderEmailService {
     private void handleSolicitorPersonalServiceNotifications(String authorisation, CaseData caseData, List<Document> orderDocuments,
                                                              Map<String, Object> dynamicDataForEmail) {
         Map<String,String> applicantSolicitors = CaseUtils.getApplicantSolicitorsToNotify(caseData);
+        log.info("Applicant sokicitors : {}", applicantSolicitors);
         if (!applicantSolicitors.isEmpty()) {
             Map.Entry<String,String> firstApplicantSolicitor = applicantSolicitors.entrySet().iterator().next();
             dynamicDataForEmail.put("name", firstApplicantSolicitor.getValue());
