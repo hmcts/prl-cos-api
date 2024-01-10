@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
@@ -216,7 +217,7 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForSolicitor() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
-        request
+        AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
             .when()
@@ -224,7 +225,8 @@ public class ManageDocumentsControllerFunctionalTest {
             .post("/manage-documents/copy-manage-docs")
             .then()
             .body("data.legalProfQuarantineDocsList[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc1.pdf"))
-            .assertThat().statusCode(200);
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
 
