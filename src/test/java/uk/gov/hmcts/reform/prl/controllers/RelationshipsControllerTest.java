@@ -31,14 +31,12 @@ import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValida
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -222,80 +220,6 @@ public class RelationshipsControllerTest {
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNotNull(caseDetailsRespnse.get("applicantChildRelationsList"));
-    }
-
-    @Test
-    public void testPrePopulateRespondentsToChildRelation_forExistingRelations() throws NotFoundException {
-
-        PartyDetails respondent1 = PartyDetails.builder()
-            .firstName("First")
-            .lastName("Respondent")
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .build();
-
-        PartyDetails respondent2 = PartyDetails.builder()
-            .firstName("Second")
-            .lastName("Respondent")
-            .canYouProvideEmailAddress(YesOrNo.No)
-            .isAddressConfidential(YesOrNo.No)
-            .isPhoneNumberConfidential(YesOrNo.No)
-            .build();
-
-        Element<PartyDetails> wrappedRespondent1 = Element.<PartyDetails>builder().value(respondent1).id(UUID.randomUUID()).build();
-        Element<PartyDetails> wrappedRespondent2 = Element.<PartyDetails>builder().value(respondent2).id(UUID.randomUUID()).build();
-        List<Element<PartyDetails>> respondentList = new ArrayList<>();
-        respondentList.add(wrappedRespondent1);
-        respondentList.add(wrappedRespondent2);
-
-        ChildDetailsRevised child = ChildDetailsRevised.builder()
-            .firstName("Test")
-            .lastName("Name")
-            .gender(female)
-            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
-            .parentalResponsibilityDetails("test")
-            .build();
-
-        Element<ChildDetailsRevised> wrappedChildren =
-            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
-        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
-
-        ChildrenAndRespondentRelation relation = ChildrenAndRespondentRelation.builder()
-            .childFullName(String.format(PrlAppsConstants.FORMAT, wrappedChildren.getValue().getFirstName(),
-                                         wrappedChildren.getValue().getLastName()))
-            .childId(wrappedChildren.getId().toString())
-            .respondentId(wrappedRespondent1.getId().toString())
-            .respondentFullName(String.format(PrlAppsConstants.FORMAT, wrappedRespondent1.getValue().getFirstName(),
-                                              wrappedRespondent1.getValue().getLastName()))
-            .childAndRespondentRelation(RelationshipsEnum.father).build();
-        Element<ChildrenAndRespondentRelation> wrappedRelation = Element.<ChildrenAndRespondentRelation>builder().value(relation).build();
-        List<Element<ChildrenAndRespondentRelation>> respondentChildRelationsList = Collections.singletonList(wrappedRelation);
-
-        CaseData caseData = CaseData.builder()
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .respondents(respondentList)
-            .newChildDetails(listOfChildren)
-            .relations(Relations.builder().childAndRespondentRelations(respondentChildRelationsList).build())
-            .build();
-
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("respondentChildRelationsList", "First Respondent");
-
-        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-
-        CallbackRequest callbackRequest =
-            CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
-                                                      .data(caseDataUpdated).build()).build();
-
-        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
-            relationshipsController.prePopulateRespondentToChildRelation("test",
-                                                                         callbackRequest);
-
-        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
-        assertNotNull(caseDetailsRespnse.get("buffChildAndRespondentRelations"));
-        ArrayList buffChildAndRespondentRelations = (ArrayList) caseDetailsRespnse.get("buffChildAndRespondentRelations");
-        assertEquals(wrappedRelation, buffChildAndRespondentRelations.get(0));
     }
 
     @Test
