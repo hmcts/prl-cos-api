@@ -13,9 +13,17 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest
@@ -35,6 +43,12 @@ public class ManageOrdersControllerFunctionalTest {
 
     @MockBean
     private ManageOrderService manageOrderService;
+
+    @MockBean
+    private RoleAssignmentApi roleAssignmentApi;
+
+    @MockBean
+    private HearingService hearingService;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
@@ -141,6 +155,9 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenBody_whenAboutToSubmitForCreateUpldOrder() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER);
+        when(roleAssignmentApi.updateRoleAssignment(any(), any(), any(), any(RoleAssignmentRequest.class)))
+            .thenReturn(RoleAssignmentResponse.builder().build());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
