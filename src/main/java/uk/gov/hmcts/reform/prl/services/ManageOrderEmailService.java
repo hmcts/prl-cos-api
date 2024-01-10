@@ -73,6 +73,7 @@ public class ManageOrderEmailService {
     public static final String FINAL = "final";
     public static final String NEW = "new";
     public static final String ORDERS = "#Orders";
+    public static final String NAME = "name";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -413,7 +414,7 @@ public class ManageOrderEmailService {
         log.info("Applicant sokicitors : {}", applicantSolicitors);
         if (!applicantSolicitors.isEmpty()) {
             Map.Entry<String,String> firstApplicantSolicitor = applicantSolicitors.entrySet().iterator().next();
-            dynamicDataForEmail.put("name", firstApplicantSolicitor.getValue());
+            dynamicDataForEmail.put(NAME, firstApplicantSolicitor.getValue());
             log.info("*** Dynamic content {}", dynamicDataForEmail);
             try {
                 sendgridService.sendEmailUsingTemplateWithAttachments(
@@ -667,6 +668,7 @@ public class ManageOrderEmailService {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
                     try {
+                        dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                         log.info("** dynamicDataForEmail : {}", dynamicDataForEmail);
                         sendgridService.sendEmailUsingTemplateWithAttachments(
                             SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR,
