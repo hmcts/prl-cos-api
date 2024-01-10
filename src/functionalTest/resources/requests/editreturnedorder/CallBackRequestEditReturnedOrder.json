@@ -1,8 +1,9 @@
 {
   "case_details": {
     "callback_response_status": "string",
+    "id": 1704889925691340,
     "case_data": {
-      "id": "1704738155348016",
+      "id": "1704889925691340",
       "caseTypeOfApplication": "C100",
       "isAddCaseNumberAdded": "Yes",
       "draftOrderCollection": [
@@ -662,11 +663,22 @@
             "label": "Child arrangements, specific issue or prohibited steps order (C43) - 8 Jan 2024, 10:35 PM"
           }
         ]
+      },
+      "draftOrdersDynamicList": {
+        "value": {
+          "code": "9622f6a8-5867-4eb3-b6ca-334911cb8061",
+          "label": "Child arrangements, specific issue or prohibited steps order (C43) - 8 Jan 2024, 10:35 PM"
+        },
+        "list_items": [
+          {
+            "code": "9622f6a8-5867-4eb3-b6ca-334911cb8061",
+            "label": "Child arrangements, specific issue or prohibited steps order (C43) - 8 Jan 2024, 10:35 PM"
+          }
+        ]
       }
     },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
-    "id": 0,
     "jurisdiction": "string",
     "last_modified": "2022-03-15T15:02:33.880Z",
     "locked_by_user_id": 0,
@@ -679,7 +691,7 @@
     "case_data": {},
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
-    "id": 0,
+    "id": 1704889925691340,
     "jurisdiction": "string",
     "last_modified": "2022-03-15T15:02:33.880Z",
     "locked_by_user_id": 0,
