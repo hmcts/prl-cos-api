@@ -194,7 +194,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecNoForSol() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(SOLICITOR);
+        //DocumentResponse docRes = uploadDocument(SOLICITOR);
 
         String requestBodyRevised = requestBodyForSolitior
             //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
