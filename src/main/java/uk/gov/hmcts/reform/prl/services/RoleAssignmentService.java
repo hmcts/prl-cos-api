@@ -104,7 +104,7 @@ public class RoleAssignmentService {
             return fetchActorIdIfJudge(authorization, caseDataUpdated);
         } else if (null != caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
-            fetchActorIdIfJudgeIsGatekeeping(authorization, caseDataUpdated);
+            return fetchActorIdIfJudgeIsGatekeeping(authorization, caseDataUpdated);
         } else {
             if (null != caseDataUpdated.get("nameOfJudgeToReviewOrder")) {
                 return getIdamId(caseDataUpdated.get("nameOfJudgeToReviewOrder"))[0];
