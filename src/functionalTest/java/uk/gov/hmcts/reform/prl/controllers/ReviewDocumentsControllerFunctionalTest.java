@@ -83,11 +83,11 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForSol() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(SOLICITOR);
+        //DocumentResponse docRes = uploadDocument(SOLICITOR);
 
         String requestBodyRevised = requestBodyForSolitior
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-                     docRes.getDocument().getDocumentUrl())
+            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+            //         docRes.getDocument().getDocumentUrl())
             .replace("\"isRestricted\": \"No\"",
                      "\"isRestricted\": \"Yes\"");
 
@@ -110,11 +110,11 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test//1
     public void givenReviewDocuments_whenOnlyConfidentialNotRestrictedForSol() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(SOLICITOR);
+        //DocumentResponse docRes = uploadDocument(SOLICITOR);
 
         String requestBodyRevised = requestBodyForSolitior
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-                     docRes.getDocument().getDocumentUrl())
+            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+            //         docRes.getDocument().getDocumentUrl())
             .replace("\"isConfidential\": \"No\"",
                      "\"isConfidential\": \"Yes\"");
 
@@ -136,11 +136,11 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test//2
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesForSol() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(SOLICITOR);
+        //DocumentResponse docRes = uploadDocument(SOLICITOR);
 
         String requestBodyRevised = requestBodyForSolitior
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-                     docRes.getDocument().getDocumentUrl())
+            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+            //         docRes.getDocument().getDocumentUrl())
             .replace("\"isConfidential\": \"No\"",
                      "\"isConfidential\": \"Yes\"")
             .replace("\"isRestricted\": \"No\"",
@@ -164,11 +164,11 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test//3
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoForSol() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(SOLICITOR);
+        //DocumentResponse docRes = uploadDocument(SOLICITOR);
 
         String requestBodyRevised = requestBodyForSolitior
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-                     docRes.getDocument().getDocumentUrl())
+            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+            //         docRes.getDocument().getDocumentUrl())
             .replace("\"reviewDecisionYesOrNo\": \"yes\"",
                      "\"reviewDecisionYesOrNo\": \"no\"");
 
@@ -274,10 +274,10 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecNoCafcass() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(CAFCASS);
+        //DocumentResponse docRes = uploadDocument(CAFCASS);
         String requestBodyRevised = requestBodyForCafcass
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-                     docRes.getDocument().getDocumentUrl())
+            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+            //         docRes.getDocument().getDocumentUrl())
             .replace("\"reviewDecisionYesOrNo\": \"yes\"",
                      "\"reviewDecisionYesOrNo\": \"no\"")
             .replace("\"isConfidential\": \"No\"",
@@ -333,11 +333,11 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForCafcass() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(CAFCASS);
+        //DocumentResponse docRes = uploadDocument(CAFCASS);
 
         String requestBodyRevised = requestBodyForCafcass
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-                     docRes.getDocument().getDocumentUrl())
+            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+            //         docRes.getDocument().getDocumentUrl())
             .replace("\"isRestricted\": \"No\"",
                      "\"isRestricted\": \"Yes\"");
 
@@ -362,11 +362,11 @@ public class ReviewDocumentsControllerFunctionalTest {
     @Test
     public void givenReviewDocuments_whenOnlyConfidentialNotRestrictedForCafcass() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(CAFCASS);
+        //DocumentResponse docRes = uploadDocument(CAFCASS);
 
         String requestBodyRevised = requestBodyForSolitior
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-                     docRes.getDocument().getDocumentUrl())
+            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+            //         docRes.getDocument().getDocumentUrl())
             .replace("\"isConfidential\": \"No\"",
                      "\"isConfidential\": \"Yes\"");
 
