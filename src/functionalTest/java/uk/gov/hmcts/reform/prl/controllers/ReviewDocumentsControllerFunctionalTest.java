@@ -17,18 +17,29 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.util.ResourceUtils;
+import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
+import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.Matchers.equalTo;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
 
 @Slf4j
@@ -42,6 +53,9 @@ public class ReviewDocumentsControllerFunctionalTest {
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    @Autowired
+    protected CaseDocumentClient caseDocumentClient;
 
     @Autowired
     ObjectMapper objectMapper;
@@ -132,14 +146,19 @@ public class ReviewDocumentsControllerFunctionalTest {
 
     }
 
+    public static byte[] resourceAsBytes(final String resourcePath) throws IOException {
+        final File file = ResourceUtils.getFile(resourcePath);
+        return Files.readAllBytes(file.toPath());
+    }
+
     @Test//f2
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesForSol() throws Exception {
 
-        //DocumentResponse docRes = uploadDocument(SOLICITOR);
+        DocumentResponse docRes = uploadDocumentIntoCdam(SOLICITOR);
 
         String requestBodyRevised = requestBodyForSolitior
-            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-            //         docRes.getDocument().getDocumentUrl())
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
             .replace("\"isConfidential\": \"No\"",
                      "\"isConfidential\": \"Yes\"")
             .replace("\"isRestricted\": \"No\"",
@@ -154,9 +173,41 @@ public class ReviewDocumentsControllerFunctionalTest {
             .then()
             .body("data.restrictedDocuments[0].value.isConfidential", equalTo("Yes"),
                   "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
-                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
                   "data.confidentialDocuments", equalTo(null))
             .assertThat().statusCode(200);
+
+    }
+
+    private DocumentResponse uploadDocumentIntoCdam(String uploadedBy) throws IOException {
+
+        String token = switch (uploadedBy) {
+            case SOLICITOR -> idamTokenGenerator.generateIdamTokenForSolicitor();
+            case CAFCASS -> idamTokenGenerator.generateIdamTokenForCafcass();
+            case COURT_STAFF, COURT_ADMIN -> idamTokenGenerator.generateIdamTokenForCourtAdmin();
+            default -> null;
+        };
+
+        String filePath = "classpath:Test.pdf";
+        final MultipartFile file = new InMemoryMultipartFile(filePath, filePath, MediaType.APPLICATION_PDF_VALUE,
+                                                             resourceAsBytes(filePath));
+
+        //MultipartFile file = new InMemoryMultipartFile("files", fileName, contentType, pdf);
+
+        UploadResponse response = caseDocumentClient.uploadDocuments(token, serviceAuthenticationGenerator.generate(),
+                                                                     CASE_TYPE, JURISDICTION, newArrayList(file)
+        );
+
+        uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument = response.getDocuments().get(0);
+
+        return DocumentResponse.builder().status("Success").document(Document.builder()
+                                                                                         .documentBinaryUrl(stampedDocument.links.binary.href)
+                                                                                         .documentUrl(stampedDocument.links.self.href)
+                                                                                         .documentFileName(stampedDocument.originalDocumentName)
+                                                                                         .documentCreatedOn(stampedDocument.createdOn)
+                                                                                         .build()).build();
+
+
 
     }
 
