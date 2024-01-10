@@ -354,9 +354,9 @@ public class CaseDocumentController {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        log.info("KKKKKKKKKKKKK ", file);
+        log.info("KKKKKKKKKKKKK {}", file);
         DocumentResponse docResp = documentGenService.uploadDocument(authorisation, file);
-        log.info("Doccccc ", docResp);
+        log.info("Doccccc {}", docResp);
         return ResponseEntity.ok(docResp);
     }
 
