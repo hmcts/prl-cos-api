@@ -90,6 +90,7 @@ public class ReviewDocumentsControllerFunctionalTest {
             .replace("\"isRestricted\": \"No\"",
                      "\"isRestricted\": \"Yes\"");
 
+
         request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBodyRevised)
