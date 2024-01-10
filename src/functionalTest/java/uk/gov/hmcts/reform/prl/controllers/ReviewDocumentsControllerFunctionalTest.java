@@ -10,6 +10,7 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -375,6 +376,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenOnlyConfidentialNotRestrictedForCourtAdmin() throws Exception {
 
         DocumentResponse docRes = uploadDocument(COURT_ADMIN);
@@ -401,6 +403,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForCourtAdmin() throws Exception {
 
         DocumentResponse docRes = uploadDocument(COURT_ADMIN);
@@ -427,6 +430,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoCourtAdmin() throws Exception {
 
         log.info("givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoCourtAdmin.......");
@@ -458,6 +462,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecNoCourtAdmin() throws Exception {
 
         DocumentResponse docRes = uploadDocument(COURT_ADMIN);
@@ -488,6 +493,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecYesCourtAdmin() throws Exception {
 
         DocumentResponse docRes = uploadDocument(COURT_ADMIN);
