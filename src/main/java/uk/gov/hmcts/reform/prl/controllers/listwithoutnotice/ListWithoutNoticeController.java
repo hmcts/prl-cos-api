@@ -165,12 +165,12 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
                 .getHearingDataForOtherOrders(caseData.getListWithoutNoticeHearingDetails(), null, caseData));
 
-            roleAssignmentService.createRoleAssignment(
-                authorisation,
-                callbackRequest.getCaseDetails(),
-                false,
-                ALLOCATE_JUDGE_ROLE
-            );
+//            roleAssignmentService.createRoleAssignment(
+//                authorisation,
+//                callbackRequest.getCaseDetails(),
+//                false,
+//                ALLOCATE_JUDGE_ROLE
+//            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
