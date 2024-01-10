@@ -48,7 +48,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
+//import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 
@@ -165,12 +165,12 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
                 .getHearingDataForOtherOrders(caseData.getListWithoutNoticeHearingDetails(), null, caseData));
 
-//            roleAssignmentService.createRoleAssignment(
-//                authorisation,
-//                callbackRequest.getCaseDetails(),
-//                false,
-//                ALLOCATE_JUDGE_ROLE
-//            );
+            //            roleAssignmentService.createRoleAssignment(
+            //                authorisation,
+            //                callbackRequest.getCaseDetails(),
+            //                false,
+            //                ALLOCATE_JUDGE_ROLE
+            //            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
