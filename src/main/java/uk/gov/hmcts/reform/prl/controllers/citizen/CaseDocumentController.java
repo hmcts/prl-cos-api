@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DeleteDocumentRequest;
@@ -353,7 +354,10 @@ public class CaseDocumentController {
         if (!isAuthorized(authorisation, serviceAuthorization)) {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return ResponseEntity.ok(documentGenService.uploadDocument(authorisation, file));
+        log.info("KKKKKKKKKKKKK ", file);
+        DocumentResponse docResp = documentGenService.uploadDocument(authorisation, file);
+        log.info("Doccccc ", docResp);
+        return ResponseEntity.ok(docResp);
     }
 
     @DeleteMapping("/{documentId}/delete")
