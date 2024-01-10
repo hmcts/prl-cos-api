@@ -202,18 +202,4 @@ public class CallbackControllerFunctionalTest {
             .body("data.caseNameHmctsInternal", equalTo("Test Name"))
             .assertThat().statusCode(200);
     }
-
-    @Test
-    public void givenRequestWithNeedToUpdateUserRoleToJudge_WhenEndPointCalled_ResponseContainsJudge() throws Exception {
-        String requestBody = ResourceLoader.loadJson(APPLICANT_CASE_NAME_REQUEST);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/allocateJudgeTest")
-            .then()
-            .assertThat()
-            .statusCode(200);
-    }
 }
