@@ -103,6 +103,7 @@ public class ManageOrdersController {
 
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
+    @Autowired
     private HearingService hearingService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
