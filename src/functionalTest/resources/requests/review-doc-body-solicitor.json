@@ -1395,7 +1395,7 @@
             "scannedDate": null,
             "categoryName": "Applicant application",
             "deliveryDate": null,
-            "documentName": null,
+            "documentName": "docName",
             "documentType": null,
             "isRestricted": "No",
             "controlNumber": null,

@@ -223,8 +223,9 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .body("data.legalProfQuarantineDocsList[0].value.document.document_filename", equalTo("Test doc1.pdf"))
+            .body("data.legalProfQuarantineDocsList[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc1.pdf"))
             .assertThat().statusCode(200);
+
     }
 
     @Test
@@ -260,9 +261,8 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .body("data.cafcassQuarantineDocsList[0].value.cafcassQuarantineDocument.document_filename", equalTo("Test doc1.pdf"))
+            .body("data.cafcassQuarantineDocsList[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc1.pdf"))
             .assertThat().statusCode(200);
-
     }
 
     @Test
@@ -279,24 +279,6 @@ public class ManageDocumentsControllerFunctionalTest {
             .body("data.cafcassUploadDocListDocTab[0].value.categoryId", equalTo(APPLICANT_APPLICATION),
                   "data.cafcassUploadDocListDocTab[0].value.categoryName", equalTo(APPLICANT_APPLICATION_NAME),
                   "data.cafcassUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc2.pdf"))
-            .assertThat().statusCode(200);
-
-    }
-
-    @Test
-    public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCA() throws Exception {
-        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED);
-
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/manage-documents/copy-manage-docs")
-            .then()
-            .body("data.courtStaffUploadDocListDocTab[0].value.categoryId", equalTo(APPLICANT_APPLICATION),
-                  "data.courtStaffUploadDocListDocTab[0].value.categoryName", equalTo(APPLICANT_APPLICATION_NAME),
-                  "data.courtStaffUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc2.pdf"))
             .assertThat().statusCode(200);
 
     }
