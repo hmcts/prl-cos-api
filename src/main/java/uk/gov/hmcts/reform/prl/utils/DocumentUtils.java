@@ -5,6 +5,7 @@ import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.commons.io.IOUtils;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
@@ -87,38 +88,26 @@ public class DocumentUtils {
         return objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
     }
 
-    private static Document getDocumentByCategoryId(String categoryConstant,
-                                                    String categoryId,
-                                                    Document document) {
-        return categoryConstant.equalsIgnoreCase(categoryId) ? document : null;
-    }
-
     public static QuarantineLegalDoc addQuarantineFields(QuarantineLegalDoc quarantineLegalDoc,
-                                                         ManageDocuments manageDocument) {
+                                                         ManageDocuments manageDocument,
+                                                         UserDetails userDetails) {
         return quarantineLegalDoc.toBuilder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox())
-            .notes(manageDocument.getDocumentDetails())
+            .restrictCheckboxCorrespondence(manageDocument.getDocumentRestrictCheckbox()) //TO BE REMOVED
+            .notes(manageDocument.getDocumentDetails()) //TO BE REMOVED
             .categoryId(DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                             ? ManageDocumentsCategoryConstants.INTERNAL_CORRESPONDENCE
                             : manageDocument.getDocumentCategories().getValueCode())
             .categoryName(DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
                               ? PrlAppsConstants.INTERNAL_CORRESPONDENCE_LABEL
                               : manageDocument.getDocumentCategories().getValueLabel())
-            .build();
-    }
-
-    public static QuarantineLegalDoc addConfFields(QuarantineLegalDoc quarantineLegalDoc,
-                                                         ManageDocuments manageDocument) {
-        return quarantineLegalDoc.toBuilder()
-            .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
-            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            .notes(manageDocument.getDocumentDetails())
-            .categoryId(manageDocument.getDocumentCategories().getValueCode())
-            .categoryName(manageDocument.getDocumentCategories().getValueLabel())
-            //move document into confidential category/folder
-            .confidentialDocument(manageDocument.getDocument())
+            //PRL-4320 - Manage documents redesign
+            .isConfidential(manageDocument.getIsConfidential())
+            .isRestricted(manageDocument.getIsRestricted())
+            .restrictedDetails(manageDocument.getRestrictedDetails())
+            .uploadedBy(userDetails.getFullName())
+            .uploadedByIdamId(userDetails.getId())
             .build();
     }
 

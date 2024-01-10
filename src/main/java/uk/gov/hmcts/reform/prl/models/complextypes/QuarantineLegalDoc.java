@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.time.LocalDateTime;
@@ -79,7 +80,6 @@ public class QuarantineLegalDoc {
     private final Document caseSummaryDocument;
     private final Document legalProfQuarantineDocument;
     private final Document cafcassQuarantineDocument;
-    //PRL-4328 - To be deleted
     private final Document courtStaffQuarantineDocument;
 
     // Adding Bulk scan attributes
@@ -91,6 +91,13 @@ public class QuarantineLegalDoc {
     public final Document url;
     public final LocalDateTime scannedDate;
     public final LocalDateTime deliveryDate;
+
+    //PRL-4320 - manage docs redesign
+    private final YesOrNo isConfidential;
+    private final YesOrNo isRestricted;
+    private final String restrictedDetails;
+    private final String uploadedBy;
+    private final String uploadedByIdamId;
 
     //PRL-4306- Added confidential category in the exclusion list
     public static String[] quarantineCategoriesToRemove() {

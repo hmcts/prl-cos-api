@@ -58,6 +58,8 @@ public enum ManageOrderFieldsEnum {
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
     selectTypeOfOrder("selectTypeOfOrder"),
+    judgeNotesEmptyUplaodJourney("judgeNotesEmptyUploadJourney"),
+    judgeNotesEmptyDraftJourney("judgeNotesEmptyDraftJourney"),
 
     //Hearing screen field show params
     isCafcassCymru("isCafcassCymru"),

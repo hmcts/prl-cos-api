@@ -89,7 +89,7 @@ public class CaseDocumentControllerFunctionalTest {
 
         //TODO Replace with citizen auth token once secrets added
         Response response = request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
             .multiPart("file", new File("src/functionalTest/resources/Test.pdf"))
             .when()

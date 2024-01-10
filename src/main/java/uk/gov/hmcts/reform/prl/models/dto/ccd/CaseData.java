@@ -761,12 +761,13 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private List<Element<ManageDocuments>> manageDocuments;
     private String manageDocumentsTriggeredBy;
     private String manageDocumentsRestrictedFlag;
+    //PRL-4320 - manage document redesign
+    //private boolean isC8DocumentPresent;
 
     @JsonProperty("legalProfQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
     @JsonProperty("cafcassQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
-    //PRL-4328 - To be deleted
     @JsonProperty("courtStaffQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
     @JsonProperty("citizenUploadQuarantineDocsList")

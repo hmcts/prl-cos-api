@@ -103,7 +103,6 @@ public class ReviewDocumentsController {
 
         //clear fields
         CaseUtils.removeTemporaryFields(caseDataUpdated, reviewDocTempFields());
-
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 

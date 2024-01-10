@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.RestrictToCafcassHmcts;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -44,7 +45,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
@@ -54,7 +57,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 @Ignore
 public class ManageDocumentsServiceTest {
 
@@ -230,7 +233,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -277,7 +281,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -327,7 +332,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -374,7 +380,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -423,7 +430,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -475,7 +483,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -528,7 +537,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(List.of(restrictToCafcassHmcts))
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -583,7 +593,8 @@ public class ManageDocumentsServiceTest {
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.RESPONDENT)
             .documentCategories(dynamicList)
-            .documentRestrictCheckbox(new ArrayList<>())
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.No)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
 
@@ -671,14 +682,14 @@ public class ManageDocumentsServiceTest {
     public void returnTrueIfUserIsCourtStaff() {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
 
-        Assert.assertTrue(manageDocumentsService.checkIfUserIsCourtStaff(auth));
+        Assert.assertTrue(manageDocumentsService.checkIfUserIsCourtStaff(userDetailsCourtStaffRole));
     }
 
     @Test
     public void returnFalseIfUserIsOtherThanCourtStaff() {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        Assert.assertFalse(manageDocumentsService.checkIfUserIsCourtStaff(auth));
+        Assert.assertFalse(manageDocumentsService.checkIfUserIsCourtStaff(userDetailsSolicitorRole));
     }
 
     @Test
@@ -728,5 +739,98 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         Assert.assertFalse(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest));
     }
+
+    @Test
+    public void testCopyDocumentMidEventIfRestrictedWithSoliRole_whenTriedWithOutReason() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .restrictedDetails(null)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+
+        assertNotNull(caseDataMapUpdated);
+        assertTrue(!caseDataMapUpdated.isEmpty());
+
+    }
+
+    @Test
+    public void testCopyDocumentMidEventIfRestrictedWithSoliRole() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .restrictedDetails("Reason")
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+
+        assertNotNull(caseDataMapUpdated);
+        assertTrue(caseDataMapUpdated.isEmpty());
+    }
+
+    @Test
+    public void testCopyDocumentMidEventIfNotRestrictedWithSoliRole() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.No)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        CaseData caseData = CaseData.builder()
+            .manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        List<String>  caseDataMapUpdated = manageDocumentsService.validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+
+        assertNotNull(caseDataMapUpdated);
+        assertTrue(caseDataMapUpdated.isEmpty());
+    }
+
+
 }
 

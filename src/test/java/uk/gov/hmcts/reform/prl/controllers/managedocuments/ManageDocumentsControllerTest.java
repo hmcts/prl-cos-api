@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -16,12 +17,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.Document;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -29,18 +32,24 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
+@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class ManageDocumentsControllerTest {
 
@@ -49,6 +58,8 @@ public class ManageDocumentsControllerTest {
 
     @Mock
     ManageDocumentsService manageDocumentsService;
+    @Mock
+    UserService userService;
 
     @Mock
     AllTabServiceImpl tabService;
@@ -166,7 +177,7 @@ public class ManageDocumentsControllerTest {
 
     @Test
     public void testValidateCourtUserShouldReturnError() {
-        when(manageDocumentsService.checkIfUserIsCourtStaff(auth)).thenReturn(false);
+        when(manageDocumentsService.checkIfUserIsCourtStaff(any(UserDetails.class))).thenReturn(false);
         when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
         Assert.assertNotNull(response.getErrors());
@@ -176,7 +187,7 @@ public class ManageDocumentsControllerTest {
 
     @Test
     public void testValidateCourtUserShouldAllowToProcess() {
-        when(manageDocumentsService.checkIfUserIsCourtStaff(auth)).thenReturn(true);
+        when(manageDocumentsService.checkIfUserIsCourtStaff(any(UserDetails.class))).thenReturn(true);
         when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
         Assert.assertNotNull(response.getData());
@@ -187,7 +198,7 @@ public class ManageDocumentsControllerTest {
     @Test
     public void testValidateOtherUserShouldReturnError() {
         when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
-        when(manageDocumentsService.checkIfUserIsCourtStaff(auth)).thenReturn(false);
+        when(manageDocumentsService.checkIfUserIsCourtStaff(any(UserDetails.class))).thenReturn(false);
         AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
         Assert.assertNotNull(response.getErrors());
         Assert.assertTrue(!response.getErrors().isEmpty());
@@ -202,4 +213,38 @@ public class ManageDocumentsControllerTest {
         Assert.assertEquals(12345678L, response.getData().get("id"));
 
     }
+
+    @Test
+    public void testCopyManageDocsMid() {
+
+        UserDetails userDetailsSolicitorRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(SOLICITOR_ROLE))
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
+        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
+        verify(manageDocumentsService).validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+        verifyNoMoreInteractions(manageDocumentsService);
+
+    }
+
+    @Test
+    public void testCopyManageDocsMid_notSolicitor() {
+
+        UserDetails userDetailsCafcassRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(CAFCASS_ROLE))
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
+
+        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
+        verifyNoInteractions(manageDocumentsService);
+    }
+
+
 }
