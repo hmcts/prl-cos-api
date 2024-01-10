@@ -51,6 +51,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -269,6 +270,8 @@ public class CallbackControllerFT {
     public void givenC100Case_whenSendToGateKeeperEndpoint_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPER);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(userService.getUserByEmailId(anyString(), anyString())).thenReturn(List.of(UserDetails.builder().build()));
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
         mockMvc.perform(post("/send-to-gatekeeper")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -363,6 +366,8 @@ public class CallbackControllerFT {
             RefDataUserService.class))).thenReturn(
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.legalAdviser).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(userService.getUserByEmailId(anyString(), anyString())).thenReturn(List.of(UserDetails.builder().build()));
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
         mockMvc.perform(post("/send-to-gatekeeper")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -379,6 +384,8 @@ public class CallbackControllerFT {
             RefDataUserService.class))).thenReturn(
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(userService.getUserByEmailId(anyString(), anyString())).thenReturn(List.of(UserDetails.builder().build()));
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
         mockMvc.perform(post("/send-to-gatekeeper")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
