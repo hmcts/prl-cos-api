@@ -454,6 +454,7 @@ public class DraftAnOrderServiceTest {
         System.out.println(dtf.format(now));
 
         DraftOrder draftOrder = DraftOrder.builder()
+            .manageOrderHearingDetails(List.of(element(HearingData.builder().build())))
             .typeOfOrder(SelectTypeOfOrderEnum.interim.getDisplayedValue())
             .orderTypeId(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue())
             .orderDocument(Document.builder()
@@ -496,6 +497,7 @@ public class DraftAnOrderServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .familymanCaseNumber("familyman12345")
@@ -2793,8 +2795,7 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest,
-                                                                    List.of(element(HearingData.builder().build())),
-                                                                    false
+                                                                    List.of(element(HearingData.builder().build()))
         );
         assertNotNull(stringObjectMap);
     }
@@ -2851,9 +2852,7 @@ public class DraftAnOrderServiceTest {
         when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
 
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest,
-                                                                    List.of(element(HearingData.builder().build())),
-                                                                    true
-        );
+                                                                    List.of(element(HearingData.builder().build())));
         assertNotNull(stringObjectMap);
     }
 
@@ -4263,8 +4262,7 @@ public class DraftAnOrderServiceTest {
                              .build())
             .build();
         stringObjectMap = draftAnOrderService.generateOrderDocument(authToken, callbackRequest,
-                                                                    null, false
-        );
+                                                                    null);
         assertNotNull(stringObjectMap);
     }
 
