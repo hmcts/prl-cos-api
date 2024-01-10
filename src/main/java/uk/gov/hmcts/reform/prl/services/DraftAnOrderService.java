@@ -294,8 +294,7 @@ public class DraftAnOrderService {
                                           DraftOrder draftOrder) {
         return Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && UserRoles.JUDGE.name().equals(loggedInUserType)
-            && Yes.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded())
-            && AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
+            && Yes.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded());
     }
 
     private static boolean isManagerReviewRequested(String loggedInUserType,
