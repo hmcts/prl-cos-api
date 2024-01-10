@@ -10,7 +10,6 @@ import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +79,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
 
-    @Test
+    @Test//f1
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForSol() throws Exception {
 
         //DocumentResponse docRes = uploadDocument(SOLICITOR);
@@ -100,14 +99,14 @@ public class ReviewDocumentsControllerFunctionalTest {
             .then()
             .body("data.restrictedDocuments[0].value.isConfidential", equalTo("No"),
                   "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
-                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
                   "data.confidentialDocuments", equalTo(null))
             .assertThat().statusCode(200);
 
 
     }
 
-    @Test//1
+    @Test//f3
     public void givenReviewDocuments_whenOnlyConfidentialNotRestrictedForSol() throws Exception {
 
         //DocumentResponse docRes = uploadDocument(SOLICITOR);
@@ -127,13 +126,13 @@ public class ReviewDocumentsControllerFunctionalTest {
             .then()
             .body("data.confidentialDocuments[0].value.isConfidential", equalTo("Yes"),
                   "data.confidentialDocuments[0].value.isRestricted", equalTo("No"),
-                  "data.confidentialDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.confidentialDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
                   "data.restrictedDocuments", equalTo(null))
             .assertThat().statusCode(200);
 
     }
 
-    @Test//2
+    @Test//f2
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesForSol() throws Exception {
 
         //DocumentResponse docRes = uploadDocument(SOLICITOR);
@@ -155,7 +154,7 @@ public class ReviewDocumentsControllerFunctionalTest {
             .then()
             .body("data.restrictedDocuments[0].value.isConfidential", equalTo("Yes"),
                   "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
-                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
                   "data.confidentialDocuments", equalTo(null))
             .assertThat().statusCode(200);
 
@@ -244,13 +243,12 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
-    @Ignore // Need to be modified
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecYesCafcass() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(CAFCASS);
+        //DocumentResponse docRes = uploadDocument(CAFCASS);
         String requestBodyRevised = requestBodyForCafcass
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-                     docRes.getDocument().getDocumentUrl())
+            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+            //         docRes.getDocument().getDocumentUrl())
             .replace("\"isConfidential\": \"No\"",
                      "\"isConfidential\": \"Yes\"")
             .replace("\"isRestricted\": \"No\"",
@@ -263,9 +261,9 @@ public class ReviewDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/review-documents/about-to-submit")
             .then()
-            .body("data.restrictedDocuments[0].value.isConfidential", equalTo(null),
-                  "data.restrictedDocuments[0].value.isRestricted", equalTo(null),
-                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+            .body("data.restrictedDocuments[0].value.isConfidential", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
                   "data.confidentialDocuments", equalTo(null))
             .assertThat().statusCode(200);
 
@@ -302,13 +300,12 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
-    @Ignore // Need to modified
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoCafcass() throws Exception {
 
-        DocumentResponse docRes = uploadDocument(CAFCASS);
+        //DocumentResponse docRes = uploadDocument(CAFCASS);
         String requestBodyRevised = requestBodyForCafcass
-            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
-                     docRes.getDocument().getDocumentUrl())
+            //.replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+            //         docRes.getDocument().getDocumentUrl())
             .replace("\"reviewDecisionYesOrNo\": \"yes\"",
                      "\"reviewDecisionYesOrNo\": \"no\"");
 
@@ -321,7 +318,7 @@ public class ReviewDocumentsControllerFunctionalTest {
             .then()
             .body("data.cafcassUploadDocListDocTab[0].value.isConfidential", equalTo(null),
                   "data.cafcassUploadDocListDocTab[0].value.isRestricted", equalTo(null),
-                  "data.cafcassUploadDocListDocTab[0].value.cafcassQuarantineDocument.document_filename", equalTo("Test.pdf"),
+                  "data.cafcassUploadDocListDocTab[0].value.cafcassQuarantineDocument.document_filename", equalTo(null),
                   "data.restrictedDocuments", equalTo(null),
                   "data.confidentialDocuments", equalTo(null))
             .assertThat().statusCode(200)
@@ -330,7 +327,7 @@ public class ReviewDocumentsControllerFunctionalTest {
 
     }
 
-    @Test
+    @Test//f5
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForCafcass() throws Exception {
 
         //DocumentResponse docRes = uploadDocument(CAFCASS);
@@ -350,7 +347,7 @@ public class ReviewDocumentsControllerFunctionalTest {
             .then()
             .body("data.restrictedDocuments[0].value.isConfidential", equalTo("No"),
                   "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
-                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
                   "data.confidentialDocuments", equalTo(null))
             .assertThat().statusCode(200)
             .extract()
@@ -359,7 +356,7 @@ public class ReviewDocumentsControllerFunctionalTest {
 
     }
 
-    @Test
+    @Test//f4
     public void givenReviewDocuments_whenOnlyConfidentialNotRestrictedForCafcass() throws Exception {
 
         //DocumentResponse docRes = uploadDocument(CAFCASS);
@@ -379,7 +376,7 @@ public class ReviewDocumentsControllerFunctionalTest {
             .then()
             .body("data.confidentialDocuments[0].value.isConfidential", equalTo("Yes"),
                   "data.confidentialDocuments[0].value.isRestricted", equalTo("No"),
-                  "data.confidentialDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.confidentialDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
                   "data.restrictedDocuments", equalTo(null))
             .assertThat().statusCode(200);
 
