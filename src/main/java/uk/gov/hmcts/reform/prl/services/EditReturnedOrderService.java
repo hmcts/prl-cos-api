@@ -33,8 +33,8 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class EditReturnedOrderService {
 
-    public static final String OPEN_THE_DRAFT_ORDER_TEXT = "Open the draft order and edit it to include the judge's instructions";
-    public static final String USE_CONTINUE_TO_EDIT_THE_ORDER = "Use continue to edit the order";
+    public static final String OPEN_THE_DRAFT_ORDER_TEXT = "Open the draft order and edit it to include the judge's instructions.";
+    public static final String USE_CONTINUE_TO_EDIT_THE_ORDER = "Use continue to edit the order.";
     public static final String ORDER_UPLOADED_AS_DRAFT_FLAG = "orderUploadedAsDraftFlag";
     public static final String ORDER_TYPE = "orderType";
     public static final String MANAGE_ORDER_OPTION_TYPE = "manageOrderOptionType";
