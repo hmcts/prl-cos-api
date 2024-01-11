@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microsoft.applicationinsights.boot.dependencies.apachecommons.lang3.StringUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 
@@ -112,6 +115,48 @@ public class RelationshipsController {
                 })
         );
         caseDataUpdated.put("buffChildAndRespondentRelations", applicantChildRelationsList);
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+    }
+
+    @PostMapping(path = "/pre-populate-amend-respondent-to-child-relation", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "pre populates amend respondent and child relations")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
+            schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse prePopulateAmendRespondentToChildRelation(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
+    ) {
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<Element<ChildrenAndRespondentRelation>> respondentChildRelationsList = new ArrayList<>();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<ChildrenAndRespondentRelation>> existingRespondentChildRelations = caseData.getRelations().getChildAndRespondentRelations();
+        caseData.getRespondents().forEach(eachRespondent ->
+              caseData.getNewChildDetails().forEach(eachChild -> {
+                  ChildrenAndRespondentRelation existingRelation = CollectionUtils.isNotEmpty(existingRespondentChildRelations)
+                            ? existingRespondentChildRelations.stream().filter(childrenAndRespondentRelationElement ->
+                                StringUtils.equals(childrenAndRespondentRelationElement.getValue().getRespondentId(),
+                                                   String.valueOf(eachRespondent.getId()))
+                                && StringUtils.equals(childrenAndRespondentRelationElement.getValue().getChildId(),
+                                                      String.valueOf(eachChild.getId())))
+                        .findFirst().map(Element::getValue).orElse(null) : null;
+
+                  ChildrenAndRespondentRelation respondentChildRelations = ChildrenAndRespondentRelation.builder()
+                      .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
+                                                   eachChild.getValue().getLastName()))
+                      .childId(eachChild.getId().toString())
+                      .respondentId(eachRespondent.getId().toString())
+                      .respondentFullName(String.format(PrlAppsConstants.FORMAT, eachRespondent.getValue().getFirstName(),
+                                                        eachRespondent.getValue().getLastName()))
+                      .childAndRespondentRelation(Objects.nonNull(existingRelation) ? existingRelation.getChildAndRespondentRelation() : null)
+                      .childLivesWith(Objects.nonNull(existingRelation) ? existingRelation.getChildLivesWith() : null)
+                      .build();
+                  respondentChildRelationsList.add(Element.<ChildrenAndRespondentRelation>builder().value(respondentChildRelations).build());
+              })
+        );
+        caseDataUpdated.put("buffChildAndRespondentRelations", respondentChildRelationsList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
