@@ -65,7 +65,7 @@ public class EditReturnedOrderControllerTest {
 
     @Before
     public void setUp() {
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(DraftOrder.builder().build());
     }
 
     @Test

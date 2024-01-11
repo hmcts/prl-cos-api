@@ -4075,8 +4075,6 @@ public class DraftAnOrderServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(elementUtils.getDynamicListSelectedValue(caseData.getDraftOrdersDynamicList(), objectMapper))
             .thenReturn(uuid);
-        //when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
-
         Map<String, Object> caseDataUpdated = draftAnOrderService
             .handleDocumentGenerationForaDraftOrder(authToken, callbackRequest);
         List<String> errors = (List<String>) caseDataUpdated.get(HEARING_SCREEN_ERRORS);

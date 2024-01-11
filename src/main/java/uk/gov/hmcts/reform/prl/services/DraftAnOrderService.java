@@ -201,7 +201,6 @@ public class DraftAnOrderService {
     private static final String BOLD_END = "</span>";
 
     private final WelshCourtEmail welshCourtEmail;
-    private final EditReturnedOrderService editReturnedOrderService;
 
     public Map<String, Object> generateDraftOrderCollection(CaseData caseData, String authorisation) {
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
@@ -557,7 +556,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("previewUploadedOrder", selectedOrder.getOrderDocument());
         if (!StringUtils.isEmpty(selectedOrder.getJudgeNotes())) {
@@ -590,9 +589,9 @@ public class DraftAnOrderService {
 
     public Map<String, Object> populateDraftOrderCustomFields(CaseData caseData, String eventId) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
         if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
-            selectedOrder = editReturnedOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+            selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                              caseData.getManageOrders()
                                                                                                  .getRejectedOrdersDynamicList());
         }
@@ -660,7 +659,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> populateStandardDirectionOrder(String authorisation, CaseData caseData, boolean editOrder) {
         Map<String, Object> standardDirectionOrderMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
         if (null != selectedOrder.getSdoDetails()) {
             StandardDirectionOrder standardDirectionOrder;
             try {
@@ -749,7 +748,7 @@ public class DraftAnOrderService {
 
     public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData);
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
         log.info("selected order: {}", selectedOrder);
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put("draftOrdersDynamicList", caseData.getDraftOrdersDynamicList());
@@ -868,11 +867,10 @@ public class DraftAnOrderService {
             .build();
     }
 
-    public DraftOrder getSelectedDraftOrderDetails(CaseData caseData) {
-        UUID orderId = elementUtils.getDynamicListSelectedValue(
-            caseData.getDraftOrdersDynamicList(), objectMapper);
+    public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
+        UUID orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
         log.info("** Order id {}", orderId);
-        return caseData.getDraftOrderCollection().stream()
+        return draftOrderCollection.stream()
             .filter(element -> element.getId().equals(orderId))
             .map(Element::getValue)
             .findFirst()
@@ -1111,13 +1109,13 @@ public class DraftAnOrderService {
             if (ObjectUtils.isEmpty(orderType)) {
                 DraftOrder draftOrder;
                 if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                    draftOrder = editReturnedOrderService.getSelectedDraftOrderDetails(
+                    draftOrder = getSelectedDraftOrderDetails(
                         caseData.getDraftOrderCollection(),
                         caseData.getManageOrders()
                             .getRejectedOrdersDynamicList()
                     );
                 } else {
-                    draftOrder = getSelectedDraftOrderDetails(caseData);
+                    draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
                 }
                 orderType = draftOrder.getOrderType();
             }
@@ -1707,9 +1705,9 @@ public class DraftAnOrderService {
     }
 
     public Map<String, Object> getDraftOrderInfo(String authorisation, CaseData caseData, String eventId) throws Exception {
-        DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+        DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
         if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
-            draftOrder = editReturnedOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+            draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                caseData.getManageOrders()
                                                                                    .getRejectedOrdersDynamicList());
         }
@@ -1892,7 +1890,8 @@ public class DraftAnOrderService {
 
     public String getDraftOrderNameForWA(CaseData caseData, boolean isApprovalJourney) {
         if (isApprovalJourney) {
-            return getSelectedDraftOrderDetails(caseData).getLabelForOrdersDynamicList();
+            return getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList())
+                .getLabelForOrdersDynamicList();
         } else {
             if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
                 return ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions().getDisplayedValue());
@@ -2130,9 +2129,9 @@ public class DraftAnOrderService {
                 caseData.getCreateSelectOrderOptions()
             );
         } else {
-            DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+            DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
             if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(callbackRequest.getEventId())) {
-                draftOrder = editReturnedOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                    caseData.getManageOrders()
                                                                                        .getRejectedOrdersDynamicList());
             }
@@ -2194,7 +2193,7 @@ public class DraftAnOrderService {
         } else if ((Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(callbackRequest.getEventId()))) {
-            DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData);
+            DraftOrder draftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
             occupationErrorList.addAll(getErrorForOccupationScreen(caseData, draftOrder.getOrderType()));
             if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
                 boolean isOrderEdited = false;

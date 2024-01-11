@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -41,6 +40,7 @@ public class EditReturnedOrderService {
     public static final String INSTRUCTIONS_TO_LEGAL_REPRESENTATIVE = "instructionsToLegalRepresentative";
     public static final String EDIT_ORDER_TEXT_INSTRUCTIONS = "editOrderTextInstructions";
     public static final String PREVIEW_UPLOADED_ORDER = "previewUploadedOrder";
+    public static final String SELECTED_ORDER = "selectedOrder";
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
     private final UserService userService;
@@ -49,6 +49,8 @@ public class EditReturnedOrderService {
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     private static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
+
+    private final DraftAnOrderService draftAnOrderService;
 
     public AboutToStartOrSubmitCallbackResponse handleAboutToStartCallback(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
@@ -92,7 +94,7 @@ public class EditReturnedOrderService {
 
     public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getManageOrders()
+        DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getManageOrders()
             .getRejectedOrdersDynamicList());
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
@@ -114,17 +116,7 @@ public class EditReturnedOrderService {
         } else {
             caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, USE_CONTINUE_TO_EDIT_THE_ORDER);
         }
+        caseDataMap.put(SELECTED_ORDER, selectedOrder.getOrderType().getDisplayedValue());
         return caseDataMap;
-    }
-
-    public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
-        UUID orderId = elementUtils.getDynamicListSelectedValue(
-            dynamicList, objectMapper);
-        log.info("** Order id {}", orderId);
-        return draftOrderCollection.stream()
-            .filter(element -> element.getId().equals(orderId))
-            .map(Element::getValue)
-            .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
     }
 }

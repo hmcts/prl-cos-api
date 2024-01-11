@@ -206,7 +206,12 @@ public class EditAndApproveDraftOrderController {
             }
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+            Object dynamicList = caseData.getDraftOrdersDynamicList();
+            if (Event.EDIT_RETURNED_ORDER.equals(callbackRequest.getEventId())) {
+                dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
+            }
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                                        dynamicList);
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
@@ -348,7 +353,8 @@ public class EditAndApproveDraftOrderController {
                 log.info("*** Draft order dynamic list : {}", caseData.getDraftOrdersDynamicList());
                 log.info("*** Draft order collection : {}", caseData.getDraftOrderCollection());
                 try {
-                    DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                    DraftOrder draftOrder = draftAnOrderService
+                        .getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
                     manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(callbackRequest.getCaseDetails(), draftOrder);
                 } catch (Exception e) {
                     log.error("Failed to send email to solicitor : {}", e.getMessage());
