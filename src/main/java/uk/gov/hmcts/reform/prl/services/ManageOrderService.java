@@ -2602,22 +2602,39 @@ public class ManageOrderService {
 
     public String checkIfHearingTaskNeeded(List<Element<HearingData>> ordersHearingDetails) {
         String isTaskNeeded = "No";
+
         if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
             for (HearingData hearing : hearingList) {
                 if (hearing.getHearingDateConfirmOptionEnum() != null
-                    && (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
-                    || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
-                    || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum()))) {
+                        && (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
+                        || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum()))) {
                     isTaskNeeded = "Yes";
+                    break;
                 }
             }
         }
         return isTaskNeeded;
     }
 
-    public void setIsHearingTaskNeedFlag(CaseData caseData, Map<String,Object> caseDataUpdated) {
+    public void getHearingSelectedForTask(List<Element<HearingData>> ordersHearingDetails, Map<String,Object> caseDataUpdated) {
+        String isMultipleHearingSelected = null;
+        HearingDateConfirmOptionEnum hearingOptionSelected = null;
+        if (ordersHearingDetails.size() > 1) {
+            isMultipleHearingSelected = "Yes";
+        } else if (!ordersHearingDetails.isEmpty()) {
+            List<HearingData> hearingList = ordersHearingDetails.stream()
+                .map(Element::getValue).toList();
+            hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum();
+        }
+
+        caseDataUpdated.put("isMultipleHearingSelected", isMultipleHearingSelected);
+        caseDataUpdated.put("hearingOptionSelected", hearingOptionSelected);
+    }
+
+    public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated) {
         String isHearingTaskNeeded = null;
         if (YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
             UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
@@ -2628,14 +2645,24 @@ public class ManageOrderService {
                     && "Yes".equalsIgnoreCase(checkIfHearingTaskNeeded(draftOrder.getManageOrderHearingDetails()))) {
                     caseDataUpdated.put("isHearingTaskNeeded", "Yes");
                 }
+
+                if (e.getId().equals(selectedOrderId)) {
+                    getHearingSelectedForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
+                }
+
             }
         } else if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
                 isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
             }
             caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
+
+            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+                getHearingSelectedForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
+            }
         }
     }
+
 
     public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
