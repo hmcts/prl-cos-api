@@ -127,7 +127,6 @@ public class BundleCreateRequestMapper {
         if (null != citizenUploadedDocuments && !citizenUploadedDocuments.isEmpty()) {
             allOtherDocuments.addAll(citizenUploadedDocuments);
         }
-
         //SNI-4260 fix
         //Updated to retrieve otherDocuments according to the new manageDocuments event
         List<Element<BundlingRequestDocument>> otherDocuments = mapOtherDocumentsFromCaseData(caseData);
