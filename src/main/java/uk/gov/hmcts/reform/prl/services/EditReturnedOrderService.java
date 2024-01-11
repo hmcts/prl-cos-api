@@ -119,8 +119,8 @@ public class EditReturnedOrderService {
         } else {
             caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, USE_CONTINUE_TO_EDIT_THE_ORDER);
         }
-        caseDataMap.put("isTheOrderAboutAllChildrenEditReturned", selectedOrder.getIsTheOrderAboutAllChildren());
-        caseDataMap.put("isTheOrderAboutChildrenEditReturned", selectedOrder.getIsTheOrderAboutChildren());
+        caseDataMap.put("isTheOrderAboutAllChildrenReturnedOrder", selectedOrder.getIsTheOrderAboutAllChildren());
+        caseDataMap.put("isTheOrderAboutChildrenReturnedOrder", selectedOrder.getIsTheOrderAboutChildren());
         caseDataMap.put("dateOrderMade1", selectedOrder.getDateOrderMade());
         caseDataMap.put("childOption", (Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
                 || No.equals(selectedOrder.getIsTheOrderAboutAllChildren()))
