@@ -224,7 +224,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .body("data.legalProfQuarantineDocsList[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc1.pdf"))
+            .body("data.legalProfQuarantineDocsList[0].value.document.document_filename", equalTo("Test doc1.pdf"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -263,7 +263,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .body("data.cafcassQuarantineDocsList[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc1.pdf"))
+            .body("data.cafcassQuarantineDocsList[0].value.cafcassQuarantineDocument.document_filename", equalTo("Test doc1.pdf"))
             .assertThat().statusCode(200);
     }
 
