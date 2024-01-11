@@ -2603,9 +2603,9 @@ public class ManageOrderService {
 
     public void setHearingSelectedInfoForTask(List<Element<HearingData>> ordersHearingDetails, Map<String,Object> caseDataUpdated) {
 
-        String isMultipleHearingSelected = null;
+        String isMultipleHearingSelected = "No";
         HearingDateConfirmOptionEnum hearingOptionSelected = null;
-        String isHearingTaskNeeded = null;
+        String isHearingTaskNeeded = "No";
 
         if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
             log.info("1111111");

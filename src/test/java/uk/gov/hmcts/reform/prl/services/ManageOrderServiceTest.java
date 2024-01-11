@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -41,6 +40,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -3848,8 +3848,10 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    @Ignore
-    public void testWaHearingTaskCreationFlag() {
+    public void testWaHearingSelectedInfoForTask_whenOneHearingOnly() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
@@ -3858,16 +3860,45 @@ public class ManageOrderServiceTest {
             .hearingChannelsEnum(null).build();
         hearingDataList.add(element(hearingdata));
         manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList,caseDataUpdated);
+        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit, caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+    }
+
+    @Test
+    public void testWaHearingSelectedInfoForTask_whenMultipleHearing() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+
+        HearingData hearingdata2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+
+        hearingDataList.add(element(hearingdata1));
+        hearingDataList.add(element(hearingdata2));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .manageOrders(manageOrders).build();
 
-        //assertEquals("Yes", manageOrderService.checkIfHearingTaskNeeded(hearingDataList));
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList,caseDataUpdated);
+        assertNull(caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
     }
 
     @Test
-    @Ignore
-    public void testWaHearingTaskCreationFlagShouldReturnNo() {
+    public void testWaHearingSelectedInfoForTask_forDateConfirmedInHearingTab_shuldReturnTaskNeededNo() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
@@ -3880,15 +3911,16 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .manageOrders(manageOrders).build();
 
-        //assertEquals("No", manageOrderService.checkIfHearingTaskNeeded(hearingDataList));
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList,caseDataUpdated);
+        assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
     }
 
     @Test
-    @Ignore
-    public void testWaHearingTaskCreationFlagShouldReturnYes() {
+    public void testWasetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
-            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
             .hearingTypes(DynamicList.builder()
                               .value(null).build())
             .hearingChannelsEnum(null).build();
@@ -3896,8 +3928,46 @@ public class ManageOrderServiceTest {
         manageOrders.setOrdersHearingDetails(hearingDataList);
         CaseData caseData = CaseData.builder()
             .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.Yes)
             .manageOrders(manageOrders).build();
 
-        //assertEquals("Yes", manageOrderService.checkIfHearingTaskNeeded(hearingDataList));
+        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated);
+        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit,
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
     }
+
+    @Test
+    public void testWasetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNo() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+
+        DraftOrder draftOrder = DraftOrder.builder().manageOrderHearingDetails(hearingDataList).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+
+        Element<DraftOrder> draftOrderElement = element(uuid,draftOrder);
+        draftOrderCollection.add(draftOrderElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.No)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(manageOrders).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated);
+        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit,
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+    }
+
 }
