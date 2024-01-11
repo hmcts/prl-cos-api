@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
@@ -162,6 +163,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private RefDataUserService refDataUserService;
+
+    @Mock
+    private DraftAnOrderService draftAnOrderService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -3916,8 +3920,8 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWasetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
+
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
@@ -3930,8 +3934,9 @@ public class ManageOrderServiceTest {
             .id(12345L)
             .doYouWantToEditTheOrder(YesOrNo.Yes)
             .manageOrders(manageOrders).build();
-
-        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated);
+        when(draftAnOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(true);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated, Event.EDIT_AND_APPROVE_ORDER.getId());
         assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit,
                      caseDataUpdated.get("hearingOptionSelected"));
         assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
@@ -3939,7 +3944,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testWasetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNo() {
+    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNo() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
@@ -3963,7 +3968,8 @@ public class ManageOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .manageOrders(manageOrders).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated);
+        when(draftAnOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
+        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.EDIT_AND_APPROVE_ORDER.getId());
         assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit,
                      caseDataUpdated.get("hearingOptionSelected"));
         assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
