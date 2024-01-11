@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -3930,11 +3931,12 @@ public class ManageOrderServiceTest {
             .hearingChannelsEnum(null).build();
         hearingDataList.add(element(hearingdata));
         manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .doYouWantToEditTheOrder(YesOrNo.Yes)
             .manageOrders(manageOrders).build();
-        when(draftAnOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(true);
+        //when(manageOrderService.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), false)).thenReturn(true);
         Map<String, Object> caseDataUpdated = new HashMap<>();
         manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated, Event.EDIT_AND_APPROVE_ORDER.getId());
         assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit,
@@ -3968,7 +3970,7 @@ public class ManageOrderServiceTest {
             .draftOrderCollection(draftOrderCollection)
             .manageOrders(manageOrders).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        when(draftAnOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
+        //when(manageOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
         manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.EDIT_AND_APPROVE_ORDER.getId());
         assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit,
                      caseDataUpdated.get("hearingOptionSelected"));

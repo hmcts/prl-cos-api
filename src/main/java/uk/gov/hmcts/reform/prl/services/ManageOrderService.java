@@ -22,6 +22,8 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.ServeOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -562,7 +564,6 @@ public class ManageOrderService {
     private final HearingService hearingService;
     private final HearingDataService hearingDataService;
     private final WelshCourtEmail welshCourtEmail;
-    private final DraftAnOrderService draftAnOrderService;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -2646,7 +2647,7 @@ public class ManageOrderService {
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId) {
         log.info("inside setHearingOptionDetailsForTask --> {}", caseData);
         boolean isOrderEdited = false;
-        if (draftAnOrderService.isOrderEdited(caseData, eventId, isOrderEdited)) {
+        if (isOrderEdited(caseData, eventId, isOrderEdited)) {
             log.info("getOrdersHearingDetails YES --> {}", caseData.getManageOrders().getOrdersHearingDetails());
             setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
         } else {
@@ -2665,6 +2666,24 @@ public class ManageOrderService {
             }
         }
 
+    }
+
+    //temporary
+    public boolean isOrderEdited(CaseData caseData, String eventId, boolean isOrderEdited) {
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(eventId)) {
+            if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+                isOrderEdited = true;
+            }
+        } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
+            && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
+            .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
+            || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
+            .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
+            isOrderEdited = true;
+        }
+        return isOrderEdited;
     }
 
     public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
