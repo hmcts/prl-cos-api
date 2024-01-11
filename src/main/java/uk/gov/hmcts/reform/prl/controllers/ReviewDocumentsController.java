@@ -28,11 +28,11 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import javax.ws.rs.core.HttpHeaders;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments.reviewDocTempFields;
@@ -108,14 +108,20 @@ public class ReviewDocumentsController {
         ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        log.info("/copy-manage-docs/about-to-submit::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
+        log.info(
+            "/copy-manage-docs/about-to-submit::CallbackRequest -> {}",
+            objectMapper.writeValueAsString(callbackRequest)
+        );
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*************************** BEFORE REVIEW ***************************");
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
+
         reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
+
+
         log.info("*************************** AFTER REVIEW ***************************");
 
         //clear fields
