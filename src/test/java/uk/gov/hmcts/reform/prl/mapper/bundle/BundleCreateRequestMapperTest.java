@@ -239,7 +239,7 @@ public class BundleCreateRequestMapperTest {
                                      .documentRestrictCheckbox(new ArrayList<>()).build());
         QuarantineLegalDoc respStatement = QuarantineLegalDoc.builder()
             .respondentStatementsDocument(Document.builder().documentFileName("respondentStatements").build())
-                                                                    .documentParty("Respondent").categoryName("Respondent's statements").build();
+            .documentParty("Respondent").categoryName("Respondent's statements").build();
         List<Element<QuarantineLegalDoc>> courtStaffDoc = new ArrayList<>();
         courtStaffDoc.add(element(respStatement));
 
@@ -390,6 +390,7 @@ public class BundleCreateRequestMapperTest {
             .state(State.DECISION_OUTCOME)
             .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
             .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
+            .reviewDocuments(ReviewDocuments.builder().build())
             .bundleInformation(BundlingInformation.builder().build())
             .reviewDocuments(ReviewDocuments.builder().build())
             .build();

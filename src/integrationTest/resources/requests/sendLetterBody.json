@@ -1,0 +1,11 @@
+{
+  "documents": ["test file in bytes array"
+  ],
+  "type": "ApplicationPack",
+  "additional_data": {
+    "caseIdentifier":"1697022507599892",
+    "recipients" : ["Mary Richards"],
+    "caseReferenceNumber" : "1697022507599892",
+    "letterType" : "ApplicationPack"
+  }
+}
