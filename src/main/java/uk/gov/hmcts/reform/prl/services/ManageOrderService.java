@@ -562,7 +562,7 @@ public class ManageOrderService {
     private final HearingService hearingService;
     private final HearingDataService hearingDataService;
     private final WelshCourtEmail welshCourtEmail;
-
+    private final DraftAnOrderService draftAnOrderService;
 
     public Map<String, Object> populateHeader(CaseData caseData) {
         Map<String, Object> headerMap = new HashMap<>();
@@ -2614,7 +2614,6 @@ public class ManageOrderService {
         String isHearingTaskNeeded = "No";
 
         if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
-            log.info("1111111");
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
             for (HearingData hearing : hearingList) {
@@ -2623,6 +2622,7 @@ public class ManageOrderService {
                     || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
                     || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum()))) {
                     isHearingTaskNeeded = "Yes";
+                    log.info("111111");
                     break;
                 }
             }
@@ -2631,7 +2631,7 @@ public class ManageOrderService {
                 log.info("22222");
                 isMultipleHearingSelected = "Yes";
             } else if (!ordersHearingDetails.isEmpty()) {
-                log.info("33333333");
+                log.info("3333");
                 hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum();
             }
         }
@@ -2643,28 +2643,28 @@ public class ManageOrderService {
         log.info("caseDataUpdated--isHearingTaskNeeded---> {}",caseDataUpdated.get("isHearingTaskNeeded"));
     }
 
-    public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        log.info("inside setHearingOptionDetailsForTask --> {}",caseData);
-        if (YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
-
+    public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId) {
+        log.info("inside setHearingOptionDetailsForTask --> {}", caseData);
+        boolean isOrderEdited = false;
+        if (draftAnOrderService.isOrderEdited(caseData, eventId, isOrderEdited)) {
+            log.info("getOrdersHearingDetails YES --> {}", caseData.getManageOrders().getOrdersHearingDetails());
+            setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
+        } else {
             UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                 caseData.getDraftOrdersDynamicList(), objectMapper);
-            log.info("selectedOrderId --> {}",selectedOrderId);
-            log.info("getDraftOrderCollection -NO-> {}",caseData.getDraftOrderCollection());
+            log.info("selectedOrderId -NO00-> {}", selectedOrderId);
+            log.info("getDraftOrderCollection -NOooo-> {}", caseData.getDraftOrderCollection());
 
             for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                 DraftOrder draftOrder = e.getValue();
-                log.info("draftOrder --> {}",draftOrder);
-                log.info("draftOrder Judge--> {}", draftOrder.getOtherDetails().getStatus());
+                log.info("draftOrder --> {}", draftOrder);
+                //log.info("draftOrder Judge--> {}", draftOrder.getOtherDetails().getStatus());
                 if (e.getId().equals(selectedOrderId)) {
                     setHearingSelectedInfoForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
                 }
             }
-        } else if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
-            log.info("getDraftOrderCollection -YESSSS-> {}",caseData.getDraftOrderCollection());
-            log.info("getOrdersHearingDetails YES --> {}",caseData.getManageOrders().getOrdersHearingDetails());
-            setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
         }
+
     }
 
     public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
