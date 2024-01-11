@@ -578,7 +578,7 @@ public class ReviewDocumentService {
             .notes(quarantineLegalDoc.getNotes())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .categoryName(quarantineLegalDoc.getCategoryName())
-            .fileName(quarantineLegalDoc.getFileName())
+            .fileName("Confidential_" + quarantineLegalDoc.getFileName())
             .controlNumber(quarantineLegalDoc.getControlNumber())
             .type(quarantineLegalDoc.getType())
             .subtype(quarantineLegalDoc.getSubtype())
