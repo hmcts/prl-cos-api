@@ -101,6 +101,7 @@ public class EditAndApproveDraftOrderController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+
     }
 
     @PostMapping(path = "/judge-or-admin-edit-approve/mid-event", consumes = APPLICATION_JSON,
@@ -202,6 +203,7 @@ public class EditAndApproveDraftOrderController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+
     }
 
     @PostMapping(path = "/judge-or-admin-populate-draft-order-common-fields", consumes = APPLICATION_JSON,

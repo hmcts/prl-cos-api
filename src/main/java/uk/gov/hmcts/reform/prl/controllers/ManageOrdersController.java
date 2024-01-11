@@ -85,16 +85,17 @@ public class ManageOrdersController {
     @Autowired
     private AmendOrderService amendOrderService;
 
+    @Autowired
+    RefDataUserService refDataUserService;
 
-
-    private final RefDataUserService refDataUserService;
-
-    private final HearingDataService hearingDataService;
+    @Autowired
+    private HearingDataService hearingDataService;
 
     @Autowired
     private AuthorisationService authorisationService;
 
-    private final CoreCaseDataService coreCaseDataService;
+    @Autowired
+    CoreCaseDataService coreCaseDataService;
 
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
