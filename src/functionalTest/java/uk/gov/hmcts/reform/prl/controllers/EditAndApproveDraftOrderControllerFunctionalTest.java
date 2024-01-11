@@ -6,14 +6,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
@@ -38,13 +36,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
-    @MockBean
-    private DraftAnOrderService draftAnOrderService;
-
-
-
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
 
+    private static final String DRAFT_ORDER_JUDGE_EDIT_AND_APPRV_REQUEST_BODY = "requests/draft-order-judge-edit-and-approve-soli-request.json";
 
     @Before
     public void setUp() {
@@ -128,4 +122,18 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .andExpect(status().isOk())
             .andReturn();
     }
+
+    @Test
+    public void givenRequestBody_whenJudge_edit_approve_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_EDIT_AND_APPRV_REQUEST_BODY);
+        mockMvc.perform(post("/judge-or-admin-edit-approve/about-to-submit")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                            .content(requestBody)
+                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+    }
+
 }

@@ -2682,10 +2682,10 @@ public class ManageOrderService {
 
     public void isApprovedByJudge(CaseData caseData, Map<String, Object> caseDataUpdated) {
 
-        boolean isApprovedByJudge = null != caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()
+        String isApprovedByJudge = String.valueOf(null != caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()
             || (null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
             && !OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
-            .equalsIgnoreCase(WHAT_TO_DO_WITH_ORDER_SOLICITOR));
+            .equalsIgnoreCase(WHAT_TO_DO_WITH_ORDER_SOLICITOR)));
 
         caseDataUpdated.put("isApprovedByJudge", isApprovedByJudge);
     }
