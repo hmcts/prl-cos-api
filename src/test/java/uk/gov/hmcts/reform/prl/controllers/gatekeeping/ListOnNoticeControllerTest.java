@@ -45,6 +45,9 @@ import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
@@ -296,5 +299,12 @@ public class ListOnNoticeControllerTest {
         assertEquals(expectedMessage, exception.getMessage());
     }
 
+    @Test
+    public void testSendListOnNoticeNotification() {
+        doNothing().when(listOnNoticeService)
+            .sendNotification(Mockito.any());
+        listOnNoticeController.sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
+        verify(listOnNoticeService,times(1)).sendNotification(Mockito.any());
+    }
 
 }
