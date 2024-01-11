@@ -47,7 +47,6 @@ public enum ManageOrderFieldsEnum {
     isHearingPageNeeded("isHearingPageNeeded"),
     postalInformationCA("postalInformationCA"),
     cafcassCymruDocuments("cafcassCymruDocuments"),
-    draftOrdersDynamicList("draftOrdersDynamicList"),
     previewDraftOrderWelsh("previewDraftOrderWelsh"),
     whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
