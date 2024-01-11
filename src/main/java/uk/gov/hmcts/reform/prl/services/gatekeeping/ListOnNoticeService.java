@@ -85,6 +85,8 @@ public class ListOnNoticeService {
     }
 
     private EmailTemplateVars buildListOnNoticeEmail(CaseData caseData, String fullName) {
+        log.info("CaseNote   " + caseData.getCaseNote());
+
         return ListOnNoticeEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
