@@ -152,6 +152,8 @@ public class RelationshipsController {
                                                         eachRespondent.getValue().getLastName()))
                       .childAndRespondentRelation(Objects.nonNull(existingRelation) ? existingRelation.getChildAndRespondentRelation() : null)
                       .childLivesWith(Objects.nonNull(existingRelation) ? existingRelation.getChildLivesWith() : null)
+                      .childAndRespondentRelationOtherDetails(Objects.nonNull(existingRelation)
+                                                                  ? existingRelation.getChildAndRespondentRelationOtherDetails() : null)
                       .build();
                   respondentChildRelationsList.add(Element.<ChildrenAndRespondentRelation>builder().value(respondentChildRelations).build());
               })
