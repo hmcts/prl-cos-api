@@ -12,7 +12,9 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
@@ -41,7 +43,6 @@ public class EditReturnedOrderService {
     public static final String EDIT_ORDER_TEXT_INSTRUCTIONS = "editOrderTextInstructions";
     public static final String PREVIEW_UPLOADED_ORDER = "previewUploadedOrder";
     public static final String SELECTED_ORDER = "selectedOrder";
-    private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
     private final UserService userService;
 
@@ -51,6 +52,8 @@ public class EditReturnedOrderService {
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
 
     private final DraftAnOrderService draftAnOrderService;
+
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public AboutToStartOrSubmitCallbackResponse handleAboutToStartCallback(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
@@ -116,6 +119,13 @@ public class EditReturnedOrderService {
         } else {
             caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, USE_CONTINUE_TO_EDIT_THE_ORDER);
         }
+        caseDataMap.put("isTheOrderAboutAllChildrenEditReturned", selectedOrder.getIsTheOrderAboutAllChildren());
+        caseDataMap.put("isTheOrderAboutChildrenEditReturned", selectedOrder.getIsTheOrderAboutChildren());
+        caseDataMap.put("dateOrderMade1", selectedOrder.getDateOrderMade());
+        caseDataMap.put("childOption", (Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
+                || No.equals(selectedOrder.getIsTheOrderAboutAllChildren()))
+                ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         caseDataMap.put(SELECTED_ORDER, selectedOrder.getOrderType().getDisplayedValue());
         return caseDataMap;
     }
