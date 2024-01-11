@@ -309,8 +309,8 @@ public class ReviewDocumentService {
 
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional = null;
         String userRole = null;
-        if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo()) ||
-            YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+        if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())
+            || YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
             if (null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
                 quarantineLegalDocElementOptional =
                     getQuarantineDocumentById(
