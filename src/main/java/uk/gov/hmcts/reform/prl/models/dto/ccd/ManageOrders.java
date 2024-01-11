@@ -265,13 +265,13 @@ public class ManageOrders implements MappableObject {
     private final List<Element<PostalInformation>> postalInformationCaOnlyC47a;
 
     @JsonProperty("ordersHearingDetails")
-    @Builder.Default
     @JsonUnwrapped
+    @Builder.Default
     private List<Element<HearingData>> ordersHearingDetails;
 
     @JsonProperty("solicitorOrdersHearingDetails")
-    @Builder.Default
     @JsonUnwrapped
+    @Builder.Default
     private List<Element<HearingData>> solicitorOrdersHearingDetails;
 
     @JsonProperty("hasJudgeProvidedHearingDetails")

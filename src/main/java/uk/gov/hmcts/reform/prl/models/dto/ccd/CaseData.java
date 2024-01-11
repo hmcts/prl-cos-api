@@ -718,6 +718,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private AllocatedJudge allocatedJudge;
     @JsonProperty("gatekeepingDetails")
     private GatekeepingDetails gatekeepingDetails;
+
     @JsonUnwrapped
     private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
     @JsonUnwrapped

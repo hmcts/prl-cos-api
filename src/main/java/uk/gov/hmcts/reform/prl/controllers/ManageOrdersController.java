@@ -32,7 +32,6 @@ import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AmendOrderService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
-import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
@@ -80,15 +79,13 @@ public class ManageOrdersController {
     @Autowired
     private ManageOrderService manageOrderService;
 
-    private final DocumentLanguageService documentLanguageService;
-
     @Autowired
     private ManageOrderEmailService manageOrderEmailService;
 
     @Autowired
     private AmendOrderService amendOrderService;
 
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+
 
     private final RefDataUserService refDataUserService;
 
@@ -98,6 +95,8 @@ public class ManageOrdersController {
     private AuthorisationService authorisationService;
 
     private final CoreCaseDataService coreCaseDataService;
+
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private final HearingService hearingService;
 
