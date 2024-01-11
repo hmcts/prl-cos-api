@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
@@ -53,6 +54,9 @@ public class EditReturnedOrderServiceTest {
     @Mock
     ObjectMapper objectMapper;
 
+    @Mock
+    DraftAnOrderService draftAnOrderService;
+
     private static final String testAuth = "auth";
 
     @Before
@@ -62,6 +66,10 @@ public class EditReturnedOrderServiceTest {
                                                                                      .build());
         Mockito.when(elementUtils.getDynamicListSelectedValue(Mockito.any(),Mockito.any()))
             .thenReturn(UUID.fromString(PrlAppsConstants.TEST_UUID));
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
+            .thenReturn(DraftOrder.builder()
+                            .orderType(CreateSelectOrderOptionsEnum.generalForm)
+                            .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build());
     }
 
 
@@ -121,39 +129,21 @@ public class EditReturnedOrderServiceTest {
 
     @Test
     public void testInstructionToLegalRepresentative() {
-        List<Element<DraftOrder>> draftOrderCollection = List.of(Element.<DraftOrder>builder()
-                                                                     .id(UUID.fromString(PrlAppsConstants.TEST_UUID))
-                                                                     .value(DraftOrder.builder().otherDetails(
-            OtherDraftOrderDetails.builder()
-                .status(OrderStatusEnum.rejectedByJudge.getDisplayedValue())
-                .orderCreatedByEmailId("test@gmail.com")
-                .instructionsToLegalRepresentative("instructions")
-                .build()).build()).build());
         CaseData caseData = CaseData.builder()
-            .draftOrderCollection(draftOrderCollection)
             .manageOrders(ManageOrders.builder()
                               .rejectedOrdersDynamicList(DynamicList.builder()
                                                              .value(DynamicListElement.builder().code(PrlAppsConstants.TEST_UUID)
                                                                         .build())
                                                              .build()).build())
             .build();
+
         Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
     }
 
     @Test
     public void testInstructionToLegalRepresentativeElseCondition() {
-        List<Element<DraftOrder>> draftOrderCollection = List.of(Element.<DraftOrder>builder()
-                                                                     .id(UUID.fromString(PrlAppsConstants.TEST_UUID))
-                                                                     .value(DraftOrder.builder()
-                                                                                .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
-                                                                                .otherDetails(
-                                                                         OtherDraftOrderDetails.builder()
-                                                                             .status(OrderStatusEnum.rejectedByJudge.getDisplayedValue())
-                                                                             .orderCreatedByEmailId("test@gmail.com")
-                                                                             .build()).build()).build());
         CaseData caseData = CaseData.builder()
-            .draftOrderCollection(draftOrderCollection)
             .manageOrders(ManageOrders.builder()
                               .rejectedOrdersDynamicList(DynamicList.builder()
                                                              .value(DynamicListElement.builder().code(PrlAppsConstants.TEST_UUID)
@@ -162,5 +152,24 @@ public class EditReturnedOrderServiceTest {
             .build();
         Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
         assertTrue(response.containsKey("editOrderTextInstructions"));
+    }
+
+    @Test
+    public void testInstructionToLegalRepresentativeWithJudgeInstructions() {
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
+            .thenReturn(DraftOrder.builder()
+                            .orderType(CreateSelectOrderOptionsEnum.generalForm)
+                            .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
+                            .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build());
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .rejectedOrdersDynamicList(DynamicList.builder()
+                                                             .value(DynamicListElement.builder().code(PrlAppsConstants.TEST_UUID)
+                                                                        .build())
+                                                             .build()).build())
+            .build();
+
+        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
+        assertTrue(response.containsKey("instructionsToLegalRepresentative"));
     }
 }
