@@ -119,6 +119,10 @@ public class ListOnNoticeController {
             if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
                 caseDataUpdated.put(CASE_NOTE, selectedAndAdditionalReasons);
                 caseDataUpdated.put(SUBJECT, REASONS_SELECTED_FOR_LIST_ON_NOTICE);
+                caseData = caseData.toBuilder()
+                    .subject(REASONS_SELECTED_FOR_LIST_ON_NOTICE)
+                    .caseNote(selectedAndAdditionalReasons)
+                    .build();
                 caseDataUpdated.put(
                     CASE_NOTES,
                     addCaseNoteService.addCaseNoteDetails(
