@@ -144,4 +144,24 @@ public class ListOnNoticeController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+    @PostMapping(path = "/send-listOnNotice-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "List On Notice submission flow")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List ON notice submission is success"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public void sendListOnNoticeNotification(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            CaseData caseData = objectMapper.convertValue(
+                callbackRequest.getCaseDetails().getData(),
+                CaseData.class
+            );
+            listOnNoticeService.sendNotification(caseData);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
 }
