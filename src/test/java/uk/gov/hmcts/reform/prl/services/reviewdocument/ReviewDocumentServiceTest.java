@@ -418,7 +418,7 @@ public class ReviewDocumentServiceTest {
                                 LocalDateTime.now())
                             .document(Document.builder().build())
                             .build());
-        reviewDocumentService.processReviewDocumentNew(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
         Assert.assertNotNull(caseData.getReviewDocuments().getConfidentialDocuments());
         List<Element<QuarantineLegalDoc>>  confidentialDocs =
@@ -463,7 +463,7 @@ public class ReviewDocumentServiceTest {
                                 LocalDateTime.now())
                             .document(Document.builder().build())
                             .build());
-        reviewDocumentService.processReviewDocumentNew(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
         Assert.assertNotNull(caseData.getReviewDocuments().getConfidentialDocuments());
         List<Element<QuarantineLegalDoc>>  confidentialDocs =
@@ -499,7 +499,7 @@ public class ReviewDocumentServiceTest {
                                  .build())
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.processReviewDocumentNew(
+        reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
@@ -531,7 +531,7 @@ public class ReviewDocumentServiceTest {
                                  .citizenUploadDocListConfTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.processReviewDocumentNew(
+        reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
@@ -570,7 +570,7 @@ public class ReviewDocumentServiceTest {
                                 LocalDateTime.now())
                             .document(Document.builder().build())
                             .build());
-        reviewDocumentService.processReviewDocumentNew(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
         Assert.assertNotNull(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab());
         List<Element<QuarantineLegalDoc>>  listQuarantineLegalDoc =
             (List<Element<QuarantineLegalDoc>>)caseDataMap.get("legalProfUploadDocListDocTab");
@@ -606,7 +606,7 @@ public class ReviewDocumentServiceTest {
                                 LocalDateTime.now())
                             .document(Document.builder().build())
                             .build());
-        reviewDocumentService.processReviewDocumentNew(
+        reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
@@ -639,7 +639,7 @@ public class ReviewDocumentServiceTest {
                                  .courtStaffUploadDocListDocTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.processReviewDocumentNew(
+        reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
@@ -671,7 +671,7 @@ public class ReviewDocumentServiceTest {
                                  .citizenUploadedDocListDocTab(new ArrayList<>()).build())
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
         Map<String, Object> caseDataMap = new HashMap<>();
-        reviewDocumentService.processReviewDocumentNew(
+        reviewDocumentService.processReviewDocument(
             caseDataMap,
             caseData,
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
@@ -821,7 +821,7 @@ public class ReviewDocumentServiceTest {
                                 LocalDateTime.now())
                             .document(Document.builder().build())
                             .build());
-        reviewDocumentService.processReviewDocumentNew(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
         Assert.assertNotNull(caseDataMap.get("scannedDocuments"));
         List<Element<ScannedDocument>>  listScannedDocuments =
@@ -869,7 +869,7 @@ public class ReviewDocumentServiceTest {
                                 LocalDateTime.now())
                             .document(Document.builder().build())
                             .build());
-        reviewDocumentService.processReviewDocumentNew(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
         Assert.assertNotNull(caseDataMap.get("scannedDocuments"));
         List<Element<ScannedDocument>>  listScannedDocuments =
             (List<Element<ScannedDocument>>) caseDataMap.get("scannedDocuments");
@@ -904,7 +904,7 @@ public class ReviewDocumentServiceTest {
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
 
-        reviewDocumentService.processReviewDocumentNew(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
         Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
         List<Element<QuarantineLegalDoc>>  confidentialDocs =
@@ -936,7 +936,7 @@ public class ReviewDocumentServiceTest {
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
 
-        reviewDocumentService.processReviewDocumentNew(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
+        reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
         Assert.assertNotNull(caseDataMap.get(RESTRICTED_DOCUMENTS));
         List<Element<QuarantineLegalDoc>>  restrictedDocs =

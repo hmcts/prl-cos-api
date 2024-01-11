@@ -115,7 +115,7 @@ public class ReviewDocumentsControllerTest {
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         reviewDocumentsController.handleAboutToSubmit(auth, callbackRequest);
-        verify(reviewDocumentService).processReviewDocumentNew(stringObjectMap,caseData,uuid);
+        verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid);
         verifyNoMoreInteractions(reviewDocumentService);
     }
 

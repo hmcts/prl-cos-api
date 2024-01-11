@@ -264,7 +264,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocumentNew(callbackRequest, auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
@@ -315,7 +315,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocumentNew(callbackRequest, auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
@@ -363,7 +363,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocumentNew(callbackRequest, auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
 
@@ -413,7 +413,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocumentNew(callbackRequest, auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
 
@@ -461,7 +461,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocumentNew(callbackRequest, auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
 
@@ -514,7 +514,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRoleExpectAdmin);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocumentNew(callbackRequest, auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
 
@@ -571,7 +571,7 @@ public class ManageDocumentsServiceTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
 
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocumentNew(callbackRequest, auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffQuarantineDocsList");
 
@@ -623,7 +623,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocumentNew(callbackRequest, auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
 
@@ -670,7 +670,7 @@ public class ManageDocumentsServiceTest {
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
 
-        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocumentNew(callbackRequest, auth);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
 

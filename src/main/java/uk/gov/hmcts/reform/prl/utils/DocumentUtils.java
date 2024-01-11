@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -177,16 +178,35 @@ public class DocumentUtils {
     }
 
     public static String populateAttributeNameFromCategoryId(String categoryId) {
-        String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
-        String finalCategory = "";
-        for (int i = 0; i < splittedCategory.length; i++) {
-            if (i == 0) {
-                finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
-            } else {
-                finalCategory = finalCategory.concat(splittedCategory[i]);
+        String wierdAttributeName = returnAttributeNameForWierdCategories(categoryId);
+        if (wierdAttributeName != null) {
+            String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
+            String finalCategory = "";
+
+            for (int i = 0; i < splittedCategory.length; i++) {
+                if (i == 0) {
+                    finalCategory = finalCategory.concat(splittedCategory[i].toLowerCase());
+                } else {
+                    finalCategory = finalCategory.concat(splittedCategory[i]);
+                }
             }
+            return finalCategory + "Document";
         }
-        return finalCategory + "Document";
+        return wierdAttributeName;
+    }
+
+    private static String returnAttributeNameForWierdCategories(String categoryId) {
+
+        Map<String, String> wierdCategory = new HashMap<>();
+        wierdCategory.put("16aRiskAssessment", "sixteenARiskAssessmentDocument");
+        wierdCategory.put("requestForFASFormsToBeChanged", "requestForFasFormsToBeChangedDocument");
+        wierdCategory.put("SPIPReferralRequests", "spipReferralRequestsDocument");
+        wierdCategory.put("homeOfficeDWPResponses", "homeOfficeDwpResponsesDocument");
+        wierdCategory.put("DNAReports_expertReport", "dnaReportsExpertReportDocument");
+        wierdCategory.put("drugAndAlcoholTest(toxicology)", "drugAndAlcoholTestDocument");
+
+        return wierdCategory.get(categoryId);
+
     }
 
     public static String getDocumentId(String url) {
@@ -200,7 +220,7 @@ public class DocumentUtils {
         return documentId;
     }
 
-    private static String getLoggedInUserType(UserDetails userDetails) {
+    public static String getLoggedInUserType(UserDetails userDetails) {
         String loggedInUserType;
         List<String> roles = userDetails.getRoles();
         if (roles.contains(Roles.JUDGE.getValue()) || roles.contains(Roles.LEGAL_ADVISER.getValue()) || roles.contains(

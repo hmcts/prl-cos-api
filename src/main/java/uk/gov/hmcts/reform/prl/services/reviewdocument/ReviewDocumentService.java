@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -303,11 +305,8 @@ public class ReviewDocumentService {
         };
     }
 
-    public void processReviewDocumentNew(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
-        forReviewDecisionYesNew(caseData, caseDataUpdated, uuid);
-    }
+    public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {
 
-    private void forReviewDecisionYesNew(CaseData caseData, Map<String, Object> caseDataUpdated, UUID uuid) {
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional = null;
         String userRole = null;
         if (null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
@@ -317,7 +316,15 @@ public class ReviewDocumentService {
                     uuid
                 );
             userRole = SOLICITOR;
-            processDocumentsAfterReview(caseData, caseDataUpdated, quarantineLegalDocElementOptional, userRole);
+
+            processDocumentsAfterReviewNew(
+                caseData,
+                caseDataUpdated,
+                quarantineLegalDocElementOptional,
+                UserDetails.builder().roles(List.of(Roles.SOLICITOR.getValue())).build(),
+                userRole
+            );
+
             removeDocumentFromQuarantineList(
                 caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
                 uuid,
@@ -328,7 +335,13 @@ public class ReviewDocumentService {
             quarantineLegalDocElementOptional =
                 getQuarantineDocumentById(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(), uuid);
             userRole = CAFCASS;
-            processDocumentsAfterReview(caseData, caseDataUpdated, quarantineLegalDocElementOptional, userRole);
+            processDocumentsAfterReviewNew(
+                caseData,
+                caseDataUpdated,
+                quarantineLegalDocElementOptional,
+                UserDetails.builder().roles(List.of(CAFCASS)).build(),
+                userRole
+            );
             removeDocumentFromQuarantineList(
                 caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
                 uuid,
@@ -342,7 +355,13 @@ public class ReviewDocumentService {
                     uuid
                 );
             userRole = COURT_STAFF;
-            processDocumentsAfterReview(caseData, caseDataUpdated, quarantineLegalDocElementOptional, userRole);
+            processDocumentsAfterReviewNew(
+                caseData,
+                caseDataUpdated,
+                quarantineLegalDocElementOptional,
+                UserDetails.builder().roles(List.of(Roles.COURT_ADMIN.getValue())).build(),
+                userRole
+            );
             removeDocumentFromQuarantineList(
                 caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
                 uuid,
@@ -399,21 +418,14 @@ public class ReviewDocumentService {
         }
     }
 
-    private void processDocumentsAfterReview(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                             Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional, String userRole) {
+    private void processDocumentsAfterReviewNew(CaseData caseData, Map<String, Object> caseDataUpdated,
+                                                Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional,
+                                                UserDetails userDetails, String userRole) {
         if (quarantineLegalDocElementOptional.isPresent()) {
             QuarantineLegalDoc tempQuarantineDoe = quarantineLegalDocElementOptional.get().getValue();
-            if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-                tempQuarantineDoe = tempQuarantineDoe.toBuilder()
-                    .isConfidential(null)
-                    .isRestricted(null)
-                    .restrictedDetails(null)
-                    .build();
-            }
-
-            // Pass Authorisation only when called via Manage document service
-            manageDocumentsService.moveDocumentsToRespectiveCategories(
+            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
                 tempQuarantineDoe,
+                userDetails,
                 caseData,
                 caseDataUpdated,
                 userRole
