@@ -1766,6 +1766,7 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
             populateChildrenListForDocmosis(caseData);
+
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
                 caseDataUpdated.put(ORDER_HEARING_DETAILS, caseData.getManageOrders().getOrdersHearingDetails());
             }
@@ -2600,69 +2601,62 @@ public class ManageOrderService {
 
     }
 
-    public String checkIfHearingTaskNeeded(List<Element<HearingData>> ordersHearingDetails) {
-        String isTaskNeeded = "No";
+    public void setHearingSelectedInfoForTask(List<Element<HearingData>> ordersHearingDetails, Map<String,Object> caseDataUpdated) {
+
+        String isMultipleHearingSelected = null;
+        HearingDateConfirmOptionEnum hearingOptionSelected = null;
+        String isHearingTaskNeeded = null;
 
         if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
+            log.info("1111111");
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
             for (HearingData hearing : hearingList) {
                 if (hearing.getHearingDateConfirmOptionEnum() != null
-                        && (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
-                        || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
-                        || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum()))) {
-                    isTaskNeeded = "Yes";
+                    && (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
+                    || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
+                    || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum()))) {
+                    isHearingTaskNeeded = "Yes";
                     break;
                 }
             }
-        }
-        return isTaskNeeded;
-    }
 
-    public void getHearingSelectedForTask(List<Element<HearingData>> ordersHearingDetails, Map<String,Object> caseDataUpdated) {
-        String isMultipleHearingSelected = null;
-        HearingDateConfirmOptionEnum hearingOptionSelected = null;
-        if (ordersHearingDetails.size() > 1) {
-            isMultipleHearingSelected = "Yes";
-        } else if (!ordersHearingDetails.isEmpty()) {
-            List<HearingData> hearingList = ordersHearingDetails.stream()
-                .map(Element::getValue).toList();
-            hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum();
+            if (ordersHearingDetails.size() > 1) {
+                log.info("22222");
+                isMultipleHearingSelected = "Yes";
+            } else if (!ordersHearingDetails.isEmpty()) {
+                log.info("33333333");
+                hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum();
+            }
         }
-
         caseDataUpdated.put("isMultipleHearingSelected", isMultipleHearingSelected);
         caseDataUpdated.put("hearingOptionSelected", hearingOptionSelected);
+        caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
+        log.info("caseDataUpdated---isMultipleHearingSelected--> {}",caseDataUpdated.get("isMultipleHearingSelected"));
+        log.info("caseDataUpdated---hearingOptionSelected--> {}",caseDataUpdated.get("hearingOptionSelected"));
+        log.info("caseDataUpdated--isHearingTaskNeeded---> {}",caseDataUpdated.get("isHearingTaskNeeded"));
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        String isHearingTaskNeeded = null;
+        log.info("inside setHearingOptionDetailsForTask --> {}",caseData);
         if (YesOrNo.No.equals(caseData.getDoYouWantToEditTheOrder())) {
+
             UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                 caseData.getDraftOrdersDynamicList(), objectMapper);
+            log.info("selectedOrderId --> {}",selectedOrderId);
+            log.info("getDraftOrderCollection -NO-> {}",caseData.getDraftOrderCollection());
+
             for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                 DraftOrder draftOrder = e.getValue();
-                if (e.getId().equals(selectedOrderId)
-                    && "Yes".equalsIgnoreCase(checkIfHearingTaskNeeded(draftOrder.getManageOrderHearingDetails()))) {
-                    caseDataUpdated.put("isHearingTaskNeeded", "Yes");
-                }
-
                 if (e.getId().equals(selectedOrderId)) {
-                    getHearingSelectedForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
+                    setHearingSelectedInfoForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
                 }
-
             }
         } else if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
-            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-                isHearingTaskNeeded = checkIfHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails());
-            }
-            caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
-
-            if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
-                getHearingSelectedForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
-            }
+            log.info("getOrdersHearingDetails YES --> {}",caseData.getManageOrders().getOrdersHearingDetails());
+            setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
         }
     }
-
 
     public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
