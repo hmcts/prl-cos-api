@@ -43,6 +43,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
@@ -148,9 +150,9 @@ public class ListOnNoticeControllerTest {
             .subject(REASONS_SELECTED_FOR_LIST_ON_NOTICE).caseNote((String) caseDataUpdated.get("SELECTED_AND_ADDITIONAL_REASONS"))
             .dateAdded(LocalDate.now().toString()).dateCreated(LocalDateTime.now()).build();
         caseNoteDetails.add(caseNoteDetails1);
-        when(listOnNoticeService.getReasonsSelected(reasonsSelected, Long.valueOf("123"))).thenReturn(reasonsSelectedString);
-        when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
-        when(addCaseNoteService.addCaseNoteDetails(caseData,UserDetails.builder().forename("PRL").surname("Judge").build()))
+        when(listOnNoticeService.getReasonsSelected(any(), anyLong())).thenReturn(reasonsSelectedString);
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
+        when(addCaseNoteService.addCaseNoteDetails(any(CaseData.class),any(UserDetails.class)))
             .thenReturn(ElementUtils.wrapElements(caseNoteDetails));
         AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
