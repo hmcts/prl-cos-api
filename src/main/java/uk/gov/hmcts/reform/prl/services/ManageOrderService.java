@@ -128,6 +128,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
+import static uk.gov.hmcts.reform.prl.controllers.EditAndApproveDraftOrderController.WHAT_TO_DO_WITH_ORDER_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
@@ -2645,7 +2646,16 @@ public class ManageOrderService {
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId) {
-        log.info("inside setHearingOptionDetailsForTask --> {}", caseData);
+        log.info("inside setHearingOptionDetailsForTask -->");
+        log.info(
+            "inside getWhatToDoWithOrderCourtAdmin --> {}",
+            caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()
+        );
+        log.info(
+            "inside getWhatToDoWithOrderSolicitor --> {}",
+            caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
+        );
+
         boolean isOrderEdited = false;
         if (isOrderEdited(caseData, eventId, isOrderEdited)) {
             log.info("getOrdersHearingDetails YES --> {}", caseData.getManageOrders().getOrdersHearingDetails());
@@ -2666,6 +2676,18 @@ public class ManageOrderService {
             }
         }
 
+        isApprovedByJudge(caseData, caseDataUpdated);
+
+    }
+
+    public void isApprovedByJudge(CaseData caseData, Map<String, Object> caseDataUpdated) {
+
+        boolean isApprovedByJudge = null != caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()
+            || (null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
+            && !OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
+            .equalsIgnoreCase(WHAT_TO_DO_WITH_ORDER_SOLICITOR));
+
+        caseDataUpdated.put("isApprovedByJudge", isApprovedByJudge);
     }
 
     //temporary
