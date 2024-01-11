@@ -43,7 +43,7 @@ public class ListOnNoticeService {
         }
     }
 
-    public void sendNotification(CaseData caseData) {
+    public void sendNotification(CaseData caseData, String selectedAndAdditionalReasons) {
         List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             applicantsInCase.forEach(applicant -> {
@@ -59,7 +59,8 @@ public class ListOnNoticeService {
                             caseData,
                             applicant.getValue().getRepresentativeFirstName()
                                 + EMPTY_SPACE_STRING
-                                + applicant.getValue().getRepresentativeLastName()
+                                + applicant.getValue().getRepresentativeLastName(),
+                            selectedAndAdditionalReasons
                         ),
                         LanguagePreference.english
                     );
@@ -75,7 +76,8 @@ public class ListOnNoticeService {
                             caseData,
                             applicant.getValue().getFirstName()
                                 + EMPTY_SPACE_STRING
-                                + applicant.getValue().getLastName()
+                                + applicant.getValue().getLastName(),
+                            selectedAndAdditionalReasons
                         ),
                         LanguagePreference.english
                     );
@@ -84,14 +86,14 @@ public class ListOnNoticeService {
         }
     }
 
-    private EmailTemplateVars buildListOnNoticeEmail(CaseData caseData, String fullName) {
+    private EmailTemplateVars buildListOnNoticeEmail(CaseData caseData, String fullName, String selectedAndAdditionalReasons) {
         log.info("CaseNote   " + caseData.getCaseNote());
 
         return ListOnNoticeEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
             .caseName(caseData.getApplicantCaseName())
             .fullName(fullName)
-            .caseNote(caseData.getCaseNote())
+            .caseNote(selectedAndAdditionalReasons)
             .build();
     }
 }

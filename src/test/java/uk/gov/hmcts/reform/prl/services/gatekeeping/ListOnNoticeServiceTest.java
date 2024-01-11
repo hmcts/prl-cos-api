@@ -58,7 +58,7 @@ public class ListOnNoticeServiceTest {
             .applicants(applicants).build();
         doNothing().when(emailService)
             .send(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
-        listOnNoticeService.sendNotification(caseData);
+        listOnNoticeService.sendNotification(caseData, "test");
         verify(emailService,times(2)).send(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());

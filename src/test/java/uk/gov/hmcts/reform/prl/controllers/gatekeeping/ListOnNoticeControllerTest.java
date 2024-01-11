@@ -302,9 +302,9 @@ public class ListOnNoticeControllerTest {
     @Test
     public void testSendListOnNoticeNotification() {
         doNothing().when(listOnNoticeService)
-            .sendNotification(Mockito.any());
+            .sendNotification(Mockito.any(),Mockito.anyString());
         listOnNoticeController.sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
-        verify(listOnNoticeService,times(1)).sendNotification(Mockito.any());
+        verify(listOnNoticeService,times(1)).sendNotification(Mockito.any(),Mockito.any());
     }
 
 }
