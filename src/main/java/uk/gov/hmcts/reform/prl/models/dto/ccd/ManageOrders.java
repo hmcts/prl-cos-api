@@ -217,9 +217,9 @@ public class ManageOrders implements MappableObject {
     private final YesOrNo isTheOrderAboutChildren;
     @JsonProperty("isTheOrderAboutAllChildren")
     private final YesOrNo isTheOrderAboutAllChildren;
-    @JsonProperty("isTheOrderAboutChildren")
+    @JsonProperty("isTheOrderAboutChildrenReturnedOrder")
     private final YesOrNo isTheOrderAboutChildrenReturnedOrder;
-    @JsonProperty("isTheOrderAboutAllChildren")
+    @JsonProperty("isTheOrderAboutAllChildrenReturnedOrder")
     private final YesOrNo isTheOrderAboutAllChildrenReturnedOrder;
     @JsonProperty("loggedInUserType")
     private final String loggedInUserType;
