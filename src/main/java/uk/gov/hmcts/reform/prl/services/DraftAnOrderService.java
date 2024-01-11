@@ -935,6 +935,7 @@ public class DraftAnOrderService {
         return isOrderEdited;
     }
 
+
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
         String status = manageOrderService.getOrderStatus(
             draftOrder.getOrderSelectionType(),
