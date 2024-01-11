@@ -155,11 +155,13 @@ public class ListOnNoticeController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            String selectedAndAdditionalReasons = (String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS);
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            listOnNoticeService.sendNotification(caseData);
+            listOnNoticeService.sendNotification(caseData, selectedAndAdditionalReasons);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
