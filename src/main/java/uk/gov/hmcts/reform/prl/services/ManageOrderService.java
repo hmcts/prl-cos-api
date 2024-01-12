@@ -2665,12 +2665,14 @@ public class ManageOrderService {
             log.info("selectedOrderId -NO00-> {}", selectedOrderId);
             log.info("getDraftOrderCollection -NOooo-> {}", caseData.getDraftOrderCollection());
 
-            for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
-                DraftOrder draftOrder = e.getValue();
-                log.info("draftOrder --> {}", draftOrder);
-                //log.info("draftOrder Judge--> {}", draftOrder.getOtherDetails().getStatus());
-                if (e.getId().equals(selectedOrderId)) {
-                    setHearingSelectedInfoForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
+            if (null != caseData.getDraftOrderCollection()) {
+                for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+                    DraftOrder draftOrder = e.getValue();
+                    log.info("draftOrder --> {}", draftOrder);
+                    //log.info("draftOrder Judge--> {}", draftOrder.getOtherDetails().getStatus());
+                    if (e.getId().equals(selectedOrderId)) {
+                        setHearingSelectedInfoForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
+                    }
                 }
             }
         }
