@@ -181,7 +181,8 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.isHearingTaskNeeded", equalTo("Yes"),
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateToBeFixed"),
-                  "data.isApprovedByJudge", equalTo(null))
+                  "data.isOrderApproved", equalTo(null),
+                  "data.whoApprovedTheOrder", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -204,7 +205,8 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.isHearingTaskNeeded", equalTo("Yes"),
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
-                  "data.isApprovedByJudge", equalTo(null))
+                  "data.isOrderApproved", equalTo(null),
+                  "data.whoApprovedTheOrder", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -227,15 +229,12 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.isHearingTaskNeeded", equalTo("Yes"),
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateToBeFixed"),
-                  "data.isApprovedByJudge", equalTo(null))
+                  "data.isOrderApproved", equalTo(null),
+                  "data.whoApprovedTheOrder", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
         System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
 
     }
-
-
-
-
 }
