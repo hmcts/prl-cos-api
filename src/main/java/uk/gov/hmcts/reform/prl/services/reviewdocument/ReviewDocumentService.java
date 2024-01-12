@@ -283,6 +283,8 @@ public class ReviewDocumentService {
                 getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
             );
 
+            log.info("confidential name is: {}", quarantineLegalDocElement.getValue().getFileName());
+
             uploadDoc = addQuarantineDocumentFields(uploadDoc,
                 quarantineLegalDocElement.getValue(), isReviewDecisionYes);
 
@@ -571,6 +573,9 @@ public class ReviewDocumentService {
                                                            QuarantineLegalDoc quarantineLegalDoc,
                                                            Boolean isReviewDecisionYes) {
 
+        log.info("confidential files is: ()", quarantineLegalDoc);
+        log.info("confidential file name is: {}", quarantineLegalDoc.getFileName());
+        log.info("confidential file name is: {}", quarantineLegalDoc.getDocumentName());
         return legalProfUploadDoc.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
