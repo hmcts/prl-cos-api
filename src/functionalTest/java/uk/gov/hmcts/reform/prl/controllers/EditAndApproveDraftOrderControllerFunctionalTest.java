@@ -176,7 +176,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .body("data.isHearingTaskNeeded", equalTo("Yes"),
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
-                  "data.isApprovedByJudge", equalTo("Yes"))
+                  "data.isOrderApproved", equalTo("Yes"),
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
