@@ -69,6 +69,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_WITH_2ND_OPTION_BODY
         = "requests/judge-edit-approve-court-admin-1hearing-judge-appr-with2nd-option-request.json";
 
+    private static final String COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL
+        = "requests/court-admin-manage-order-noapproval-required-request.json";
+
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
@@ -144,7 +147,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     @Test
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY2);
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
         mockMvc.perform(post("/edit-and-approve/submitted")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -315,4 +318,31 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
 
     }
+
+
+    //when admin draft an order then flag shud be
+
+    @Test
+    public void givenRequestBody_courtArdmin() throws Exception {
+        String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL);
+
+        AboutToStartOrSubmitCallbackResponse resp = request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-edit-approve/about-to-submit")
+            .then()
+            .body("data.isHearingTaskNeeded", equalTo("No"),
+                  "data.isMultipleHearingSelected", equalTo("No"),
+                  "data.hearingOptionSelected", equalTo("dateConfirmedInHearingsTab"),
+                  "data.isApprovedByJudge", equalTo("Yes"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
+
+    }
+
 }
