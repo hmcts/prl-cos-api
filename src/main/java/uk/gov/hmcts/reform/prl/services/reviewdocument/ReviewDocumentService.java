@@ -283,12 +283,8 @@ public class ReviewDocumentService {
                 getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
             );
 
-            uploadDoc = isReviewDecisionYes ? addQuarantineDocumentFields(
-                uploadDoc,
-                quarantineLegalDocElement.getValue(), true) : addQuarantineDocumentFields(
-                uploadDoc,
-                quarantineLegalDocElement.getValue(), false
-            );
+            uploadDoc = addQuarantineDocumentFields(uploadDoc,
+                quarantineLegalDocElement.getValue(), isReviewDecisionYes);
 
             if (null != uploadDocListConfOrDocTab) {
                 uploadDocListConfOrDocTab.add(element(uploadDoc));
