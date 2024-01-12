@@ -115,7 +115,7 @@ public class RelationshipsController {
                     applicantChildRelationsList.add(Element.<ChildrenAndRespondentRelation>builder().value(applicantChildRelations).build());
                 })
         );
-        caseDataUpdated.put("buffChildAndRespondentRelations", applicantChildRelationsList);
+        caseDataUpdated.put(PrlAppsConstants.BUFF_CHILD_AND_RESPONDENT_RELATIONS, applicantChildRelationsList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -159,7 +159,7 @@ public class RelationshipsController {
                   respondentChildRelationsList.add(Element.<ChildrenAndRespondentRelation>builder().value(respondentChildRelations).build());
               })
         );
-        caseDataUpdated.put("buffChildAndRespondentRelations", respondentChildRelationsList);
+        caseDataUpdated.put(PrlAppsConstants.BUFF_CHILD_AND_RESPONDENT_RELATIONS, respondentChildRelationsList);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -187,7 +187,7 @@ public class RelationshipsController {
             }
         });
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        caseDataUpdated.put("buffChildAndRespondentRelations", null);
+        caseDataUpdated.put(PrlAppsConstants.BUFF_CHILD_AND_RESPONDENT_RELATIONS, null);
         caseDataUpdated.put("childAndRespondentRelations", updatedChildAndRespondentRelations);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
