@@ -3938,7 +3938,7 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders).build();
         //when(manageOrderService.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), false)).thenReturn(true);
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated, Event.EDIT_AND_APPROVE_ORDER.getId());
+        manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated, Event.EDIT_AND_APPROVE_ORDER.getId(),"JUDGE");
         assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit,
                      caseDataUpdated.get("hearingOptionSelected"));
         assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
@@ -3971,7 +3971,7 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         //when(manageOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
-        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.EDIT_AND_APPROVE_ORDER.getId());
+        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.EDIT_AND_APPROVE_ORDER.getId(),"JUDGE");
         assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit,
                      caseDataUpdated.get("hearingOptionSelected"));
         assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
