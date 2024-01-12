@@ -939,7 +939,7 @@ public class C100RespondentSolicitorService {
         dataMap.put(COURT_NAME_FIELD, callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put(CASE_DATA_ID, callbackRequest.getCaseDetails().getId());
         dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
-        List<Element<ChildDetailsRevised>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(
+        List<Element<ChildDetailsRevised>> listOfChildren = (List<Element<ChildDetailsRevised>>) callbackRequest.getCaseDetails().getData().get(
             CHILDREN);
         dataMap.put(CHILDREN, listOfChildren);
 
