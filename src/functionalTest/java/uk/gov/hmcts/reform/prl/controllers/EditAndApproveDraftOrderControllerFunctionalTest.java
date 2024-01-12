@@ -58,6 +58,12 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private static final String DRAFT_ORDER_JUDGE_REJECT_SOLI_ONE_HEARING_BODY
         = "requests/draft-ordr-judge-edit-approve-soli-1hearing-judgereject-request.json";
 
+    private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
+        = "requests/judge-edit-approve-court-admin-1hearing-judge-appr-request.json";
+
+    private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_MANY_HEARING_BODY
+        = "requests/judge-edit-approve-court-admin-manyhearing-judgeappr-request.json";
+
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
 
@@ -227,35 +233,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     /**
      * Judge editApprove - approves the order with one hearing which is created by court admin.
      */
-    @Test//1
+    @Test
     public void givenRequestBody_whenJudge_edit_approve_court_admin_order_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY);
-
-        AboutToStartOrSubmitCallbackResponse resp = request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/judge-or-admin-edit-approve/about-to-submit")
-            .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"),
-                  "data.isMultipleHearingSelected", equalTo("No"),
-                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
-                  "data.isApprovedByJudge", equalTo("Yes"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
-
-    }
-
-    /**
-     * Judge editApprove - approves the order with no hearing which is created by court admin.
-     */
-    @Test//3
-    public void givenRequestBody_whenJudge_edit_approve_court_admin_order_with_no_hearing_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_NO_HEARING_BODY);
+        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY);
 
         AboutToStartOrSubmitCallbackResponse resp = request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -265,9 +245,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .contentType("application/json")
             .post("/judge-or-admin-edit-approve/about-to-submit")
             .then()
-            .body("data.isHearingTaskNeeded", equalTo("No"),
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),
                   "data.isMultipleHearingSelected", equalTo("No"),
-                  "data.hearingOptionSelected", equalTo(null),
+                  "data.hearingOptionSelected", equalTo("dateConfirmedByListingTeam"),
                   "data.isApprovedByJudge", equalTo("Yes"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
@@ -281,7 +261,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
      */
     @Test//4
     public void givenRequestBody_whenJudge_edit_approve_court_admin_order_with_many_hearing_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_NO_HEARING_BODY);
+        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_ADMIN_MANY_HEARING_BODY);
 
         AboutToStartOrSubmitCallbackResponse resp = request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -291,8 +271,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .contentType("application/json")
             .post("/judge-or-admin-edit-approve/about-to-submit")
             .then()
-            .body("data.isHearingTaskNeeded", equalTo("No"),
-                  "data.isMultipleHearingSelected", equalTo("No"),
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),
+                  "data.isMultipleHearingSelected", equalTo("Yes"),
                   "data.hearingOptionSelected", equalTo(null),
                   "data.isApprovedByJudge", equalTo("Yes"))
             .extract()
