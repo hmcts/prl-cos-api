@@ -215,7 +215,7 @@ public class EditAndApproveDraftOrderController {
                     .data(caseDataUpdated).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, callbackRequest.getEventId(), authorisation)).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, callbackRequest.getEventId())).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
