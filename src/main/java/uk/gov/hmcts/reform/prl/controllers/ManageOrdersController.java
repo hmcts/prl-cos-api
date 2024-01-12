@@ -294,7 +294,6 @@ public class ManageOrdersController {
                     caseData.getCreateSelectOrderOptions(),
                     caseData.getManageOrders().getC21OrderOptions()
                 )) {
-                    //manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated,callbackRequest.getEventId());
                     caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
                                                                            .getHearingDataForSelectedHearing(
                                                                                caseData,
@@ -303,7 +302,6 @@ public class ManageOrdersController {
                                                                            ));
                 } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
                     && CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-                    //manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated,callbackRequest.getEventId());
                     caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                 }
                 caseDataUpdated.putAll(manageOrderService.addOrderDetailsAndReturnReverseSortedList(
