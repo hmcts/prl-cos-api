@@ -128,7 +128,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_A
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
-import static uk.gov.hmcts.reform.prl.controllers.EditAndApproveDraftOrderController.WHAT_TO_DO_WITH_ORDER_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.blankOrderOrDirections;
@@ -2682,20 +2681,12 @@ public class ManageOrderService {
 
     public void isApprovedByJudge(CaseData caseData, Map<String, Object> caseDataUpdated) {
         String isApprovedByJudge = "No";
-        log.info("null != getWhatToDoWithOrderCourtAdmin() {}", null != caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin());
-        log.info("null != getWhatToDoWithOrderSolicitor() {}", null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor());
-        log.info("askLegalRepToMakeChanges.toString() {}", OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString());
-        log.info("WHAT_TO_DO_WITH_ORDER_SOLICITOR {}", WHAT_TO_DO_WITH_ORDER_SOLICITOR);
-
-        log.info("checking condition {}", (null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
-            && !OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
-            .equalsIgnoreCase(WHAT_TO_DO_WITH_ORDER_SOLICITOR)));
 
         if (null != caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()
             || (null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
             && !OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
-            .equalsIgnoreCase(WHAT_TO_DO_WITH_ORDER_SOLICITOR))) {
-            log.info("judge approvesss");
+            .equalsIgnoreCase(caseData.getManageOrders().getWhatToDoWithOrderSolicitor().toString()))) {
+            log.info("judge approves");
             isApprovedByJudge = "Yes";
         }
 

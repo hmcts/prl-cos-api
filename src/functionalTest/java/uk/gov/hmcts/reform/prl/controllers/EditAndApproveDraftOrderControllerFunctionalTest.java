@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
@@ -48,8 +49,14 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
 
-    private static final String DRAFT_ORDER_JUDGE_EDIT_AND_APPRV_REQUEST_BODY
+    private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY
         = "requests/draft-ordr-judge-edit-approve-soli-1hearing-jugappr-request.json";
+
+    private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_NO_HEARING_BODY
+        = "requests/draft-ordr-judge-edit-approve-soli-nohearing-judgeappr-request.json";
+
+    private static final String DRAFT_ORDER_JUDGE_REJECT_SOLI_ONE_HEARING_BODY
+        = "requests/draft-ordr-judge-edit-approve-soli-1hearing-judgereject-request.json";
 
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -137,9 +144,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .andReturn();
     }
 
-    @Test
-    public void givenRequestBody_whenJudge_edit_approve_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_EDIT_AND_APPRV_REQUEST_BODY);
+    @Test //judge editApprove - approves the order with one hearing which is created by solicitor
+    public void givenRequestBody_whenJudge_edit_approve_soli_order_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY);
 
         AboutToStartOrSubmitCallbackResponse resp = request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -149,11 +156,60 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .contentType("application/json")
             .post("/judge-or-admin-edit-approve/about-to-submit")
             .then()
-            //.body("data.legalProfQuarantineDocsList[0].value.document.document_filename", equalTo("Test doc1.pdf"))
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),
+                  "data.isMultipleHearingSelected", equalTo("No"),
+                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
+                  "data.isApprovedByJudge", equalTo("Yes"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        System.out.println("Respppp " + resp);
+        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
+
+    }
+
+    @Test //judge editApprove - approves the order with no hearing which is created by solicitor
+    public void givenRequestBody_whenJudge_edit_approve_soli_order_with_no_hearing_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_NO_HEARING_BODY);
+
+        AboutToStartOrSubmitCallbackResponse resp = request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-edit-approve/about-to-submit")
+            .then()
+            .body("data.isHearingTaskNeeded", equalTo("No"),
+                  "data.isMultipleHearingSelected", equalTo("No"),
+                  "data.hearingOptionSelected", equalTo(null),
+                  "data.isApprovedByJudge", equalTo("Yes"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
+
+    }
+
+    @Test //judge editApprove - rejects the order with one hearing which is created by solicitor
+    public void givenRequestBody_whenJudge_edit_reject_soli_order_with_one_hearing_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_REJECT_SOLI_ONE_HEARING_BODY);
+
+        AboutToStartOrSubmitCallbackResponse resp = request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-edit-approve/about-to-submit")
+            .then()
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),
+                  "data.isMultipleHearingSelected", equalTo("No"),
+                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
+                  "data.isApprovedByJudge", equalTo("No"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
 
     }
 
