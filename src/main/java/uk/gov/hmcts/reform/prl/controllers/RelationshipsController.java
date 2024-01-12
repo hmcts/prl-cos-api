@@ -178,8 +178,6 @@ public class RelationshipsController {
         List<Element<ChildrenAndRespondentRelation>> buffChildAndRespondentRelations = caseData.getRelations().getBuffChildAndRespondentRelations();
         List<Element<ChildrenAndRespondentRelation>> updatedChildAndRespondentRelations = new ArrayList<>();
         buffChildAndRespondentRelations.stream().forEach(relation -> {
-            log.info("Relation for respondent {} to child id {} : {}", relation.getValue().getRespondentId(), relation.getValue().getChildId(),
-                     relation.getValue().getChildAndRespondentRelation());
             if (!StringUtils.equals(relation.getValue().getChildAndRespondentRelation().getId(), RelationshipsEnum.other.getId())) {
                 updatedChildAndRespondentRelations.add(Element.<ChildrenAndRespondentRelation>builder()
                                                         .value(relation.getValue().toBuilder().childAndRespondentRelationOtherDetails(null).build())
@@ -188,8 +186,6 @@ public class RelationshipsController {
                 updatedChildAndRespondentRelations.add(relation);
             }
         });
-        log.info("Buffered child and respondent relations: {}", buffChildAndRespondentRelations);
-        log.info("Updated child and respondent relations: {}", updatedChildAndRespondentRelations);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndRespondentRelations", null);
         caseDataUpdated.put("childAndRespondentRelations", updatedChildAndRespondentRelations);
