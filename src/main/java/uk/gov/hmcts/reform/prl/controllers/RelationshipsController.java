@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
@@ -175,8 +176,14 @@ public class RelationshipsController {
     ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        List<Element<ChildrenAndRespondentRelation>> buffChildAndRespondentRelations = caseData.getRelations().getBuffChildAndRespondentRelations();
+        buffChildAndRespondentRelations.stream().map(Element::getValue).forEach(relation -> {
+            if (!StringUtils.equals(relation.getChildAndRespondentRelation().getId(), RelationshipsEnum.other.getId())) {
+                relation.builder().childAndRespondentRelationOtherDetails(null).build();
+            }
+        });
         caseDataUpdated.put("buffChildAndRespondentRelations", null);
-        caseDataUpdated.put("childAndRespondentRelations", caseData.getRelations().getBuffChildAndRespondentRelations());
+        caseDataUpdated.put("childAndRespondentRelations", buffChildAndRespondentRelations);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
