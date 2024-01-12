@@ -48,7 +48,8 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
 
-    private static final String DRAFT_ORDER_JUDGE_EDIT_AND_APPRV_REQUEST_BODY = "requests/draft-order-judge-edit-and-approve-soli-request.json";
+    private static final String DRAFT_ORDER_JUDGE_EDIT_AND_APPRV_REQUEST_BODY
+        = "requests/draft-ordr-judge-edit-approve-soli-1hearing-jugappr-request.json";
 
     private final RequestSpecification request1 = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 

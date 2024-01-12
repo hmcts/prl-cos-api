@@ -2682,10 +2682,20 @@ public class ManageOrderService {
 
     public void isApprovedByJudge(CaseData caseData, Map<String, Object> caseDataUpdated) {
         String isApprovedByJudge = "No";
+        log.info("null != getWhatToDoWithOrderCourtAdmin() {}", null != caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin());
+        log.info("null != getWhatToDoWithOrderSolicitor() {}", null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor());
+        log.info("askLegalRepToMakeChanges.toString() {}", OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString());
+        log.info("WHAT_TO_DO_WITH_ORDER_SOLICITOR {}", WHAT_TO_DO_WITH_ORDER_SOLICITOR);
+
+        log.info("checking condition {}", (null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
+            && !OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
+            .equalsIgnoreCase(WHAT_TO_DO_WITH_ORDER_SOLICITOR)));
+
         if (null != caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()
             || (null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
             && !OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
             .equalsIgnoreCase(WHAT_TO_DO_WITH_ORDER_SOLICITOR))) {
+            log.info("judge approvesss");
             isApprovedByJudge = "Yes";
         }
 
