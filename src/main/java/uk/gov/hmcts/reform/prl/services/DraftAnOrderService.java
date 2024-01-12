@@ -1930,8 +1930,11 @@ public class DraftAnOrderService {
 
         List<String> errorList = new ArrayList<>();
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
-            errorList.add("This order is not available to be drafted");
+            || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())
+            || CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(caseData.getCreateSelectOrderOptions())
+            || CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(caseData.getCreateSelectOrderOptions())
+            || CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(caseData.getCreateSelectOrderOptions())) {
+            errorList.add("This order is not available to be draftedddddddddddd");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
