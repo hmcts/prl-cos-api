@@ -573,6 +573,9 @@ public class ReviewDocumentService {
                                                            QuarantineLegalDoc quarantineLegalDoc,
                                                            Boolean isReviewDecisionYes) {
 
+        log.info("confidential files is: ()", legalProfUploadDoc);
+        log.info("confidential file name is: {}", legalProfUploadDoc.getFileName());
+        log.info("confidential file name is: {}", legalProfUploadDoc.getDocumentName());
         log.info("confidential files is: ()", quarantineLegalDoc);
         log.info("confidential file name is: {}", quarantineLegalDoc.getFileName());
         log.info("confidential file name is: {}", quarantineLegalDoc.getDocumentName());
