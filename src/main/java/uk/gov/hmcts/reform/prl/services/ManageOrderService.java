@@ -2628,12 +2628,12 @@ public class ManageOrderService {
                 }
             }
 
-            if (ordersHearingDetails.size() > 1) {
+            if (ordersHearingDetails.size() == 1) {
                 log.info("22222");
-                isMultipleHearingSelected = "Yes";
-            } else if (!ordersHearingDetails.isEmpty()) {
-                log.info("3333");
                 hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum();
+            } else if (!ordersHearingDetails.isEmpty()) {
+                log.info("33333");
+                isMultipleHearingSelected = "Yes";
             }
         }
         caseDataUpdated.put("isMultipleHearingSelected", isMultipleHearingSelected);
@@ -2654,6 +2654,8 @@ public class ManageOrderService {
             "inside getWhatToDoWithOrderSolicitor --> {}",
             caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
         );
+
+        log.info("Casedataaaa--> {}", caseData);
 
         boolean isOrderEdited = false;
         if (isOrderEdited(caseData, eventId, isOrderEdited)) {
@@ -2865,7 +2867,7 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData) {
+    public Map<String, Object> setFieldsForWaTask(String authorisation, CaseData caseData, String eventId) {
         String judgeLaReviewRequired = null;
         String performingUser = null;
         String performingAction = null;
@@ -2886,6 +2888,10 @@ public class ManageOrderService {
                     .equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) ? "Yes" : "No";
                 waFieldsMap.put(WA_ORDER_NAME_ADMIN_CREATED, orderNameForWA);
             } else if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.JUDGE.toString())) {
+                log.info("PERFORMMM USEr JUDGE --->");
+                if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
+                    setHearingOptionDetailsForTask(caseData, waFieldsMap,eventId);
+                }
                 waFieldsMap.put(WA_ORDER_NAME_JUDGE_CREATED, orderNameForWA);
             }
         }
