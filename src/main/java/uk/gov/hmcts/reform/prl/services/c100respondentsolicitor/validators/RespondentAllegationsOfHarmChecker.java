@@ -4,9 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.WhomConsistPassportList;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.complextypes.Behaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -63,7 +60,9 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
         Optional<YesOrNo> respondentAohYesOrNo = ofNullable(respondentAllegationsOfHarmData.getRespAohYesOrNo());
         fields.add(respondentAohYesOrNo);
         if (respondentAohYesOrNo.isPresent() && YesOrNo.Yes.equals(respondentAohYesOrNo.get())) {
+          /*
             Optional<YesOrNo> drugOrAlcoholAbuse = ofNullable(respondentAllegationsOfHarmData
+
                                                                   .getRespAllegationsOfHarmInfo()
                                                                   .getRespondentDrugOrAlcoholAbuse());
 
@@ -87,6 +86,8 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             fields.add(ofNullable(respondentAllegationsOfHarmData.getRespOtherConcernsInfo().getChildSpendingSupervisedTime()));
             fields.add(ofNullable(respondentAllegationsOfHarmData.getRespOtherConcernsInfo().getOrdersRespondentWantFromCourt()));
             fields.add(ofNullable(respondentAllegationsOfHarmData.getRespOtherConcernsInfo().getChildSpendingUnsupervisedTime()));
+             */
+
         }
 
         return fields.stream().noneMatch(Optional::isEmpty)
@@ -97,6 +98,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     private static void populateRespondentChildAbduction(RespondentAllegationsOfHarmData respondentAllegationsOfHarmData,
                                                          List<Optional<?>> fields) {
 
+        /*
         Optional<YesOrNo> respondentChildAbduction = ofNullable(respondentAllegationsOfHarmData
                                                                     .getRespAllegationsOfHarmInfo()
                                                                     .getIsRespondentChildAbduction());
@@ -125,6 +127,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             Optional<YesOrNo> childHasPassport = ofNullable(respondentAllegationsOfHarmData
                                                                 .getRespChildAbductionInfo().getChildrenHavePassport());
             fields.add(childHasPassport);
+
             populatePassportDetails(respondentAllegationsOfHarmData, fields, childHasPassport);
         }
     }
@@ -132,6 +135,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
     private static void populatePassportDetails(RespondentAllegationsOfHarmData respondentAllegationsOfHarmData,
                                                 List<Optional<?>> fields, Optional<YesOrNo> childHasPassport) {
         if (childHasPassport.isPresent() && YesOrNo.Yes.equals(childHasPassport.get())) {
+
             fields.add(ofNullable(respondentAllegationsOfHarmData.getRespChildAbductionInfo()
                                       .getChildrenHaveMoreThanOnePassport()));
             List<WhomConsistPassportList> whoConsistPassportList = respondentAllegationsOfHarmData
@@ -145,6 +149,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                 }
             }
         }
+
     }
 
     private static void populateRespondentChildAbuse(RespondentAllegationsOfHarmData respondentAllegationsOfHarmData,
@@ -195,6 +200,7 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
 
     private static void populateOtherSafetyConcerns(RespondentAllegationsOfHarmData respondentAllegationsOfHarmData,
                                                     List<Optional<?>> fields) {
+
         Optional<YesOrNo> otherSafetyConcerns = ofNullable(respondentAllegationsOfHarmData
                                                                .getRespAllegationsOfHarmInfo()
                                                                .getRespondentOtherSafetyConcerns());
@@ -203,5 +209,6 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
             fields.add(ofNullable(respondentAllegationsOfHarmData.getRespAllegationsOfHarmInfo()
                                       .getRespondentOtherSafetyConcernsDetails()));
         }
+     */
     }
 }
