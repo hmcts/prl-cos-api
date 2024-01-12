@@ -21,10 +21,11 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.MIAM;
 
 @Slf4j
-@SuppressWarnings("ALL")
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ResponseSubmitChecker implements RespondentEventChecker {
+
+    @Autowired
     @Lazy
     private RespondentEventsChecker respondentEventsChecker;
 
