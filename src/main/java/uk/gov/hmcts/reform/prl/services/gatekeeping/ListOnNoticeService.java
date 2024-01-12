@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.gatekeeping;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -50,7 +51,7 @@ public class ListOnNoticeService {
                 = new StringBuilder(selectedAndAdditionalReasons.replace("\n\n", "\n• "))
                 .insert(0,"• ");
             applicantsInCase.forEach(applicant -> {
-                if (applicant.getValue().getSolicitorEmail() != null) {
+                if (StringUtils.isNotEmpty(applicant.getValue().getSolicitorEmail())) {
                     log.info(
                         "Sending the email notification to applicant solicitor for List on Notice for caseId {}",
                         caseData.getId()
@@ -90,7 +91,6 @@ public class ListOnNoticeService {
     }
 
     private EmailTemplateVars buildListOnNoticeEmail(CaseData caseData, String fullName, String selectedAndAdditionalReasons) {
-        log.info("CaseNote   " + caseData.getCaseNote());
 
         return ListOnNoticeEmail.builder()
             .caseReference(String.valueOf(caseData.getId()))
