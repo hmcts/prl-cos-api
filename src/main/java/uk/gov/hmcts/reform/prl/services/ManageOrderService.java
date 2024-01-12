@@ -2692,6 +2692,7 @@ public class ManageOrderService {
 
     public void isOrderApproved(CaseData caseData, Map<String, Object> caseDataUpdated, String performingUser) {
         String whoApprovedTheOrder = null;
+        String isOrderApproved = "No";
 
         if (null != caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()
             || (null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
@@ -2699,8 +2700,10 @@ public class ManageOrderService {
             .equalsIgnoreCase(caseData.getManageOrders().getWhatToDoWithOrderSolicitor().toString()))) {
             log.info("approved byyy---> {}", performingUser);
             whoApprovedTheOrder = performingUser;
+            isOrderApproved = "Yes";
         }
 
+        caseDataUpdated.put("isOrderApproved", isOrderApproved);
         caseDataUpdated.put("whoApprovedTheOrder", whoApprovedTheOrder);
     }
 
