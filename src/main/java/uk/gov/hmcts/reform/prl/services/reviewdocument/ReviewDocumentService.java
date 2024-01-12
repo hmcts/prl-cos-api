@@ -79,7 +79,7 @@ public class ReviewDocumentService {
     public static final String COURT_STAFF_UPLOAD_DOC_LIST_DOC_TAB = "courtStaffUploadDocListDocTab";
     public static final String CITIZEN_UPLOADED_DOC_LIST_DOC_TAB = "citizenUploadedDocListDocTab";
     public static final String BULKSCAN_UPLOADED_DOC_LIST_DOC_TAB = "bulkScannedDocListDocTab";
-    public static final String CONFIDENTIAL_CATEGORY_ID = "confidential";
+
 
     public List<DynamicListElement> getDynamicListElements(CaseData caseData) {
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
@@ -279,7 +279,7 @@ public class ReviewDocumentService {
             quarantineDocsList.remove(quarantineLegalDocElement);
 
             QuarantineLegalDoc uploadDoc = DocumentUtils.getQuarantineUploadDocument(
-                isReviewDecisionYes ? CONFIDENTIAL_CATEGORY_ID : quarantineLegalDocElement.getValue().getCategoryId(),
+                quarantineLegalDocElement.getValue().getCategoryId(),
                 getQuarantineDocument(uploadedBy, quarantineLegalDocElement.getValue())
             );
 
