@@ -51,6 +51,8 @@ public class ListOnNoticeControllerFT {
 
     private final String listOnNoticePrepopulateEndpoint = "/pre-populate-list-on-notice";
 
+    private final String listOnNoticeSendNotificationEndpoint = "/send-listOnNotice-notification";
+
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -156,5 +158,19 @@ public class ListOnNoticeControllerFT {
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res);
         Assert.assertTrue(res.getData().containsKey("legalAdviserList"));
+    }
+
+    @Test
+    public void testSendListOnNoticeNotification() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
+        Response response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(listOnNoticeSendNotificationEndpoint);
+        response.then().assertThat().statusCode(200);
     }
 }
