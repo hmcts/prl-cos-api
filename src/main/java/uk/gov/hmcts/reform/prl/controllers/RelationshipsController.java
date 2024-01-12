@@ -177,11 +177,14 @@ public class RelationshipsController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         List<Element<ChildrenAndRespondentRelation>> buffChildAndRespondentRelations = caseData.getRelations().getBuffChildAndRespondentRelations();
-        buffChildAndRespondentRelations.stream().map(Element::getValue).forEach(relation -> {
-            if (!StringUtils.equals(relation.getChildAndRespondentRelation().getId(), RelationshipsEnum.other.getId())) {
-                relation.builder().childAndRespondentRelationOtherDetails(null).build();
+        buffChildAndRespondentRelations.stream().forEach(relation -> {
+            log.info("Relation for respondent {} to child id {} : {}", relation.getValue().getRespondentId(), relation.getValue().getChildId(),
+                     relation.getValue().getChildAndRespondentRelation());
+            if (!StringUtils.equals(relation.getValue().getChildAndRespondentRelation().getId(), RelationshipsEnum.other.getId())) {
+                relation.getValue().builder().childAndRespondentRelationOtherDetails(null).build();
             }
         });
+        log.info("Buffered child and respondent relations: {}", buffChildAndRespondentRelations);
         caseDataUpdated.put("buffChildAndRespondentRelations", null);
         caseDataUpdated.put("childAndRespondentRelations", buffChildAndRespondentRelations);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
