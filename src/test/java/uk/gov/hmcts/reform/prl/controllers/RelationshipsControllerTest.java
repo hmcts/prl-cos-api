@@ -518,6 +518,7 @@ public class RelationshipsControllerTest {
             .respondentFullName("Test")
             .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.father)
             .childLivesWith(YesOrNo.Yes)
+            .childAndRespondentRelationOtherDetails("test")
             .build();
 
         Element<ChildrenAndRespondentRelation> wrappedChildrenAndApplicantRelation =
@@ -529,11 +530,10 @@ public class RelationshipsControllerTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(applicantList)
             .newChildDetails(listOfChildren)
-                .relations(Relations.builder().buffChildAndRespondentRelations(listOfwrappedChildrenAndApplicantRelation).build())
+            .relations(Relations.builder().buffChildAndRespondentRelations(listOfwrappedChildrenAndApplicantRelation).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("childAndRespondentRelations", "test1 test22");
 
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
 
@@ -541,9 +541,21 @@ public class RelationshipsControllerTest {
             CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
                                                       .data(caseDataUpdated).build()).build();
 
+        ChildrenAndRespondentRelation expectedRelation = ChildrenAndRespondentRelation.builder()
+            .respondentFullName("Test")
+            .childFullName("Name")
+            .childAndRespondentRelation(RelationshipsEnum.father)
+            .childLivesWith(YesOrNo.Yes)
+            .childAndRespondentRelationOtherDetails(null)
+            .build();
+        List<Element<ChildrenAndRespondentRelation>> expectedRelationList = Collections.singletonList(Element.<ChildrenAndRespondentRelation>builder()
+                                                                                                          .value(expectedRelation).build());
 
-        assertNotNull(relationshipsController.populateRespondentToChildRelation("test",
-                                                                               callbackRequest));
+        AboutToStartOrSubmitCallbackResponse response = relationshipsController.populateRespondentToChildRelation(
+            "test",
+            callbackRequest
+        );
+        assertEquals(expectedRelationList, response.getData().get("childAndRespondentRelations"));
     }
 
 
