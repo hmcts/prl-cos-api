@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection.newSection;
@@ -116,7 +115,7 @@ public class RespondentSolicitorTaskListRenderer {
             submit
         )
             .filter(RespondentTaskSection::hasAnyTask)
-            .collect(toList());
+            .toList();
     }
 
     private List<String> renderSection(RespondentTaskSection sec, String respondent) {
@@ -190,7 +189,7 @@ public class RespondentSolicitorTaskListRenderer {
                     error,
                     taskListRenderElements.renderRespondentSolicitorLink(task.getEvent(), respondent)
                 )))
-            .collect(toList());
+            .toList();
         return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
     }
 }

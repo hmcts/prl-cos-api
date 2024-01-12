@@ -6,7 +6,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -82,7 +81,6 @@ public class CaseWorkerEmailServiceTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
 
         applicant = PartyDetails.builder()
             .firstName("TestFirst")

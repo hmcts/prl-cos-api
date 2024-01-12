@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.CaseRole;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OrganisationPolicy {
