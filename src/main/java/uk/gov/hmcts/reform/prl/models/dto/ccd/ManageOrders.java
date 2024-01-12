@@ -217,10 +217,6 @@ public class ManageOrders implements MappableObject {
     private final YesOrNo isTheOrderAboutChildren;
     @JsonProperty("isTheOrderAboutAllChildren")
     private final YesOrNo isTheOrderAboutAllChildren;
-    @JsonProperty("isTheOrderAboutChildrenReturnedOrder")
-    private final YesOrNo isTheOrderAboutChildrenReturnedOrder;
-    @JsonProperty("isTheOrderAboutAllChildrenReturnedOrder")
-    private final YesOrNo isTheOrderAboutAllChildrenReturnedOrder;
     @JsonProperty("loggedInUserType")
     private final String loggedInUserType;
     @JsonProperty("judgeDirectionsToAdminAmendOrder")
@@ -302,6 +298,4 @@ public class ManageOrders implements MappableObject {
 
     private Object rejectedOrdersDynamicList;
     private String editOrderTextInstructions;
-
-    private DynamicMultiSelectList
 }
