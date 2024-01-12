@@ -529,7 +529,7 @@ public class RelationshipsControllerTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(applicantList)
             .newChildDetails(listOfChildren)
-                .relations(Relations.builder().childAndRespondentRelations(listOfwrappedChildrenAndApplicantRelation).build())
+                .relations(Relations.builder().buffChildAndRespondentRelations(listOfwrappedChildrenAndApplicantRelation).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
@@ -546,6 +546,66 @@ public class RelationshipsControllerTest {
                                                                                callbackRequest));
     }
 
+
+    @Test
+    public void testPopulateRespondentToChildRelationWhenRelationIsOther() throws NotFoundException {
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().id(UUID.randomUUID()).value(applicant1).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChildren =
+            Element.<ChildDetailsRevised>builder().id(UUID.randomUUID()).value(child).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        ChildrenAndRespondentRelation childrenAndRespondentRelation = ChildrenAndRespondentRelation.builder()
+            .respondentFullName("Test")
+            .childFullName("Name").childAndRespondentRelation(RelationshipsEnum.other)
+            .childAndRespondentRelationOtherDetails("test")
+            .childLivesWith(YesOrNo.Yes)
+            .build();
+
+        Element<ChildrenAndRespondentRelation> wrappedChildrenAndApplicantRelation =
+            Element.<ChildrenAndRespondentRelation>builder().value(childrenAndRespondentRelation).build();
+        List<Element<ChildrenAndRespondentRelation>> listOfwrappedChildrenAndApplicantRelation =
+            Collections.singletonList(wrappedChildrenAndApplicantRelation);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .newChildDetails(listOfChildren)
+            .relations(Relations.builder().buffChildAndRespondentRelations(listOfwrappedChildrenAndApplicantRelation).build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+                                                      .data(caseDataUpdated).build()).build();
+
+        List<Element<ChildrenAndRespondentRelation>> expectedRelation = Collections.singletonList(
+            Element.<ChildrenAndRespondentRelation>builder().value(childrenAndRespondentRelation).build());
+        AboutToStartOrSubmitCallbackResponse response = relationshipsController.populateRespondentToChildRelation(
+            "test",
+            callbackRequest
+        );
+        assertEquals(listOfwrappedChildrenAndApplicantRelation, response.getData().get("childAndRespondentRelations"));
+    }
 
 
     @Test
