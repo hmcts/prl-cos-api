@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -1225,11 +1226,13 @@ public class UpdatePartyDetailsServiceTest {
                 .caseTypeOfApplication("C100")
                 .respondents(listOfRespondents)
                 .respondentC8Document(RespondentC8Document.builder().build())
-                .respondentAc8(ResponseDocuments.builder().build())
-                .respondentBc8(ResponseDocuments.builder().build())
-                .respondentCc8(ResponseDocuments.builder().build())
-                .respondentDc8(ResponseDocuments.builder().build())
-                .respondentEc8(ResponseDocuments.builder().build())
+            .citizenResponseDocuments(CitizenResponseDocuments.builder()
+                                          .respondentAc8(ResponseDocuments.builder().build())
+                                          .respondentBc8(ResponseDocuments.builder().build())
+                                          .respondentCc8(ResponseDocuments.builder().build())
+                                          .respondentDc8(ResponseDocuments.builder().build())
+                                          .respondentEc8(ResponseDocuments.builder().build())
+                                          .build())
                 .build();
         Map<String, Object> objectMap = new HashMap<>();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
