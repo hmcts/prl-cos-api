@@ -2084,7 +2084,8 @@ public class DraftAnOrderService {
             errorList.addAll(getHearingScreenValidations(
                 caseData.getManageOrders().getOrdersHearingDetails(),
                 draftOrder.getOrderType(),
-                Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())));
+                (Yes.equals(draftOrder.getIsOrderCreatedBySolicitor())
+                    && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails()))));
         } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
             errorList.addAll(getHearingScreenValidationsForSdo(caseData.getStandardDirectionOrder()));
         }
