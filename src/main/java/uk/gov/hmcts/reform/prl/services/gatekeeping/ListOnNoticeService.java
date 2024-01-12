@@ -46,6 +46,7 @@ public class ListOnNoticeService {
     public void sendNotification(CaseData caseData, String selectedAndAdditionalReasons) {
         List<Element<PartyDetails>> applicantsInCase = caseData.getApplicants();
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            String finalSelectedAndAdditionalReasons = selectedAndAdditionalReasons.replace("\n\n", "\n• ");
             applicantsInCase.forEach(applicant -> {
                 if (applicant.getValue().getSolicitorEmail() != null) {
                     log.info(
@@ -60,7 +61,7 @@ public class ListOnNoticeService {
                             applicant.getValue().getRepresentativeFirstName()
                                 + EMPTY_SPACE_STRING
                                 + applicant.getValue().getRepresentativeLastName(),
-                            selectedAndAdditionalReasons
+                            finalSelectedAndAdditionalReasons
                         ),
                         LanguagePreference.english
                     );
@@ -77,7 +78,7 @@ public class ListOnNoticeService {
                             applicant.getValue().getFirstName()
                                 + EMPTY_SPACE_STRING
                                 + applicant.getValue().getLastName(),
-                            selectedAndAdditionalReasons
+                            finalSelectedAndAdditionalReasons
                         ),
                         LanguagePreference.english
                     );
