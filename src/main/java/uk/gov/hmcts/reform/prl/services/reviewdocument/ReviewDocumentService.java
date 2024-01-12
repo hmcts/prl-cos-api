@@ -270,7 +270,8 @@ public class ReviewDocumentService {
                                           List<Element<QuarantineLegalDoc>> uploadDocListConfOrDocTab,
                                           String uploadDocListConfOrDocTabKey,
                                           String uploadedBy) {
-
+        log.info("quarantine docslist {}", quarantineDocsList);
+        log.info("upload docslist {}", uploadDocListConfOrDocTab);
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
             getQuarantineDocumentById(quarantineDocsList, uuid);
         if (quarantineLegalDocElementOptional.isPresent()) {
@@ -573,12 +574,12 @@ public class ReviewDocumentService {
                                                            QuarantineLegalDoc quarantineLegalDoc,
                                                            Boolean isReviewDecisionYes) {
 
-        log.info("confidential files is: ()", legalProfUploadDoc);
+        log.info("confidential files is: {}", legalProfUploadDoc);
         log.info("confidential file name is: {}", legalProfUploadDoc.getFileName());
-        log.info("confidential file name is: {}", legalProfUploadDoc.getDocumentName());
-        log.info("confidential files is: ()", quarantineLegalDoc);
-        log.info("confidential file name is: {}", quarantineLegalDoc.getFileName());
-        log.info("confidential file name is: {}", quarantineLegalDoc.getDocumentName());
+        log.info("confidential document name is: {}", legalProfUploadDoc.getDocumentName());
+        log.info("quaratine files is: {}", quarantineLegalDoc);
+        log.info("quaratine file name is: {}", quarantineLegalDoc.getFileName());
+        log.info("quaratine document name is: {}", quarantineLegalDoc.getDocumentName());
         return legalProfUploadDoc.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
