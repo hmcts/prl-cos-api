@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.util.HashMap;
@@ -56,6 +57,9 @@ public class EditReturnedOrderServiceTest {
 
     @Mock
     DraftAnOrderService draftAnOrderService;
+
+    @Mock
+    DynamicMultiSelectListService dynamicMultiSelectListService;
 
     private static final String testAuth = "auth";
 
