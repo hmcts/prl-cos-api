@@ -497,6 +497,8 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseData);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData);
 
@@ -634,6 +636,8 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseData);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData);
 
@@ -668,6 +672,8 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocuments(authToken, fl401CaseData1);
@@ -796,6 +802,8 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         documentGenService.generateDocuments(authToken, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -911,6 +919,8 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         documentGenService.generateDocuments(authToken, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
             Mockito.anyString(),
@@ -1016,6 +1026,8 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         documentGenService.generateDocuments(authToken, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
@@ -1106,6 +1118,8 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
         documentGenService.generateDocuments(authToken, fl401CaseData);
@@ -1198,6 +1212,8 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         documentGenService.generateDocuments(authToken, fl401CaseData);
         verify(dgsService, times(1)).generateDocument(
@@ -1280,6 +1296,8 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
         documentGenService.generateDocuments(authToken, fl401CaseData);
@@ -2445,6 +2463,8 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseData);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
 
@@ -2524,6 +2544,8 @@ public class DocumentGenServiceTest {
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseData);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
 
@@ -2558,6 +2580,8 @@ public class DocumentGenServiceTest {
             Mockito.any()
         );
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
+            fl401CaseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class))).thenReturn(
             fl401CaseData);
 
         Map<String, Object> stringObjectMap = documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData1);
@@ -2685,6 +2709,8 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -2799,6 +2825,8 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
         documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
         verify(dgsService, times(3)).generateDocument(
             Mockito.anyString(),
@@ -2904,6 +2932,8 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
         verify(dgsService, times(3)).generateDocument(
@@ -2974,6 +3004,8 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
         documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
@@ -3048,6 +3080,8 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
         verify(dgsService, times(2)).generateDocument(
@@ -3111,6 +3145,8 @@ public class DocumentGenServiceTest {
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
 
         documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
         verify(dgsService, times(2)).generateWelshDocument(
@@ -3173,6 +3209,8 @@ public class DocumentGenServiceTest {
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
         when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
         when(organisationService.getApplicantOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
+            .thenReturn(caseData);
+        when(organisationService.getRespondentOrganisationDetailsForFL401(Mockito.any(CaseData.class)))
             .thenReturn(caseData);
 
         documentGenService.generateDocumentsForTestingSupport(authToken, fl401CaseData);
