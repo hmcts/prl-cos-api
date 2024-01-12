@@ -2611,7 +2611,7 @@ public class ManageOrderService {
     }
 
     public void setHearingSelectedInfoForTask(List<Element<HearingData>> ordersHearingDetails, Map<String,Object> caseDataUpdated) {
-
+        log.info("22222222");
         String isMultipleHearingSelected = "No";
         HearingDateConfirmOptionEnum hearingOptionSelected = null;
         String isHearingTaskNeeded = "No";
@@ -2625,50 +2625,40 @@ public class ManageOrderService {
                     || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
                     || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum()))) {
                     isHearingTaskNeeded = "Yes";
-                    log.info("111111");
                     break;
                 }
             }
 
             if (ordersHearingDetails.size() == 1) {
-                log.info("22222");
                 hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum();
             } else if (!ordersHearingDetails.isEmpty()) {
-                log.info("33333");
                 isMultipleHearingSelected = "Yes";
             }
         }
         caseDataUpdated.put("isMultipleHearingSelected", isMultipleHearingSelected);
         caseDataUpdated.put("hearingOptionSelected", hearingOptionSelected);
         caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
-        log.info("caseDataUpdated---isMultipleHearingSelected--> {}",caseDataUpdated.get("isMultipleHearingSelected"));
-        log.info("caseDataUpdated---hearingOptionSelected--> {}",caseDataUpdated.get("hearingOptionSelected"));
-        log.info("caseDataUpdated--isHearingTaskNeeded---> {}",caseDataUpdated.get("isHearingTaskNeeded"));
+        log.info("isMultipleHearingSelected--> {}",caseDataUpdated.get("isMultipleHearingSelected"));
+        log.info("hearingOptionSelected--> {}",caseDataUpdated.get("hearingOptionSelected"));
+        log.info("isHearingTaskNeeded---> {}",caseDataUpdated.get("isHearingTaskNeeded"));
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId, String performingUser) {
 
-        log.info("inside setHearingOptionDetailsForTask -eventId-> {}",eventId);
         if (eventId.equals(MANAGE_ORDERS.getId())) {
-            log.info("When Manage Ordersss --> {}", caseData.getManageOrders().getOrdersHearingDetails());
             setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
 
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
             boolean isOrderEdited = false;
             if (isOrderEdited(caseData, eventId, isOrderEdited)) {
-                log.info("getOrdersHearingDetails YES --> {}", caseData.getManageOrders().getOrdersHearingDetails());
                 setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
             } else {
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
-                log.info("selectedOrderId -NO00-> {}", selectedOrderId);
-                log.info("getDraftOrderCollection -NOooo-> {}", caseData.getDraftOrderCollection());
 
                 if (null != caseData.getDraftOrderCollection()) {
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                         DraftOrder draftOrder = e.getValue();
-                        log.info("draftOrder --> {}", draftOrder);
-                        //log.info("draftOrder Judge--> {}", draftOrder.getOtherDetails().getStatus());
                         if (e.getId().equals(selectedOrderId)) {
                             setHearingSelectedInfoForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
                         }
@@ -2677,17 +2667,6 @@ public class ManageOrderService {
             }
             isOrderApproved(caseData, caseDataUpdated, performingUser);
         }
-        log.info(
-            "inside getWhatToDoWithOrderCourtAdmin --> {}",
-            caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()
-        );
-        log.info(
-            "inside getWhatToDoWithOrderSolicitor --> {}",
-            caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
-        );
-
-
-
     }
 
     public void isOrderApproved(CaseData caseData, Map<String, Object> caseDataUpdated, String performingUser) {
@@ -2698,7 +2677,7 @@ public class ManageOrderService {
             || (null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
             && !OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
             .equalsIgnoreCase(caseData.getManageOrders().getWhatToDoWithOrderSolicitor().toString()))) {
-            log.info("approved byyy---> {}", performingUser);
+            log.info("Approved by performingUser---> {}", performingUser);
             whoApprovedTheOrder = performingUser;
             isOrderApproved = "Yes";
         }
