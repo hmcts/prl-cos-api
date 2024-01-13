@@ -25,6 +25,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class RoleAssignmentServiceTest {
@@ -217,7 +218,7 @@ public class RoleAssignmentServiceTest {
     public void testValidateIfUserHasRightRole() {
         List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
         RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
-        roleAssignmentResponse.setRoleName("allocate-judge");
+        roleAssignmentResponse.setRoleName(HEARING_JUDGE_ROLE);
         listOfRoleAssignmentResponses.add(roleAssignmentResponse);
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
         roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
