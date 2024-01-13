@@ -119,6 +119,8 @@ public class RoleAssignmentService {
     }
 
     private String fetchActorIdIfJudge(String authorization, HashMap<String, Object> caseDataUpdated) {
+        log.info("caseDataUpdated.get(JUDGE_NAME)--- {}", caseDataUpdated.get(JUDGE_NAME));
+        log.info("caseDataUpdated.get(JUDGE_NAME_EMAIL)--- {}", caseDataUpdated.get(JUDGE_NAME_EMAIL));
         if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR)))) {
             return (null != caseDataUpdated.get(JUDGE_NAME)) ? getIdamId(caseDataUpdated.get(
