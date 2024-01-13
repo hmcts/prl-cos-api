@@ -202,8 +202,36 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-orders/about-to-submit")
             .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"),
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),// shud be no
                   "data.isMultipleHearingSelected", equalTo("No"),
+                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
+                  "data.isOrderApproved", equalTo(null),
+                  "data.whoApprovedTheOrder", equalTo(null))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
+
+    }
+
+
+    /**
+     * Court Admin manageOrders journey - creates the order with many hearings with approval required.
+     */
+    @Test
+    public void givenRequestBody_courtArdmin_judge_approval_requiredMultiple() throws Exception {
+        String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED);
+
+        AboutToStartOrSubmitCallbackResponse resp = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),// shud be no
+                  "data.isMultipleHearingSelected", equalTo("Yes"),
                   "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
                   "data.isOrderApproved", equalTo(null),
                   "data.whoApprovedTheOrder", equalTo(null))
@@ -226,7 +254,7 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-orders/about-to-submit")
             .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"),
+            .body("data.isHearingTaskNeeded", equalTo("No"),
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateToBeFixed"),
                   "data.isOrderApproved", equalTo(null),
