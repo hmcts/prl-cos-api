@@ -36,8 +36,8 @@ public class EditReturnedOrderService {
 
     private static final String BOLD_BEGIN = "<span class='heading-h2'>";
     private static final String BOLD_END = "</span>";
-    private static final String INSTRUCTIONS_FROM_JUDGE = BOLD_BEGIN + "Instructions from the judge" + BOLD_END + "<br><br>";
-    private static final String EDIT_THE_ORDER_LABEL = "<br><br><span class='heading-h3'>Edit the order</span><br><br>";
+    private static final String INSTRUCTIONS_FROM_JUDGE = BOLD_BEGIN + "Instructions from the judge" + BOLD_END + " \n\n ";
+    private static final String EDIT_THE_ORDER_LABEL = " \n\n <span class='heading-h3'>Edit the order</span> \n\n";
     public static final String OPEN_THE_DRAFT_ORDER_TEXT = "Open the draft order and edit it to include the judge's instructions.";
     public static final String USE_CONTINUE_TO_EDIT_THE_ORDER = "Use continue to edit the order.";
     public static final String ORDER_UPLOADED_AS_DRAFT_FLAG = "orderUploadedAsDraftFlag";
