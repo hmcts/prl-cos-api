@@ -2913,6 +2913,12 @@ public class ManageOrderService {
 
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
                 setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser);
+                log.info("isHearingTaskNeeded--- CREATE--{}",waFieldsMap.get("isHearingTaskNeeded"));
+                log.info("isMultipleHearingSelected--- CREATE--{}",waFieldsMap.get("isMultipleHearingSelected"));
+                log.info("hearingOptionSelected--- CREATE--{}",waFieldsMap.get("hearingOptionSelected"));
+                log.info("isOrderApproved--- CREATE--{}",waFieldsMap.get("isOrderApproved"));
+                log.info("whoApprovedTheOrder--- CREATE--{}",waFieldsMap.get("whoApprovedTheOrder"));
+                log.info("judgeLaManagerReviewRequired--- CREATE--{}",waFieldsMap.get("judgeLaManagerReviewRequired"));
             }
 
             if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.COURT_ADMIN.toString())) {

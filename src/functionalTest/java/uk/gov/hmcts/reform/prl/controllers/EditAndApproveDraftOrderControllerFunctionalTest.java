@@ -355,7 +355,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
+        System.out.println("Respppp " + resp.getData());
 
     }
 }
