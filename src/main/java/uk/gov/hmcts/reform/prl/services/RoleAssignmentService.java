@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
@@ -167,7 +167,7 @@ public class RoleAssignmentService {
         return roleAssignmentServiceResponse.getRoleAssignmentResponse()
             .stream()
             .anyMatch(
-                roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(ALLOCATE_JUDGE_ROLE)
+                roleAssignmentResponse -> roleAssignmentResponse.getRoleName().equals(HEARING_JUDGE_ROLE)
             );
     }
 
