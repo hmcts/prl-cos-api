@@ -86,7 +86,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_whenPostRequestToFetchChildList_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
@@ -96,11 +95,10 @@ public class ManageOrdersControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/fetch-child-details")
-            .then().assertThat().statusCode(500);
+            .then().assertThat().statusCode(200);
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_whenPostRequestToFetchHeader_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_MANAGE_ORDER_REQUEST_BODY);
         request
@@ -113,8 +111,8 @@ public class ManageOrdersControllerFunctionalTest {
             .then().assertThat().statusCode(200);
     }
 
-    @Ignore
     @Test
+    @Ignore
     public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 

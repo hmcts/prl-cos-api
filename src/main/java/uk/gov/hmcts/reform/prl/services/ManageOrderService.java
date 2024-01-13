@@ -2634,7 +2634,7 @@ public class ManageOrderService {
             return;
         }
 
-        // If judge or la or manager approval required is , then isHearingTaskNeeded should be always 'No'.
+        // If judge or la or manager approval is required (for managerOrders journey only) , then isHearingTaskNeeded should be always 'No'.
         if (eventId.equals(MANAGE_ORDERS.getId())
             && (AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(amendOrderCheck)
             || AmendOrderCheckEnum.managerCheck.equals(amendOrderCheck))) {
