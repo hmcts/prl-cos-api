@@ -118,16 +118,25 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_HEARING_TASK_NEEDED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_MULTIPLE_HEARING_SELECTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_JUDGE_LA_REVIEW_REQUIRED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_ACTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_PERFORMING_USER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.Event.EDIT_AND_APPROVE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Event.MANAGE_ORDERS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -2617,19 +2626,19 @@ public class ManageOrderService {
                                        AmendOrderCheckEnum amendOrderCheck,
                                        String eventId) {
 
-        String isHearingTaskNeeded = "No";
+        String isHearingTaskNeeded = NO;
 
         // If rejected by judge, then isHearingTaskNeeded should be always 'No'.
-        if (null != isOrderApproved && isOrderApproved.equals("No")) {
-            caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
+        if (null != isOrderApproved && isOrderApproved.equals(NO)) {
+            caseDataUpdated.put(WA_IS_HEARING_TASK_NEEDED, isHearingTaskNeeded);
             return;
         }
 
         // If judge or la or manager approval required is , then isHearingTaskNeeded should be always 'No'.
-        if (eventId.equals("manageOrders")
+        if (eventId.equals(MANAGE_ORDERS.getId())
             && (AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(amendOrderCheck)
             || AmendOrderCheckEnum.managerCheck.equals(amendOrderCheck))) {
-            caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
+            caseDataUpdated.put(WA_IS_HEARING_TASK_NEEDED, isHearingTaskNeeded);
             return;
         }
 
@@ -2641,16 +2650,16 @@ public class ManageOrderService {
                     && (HearingDateConfirmOptionEnum.dateReservedWithListAssit.equals(hearing.getHearingDateConfirmOptionEnum())
                     || HearingDateConfirmOptionEnum.dateToBeFixed.equals(hearing.getHearingDateConfirmOptionEnum())
                     || HearingDateConfirmOptionEnum.dateConfirmedByListingTeam.equals(hearing.getHearingDateConfirmOptionEnum()))) {
-                    isHearingTaskNeeded = "Yes";
+                    isHearingTaskNeeded = YES;
                     break;
                 }
             }
         }
-        caseDataUpdated.put("isHearingTaskNeeded", isHearingTaskNeeded);
+        caseDataUpdated.put(WA_IS_HEARING_TASK_NEEDED, isHearingTaskNeeded);
     }
 
     public void setHearingSelectedInfoForTask(List<Element<HearingData>> ordersHearingDetails, Map<String,Object> caseDataUpdated) {
-        String isMultipleHearingSelected = "No";
+        String isMultipleHearingSelected = NO;
         String hearingOptionSelected = null;
 
         if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
@@ -2660,12 +2669,12 @@ public class ManageOrderService {
             if (ordersHearingDetails.size() == 1) {
                 hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum().toString();
             } else if (!ordersHearingDetails.isEmpty()) {
-                hearingOptionSelected = "multipleOptionSelected";
-                isMultipleHearingSelected = "Yes";
+                hearingOptionSelected = WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
+                isMultipleHearingSelected = YES;
             }
         }
-        caseDataUpdated.put("isMultipleHearingSelected", isMultipleHearingSelected);
-        caseDataUpdated.put("hearingOptionSelected", hearingOptionSelected);
+        caseDataUpdated.put(WA_IS_MULTIPLE_HEARING_SELECTED, isMultipleHearingSelected);
+        caseDataUpdated.put(WA_HEARING_OPTION_SELECTED, hearingOptionSelected);
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId, String performingUser) {
@@ -2675,12 +2684,13 @@ public class ManageOrderService {
         if (null != amendOrderCheckEnum) {
             judgeLaManagerReviewRequired = amendOrderCheckEnum.toString();
         }
-        caseDataUpdated.put("judgeLaManagerReviewRequired", judgeLaManagerReviewRequired);
+        caseDataUpdated.put(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED, judgeLaManagerReviewRequired);
 
         if (eventId.equals(MANAGE_ORDERS.getId())) {
             setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
             setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),caseDataUpdated,null,amendOrderCheckEnum,eventId);
-
+            caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
+            caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
             boolean isOrderEdited = false;
             if (isOrderEdited(caseData, eventId, isOrderEdited)) {
@@ -2709,18 +2719,18 @@ public class ManageOrderService {
 
     public String isOrderApproved(CaseData caseData, Map<String, Object> caseDataUpdated, String performingUser) {
         String whoApprovedTheOrder = null;
-        String isOrderApproved = "No";
+        String isOrderApproved = NO;
 
         if (null != caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin()
             || (null != caseData.getManageOrders().getWhatToDoWithOrderSolicitor()
             && !OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges.toString()
             .equalsIgnoreCase(caseData.getManageOrders().getWhatToDoWithOrderSolicitor().toString()))) {
             whoApprovedTheOrder = performingUser;
-            isOrderApproved = "Yes";
+            isOrderApproved = YES;
         }
 
-        caseDataUpdated.put("isOrderApproved", isOrderApproved);
-        caseDataUpdated.put("whoApprovedTheOrder", whoApprovedTheOrder);
+        caseDataUpdated.put(WA_IS_ORDER_APPROVED, isOrderApproved);
+        caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, whoApprovedTheOrder);
 
         return isOrderApproved;
     }
