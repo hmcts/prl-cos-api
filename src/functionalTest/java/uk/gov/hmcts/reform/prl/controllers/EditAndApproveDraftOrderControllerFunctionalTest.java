@@ -55,11 +55,16 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY
         = "requests/draft-ordr-judge-edit-approve-soli-1hearing-jugappr-request.json";
 
+    private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_WITH_MANY_HEARING_BODY
+        = "requests/draft-ordr-judge-edit-approve-soli-manyhearing-jugappr-request.json";
+
     private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_NO_HEARING_BODY
         = "requests/draft-ordr-judge-edit-approve-soli-nohearing-judgeappr-request.json";
 
     private static final String DRAFT_ORDER_JUDGE_REJECT_SOLI_ONE_HEARING_BODY
         = "requests/draft-ordr-judge-edit-approve-soli-1hearing-judgereject-request.json";
+
+
 
     private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
         = "requests/judge-edit-approve-court-admin-1hearing-judge-appr-request.json";
@@ -188,6 +193,33 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     }
 
     /**
+     * Judge editApprove - approves the order with many hearing which is created by solicitor.
+     */
+    @Test
+    public void givenRequestBody_whenJudge_edit_approve_soli_order_many_hearing_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_WITH_MANY_HEARING_BODY);
+
+        AboutToStartOrSubmitCallbackResponse resp = request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-edit-approve/about-to-submit")
+            .then()
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),
+                  "data.isMultipleHearingSelected", equalTo("Yes"),
+                  "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
+                  "data.isOrderApproved", equalTo("Yes"),
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
+
+    }
+
+    /**
      * Judge editApprove - approves the order with no hearing which is created by solicitor.
      */
     @Test
@@ -217,7 +249,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     /**
      * Judge editApprove - rejects the order with one hearing which is created by solicitor.
      */
-    @Test // Checkkkkk
+    @Test
     public void givenRequestBody_whenJudge_edit_reject_soli_order_with_one_hearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_REJECT_SOLI_ONE_HEARING_BODY);
 
@@ -229,7 +261,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .contentType("application/json")
             .post("/judge-or-admin-edit-approve/about-to-submit")
             .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"), // revamp
+            .body("data.isHearingTaskNeeded", equalTo("No"), // revamp
                   "data.isMultipleHearingSelected", equalTo("No"),
                   "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
                   "data.isOrderApproved", equalTo("No"),
@@ -287,7 +319,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .then()
             .body("data.isHearingTaskNeeded", equalTo("Yes"),
                   "data.isMultipleHearingSelected", equalTo("Yes"),
-                  "data.hearingOptionSelected", equalTo(null),// multiplehear
+                  "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
                   "data.isOrderApproved", equalTo("Yes"),
                   "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
             .extract()
