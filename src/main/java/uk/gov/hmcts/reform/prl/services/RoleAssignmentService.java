@@ -107,10 +107,10 @@ public class RoleAssignmentService {
             return fetchActorIdIfJudgeIsGatekeeping(authorization, caseDataUpdated);
         } else {
             if (null != caseDataUpdated.get("nameOfJudgeToReviewOrder")
-                && StringUtils.isNotEmpty(caseDataUpdated.get("nameOfJudgeToReviewOrder").toString())) {
+                && caseDataUpdated.get("nameOfJudgeToReviewOrder").toString().length() > 3) {
                 return getIdamId(caseDataUpdated.get("nameOfJudgeToReviewOrder"))[0];
             } else if (null != caseDataUpdated.get("nameOfLaToReviewOrder") &&
-                StringUtils.isNotEmpty(caseDataUpdated.get("nameOfLaToReviewOrder").toString())) {
+                caseDataUpdated.get("nameOfLaToReviewOrder").toString().length() > 3) {
                 return fetchActorIdFromSelectedLegalAdviser(
                     authorization,
                     caseDataUpdated.get("nameOfLaToReviewOrder")
@@ -126,7 +126,7 @@ public class RoleAssignmentService {
         if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR)))) {
             return (null != caseDataUpdated.get(JUDGE_NAME)
-                && StringUtils.isNotEmpty(caseDataUpdated.get(JUDGE_NAME).toString()))
+                && caseDataUpdated.get(JUDGE_NAME).toString().length() > 3)
                 ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
                 : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
         } else {
@@ -137,7 +137,8 @@ public class RoleAssignmentService {
     private String fetchActorIdIfJudgeIsGatekeeping(String authorization, HashMap<String, Object> caseDataUpdated) {
         if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))) {
-            return caseDataUpdated.get(JUDGE_NAME) != null ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
+            return caseDataUpdated.get(JUDGE_NAME) != null && caseDataUpdated.get(JUDGE_NAME).toString().length() > 3
+                ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
                 : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
         } else {
             return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
