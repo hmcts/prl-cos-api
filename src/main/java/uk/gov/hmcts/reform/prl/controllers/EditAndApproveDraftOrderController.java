@@ -172,6 +172,13 @@ public class EditAndApproveDraftOrderController {
                 log.info("CCCCCCC--->{}", result);
 
                 manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated,callbackRequest.getEventId(),loggedInUserType);
+                log.info("isHearingTaskNeeded--- EDIT--{}",caseDataUpdated.get("isHearingTaskNeeded"));
+                log.info("isMultipleHearingSelected--- EDIT--{}",caseDataUpdated.get("isMultipleHearingSelected"));
+                log.info("hearingOptionSelected--- EDIT--{}",caseDataUpdated.get("hearingOptionSelected"));
+                log.info("isOrderApproved--- EDIT--{}",caseDataUpdated.get("isOrderApproved"));
+                log.info("whoApprovedTheOrder--- EDIT--{}",caseDataUpdated.get("whoApprovedTheOrder"));
+                log.info("judgeLaManagerReviewRequired--- EDIT--{}",caseDataUpdated.get("judgeLaManagerReviewRequired"));
+
                 caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService.getDraftOrderNameForWA(caseData, true));
                 caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
                     caseData,
