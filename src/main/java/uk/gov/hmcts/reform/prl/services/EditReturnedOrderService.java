@@ -128,9 +128,8 @@ public class EditReturnedOrderService {
                     + selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative()
                     + "\n" + EDIT_THE_ORDER_LABEL + "\n" + USE_CONTINUE_TO_EDIT_THE_ORDER);
         }
-        caseDataMap.put("isTheOrderAboutAllChildrenReturnedOrder", selectedOrder.getIsTheOrderAboutAllChildren());
-        caseDataMap.put("isTheOrderAboutChildrenReturnedOrder", selectedOrder.getIsTheOrderAboutChildren());
-        caseDataMap.put("dateOrderMade1", selectedOrder.getDateOrderMade());
+        caseDataMap.put("isTheOrderAboutAllChildren", selectedOrder.getIsTheOrderAboutAllChildren());
+        caseDataMap.put("isTheOrderAboutChildren", selectedOrder.getIsTheOrderAboutChildren());
         caseDataMap.put("childOption", (Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
                 || No.equals(selectedOrder.getIsTheOrderAboutAllChildren()))
                 ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
