@@ -34,6 +34,10 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class EditReturnedOrderService {
 
+    private static final String BOLD_BEGIN = "<span class='heading-h3'>";
+    private static final String BOLD_END = "</span>";
+    private static final String INSTRUCTIONS_FROM_JUDGE = BOLD_BEGIN + "Instructions from the judge" + BOLD_END;
+    private static final String EDIT_THE_ORDER_LABEL = "<span class='heading-h3'>Edit the order</span>";
     public static final String OPEN_THE_DRAFT_ORDER_TEXT = "Open the draft order and edit it to include the judge's instructions.";
     public static final String USE_CONTINUE_TO_EDIT_THE_ORDER = "Use continue to edit the order.";
     public static final String ORDER_UPLOADED_AS_DRAFT_FLAG = "orderUploadedAsDraftFlag";
@@ -114,10 +118,15 @@ public class EditReturnedOrderService {
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         if (YesOrNo.Yes.equals(selectedOrder.getIsOrderUploadedByJudgeOrAdmin())) {
-            caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, OPEN_THE_DRAFT_ORDER_TEXT);
+            caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, INSTRUCTIONS_FROM_JUDGE + "\n"
+                    + selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative()
+                    + "\n" + EDIT_THE_ORDER_LABEL + "\n" + OPEN_THE_DRAFT_ORDER_TEXT);
             caseDataMap.put(PREVIEW_UPLOADED_ORDER, selectedOrder.getOrderDocument());
+            caseDataMap.put(SELECTED_ORDER, selectedOrder.getOrderTypeId());
         } else {
-            caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, USE_CONTINUE_TO_EDIT_THE_ORDER);
+            caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, INSTRUCTIONS_FROM_JUDGE + "\n"
+                    + selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative()
+                    + "\n" + EDIT_THE_ORDER_LABEL + "\n" + USE_CONTINUE_TO_EDIT_THE_ORDER);
         }
         caseDataMap.put("isTheOrderAboutAllChildrenReturnedOrder", selectedOrder.getIsTheOrderAboutAllChildren());
         caseDataMap.put("isTheOrderAboutChildrenReturnedOrder", selectedOrder.getIsTheOrderAboutChildren());
@@ -126,7 +135,6 @@ public class EditReturnedOrderService {
                 || No.equals(selectedOrder.getIsTheOrderAboutAllChildren()))
                 ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
                 .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
-        caseDataMap.put(SELECTED_ORDER, selectedOrder.getOrderType().getDisplayedValue());
         return caseDataMap;
     }
 }
