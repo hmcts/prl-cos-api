@@ -109,8 +109,8 @@ public class RoleAssignmentService {
             if (null != caseDataUpdated.get("nameOfJudgeToReviewOrder")
                 && caseDataUpdated.get("nameOfJudgeToReviewOrder").toString().length() > 3) {
                 return getIdamId(caseDataUpdated.get("nameOfJudgeToReviewOrder"))[0];
-            } else if (null != caseDataUpdated.get("nameOfLaToReviewOrder") &&
-                caseDataUpdated.get("nameOfLaToReviewOrder").toString().length() > 3) {
+            } else if (null != caseDataUpdated.get("nameOfLaToReviewOrder")
+                && caseDataUpdated.get("nameOfLaToReviewOrder").toString().length() > 3) {
                 return fetchActorIdFromSelectedLegalAdviser(
                     authorization,
                     caseDataUpdated.get("nameOfLaToReviewOrder")
