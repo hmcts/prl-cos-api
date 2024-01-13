@@ -111,6 +111,7 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                     )
                 );
                 addCaseNoteService.clearFields(caseDataUpdated);
+                caseDataUpdated.remove("listWithoutNoticeHearingInstruction");
             }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
