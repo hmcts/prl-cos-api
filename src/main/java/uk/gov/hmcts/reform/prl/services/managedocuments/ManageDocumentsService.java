@@ -209,6 +209,10 @@ public class ManageDocumentsService {
                     loggedInUserType,
                     quarantineLegalDoc
                 );
+            } else {
+                quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+                    .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+                    .build();
             }
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,
@@ -224,6 +228,13 @@ public class ManageDocumentsService {
                 restrcitedKey
             );
         } else {
+            // Remove these attributes for Non Confidential documents
+            quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+                .isConfidential(null)
+                .isRestricted(null)
+                .restrictedDetails(null)
+                .build();
+
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,
                 userDetails
@@ -613,29 +624,37 @@ public class ManageDocumentsService {
 
     private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
         final @NotNull @Valid QuarantineLegalDoc[] quarantineLegalDoc = new QuarantineLegalDoc[1];
-        return confidentialDocuments.stream().map(
-            element -> {
-                quarantineLegalDoc[0] = element.getValue();
+        return confidentialDocuments.stream()
+            .filter(element -> element.getValue().getHasTheConfidentialDocumentBeenRenamed().equals(YesOrNo.No))
+            .map(
+                element -> {
+                    quarantineLegalDoc[0] = element.getValue();
 
-                String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc[0].getCategoryId());
-                Document existingDocument = objectMapper.convertValue(
-                    objectMapper.convertValue(quarantineLegalDoc[0], Map.class).get(attributeName),
-                    Document.class
-                );
-                QuarantineLegalDoc updatedQuarantineLegalDocumentObject = quarantineLegalDoc[0];
-                if (existingDocument.getDocumentFileName().startsWith(CONFIDENTIAL)) {
+                    String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc[0].getCategoryId());
+                    Document existingDocument = objectMapper.convertValue(
+                        objectMapper.convertValue(quarantineLegalDoc[0], Map.class).get(attributeName),
+                        Document.class
+                    );
+                    QuarantineLegalDoc updatedQuarantineLegalDocumentObject = quarantineLegalDoc[0];
+
                     Document renamedDocument = downloadAndDeleteDocument(
                         quarantineLegalDoc[0], existingDocument
                     );
                     updatedQuarantineLegalDocumentObject = objectMapper.convertValue(
-                        objectMapper.convertValue(quarantineLegalDoc[0], Map.class).put(attributeName, renamedDocument),
+                        objectMapper.convertValue(quarantineLegalDoc[0], Map.class).put(
+                            attributeName,
+                            renamedDocument
+                        ),
                         QuarantineLegalDoc.class
-                    );
-                }
+                    )
+                        .toBuilder()
+                        .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes)
+                        .build();
 
-                log.info("renameConfidentialDocumentForCourtAdmin -- {}", quarantineLegalDoc[0]);
-                return element(element.getId(), updatedQuarantineLegalDocumentObject);
-            }
+
+                    log.info("renameConfidentialDocumentForCourtAdmin -- {}", quarantineLegalDoc[0]);
+                    return element(element.getId(), updatedQuarantineLegalDocumentObject);
+                }
         ).collect(Collectors.toList());
     }
 }
