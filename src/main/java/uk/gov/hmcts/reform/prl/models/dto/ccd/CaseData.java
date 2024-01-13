@@ -720,7 +720,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private GatekeepingDetails gatekeepingDetails;
 
     @JsonUnwrapped
-    private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
+    private final ListWithoutNoticeDetails listWithoutNoticeDetails;
     @JsonUnwrapped
     private final Fl401ListOnNotice fl401ListOnNotice;
 

@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ListWithoutNoticeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -41,6 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -105,7 +107,7 @@ public class ListWithoutNoticeControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
             .prePopulateHearingPageData(authToken, serviceAuth,callbackRequest);
-        assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
+        assertNotNull(response.getData());
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
 
@@ -159,7 +161,8 @@ public class ListWithoutNoticeControllerTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -229,7 +232,8 @@ public class ListWithoutNoticeControllerTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -316,7 +320,8 @@ public class ListWithoutNoticeControllerTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -384,7 +389,8 @@ public class ListWithoutNoticeControllerTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -452,7 +458,8 @@ public class ListWithoutNoticeControllerTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
