@@ -101,8 +101,10 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 CaseData.class
             );
             if (!StringUtils.isEmpty(caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingInstruction())) {
-                caseDataUpdated.put(CASE_NOTE, caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingInstruction());
-                caseDataUpdated.put(SUBJECT, LISTING_INSTRUCTIONS_SENT_TO_ADMIN);
+                caseData = caseData.toBuilder()
+                    .caseNote(caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingInstruction())
+                    .subject(LISTING_INSTRUCTIONS_SENT_TO_ADMIN)
+                        .build();
                 caseDataUpdated.put(
                     CASE_NOTES,
                     addCaseNoteService.addCaseNoteDetails(
