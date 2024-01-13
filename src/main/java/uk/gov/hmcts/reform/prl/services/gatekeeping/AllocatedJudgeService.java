@@ -20,6 +20,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIRCUIT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISTRICT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HIGHCOURT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
@@ -30,6 +31,7 @@ import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class AllocatedJudgeService {
 
+
     public AllocatedJudge getAllocatedJudgeDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                    RefDataUserService refDataUserService) {
         return mapAllocatedJudge(caseDataUpdated, legalAdviserList, refDataUserService);
@@ -39,7 +41,7 @@ public class AllocatedJudgeService {
     private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                              RefDataUserService refDataUserService) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
-        if (null != caseDataUpdated.get(TIER_OF_JUDICIARY)) {
+        if ("No".equals(caseDataUpdated.get(IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED))) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
             allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get(TIER_OF_JUDICIARY))));
         } else {
