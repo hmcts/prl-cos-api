@@ -65,7 +65,6 @@ public class DraftAnOrderController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("Selectttttt Orderrrrr ");
             return draftAnOrderService.handleSelectedOrder(callbackRequest, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

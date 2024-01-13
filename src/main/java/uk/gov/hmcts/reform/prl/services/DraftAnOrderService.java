@@ -1929,12 +1929,14 @@ public class DraftAnOrderService {
         }
 
         List<String> errorList = new ArrayList<>();
-        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
+        if ((CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
             || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(caseData.getCreateSelectOrderOptions())) {
-            errorList.add("This order is not available to be draftedddddddddddd");
+            || CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(caseData.getCreateSelectOrderOptions()))
+            || (
+            C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+                && Arrays.stream(ManageOrdersUtils.PROHIBITED_C100_ORDER_IDS_FOR_SOLICITORS)
+                .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getCreateSelectOrderOptions().toString())))) {
+            errorList.add("This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
