@@ -106,9 +106,11 @@ public class RoleAssignmentService {
             IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
             return fetchActorIdIfJudgeIsGatekeeping(authorization, caseDataUpdated);
         } else {
-            if (null != caseDataUpdated.get("nameOfJudgeToReviewOrder")) {
+            if (null != caseDataUpdated.get("nameOfJudgeToReviewOrder")
+                && StringUtils.isNotEmpty(caseDataUpdated.get("nameOfJudgeToReviewOrder").toString())) {
                 return getIdamId(caseDataUpdated.get("nameOfJudgeToReviewOrder"))[0];
-            } else if (null != caseDataUpdated.get("nameOfLaToReviewOrder")) {
+            } else if (null != caseDataUpdated.get("nameOfLaToReviewOrder") &&
+                StringUtils.isNotEmpty(caseDataUpdated.get("nameOfLaToReviewOrder").toString())) {
                 return fetchActorIdFromSelectedLegalAdviser(
                     authorization,
                     caseDataUpdated.get("nameOfLaToReviewOrder")
@@ -123,8 +125,9 @@ public class RoleAssignmentService {
         log.info("caseDataUpdated.get(JUDGE_NAME_EMAIL)--- {}", caseDataUpdated.get(JUDGE_NAME_EMAIL));
         if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR)))) {
-            return (null != caseDataUpdated.get(JUDGE_NAME)) ? getIdamId(caseDataUpdated.get(
-                JUDGE_NAME))[0]
+            return (null != caseDataUpdated.get(JUDGE_NAME)
+                && StringUtils.isNotEmpty(caseDataUpdated.get(JUDGE_NAME).toString()))
+                ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
                 : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
         } else {
             return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
