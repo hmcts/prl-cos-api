@@ -591,12 +591,12 @@ public class ManageDocumentsService {
         UserDetails userDetails = userService.getUserDetails(authorization);
         String userRole = CaseUtils.getUserRole(userDetails);
         if (userRole.equals(COURT_ADMIN)) {
-            if (caseData.getReviewDocuments().getConfidentialDocuments() != null) {
+            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
                 List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getConfidentialDocuments());
                 caseDataUpdated.put("confidentialDocuments", confidentialDocuments);
             }
-            if (caseData.getReviewDocuments().getRestrictedDocuments() != null) {
+            if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getRestrictedDocuments())) {
                 List<Element<QuarantineLegalDoc>> restrictedDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getRestrictedDocuments());
                 caseDataUpdated.put("restrictedDocuments", restrictedDocuments);
