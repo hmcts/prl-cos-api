@@ -179,7 +179,7 @@ public class DocumentUtils {
 
     public static String populateAttributeNameFromCategoryId(String categoryId) {
         String wierdAttributeName = returnAttributeNameForWierdCategories(categoryId);
-        if (wierdAttributeName != null) {
+        if (wierdAttributeName == null) {
             String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
             String finalCategory = "";
 
