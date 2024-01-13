@@ -174,7 +174,9 @@ public class ManageDocumentsService {
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
 
-            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())) {
+            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty())
+                || getRestrictedOrConfidentialKey(quarantineLegalDoc) == null
+            ) {
                 moveDocumentsToRespectiveCategoriesNew(
                     quarantineLegalDoc,
                     userDetails,
@@ -241,8 +243,7 @@ public class ManageDocumentsService {
         hashMap.put(DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId()), document);
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
-
-        return finalQuarantineDocument.builder()
+        return finalQuarantineDocument.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
             .notes(quarantineLegalDoc.getNotes())
@@ -258,15 +259,14 @@ public class ManageDocumentsService {
             .uploadedByIdamId(quarantineLegalDoc.getUploadedByIdamId())
             .uploaderRole(quarantineLegalDoc.getUploaderRole())
             .build();
+
     }
 
     private QuarantineLegalDoc covertManageDocToQuarantineDoc(ManageDocuments manageDocument, UserDetails userDetails) {
         boolean isCourtPartySelected = DocumentPartyEnum.COURT.equals(manageDocument.getDocumentParty());
 
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
-        quarantineLegalDoc = setQuarantineDocumentForUploader(manageDocument, loggedInUserType, quarantineLegalDoc);
-        return quarantineLegalDoc.builder()
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
             .notes(manageDocument.getDocumentDetails())
@@ -282,6 +282,7 @@ public class ManageDocumentsService {
             .uploadedByIdamId(userDetails.getId())
             .uploaderRole(loggedInUserType)
             .build();
+        return setQuarantineDocumentForUploader(manageDocument, loggedInUserType, quarantineLegalDoc);
     }
 
     private void setFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
@@ -318,12 +319,16 @@ public class ManageDocumentsService {
      */
     public String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
         if (quarantineLegalDoc.getIsConfidential() != null) {
-            if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
-                && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
-                return CONFIDENTIAL_DOCUMENTS;
-            } else {
-                return RESTRICTED_DOCUMENTS;
+            if (!(YesOrNo.No.equals(quarantineLegalDoc.getIsConfidential())
+                && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted()))) {
+                if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
+                    && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
+                    return CONFIDENTIAL_DOCUMENTS;
+                } else {
+                    return RESTRICTED_DOCUMENTS;
+                }
             }
+
         }
         return null;
     }
