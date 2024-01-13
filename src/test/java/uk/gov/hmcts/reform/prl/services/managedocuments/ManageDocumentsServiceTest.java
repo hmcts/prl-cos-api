@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -29,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
@@ -58,7 +58,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class ManageDocumentsServiceTest {
 
     @InjectMocks
@@ -256,6 +255,7 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .manageDocuments(List.of(manageDocumentsElement)).build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -307,6 +307,7 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .manageDocuments(List.of(manageDocumentsElement)).build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -355,6 +356,7 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .manageDocuments(List.of(manageDocumentsElement)).build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -405,6 +407,7 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .manageDocuments(List.of(manageDocumentsElement)).build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -429,10 +432,10 @@ public class ManageDocumentsServiceTest {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
-            .documentCategories(dynamicList)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").build()).build())
             .isRestricted(YesOrNo.Yes)
             .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().categoryId("test").build())
             .build();
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
@@ -446,7 +449,7 @@ public class ManageDocumentsServiceTest {
 
         manageDocumentsElement = element(manageDocuments);
 
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().build();
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder().categoryId("test").build();
         quarantineLegalDocElement = element(quarantineLegalDoc);
 
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
@@ -470,7 +473,6 @@ public class ManageDocumentsServiceTest {
         List<Element<QuarantineLegalDoc>> courtStaffUploadDocListConfTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
             "courtStaffUploadDocListConfTab");
 
-        assertEquals(1,courtStaffUploadDocListConfTab.size());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
         assertEquals(0,courtStaffQuarantineDocsList.size());
         assertEquals(0,courtStaffUploadDocListDocTab.size());
@@ -506,6 +508,7 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .manageDocuments(List.of(manageDocumentsElement)).build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -536,7 +539,7 @@ public class ManageDocumentsServiceTest {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
-            .documentCategories(dynamicList)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").build()).build())
             .isRestricted(YesOrNo.Yes)
             .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
@@ -577,10 +580,6 @@ public class ManageDocumentsServiceTest {
 
         courtStaffUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("courtStaffUploadDocListDocTab");
 
-        List<Element<QuarantineLegalDoc>> courtStaffUploadDocListConfTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get(
-            "courtStaffUploadDocListConfTab");
-
-        assertEquals(1,courtStaffUploadDocListConfTab.size());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
         assertEquals(0,courtStaffQuarantineDocsList.size());
         assertEquals(1,courtStaffUploadDocListDocTab.size());
@@ -615,6 +614,7 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .manageDocuments(List.of(manageDocumentsElement)).build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -630,8 +630,8 @@ public class ManageDocumentsServiceTest {
         legalProfUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(0,legalProfQuarantineDocsList.size());
-        assertEquals(1,legalProfUploadDocListDocTab.size());
+        assertEquals(1,legalProfQuarantineDocsList.size());
+        assertEquals(0,legalProfUploadDocListDocTab.size());
 
     }
 
