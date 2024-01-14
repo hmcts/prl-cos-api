@@ -59,6 +59,10 @@ public class IdamTokenGenerator {
     private String courtAdminPassword;
 
     public String generateIdamTokenForSolicitor() {
+        log.info("SOLLLLLLLL {}",solicitorUsername);
+        log.info("SOLLLLLLLL {}",solicitorUsername);
+        System.out.println("SOLL" + courtAdminUsername);
+        System.out.println("SOLLll" + solicitorPassword);
         return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
     }
 
