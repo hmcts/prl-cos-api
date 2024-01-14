@@ -17,7 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -210,8 +209,7 @@ public class DraftOrdersControllerFunctionalTest {
             .post("/selected-order")
             .then()
             .body("errors[0]", equalTo("This order is not available to be drafted"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .assertThat().statusCode(200);
 
     }
 
@@ -241,8 +239,7 @@ public class DraftOrdersControllerFunctionalTest {
             .post("/selected-order")
             .then()
             .body("errors[0]", equalTo("This order is not available to be drafted"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .assertThat().statusCode(200);
 
     }
 
@@ -272,8 +269,7 @@ public class DraftOrdersControllerFunctionalTest {
             .post("/selected-order")
             .then()
             .body("errors[0]", equalTo("This order is not available to be drafted"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .assertThat().statusCode(200);
 
     }
 
@@ -303,8 +299,7 @@ public class DraftOrdersControllerFunctionalTest {
             .post("/selected-order")
             .then()
             .body("errors[0]", equalTo("This order is not available to be drafted"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .assertThat().statusCode(200);
 
     }
 
