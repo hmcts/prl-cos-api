@@ -209,15 +209,16 @@ public class ManageDocumentsService {
                     loggedInUserType,
                     quarantineLegalDoc
                 );
-            } else {
-                quarantineLegalDoc = quarantineLegalDoc.toBuilder()
-                    .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
-                    .build();
             }
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,
                 userDetails
             );
+            if (userRole.equals(COURT_ADMIN)) {
+                finalConfidentialDocument = finalConfidentialDocument.toBuilder()
+                    .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
+                    .build();
+            }
 
             moveToConfidentialOrRestricted(
                 caseDataUpdated,
@@ -625,7 +626,8 @@ public class ManageDocumentsService {
     private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
         final @NotNull @Valid QuarantineLegalDoc[] quarantineLegalDoc = new QuarantineLegalDoc[1];
         return confidentialDocuments.stream()
-            .filter(element -> element.getValue().getHasTheConfidentialDocumentBeenRenamed().equals(YesOrNo.No))
+            .filter(element -> element.getValue().getHasTheConfidentialDocumentBeenRenamed().equals(YesOrNo.No)
+                && element.getValue().getUploaderRole().equals(COURT_STAFF))
             .map(
                 element -> {
                     quarantineLegalDoc[0] = element.getValue();
@@ -640,17 +642,14 @@ public class ManageDocumentsService {
                     Document renamedDocument = downloadAndDeleteDocument(
                         quarantineLegalDoc[0], existingDocument
                     );
-                    updatedQuarantineLegalDocumentObject = objectMapper.convertValue(
-                        objectMapper.convertValue(quarantineLegalDoc[0], Map.class).put(
-                            attributeName,
-                            renamedDocument
-                        ),
-                        QuarantineLegalDoc.class
-                    )
-                        .toBuilder()
-                        .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes)
-                        .build();
-
+                    Map tempQuarantineObjectMap =
+                        objectMapper.convertValue(quarantineLegalDoc[0], Map.class);
+                    tempQuarantineObjectMap.put(
+                        attributeName,
+                        renamedDocument
+                    );
+                    tempQuarantineObjectMap.put("hasTheConfidentialDocumentBeenRenamed", YesOrNo.Yes);
+                    updatedQuarantineLegalDocumentObject = objectMapper.convertValue(tempQuarantineObjectMap, QuarantineLegalDoc.class);
 
                     log.info("renameConfidentialDocumentForCourtAdmin -- {}", quarantineLegalDoc[0]);
                     return element(element.getId(), updatedQuarantineLegalDocumentObject);
