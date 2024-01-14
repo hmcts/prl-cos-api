@@ -4699,9 +4699,12 @@ public class DraftAnOrderServiceTest {
             .manageOrders(ManageOrders.builder()
                               .isTheOrderAboutChildren(Yes)
                               .build())
-            .draftOrdersDynamicList(TEST_UUID)
+            .draftOrdersDynamicList(DynamicList.builder().value(DynamicListElement.builder().code(TEST_UUID).build()).build())
+            .draftOrderCollection(List.of(element(UUID.fromString(TEST_UUID), DraftOrder.builder().build())))
             .doYouWantToEditTheOrder(No)
             .build();
+        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
+            TEST_UUID));
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
@@ -4725,7 +4728,8 @@ public class DraftAnOrderServiceTest {
                               .c21OrderOptions(C21OrderOptionsEnum.c21other)
                               .hasJudgeProvidedHearingDetails(Yes)
                               .build())
-            .draftOrdersDynamicList(TEST_UUID)
+            .draftOrdersDynamicList(DynamicList.builder().value(DynamicListElement.builder().code(TEST_UUID).build()).build())
+            .draftOrderCollection(List.of(element(UUID.fromString(TEST_UUID), DraftOrder.builder().build())))
             .doYouWantToEditTheOrder(No)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -4735,6 +4739,8 @@ public class DraftAnOrderServiceTest {
                              .build())
             .eventId(Event.DRAFT_AN_ORDER.getId())
             .build();
+        when(elementUtils.getDynamicListSelectedValue(Mockito.any(), Mockito.any())).thenReturn(UUID.fromString(
+            TEST_UUID));
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         assertNotNull(draftAnOrderService.handleDocumentGeneration("testAuth", callbackRequest));
     }
