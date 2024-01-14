@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 @TestPropertySource("classpath:application.yaml")
 @Service
+@Slf4j
 public class IdamTokenGenerator {
 
     @Value("${idam.solicitor.username}")
@@ -89,6 +91,8 @@ public class IdamTokenGenerator {
     }
 
     public String generateIdamTokenForCourtAdmin() {
+        log.info("Adminnnnnnn1111 {}",courtAdminUsername);
+        log.info("Adminnnnnnn2222 {}",courtAdminPassword);
         return idamClient.getAccessToken(courtAdminUsername, courtAdminPassword);
     }
 

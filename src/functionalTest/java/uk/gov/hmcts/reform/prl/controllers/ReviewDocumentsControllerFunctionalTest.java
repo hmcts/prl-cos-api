@@ -223,7 +223,7 @@ public class ReviewDocumentsControllerFunctionalTest {
                      "\"reviewDecisionYesOrNo\": \"no\"");
 
         AboutToStartOrSubmitCallbackResponse resp = request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
             .body(requestBodyRevised)
             .when()
             .contentType("application/json")
