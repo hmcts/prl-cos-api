@@ -133,6 +133,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
             throw new RuntimeException(e);
         }
 
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         //update all tabs
         tabService.updateAllTabsIncludingConfTab(objectMapper.convertValue(caseDataUpdated, CaseData.class));
 
