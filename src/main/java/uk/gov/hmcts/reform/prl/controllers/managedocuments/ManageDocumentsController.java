@@ -127,11 +127,12 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation) {
+        try {
+            log.info("/handleSubmitted::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
-        Map<String, Object> caseDataUpdated = manageDocumentsService.appendConfidentialDocumentNameForCourtAdmin(
-            callbackRequest,
-            authorisation
-        );
         //update all tabs
         tabService.updateAllTabsIncludingConfTab(objectMapper.convertValue(caseDataUpdated, CaseData.class));
 
