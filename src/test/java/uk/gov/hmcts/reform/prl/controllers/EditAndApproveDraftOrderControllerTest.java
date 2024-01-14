@@ -413,7 +413,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
-        when(draftAnOrderService.getDraftOrderInfo("test", caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
                  .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any()))
             .thenReturn(DraftOrder.builder().orderType(
@@ -471,7 +471,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData,Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
-        when(draftAnOrderService.getDraftOrderInfo("test", caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
                 .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any()))
                 .thenReturn(DraftOrder.builder().orderType(
@@ -530,7 +530,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData,Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
-        when(draftAnOrderService.getDraftOrderInfo("test", caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService
                 .getSelectedDraftOrderDetails(Mockito.any(), Mockito.any()))
                 .thenReturn(DraftOrder.builder().orderType(
@@ -582,7 +582,7 @@ public class EditAndApproveDraftOrderControllerTest {
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
-        when(draftAnOrderService.getDraftOrderInfo("test", caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderInfo("test", caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
