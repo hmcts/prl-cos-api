@@ -1208,8 +1208,6 @@ public class HearingDataServiceTest {
                                       .hmcStatus(COMPLETED)
                                       .hearingDaySchedule(List.of(HearingDaySchedule
                                                                       .hearingDayScheduleWith()
-                                                                      .hearingStartDateTime(LocalDateTime.now())
-                                                                      .hearingEndDateTime(LocalDateTime.now())
                                                                       .hearingVenueAddress("abc")
                                                                       .attendees(List.of(
                                                                           Attendee.attendeeWith().partyID(TEST_UUID)

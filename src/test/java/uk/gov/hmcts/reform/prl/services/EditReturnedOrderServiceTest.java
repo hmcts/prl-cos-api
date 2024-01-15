@@ -61,6 +61,9 @@ public class EditReturnedOrderServiceTest {
     @Mock
     DynamicMultiSelectListService dynamicMultiSelectListService;
 
+    @Mock
+    HearingDataService hearingDataService;
+
     private static final String testAuth = "auth";
 
     @Before
@@ -159,7 +162,7 @@ public class EditReturnedOrderServiceTest {
     }
 
     @Test
-    public void testInstructionToLegalRepresentativeWithJudgeInstructions() {
+    public void  testInstructionToLegalRepresentativeWithJudgeInstructions() {
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
             .thenReturn(DraftOrder.builder()
                             .orderType(CreateSelectOrderOptionsEnum.generalForm)
