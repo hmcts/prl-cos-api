@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -107,6 +108,9 @@ public class HearingDataServiceTest {
     CoreCaseDataApi coreCaseDataApi;
     @Mock
     AllocatedJudgeService allocatedJudgeService;
+
+    @Mock
+    DateTimeFormatter dateTimeFormatter;
 
     public static final String authToken = "Bearer TestAuthToken";
     @Mock
@@ -1186,10 +1190,9 @@ public class HearingDataServiceTest {
             .caseHearings(List.of(CaseHearing.caseHearingWith()
                                       .hearingID(123L)
                                       .hmcStatus(COMPLETED)
+                                      .nextHearingDate(LocalDateTime.now())
                                       .hearingDaySchedule(List.of(HearingDaySchedule
                                                                       .hearingDayScheduleWith()
-                                                                      .hearingStartDateTime(LocalDateTime.now())
-                                                                      .hearingEndDateTime(LocalDateTime.now())
                                                                       .hearingVenueAddress("abc")
                                                                       .attendees(List.of(
                                                                           Attendee.attendeeWith().partyID(TEST_UUID)
