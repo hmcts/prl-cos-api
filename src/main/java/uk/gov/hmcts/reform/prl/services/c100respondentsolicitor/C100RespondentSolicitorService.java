@@ -953,10 +953,10 @@ public class C100RespondentSolicitorService {
             }
         }
         if (null != solicitorRepresentedRespondent
-            && null != solicitorRepresentedRespondent.getValue()
-            && null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
-            getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
-
+            && null != solicitorRepresentedRespondent.getValue()) {
+            if (null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
+                getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
+            }
             dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
 
