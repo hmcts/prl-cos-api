@@ -618,8 +618,9 @@ public class ManageDocumentsService {
     private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
         final @NotNull @Valid QuarantineLegalDoc[] quarantineLegalDoc = new QuarantineLegalDoc[1];
         return confidentialDocuments.stream()
-            .filter(element -> element.getValue().getHasTheConfidentialDocumentBeenRenamed().equals(YesOrNo.No)
-                && element.getValue().getUploaderRole().equals(COURT_STAFF))
+            .filter(element -> element.getValue().getUploaderRole().equals(COURT_STAFF)
+                && element.getValue().getHasTheConfidentialDocumentBeenRenamed().equals(YesOrNo.No)
+            )
             .map(
                 element -> {
                     quarantineLegalDoc[0] = element.getValue();
