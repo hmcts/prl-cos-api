@@ -264,7 +264,8 @@ public class RelationshipsControllerTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(applicantList)
             .newChildDetails(listOfChildren)
-            .relations(Relations.builder().childAndApplicantRelations(listOfwrappedChildrenAndApplicantRelation).build())
+            .relations(Relations.builder().childAndApplicantRelations(listOfwrappedChildrenAndApplicantRelation)
+                           .buffChildAndApplicantRelations(listOfwrappedChildrenAndApplicantRelation).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
