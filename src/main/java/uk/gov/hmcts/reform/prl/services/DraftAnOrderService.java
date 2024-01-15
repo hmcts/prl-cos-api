@@ -1802,7 +1802,7 @@ public class DraftAnOrderService {
             caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
         }
         Object dynamicList = caseData.getDraftOrdersDynamicList();
-        if (Event.EDIT_RETURNED_ORDER.equals(callbackRequest.getEventId())) {
+        if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
             dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
         }
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
