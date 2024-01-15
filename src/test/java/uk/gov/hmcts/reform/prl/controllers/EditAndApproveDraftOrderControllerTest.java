@@ -645,7 +645,7 @@ public class EditAndApproveDraftOrderControllerTest {
         String errormessage = "Selected order is not reviewed by Judge.";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateCommonFields(authToken, s2sToken, callbackRequest);
@@ -708,7 +708,7 @@ public class EditAndApproveDraftOrderControllerTest {
         String errormessage = "Selected order is not reviewed by Judge.";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
                 .populateCommonFields(authToken, s2sToken, callbackRequest);
@@ -768,7 +768,7 @@ public class EditAndApproveDraftOrderControllerTest {
                              .build())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData)).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrderElement.getValue())).thenReturn(caseDataMap);
         when(draftAnOrderService.isOrderEdited(Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController

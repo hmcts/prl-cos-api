@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.editreturnedorder;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -19,6 +18,8 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
@@ -102,7 +103,10 @@ public class EditReturnedOrderController {
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 Map<String, Object> caseDataUpdated = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authorisation);
-                caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData));
+                DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                                            caseData.getManageOrders().getRejectedOrdersDynamicList());
+
+                caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             } else {

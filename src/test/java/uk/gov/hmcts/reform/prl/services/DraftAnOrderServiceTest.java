@@ -823,7 +823,8 @@ public class DraftAnOrderServiceTest {
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().retrievedHearingDates(DynamicList.builder().build()).build());
         Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
             authToken,
-            caseData
+            caseData,
+            draftOrder
         );
         assertNotNull(caseDataMap);
     }
@@ -1186,10 +1187,7 @@ public class DraftAnOrderServiceTest {
 
         when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
 
-        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
-            authorisation,
-            caseData
-        );
+        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrder);
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }
@@ -1238,10 +1236,7 @@ public class DraftAnOrderServiceTest {
 
         when(manageOrderService.populateHearingsDropdown(authorisation, caseData)).thenReturn(dynamicList);
 
-        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(
-            authorisation,
-            caseData
-        );
+        Map<String, Object> caseDataMap = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, draftOrder);
 
         assertEquals(CreateSelectOrderOptionsEnum.blankOrderOrDirections, caseDataMap.get("orderType"));
     }

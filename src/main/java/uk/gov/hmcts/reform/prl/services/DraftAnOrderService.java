@@ -337,7 +337,12 @@ public class DraftAnOrderService {
     private CaseData updateCaseDataForFinalOrderDocument(CaseData caseData, String authorisation, CreateSelectOrderOptionsEnum orderType,
                                                          String eventId) {
         Map<String, Object> caseDataMap = objectMapper.convertValue(caseData, Map.class);
-        caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData));
+        Object dynamicList = caseData.getDraftOrdersDynamicList();
+        if (Event.EDIT_RETURNED_ORDER.getId().equals(eventId)) {
+            dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
+        }
+        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
+        caseDataMap.putAll(populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
         StandardDirectionOrder standardDirectionOrder = null;
         if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType)) {
             Map<String, Object> standardDirectionOrderMap = populateStandardDirectionOrder(authorisation, caseData, false);
@@ -345,12 +350,6 @@ public class DraftAnOrderService {
         } else if (!(CreateSelectOrderOptionsEnum.noticeOfProceedings.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsParties.equals(orderType)
             || CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.equals(orderType))) {
-            DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
-            if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
-                selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                             caseData.getManageOrders()
-                                                                 .getRejectedOrdersDynamicList());
-            }
             caseDataMap.putAll(populateDraftOrderCustomFields(caseData, selectedOrder));
         }
         caseData = objectMapper.convertValue(caseDataMap, CaseData.class);
@@ -746,7 +745,7 @@ public class DraftAnOrderService {
         return standardDirectionOrder;
     }
 
-    public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData) {
+    public Map<String, Object> populateCommonDraftOrderFields(String authorization, CaseData caseData, DraftOrder draftOrder) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
         log.info("selected order: {}", selectedOrder);

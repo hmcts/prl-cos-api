@@ -243,7 +243,12 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             log.info("*** draft order dynamic list: {}", callbackRequest.getCaseDetails().getData().get("draftOrdersDynamicList"));
-            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
+            Object dynamicList = caseData.getDraftOrdersDynamicList();
+            if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
+                dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
+            }
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder);
             boolean isOrderEdited = false;
             isOrderEdited = draftAnOrderService.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited);
             if (isOrderEdited) {
