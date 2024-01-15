@@ -481,7 +481,7 @@ public class UpdatePartyDetailsService {
                 return  c8Documents;
             }
         } else {
-            return c8Documents;
+            return null;
         }
     }
 
