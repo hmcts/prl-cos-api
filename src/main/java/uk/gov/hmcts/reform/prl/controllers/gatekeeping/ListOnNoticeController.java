@@ -150,7 +150,7 @@ public class ListOnNoticeController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "List ON notice submission is success"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public void sendListOnNoticeNotification(
+    public AboutToStartOrSubmitCallbackResponse sendListOnNoticeNotification(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
@@ -162,6 +162,7 @@ public class ListOnNoticeController {
                 CaseData.class
             );
             listOnNoticeService.sendNotification(caseData, selectedAndAdditionalReasons);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
