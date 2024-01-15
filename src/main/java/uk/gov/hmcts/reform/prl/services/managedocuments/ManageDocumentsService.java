@@ -171,6 +171,7 @@ public class ManageDocumentsService {
         String userRole = CaseUtils.getUserRole(userDetails);
         List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
         for (Element<ManageDocuments> element : manageDocuments) {
+            CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
             ManageDocuments manageDocument = element.getValue();
             QuarantineLegalDoc quarantineLegalDoc = covertManageDocToQuarantineDoc(manageDocument, userDetails);
 
@@ -180,13 +181,13 @@ public class ManageDocumentsService {
                 moveDocumentsToRespectiveCategoriesNew(
                     quarantineLegalDoc,
                     userDetails,
-                    caseData,
+                    updatedCaseData,
                     caseDataUpdated,
                     userRole
                 );
             } else {
-                moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
-                setFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
+                setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
             }
         }
     }
