@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,6 +10,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 @TestPropertySource("classpath:application.yaml")
 @Service
+@Slf4j
 public class IdamTokenGenerator {
 
     @Value("${idam.solicitor.username}")
@@ -50,7 +52,17 @@ public class IdamTokenGenerator {
     @Value("${idam.judge.password}")
     private String judgePassword;
 
+    @Value("${idam.admin.username}")
+    private String courtAdminUsername;
+
+    @Value("${idam.admin.password}")
+    private String courtAdminPassword;
+
     public String generateIdamTokenForSolicitor() {
+        log.info("SOLLLLLLLL {}",solicitorUsername);
+        log.info("SOLLLLLLLL {}",solicitorUsername);
+        System.out.println("SOLL" + courtAdminUsername);
+        System.out.println("SOLLll" + solicitorPassword);
         return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
     }
 
@@ -59,6 +71,10 @@ public class IdamTokenGenerator {
     }
 
     public String generateIdamTokenForJudge() {
+        log.info("Judge1111 {}",courtAdminUsername);
+        log.info("Judge2222 {}",courtAdminPassword);
+        System.out.println("Judge1111" + courtAdminUsername);
+        System.out.println("Judge2222" + courtAdminPassword);
         return idamClient.getAccessToken(judgeUserName, judgePassword);
     }
 
@@ -80,6 +96,14 @@ public class IdamTokenGenerator {
 
     public String generateIdamTokenForCitizen() {
         return idamClient.getAccessToken(citizenUsername, citizenPassword);
+    }
+
+    public String generateIdamTokenForCourtAdmin() {
+        log.info("Adminnnnnnn1111 {}",courtAdminUsername);
+        log.info("Adminnnnnnn2222 {}",courtAdminPassword);
+        System.out.println("UUUUUUUUUU" + courtAdminUsername);
+        System.out.println("UUUUUUUUUU" + courtAdminPassword);
+        return idamClient.getAccessToken(courtAdminUsername, courtAdminPassword);
     }
 
 }

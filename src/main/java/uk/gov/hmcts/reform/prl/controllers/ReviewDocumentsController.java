@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -51,16 +53,22 @@ public class ReviewDocumentsController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
+        try {
+            log.info("/review documents/about-to-start::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<String> errors = new ArrayList<>();
-        List<DynamicListElement> dynamicListElements = reviewDocumentService.getDynamicListElements(caseData);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        List<DynamicListElement> dynamicListElements = reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated);
 
         if (dynamicListElements.isEmpty()) {
             errors = List.of("No documents to review");
         }
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
+
         caseDataUpdated.put("reviewDocsDynamicList", DynamicList.builder().listItems(dynamicListElements).build());
 
         //clear the previous decision
@@ -75,9 +83,14 @@ public class ReviewDocumentsController {
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
+        try {
+            log.info("/review docs/mid event::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        reviewDocumentService.getReviewedDocumentDetails(caseData, caseDataUpdated);
+        reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
@@ -92,13 +105,18 @@ public class ReviewDocumentsController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
+        log.info("MMMMMMM {}",authorisation);
+        ObjectMapper om = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+        log.info("/copy-manage-docs/about-to-submit::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*************************** BEFORE REVIEW ***************************");
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-        reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
+        reviewDocumentService.processReviewDocumentNew(caseDataUpdated, caseData, uuid);
         log.info("*************************** AFTER REVIEW ***************************");
 
         //clear fields
