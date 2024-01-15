@@ -191,8 +191,7 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.hearingOptionSelected", equalTo("dateToBeFixed"),
                   "data.isOrderApproved", equalTo(null),
                   "data.whoApprovedTheOrder", equalTo(null),
-                  "data.judgeLaManagerReviewRequired", equalTo("noCheck"),
-                  "data.amendOrderSelectCheckOptions", equalTo("noCheck"))
+                  "data.judgeLaManagerReviewRequired", equalTo("noCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -220,8 +219,7 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
                   "data.isOrderApproved", equalTo(null),
                   "data.whoApprovedTheOrder", equalTo(null),
-                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"),
-                  "data.amendOrderSelectCheckOptions", equalTo("judgeOrLegalAdvisorCheck"))
+                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -250,8 +248,7 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
                   "data.isOrderApproved", equalTo(null),
                   "data.whoApprovedTheOrder", equalTo(null),
-                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"),
-                  "data.amendOrderSelectCheckOptions", equalTo("judgeOrLegalAdvisorCheck"))
+                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -279,8 +276,7 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.hearingOptionSelected", equalTo("dateToBeFixed"),
                   "data.isOrderApproved", equalTo(null),
                   "data.whoApprovedTheOrder", equalTo(null),
-                  "data.judgeLaManagerReviewRequired", equalTo("managerCheck"),
-                  "data.amendOrderSelectCheckOptions", equalTo("managerCheck"))
+                  "data.judgeLaManagerReviewRequired", equalTo("managerCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -308,8 +304,7 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.hearingOptionSelected", equalTo("dateToBeFixed"),
                   "data.isOrderApproved", equalTo(null),
                   "data.whoApprovedTheOrder", equalTo(null),
-                  "data.judgeLaManagerReviewRequired", equalTo(null),
-                  "data.amendOrderSelectCheckOptions", equalTo(null))
+                  "data.judgeLaManagerReviewRequired", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
