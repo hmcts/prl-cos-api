@@ -477,10 +477,9 @@ public class ManageDocumentsService {
     public Document getDocumentFromQuarantineObject(QuarantineLegalDoc quarantineLegalDoc) {
 
         String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId());
-        return objectMapper.convertValue(
-            objectMapper.convertValue(quarantineLegalDoc, Map.class).get(attributeName),
-            Document.class
-        );
+        Map quarantineLegalDocMap = objectMapper.convertValue(quarantineLegalDoc, Map.class);
+
+        return objectMapper.convertValue(quarantineLegalDocMap.get(attributeName), Document.class);
     }
 
     public List<String> validateCourtUser(CallbackRequest callbackRequest,
