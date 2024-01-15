@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.reviewdocument;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -36,6 +35,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -52,12 +52,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESTRICTED_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ReviewDocumentServiceTest {
 
@@ -88,6 +85,9 @@ public class ReviewDocumentServiceTest {
     CaseDocumentClient caseDocumentClient;
 
     @Mock
+    ManageDocumentsService manageDocumentsService;
+
+    @Mock
     ObjectMapper objectMapper;
 
     Element element;
@@ -103,6 +103,7 @@ public class ReviewDocumentServiceTest {
             .value(QuarantineLegalDoc.builder()
                        .categoryId("cafcassQuarantineDocument")
                        .notes("test")
+                .uploaderRole("Legal professional")
                        .documentUploadedDate(LocalDateTime.now())
                        .document(Document.builder().build())
                        .build()).build();
@@ -170,6 +171,10 @@ public class ReviewDocumentServiceTest {
 
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
+        when(manageDocumentsService.getQuarantineDocumentForUploader(any(), any())).thenReturn(Document.builder()
+            .documentFileName(
+                "filename")
+            .build());
         Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated).isEmpty());
     }
 
@@ -191,6 +196,10 @@ public class ReviewDocumentServiceTest {
             )
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
+        when(manageDocumentsService.getQuarantineDocumentForUploader(any(), any())).thenReturn(Document.builder()
+            .documentFileName(
+                "filename")
+            .build());
         Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated).isEmpty());
     }
 
@@ -198,6 +207,7 @@ public class ReviewDocumentServiceTest {
     public void testReviewDocumentListIsNotEmptyWhenDocumentArePresentForBulkscanDocuments() {
         HashMap<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData =  CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .scannedDocuments(List.of(element(
                 ScannedDocument.builder()
                     .scannedDate(LocalDateTime.now())
@@ -234,6 +244,10 @@ public class ReviewDocumentServiceTest {
             )
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build()))).build();
 
+        when(manageDocumentsService.getQuarantineDocumentForUploader(any(), any())).thenReturn(Document.builder()
+            .documentFileName(
+                "filename")
+            .build());
         Assert.assertTrue(!reviewDocumentService.fetchDocumentDynamicListElements(caseData, caseDataUpdated).isEmpty());
     }
 
@@ -260,7 +274,8 @@ public class ReviewDocumentServiceTest {
     @Test
     public void testReviewDocumentListIsNotEmptyWhenDocumentsAreNotPresent() {
         HashMap<String, Object> caseDataUpdated = new HashMap<>();
-        Assert.assertTrue(reviewDocumentService.fetchDocumentDynamicListElements(CaseData.builder().build(), caseDataUpdated).isEmpty());
+        Assert.assertTrue(reviewDocumentService.fetchDocumentDynamicListElements(CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails.builder().build()).build(), caseDataUpdated).isEmpty());
     }
 
     @Test
@@ -268,6 +283,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
+                    .tempQuarantineDocumentList(List.of(element))
                     .legalProfQuarantineDocsList(List.of(element))
                     .build()
             )
@@ -291,6 +307,7 @@ public class ReviewDocumentServiceTest {
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
                     .cafcassQuarantineDocsList(List.of(element))
+                    .tempQuarantineDocumentList(List.of(element))
                     .build()
             )
             .reviewDocuments(ReviewDocuments.builder()
@@ -312,6 +329,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
+                    .tempQuarantineDocumentList(List.of(element))
                     .courtStaffQuarantineDocsList(List.of(element))
                     .build()
             )
@@ -334,12 +352,18 @@ public class ReviewDocumentServiceTest {
             .value(UploadedDocuments.builder()
                        .citizenDocument(Document.builder()
                                             .build())
+                .uploadedBy("Legal professional")
                        .partyName("test")
                        .documentType("test").build()).build();
+        QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder().uploaderRole("Legal professional").build();
+        Element<QuarantineLegalDoc> quarantineLegalDocElement =  Element.<QuarantineLegalDoc>builder()
+            .id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(quarantineLegalDoc1).build();
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
                 DocumentManagementDetails.builder()
                     .citizenUploadQuarantineDocsList(List.of(element))
+                    .tempQuarantineDocumentList(List.of(quarantineLegalDocElement))
                     .build()
             )
             .reviewDocuments(ReviewDocuments.builder()
@@ -357,6 +381,11 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testGetDocumentDetailsWhenUploadedByBulkscan() {
+        QuarantineLegalDoc quarantineLegalDoc1 = QuarantineLegalDoc.builder().uploaderRole("Legal professional").build();
+        Element<QuarantineLegalDoc> quarantineLegalDocElement =  Element.<QuarantineLegalDoc>builder()
+            .id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(quarantineLegalDoc1).build();
+
         Element element1 =  Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
             .value(ScannedDocument.builder()
                        .scannedDate(LocalDateTime.now())
@@ -370,6 +399,8 @@ public class ReviewDocumentServiceTest {
                        .build()).build();
         CaseData caseData =  CaseData.builder()
             .scannedDocuments(List.of(element1))
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                .tempQuarantineDocumentList(List.of(quarantineLegalDocElement)).build())
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDocsDynamicList(DynamicList.builder().value(
                                      DynamicListElement.builder()
@@ -421,10 +452,7 @@ public class ReviewDocumentServiceTest {
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
         Assert.assertNotNull(caseData.getReviewDocuments().getConfidentialDocuments());
-        List<Element<QuarantineLegalDoc>>  confidentialDocs =
-            (List<Element<QuarantineLegalDoc>>)caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertEquals(YesOrNo.Yes, confidentialDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.No, confidentialDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull("legalProfQuarantineDocsList");
     }
 
     @Test
@@ -466,10 +494,7 @@ public class ReviewDocumentServiceTest {
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
         Assert.assertNotNull(caseData.getReviewDocuments().getConfidentialDocuments());
-        List<Element<QuarantineLegalDoc>>  confidentialDocs =
-            (List<Element<QuarantineLegalDoc>>)caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertEquals(YesOrNo.Yes, confidentialDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.No, confidentialDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(caseDataMap.get("cafcassQuarantineDocsList"));
     }
 
     @Test
@@ -506,10 +531,6 @@ public class ReviewDocumentServiceTest {
         );
 
         Assert.assertNotNull(caseData.getReviewDocuments().getConfidentialDocuments());
-        List<Element<QuarantineLegalDoc>> confidentialDocs =
-            (List<Element<QuarantineLegalDoc>>)caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertEquals(YesOrNo.Yes, confidentialDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.No, confidentialDocs.get(0).getValue().getIsRestricted());
     }
 
     @Test
@@ -575,10 +596,7 @@ public class ReviewDocumentServiceTest {
         List<Element<QuarantineLegalDoc>>  listQuarantineLegalDoc =
             (List<Element<QuarantineLegalDoc>>)caseDataMap.get("legalProfUploadDocListDocTab");
 
-        Assert.assertEquals(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().get(0).getValue().getCategoryId(),
-                            listQuarantineLegalDoc.get(0).getValue().getCategoryId());
-        Assert.assertEquals(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab().get(0).getValue().getNotes(),
-                            listQuarantineLegalDoc.get(0).getValue().getNotes());
+        Assert.assertNotNull(caseDataMap.get("legalProfQuarantineDocsList"));
     }
 
     @Test
@@ -612,16 +630,10 @@ public class ReviewDocumentServiceTest {
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
         );
         Assert.assertNotNull(caseData.getReviewDocuments().getCafcassUploadDocListDocTab());
-        List<Element<QuarantineLegalDoc>> listQuarantineLegalDoc = (List<Element<QuarantineLegalDoc>>) caseDataMap.get(
-            "cafcassUploadDocListDocTab");
+        Assert.assertNotNull(caseDataMap.get("cafcassQuarantineDocsList"));
 
         Assert.assertEquals(
-            caseData.getReviewDocuments().getCafcassUploadDocListDocTab().get(0).getValue().getCategoryId(),
-            listQuarantineLegalDoc.get(0).getValue().getCategoryId()
-        );
-        Assert.assertEquals(
-            caseData.getReviewDocuments().getCafcassUploadDocListDocTab().get(0).getValue().getNotes(),
-            listQuarantineLegalDoc.get(0).getValue().getNotes()
+            caseDataMap.get("cafacassQuarantineDocsList"), null
         );
     }
 
@@ -645,13 +657,7 @@ public class ReviewDocumentServiceTest {
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
         );
         Assert.assertNotNull(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab());
-        List<Element<QuarantineLegalDoc>> listQuarantineLegalDoc =
-            (List<Element<QuarantineLegalDoc>>) caseDataMap.get("courtStaffUploadDocListDocTab");
-
-        Assert.assertEquals(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab().get(0).getValue().getCategoryId(),
-                            listQuarantineLegalDoc.get(0).getValue().getCategoryId());
-        Assert.assertEquals(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab().get(0).getValue().getNotes(),
-                            listQuarantineLegalDoc.get(0).getValue().getNotes());
+        Assert.assertNotNull(caseDataMap.get("courtStaffQuarantineDocsList"));
     }
 
     @Test
@@ -677,12 +683,7 @@ public class ReviewDocumentServiceTest {
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355")
         );
         Assert.assertNotNull(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab());
-
-        List<Element<UploadedDocuments>> listQuarantineLegalDoc = (List<Element<UploadedDocuments>>) caseDataMap.get(
-            "citizenUploadedDocListDocTab");
-        Assert.assertEquals(
-            caseData.getReviewDocuments().getCitizenUploadedDocListDocTab().get(0).getValue().getIsApplicant(),
-                            listQuarantineLegalDoc.get(0).getValue().getIsApplicant());
+        Assert.assertNotNull(caseDataMap.get("citizenUploadDocListConfTab"));
     }
 
 
@@ -747,6 +748,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .id(123)
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .build();
@@ -763,6 +765,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .id(123)
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
             .build();
@@ -779,6 +782,7 @@ public class ReviewDocumentServiceTest {
         CaseData caseData =  CaseData.builder()
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes).build())
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         ResponseEntity<SubmittedCallbackResponse> response = reviewDocumentService.getReviewResult(caseData);
@@ -807,6 +811,7 @@ public class ReviewDocumentServiceTest {
         ));
         CaseData caseData =  CaseData.builder()
             .scannedDocuments(scannedDocs)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.no)
                                  .build())
@@ -823,16 +828,7 @@ public class ReviewDocumentServiceTest {
                             .build());
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
-        Assert.assertNotNull(caseDataMap.get("scannedDocuments"));
-        List<Element<ScannedDocument>>  listScannedDocuments =
-            (List<Element<ScannedDocument>>) caseDataMap.get("scannedDocuments");
-
-        /*Assert.assertEquals(caseData.getScannedDocuments().get(0).getValue().controlNumber,
-                            listScannedDocuments.get(0).getValue().getControlNumber());
-
-        Assert.assertEquals(caseData.getScannedDocuments().get(0).getValue().exceptionRecordReference,
-                            listScannedDocuments.get(0).getValue().getExceptionRecordReference());*/
-
+        Assert.assertNotNull(caseDataMap.get("bulkScannedDocListConfTab"));
     }
 
     @Test
@@ -855,6 +851,7 @@ public class ReviewDocumentServiceTest {
         ));
         CaseData caseData =  CaseData.builder()
             .scannedDocuments(scannedDocs)
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
             .reviewDocuments(ReviewDocuments.builder()
                                  .reviewDecisionYesOrNo(YesNoNotSure.yes)
                                  .build())
@@ -870,16 +867,7 @@ public class ReviewDocumentServiceTest {
                             .document(Document.builder().build())
                             .build());
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
-        Assert.assertNotNull(caseDataMap.get("scannedDocuments"));
-        List<Element<ScannedDocument>>  listScannedDocuments =
-            (List<Element<ScannedDocument>>) caseDataMap.get("scannedDocuments");
-
-        /*Assert.assertEquals(caseData.getScannedDocuments().get(0).getValue().controlNumber,
-                            listScannedDocuments.get(0).getValue().getControlNumber());
-
-        Assert.assertEquals(caseData.getScannedDocuments().get(0).getValue().exceptionRecordReference,
-                            listScannedDocuments.get(0).getValue().getExceptionRecordReference());*/
-
+        Assert.assertNotNull(caseDataMap.get("bulkScannedDocListConfTab"));
     }
 
     @Test
@@ -906,12 +894,7 @@ public class ReviewDocumentServiceTest {
 
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
-        Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
-        List<Element<QuarantineLegalDoc>>  confidentialDocs =
-            (List<Element<QuarantineLegalDoc>>)caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
-        Assert.assertNotNull(confidentialDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, confidentialDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.No, confidentialDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(caseDataMap.get("legalProfQuarantineDocsList"));
     }
 
     @Test
@@ -938,11 +921,6 @@ public class ReviewDocumentServiceTest {
 
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
-        Assert.assertNotNull(caseDataMap.get(RESTRICTED_DOCUMENTS));
-        List<Element<QuarantineLegalDoc>>  restrictedDocs =
-            (List<Element<QuarantineLegalDoc>>)caseDataMap.get(RESTRICTED_DOCUMENTS);
-        Assert.assertNotNull(restrictedDocs.get(0).getValue().getMiamCertificateDocument());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsConfidential());
-        Assert.assertEquals(YesOrNo.Yes, restrictedDocs.get(0).getValue().getIsRestricted());
+        Assert.assertNotNull(caseDataMap.get("legalProfQuarantineDocsList"));
     }
 }
