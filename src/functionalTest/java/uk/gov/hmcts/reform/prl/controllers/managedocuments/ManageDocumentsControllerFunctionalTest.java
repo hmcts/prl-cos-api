@@ -5,6 +5,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -284,6 +285,25 @@ public class ManageDocumentsControllerFunctionalTest {
                   "data.cafcassUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc2.pdf"))
             .assertThat().statusCode(200);
 
+    }
+
+    @Test
+    @Ignore
+    public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
+
+        AboutToStartOrSubmitCallbackResponse response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/copy-manage-docs")
+            .then()
+            //.body("data.cafcassQuarantineDocsList[0].value.cafcassQuarantineDocument.document_filename", equalTo("Test doc1.pdf"))
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+        System.out.println("MMMMM " + response);
     }
 
 }

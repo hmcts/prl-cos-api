@@ -426,4 +426,151 @@ public class ReviewDocumentsControllerFunctionalTest {
             .assertThat().statusCode(200);
 
     }
+
+    //court admin
+
+    @Test
+    public void givenReviewDocuments_whenOnlyConfidentialNotRestrictedForCourtAdmin() throws Exception {
+
+        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+
+        String requestBodyRevised = requestBodyForCourtAdmin
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
+            .replace("\"isConfidential\": \"No\"",
+                     "\"isConfidential\": \"Yes\"");
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.confidentialDocuments[0].value.isConfidential", equalTo("Yes"),
+                  "data.confidentialDocuments[0].value.isRestricted", equalTo("No"),
+                  "data.confidentialDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.restrictedDocuments", equalTo(null))
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForCourtAdmin() throws Exception {
+
+        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+
+        String requestBodyRevised = requestBodyForCourtAdmin
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
+            .replace("\"isRestricted\": \"No\"",
+                     "\"isRestricted\": \"Yes\"");
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.restrictedDocuments[0].value.isConfidential", equalTo("No"),
+                  "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.confidentialDocuments", equalTo(null))
+            .assertThat().statusCode(200);
+
+    }
+
+    @Test
+    public void givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoCourtAdmin() throws Exception {
+
+        log.info("givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoCourtAdmin.......");
+        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+        String requestBodyRevised = requestBodyForCourtAdmin
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
+            .replace("\"reviewDecisionYesOrNo\": \"yes\"",
+                     "\"reviewDecisionYesOrNo\": \"no\"");
+
+        AboutToStartOrSubmitCallbackResponse resp = request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.legalProfUploadDocListDocTab[0].value.isConfidential", equalTo(null),
+                  "data.legalProfUploadDocListDocTab[0].value.isRestricted", equalTo(null),
+                  "data.courtStaffUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
+                  "data.restrictedDocuments", equalTo(null),
+                  "data.confidentialDocuments", equalTo(null))
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        log.info("RESULTTTTTT.......{}",resp);
+
+    }
+
+    @Test
+    public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecNoCourtAdmin() throws Exception {
+
+        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+        String requestBodyRevised = requestBodyForCourtAdmin
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
+            .replace("\"reviewDecisionYesOrNo\": \"yes\"",
+                     "\"reviewDecisionYesOrNo\": \"no\"")
+            .replace("\"isConfidential\": \"No\"",
+                     "\"isConfidential\": \"Yes\"")
+            .replace("\"isRestricted\": \"No\"",
+                     "\"isRestricted\": \"Yes\"");
+
+        AboutToStartOrSubmitCallbackResponse resp = request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.courtStaffUploadDocListDocTab[0].value.isConfidential", equalTo(null),
+                  "data.courtStaffUploadDocListDocTab[0].value.isRestricted", equalTo(null),
+                  "data.courtStaffUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
+                  "data.restrictedDocuments", equalTo(null),
+                  "data.confidentialDocuments", equalTo(null))
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        log.info("RESULTTTTTT.......{}",resp);
+
+    }
+
+    @Test
+    public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecYesCourtAdmin() throws Exception {
+
+        DocumentResponse docRes = uploadDocument(COURT_ADMIN);
+        String requestBodyRevised = requestBodyForCourtAdmin
+            .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
+                     docRes.getDocument().getDocumentUrl())
+            .replace("\"isConfidential\": \"No\"",
+                     "\"isConfidential\": \"Yes\"")
+            .replace("\"isRestricted\": \"No\"",
+                     "\"isRestricted\": \"Yes\"");
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/review-documents/about-to-submit")
+            .then()
+            .body("data.restrictedDocuments[0].value.isConfidential", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
+                  "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
+                  "data.confidentialDocuments", equalTo(null))
+            .assertThat().statusCode(200);
+
+    }
+
 }
