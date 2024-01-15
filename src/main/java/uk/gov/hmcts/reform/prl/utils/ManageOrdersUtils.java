@@ -69,7 +69,7 @@ public class ManageOrdersUtils {
         singleHearingValidations(ordersHearingDetails, errorList, selectedOrderType, isSolicitorOrdersHearings);
 
         //hearingType is mandatory for all except dateConfirmedInHearingsTab
-        hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList);
+        hearingTypeAndEstimatedTimingsValidations(ordersHearingDetails, errorList, isSolicitorOrdersHearings);
 
         return errorList;
     }
@@ -83,9 +83,6 @@ public class ManageOrdersUtils {
             if (isSolicitorOrdersHearings) {
                 if (isEmpty(ordersHearingDetails)) {
                     errorList.add("Please provide at least one hearing details");
-                } else if (ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes())
-                    || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingTypes().getValue())) {
-                    errorList.add("HearingType cannot be empty, please select a hearingType");
                 }
             } else if (isEmpty(ordersHearingDetails)
                 || ObjectUtils.isEmpty(ordersHearingDetails.get(0).getValue().getHearingDateConfirmOptionEnum())) {
@@ -99,15 +96,14 @@ public class ManageOrdersUtils {
     }
 
     private static void hearingTypeAndEstimatedTimingsValidations(List<Element<HearingData>> ordersHearingDetails,
-                                                                  List<String> errorList) {
+                                                                  List<String> errorList,
+                                                                  boolean isSolicitorOrdersHearings) {
         if (isNotEmpty(ordersHearingDetails)) {
             ordersHearingDetails.stream()
                 .map(Element::getValue)
                 .forEach(hearingData -> {
-                    //hearingType validation
-                    if (ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
-                        && HearingDateConfirmOptionEnum.dateReservedWithListAssit
-                        .equals(hearingData.getHearingDateConfirmOptionEnum())
+                    //validate for manage orders, draft & edit returned order
+                    if ((isSolicitorOrdersHearings || isDateReservedWithListAssist(hearingData))
                         && (ObjectUtils.isEmpty(hearingData.getHearingTypes())
                         || ObjectUtils.isEmpty(hearingData.getHearingTypes().getValue()))) {
                         errorList.add("You must select a hearing type");
@@ -116,6 +112,12 @@ public class ManageOrdersUtils {
                     validateHearingEstimatedTimings(errorList, hearingData);
                 });
         }
+    }
+
+    private static boolean isDateReservedWithListAssist(HearingData hearingData) {
+        return ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+            && HearingDateConfirmOptionEnum.dateReservedWithListAssit
+            .equals(hearingData.getHearingDateConfirmOptionEnum());
     }
 
     private static void validateHearingEstimatedTimings(List<String> errorList, HearingData hearingData) {
