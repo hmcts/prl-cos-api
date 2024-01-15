@@ -71,6 +71,10 @@ public class IdamTokenGenerator {
     }
 
     public String generateIdamTokenForJudge() {
+        log.info("Judge1111 {}",courtAdminUsername);
+        log.info("Judge2222 {}",courtAdminPassword);
+        System.out.println("Judge1111" + courtAdminUsername);
+        System.out.println("Judge2222" + courtAdminPassword);
         return idamClient.getAccessToken(judgeUserName, judgePassword);
     }
 

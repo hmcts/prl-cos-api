@@ -223,7 +223,7 @@ public class ReviewDocumentsControllerFunctionalTest {
                      "\"reviewDecisionYesOrNo\": \"no\"");
 
         AboutToStartOrSubmitCallbackResponse resp = request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForJudge())
             .body(requestBodyRevised)
             .when()
             .contentType("application/json")
@@ -306,7 +306,7 @@ public class ReviewDocumentsControllerFunctionalTest {
                      "\"isRestricted\": \"Yes\"");
 
         request1
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
             .body(requestBodyRevised)
             .when()
             .contentType("application/json")
