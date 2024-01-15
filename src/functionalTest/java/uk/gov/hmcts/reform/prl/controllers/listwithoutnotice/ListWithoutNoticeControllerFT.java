@@ -14,9 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import static uk.gov.hmcts.reform.prl.controllers.listwithoutnotice.ListWithoutNoticeController.CONFIRMATION_BODY_PREFIX;
 
 @Slf4j
 @SpringBootTest
@@ -36,6 +39,8 @@ public class ListWithoutNoticeControllerFT {
     private static final String LIST_WITHOUT_NOTICE_VALID_REQUEST_BODY = "requests/listwithoutnotice/ListWithoutNotice1.json";
 
     private final String listWithoutNoticeEndpoint = "/listWithoutNotice";
+
+    private final String listWithoutNoticeConfirmationEndpoint = "/listWithoutNotice-confirmation";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -61,5 +66,25 @@ public class ListWithoutNoticeControllerFT {
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res.getData());
         Assert.assertTrue(res.getData().containsKey("caseNotes"));
+    }
+
+    @Test
+    public void testListWithoutNoticeConfirmationEndpoint_200ResponseAndNoErrors() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(LIST_WITHOUT_NOTICE_VALID_REQUEST_BODY);
+
+        Response response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(listWithoutNoticeConfirmationEndpoint);
+        response.then().assertThat().statusCode(200);
+        SubmittedCallbackResponse res = objectMapper.readValue(
+            response.getBody().asString(),
+            SubmittedCallbackResponse.class
+        );
+        Assert.assertEquals(res.getConfirmationBody(),CONFIRMATION_BODY_PREFIX);
     }
 }
