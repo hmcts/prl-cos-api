@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -65,7 +66,7 @@ public class EditReturnedOrderControllerTest {
 
     @Before
     public void setUp() {
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(DraftOrder.builder().build());
     }
 
     @Test
@@ -117,13 +118,14 @@ public class EditReturnedOrderControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .draftOrderCollection(draftOrderCollection)
+            .manageOrders(ManageOrders.builder().rejectedOrdersDynamicList(DynamicList.builder().build()).build())
             .state(State.CASE_ISSUED)
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
         caseDataMap.put("orderType", "test");
-        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(),Mockito.any())).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(),Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -154,7 +156,7 @@ public class EditReturnedOrderControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any())).thenReturn(caseDataMap);
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderController
             .populateInstructionsToSolicitor(authToken,s2sToken,callbackRequest);
         Assert.assertTrue(response.getErrors().size() > 0);

@@ -206,16 +206,21 @@ public class EditAndApproveDraftOrderController {
             }
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+            Object dynamicList = caseData.getDraftOrdersDynamicList();
+            if (Event.EDIT_RETURNED_ORDER.equals(callbackRequest.getEventId())) {
+                dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
+            }
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                                        dynamicList);
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
-                caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, callbackRequest.getEventId()));
+                caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, callbackRequest.getEventId())).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, selectedOrder)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -238,7 +243,12 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             log.info("*** draft order dynamic list: {}", callbackRequest.getCaseDetails().getData().get("draftOrdersDynamicList"));
-            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
+            Object dynamicList = caseData.getDraftOrdersDynamicList();
+            if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
+                dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
+            }
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder);
             boolean isOrderEdited = false;
             isOrderEdited = draftAnOrderService.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited);
             if (isOrderEdited) {
@@ -348,7 +358,8 @@ public class EditAndApproveDraftOrderController {
                 log.info("*** Draft order dynamic list : {}", caseData.getDraftOrdersDynamicList());
                 log.info("*** Draft order collection : {}", caseData.getDraftOrderCollection());
                 try {
-                    DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                    DraftOrder draftOrder = draftAnOrderService
+                        .getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
                     manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(callbackRequest.getCaseDetails(), draftOrder);
                 } catch (Exception e) {
                     log.error("Failed to send email to solicitor : {}", e.getMessage());

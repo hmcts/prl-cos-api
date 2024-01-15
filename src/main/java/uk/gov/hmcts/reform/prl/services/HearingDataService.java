@@ -736,4 +736,35 @@ public class HearingDataService {
         dynamicList.setListItems(dynamicListElements);
         return dynamicList;
     }
+
+    public List<DynamicListElement> getListOfRequestedStatusHearings(String authorisation, String caseReference, List<String> status) {
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        try {
+            log.info("Fetching Completed and Awaiting hearings for the case {}", caseReference);
+            Hearings hearingsList = hearingService.getHearings(
+                authorisation,
+                caseReference
+            );
+
+            if (hearingsList != null) {
+                hearingsList.getCaseHearings().stream()
+                    .filter(caseHearing -> status.contains(caseHearing.getHmcStatus()))
+                    .forEach(
+                        hearingFromHmc ->
+                            dynamicListElements.add(
+                                DynamicListElement
+                                    .builder()
+                                    .code(caseReference + UNDERSCORE + hearingFromHmc.getHearingID())
+                                    .label(caseReference + UNDERSCORE + hearingFromHmc.getHearingTypeValue()
+                                               + HYPHEN_SEPARATOR
+                                               + hearingFromHmc.getNextHearingDate().format(
+                                        customDateTimeFormatter))
+                                    .build()));
+            }
+
+        } catch (Exception e) {
+            log.error("Exception occurred in Linked case method for hmc api calls ", e);
+        }
+        return dynamicListElements;
+    }
 }

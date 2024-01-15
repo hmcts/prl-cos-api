@@ -7,12 +7,15 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
@@ -21,7 +24,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -33,6 +35,10 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class EditReturnedOrderService {
 
+    private static final String BOLD_BEGIN = "<span class='heading-h2'>";
+    private static final String BOLD_END = "</span>";
+    private static final String INSTRUCTIONS_FROM_JUDGE = BOLD_BEGIN + "Instructions from the judge" + BOLD_END + " \n\n ";
+    private static final String EDIT_THE_ORDER_LABEL = "\n\n <span class='heading-h3'>Edit the order</span> \n\n";
     public static final String OPEN_THE_DRAFT_ORDER_TEXT = "Open the draft order and edit it to include the judge's instructions.";
     public static final String USE_CONTINUE_TO_EDIT_THE_ORDER = "Use continue to edit the order.";
     public static final String ORDER_UPLOADED_AS_DRAFT_FLAG = "orderUploadedAsDraftFlag";
@@ -41,7 +47,8 @@ public class EditReturnedOrderService {
     public static final String INSTRUCTIONS_TO_LEGAL_REPRESENTATIVE = "instructionsToLegalRepresentative";
     public static final String EDIT_ORDER_TEXT_INSTRUCTIONS = "editOrderTextInstructions";
     public static final String PREVIEW_UPLOADED_ORDER = "previewUploadedOrder";
-    private final ElementUtils elementUtils;
+    public static final String SELECTED_ORDER = "selectedOrder";
+    public static final String SELECT_THE_HEARING = "selectTheHearing";
     private final ObjectMapper objectMapper;
     private final UserService userService;
 
@@ -49,6 +56,10 @@ public class EditReturnedOrderService {
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
     private static final String IS_HEARING_PAGE_NEEDED = "isHearingPageNeeded";
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
+
+    private final DraftAnOrderService draftAnOrderService;
+    private final HearingDataService hearingDataService;
+    private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public AboutToStartOrSubmitCallbackResponse handleAboutToStartCallback(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
@@ -90,9 +101,9 @@ public class EditReturnedOrderService {
         );
     }
 
-    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData) {
+    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, String authorisation) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getManageOrders()
+        DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getManageOrders()
             .getRejectedOrdersDynamicList());
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
@@ -109,22 +120,25 @@ public class EditReturnedOrderService {
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         if (YesOrNo.Yes.equals(selectedOrder.getIsOrderUploadedByJudgeOrAdmin())) {
-            caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, OPEN_THE_DRAFT_ORDER_TEXT);
+            caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, INSTRUCTIONS_FROM_JUDGE
+                    + selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative()
+                    + EDIT_THE_ORDER_LABEL + "\n" + OPEN_THE_DRAFT_ORDER_TEXT);
             caseDataMap.put(PREVIEW_UPLOADED_ORDER, selectedOrder.getOrderDocument());
+            caseDataMap.put(SELECTED_ORDER, selectedOrder.getOrderTypeId());
+            caseDataMap.put(SELECT_THE_HEARING,hearingDataService
+                    .getListOfRequestedStatusHearings(authorisation, String.valueOf(caseData.getId()),
+                    List.of(PrlAppsConstants.AWAITING_HEARING_DETAILS, PrlAppsConstants.HMC_STATUS_COMPLETED)));
         } else {
-            caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, USE_CONTINUE_TO_EDIT_THE_ORDER);
+            caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, INSTRUCTIONS_FROM_JUDGE + "\n"
+                    + selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative()
+                    + EDIT_THE_ORDER_LABEL + "\n" + USE_CONTINUE_TO_EDIT_THE_ORDER);
         }
+        caseDataMap.put("isTheOrderAboutAllChildren", selectedOrder.getIsTheOrderAboutAllChildren());
+        caseDataMap.put("isTheOrderAboutChildren", selectedOrder.getIsTheOrderAboutChildren());
+        caseDataMap.put("childOption", (Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
+                || No.equals(selectedOrder.getIsTheOrderAboutAllChildren()))
+                ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
+                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         return caseDataMap;
-    }
-
-    public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
-        UUID orderId = elementUtils.getDynamicListSelectedValue(
-            dynamicList, objectMapper);
-        log.info("** Order id {}", orderId);
-        return draftOrderCollection.stream()
-            .filter(element -> element.getId().equals(orderId))
-            .map(Element::getValue)
-            .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
     }
 }
