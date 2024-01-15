@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
@@ -47,6 +48,7 @@ public class EditReturnedOrderService {
     public static final String EDIT_ORDER_TEXT_INSTRUCTIONS = "editOrderTextInstructions";
     public static final String PREVIEW_UPLOADED_ORDER = "previewUploadedOrder";
     public static final String SELECTED_ORDER = "selectedOrder";
+    public static final String SELECT_THE_HEARING = "selectTheHearing";
     private final ObjectMapper objectMapper;
     private final UserService userService;
 
@@ -56,7 +58,7 @@ public class EditReturnedOrderService {
     private static final String IS_ORDER_CREATED_BY_SOLICITOR = "isOrderCreatedBySolicitor";
 
     private final DraftAnOrderService draftAnOrderService;
-
+    private final HearingDataService hearingDataService;
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
 
     public AboutToStartOrSubmitCallbackResponse handleAboutToStartCallback(String authorisation, CallbackRequest callbackRequest) {
@@ -99,7 +101,7 @@ public class EditReturnedOrderService {
         );
     }
 
-    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData) {
+    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, String authorisation) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getManageOrders()
             .getRejectedOrdersDynamicList());
@@ -123,6 +125,9 @@ public class EditReturnedOrderService {
                     + EDIT_THE_ORDER_LABEL + "\n" + OPEN_THE_DRAFT_ORDER_TEXT);
             caseDataMap.put(PREVIEW_UPLOADED_ORDER, selectedOrder.getOrderDocument());
             caseDataMap.put(SELECTED_ORDER, selectedOrder.getOrderTypeId());
+            caseDataMap.put(SELECT_THE_HEARING,hearingDataService
+                    .getListOfRequestedStatusHearings(authorisation, String.valueOf(caseData.getId()),
+                    List.of(PrlAppsConstants.AWAITING_HEARING_DETAILS, PrlAppsConstants.HMC_STATUS_COMPLETED)));
         } else {
             caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, INSTRUCTIONS_FROM_JUDGE + "\n"
                     + selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative()

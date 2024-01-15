@@ -101,7 +101,7 @@ public class EditReturnedOrderController {
             );
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
-                Map<String, Object> caseDataUpdated = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
+                Map<String, Object> caseDataUpdated = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authorisation);
                 caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();

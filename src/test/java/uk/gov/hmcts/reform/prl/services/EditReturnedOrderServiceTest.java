@@ -141,7 +141,7 @@ public class EditReturnedOrderServiceTest {
                                                              .build()).build())
             .build();
 
-        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
+        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authToken);
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
     }
 
@@ -154,7 +154,7 @@ public class EditReturnedOrderServiceTest {
                                                                         .build())
                                                              .build()).build())
             .build();
-        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
+        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authToken);
         assertTrue(response.containsKey("editOrderTextInstructions"));
     }
 
@@ -173,7 +173,7 @@ public class EditReturnedOrderServiceTest {
                                                              .build()).build())
             .build();
 
-        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData);
+        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authToken);
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
     }
 }
