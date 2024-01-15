@@ -10,22 +10,39 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
+import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ListWithoutNoticeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.HearingDataService;
+import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -35,7 +52,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.controllers.listwithoutnotice.ListWithoutNoticeController.CONFIRMATION_HEADER;
+import static uk.gov.hmcts.reform.prl.controllers.listwithoutnotice.ListWithoutNoticeController.CONFIRMATION_BODY_PREFIX_CA;
+import static uk.gov.hmcts.reform.prl.controllers.listwithoutnotice.ListWithoutNoticeController.CONFIRMATION_BODY_PREFIX_DA;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -44,6 +62,12 @@ public class ListWithoutNoticeControllerTest {
 
     @InjectMocks
     ListWithoutNoticeController listWithoutNoticeController;
+
+    @Mock
+    HearingDataService hearingPrePopulateService;
+
+    @Mock
+    HearingService hearingService;
 
     @Mock
     AddCaseNoteService addCaseNoteService;
@@ -55,19 +79,178 @@ public class ListWithoutNoticeControllerTest {
     private ObjectMapper objectMapper;
 
     @Mock
+    AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    RefDataUserService refDataUserService;
+
+    @Mock
+    AllocatedJudgeService allocatedJudgeService;
+
+    @Mock
+    @Qualifier("caseSummaryTab")
+    CaseSummaryTabService caseSummaryTabService;
+
+    @Mock
     private AuthorisationService authorisationService;
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String serviceAuth = "serviceAuth";
 
+    @Test
+    public void shouldSeeHearingDetailswithoutListWithoutNotice() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .caseTypeOfApplication("FL401")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(hearingPrePopulateService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder()
+                                                                                                 .build()));
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
+            .prePopulateHearingPageData(authToken, serviceAuth,callbackRequest);
+        assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
+        when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
+    }
+
+    @Test
+    public void shouldSeeHearingDetailswithoutListWithNotice() throws Exception {
+
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+
+        Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
+        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("listWithoutNoticeHearingDetails",listWithoutNoticeHearingDetails);
+
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .listWithoutNoticeDetails(
+                ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails).build())
+            .caseTypeOfApplication("FL401")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(hearingPrePopulateService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder()
+                                                                                                 .build()));
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController.prePopulateHearingPageData(authToken,serviceAuth,callbackRequest);
+        assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
+    }
+
 
     @Test
     public void testListWithoutNoticeSubmission() throws Exception {
 
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+
+        Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
+        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
+
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingInstruction(
-                "test").build())
+            .listWithoutNoticeDetails(
+                ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails).build())
+            .caseTypeOfApplication("FL401")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
@@ -90,24 +273,143 @@ public class ListWithoutNoticeControllerTest {
             "field5", "value5"
         );
 
-        when(userService.getUserDetails(anyString())).thenReturn(
-            UserDetails.builder().email("abc@test.com").build());
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService)).thenReturn(
+            allocatedJudge);
 
-        when(addCaseNoteService.addCaseNoteDetails(any(CaseData.class), any(UserDetails.class))).thenReturn(List.of(element(
-            CaseNoteDetails.builder().build())));
+        when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
+
+        when(hearingPrePopulateService.prePopulateHearingType(authToken)).thenReturn(List.of(DynamicListElement.builder()
+                                                                                                 .build()));
+        when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
             .listWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
-        assertTrue(response.getData().containsKey("caseNotes"));
+        assertTrue(response.getData().containsKey("listWithoutNoticeHearingDetails"));
+    }
+
+    @Test
+    public void testExceptionForPrePopulateHearingPageData() throws Exception {
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+
+        Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
+        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("listWithoutNoticeHearingDetails",listWithoutNoticeHearingDetails);
+
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .listWithoutNoticeDetails(
+                ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails).build())
+            .caseTypeOfApplication("FL401")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(false);
+        assertExpectedException(() -> {
+            listWithoutNoticeController.prePopulateHearingPageData(authToken,serviceAuth,callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
     }
 
     @Test
     public void testExceptionForListWithoutNoticeSubmission() throws Exception {
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+
+        Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
+        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("listWithoutNoticeHearingDetails",listWithoutNoticeHearingDetails);
+
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingInstruction(
-                "test").build())
+            .listWithoutNoticeDetails(
+                ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails).build())
+            .caseTypeOfApplication("FL401")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -128,18 +430,64 @@ public class ListWithoutNoticeControllerTest {
 
     @Test
     public void testExceptionForCcdSubmitted() throws Exception {
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
+
+        Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
+        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("listWithoutNoticeHearingDetails",listWithoutNoticeHearingDetails);
+
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingInstruction(
-                "test").build())
+            .listWithoutNoticeDetails(
+                ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails).build())
+            .caseTypeOfApplication("FL401")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest callbackRequest = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
-                             .caseId("123")
-                             .caseData(caseData)
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
                              .build())
             .build();
 
@@ -151,26 +499,137 @@ public class ListWithoutNoticeControllerTest {
     }
 
     @Test
-    public void testForCcdSubmitted() throws Exception {
+    public void testListWithoutNoticeSubmission_CA() throws Exception {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingInstruction(
                 "test").build())
+            .caseTypeOfApplication("C100")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .build();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+
+        when(userService.getUserDetails(anyString())).thenReturn(
+            UserDetails.builder().email("abc@test.com").build());
+
+        when(addCaseNoteService.addCaseNoteDetails(any(CaseData.class), any(UserDetails.class))).thenReturn(List.of(element(
+            CaseNoteDetails.builder().build())));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
+            .listWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
+        assertTrue(response.getData().containsKey("caseNotes"));
+    }
+
+    @Test
+    public void testExceptionForListWithoutNoticeSubmission_CA() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingInstruction(
+                "test").build())
+            .caseTypeOfApplication("C100")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest callbackRequest = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
-                             .caseId("123")
-                             .caseData(caseData)
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(false);
+        assertExpectedException(() -> {
+            listWithoutNoticeController.listWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    @Test
+    public void testExceptionForCcdSubmitted_CA() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingInstruction(
+                "test").build())
+            .caseTypeOfApplication("C100")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(false);
+        assertExpectedException(() -> {
+            listWithoutNoticeController.ccdSubmitted(authToken,serviceAuth,callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
+    }
+
+    @Test
+    public void testForCcdSubmitted_CA() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingInstruction(
+                "test").build())
+            .caseTypeOfApplication("C100")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
                              .build())
             .build();
 
         Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(true);
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse =
             listWithoutNoticeController.ccdSubmitted(authToken,serviceAuth,callbackRequest);
-        assertEquals(CONFIRMATION_HEADER, submittedCallbackResponse.getBody().getConfirmationHeader());
+        assertEquals(CONFIRMATION_BODY_PREFIX_CA, submittedCallbackResponse.getBody().getConfirmationBody());
+    }
+
+    @Test
+    public void testForCcdSubmitted_DA() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingInstruction(
+                "test").build())
+            .caseTypeOfApplication("FL401")
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(true);
+        ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse =
+            listWithoutNoticeController.ccdSubmitted(authToken,serviceAuth,callbackRequest);
+        assertEquals(CONFIRMATION_BODY_PREFIX_DA, submittedCallbackResponse.getBody().getConfirmationBody());
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
