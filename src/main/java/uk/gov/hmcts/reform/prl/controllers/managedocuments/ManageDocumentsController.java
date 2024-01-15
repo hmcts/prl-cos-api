@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
 import java.util.List;
 import java.util.Map;
@@ -45,8 +43,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @SecurityRequirement(name = "Bearer Authentication")
 public class ManageDocumentsController extends AbstractCallbackController {
     private final ManageDocumentsService manageDocumentsService;
-    @Qualifier("allTabsService")
-    private final AllTabServiceImpl tabService;
+
     private final UserService userService;
 
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
@@ -55,11 +52,9 @@ public class ManageDocumentsController extends AbstractCallbackController {
     @Autowired
     protected ManageDocumentsController(ObjectMapper objectMapper, EventService eventPublisher,
                                         ManageDocumentsService manageDocumentsService,
-                                        AllTabServiceImpl tabService,
                                         UserService userService) {
         super(objectMapper, eventPublisher);
         this.manageDocumentsService = manageDocumentsService;
-        this.tabService = tabService;
         this.userService = userService;
     }
 
@@ -138,7 +133,7 @@ public class ManageDocumentsController extends AbstractCallbackController {
             authorisation
         );
         //update all tabs
-        tabService.updateAllTabsIncludingConfTab(objectMapper.convertValue(caseDataUpdated, CaseData.class));
+        manageDocumentsService.updateCaseData(callbackRequest, caseDataUpdated);
 
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIRMATION_HEADER)
