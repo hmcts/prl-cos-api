@@ -104,7 +104,7 @@ public class ReviewDocumentsControllerFunctionalTest {
             .replace("\"isRestricted\": \"No\"",
                      "\"isRestricted\": \"Yes\"");
 
-        request1
+        AboutToStartOrSubmitCallbackResponse resp = request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBodyRevised)
             .when()
@@ -115,8 +115,8 @@ public class ReviewDocumentsControllerFunctionalTest {
                   "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
                   "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
                   "data.confidentialDocuments", equalTo(null))
-            .assertThat().statusCode(200);
-
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
 
@@ -222,7 +222,7 @@ public class ReviewDocumentsControllerFunctionalTest {
             .replace("\"reviewDecisionYesOrNo\": \"yes\"",
                      "\"reviewDecisionYesOrNo\": \"no\"");
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBodyRevised)
             .when()
@@ -234,9 +234,7 @@ public class ReviewDocumentsControllerFunctionalTest {
                   "data.legalProfUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test.pdf"),
                   "data.restrictedDocuments", equalTo(null),
                   "data.confidentialDocuments", equalTo(null))
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .assertThat().statusCode(200);
 
 
     }
@@ -360,7 +358,7 @@ public class ReviewDocumentsControllerFunctionalTest {
             .replace("\"reviewDecisionYesOrNo\": \"yes\"",
                      "\"reviewDecisionYesOrNo\": \"no\"");
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
             .body(requestBodyRevised)
             .when()
@@ -372,9 +370,7 @@ public class ReviewDocumentsControllerFunctionalTest {
                   "data.cafcassUploadDocListDocTab[0].value.cafcassQuarantineDocument.document_filename", equalTo(null),
                   "data.restrictedDocuments", equalTo(null),
                   "data.confidentialDocuments", equalTo(null))
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .assertThat().statusCode(200);
 
     }
 
@@ -389,7 +385,7 @@ public class ReviewDocumentsControllerFunctionalTest {
             .replace("\"isRestricted\": \"No\"",
                      "\"isRestricted\": \"Yes\"");
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
             .body(requestBodyRevised)
             .when()
@@ -400,9 +396,7 @@ public class ReviewDocumentsControllerFunctionalTest {
                   "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
                   "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
                   "data.confidentialDocuments", equalTo(null))
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .assertThat().statusCode(200);
 
 
     }
@@ -412,7 +406,7 @@ public class ReviewDocumentsControllerFunctionalTest {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(CAFCASS);
 
-        String requestBodyRevised = requestBodyForSolitior
+        String requestBodyRevised = requestBodyForCafcass
             .replace("http://dm-store-aat.service.core-compute-aat.internal/documents/docId",
                      docRes.getDocument().getDocumentUrl())
             .replace("\"isConfidential\": \"No\"",

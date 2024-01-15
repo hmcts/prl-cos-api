@@ -83,7 +83,7 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
-        request
+        AboutToStartOrSubmitCallbackResponse response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .body(requestBody)
             .when()
@@ -124,7 +124,9 @@ public class ManageDocumentsControllerFunctionalTest {
                   "data.manageDocuments[0].value.documentCategories.list_items[25].code", equalTo(SPIP_REFERRAL_REQUESTS),
                   "data.manageDocuments[0].value.documentCategories.list_items[26].code", equalTo(HOME_OFFICE_DWP_RESPONSES)
             )
-            .assertThat().statusCode(200);
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
 
@@ -217,16 +219,15 @@ public class ManageDocumentsControllerFunctionalTest {
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForSolicitor() throws Exception {
         String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
 
-        AboutToStartOrSubmitCallbackResponse resp = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .body(requestBody)
             .when()
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .body("data.legalProfQuarantineDocsList[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc1.pdf"))
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
+            .body("data.legalProfQuarantineDocsList[0].value.document.document_filename", equalTo("Test doc1.pdf"))
+            .assertThat().statusCode(200);
 
     }
 
@@ -263,7 +264,7 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            .body("data.cafcassQuarantineDocsList[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc1.pdf"))
+            .body("data.cafcassQuarantineDocsList[0].value.cafcassQuarantineDocument.document_filename", equalTo("Test doc1.pdf"))
             .assertThat().statusCode(200);
     }
 
