@@ -526,7 +526,7 @@ public class ListWithoutNoticeControllerTest {
             CaseNoteDetails.builder().build())));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = listWithoutNoticeController
-            .listWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
+            .c100ListWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
         assertTrue(response.getData().containsKey("caseNotes"));
     }
 
@@ -551,7 +551,7 @@ public class ListWithoutNoticeControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(false);
         assertExpectedException(() -> {
-            listWithoutNoticeController.listWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
+            listWithoutNoticeController.c100ListWithoutNoticeSubmission(authToken,serviceAuth,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
 
     }
@@ -577,7 +577,7 @@ public class ListWithoutNoticeControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(false);
         assertExpectedException(() -> {
-            listWithoutNoticeController.ccdSubmitted(authToken,serviceAuth,callbackRequest);
+            listWithoutNoticeController.c100CcdSubmitted(authToken,serviceAuth,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
 
     }
@@ -603,7 +603,7 @@ public class ListWithoutNoticeControllerTest {
 
         Mockito.when(authorisationService.isAuthorized(authToken, serviceAuth)).thenReturn(true);
         ResponseEntity<SubmittedCallbackResponse> submittedCallbackResponse =
-            listWithoutNoticeController.ccdSubmitted(authToken,serviceAuth,callbackRequest);
+            listWithoutNoticeController.c100CcdSubmitted(authToken,serviceAuth,callbackRequest);
         assertEquals(CONFIRMATION_BODY_PREFIX_CA, submittedCallbackResponse.getBody().getConfirmationBody());
     }
 

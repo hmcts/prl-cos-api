@@ -55,6 +55,10 @@ public class ListWithoutNoticeControllerFT {
 
     private final String listWithoutNoticeConfirmationEndpoint = "/listWithoutNotice-confirmation";
 
+    private final String c100ListWithoutNoticeEndpoint = "/ca-listWithoutNotice";
+
+    private final String c100ListWithoutNoticeConfirmationEndpoint = "/ca-listWithoutNotice-confirmation";
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -191,7 +195,7 @@ public class ListWithoutNoticeControllerFT {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post(listWithoutNoticeEndpoint);
+            .post(c100ListWithoutNoticeEndpoint);
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res.getData());
@@ -209,7 +213,7 @@ public class ListWithoutNoticeControllerFT {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post(listWithoutNoticeConfirmationEndpoint);
+            .post(c100ListWithoutNoticeConfirmationEndpoint);
         response.then().assertThat().statusCode(200);
         SubmittedCallbackResponse res = objectMapper.readValue(
             response.getBody().asString(),
