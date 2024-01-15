@@ -653,6 +653,7 @@ public class ManageDocumentsService {
                     updatedQuarantineLegalDocumentObject = objectMapper.convertValue(tempQuarantineObjectMap, QuarantineLegalDoc.class);
 
                     log.info("renameConfidentialDocumentForCourtAdmin -- {}", quarantineLegalDoc[0]);
+                    log.info("updatedQuarantineLegalDocumentObject -- {}", updatedQuarantineLegalDocumentObject);
                     return element(element.getId(), updatedQuarantineLegalDocumentObject);
                 }
         ).collect(Collectors.toList());

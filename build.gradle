@@ -556,6 +556,7 @@ pitest {
 }
 
 jacocoTestReport {
+  executionData(test)
 
   reports {
     xml.enabled = true
