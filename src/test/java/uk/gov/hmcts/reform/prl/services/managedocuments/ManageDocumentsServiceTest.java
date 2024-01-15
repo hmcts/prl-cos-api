@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services.managedocuments;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -59,7 +58,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
-@Ignore
 public class ManageDocumentsServiceTest {
 
     @InjectMocks
@@ -440,6 +438,9 @@ public class ManageDocumentsServiceTest {
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().categoryId("test").build())
             .build();
 
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", manageDocuments.getDocument());
+
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
@@ -462,6 +463,7 @@ public class ManageDocumentsServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
@@ -541,11 +543,13 @@ public class ManageDocumentsServiceTest {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
-            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").build()).build())
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
             .isRestricted(YesOrNo.Yes)
             .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", manageDocuments.getDocument());
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocuments);
@@ -571,6 +575,7 @@ public class ManageDocumentsServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);
@@ -593,11 +598,13 @@ public class ManageDocumentsServiceTest {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.RESPONDENT)
-            .documentCategories(dynamicList)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
             .isRestricted(YesOrNo.No)
             .isConfidential(YesOrNo.No)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", manageDocuments.getDocument());
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocuments);
@@ -621,6 +628,7 @@ public class ManageDocumentsServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
@@ -632,8 +640,8 @@ public class ManageDocumentsServiceTest {
         legalProfUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
 
         assertNull(caseDataMapUpdated.get("manageDocuments"));
-        assertEquals(1,legalProfQuarantineDocsList.size());
-        assertEquals(0,legalProfUploadDocListDocTab.size());
+        assertEquals(0,legalProfQuarantineDocsList.size());
+        assertEquals(1,legalProfUploadDocListDocTab.size());
 
     }
 
@@ -646,6 +654,8 @@ public class ManageDocumentsServiceTest {
             .documentRestrictCheckbox(new ArrayList<>())
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
+        HashMap hashMap = new HashMap();
+        hashMap.put("internalCorrespondenceDocument", manageDocuments.getDocument());
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocuments);
@@ -668,6 +678,7 @@ public class ManageDocumentsServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtStaffRole);

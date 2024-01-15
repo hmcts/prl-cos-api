@@ -103,6 +103,9 @@ public class ReviewDocumentServiceTest {
             .value(QuarantineLegalDoc.builder()
                        .categoryId("cafcassQuarantineDocument")
                        .notes("test")
+                .isConfidential(YesOrNo.Yes)
+                .isRestricted(YesOrNo.No)
+                .restrictedDetails("test")
                 .uploaderRole("Legal professional")
                        .documentUploadedDate(LocalDateTime.now())
                        .document(Document.builder().build())
@@ -302,6 +305,15 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testGetDocumentDetailsWhenUploadedByCafcassProfessional() {
+
+        element = Element.builder().id(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"))
+            .value(QuarantineLegalDoc.builder()
+                .categoryId("cafcassQuarantineDocument")
+                .notes("test")
+                .uploaderRole("Legal professional")
+                .documentUploadedDate(LocalDateTime.now())
+                .document(Document.builder().build())
+                .build()).build();
 
         CaseData caseData = CaseData.builder()
             .documentManagementDetails(
@@ -866,6 +878,7 @@ public class ReviewDocumentServiceTest {
                                 LocalDateTime.now())
                             .document(Document.builder().build())
                             .build());
+        when(manageDocumentsService.addQuarantineDocumentFields(any(),any())).thenReturn(QuarantineLegalDoc.builder().build());
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
         Assert.assertNotNull(caseDataMap.get("bulkScannedDocListConfTab"));
     }
