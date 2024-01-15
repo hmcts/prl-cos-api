@@ -1911,6 +1911,7 @@ public class DraftAnOrderService {
     }
 
     public AboutToStartOrSubmitCallbackResponse handleSelectedOrder(CallbackRequest callbackRequest, String authorisation) {
+        log.info("CALLEDDDDDDD");
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
