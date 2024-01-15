@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
@@ -117,6 +118,7 @@ public class EditReturnedOrderControllerTest {
             .id(123L)
             .caseTypeOfApplication(C100_CASE_TYPE)
             .draftOrderCollection(draftOrderCollection)
+            .manageOrders(ManageOrders.builder().rejectedOrdersDynamicList(DynamicList.builder().build()).build())
             .state(State.CASE_ISSUED)
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
