@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
@@ -101,6 +102,8 @@ public class RelationshipsController {
                          .applicantId(eachApplicant.getId().toString())
                          .childAndApplicantRelation(Objects.nonNull(existingRelation) ? existingRelation.getChildAndApplicantRelation() : null)
                          .childLivesWith(Objects.nonNull(existingRelation) ? existingRelation.getChildLivesWith() : null)
+                         .childAndApplicantRelationOtherDetails(Objects.nonNull(existingRelation)
+                                                                    ? existingRelation.getChildAndApplicantRelationOtherDetails() : null)
                          .applicantFullName(String.format(PrlAppsConstants.FORMAT,
                                                          eachApplicant.getValue().getFirstName(),
                                                          eachApplicant.getValue().getLastName()
@@ -125,9 +128,20 @@ public class RelationshipsController {
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        List<Element<ChildrenAndApplicantRelation>> buffChildAndApplicantRelations = caseData.getRelations().getChildAndApplicantRelations();
+        List<Element<ChildrenAndApplicantRelation>> updatedChildAndApplicantRelations = new ArrayList<>();
+        buffChildAndApplicantRelations.forEach(relation -> {
+            if (!StringUtils.equals(relation.getValue().getChildAndApplicantRelation().getId(), RelationshipsEnum.other.getId())) {
+                updatedChildAndApplicantRelations.add(Element.<ChildrenAndApplicantRelation>builder()
+                                                           .value(relation.getValue().toBuilder().childAndApplicantRelation(null).build())
+                                                           .id(relation.getId()).build());
+            } else {
+                updatedChildAndApplicantRelations.add(relation);
+            }
+        });
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndApplicantRelations", null);
-        caseDataUpdated.put("childAndApplicantRelations", caseData.getRelations().getBuffChildAndApplicantRelations());
+        caseDataUpdated.put("childAndApplicantRelations", updatedChildAndApplicantRelations);
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 
