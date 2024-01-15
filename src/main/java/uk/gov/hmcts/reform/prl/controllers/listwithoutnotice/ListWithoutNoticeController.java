@@ -9,7 +9,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import javassist.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,23 +61,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         this.addCaseNoteService = addCaseNoteService;
         this.userService = userService;
         this.authorisationService = authorisationService;
-    }
-
-
-    @PostMapping(path = "/pre-populate-hearingPage-Data", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate Hearing page details")
-    public AboutToStartOrSubmitCallbackResponse prePopulateHearingPageData(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
-            log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
     }
 
     @PostMapping(path = "/listWithoutNotice", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)

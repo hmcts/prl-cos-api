@@ -117,7 +117,8 @@
             "allPartiesAttendHearingSameWayYesOrNo": "No"
           }
         }
-      ]
+      ],
+      "listWithoutNoticeHearingInstruction": "test instruction"
     },
     "security_classification": "PUBLIC",
     "callback_response_status": "string"
