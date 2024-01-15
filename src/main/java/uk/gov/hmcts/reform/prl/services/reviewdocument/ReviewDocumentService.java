@@ -123,7 +123,10 @@ public class ReviewDocumentService {
         if (isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(manageDocumentsService.getDocumentFromQuarantineObject(element.getValue())
+                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
+                                                       element.getValue().getUploaderRole(),
+                                                       element.getValue()
+                                                   )
                                                           .getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(
                                                    DATE_TIME_PATTERN,
@@ -137,7 +140,10 @@ public class ReviewDocumentService {
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(manageDocumentsService.getDocumentFromQuarantineObject(element.getValue())
+                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
+                                                       element.getValue().getUploaderRole(),
+                                                       element.getValue()
+                                                   )
                                                           .getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(
                                                    DATE_TIME_PATTERN,
@@ -151,7 +157,10 @@ public class ReviewDocumentService {
         if (isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())) {
             dynamicListElements.addAll(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList().stream()
                                            .map(element -> DynamicListElement.builder().code(element.getId().toString())
-                                               .label(manageDocumentsService.getDocumentFromQuarantineObject(element.getValue())
+                                               .label(manageDocumentsService.getQuarantineDocumentForUploader(
+                                                       element.getValue().getUploaderRole(),
+                                                       element.getValue()
+                                                   )
                                                           .getDocumentFileName()
                                                           + HYPHEN_SEPARATOR + formatDateTime(
                                                    DATE_TIME_PATTERN,
@@ -245,7 +254,10 @@ public class ReviewDocumentService {
 
         switch (submittedBy) {
             case LEGAL_PROFESSIONAL, CAFCASS, COURT_STAFF:
-                Document documentTobeReviewed = manageDocumentsService.getDocumentFromQuarantineObject(quarantineLegalDoc);
+                Document documentTobeReviewed = manageDocumentsService.getQuarantineDocumentForUploader(
+                    quarantineLegalDoc.getUploaderRole(),
+                    quarantineLegalDoc
+                );
                 caseDataUpdated.put(REVIEW_DOC, documentTobeReviewed);
                 log.info(REVIEW_DOC + " {}", documentTobeReviewed);
                 break;

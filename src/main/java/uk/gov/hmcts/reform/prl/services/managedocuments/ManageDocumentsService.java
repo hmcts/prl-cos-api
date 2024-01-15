@@ -450,8 +450,8 @@ public class ManageDocumentsService {
         return newUploadedDocument;
     }
 
-    private Document getQuarantineDocumentForUploader(String uploadedBy,
-                                                      QuarantineLegalDoc quarantineLegalDoc) {
+    public Document getQuarantineDocumentForUploader(String uploadedBy,
+                                                     QuarantineLegalDoc quarantineLegalDoc) {
         return switch (uploadedBy) {
             case LEGAL_PROFESSIONAL -> quarantineLegalDoc.getDocument();
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
@@ -472,14 +472,6 @@ public class ManageDocumentsService {
             case BULK_SCAN -> quarantineLegalDoc.toBuilder().url(manageDocument.getDocument()).build();
             default -> null;
         };
-    }
-
-    public Document getDocumentFromQuarantineObject(QuarantineLegalDoc quarantineLegalDoc) {
-
-        String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId());
-        Map quarantineLegalDocMap = objectMapper.convertValue(quarantineLegalDoc, Map.class);
-
-        return objectMapper.convertValue(quarantineLegalDocMap.get(attributeName), Document.class);
     }
 
     public List<String> validateCourtUser(CallbackRequest callbackRequest,
