@@ -162,6 +162,11 @@ public class ListOnNoticeController {
                 CaseData.class
             );
             listOnNoticeService.sendNotification(caseData, selectedAndAdditionalReasons);
+            log.info("CASE_NOTES before ==>" + caseDataUpdated.get(CASE_NOTES));
+            caseDataUpdated.put(
+                CASE_NOTES, null
+            );
+            log.info("CASE_NOTES after ==>" + caseDataUpdated.get(CASE_NOTES));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
