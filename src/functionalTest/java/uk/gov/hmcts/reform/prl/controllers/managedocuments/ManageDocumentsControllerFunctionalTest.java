@@ -5,7 +5,6 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +63,7 @@ public class ManageDocumentsControllerFunctionalTest {
 
     private static final String MANAGE_DOCUMENT_REQUEST = "requests/manage-documents-request.json";
 
-    private static final String APPLICANT_APPLICATION_NAME = "Applicant Application";
+    private static final String APPLICANT_APPLICATION_NAME = "Applicant application";
 
 
     private static final String MANAGE_DOCUMENT_COURT_REQUEST =
@@ -76,6 +75,8 @@ public class ManageDocumentsControllerFunctionalTest {
     private static final String MANAGE_DOCUMENT_REQUEST_NOT_RESTRICTED = "requests/manage-documents-not-restricted.json";
 
     private static final String MANAGE_DOCUMENT_REQUEST_NEITHER_CONF_NOR_RESTRICTED = "requests/manage-documents-neitherConfNorRestricted.json";
+
+    private static final String MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN = "requests/manage-documents-restricted-admin.json";
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -288,9 +289,8 @@ public class ManageDocumentsControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenMangeDocs_whenCopyDocs_thenRespWithCopiedDocuments_whenRestricedForCourtAdmin() throws Exception {
-        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED);
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
 
         AboutToStartOrSubmitCallbackResponse response = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
@@ -299,11 +299,38 @@ public class ManageDocumentsControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-documents/copy-manage-docs")
             .then()
-            //.body("data.cafcassQuarantineDocsList[0].value.cafcassQuarantineDocument.document_filename", equalTo("Test doc1.pdf"))
+            .body("data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc4.pdf"))
             .assertThat().statusCode(200)
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
         System.out.println("MMMMM " + response);
+    }
+
+    @Test
+    public void givenMangeDocs_whenCopyDocsNeitherConfNorRestricted_thenAppropriateCategoryForCourtAdmin() throws Exception {
+        String requestBody = ResourceLoader.loadJson(MANAGE_DOCUMENT_REQUEST_RESTRICTED_ADMIN);
+
+        String requestBodyRevised = requestBody
+            .replace("\"isConfidential\": \"Yes\"",
+                     "\"isConfidential\": \"No\"")
+            .replace("\"isRestricted\": \"Yes\"",
+                     "\"isRestricted\": \"No\"");
+
+        AboutToStartOrSubmitCallbackResponse response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/manage-documents/copy-manage-docs")
+            .then()
+            .body("data.courtStaffUploadDocListDocTab[0].value.categoryId", equalTo(APPLICANT_APPLICATION),
+                  "data.courtStaffUploadDocListDocTab[0].value.categoryName", equalTo(APPLICANT_APPLICATION_NAME),
+                  "data.courtStaffUploadDocListDocTab[0].value.applicantApplicationDocument.document_filename", equalTo("Test doc4.pdf"))
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+        System.out.println("MMMMM " + response);
+
     }
 
 }

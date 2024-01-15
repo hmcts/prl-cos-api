@@ -10,60 +10,56 @@
             "documentCategories": {
               "value": {
                 "code": "applicantApplication",
-                "label": "Applicant Application"
+                "label": "Applicant application"
               },
               "list_items": [
                 {
                   "code": "applicantApplication",
-                  "label": "Applicant Application"
+                  "label": "Applicant application"
                 },
                 {
                   "code": "applicantC1AApplication",
-                  "label": "Applicant C1A Application"
+                  "label": "Applicant C1A application"
                 },
                 {
                   "code": "applicantC1AResponse",
-                  "label": "Applicant C1A Response"
-                },
-                {
-                  "code": "applicationsWithinProceedings",
-                  "label": "Applications within proceedings"
+                  "label": "Applicant C1A response"
                 },
                 {
                   "code": "MIAMCertificate",
-                  "label": "MIAM Certificate"
+                  "label": "MIAM certificate"
                 },
                 {
                   "code": "previousOrdersSubmittedWithApplication",
-                  "label": "Prev orders submitted with application"
+                  "label": "Orders from other proceedings"
                 },
                 {
                   "code": "respondentApplication",
-                  "label": "Respondent Application"
+                  "label": "Respondent application"
                 },
                 {
                   "code": "respondentC1AApplication",
-                  "label": "Respondent C1A Application"
+                  "label": "Respondent C1A application"
                 },
                 {
                   "code": "respondentC1AResponse",
-                  "label": "Respondent C1A Response"
+                  "label": "Respondent C1A response"
                 },
                 {
-                  "code": "applicationsFromOtherProceedings",
-                  "label": "Applications from other proceedings"
+                  "code": "ordersFromOtherProceedings",
+                  "label": "Orders from other proceedings"
                 },
                 {
                   "code": "noticeOfHearing",
-                  "label": "Notice of Hearing"
+                  "label": "Notice of hearing"
                 },
                 {
                   "code": "courtBundle",
-                  "label": "Court Bundle"
+                  "label": "Court bundle"
                 },
                 {
                   "code": "caseSummary",
-                  "label": "Case Summary"
+                  "label": "Case summary"
                 },
                 {
                   "code": "safeguardingLetter",
@@ -92,10 +88,6 @@
                 {
                   "code": "otherDocs",
                   "label": "Other documents"
-                },
-                {
-                  "code": "confidential",
-                  "label": "Confidential"
                 },
                 {
                   "code": "emailsToCourtToRequestHearingsAdjourned",
@@ -127,7 +119,11 @@
                 },
                 {
                   "code": "homeOfficeDWPResponses",
-                  "label": "Home office/ DWP responses"
+                  "label": "Home Office/ DWP responses"
+                },
+                {
+                  "code": "internalCorrespondence",
+                  "label": "Internal correspondence"
                 },
                 {
                   "code": "bulkScanQuarantine",
@@ -151,7 +147,7 @@
                 },
                 {
                   "code": "medicalRecords",
-                  "label": "Medical Records"
+                  "label": "Medical records"
                 },
                 {
                   "code": "drugAndAlcoholTest(toxicology)",
@@ -166,8 +162,12 @@
                   "label": "Section 37 report"
                 },
                 {
+                  "code": "localAuthorityOtherDoc",
+                  "label": "Other documents"
+                },
+                {
                   "code": "ordersSubmittedWithApplication",
-                  "label": "Orders Submitted with Application"
+                  "label": "Draft orders"
                 },
                 {
                   "code": "approvedOrders",
@@ -194,20 +194,20 @@
                   "label": "Important info about address and contact"
                 },
                 {
-                  "code": "DNAReports_otherDocs",
-                  "label": "DNA reports"
-                },
-                {
                   "code": "privacyNotice",
-                  "label": "Privacy Notice"
+                  "label": "Privacy notice"
                 },
                 {
                   "code": "specialMeasures",
-                  "label": "Special Measures"
+                  "label": "Reasonable adjustments and special measures"
                 },
                 {
                   "code": "anyOtherDoc",
-                  "label": "Any Other Documents"
+                  "label": "Any other documents"
+                },
+                {
+                  "code": "pathfinder",
+                  "label": "Pathfinder"
                 },
                 {
                   "code": "positionStatements",
@@ -223,7 +223,7 @@
                 },
                 {
                   "code": "otherWitnessStatements",
-                  "label": "Other witness Statements"
+                  "label": "Other witness statements"
                 }
               ]
             },
