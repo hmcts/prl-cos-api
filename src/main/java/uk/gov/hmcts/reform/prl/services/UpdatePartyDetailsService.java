@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -121,7 +122,6 @@ public class UpdatePartyDetailsService {
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
                                                   callbackRequest,authorisation,caseData,caseData.getRespondents());
-                log.info("Updated case data {}", updatedCaseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
@@ -355,8 +355,7 @@ public class UpdatePartyDetailsService {
             respondentList = caseDataBefore.getRespondents().stream()
                     .filter(resp1 -> resp1.getId().equals(respondent.getId())
                             && (!StringUtils.equals(resp1.getValue().getEmail(),respondent.getValue().getEmail())
-                            || (respondent.getValue().getAddress() != null
-                            && !respondent.getValue().getAddress().equals(resp1.getValue().getAddress()))
+                            || checkIfAddressIsChanged(respondent.getValue().getAddress(), resp1.getValue().getAddress())
                             || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
                             respondent.getValue().getPhoneNumber())
                             || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
@@ -364,8 +363,7 @@ public class UpdatePartyDetailsService {
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
-                    || (respondent.getValue().getAddress() != null
-                    && !respondent.getValue().getAddress().equals(respondentDetailsFL401.getAddress()))
+                    || checkIfAddressIsChanged(respondent.getValue().getAddress(),respondentDetailsFL401.getAddress())
                     || (!StringUtils.equalsIgnoreCase(respondentDetailsFL401.getPhoneNumber(),
                     respondent.getValue().getPhoneNumber()))) {
                 log.info("respondent data changed for fl401");
@@ -379,6 +377,19 @@ public class UpdatePartyDetailsService {
         }
         log.info("respondent data not changed");
         return  false;
+    }
+
+    private boolean checkIfAddressIsChanged(Address currentAddress, Address previousAddress) {
+        log.info("Current address {} ", currentAddress);
+        log.info("Previous address {} ", previousAddress);
+        return currentAddress != null
+            && (!currentAddress.getAddressLine1().equals(previousAddress.getAddressLine1())
+            || !currentAddress.getAddressLine2().equals(previousAddress.getAddressLine2())
+            || !currentAddress.getAddressLine3().equals(previousAddress.getAddressLine3())
+            || !currentAddress.getCountry().equals(previousAddress.getCountry())
+            || !currentAddress.getCounty().equals(previousAddress.getCounty())
+            || !currentAddress.getPostCode().equals(previousAddress.getPostCode())
+            || !currentAddress.getPostTown().equals(previousAddress.getPostTown()));
     }
 
     private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
