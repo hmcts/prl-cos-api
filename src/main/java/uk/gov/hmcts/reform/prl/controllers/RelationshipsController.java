@@ -128,7 +128,7 @@ public class RelationshipsController {
             @RequestBody uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        List<Element<ChildrenAndApplicantRelation>> buffChildAndApplicantRelations = caseData.getRelations().getChildAndApplicantRelations();
+        List<Element<ChildrenAndApplicantRelation>> buffChildAndApplicantRelations = caseData.getRelations().getBuffChildAndApplicantRelations();
         List<Element<ChildrenAndApplicantRelation>> updatedChildAndApplicantRelations = new ArrayList<>();
         buffChildAndApplicantRelations.forEach(relation -> {
             if (!StringUtils.equals(relation.getValue().getChildAndApplicantRelation().getId(), RelationshipsEnum.other.getId())) {
