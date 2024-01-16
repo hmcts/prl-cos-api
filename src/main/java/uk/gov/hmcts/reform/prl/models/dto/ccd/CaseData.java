@@ -84,7 +84,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -338,6 +337,11 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final Document c1ADocument;
     @JsonProperty("c1AWelshDocument")
     private final Document c1AWelshDocument;
+
+    @JsonProperty("c8DraftDocument")
+    private final Document c8DraftDocument;
+    @JsonProperty("c8WelshDraftDocument")
+    private final Document c8WelshDraftDocument;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
@@ -757,14 +761,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
     //PRL-3454 - send and reply message enhancements
     @JsonUnwrapped
     private SendOrReplyMessage sendOrReplyMessage;
-
-    //PRL-3562 - manage document enhancements
-    @JsonProperty("manageDocuments")
-    private List<Element<ManageDocuments>> manageDocuments;
-    private String manageDocumentsTriggeredBy;
-    private String manageDocumentsRestrictedFlag;
-    //PRL-4320 - manage document redesign
-    //private boolean isC8DocumentPresent;
 
     @JsonUnwrapped
     private DocumentManagementDetails documentManagementDetails;

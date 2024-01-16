@@ -61,6 +61,4 @@ public class BaseCaseData {
     //FPET-567 - Added for hiding fields for SDO
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
-    //temporary added for now for PRL-4320
-    private String isC8DocumentPresent;
 }

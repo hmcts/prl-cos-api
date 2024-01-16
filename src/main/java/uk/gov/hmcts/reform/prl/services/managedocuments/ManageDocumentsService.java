@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
@@ -100,8 +101,10 @@ public class ManageDocumentsService {
             .build();
 
         return caseData.toBuilder()
-            .isC8DocumentPresent(CaseUtils.isC8Present(caseData) ? "Yes" : "No")
-            .manageDocuments(Arrays.asList(element(manageDocuments)))
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .isC8DocumentPresent(CaseUtils.isC8PresentCheckDraftAndFinal(caseData) ? "Yes" : "No")
+                                           .manageDocuments(Arrays.asList(element(manageDocuments)))
+                                           .build())
             .build();
     }
 
@@ -142,7 +145,7 @@ public class ManageDocumentsService {
         if (SOLICITOR.equals(userRole)) {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
 
-            List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
+            List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
             for (Element<ManageDocuments> element : manageDocuments) {
                 boolean restricted = element.getValue().getIsRestricted().equals(YesOrNo.Yes);
                 boolean restrictedReasonEmpty = element.getValue().getRestrictedDetails() == null
@@ -172,7 +175,7 @@ public class ManageDocumentsService {
                                           UserDetails userDetails) {
 
         String userRole = CaseUtils.getUserRole(userDetails);
-        List<Element<ManageDocuments>> manageDocuments = caseData.getManageDocuments();
+        List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
         for (Element<ManageDocuments> element : manageDocuments) {
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
             ManageDocuments manageDocument = element.getValue();
@@ -492,7 +495,7 @@ public class ManageDocumentsService {
 
     public boolean isCourtSelectedInDocumentParty(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        return caseData.getManageDocuments().stream()
+        return caseData.getDocumentManagementDetails().getManageDocuments().stream()
             .anyMatch(element -> DocumentPartyEnum.COURT.equals(element.getValue().getDocumentParty()));
     }
 

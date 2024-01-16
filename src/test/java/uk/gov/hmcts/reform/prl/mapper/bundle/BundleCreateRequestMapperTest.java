@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.MiamDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
@@ -301,7 +302,10 @@ public class BundleCreateRequestMapperTest {
             .finalDocument(Document.builder().documentFileName("C100AppDoc").documentUrl("Url").build())
             .c1ADocument(Document.builder().documentFileName("c1ADocument").documentUrl("Url").build())
             .otherDocuments(ElementUtils.wrapElements(otherDocuments))
-            .manageDocuments(ElementUtils.wrapElements(otherManageDocuments))
+            .documentManagementDetails(DocumentManagementDetails
+                                           .builder()
+                                           .manageDocuments(ElementUtils.wrapElements(otherManageDocuments))
+                                           .build())
             .furtherEvidences(ElementUtils.wrapElements(furtherEvidences))
             .orderCollection(ElementUtils.wrapElements(orders))
             .bundleInformation(BundlingInformation.builder().build())

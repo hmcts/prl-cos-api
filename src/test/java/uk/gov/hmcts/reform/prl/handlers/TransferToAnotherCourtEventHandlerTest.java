@@ -158,8 +158,13 @@ public class TransferToAnotherCourtEventHandlerTest {
             .c1ADocument(document)
             .c1AWelshDocument(document)
             .otherDocuments(List.of(element(OtherDocuments.builder().build())))
-            .manageDocuments(List.of(element(ManageDocuments.builder()
-                                                 .document(document).build())))
+            .documentManagementDetails(
+                DocumentManagementDetails
+                    .builder()
+                    .manageDocuments(List.of(element(ManageDocuments.builder()
+                                                         .document(document).build())))
+                    .build())
+
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder()
                                                              .citizenDocument(document).build())))
             .citizenResponseC7DocumentList(List.of(element(ResponseDocuments.builder()

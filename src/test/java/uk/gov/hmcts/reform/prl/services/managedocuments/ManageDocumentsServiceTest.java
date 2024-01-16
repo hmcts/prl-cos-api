@@ -208,8 +208,10 @@ public class ManageDocumentsServiceTest {
         CaseData caseData = CaseData.builder().build();
 
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
-        String docCode  = updatedCaseData.getManageDocuments().get(0).getValue().getDocumentCategories().getListItems().get(0).getCode();
-        assertEquals(subCategory2.getCategoryId(),docCode);
+        String docCode = updatedCaseData.getDocumentManagementDetails()
+            .getManageDocuments().get(0).getValue().getDocumentCategories().getListItems()
+            .get(0).getCode();
+        assertEquals(subCategory2.getCategoryId(), docCode);
     }
 
     @Test
@@ -233,8 +235,9 @@ public class ManageDocumentsServiceTest {
         CaseData caseData = CaseData.builder().build();
 
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
-        List categoryList  = updatedCaseData.getManageDocuments().get(0).getValue().getDocumentCategories().getListItems();
-        assertEquals(0,categoryList.size());
+        List categoryList = updatedCaseData.getDocumentManagementDetails().getManageDocuments().get(0)
+            .getValue().getDocumentCategories().getListItems();
+        assertEquals(0, categoryList.size());
     }
 
     @Test
@@ -243,7 +246,8 @@ public class ManageDocumentsServiceTest {
         when(authTokenGenerator.generate()).thenThrow(new RuntimeException());
         CaseData caseData = CaseData.builder().build();
         CaseData updatedCaseData = manageDocumentsService.populateDocumentCategories(auth, caseData);
-        List<DynamicListElement> listItems  = updatedCaseData.getManageDocuments().get(0).getValue().getDocumentCategories().getListItems();
+        List<DynamicListElement> listItems = updatedCaseData.getDocumentManagementDetails().getManageDocuments()
+            .get(0).getValue().getDocumentCategories().getListItems();
         Assert.assertEquals(null, listItems);
     }
 
@@ -276,8 +280,10 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder().build())
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -331,8 +337,10 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder().legalProfQuarantineDocsList(listQuarantine).build())
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .legalProfQuarantineDocsList(listQuarantine).build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -383,8 +391,10 @@ public class ManageDocumentsServiceTest {
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
             .documentManagementDetails(DocumentManagementDetails.builder()
-                .cafcassQuarantineDocsList(listQuarantine).build())
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+                                           .cafcassQuarantineDocsList(listQuarantine)
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -434,8 +444,10 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder().build())
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -486,7 +498,10 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -543,8 +558,10 @@ public class ManageDocumentsServiceTest {
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
             .documentManagementDetails(DocumentManagementDetails.builder()
-                .legalProfQuarantineDocsList(listQuarantine).build())
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+                                           .legalProfQuarantineDocsList(listQuarantine)
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -602,7 +619,10 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -659,8 +679,10 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder().build())
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -714,8 +736,10 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
-            .documentManagementDetails(DocumentManagementDetails.builder().build())
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -765,7 +789,10 @@ public class ManageDocumentsServiceTest {
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -808,7 +835,10 @@ public class ManageDocumentsServiceTest {
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocumentsList);
         CaseData caseData = CaseData.builder()
-            .manageDocuments(manageDocumentsList).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(manageDocumentsList)
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -835,7 +865,10 @@ public class ManageDocumentsServiceTest {
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocumentsList);
         CaseData caseData = CaseData.builder()
-            .manageDocuments(manageDocumentsList).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(manageDocumentsList)
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -862,7 +895,10 @@ public class ManageDocumentsServiceTest {
         manageDocumentsElement = element(manageDocuments);
 
         CaseData caseData = CaseData.builder()
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -894,7 +930,10 @@ public class ManageDocumentsServiceTest {
         manageDocumentsElement = element(manageDocuments);
 
         CaseData caseData = CaseData.builder()
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -923,7 +962,10 @@ public class ManageDocumentsServiceTest {
         manageDocumentsElement = element(manageDocuments);
 
         CaseData caseData = CaseData.builder()
-            .manageDocuments(List.of(manageDocumentsElement)).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -957,7 +999,10 @@ public class ManageDocumentsServiceTest {
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocumentsList);
         CaseData caseData = CaseData.builder()
-            .manageDocuments(manageDocumentsList).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(manageDocumentsList)
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
@@ -982,7 +1027,10 @@ public class ManageDocumentsServiceTest {
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments", manageDocumentsList);
         CaseData caseData = CaseData.builder()
-            .manageDocuments(manageDocumentsList).build();
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(manageDocumentsList)
+                                           .build())
+            .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 

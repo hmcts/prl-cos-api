@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -142,11 +143,15 @@ public class ManageDocumentsControllerTest {
 
         Element<ManageDocuments> manageDocumentsElement = element(manageDocuments);
 
-        CaseData caseDataUpdated = CaseData.builder().manageDocuments(List.of(manageDocumentsElement)).build();
+        CaseData caseDataUpdated = CaseData.builder()
+            .documentManagementDetails(DocumentManagementDetails
+                                           .builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build()).build();
 
-        when(manageDocumentsService.populateDocumentCategories(auth,caseData)).thenReturn(caseDataUpdated);
+        when(manageDocumentsService.populateDocumentCategories(auth, caseData)).thenReturn(caseDataUpdated);
         CallbackResponse response = manageDocumentsController.handleAboutToStart(auth, callbackRequest);
-        Assert.assertNotNull(response.getData().getManageDocuments());
+        Assert.assertNotNull(response.getData().getDocumentManagementDetails().getManageDocuments());
 
         verify(manageDocumentsService).populateDocumentCategories(auth, caseData);
         verifyNoMoreInteractions(manageDocumentsService);
