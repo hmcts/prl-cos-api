@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSo
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -355,7 +356,7 @@ public class UpdatePartyDetailsService {
             respondentList = caseDataBefore.getRespondents().stream()
                     .filter(resp1 -> resp1.getId().equals(respondent.getId())
                             && (!StringUtils.equals(resp1.getValue().getEmail(),respondent.getValue().getEmail())
-                            || checkIfAddressIsChanged(respondent.getValue().getAddress(), resp1.getValue().getAddress())
+                            || CaseUtils.checkIfAddressIsChanged(respondent.getValue().getAddress(), resp1.getValue().getAddress())
                             || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
                             respondent.getValue().getPhoneNumber())
                             || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
@@ -363,7 +364,7 @@ public class UpdatePartyDetailsService {
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
-                    || checkIfAddressIsChanged(respondent.getValue().getAddress(),respondentDetailsFL401.getAddress())
+                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue().getAddress(), respondentDetailsFL401.getAddress())
                     || (!StringUtils.equalsIgnoreCase(respondentDetailsFL401.getPhoneNumber(),
                     respondent.getValue().getPhoneNumber()))
                 || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
@@ -381,18 +382,7 @@ public class UpdatePartyDetailsService {
         return  false;
     }
 
-    private boolean checkIfAddressIsChanged(Address currentAddress, Address previousAddress) {
-        log.info("Current address {} ", currentAddress);
-        log.info("Previous address {} ", previousAddress);
-        return currentAddress != null
-            && (!StringUtils.equals(currentAddress.getAddressLine1(),previousAddress.getAddressLine1())
-            || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
-            || !StringUtils.equals(currentAddress.getAddressLine3(),previousAddress.getAddressLine3())
-            || !StringUtils.equals(currentAddress.getCountry(),previousAddress.getCountry())
-            || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
-            || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
-            || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown()));
-    }
+
 
     private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
