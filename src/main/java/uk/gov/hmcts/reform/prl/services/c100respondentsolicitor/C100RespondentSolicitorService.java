@@ -988,7 +988,7 @@ public class C100RespondentSolicitorService {
             populateRepresentativeDetails(solicitorRepresentedRespondent, dataMap);
             populatePartyDetails(solicitorRepresentedRespondent, response, dataMap);
             populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response);
-            if(isConfidentialDataPresent) {
+            if (isConfidentialDataPresent) {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
         }
