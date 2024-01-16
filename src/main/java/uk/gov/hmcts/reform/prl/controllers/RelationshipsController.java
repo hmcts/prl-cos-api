@@ -133,7 +133,7 @@ public class RelationshipsController {
         buffChildAndApplicantRelations.forEach(relation -> {
             if (!StringUtils.equals(relation.getValue().getChildAndApplicantRelation().getId(), RelationshipsEnum.other.getId())) {
                 updatedChildAndApplicantRelations.add(Element.<ChildrenAndApplicantRelation>builder()
-                                                           .value(relation.getValue().toBuilder().childAndApplicantRelation(null).build())
+                                                           .value(relation.getValue().toBuilder().childAndApplicantRelationOtherDetails(null).build())
                                                            .id(relation.getId()).build());
             } else {
                 updatedChildAndApplicantRelations.add(relation);
