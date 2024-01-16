@@ -1072,7 +1072,9 @@ public class C100RespondentSolicitorService {
                 .getValue().getRepresentativeFirstName() + " " + solicitorRepresentedRespondent
                 .getValue().getRepresentativeLastName());
         }
-        populateAddressMap(solicitorRepresentedRespondent, dataMap);
+        if (null != solicitorRepresentedRespondent.getValue().getSolicitorAddress()) {
+            populateAddressMap(solicitorRepresentedRespondent, dataMap);
+        }
         dataMap.put("repEmail", solicitorRepresentedRespondent.getValue().getSolicitorEmail());
         dataMap.put("repTelephone", solicitorRepresentedRespondent.getValue().getSolicitorTelephone());
         if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
