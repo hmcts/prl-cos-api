@@ -122,7 +122,7 @@ public class EditReturnedOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        if (YesOrNo.Yes.equals(selectedOrder.getIsOrderUploadedByJudgeOrAdmin())) {
+        if (ManageOrdersOptionsEnum.uploadAnOrder.toString().equalsIgnoreCase(selectedOrder.getOrderSelectionType())) {
             caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, INSTRUCTIONS_FROM_JUDGE
                     + selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative()
                     + EDIT_THE_ORDER_LABEL + "\n" + OPEN_THE_DRAFT_ORDER_TEXT);
