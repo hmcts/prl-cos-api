@@ -1799,12 +1799,12 @@ public class DraftAnOrderService {
             Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
             caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
         }
-        Object dynamicList = caseData.getDraftOrdersDynamicList();
-        if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
-            dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
-        }
-        DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
         if (isOrderEdited) {
+            Object dynamicList = caseData.getDraftOrdersDynamicList();
+            if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
+                dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
+            }
+            DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
             caseDataUpdated.putAll(getDraftOrderInfo(authorisation, caseData, selectedOrder));
         } else {
             caseDataUpdated.putAll(getDraftOrderData(authorisation, caseData, orderType));
