@@ -682,7 +682,7 @@ public class RelationshipsControllerTest {
         ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.father)
-            .childLivesWith(YesOrNo.Yes)
+            .childLivesWith(YesOrNo.No)
             .isChildLivesWithPersonConfidential(YesOrNo.Yes)
             .childAndOtherPeopleRelationOtherDetails("test")
             .build();
@@ -712,9 +712,9 @@ public class RelationshipsControllerTest {
             .otherPeopleFullName("Test")
             .childFullName("Name")
             .childAndOtherPeopleRelation(RelationshipsEnum.father)
-            .childLivesWith(YesOrNo.Yes)
+            .childLivesWith(YesOrNo.No)
             .childAndOtherPeopleRelationOtherDetails(null)
-            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(null)
             .build();
         List<Element<ChildrenAndOtherPeopleRelation>> expectedRelationList = Collections.singletonList(
             Element.<ChildrenAndOtherPeopleRelation>builder().value(expectedRelation).build());
@@ -727,7 +727,7 @@ public class RelationshipsControllerTest {
     }
 
     @Test
-    public void testPopulateOtherPeopleToChildRelationWhenRelationIsOther() throws NotFoundException {
+    public void testPopulateOtherPeopleToChildRelationWhenRelationIsOtherAndChildLivesWithIsYes() throws NotFoundException {
 
         PartyDetails otherPerson = PartyDetails.builder()
             .firstName("test1")
@@ -756,6 +756,7 @@ public class RelationshipsControllerTest {
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.other)
             .childAndOtherPeopleRelationOtherDetails("test")
             .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
             .build();
 
         Element<ChildrenAndOtherPeopleRelation> wrappedChildrenAndOtherPeopleRelation =
@@ -777,8 +778,6 @@ public class RelationshipsControllerTest {
             CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
                                                       .data(caseDataUpdated).build()).build();
 
-        List<Element<ChildrenAndOtherPeopleRelation>> expectedRelation = Collections.singletonList(
-            Element.<ChildrenAndOtherPeopleRelation>builder().value(childrenAndOtherPeopleRelation).build());
         AboutToStartOrSubmitCallbackResponse response = relationshipsController.populateOtherPeopleToChildRelation(
             "test",
             callbackRequest
