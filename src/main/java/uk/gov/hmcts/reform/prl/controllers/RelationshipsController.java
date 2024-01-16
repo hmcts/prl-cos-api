@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.RelationshipsEnum;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndApplicantRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelation;
@@ -228,15 +229,18 @@ public class RelationshipsController {
         List<Element<ChildrenAndOtherPeopleRelation>> buffChildAndOtherPeopleRelations = caseData.getRelations()
                                                                                             .getBuffChildAndOtherPeopleRelations();
         List<Element<ChildrenAndOtherPeopleRelation>> updatedChildAndOtherPeopleRelations = new ArrayList<>();
-        buffChildAndOtherPeopleRelations.stream().forEach(relation -> {
-            if (!StringUtils.equals(relation.getValue().getChildAndOtherPeopleRelation().getId(), RelationshipsEnum.other.getId())) {
-                updatedChildAndOtherPeopleRelations.add(Element.<ChildrenAndOtherPeopleRelation>builder()
-                                                        .value(relation.getValue().toBuilder().childAndOtherPeopleRelationOtherDetails(null).build())
-                                                        .id(relation.getId())
-                                                        .build());
-            } else {
-                updatedChildAndOtherPeopleRelations.add(relation);
-            }
+        buffChildAndOtherPeopleRelations.stream().forEach(relationElement -> {
+            ChildrenAndOtherPeopleRelation relation = relationElement.getValue();
+            updatedChildAndOtherPeopleRelations.add(Element.<ChildrenAndOtherPeopleRelation>builder()
+                .value(relation.toBuilder()
+                           .childAndOtherPeopleRelationOtherDetails(
+                               StringUtils.equals(relation.getChildAndOtherPeopleRelation().getId(), RelationshipsEnum.other.getId())
+                                   ? relation.getChildAndOtherPeopleRelationOtherDetails() : null)
+                           .isChildLivesWithPersonConfidential(
+                               relation.getChildLivesWith().equals(YesOrNo.Yes) ? relation.getIsChildLivesWithPersonConfidential() : null)
+                           .build())
+                .id(relationElement.getId())
+                .build());
         });
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.put("buffChildAndOtherPeopleRelations", null);
