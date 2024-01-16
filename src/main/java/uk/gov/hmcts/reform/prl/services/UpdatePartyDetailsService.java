@@ -355,8 +355,8 @@ public class UpdatePartyDetailsService {
             respondentList = caseDataBefore.getRespondents().stream()
                     .filter(resp1 -> resp1.getId().equals(respondent.getId())
                             && (!StringUtils.equals(resp1.getValue().getEmail(),respondent.getValue().getEmail())
-                            || (resp1.getValue().getAddress() != null
-                            && !resp1.getValue().getAddress().equals(respondent.getValue().getAddress()))
+                            || (respondent.getValue().getAddress() != null
+                            && !respondent.getValue().getAddress().equals(resp1.getValue().getAddress()))
                             || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
                             respondent.getValue().getPhoneNumber())
                             || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
@@ -364,8 +364,8 @@ public class UpdatePartyDetailsService {
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
             if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
-                    || (respondentDetailsFL401.getAddress() != null
-                    && !respondentDetailsFL401.getAddress().equals(respondent.getValue().getAddress()))
+                    || (respondent.getValue().getAddress() != null
+                    && !respondent.getValue().getAddress().equals(respondentDetailsFL401.getAddress()))
                     || (!StringUtils.equalsIgnoreCase(respondentDetailsFL401.getPhoneNumber(),
                     respondent.getValue().getPhoneNumber()))) {
                 log.info("respondent data changed for fl401");
@@ -374,7 +374,7 @@ public class UpdatePartyDetailsService {
         }
         if (respondentList != null && !respondentList.isEmpty()) {
             log.info("respondent data changed {}", respondent.getValue().getLabelForDynamicList());
-            log.info("{}", respondent.getValue());
+            log.info("{}", respondent.getValue().getAddress());
             return true;
         }
         log.info("respondent data not changed");

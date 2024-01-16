@@ -991,7 +991,6 @@ public class C100RespondentSolicitorService {
             if (isConfidentialDataPresent) {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
-            log.info("check confidential data present {}, {}",isConfidentialDataPresent, dataMap);
         }
         return dataMap;
     }
