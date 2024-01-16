@@ -365,7 +365,9 @@ public class UpdatePartyDetailsService {
             if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
                     || checkIfAddressIsChanged(respondent.getValue().getAddress(),respondentDetailsFL401.getAddress())
                     || (!StringUtils.equalsIgnoreCase(respondentDetailsFL401.getPhoneNumber(),
-                    respondent.getValue().getPhoneNumber()))) {
+                    respondent.getValue().getPhoneNumber()))
+                || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
+                .getLabelForDynamicList())) {
                 log.info("respondent data changed for fl401");
                 return true;
             }
@@ -383,13 +385,13 @@ public class UpdatePartyDetailsService {
         log.info("Current address {} ", currentAddress);
         log.info("Previous address {} ", previousAddress);
         return currentAddress != null
-            && (!currentAddress.getAddressLine1().equals(previousAddress.getAddressLine1())
-            || !currentAddress.getAddressLine2().equals(previousAddress.getAddressLine2())
-            || !currentAddress.getAddressLine3().equals(previousAddress.getAddressLine3())
-            || !currentAddress.getCountry().equals(previousAddress.getCountry())
-            || !currentAddress.getCounty().equals(previousAddress.getCounty())
-            || !currentAddress.getPostCode().equals(previousAddress.getPostCode())
-            || !currentAddress.getPostTown().equals(previousAddress.getPostTown()));
+            && (!StringUtils.equals(currentAddress.getAddressLine1(),previousAddress.getAddressLine1())
+            || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
+            || !StringUtils.equals(currentAddress.getAddressLine3(),previousAddress.getAddressLine3())
+            || !StringUtils.equals(currentAddress.getCountry(),previousAddress.getCountry())
+            || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
+            || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
+            || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown()));
     }
 
     private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
