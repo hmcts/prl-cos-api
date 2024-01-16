@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -53,6 +54,7 @@ public class EditAndApproveDraftOrderController {
     private final ManageOrderService manageOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
+    private final EditReturnedOrderService editReturnedOrderService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -160,7 +162,6 @@ public class EditAndApproveDraftOrderController {
                     callbackRequest
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
-                .equalsIgnoreCase(callbackRequest.getEventId()) || Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 if (Event.EDIT_AND_APPROVE_ORDER.getId()
                     .equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -172,6 +173,9 @@ public class EditAndApproveDraftOrderController {
                     authorisation,
                     callbackRequest.getEventId()
                 ));
+            } else if (Event.EDIT_RETURNED_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);

@@ -8,8 +8,10 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -51,6 +53,7 @@ public class EditReturnedOrderService {
     public static final String SELECT_THE_HEARING = "selectTheHearing";
     private final ObjectMapper objectMapper;
     private final UserService userService;
+    private final ManageOrderService manageOrderService;
 
     private static final String ORDER_NAME = "orderName";
     private static final String CASE_TYPE_OF_APPLICATION = "caseTypeOfApplication";
@@ -140,5 +143,37 @@ public class EditReturnedOrderService {
                 ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
                 .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         return caseDataMap;
+    }
+
+    public Map<String,Object> updateDraftOrderCollection(CaseData caseData, String authorisation) {
+        Map<String,Object> caseDataMap = new HashMap<>();
+        DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                                 caseData.getManageOrders().getRejectedOrdersDynamicList());
+
+        if (ManageOrdersOptionsEnum.uploadAnOrder.toString().equalsIgnoreCase(draftOrder.getOrderSelectionType())) {
+            caseDataMap.put("draftOrderCollection", updateUploadedDraftOrderDetails(caseData, draftOrder));
+        } else {
+            caseDataMap.putAll(draftAnOrderService.updateDraftOrderCollection(caseData,authorisation, Event.EDIT_RETURNED_ORDER.getId()));
+        }
+
+        return caseDataMap;
+    }
+
+    public DraftOrder updateUploadedDraftOrderDetails(CaseData caseData, DraftOrder draftOrder) {
+        return draftOrder.toBuilder()
+            .orderDocument(caseData.getUploadOrderDoc())
+            .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+            .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+            .childOption(manageOrderService.getChildOption(caseData))
+            .childrenList(caseData.getManageOrders() != null
+                              ? manageOrderService.getSelectedChildInfoFromMangeOrder(caseData) : null)
+            .otherDetails(draftOrder.getOtherDetails().toBuilder()
+                              .status(manageOrderService.getOrderStatus(null, null,
+                                                                        Event.EDIT_RETURNED_ORDER.getId(), null))
+                              .build())
+            .dateOrderMade(caseData.getDateOrderMade())
+            .isThisOrderFromHearing(caseData.getManageOrders().getIsThisOrderFromHearing())
+            .selectTheHearing(caseData.getManageOrders().getSelectTheHearing())
+            .build();
     }
 }

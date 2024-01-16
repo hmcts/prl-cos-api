@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
@@ -42,6 +43,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 public class EditReturnedOrderServiceTest {
 
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
 
     @InjectMocks
     private EditReturnedOrderService editReturnedOrderService;
@@ -63,6 +65,9 @@ public class EditReturnedOrderServiceTest {
 
     @Mock
     HearingDataService hearingDataService;
+
+    @Mock
+    ManageOrderService manageOrderService;
 
     private static final String testAuth = "auth";
 
@@ -178,5 +183,46 @@ public class EditReturnedOrderServiceTest {
 
         Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authToken);
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
+    }
+
+    @Test
+    public void  testAboutToSubmitHandlerForDraftedOrder() {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .rejectedOrdersDynamicList(DynamicList.builder()
+                                                             .value(DynamicListElement.builder().code(PrlAppsConstants.TEST_UUID)
+                                                                        .build())
+                                                             .build()).build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
+        when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(caseDataMap);
+        Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken);
+        assertTrue(response.containsKey(DRAFT_ORDER_COLLECTION));
+    }
+
+    @Test
+    public void  testAboutToSubmitHandlerForUploadedOrder() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(CreateSelectOrderOptionsEnum.generalForm)
+            .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
+            .orderSelectionType(ManageOrdersOptionsEnum.uploadAnOrder.toString())
+            .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build();
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
+            .thenReturn(draftOrder);
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder()
+                              .rejectedOrdersDynamicList(DynamicList.builder()
+                                                             .value(DynamicListElement.builder().code(PrlAppsConstants.TEST_UUID)
+                                                                        .build())
+                                                             .build()).build())
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        caseDataMap.put(DRAFT_ORDER_COLLECTION, List.of(Element.builder().build()));
+        when(draftAnOrderService.updateDraftOrderCollection(Mockito.any(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(caseDataMap);
+        Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken);
+        assertTrue(response.containsKey(DRAFT_ORDER_COLLECTION));
     }
 }

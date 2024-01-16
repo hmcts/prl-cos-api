@@ -143,7 +143,8 @@ public class DraftOrder {
     private final C21OrderOptionsEnum c21OrderOptions;
     //PRL-3318 - Added for storing hearing dropdown
     private DynamicList hearingsType;
-
+    private final YesOrNo isThisOrderFromHearing;
+    private Object selectTheHearing;
     @JsonProperty("hasJudgeProvidedHearingDetails")
     private YesOrNo hasJudgeProvidedHearingDetails;
 
