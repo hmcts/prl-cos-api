@@ -1143,7 +1143,7 @@ public class C100RespondentSolicitorService {
             isConfidentialDataPresent = true;
         } else if (null != response.getCitizenDetails().getAddress()) {
             dataMap.put(ADDRESS, response.getCitizenDetails().getAddress().getAddressLine1());
-        } else {
+        } else if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
             dataMap.put(ADDRESS, solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
         }
         return isConfidentialDataPresent;
