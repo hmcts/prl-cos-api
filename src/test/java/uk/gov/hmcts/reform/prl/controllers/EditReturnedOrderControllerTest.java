@@ -97,7 +97,7 @@ public class EditReturnedOrderControllerTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -172,7 +172,7 @@ public class EditReturnedOrderControllerTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -194,7 +194,7 @@ public class EditReturnedOrderControllerTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
@@ -224,7 +224,7 @@ public class EditReturnedOrderControllerTest {
 
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId())).thenReturn(caseDataMap);
+        when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         ResponseEntity<SubmittedCallbackResponse> responseEntity = editReturnedOrderController
             .handleEditAndReturnedSubmitted(authToken, s2sToken, callbackRequest);
         assertNotNull(responseEntity.getBody());
