@@ -1353,6 +1353,11 @@ public class ManageOrderService {
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             currentOrderStatus = OrderStatusEnum.reviewedByCA.getDisplayedValue();
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
+            if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
+                currentOrderStatus = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
+            } else {
+                currentOrderStatus = OrderStatusEnum.reviewedByManager.getDisplayedValue();
+            }
             currentOrderStatus = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
         } else if (Event.EDIT_RETURNED_ORDER.getId().equals(eventId)) {
             return OrderStatusEnum.draftedByLR.getDisplayedValue();
