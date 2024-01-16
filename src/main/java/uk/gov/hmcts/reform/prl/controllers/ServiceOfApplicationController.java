@@ -48,7 +48,6 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService
                                                                            .getSoaCaseFieldsMap(authorisation,
                 callbackRequest.getCaseDetails())).build();
