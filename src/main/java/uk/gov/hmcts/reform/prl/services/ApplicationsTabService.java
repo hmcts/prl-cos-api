@@ -1150,8 +1150,7 @@ public class ApplicationsTabService implements TabService {
         }
         PartyDetails currentApplicant = maskFl401ConfidentialDetails(caseData.getApplicantsFL401());
         FL401Applicant applicant = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
-        applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build();
-        return toMap(applicant);
+        return toMap(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build());
     }
 
     public Map<String, Object> getFl401ApplicantsSolictorDetailsTable(CaseData caseData) {
