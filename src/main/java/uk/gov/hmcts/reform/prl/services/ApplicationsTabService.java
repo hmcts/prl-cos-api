@@ -444,10 +444,12 @@ public class ApplicationsTabService implements TabService {
         }
 
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
-        for (Element<PartyDetails> applicant : currentApplicants) {
-            Applicant a = objectMapper.convertValue(applicant.getValue(), Applicant.class);
-            Element<Applicant> app = Element.<Applicant>builder().id(applicant.getId()).value(a.builder().gender(Gender.getDisplayedValueFromEnumString(a.getGender()).getDisplayedValue()).build()).build();
-            applicants.add(app);
+        for (Element<PartyDetails> currentApplicant : currentApplicants) {
+            Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);
+            Element<Applicant> applicantElement = Element.<Applicant>builder().id(currentApplicant.getId())
+                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build())
+                .build();
+            applicants.add(applicantElement);
         }
         return applicants;
     }
@@ -503,25 +505,19 @@ public class ApplicationsTabService implements TabService {
             return respondents;
         }
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
-        for (Element<PartyDetails> respondent : currentRespondents) {
-            Respondent a = objectMapper.convertValue(respondent.getValue(), Respondent.class);
+        for (Element<PartyDetails> currentRespondent : currentRespondents) {
+            Respondent respondent = objectMapper.convertValue(currentRespondent.getValue(), Respondent.class);
 
-            if (a.getGender() != null) {
-                a.setGender(Gender.getDisplayedValueFromEnumString(a.getGender()).getDisplayedValue());
-            }
-            if (a.getIsAtAddressLessThan5YearsWithDontKnow() != null) {
-                log.info("getIsAtAddressLessThan5YearsWithDontKnow value: " +  a.getIsAtAddressLessThan5YearsWithDontKnow());
-                a.setIsAtAddressLessThan5YearsWithDontKnow(
-                    YesNoDontKnow.getDisplayedValueIgnoreCase(a.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue());
-            }
-            if (a.getDoTheyHaveLegalRepresentation() != null) {
-                log.info("getDoTheyHaveLegalRepresentation value: " +  a.getDoTheyHaveLegalRepresentation());
-                a.setDoTheyHaveLegalRepresentation(
-                    YesNoDontKnow.getDisplayedValueIgnoreCase(a.getDoTheyHaveLegalRepresentation()).getDisplayedValue());
-            }
-
-            Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
-            respondents.add(app);
+            Element<Respondent> respondentElement = Element.<Respondent>builder().id(currentRespondent.getId()).value(respondent.toBuilder()
+                .gender(respondent.getGender() != null ? Gender.getDisplayedValueFromEnumString(respondent.getGender()).getDisplayedValue() : null)
+                .isAtAddressLessThan5YearsWithDontKnow(respondent.getIsAtAddressLessThan5YearsWithDontKnow() != null
+                                                   ? YesNoDontKnow.getDisplayedValueIgnoreCase(
+                                                       respondent.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue() : null)
+                .doTheyHaveLegalRepresentation(respondent.getDoTheyHaveLegalRepresentation() != null
+                                                   ? YesNoDontKnow.getDisplayedValueIgnoreCase(
+                                                       respondent.getDoTheyHaveLegalRepresentation()).getDisplayedValue() : null)
+                .build()).build();
+            respondents.add(respondentElement);
         }
         return respondents;
     }
@@ -1060,15 +1056,15 @@ public class ApplicationsTabService implements TabService {
 
         List<PartyDetails> otherPeople = caseData.getOthersToNotify().stream().map(Element::getValue).toList();
 
-        for (PartyDetails p : otherPeople) {
-            OtherPersonInTheCase other = objectMapper.convertValue(p, OtherPersonInTheCase.class);
-            //field below is not mapping correctly with the object mapper
-            other.setRelationshipToChild(p.getOtherPersonRelationshipToChildren());
-            if (other.getGender() != null) {
-                other.setGender(Gender.getDisplayedValueFromEnumString(other.getGender()).getDisplayedValue());
-            }
+        for (PartyDetails currentOtherPerson : otherPeople) {
+            OtherPersonInTheCase otherPerson = objectMapper.convertValue(currentOtherPerson, OtherPersonInTheCase.class);
             Element<OtherPersonInTheCase> wrappedPerson = Element.<OtherPersonInTheCase>builder()
-                .value(other).build();
+                .value(otherPerson.toBuilder()
+                           .relationshipToChild(currentOtherPerson.getOtherPersonRelationshipToChildren())
+                           .gender(otherPerson.getGender() != null
+                                       ? Gender.getDisplayedValueFromEnumString(otherPerson.getGender()).getDisplayedValue() : null)
+                           .build())
+                .build();
             otherPersonsInTheCase.add(wrappedPerson);
         }
         return otherPersonsInTheCase;
@@ -1153,9 +1149,9 @@ public class ApplicationsTabService implements TabService {
             return Collections.emptyMap();
         }
         PartyDetails currentApplicant = maskFl401ConfidentialDetails(caseData.getApplicantsFL401());
-        FL401Applicant a = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
-        a.setGender(Gender.getDisplayedValueFromEnumString(a.getGender()).getDisplayedValue());
-        return toMap(a);
+        FL401Applicant applicant = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
+        applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build();
+        return toMap(applicant);
     }
 
     public Map<String, Object> getFl401ApplicantsSolictorDetailsTable(CaseData caseData) {

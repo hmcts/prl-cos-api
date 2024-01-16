@@ -8,7 +8,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 
 import java.time.LocalDate;
 
-@Builder
+@Builder(toBuilder = true)
 @Data
 public class FL401Applicant {
 
@@ -17,7 +17,7 @@ public class FL401Applicant {
     private final String previousName;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate dateOfBirth;
-    private String gender;
+    private final String gender;
     private final Address address;
     private final YesOrNo isAddressConfidential;
     private final YesOrNo canYouProvideEmailAddress;

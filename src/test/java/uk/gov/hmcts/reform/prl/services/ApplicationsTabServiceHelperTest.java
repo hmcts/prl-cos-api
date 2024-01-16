@@ -322,7 +322,7 @@ public class ApplicationsTabServiceHelperTest {
             .addressLivedLessThan5YearsDetails("test")
             .isAtAddressLessThan5Years(YesOrNo.Yes)
             .addressLivedLessThan5YearsDetails("Test")
-            .gender("female")
+            .gender("Female")
             .lastName("lastName")
             .previousName("testPreviousname")
             .isDateOfBirthKnown(YesOrNo.Yes)
