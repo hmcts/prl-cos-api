@@ -446,8 +446,7 @@ public class ApplicationsTabService implements TabService {
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
         for (Element<PartyDetails> applicant : currentApplicants) {
             Applicant a = objectMapper.convertValue(applicant.getValue(), Applicant.class);
-            a.setGender(Gender.getDisplayedValueFromEnumString(a.getGender()).getDisplayedValue());
-            Element<Applicant> app = Element.<Applicant>builder().id(applicant.getId()).value(a).build();
+            Element<Applicant> app = Element.<Applicant>builder().id(applicant.getId()).value(a.builder().gender(Gender.getDisplayedValueFromEnumString(a.getGender()).getDisplayedValue()).build()).build();
             applicants.add(app);
         }
         return applicants;
