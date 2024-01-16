@@ -350,7 +350,7 @@ public class ApplicationsTabServiceTest {
             .email("test@test.com")
             .build();
 
-        Element<Applicant> applicantElement = Element.<Applicant>builder().value(applicant).build();
+        Element<Applicant> applicantElement = Element.<Applicant>builder().value(applicant.toBuilder().gender("Male").build()).build();
         List<Element<Applicant>> expectedApplicantList = Collections.singletonList(applicantElement);
         Applicant emptyApplicant = Applicant.builder().build();
         Element<Applicant> emptyApplicantElement = Element.<Applicant>builder().value(emptyApplicant).build();
@@ -641,8 +641,16 @@ public class ApplicationsTabServiceTest {
             .email("test@test.com")
             .build();
 
-        Element<Respondent> respondentElement = Element.<Respondent>builder().value(respondent).build();
-        List<Element<Respondent>> expectedRespondentList = Collections.singletonList(respondentElement);
+        Element<Respondent> expectedRespondent = Element.<Respondent>builder().value(
+            respondent
+                .toBuilder()
+                .gender("Male")
+                .isAtAddressLessThan5YearsWithDontKnow("Don't know")
+                .doTheyHaveLegalRepresentation("Don't know")
+                .build())
+            .build();
+
+        List<Element<Respondent>> expectedRespondentList = Collections.singletonList(expectedRespondent);
         Respondent emptyRespondent = Respondent.builder().build();
         Element<Respondent> emptyRespondentElement = Element.<Respondent>builder().value(emptyRespondent).build();
         List<Element<Respondent>> emptyRespondentList = Collections.singletonList(emptyRespondentElement);
@@ -1016,8 +1024,11 @@ public class ApplicationsTabServiceTest {
             .email("test@test.com")
             .build();
 
+        List<Element<OtherPersonRelationshipToChild>> expectedRelationship = List.of(Element.<OtherPersonRelationshipToChild>builder().value(
+            OtherPersonRelationshipToChild.builder().personRelationshipToChild("Bro").build()).build());
+
         Element<OtherPersonInTheCase> otherPersonElement = Element.<OtherPersonInTheCase>builder()
-            .value(otherPerson).build();
+            .value(otherPerson.toBuilder().gender("Male").relationshipToChild(expectedRelationship).build()).build();
         List<Element<OtherPersonInTheCase>> expectedList = Collections.singletonList(otherPersonElement);
         OtherPersonInTheCase emptyOtherPerson = OtherPersonInTheCase.builder().build();
         Element<OtherPersonInTheCase> emptyOtherElement = Element.<OtherPersonInTheCase>builder()
