@@ -373,7 +373,8 @@ public class UpdatePartyDetailsService {
             }
         }
         if (respondentList != null && !respondentList.isEmpty()) {
-            log.info("respondent data changed");
+            log.info("respondent data changed {}", respondent.getValue().getLabelForDynamicList());
+            log.info("{}", respondent.getValue());
             return true;
         }
         log.info("respondent data not changed");
