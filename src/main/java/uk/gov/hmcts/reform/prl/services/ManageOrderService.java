@@ -1358,7 +1358,6 @@ public class ManageOrderService {
             } else {
                 currentOrderStatus = OrderStatusEnum.reviewedByManager.getDisplayedValue();
             }
-            currentOrderStatus = OrderStatusEnum.reviewedByJudge.getDisplayedValue();
         } else if (Event.EDIT_RETURNED_ORDER.getId().equals(eventId)) {
             return OrderStatusEnum.draftedByLR.getDisplayedValue();
         } else if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(
