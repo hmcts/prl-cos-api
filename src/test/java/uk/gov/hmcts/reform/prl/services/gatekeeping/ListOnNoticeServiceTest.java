@@ -13,12 +13,17 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.EmailService;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -63,6 +68,16 @@ public class ListOnNoticeServiceTest {
                                            Mockito.any(),
                                            Mockito.any(), Mockito.any());
 
+    }
+
+    @Test
+    public void testCleanUpListOnNoticeFields() {
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS, "test");
+        caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED, "test");
+        listOnNoticeService.cleanUpListOnNoticeFields(caseDataUpdated);
+        assertNull(caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS));
+        assertNull(caseDataUpdated.get(LIST_ON_NOTICE_REASONS_SELECTED));
     }
 
 }

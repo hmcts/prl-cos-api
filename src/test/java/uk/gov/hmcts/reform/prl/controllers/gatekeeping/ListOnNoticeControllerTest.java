@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
@@ -83,6 +84,9 @@ public class ListOnNoticeControllerTest {
 
     @Mock
     AllocatedJudgeService allocatedJudgeService;
+
+    @Mock
+    CoreCaseDataService coreCaseDataService;
 
     private CaseData caseData;
 
@@ -150,12 +154,14 @@ public class ListOnNoticeControllerTest {
         caseDataUpdated.put(SELECTED_AND_ADDITIONAL_REASONS,reasonsSelectedString + "testAdditionalReasons\n");
         List<CaseNoteDetails> caseNoteDetails = new ArrayList<>();
         CaseNoteDetails caseNoteDetails1 = CaseNoteDetails.builder()
-            .subject(REASONS_SELECTED_FOR_LIST_ON_NOTICE).caseNote((String) caseDataUpdated.get("SELECTED_AND_ADDITIONAL_REASONS"))
+            .subject(REASONS_SELECTED_FOR_LIST_ON_NOTICE).caseNote((String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS))
             .dateAdded(LocalDate.now().toString()).dateCreated(LocalDateTime.now()).build();
         caseNoteDetails.add(caseNoteDetails1);
         when(listOnNoticeService.getReasonsSelected(any(), anyLong())).thenReturn(reasonsSelectedString);
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
-        when(addCaseNoteService.addCaseNoteDetails(any(CaseData.class),any(UserDetails.class)))
+        when(addCaseNoteService.getCurrentCaseNoteDetails(anyString(), anyString(),any(UserDetails.class)))
+            .thenReturn(caseNoteDetails1);
+        when(addCaseNoteService.getCaseNoteDetails(any(CaseData.class),any(CaseNoteDetails.class)))
             .thenReturn(ElementUtils.wrapElements(caseNoteDetails));
         AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
