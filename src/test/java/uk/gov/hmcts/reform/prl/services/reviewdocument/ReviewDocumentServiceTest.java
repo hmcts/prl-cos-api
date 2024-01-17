@@ -62,7 +62,7 @@ public class ReviewDocumentServiceTest {
     public static final String DOCUMENT_IN_REVIEW = "# Document review in progress";
     private static final String REVIEW_YES = "### You have successfully reviewed this document"
         + System.lineSeparator()
-        + "This document can only be seen by court staff, Cafcass and the judiciary. "
+        + "This document can only be seen by court staff and the judiciary. "
         + "You can view it in case file view and the confidential details tab.";
     private static final String REVIEW_NO = "### You have successfully reviewed this document"
         +  System.lineSeparator()
