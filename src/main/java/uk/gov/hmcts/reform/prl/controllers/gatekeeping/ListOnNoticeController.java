@@ -159,15 +159,17 @@ public class ListOnNoticeController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            listOnNoticeService.sendNotification(caseData, selectedAndAdditionalReasons);
-            listOnNoticeService.cleanUpListOnNoticeFields(caseDataUpdated);
-            coreCaseDataService.triggerEvent(
-                JURISDICTION,
-                CASE_TYPE,
-                caseData.getId(),
-                "internal-update-all-tabs",
-                caseDataUpdated
-            );
+            if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
+                listOnNoticeService.sendNotification(caseData, selectedAndAdditionalReasons);
+                listOnNoticeService.cleanUpListOnNoticeFields(caseDataUpdated);
+                coreCaseDataService.triggerEvent(
+                    JURISDICTION,
+                    CASE_TYPE,
+                    caseData.getId(),
+                    "internal-update-all-tabs",
+                    caseDataUpdated
+                );
+            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
