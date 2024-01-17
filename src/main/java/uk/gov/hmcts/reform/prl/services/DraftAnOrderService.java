@@ -292,6 +292,7 @@ public class DraftAnOrderService {
                                           DraftOrder draftOrder) {
         return Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
             && UserRoles.JUDGE.name().equals(loggedInUserType)
+            && !OrderStatusEnum.rejectedByJudge.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus())
             && Yes.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded());
     }
 
