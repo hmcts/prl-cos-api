@@ -19,9 +19,12 @@ import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
+import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
 
 @Slf4j
 @Service
@@ -98,5 +101,14 @@ public class ListOnNoticeService {
             .fullName(fullName)
             .caseNote(selectedAndAdditionalReasons)
             .build();
+    }
+
+    public void cleanUpListOnNoticeFields(Map<String, Object> caseDataUpdated) {
+        String[] listOnNoticeFields = {SELECTED_AND_ADDITIONAL_REASONS, LIST_ON_NOTICE_REASONS_SELECTED};
+        for (String field : listOnNoticeFields) {
+            if (caseDataUpdated.containsKey(field)) {
+                caseDataUpdated.put(field, null);
+            }
+        }
     }
 }
