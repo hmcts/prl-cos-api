@@ -149,7 +149,10 @@ public class EditReturnedOrderServiceTest {
                                                              .build()).build())
             .build();
 
-        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authToken);
+        Map<String, Object> response = editReturnedOrderService
+            .populateInstructionsAndDocuments(caseData, authToken, DraftOrder.builder()
+                .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("hello").build())
+                .build());
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
     }
 
@@ -162,17 +165,15 @@ public class EditReturnedOrderServiceTest {
                                                                         .build())
                                                              .build()).build())
             .build();
-        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authToken);
+        Map<String, Object> response = editReturnedOrderService
+            .populateInstructionsAndDocuments(caseData, authToken, DraftOrder.builder()
+                .otherDetails(OtherDraftOrderDetails.builder().build())
+            .build());
         assertTrue(response.containsKey("editOrderTextInstructions"));
     }
 
     @Test
     public void  testInstructionToLegalRepresentativeWithJudgeInstructions() {
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
-            .thenReturn(DraftOrder.builder()
-                            .orderType(CreateSelectOrderOptionsEnum.generalForm)
-                            .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
-                            .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build());
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder()
                               .rejectedOrdersDynamicList(DynamicList.builder()
@@ -181,7 +182,12 @@ public class EditReturnedOrderServiceTest {
                                                              .build()).build())
             .build();
 
-        Map<String, Object> response = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authToken);
+        Map<String, Object> response = editReturnedOrderService
+            .populateInstructionsAndDocuments(caseData, authToken, DraftOrder.builder()
+                .orderType(CreateSelectOrderOptionsEnum.generalForm)
+                .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
+                .orderSelectionType(ManageOrdersOptionsEnum.uploadAnOrder.toString())
+                .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build());
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
     }
 

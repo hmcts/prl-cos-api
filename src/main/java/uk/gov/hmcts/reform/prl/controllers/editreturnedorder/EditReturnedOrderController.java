@@ -71,11 +71,6 @@ public class EditReturnedOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            try {
-                log.info("callbackRequest ==>" + objectMapper.writeValueAsString(callbackRequest));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
             return editReturnedOrderService.handleAboutToStartCallback(authorisation, callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -90,11 +85,6 @@ public class EditReturnedOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            try {
-                log.info("callbackRequest ==>" + objectMapper.writeValueAsString(callbackRequest));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -104,7 +94,8 @@ public class EditReturnedOrderController {
                 DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                             caseData.getManageOrders()
                                                                                                 .getRejectedOrdersDynamicList());
-                Map<String, Object> caseDataUpdated = editReturnedOrderService.populateInstructionsAndDocuments(caseData, authorisation);
+                Map<String, Object> caseDataUpdated = editReturnedOrderService
+                    .populateInstructionsAndDocuments(caseData, authorisation, selectedOrder);
                 caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();

@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -103,10 +102,8 @@ public class EditReturnedOrderService {
         );
     }
 
-    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, String authorisation) {
+    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, String authorisation, DraftOrder selectedOrder) {
         Map<String, Object> caseDataMap = new HashMap<>();
-        DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getManageOrders()
-            .getRejectedOrdersDynamicList());
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         caseDataMap.put(ORDER_TYPE, selectedOrder.getOrderType());
@@ -135,12 +132,6 @@ public class EditReturnedOrderService {
                     + selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative()
                     + EDIT_THE_ORDER_LABEL + "\n" + USE_CONTINUE_TO_EDIT_THE_ORDER);
         }
-        caseDataMap.put("isTheOrderAboutAllChildren", selectedOrder.getIsTheOrderAboutAllChildren());
-        caseDataMap.put("isTheOrderAboutChildren", selectedOrder.getIsTheOrderAboutChildren());
-        caseDataMap.put("childOption", (Yes.equals(selectedOrder.getIsTheOrderAboutChildren())
-                || No.equals(selectedOrder.getIsTheOrderAboutAllChildren()))
-                ? selectedOrder.getChildOption() : DynamicMultiSelectList.builder()
-                .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
         return caseDataMap;
     }
 
