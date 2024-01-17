@@ -1059,7 +1059,9 @@ public class C100RespondentSolicitorService {
         } else {
             dataMap.put("dob", solicitorRepresentedRespondent.getValue().getDateOfBirth());
         }
-        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
+        if (null != solicitorRepresentedRespondent.getValue().getGender()) {
+            dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
+        }
     }
 
     private void populateRepresentativeDetails(Element<PartyDetails> solicitorRepresentedRespondent, Map<String, Object> dataMap) {
