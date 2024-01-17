@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 
 
 @PropertySource(value = "classpath:application.yaml")
@@ -210,14 +212,19 @@ public class EditReturnedOrderServiceTest {
 
     @Test
     public void  testAboutToSubmitHandlerForUploadedOrder() {
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
         DraftOrder draftOrder = DraftOrder.builder()
             .orderType(CreateSelectOrderOptionsEnum.generalForm)
             .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
             .orderSelectionType(ManageOrdersOptionsEnum.uploadAnOrder.toString())
             .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("u").build()).build();
+        draftOrderCollection.add(Element.<DraftOrder>builder().id(UUID.fromString(TEST_UUID))
+                                     .value(draftOrder)
+                                     .build());
         when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(),Mockito.any()))
             .thenReturn(draftOrder);
         CaseData caseData = CaseData.builder()
+            .draftOrderCollection(draftOrderCollection)
             .manageOrders(ManageOrders.builder()
                               .rejectedOrdersDynamicList(DynamicList.builder()
                                                              .value(DynamicListElement.builder().code(PrlAppsConstants.TEST_UUID)

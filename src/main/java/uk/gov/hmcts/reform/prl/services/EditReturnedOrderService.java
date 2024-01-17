@@ -15,18 +15,20 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeeded;
 
 @Slf4j
@@ -49,6 +51,7 @@ public class EditReturnedOrderService {
     public static final String PREVIEW_UPLOADED_ORDER = "previewUploadedOrder";
     public static final String SELECTED_ORDER = "selectedOrder";
     public static final String SELECT_THE_HEARING = "selectTheHearing";
+    public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
     private final ObjectMapper objectMapper;
     private final UserService userService;
     private final ManageOrderService manageOrderService;
@@ -60,7 +63,7 @@ public class EditReturnedOrderService {
 
     private final DraftAnOrderService draftAnOrderService;
     private final HearingDataService hearingDataService;
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private final ElementUtils elementUtils;
 
     public AboutToStartOrSubmitCallbackResponse handleAboutToStartCallback(String authorisation, CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
@@ -137,11 +140,28 @@ public class EditReturnedOrderService {
 
     public Map<String,Object> updateDraftOrderCollection(CaseData caseData, String authorisation) {
         Map<String,Object> caseDataMap = new HashMap<>();
+        List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                  caseData.getManageOrders().getRejectedOrdersDynamicList());
 
         if (ManageOrdersOptionsEnum.uploadAnOrder.toString().equalsIgnoreCase(draftOrder.getOrderSelectionType())) {
-            caseDataMap.put("draftOrderCollection", updateUploadedDraftOrderDetails(caseData, draftOrder));
+            DraftOrder updatedOrder = updateUploadedDraftOrderDetails(caseData, draftOrder);
+            UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
+                caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper);
+            for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+                if (e.getId().equals(selectedOrderId)) {
+                    draftOrderCollection.set(
+                        draftOrderCollection.indexOf(e),
+                        element(selectedOrderId, updatedOrder)
+                    );
+                    break;
+                }
+            }
+            draftOrderCollection.sort(Comparator.comparing(
+                m -> m.getValue().getOtherDetails().getDateCreated(),
+                Comparator.reverseOrder()
+            ));
+            caseDataMap.put(DRAFT_ORDER_COLLECTION, updateUploadedDraftOrderDetails(caseData, draftOrder));
         } else {
             caseDataMap.putAll(draftAnOrderService.updateDraftOrderCollection(caseData,authorisation, Event.EDIT_RETURNED_ORDER.getId()));
         }
@@ -150,6 +170,7 @@ public class EditReturnedOrderService {
     }
 
     public DraftOrder updateUploadedDraftOrderDetails(CaseData caseData, DraftOrder draftOrder) {
+
         return draftOrder.toBuilder()
             .orderDocument(caseData.getUploadOrderDoc())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
