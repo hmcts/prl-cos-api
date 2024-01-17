@@ -187,7 +187,8 @@ public class RelationshipsController {
         List<Element<ChildrenAndOtherPeopleRelation>> existingOtherPeopleChildRelations = caseData.getRelations().getChildAndOtherPeopleRelations();
         caseData.getOtherPartyInTheCaseRevised().forEach(eachPeople ->
              caseData.getNewChildDetails().forEach(eachChild -> {
-                 ChildrenAndOtherPeopleRelation existingRelation = getExistingChildrenAndOtherPeopleRelation(existingOtherPeopleChildRelations, eachPeople, eachChild);
+                 ChildrenAndOtherPeopleRelation existingRelation = getExistingChildrenAndOtherPeopleRelation(existingOtherPeopleChildRelations,
+                                                                                                             eachPeople, eachChild);
 
                  ChildrenAndOtherPeopleRelation otherPeopleChildRelation = ChildrenAndOtherPeopleRelation.builder()
                      .childFullName(String.format(PrlAppsConstants.FORMAT, eachChild.getValue().getFirstName(),
