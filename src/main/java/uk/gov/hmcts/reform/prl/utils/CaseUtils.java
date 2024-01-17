@@ -483,7 +483,9 @@ public class CaseUtils {
         return null;
     }
 
-    public static boolean checkIfAddressIsChanged(Address currentAddress, Address previousAddress) {
+    public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        Address currentAddress = currentParty.getAddress();
+        Address previousAddress = updatedParty.getAddress();
         log.info("Current address {} ", currentAddress);
         log.info("Previous address {} ", previousAddress);
         return currentAddress != null
@@ -493,6 +495,20 @@ public class CaseUtils {
             || !StringUtils.equals(currentAddress.getCountry(),previousAddress.getCountry())
             || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
             || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
-            || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown()));
+            || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
+            || (currentParty.getIsAddressConfidential() != null
+            && !currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+    }
+
+    public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return !StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
+            || (currentParty.getIsEmailAddressConfidential() != null
+            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+    }
+
+    public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
+            || (currentParty.getIsEmailAddressConfidential() != null
+            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
     }
 }

@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -156,7 +155,7 @@ public class UpdatePartyDetailsService {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
             PartyDetails applicant1 = applicants.get(0);
             if (Objects.nonNull(applicant1)) {
                 updatedCaseData.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
@@ -354,18 +353,16 @@ public class UpdatePartyDetailsService {
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             respondentList = caseDataBefore.getRespondents().stream()
                     .filter(resp1 -> resp1.getId().equals(respondent.getId())
-                            && (!StringUtils.equals(resp1.getValue().getEmail(),respondent.getValue().getEmail())
-                            || CaseUtils.checkIfAddressIsChanged(respondent.getValue().getAddress(), resp1.getValue().getAddress())
-                            || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
-                            respondent.getValue().getPhoneNumber())
+                            && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
+                            || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
+                            || CaseUtils.isPhoneNumberChanged(respondent.getValue(),resp1.getValue())
                             || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
                             .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
-            if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
-                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue().getAddress(), respondentDetailsFL401.getAddress())
-                    || (!StringUtils.equalsIgnoreCase(respondentDetailsFL401.getPhoneNumber(),
-                    respondent.getValue().getPhoneNumber()))
+            if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
+                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
+                    || (CaseUtils.isPhoneNumberChanged(respondent.getValue(),respondentDetailsFL401))
                 || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
                 .getLabelForDynamicList())) {
                 log.info("respondent data changed for fl401");
@@ -484,7 +481,7 @@ public class UpdatePartyDetailsService {
                 return  c8Documents;
             }
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 
