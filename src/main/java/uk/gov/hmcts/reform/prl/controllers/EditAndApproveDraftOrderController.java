@@ -212,6 +212,10 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             Object dynamicList = caseData.getDraftOrdersDynamicList();
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
+                if (Yes.getDisplayedValue().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("orderUploadedAsDraftFlag")))) {
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .data(caseDataUpdated).build();
+                }
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
