@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -52,6 +53,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 
 @Slf4j
 @RestController
@@ -59,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTI
 @SuppressWarnings({"java:S107"})
 public class ListWithoutNoticeController extends AbstractCallbackController {
     public static final String LISTING_INSTRUCTIONS_SENT_TO_ADMIN = "Listing instructions sent to admin";
+    public static final String LIST_WITHOUT_NOTICE_HEARING_INSTRUCTION = "listWithoutNoticeHearingInstruction";
     private final AddCaseNoteService addCaseNoteService;
     private final UserService userService;
     private final HearingDataService hearingDataService;
@@ -216,24 +219,20 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            caseData = caseData.toBuilder()
-                .caseNote(caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingInstruction())
-                .subject(LISTING_INSTRUCTIONS_SENT_TO_ADMIN)
-                .build();
+            CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+                REASONS_SELECTED_FOR_LIST_ON_NOTICE,
+                caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingInstruction(),
+                userService.getUserDetails(authorisation)
+            );
             caseDataUpdated.put(
                 CASE_NOTES,
-                addCaseNoteService.addCaseNoteDetails(
-                    caseData,
-                    userService.getUserDetails(authorisation)
-                )
+                addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
             );
-            addCaseNoteService.clearFields(caseDataUpdated);
-            caseDataUpdated.remove("listWithoutNoticeHearingInstruction");
+            caseDataUpdated.remove(LIST_WITHOUT_NOTICE_HEARING_INSTRUCTION);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
