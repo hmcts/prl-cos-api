@@ -174,6 +174,6 @@ public class ListOnNoticeControllerFT {
         response.then().assertThat().statusCode(200);
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res);
-        Assert.assertNotNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
+        Assert.assertNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
     }
 }
