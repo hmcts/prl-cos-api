@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -65,6 +66,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -235,14 +237,16 @@ public class DraftAnOrderService {
         return manageOrderService.getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, userDetails);
     }
 
-    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData, String eventId) {
-
+    public Map<String, Object> getDraftOrderDynamicList(CaseData caseData,
+                                                        String eventId,
+                                                        String authorisation) {
+        String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         Map<String, Object> caseDataMap = new HashMap<>();
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(
             draftOrderElement -> {
                 if (ObjectUtils.isNotEmpty(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded())) {
-                    filterDraftOrderForNewCases(eventId, supportedDraftOrderList, draftOrderElement);
+                    filterDraftOrderForNewCases(eventId, supportedDraftOrderList, draftOrderElement, loggedInUserType);
                 } else {
                     filterDraftOrderForExistingCases(eventId, supportedDraftOrderList, draftOrderElement);
                 }
@@ -277,15 +281,38 @@ public class DraftAnOrderService {
     }
 
     private static void filterDraftOrderForNewCases(String eventId, List<Element<DraftOrder>> supportedDraftOrderList,
-                                                    Element<DraftOrder> draftOrderElement) {
-        String orderStatus = draftOrderElement.getValue().getOtherDetails().getStatus();
-        if ((Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && Yes.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded())
-            && !OrderStatusEnum.rejectedByJudge.getDisplayedValue().equals(orderStatus))
-            || (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
-            && YesOrNo.No.equals(draftOrderElement.getValue().getOtherDetails().getIsJudgeApprovalNeeded()))) {
+                                                    Element<DraftOrder> draftOrderElement, String loggedInUserType) {
+        if (isJudgeReviewRequested(loggedInUserType, eventId, draftOrderElement.getValue())
+            || isManagerReviewRequested(loggedInUserType, eventId, draftOrderElement.getValue())
+            || isAdminEditAndApproveOrder(loggedInUserType, eventId, draftOrderElement.getValue())) {
             supportedDraftOrderList.add(draftOrderElement);
         }
+    }
+
+    private static boolean isJudgeReviewRequested(String loggedInUserType,
+                                          String eventId,
+                                          DraftOrder draftOrder) {
+        return Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && UserRoles.JUDGE.name().equals(loggedInUserType)
+            && Yes.equals(draftOrder.getOtherDetails().getIsJudgeApprovalNeeded());
+    }
+
+    private static boolean isManagerReviewRequested(String loggedInUserType,
+                                                    String eventId,
+                                                    DraftOrder draftOrder) {
+        return Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && !UserRoles.JUDGE.name().equals(loggedInUserType)
+            && AmendOrderCheckEnum.managerCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy());
+    }
+
+    private static boolean isAdminEditAndApproveOrder(String loggedInUserType,
+                                                      String eventId,
+                                                      DraftOrder draftOrder) {
+        return Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(eventId)
+            && UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
+            && (AmendOrderCheckEnum.noCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy())
+            || OrderStatusEnum.reviewedByManager.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus())
+            || OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus()));
     }
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
@@ -959,6 +986,8 @@ public class DraftAnOrderService {
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(status)
                               .isJudgeApprovalNeeded(isJudgeApprovalNeeded)
+                              //PRL-4857 - clear this field as order is reviewed by judge/manager already.
+                              .reviewRequiredBy(null)
                               .build())
             .build();
     }
