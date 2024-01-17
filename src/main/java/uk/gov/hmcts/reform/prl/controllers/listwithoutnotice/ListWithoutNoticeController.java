@@ -41,7 +41,6 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
@@ -51,7 +50,6 @@ import java.util.Map;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 
@@ -111,29 +109,22 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             String caseReferenceNumber = String.valueOf(callbackRequest.getCaseDetails().getId());
             log.info("Inside Prepopulate prePopulateHearingPageData for the case id {}", caseReferenceNumber);
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            List<Element<HearingData>> existingListWithoutNoticeHearingDetails = null != caseData.getListWithoutNoticeDetails()
+                ? caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingDetails() : null;
             Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-                hearingDataService.populateHearingDynamicLists(
-                    authorisation,
-                    caseReferenceNumber,
-                    caseData,
-                    hearings
-                );
+                hearingDataService.populateHearingDynamicLists(authorisation, caseReferenceNumber, caseData, hearings);
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             if (caseDataUpdated.containsKey(LISTWITHOUTNOTICE_HEARINGDETAILS)) {
-                List<Element<HearingData>> existingListWithoutNoticeHearingDetails = caseData.getListWithoutNoticeDetails()
-                    .getListWithoutNoticeHearingDetails();
                 caseDataUpdated.put(
                     LISTWITHOUTNOTICE_HEARINGDETAILS,
-                    hearingDataService.getHearingDataForOtherOrders(
-                        existingListWithoutNoticeHearingDetails,
-                        hearingDataPrePopulatedDynamicLists,
-                        caseData
-                    )
+                    hearingDataService.getHearingDataForOtherOrders(existingListWithoutNoticeHearingDetails,
+                                                      hearingDataPrePopulatedDynamicLists,
+                                                      caseData)
                 );
             } else {
                 HearingData hearingData = hearingDataService.generateHearingData(
@@ -149,7 +140,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
                     .build()
             );
-            caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -165,27 +155,25 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             log.info("Without Notice Submission flow - case id : {}", callbackRequest.getCaseDetails().getId());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            Object listWithoutNoticeHeardetailsObj = caseDataUpdated.get(LISTWITHOUTNOTICE_HEARINGDETAILS);
+            hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
             objectMapper.enable(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT);
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            Object listWithoutNoticeHeardetailsObj = caseDataUpdated.get(LISTWITHOUTNOTICE_HEARINGDETAILS);
-            hearingDataService.nullifyUnncessaryFieldsPopulated(listWithoutNoticeHeardetailsObj);
-            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
-                caseDataUpdated,
-                caseData.getLegalAdviserList(),
-                refDataUserService
+            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
+                                                                                           caseData.getLegalAdviserList(),
+                                                                                           refDataUserService
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
             caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
                 .getHearingDataForOtherOrders(caseData.getListWithoutNoticeDetails().getListWithoutNoticeHearingDetails(),
-                                              null, caseData
-                ));
+                                              null, caseData));
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -204,9 +192,9 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> ccdSubmitted(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest
+        @RequestBody uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
                 CONFIRMATION_BODY_PREFIX_DA

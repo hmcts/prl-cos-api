@@ -483,11 +483,10 @@ public class ListWithoutNoticeControllerTest {
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest callbackRequest = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
+                             .caseId("123")
+                             .caseData(caseData)
                              .build())
             .build();
 
@@ -609,20 +608,60 @@ public class ListWithoutNoticeControllerTest {
 
     @Test
     public void testForCcdSubmitted_DA() throws Exception {
+        DynamicListElement dynamicListElement2 = DynamicListElement.builder()
+            .code("INTER")
+            .label("In Person")
+            .build();
+        List<DynamicListElement> dynamicListElementsList = new ArrayList<>();
+        dynamicListElementsList.add(dynamicListElement2);
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(dynamicListElementsList)
+            .build();
+        HearingData hearingData = HearingData.builder()
+            .hearingTypes(dynamicList)
+            .confirmedHearingDates(dynamicList)
+            .hearingChannels(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingVideoChannels(dynamicList)
+            .hearingTelephoneChannels(dynamicList)
+            .courtList(dynamicList)
+            .localAuthorityHearingChannel(dynamicList)
+            .hearingListedLinkedCases(dynamicList)
+            .applicantSolicitorHearingChannel(dynamicList)
+            .respondentHearingChannel(dynamicList)
+            .respondentSolicitorHearingChannel(dynamicList)
+            .cafcassHearingChannel(dynamicList)
+            .cafcassCymruHearingChannel(dynamicList)
+            .applicantHearingChannel(dynamicList)
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .additionalHearingDetails("Test")
+            .instructionsForRemoteHearing("Test")
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
+            .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
+            .hearingAuthority(DioBeforeAEnum.circuitJudge)
+            .hearingJudgePersonalCode("test")
+            .hearingJudgeLastName("test")
+            .hearingJudgeEmailAddress("Test")
+            .applicantName("Test")
+            .build();
 
+        Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
+        List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingInstruction(
-                "test").build())
+            .listWithoutNoticeDetails(
+                ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails).build())
             .caseTypeOfApplication("FL401")
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
+
+        uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest callbackRequest = uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder()
+                             .caseId("123")
+                             .caseData(caseData)
                              .build())
             .build();
 
