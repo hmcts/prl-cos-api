@@ -155,11 +155,11 @@ public class ListOnNoticeController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             String selectedAndAdditionalReasons = (String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS);
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
             if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
+                CaseData caseData = objectMapper.convertValue(
+                    callbackRequest.getCaseDetails().getData(),
+                    CaseData.class
+                );
                 listOnNoticeService.sendNotification(caseData, selectedAndAdditionalReasons);
                 listOnNoticeService.cleanUpListOnNoticeFields(caseDataUpdated);
                 coreCaseDataService.triggerEvent(

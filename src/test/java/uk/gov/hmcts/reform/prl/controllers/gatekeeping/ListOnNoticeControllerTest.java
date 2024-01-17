@@ -307,6 +307,21 @@ public class ListOnNoticeControllerTest {
 
     @Test
     public void testSendListOnNoticeNotification() {
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .id(12345L)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(SELECTED_AND_ADDITIONAL_REASONS, "test");
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
         doNothing().when(listOnNoticeService)
             .sendNotification(Mockito.any(),Mockito.anyString());
         listOnNoticeController.sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
