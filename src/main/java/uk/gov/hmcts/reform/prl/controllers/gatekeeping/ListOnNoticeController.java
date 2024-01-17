@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
@@ -137,6 +138,7 @@ public class ListOnNoticeController {
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
