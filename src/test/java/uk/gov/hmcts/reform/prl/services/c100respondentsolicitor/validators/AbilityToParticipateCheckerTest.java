@@ -8,7 +8,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
@@ -46,7 +45,7 @@ public class AbilityToParticipateCheckerTest {
             .user(user)
             .response(Response.builder().abilityToParticipate(
                     AbilityToParticipate.builder()
-                    .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
+                    .factorsAffectingAbilityToParticipate(Yes)
                     .provideDetailsForFactorsAffectingAbilityToParticipate("test")
                     .build())
                           .build())
