@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
@@ -20,6 +19,7 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.MIAM;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
@@ -44,7 +44,7 @@ public class RespondentSolicitorTaskListRendererTest {
         RespondentTask.builder().event(CURRENT_OR_PREVIOUS_PROCEEDINGS).state(TaskState.MANDATORY_COMPLETED).build(),
         RespondentTask.builder().event(ALLEGATION_OF_HARM).state(TaskState.NOT_STARTED).build(),
         RespondentTask.builder().event(INTERNATIONAL_ELEMENT).state(TaskState.NOT_STARTED).build(),
-        RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).state(TaskState.NOT_STARTED).build(),
+        RespondentTask.builder().event(LITIGATION_CAPACITY).state(TaskState.NOT_STARTED).build(),
         RespondentTask.builder().event(VIEW_DRAFT_RESPONSE).state(TaskState.NOT_STARTED).build(),
         RespondentTask.builder().event(SUBMIT).state(TaskState.NOT_STARTED).build()
     );

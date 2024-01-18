@@ -30,7 +30,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.Contact;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.LitigationCapacity;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
@@ -231,11 +231,11 @@ public class C100RespondentSolicitorService {
                         solicitorRepresentedRespondent.getValue().getResponse().getCitizenInternationalElements()
                     );
                     break;
-                case ABILITY_TO_PARTICIPATE:
+                case LITIGATION_CAPACITY:
                     String[] abilityToParticipateFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         abilityToParticipateFields[0],
-                        solicitorRepresentedRespondent.getValue().getResponse().getAbilityToParticipate()
+                        solicitorRepresentedRespondent.getValue().getResponse().getLitigationCapacity()
                     );
                     break;
                 case VIEW_DRAFT_RESPONSE:
@@ -331,7 +331,7 @@ public class C100RespondentSolicitorService {
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildInternationalElementResponse(caseData, buildResponseForRespondent);
                 break;
-            case ABILITY_TO_PARTICIPATE:
+            case LITIGATION_CAPACITY:
                 buildResponseForRespondent = buildAbilityToParticipateResponse(caseData, buildResponseForRespondent);
                 break;
             case VIEW_DRAFT_RESPONSE, SUBMIT:
@@ -380,16 +380,16 @@ public class C100RespondentSolicitorService {
 
     private Response buildAbilityToParticipateResponse(CaseData caseData, Response buildResponseForRespondent) {
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-            .abilityToParticipate(AbilityToParticipate.builder()
+            .litigationCapacity(LitigationCapacity.builder()
                                       .factorsAffectingAbilityToParticipate(caseData.getRespondentSolicitorData()
-                                                                                .getAbilityToParticipateInProceedings()
+                                                                                .getLitigationCapacityInProceedings()
                                                                                 .getFactorsAffectingAbilityToParticipate())
                                       .provideDetailsForFactorsAffectingAbilityToParticipate(
-                                          YesNoDontKnow.yes.equals(
+                                          Yes.equals(
                                               caseData.getRespondentSolicitorData()
-                                                  .getAbilityToParticipateInProceedings().getFactorsAffectingAbilityToParticipate())
+                                                  .getLitigationCapacityInProceedings().getFactorsAffectingAbilityToParticipate())
                                               ? caseData.getRespondentSolicitorData()
-                                              .getAbilityToParticipateInProceedings()
+                                              .getLitigationCapacityInProceedings()
                                               .getProvideDetailsForFactorsAffectingAbilityToParticipate()
                                               : null)
                                       .build())

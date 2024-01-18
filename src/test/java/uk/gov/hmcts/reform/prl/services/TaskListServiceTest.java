@@ -68,7 +68,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
@@ -152,7 +151,7 @@ public class TaskListServiceTest {
             RespondentTask.builder().event(CURRENT_OR_PREVIOUS_PROCEEDINGS).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(ALLEGATION_OF_HARM).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT).state(TaskState.NOT_STARTED).build(),
-            RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).state(TaskState.NOT_STARTED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.LITIGATION_CAPACITY).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(VIEW_DRAFT_RESPONSE).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(RespondentSolicitorEvents.SUBMIT).state(TaskState.NOT_STARTED).build()
         );
@@ -454,7 +453,7 @@ public class TaskListServiceTest {
             CURRENT_OR_PREVIOUS_PROCEEDINGS,
             RespondentSolicitorEvents.ALLEGATION_OF_HARM,
             RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
-            ABILITY_TO_PARTICIPATE,
+            RespondentSolicitorEvents.LITIGATION_CAPACITY,
             VIEW_DRAFT_RESPONSE,
             RespondentSolicitorEvents.SUBMIT
         );

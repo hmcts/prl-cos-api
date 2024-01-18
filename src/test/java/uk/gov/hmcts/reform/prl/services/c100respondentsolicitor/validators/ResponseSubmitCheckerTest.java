@@ -9,7 +9,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.LitigationCapacity;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
@@ -76,7 +76,7 @@ public class ResponseSubmitCheckerTest {
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
                                                   .build())
-                          .abilityToParticipate(AbilityToParticipate
+                          .litigationCapacity(LitigationCapacity
                                                     .builder()
                                                     .build())
                           .attendToCourt(AttendToCourt

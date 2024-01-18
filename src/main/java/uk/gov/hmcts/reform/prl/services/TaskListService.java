@@ -59,7 +59,6 @@ import static uk.gov.hmcts.reform.prl.enums.Event.TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.Event.VIEW_PDF_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.Event.WELSH_LANGUAGE_REQUIREMENTS;
 import static uk.gov.hmcts.reform.prl.enums.Event.WITHOUT_NOTICE_ORDER;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
@@ -215,7 +214,7 @@ public class TaskListService {
             CURRENT_OR_PREVIOUS_PROCEEDINGS,
             RespondentSolicitorEvents.ALLEGATION_OF_HARM,
             RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
-            ABILITY_TO_PARTICIPATE,
+            RespondentSolicitorEvents.LITIGATION_CAPACITY,
             VIEW_DRAFT_RESPONSE,
             RespondentSolicitorEvents.SUBMIT
         ));

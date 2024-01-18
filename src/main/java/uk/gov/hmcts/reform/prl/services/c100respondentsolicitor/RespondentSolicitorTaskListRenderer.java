@@ -97,7 +97,7 @@ public class RespondentSolicitorTaskListRenderer {
 
         final RespondentTaskSection additionalInformation = newSection("5. Additional information")
             .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
-            .withTask(tasks.get(RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE));
+            .withTask(tasks.get(RespondentSolicitorEvents.LITIGATION_CAPACITY));
 
         final RespondentTaskSection viewResponse = newSection("6. View PDF response")
             .withTask(tasks.get(RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE));

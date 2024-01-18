@@ -10,14 +10,15 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.LITIGATION_CAPACITY;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.MIAM;
+
 
 @Slf4j
 @SuppressWarnings("ALL")
@@ -40,7 +41,7 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         mandatoryEvents.put(CONSENT, respondentEventsChecker.getConsentToApplicationChecker());
         mandatoryEvents.put(KEEP_DETAILS_PRIVATE, respondentEventsChecker.getKeepDetailsPrivateChecker());
         mandatoryEvents.put(MIAM, respondentEventsChecker.getRespondentMiamChecker());
-        mandatoryEvents.put(ABILITY_TO_PARTICIPATE, respondentEventsChecker.getAbilityToParticipateChecker());
+        mandatoryEvents.put(LITIGATION_CAPACITY, respondentEventsChecker.getAbilityToParticipateChecker());
         mandatoryEvents.put(ATTENDING_THE_COURT, respondentEventsChecker.getAttendToCourtChecker());
         mandatoryEvents.put(CURRENT_OR_PREVIOUS_PROCEEDINGS, respondentEventsChecker.getCurrentOrPastProceedingsChecker());
         mandatoryEvents.put(ALLEGATION_OF_HARM, respondentEventsChecker.getRespondentAllegationsOfHarmChecker());

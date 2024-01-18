@@ -9,7 +9,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.LitigationCapacity;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
@@ -47,7 +47,7 @@ public class Response {
     private final List<Element<RespondentProceedingDetails>> respondentExistingProceedings;
     @JsonUnwrapped
     @Builder.Default
-    private final AbilityToParticipate abilityToParticipate;
+    private final LitigationCapacity litigationCapacity;
     private final AttendToCourt attendToCourt;
 
     @JsonUnwrapped

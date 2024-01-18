@@ -8,12 +8,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.LitigationCapacity;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
@@ -27,7 +26,7 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 @Slf4j
-public class AbilityToParticipateCheckerTest {
+public class LitigationCapacityCheckerTest {
 
     @InjectMocks
     AbilityToParticipateChecker abilityToParticipateChecker;
@@ -44,9 +43,9 @@ public class AbilityToParticipateCheckerTest {
             .idamId("1234-5678").solicitorRepresented(Yes).build();
         respondent = PartyDetails.builder()
             .user(user)
-            .response(Response.builder().abilityToParticipate(
-                    AbilityToParticipate.builder()
-                    .factorsAffectingAbilityToParticipate(YesNoDontKnow.yes)
+            .response(Response.builder().litigationCapacity(
+                    LitigationCapacity.builder()
+                    .factorsAffectingAbilityToParticipate(Yes)
                     .provideDetailsForFactorsAffectingAbilityToParticipate("test")
                     .build())
                           .build())
