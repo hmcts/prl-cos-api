@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.prl.mapper.CcdObjectMapper;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
-import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
 import uk.gov.hmcts.reform.prl.models.SdoDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -178,6 +177,7 @@ public class DraftAnOrderService {
     public static final String SDO_NEW_PARTNER_PARTIES_CAFCASS_CYMRU = "sdoNewPartnerPartiesCafcassCymru";
     private static final String DATE_ORDER_MADE = "dateOrderMade";
     private static final String SELECTED_ORDER = "selectedOrder";
+    public static final String INSTRUCTIONS_TO_LEGAL_REPRESENTATIVE = "instructionsToLegalRepresentative";
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -612,6 +612,9 @@ public class DraftAnOrderService {
         } else {
             caseDataMap.put("judgeNotesEmptyDraftJourney", YES);
         }
+        if (null != selectedOrder.getOtherDetails()) {
+            caseDataMap.put(INSTRUCTIONS_TO_LEGAL_REPRESENTATIVE, selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative());
+        }
         caseDataMap.put(
             IS_HEARING_PAGE_NEEDED,
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
@@ -981,6 +984,7 @@ public class DraftAnOrderService {
             draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getStatus() : null
         );
         YesOrNo isJudgeApprovalNeeded =  draftOrder.getOtherDetails().getIsJudgeApprovalNeeded();
+        String instructionssToLegalRep = caseData.getManageOrders().getInstructionsToLegalRepresentative();
         if (Event.EDIT_AND_APPROVE_ORDER.getId().equals(eventId)) {
             if (OrderApprovalDecisionsForSolicitorOrderEnum.askLegalRepToMakeChanges
                 .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())) {
@@ -988,6 +992,7 @@ public class DraftAnOrderService {
                 isJudgeApprovalNeeded = Yes;
             } else {
                 isJudgeApprovalNeeded = No;
+                instructionssToLegalRep = "";
             }
         }
         return draftOrder.toBuilder()
@@ -995,7 +1000,7 @@ public class DraftAnOrderService {
             .adminNotes(caseData.getCourtAdminNotes())
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(status)
-                              .instructionsToLegalRepresentative(caseData.getManageOrders().getInstructionsToLegalRepresentative())
+                              .instructionsToLegalRepresentative(instructionssToLegalRep)
                               .isJudgeApprovalNeeded(isJudgeApprovalNeeded)
                               //PRL-4857 - clear this field as order is reviewed by judge/manager already.
                               .reviewRequiredBy(null)
@@ -1021,15 +1026,12 @@ public class DraftAnOrderService {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         log.info("*** Judge notes 3 {}", draftOrder.getJudgeNotes());
         log.info("*** Judge directions to admin 3 {}", caseData.getJudgeDirectionsToAdmin());
-        return DraftOrder.builder().orderType(draftOrder.getOrderType())
+        return draftOrder.toBuilder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
-            .orderTypeId(draftOrder.getOrderTypeId())
             .orderDocument(orderDocumentEng)
             .orderDocumentWelsh(orderDocumentWelsh)
-            .otherDetails(OtherDraftOrderDetails.builder()
+            .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
-                              .orderCreatedBy(draftOrder.getOtherDetails().getOrderCreatedBy())
-                              .orderCreatedByEmailId(draftOrder.getOtherDetails().getOrderCreatedByEmailId())
                               .dateCreated(draftOrder.getOtherDetails() != null ? draftOrder.getOtherDetails().getDateCreated() : dateTime.now())
                               .status(manageOrderService.getOrderStatus(
                                   draftOrder.getOrderSelectionType(),
@@ -1045,7 +1047,7 @@ public class DraftAnOrderService {
                                                                            caseData.getStandardDirectionOrder(),
                                                                            draftOrder.getOrderType(),
                                                                            draftOrder.getC21OrderOptions()))
-                              .instructionsToLegalRepresentative(caseData.getManageOrders().getInstructionsToLegalRepresentative())
+                              .instructionsToLegalRepresentative(null)
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
@@ -1098,18 +1100,13 @@ public class DraftAnOrderService {
             .dateOfHearingTimeEstimate(caseData.getManageOrders().getDateOfHearingTimeEstimate())
             .fl402HearingCourtname(caseData.getManageOrders().getFl402HearingCourtname())
             .fl402HearingCourtAddress(caseData.getManageOrders().getFl402HearingCourtAddress())
-            .orderSelectionType(draftOrder.getOrderSelectionType())
             .orderCreatedBy(loggedInUserType)
-            .isOrderUploadedByJudgeOrAdmin(draftOrder.getIsOrderUploadedByJudgeOrAdmin())
-            .approvalDate(draftOrder.getApprovalDate())
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .childrenList(manageOrderService.getSelectedChildInfoFromMangeOrder(caseData))
             .sdoDetails(CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())
                             ? manageOrderService.copyPropertiesToSdoDetails(caseData) : null)
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
-            .isOrderCreatedBySolicitor(draftOrder.getIsOrderCreatedBySolicitor())
             .hearingsType(caseData.getManageOrders().getHearingsType())
-            .c21OrderOptions(draftOrder.getC21OrderOptions())
             .build();
     }
 
