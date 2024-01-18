@@ -124,6 +124,9 @@ public class DgsService {
         });
         caseDataMap.put("case_data", caseDataValues);
         Map<String, Object> tempCaseDetails = new HashMap<>();
+        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+        }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
