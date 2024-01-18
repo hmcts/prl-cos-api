@@ -47,6 +47,7 @@ public class AllocatedJudgeServiceTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("isSpecificJudgeOrLegalAdviserNeeded","No");
         stringObjectMap.put("tierOfJudiciary","circuitJudge");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
@@ -61,6 +62,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","districtJudge");
+        stringObjectMap.put("isSpecificJudgeOrLegalAdviserNeeded","No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.DISTRICT_JUDGE.getDisplayedValue());
@@ -74,6 +76,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","highCourtJudge");
+        stringObjectMap.put("isSpecificJudgeOrLegalAdviserNeeded","No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.HIGHCOURT_JUDGE.getDisplayedValue());
@@ -87,6 +90,7 @@ public class AllocatedJudgeServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         stringObjectMap.put("tierOfJudiciary","magistrates");
+        stringObjectMap.put("isSpecificJudgeOrLegalAdviserNeeded","No");
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         AllocatedJudge expectedResponse = allocatedJudgeService.getAllocatedJudgeDetails(stringObjectMap,null,null);
         assertEquals(expectedResponse.getTierOfJudiciary().getDisplayedValue(),TierOfJudiciaryEnum.MAGISTRATES.getDisplayedValue());
