@@ -161,11 +161,11 @@ public class EditReturnedOrderService {
                 m -> m.getValue().getOtherDetails().getDateCreated(),
                 Comparator.reverseOrder()
             ));
-            caseDataMap.put(DRAFT_ORDER_COLLECTION, updateUploadedDraftOrderDetails(caseData, draftOrder));
+            caseDataMap.put(DRAFT_ORDER_COLLECTION, draftOrderCollection);
         } else {
             caseDataMap.putAll(draftAnOrderService.updateDraftOrderCollection(caseData,authorisation, Event.EDIT_RETURNED_ORDER.getId()));
         }
-
+        log.info("*** Draft Order Collection : {}",caseDataMap.get(DRAFT_ORDER_COLLECTION));
         return caseDataMap;
     }
 
