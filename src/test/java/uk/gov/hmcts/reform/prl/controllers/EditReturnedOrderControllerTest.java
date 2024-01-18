@@ -19,16 +19,13 @@ import uk.gov.hmcts.reform.prl.controllers.editreturnedorder.EditReturnedOrderCo
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -111,55 +108,17 @@ public class EditReturnedOrderControllerTest {
 
     @Test
     public void testPopulateInstructions() {
-        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
-        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
-        draftOrderCollection.add(draftOrderElement);
-        CaseData caseData = CaseData.builder()
-            .id(123L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .draftOrderCollection(draftOrderCollection)
-            .manageOrders(ManageOrders.builder().rejectedOrdersDynamicList(DynamicList.builder().build()).build())
-            .state(State.CASE_ISSUED)
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        caseDataMap.put("orderType", "test");
-        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(),Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
+        when(editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(Mockito.anyString(), Mockito.any()))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("error1")).build());
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
-                             .data(caseDataMap)
                              .build())
             .build();
-
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderController
             .populateInstructionsToSolicitor(authToken,s2sToken,callbackRequest);
-        Assert.assertFalse(response.getData().isEmpty());
-    }
-
-    @Test
-    public void testPopulateInstructionsWithEmptyDraftOrderCollection() {
-        CaseData caseData = CaseData.builder()
-            .id(123L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .state(State.CASE_ISSUED)
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(caseDataMap)
-                             .build())
-            .build();
-
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
-        AboutToStartOrSubmitCallbackResponse response = editReturnedOrderController
-            .populateInstructionsToSolicitor(authToken,s2sToken,callbackRequest);
-        Assert.assertTrue(response.getErrors().size() > 0);
+        Assert.assertFalse(response.getErrors().isEmpty());
     }
 
     @Test

@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -237,5 +239,56 @@ public class EditReturnedOrderServiceTest {
             .thenReturn(caseDataMap);
         Map<String, Object> response = editReturnedOrderService.updateDraftOrderCollection(caseData, authToken);
         assertTrue(response.containsKey(DRAFT_ORDER_COLLECTION));
+    }
+
+    @Test
+    public void testpopulateInstructionsAndFieldsForLegalRep() {
+        Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder()
+            .value(DraftOrder.builder().otherDetails(OtherDraftOrderDetails.builder().build()).build()).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(ManageOrders.builder().rejectedOrdersDynamicList(DynamicList.builder().build()).build())
+            .state(State.CASE_ISSUED)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        caseDataMap.put("orderType", "test");
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(),Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+        AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(authToken, callbackRequest);
+        Assert.assertEquals(response.getData().get("instructionsToLegalRepresentative"),"u");
+        Assert.assertEquals(response.getData().get("orderName"),"<span class='heading-h3'>General form of undertaking (N117)</span>");
+    }
+
+    @Test
+    public void testPopulateInstructionsWithEmptyDraftOrderCollection() {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .state(State.CASE_ISSUED)
+            .build();
+        Map<String, Object> caseDataMap = new HashMap<>();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(caseDataMap)
+                             .build())
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.populateCommonDraftOrderFields(Mockito.anyString(), Mockito.any(), Mockito.any())).thenReturn(caseDataMap);
+        AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService
+            .populateInstructionsAndFieldsForLegalRep(authToken,callbackRequest);
+        Assert.assertTrue(response.getErrors().size() > 0);
     }
 }

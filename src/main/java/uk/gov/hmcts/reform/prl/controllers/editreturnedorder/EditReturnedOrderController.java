@@ -18,15 +18,12 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.DraftOrder;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 
-import java.util.List;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -85,23 +82,7 @@ public class EditReturnedOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            CaseData caseData = objectMapper.convertValue(
-                callbackRequest.getCaseDetails().getData(),
-                CaseData.class
-            );
-            if (caseData.getDraftOrderCollection() != null
-                && !caseData.getDraftOrderCollection().isEmpty()) {
-                DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                                                            caseData.getManageOrders()
-                                                                                                .getRejectedOrdersDynamicList());
-                Map<String, Object> caseDataUpdated = editReturnedOrderService
-                    .populateInstructionsAndDocuments(caseData, authorisation, selectedOrder);
-                caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
-                return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(caseDataUpdated).build();
-            } else {
-                return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
-            }
+            return editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(authorisation, callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

@@ -950,8 +950,7 @@ public class DraftAnOrderService {
             m -> m.getValue().getOtherDetails().getDateCreated(),
             Comparator.reverseOrder()
         ));
-        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderCollection
-        );
+        return Map.of(DRAFT_ORDER_COLLECTION, draftOrderCollection);
     }
 
     public boolean isOrderEdited(CaseData caseData, String eventId, boolean isOrderEdited) {
@@ -1046,6 +1045,7 @@ public class DraftAnOrderService {
                                                                            caseData.getStandardDirectionOrder(),
                                                                            draftOrder.getOrderType(),
                                                                            draftOrder.getC21OrderOptions()))
+                              .instructionsToLegalRepresentative(caseData.getManageOrders().getInstructionsToLegalRepresentative())
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
