@@ -32,8 +32,8 @@ public enum RespondentSolicitorEvents {
         + "respondentChildAbduction,respondentOtherConcerns"),
     INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild"),
     ABILITY_TO_PARTICIPATE(
-        "c100ResSolAbilityToParticipate",
-        "Ability to participate",
+        "c100ResSolLitigationCapacity",
+        "Litigation capacity",
         "abilityToParticipateInProceedings"
     ),
     VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response", ""),
