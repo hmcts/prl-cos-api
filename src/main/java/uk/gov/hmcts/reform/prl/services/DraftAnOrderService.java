@@ -177,7 +177,7 @@ public class DraftAnOrderService {
     public static final String SDO_NEW_PARTNER_PARTIES_CAFCASS_CYMRU = "sdoNewPartnerPartiesCafcassCymru";
     private static final String DATE_ORDER_MADE = "dateOrderMade";
     private static final String SELECTED_ORDER = "selectedOrder";
-    public static final String INSTRUCTIONS_TO_LEGAL_REPRESENTATIVE = "instructionsToLegalRepresentative";
+    public static final String LEGAL_REP_INSTRUCTIONS_PLACE_HOLDER = "legalRepInstructionsPlaceHolder";
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -613,7 +613,7 @@ public class DraftAnOrderService {
             caseDataMap.put("judgeNotesEmptyDraftJourney", YES);
         }
         if (null != selectedOrder.getOtherDetails()) {
-            caseDataMap.put(INSTRUCTIONS_TO_LEGAL_REPRESENTATIVE, selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative());
+            caseDataMap.put(LEGAL_REP_INSTRUCTIONS_PLACE_HOLDER, selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative());
         }
         caseDataMap.put(
             IS_HEARING_PAGE_NEEDED,
