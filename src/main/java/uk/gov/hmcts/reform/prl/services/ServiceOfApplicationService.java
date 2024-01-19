@@ -137,17 +137,22 @@ public class ServiceOfApplicationService {
     public static final String BY_EMAIL_AND_POST = "By email and post";
     public static final String BY_POST = "By post";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
+    public static final String PROCEED_TO_SERVING = "proceedToServing";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
     public static final String APPLICATION_SERVED_HEADER = "# Application served";
-    public static final String CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX = "### What happens next \n\n The application will "
-        + "be served to relevant people in the case";
-    public static final String CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX = "### What happens next \n\n The application cannot "
-        + "be served. The packs will be sent to the filling team to be redacted.";
+    public static final String CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX = """
+        ### What happens next
+        The application will be served to relevant people in the case""";
+    public static final String CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX = """
+           ### What happens next
+           The application cannot be served. The packs will be sent to the filling team to be redacted.""";
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
-    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document will "
-        + "be reviewed for confidential details";
+    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
+        ### What happens next
+        The document will be reviewed for confidential details
+        """;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";
@@ -332,7 +337,7 @@ public class ServiceOfApplicationService {
             //serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
             if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
                 && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
-                && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
+                && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
                 handleNonPersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
                                                    bulkPrintDetails, c100StaticDocs);
             } else {
@@ -343,7 +348,7 @@ public class ServiceOfApplicationService {
             }
             //serving other people in case
             if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-                && caseData.getServiceOfApplication().getSoaOtherParties().getValue().size() > 0) {
+                && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
                 log.info("sending notification to Other in case of Citizen");
                 sendNotificationToOthers(caseData, authorization, bulkPrintDetails, c100StaticDocs);
             }
@@ -417,7 +422,7 @@ public class ServiceOfApplicationService {
             }
         } else if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
-            && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
+            && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
             log.info("Non personal Service - Case created by - Solicitor");
             c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
                 C9_DOCUMENT_FILENAME)).collect(
@@ -429,7 +434,7 @@ public class ServiceOfApplicationService {
             );
 
             log.info("selected Applicants " + selectedApplicants.size());
-            if (selectedApplicants.size() > 0) {
+            if (!selectedApplicants.isEmpty()) {
                 List<Document> packQDocs = getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs);
                 emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
                     caseData,
@@ -444,7 +449,7 @@ public class ServiceOfApplicationService {
                 caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
             );
             log.info("selected respondents " + selectedRespondents.size());
-            if (selectedRespondents.size() > 0) {
+            if (!selectedRespondents.isEmpty()) {
                 List<Document> packRDocs = getNotificationPack(caseData, PrlAppsConstants.R, c100StaticDocs);
                 List<Document> packSDocs = getNotificationPack(caseData, PrlAppsConstants.S, c100StaticDocs);
                 sendNotificationToRespondentNonPersonal(
@@ -460,7 +465,7 @@ public class ServiceOfApplicationService {
         }
         //serving other people in case
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-            && caseData.getServiceOfApplication().getSoaOtherParties().getValue().size() > 0) {
+            && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
             sendNotificationToOthers(caseData, authorization, bulkPrintDetails, c100StaticDocs);
         }
         return whoIsResponsibleForServing;
@@ -593,9 +598,9 @@ public class ServiceOfApplicationService {
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        if (ObjectUtils.isEmpty(caseDataMap.get("proceedToServing"))) {
-            caseDataMap.put("proceedToServing", Yes);
-            log.info("SOA proceed to serving {}", caseDataMap.get("proceedToServing"));
+        if (ObjectUtils.isEmpty(caseDataMap.get(PROCEED_TO_SERVING))) {
+            caseDataMap.put(PROCEED_TO_SERVING, Yes);
+            log.info("SOA proceed to serving {}", caseDataMap.get(PROCEED_TO_SERVING));
         }
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
@@ -766,7 +771,7 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    private Boolean isAccessEnabled(Element<PartyDetails> party) {
+    private boolean isAccessEnabled(Element<PartyDetails> party) {
         return party.getValue() != null && party.getValue().getUser() != null
             && party.getValue().getUser().getIdamId() != null;
     }
@@ -1190,8 +1195,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME))
-                        .collect(Collectors.toList()));
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList());
         return docs;
     }
 
@@ -1204,8 +1208,7 @@ public class ServiceOfApplicationService {
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                             C1A_BLANK_DOCUMENT_FILENAME))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                            C7_BLANK_DOCUMENT_FILENAME))
-                        .collect(Collectors.toList()));
+                            C7_BLANK_DOCUMENT_FILENAME)).toList());
         return docs;
     }
 
@@ -1251,8 +1254,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
-                        .collect(Collectors.toList()));
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
         return docs;
     }
 
@@ -1263,8 +1265,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(staticDocs.stream()
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL416_FILENAME))
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
-                        .collect(Collectors.toList()));
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
         return docs;
     }
 
@@ -1284,8 +1285,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(staticDocs.stream()
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL416_FILENAME))
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME))
-                        .collect(Collectors.toList()));
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
         return docs;
     }
 
@@ -1347,9 +1347,8 @@ public class ServiceOfApplicationService {
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
             List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
-                .getValue().stream().map(DynamicMultiselectListElement::getCode)
-                .collect(Collectors.toList());
-            orderCodes.stream().forEach(orderCode ->
+                .getValue().stream().map(DynamicMultiselectListElement::getCode).toList();
+            orderCodes.forEach(orderCode ->
                 caseData.getOrderCollection().stream()
                     .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
                     .findFirst()
@@ -1394,7 +1393,7 @@ public class ServiceOfApplicationService {
             "soaIsOrderListEmpty",
             "noticeOfSafetySupportLetter",
             "additionalDocumentsList",
-            "proceedToServing"
+            PROCEED_TO_SERVING
         ));
 
         if (removeCafcassFields) {
@@ -1513,11 +1512,10 @@ public class ServiceOfApplicationService {
         // Checking the Respondent Details..
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
 
-        if (!respondentsWrapped.isEmpty() && !respondentsWrapped.get().isEmpty()) {
+        if (respondentsWrapped.isPresent() && !respondentsWrapped.get().isEmpty()) {
             List<PartyDetails> respondents = respondentsWrapped.get()
                 .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
+                .map(Element::getValue).toList();
 
             for (PartyDetails respondent : respondents) {
                 if (YesOrNo.Yes.equals(respondent.getIsAddressConfidential())
@@ -1660,7 +1658,7 @@ public class ServiceOfApplicationService {
         log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
-            && (caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().size() > 0)) {
+            && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
             c100StaticDocs = c100StaticDocs.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
                 C9_DOCUMENT_FILENAME)).collect(
                 Collectors.toList());
@@ -1671,8 +1669,7 @@ public class ServiceOfApplicationService {
             );
 
             // Applicants pack
-            if (selectedApplicants != null
-                && selectedApplicants.size() > 0) {
+            if (CollectionUtils.isNotEmpty(selectedApplicants)) {
                 buildUnservedApplicantPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs, selectedApplicants);
 
             } else {
@@ -1685,7 +1682,7 @@ public class ServiceOfApplicationService {
                 caseData.getRespondents(),
                 caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
             );
-            if (selectedRespondents != null && selectedRespondents.size() > 0) {
+            if (CollectionUtils.isNotEmpty(selectedRespondents)) {
 
                 buildUnservedRespondentPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs, selectedRespondents);
 
@@ -1695,7 +1692,7 @@ public class ServiceOfApplicationService {
 
             //serving other people in case
             if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-                && caseData.getServiceOfApplication().getSoaOtherParties().getValue().size() > 0) {
+                && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
                 buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
             } else {
                 caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
@@ -1942,7 +1939,7 @@ public class ServiceOfApplicationService {
             }
             return docs;
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromDynamicList(String authorisation,
@@ -2065,7 +2062,7 @@ public class ServiceOfApplicationService {
         if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
             && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
             response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
-            caseDataMap.put("proceedToServing", Yes);
+            caseDataMap.put(PROCEED_TO_SERVING, Yes);
             CaseUtils.setCaseState(callbackRequest, caseDataMap);
             log.info("**** Case status :  {}", caseDataMap.get("caseStatus"));
         } else {
