@@ -8,19 +8,14 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -42,9 +37,6 @@ public class DgsServiceTest {
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
 
-    @Mock
-    private HearingDataService hearingDataService;
-
     public static final String authToken = "Bearer TestAuthToken";
     public static final String PRL_DRAFT_TEMPLATE = "FL-DIV-GOR-ENG-00062.docx";
     private CaseData caseData;
@@ -54,15 +46,7 @@ public class DgsServiceTest {
     @Before
     public void setUp() {
 
-        caseData = CaseData.builder()
-            .manageOrders(ManageOrders.builder()
-                              .ordersHearingDetails(
-                                  List.of(Element.<HearingData>builder()
-                                              .id(UUID.randomUUID())
-                                              .value(HearingData.builder().build())
-                                              .build()))
-                              .build())
-            .build();
+        caseData = CaseData.builder().build();
 
         caseDetails = CaseDetails.builder()
             .caseId("123")
@@ -91,8 +75,6 @@ public class DgsServiceTest {
             .binaryUrl("binaryUrl")
             .hashToken("testHashToken")
             .build();
-        Map<String, Object> dataMap = new HashMap<>();
-        Mockito.doNothing().when(hearingDataService).populatePartiesAndSolicitorsNames(caseData, dataMap);
 
         assertEquals(dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE),generatedDocumentInfo);
 
@@ -134,8 +116,6 @@ public class DgsServiceTest {
 
     @Test
     public void testToGenerateDocumentWithNoDataExpectedException() throws Exception {
-        Map<String, Object> dataMap = new HashMap<>();
-        Mockito.doNothing().when(hearingDataService).populatePartiesAndSolicitorsNames(caseData, dataMap);
         dgsService.generateDocument(authToken, caseDetails, PRL_DRAFT_TEMPLATE);
         Throwable exception = assertThrows(Exception.class, () -> {
             throw new Exception("Error generating and storing document for case");
@@ -173,16 +153,5 @@ public class DgsServiceTest {
     public void testgenerateCitizenDocument() throws Exception {
         dgsService.generateCitizenDocument(" ", generateAndUploadDocumentRequest, " ");
         assertEquals("test", generateAndUploadDocumentRequest.getValues().get("freeTextUploadStatements"));
-    }
-
-    @Test
-    public void testToGenerateDocumentWithEmptyHearingsData() throws Exception {
-        CaseData caseData1 = CaseData.builder().manageOrders(ManageOrders.builder().build()).build();
-        CaseDetails caseDetails1 = CaseDetails.builder()
-            .caseId("123")
-            .caseData(caseData1)
-            .build();
-
-        assertEquals(dgsService.generateDocument(authToken, caseDetails1, PRL_DRAFT_TEMPLATE), generatedDocumentInfo);
     }
 }
