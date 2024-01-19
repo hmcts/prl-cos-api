@@ -50,7 +50,6 @@ public class HearingService {
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
 
         Hearings hearings = null;
-        caseReferenceNumber = "1704883788132906";
         try {
             hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
             if (hearings != null) {
