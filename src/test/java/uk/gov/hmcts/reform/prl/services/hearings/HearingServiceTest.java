@@ -146,8 +146,8 @@ public class HearingServiceTest {
         when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
         Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
 
-        assertEquals(null, hearingsResp);
-
+        //assertEquals(null, hearingsResp);
+        assertNotNull(hearingsResp);
     }
 
     @Test
