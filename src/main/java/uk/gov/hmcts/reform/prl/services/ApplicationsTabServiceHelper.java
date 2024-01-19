@@ -57,6 +57,10 @@ public class ApplicationsTabServiceHelper {
                 .value(otherPerson.toBuilder()
                            .gender(otherPerson.getGender() != null
                                        ? Gender.getDisplayedValueFromEnumString(otherPerson.getGender()).getDisplayedValue() : null)
+                           .otherGender((otherPerson.getGender() != null
+                               && StringUtils.equals(Gender.getDisplayedValueFromEnumString(otherPerson.getGender()).getDisplayedValue(),
+                                                     Gender.other.getDisplayedValue()))
+                                            ? StringUtils.capitalize(otherPerson.getOtherGender()) : null)
                            .build()).build();
             otherPersonsInTheCase.add(wrappedPerson);
         }
