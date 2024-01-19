@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,13 +26,10 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
-import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
@@ -50,44 +48,26 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RestController
 @RequestMapping("/service-of-application")
 @Slf4j
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ServiceOfApplicationController {
-
-    @Autowired
-    private ServiceOfApplicationService serviceOfApplicationService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    AllTabServiceImpl allTabService;
-
-    @Autowired
-    DynamicMultiSelectListService dynamicMultiSelectListService;
-
-    @Autowired
-    private LaunchDarklyClient launchDarklyClient;
-
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
-
-    private Map<String, Object> caseDataUpdated;
-
-    @Autowired
+    private final ServiceOfApplicationService serviceOfApplicationService;
+    private final ObjectMapper objectMapper;
+    private final LaunchDarklyClient launchDarklyClient;
+    private final CoreCaseDataService coreCaseDataService;
     @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
-
-    @Autowired
-    private AuthorisationService authorisationService;
-
-    @Autowired
-    WelshCourtEmail welshCourtEmail;
+    private final CaseSummaryTabService caseSummaryTabService;
+    private final AuthorisationService authorisationService;
 
     public static final String CONFIRMATION_HEADER = "# The application is served";
+
+    public static final String PROCEED_TO_SERVING = "proceedToServing";
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";
 
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
-    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document will "
-        + "be reviewed for confidential details";
+    public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
+        ### What happens next
+
+        The document will be reviewed for confidential details""";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
 
@@ -101,7 +81,6 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.getSoaCaseFieldsMap(
                 authorisation, callbackRequest.getCaseDetails())).build();
         } else {
@@ -118,12 +97,10 @@ public class ServiceOfApplicationController {
     @SecurityRequirement(name = "Bearer Authentication")
     public AboutToStartOrSubmitCallbackResponse handleAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) throws Exception {
-        log.info("handleAboutToSubmit: Callback for about-to-submit");
+        @RequestBody CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        if (ObjectUtils.isEmpty(updatedCaseData.get("proceedToServing"))) {
-            updatedCaseData.put("proceedToServing", Yes);
-            log.info("SOA proceed to serving {}", updatedCaseData.get("proceedToServing"));
+        if (ObjectUtils.isEmpty(updatedCaseData.get(PROCEED_TO_SERVING))) {
+            updatedCaseData.put(PROCEED_TO_SERVING, Yes);
         }
         return AboutToStartOrSubmitCallbackResponse
             .builder()
@@ -147,12 +124,10 @@ public class ServiceOfApplicationController {
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             if (caseData.getServiceOfApplication() != null && caseData.getServiceOfApplication().getProceedToServing() != null && YesOrNo.No.equals(
                 caseData.getServiceOfApplication().getProceedToServing())) {
-                log.info("Confidential details are present, case needs to be reviewed and served later");
                 return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                     CONFIDENTIAL_CONFIRMATION_HEADER).confirmationBody(
                     CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
             }
-            log.info("Confidential details are NOT present in case {}", caseData.getId());
             if (caseData.getFinalServedApplicationDetailsList() != null) {
                 finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
             } else {
@@ -176,7 +151,6 @@ public class ServiceOfApplicationController {
                 "internal-update-all-tabs",
                 caseDataMap
             );
-            log.info("Cervice of application is completed for case {}", caseData.getId());
             return ok(SubmittedCallbackResponse.builder().confirmationHeader(
                 CONFIRMATION_HEADER).confirmationBody(
                 CONFIRMATION_BODY_PREFIX).build());

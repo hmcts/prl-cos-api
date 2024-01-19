@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -289,6 +290,20 @@ public class ServiceOfApplicationControllerTest {
         assertExpectedException(() -> {
             serviceOfApplicationController.handleSubmitted(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void handleAboutToSubmit() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest
+                .builder()
+                .caseDetails(CaseDetails
+                        .builder().data(caseData)
+                        .build())
+                .build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
+                .handleAboutToSubmit("", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
