@@ -65,8 +65,19 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+     logback-classic-1.4.11.jar ]]></notes>
+    <cve>CVE-2023-6378</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     logback-core-1.4.11.jar ]]></notes>
+    <cve>CVE-2023-6378</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
      tomcat-embed-core-10.1.12.jar ]]></notes>
     <cve>CVE-2023-42795</cve>
+    <cve>CVE-2023-6378</cve>
     <cve>CVE-2023-45648</cve>
     <cve>CVE-2023-44487</cve>
     <cve>CVE-2023-5072</cve>
