@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -1206,25 +1207,21 @@ public class ServiceOfApplicationServiceTest {
                                                                           .label("otherPeople")
                                                                           .code("otherPeople")
                                                                           .build());
-
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData)).thenReturn(otherPeopleList);
-
         Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
-
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .data(caseDatatMap).build();
-
         when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
-
-
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
         )).thenReturn(caseData);
-
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().code("Confidential-").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
         final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
@@ -1299,8 +1296,10 @@ public class ServiceOfApplicationServiceTest {
             caseDetails,
             objectMapper
         )).thenReturn(caseData);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().code("").build());
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
-            .thenReturn(DynamicList.builder().build());
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
 
         final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);

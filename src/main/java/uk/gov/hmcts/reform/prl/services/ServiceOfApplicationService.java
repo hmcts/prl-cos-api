@@ -1531,9 +1531,10 @@ public class ServiceOfApplicationService {
     }
 
     private List<Element<DocumentListForLa>> getDocumentsDynamicListForLa(String authorisation, String caseId) {
+        DynamicList categoriesAdnDocumentsList = sendAndReplyService.getCategoriesAndDocuments(authorisation, caseId);
+        categoriesAdnDocumentsList.getListItems().removeIf(dynamicListElement -> dynamicListElement.getCode().contains("Confidential"));
         return List.of(Element.<DocumentListForLa>builder().id(UUID.randomUUID()).value(DocumentListForLa.builder()
-                                                                                      .documentsListForLa(sendAndReplyService
-                                                                .getCategoriesAndDocuments(authorisation, caseId))
+                                                                                      .documentsListForLa(categoriesAdnDocumentsList)
                                                                                       .build()).build());
     }
 
