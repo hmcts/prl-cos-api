@@ -124,6 +124,10 @@ public class DgsService {
         });
         caseDataMap.put("case_data", caseDataValues);
         Map<String, Object> tempCaseDetails = new HashMap<>();
+        //PRL-4981 - Populate applicants/respondents & representing solicitors names
+        if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
+            hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+        }
         tempCaseDetails.put(CASE_DETAILS_STRING, caseDataMap);
         GeneratedDocumentInfo generatedDocumentInfo = null;
         try {
