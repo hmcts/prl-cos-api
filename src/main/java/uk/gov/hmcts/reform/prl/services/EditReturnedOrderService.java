@@ -50,7 +50,6 @@ public class EditReturnedOrderService {
     public static final String EDIT_ORDER_TEXT_INSTRUCTIONS = "editOrderTextInstructions";
     public static final String PREVIEW_UPLOADED_ORDER = "previewUploadedOrder";
     public static final String SELECTED_ORDER = "selectedOrder";
-    public static final String SELECT_THE_HEARING = "selectTheHearing";
     public static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
     private final ObjectMapper objectMapper;
     private final UserService userService;
@@ -127,9 +126,6 @@ public class EditReturnedOrderService {
                     + EDIT_THE_ORDER_LABEL + "\n" + OPEN_THE_DRAFT_ORDER_TEXT);
             caseDataMap.put(PREVIEW_UPLOADED_ORDER, selectedOrder.getOrderDocument());
             caseDataMap.put(SELECTED_ORDER, selectedOrder.getOrderTypeId());
-            caseDataMap.put(SELECT_THE_HEARING,hearingDataService
-                    .getListOfRequestedStatusHearings(authorisation, String.valueOf(caseData.getId()),
-                    List.of(PrlAppsConstants.AWAITING_HEARING_DETAILS, PrlAppsConstants.HMC_STATUS_COMPLETED)));
         } else {
             caseDataMap.put(EDIT_ORDER_TEXT_INSTRUCTIONS, INSTRUCTIONS_FROM_JUDGE + "\n"
                     + selectedOrder.getOtherDetails().getInstructionsToLegalRepresentative()
@@ -183,8 +179,6 @@ public class EditReturnedOrderService {
                                                                         Event.EDIT_RETURNED_ORDER.getId(), null))
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
-            .isThisOrderFromHearing(caseData.getManageOrders().getIsThisOrderFromHearing())
-            .selectTheHearing(caseData.getManageOrders().getSelectTheHearing())
             .build();
     }
 

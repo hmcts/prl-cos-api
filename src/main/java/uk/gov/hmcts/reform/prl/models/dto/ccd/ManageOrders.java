@@ -288,8 +288,6 @@ public class ManageOrders implements MappableObject {
 
     private Object rejectedOrdersDynamicList;
     private String editOrderTextInstructions;
-    private YesOrNo isThisOrderFromHearing;
-    private Object selectTheHearing;
 
     @JsonProperty("displayLegalRepOption")
     private String displayLegalRepOption;
