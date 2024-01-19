@@ -304,6 +304,9 @@ public enum ManageOrderFieldsEnum {
     manageOrdersDocumentToAmend("manageOrdersDocumentToAmend"),
     draftOrderOptions("draftOrderOptions"),
     legalRepInstructionsPlaceHolder("legalRepInstructionsPlaceHolder"),
+    editOrderTextInstructions("editOrderTextInstructions"),
+    isThisOrderFromHearing("isThisOrderFromHearing"),
+    selectTheHearing("selectTheHearing"),
     orderNameForWA("orderNameForWA");
 
     private final String value;
