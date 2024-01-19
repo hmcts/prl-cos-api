@@ -1039,27 +1039,23 @@ public class ServiceOfApplicationServiceTest {
                                                                           .label("otherPeople")
                                                                           .code("otherPeople")
                                                                           .build());
-
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData)).thenReturn(otherPeopleList);
-
         Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
-
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .data(caseDatatMap).build();
-
         when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
-
-
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
         )).thenReturn(caseData);
-
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("Confidential-").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap("", caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap("authorization", caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1134,6 +1130,10 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
 
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("Confidential").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
         final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap("", caseDetails);
 
@@ -1197,6 +1197,10 @@ public class ServiceOfApplicationServiceTest {
         String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
 
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
         final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap("",caseDetails);
 
@@ -1263,6 +1267,10 @@ public class ServiceOfApplicationServiceTest {
         String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
 
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
         final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap("", caseDetails);
 
