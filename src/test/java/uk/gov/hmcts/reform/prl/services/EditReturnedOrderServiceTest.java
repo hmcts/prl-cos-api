@@ -154,7 +154,7 @@ public class EditReturnedOrderServiceTest {
             .build();
 
         Map<String, Object> response = editReturnedOrderService
-            .populateInstructionsAndDocuments(caseData, authToken, DraftOrder.builder()
+            .populateInstructionsAndDocuments(caseData, DraftOrder.builder()
                 .otherDetails(OtherDraftOrderDetails.builder().instructionsToLegalRepresentative("hello").build())
                 .build());
         assertTrue(response.containsKey("instructionsToLegalRepresentative"));
@@ -170,7 +170,7 @@ public class EditReturnedOrderServiceTest {
                                                              .build()).build())
             .build();
         Map<String, Object> response = editReturnedOrderService
-            .populateInstructionsAndDocuments(caseData, authToken, DraftOrder.builder()
+            .populateInstructionsAndDocuments(caseData, DraftOrder.builder()
                 .otherDetails(OtherDraftOrderDetails.builder().build())
             .build());
         assertTrue(response.containsKey("editOrderTextInstructions"));
@@ -187,7 +187,7 @@ public class EditReturnedOrderServiceTest {
             .build();
 
         Map<String, Object> response = editReturnedOrderService
-            .populateInstructionsAndDocuments(caseData, authToken, DraftOrder.builder()
+            .populateInstructionsAndDocuments(caseData, DraftOrder.builder()
                 .orderType(CreateSelectOrderOptionsEnum.generalForm)
                 .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
                 .orderSelectionType(ManageOrdersOptionsEnum.uploadAnOrder.toString())

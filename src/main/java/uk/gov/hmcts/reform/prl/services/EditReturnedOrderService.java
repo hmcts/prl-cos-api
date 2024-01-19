@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
-import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
@@ -104,7 +103,7 @@ public class EditReturnedOrderService {
         );
     }
 
-    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, String authorisation, DraftOrder selectedOrder) {
+    public Map<String, Object> populateInstructionsAndDocuments(CaseData caseData, DraftOrder selectedOrder) {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
@@ -192,7 +191,7 @@ public class EditReturnedOrderService {
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
                                                                                         caseData.getManageOrders()
                                                                                             .getRejectedOrdersDynamicList());
-            Map<String, Object> caseDataUpdated = populateInstructionsAndDocuments(caseData, authorisation, selectedOrder);
+            Map<String, Object> caseDataUpdated = populateInstructionsAndDocuments(caseData, selectedOrder);
             caseDataUpdated.putAll(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder));
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated).build();
