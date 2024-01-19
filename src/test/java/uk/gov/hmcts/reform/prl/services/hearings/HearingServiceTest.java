@@ -143,7 +143,7 @@ public class HearingServiceTest {
     public void getHearingsTestNoHearingReturned() {
 
         when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
-        when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
+        //when(hearingApiClient.getHearingDetails(auth, serviceAuthToken, caseReferenceNumber)).thenReturn(null);
         Hearings hearingsResp = hearingService.getHearings(auth, caseReferenceNumber);
 
         //assertEquals(null, hearingsResp);
