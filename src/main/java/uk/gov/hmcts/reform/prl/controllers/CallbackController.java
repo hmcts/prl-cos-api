@@ -100,7 +100,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -519,7 +519,7 @@ public class CallbackController {
                 authorisation,
                 callbackRequest.getCaseDetails(),
                 false,
-                HEARING_JUDGE_ROLE
+                GATEKEEPING_JUDGE_ROLE
             );
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

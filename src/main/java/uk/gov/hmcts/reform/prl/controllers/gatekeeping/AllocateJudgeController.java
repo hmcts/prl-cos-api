@@ -36,7 +36,7 @@ import java.util.Map;
 import javax.ws.rs.NotFoundException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
@@ -114,7 +114,7 @@ public class AllocateJudgeController extends AbstractCallbackController {
                 authorisation,
                 callbackRequest.getCaseDetails(),
                 false,
-                HEARING_JUDGE_ROLE
+                ALLOCATE_JUDGE_ROLE
             );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
