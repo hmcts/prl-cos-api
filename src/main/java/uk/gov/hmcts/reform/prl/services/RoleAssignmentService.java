@@ -37,6 +37,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEG
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIARY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 
 @Slf4j
 @Service
@@ -54,6 +57,10 @@ public class RoleAssignmentService {
                                      boolean replaceExisting,
                                      String roleName) {
         String actorId = populateActorId(authorization, (HashMap<String, Object>) caseDetails.getData());
+
+        if (actorId.split(UNDERSCORE)[1].equals(LEGAL_ADVISER)) {
+            roleName = "allocated-legal-adviser";
+        }
         log.info("actor id is {}", actorId);
         UserDetails userDetails = userService.getUserDetails(authorization);
         var roleCategory = CaseUtils.getUserRole(userDetails);
@@ -65,10 +72,10 @@ public class RoleAssignmentService {
             .reference(createRoleRequestReference(caseDetails, userDetails.getId()))
             .replaceExisting(replaceExisting)
             .build();
-
+        String actorIdForService = actorId.split(UNDERSCORE)[0];
         List<RequestedRoles> requestedRoles = List.of(RequestedRoles.requestedRoles()
                                                           .actorIdType("IDAM")
-                                                          .actorId(actorId)
+                                                          .actorId(actorIdForService)
                                                           .roleType(RoleType.CASE.name())
                                                           .roleName(roleName)
                                                           .classification(Classification.RESTRICTED.name())
@@ -108,7 +115,7 @@ public class RoleAssignmentService {
         } else {
             if (null != caseDataUpdated.get("nameOfJudgeToReviewOrder")
                 && caseDataUpdated.get("nameOfJudgeToReviewOrder").toString().length() > 3) {
-                return getIdamId(caseDataUpdated.get("nameOfJudgeToReviewOrder"))[0];
+                return (getIdamId(caseDataUpdated.get("nameOfJudgeToReviewOrder"))[0]) + UNDERSCORE + JUDICIARY;
             } else if (null != caseDataUpdated.get("nameOfLaToReviewOrder")
                 && caseDataUpdated.get("nameOfLaToReviewOrder").toString().length() > 3) {
                 return fetchActorIdFromSelectedLegalAdviser(
@@ -125,10 +132,10 @@ public class RoleAssignmentService {
         log.info("caseDataUpdated.get(JUDGE_NAME_EMAIL)--- {}", caseDataUpdated.get(JUDGE_NAME_EMAIL));
         if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR)))) {
-            return (null != caseDataUpdated.get(JUDGE_NAME)
+            return ((null != caseDataUpdated.get(JUDGE_NAME)
                 && caseDataUpdated.get(JUDGE_NAME).toString().length() > 3)
                 ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
-                : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
+                : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0]) + UNDERSCORE + JUDICIARY;
         } else {
             return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
         }
@@ -137,9 +144,9 @@ public class RoleAssignmentService {
     private String fetchActorIdIfJudgeIsGatekeeping(String authorization, HashMap<String, Object> caseDataUpdated) {
         if (SendToGatekeeperTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)))) {
-            return caseDataUpdated.get(JUDGE_NAME) != null && caseDataUpdated.get(JUDGE_NAME).toString().length() > 3
+            return (caseDataUpdated.get(JUDGE_NAME) != null && caseDataUpdated.get(JUDGE_NAME).toString().length() > 3
                 ? getIdamId(caseDataUpdated.get(JUDGE_NAME))[0]
-                : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0];
+                : getIdamId(caseDataUpdated.get(JUDGE_NAME_EMAIL))[0]) + UNDERSCORE + JUDICIARY;
         } else {
             return fetchActorIdFromSelectedLegalAdviser(authorization, caseDataUpdated.get("legalAdviserList"));
         }
@@ -150,7 +157,7 @@ public class RoleAssignmentService {
             legalAdviserList,
             DynamicList.class
         ).getValue().getCode(), "(", ")");
-        return userService.getUserByEmailId(authorization, laEmailId).get(0).getId();
+        return userService.getUserByEmailId(authorization, laEmailId).get(0).getId() + UNDERSCORE + LEGAL_ADVISER;
     }
 
     private String createRoleRequestReference(final CaseDetails caseDetails, final String userId) {
