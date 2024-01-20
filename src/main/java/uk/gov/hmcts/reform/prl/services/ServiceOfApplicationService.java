@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -93,6 +92,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
@@ -2193,17 +2193,11 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    public AboutToStartOrSubmitCallbackResponse checkC6AOrderExistenceForSoaParties(CallbackRequest callbackRequest,
-                                                                    String authorisation) throws JsonProcessingException {
+    public AboutToStartOrSubmitCallbackResponse checkC6AOrderExistenceForSoaParties(CallbackRequest callbackRequest) throws JsonProcessingException {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         );
-
-        ObjectMapper om = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("CAseDataa ----> " + result);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
@@ -2211,17 +2205,13 @@ public class ServiceOfApplicationService {
 
         if (!caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
 
-            log.info("getSoaOtherParties {}", caseData.getServiceOfApplication().getSoaOtherParties());
-
             List<String> c6aOrderIds = caseData.getOrderCollection().stream()
                 .filter(element -> element.getValue() != null && element.getValue().getOrderTypeId().equals(
                     CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()))
                 .map(s -> s.getId().toString()).toList();
 
             if (c6aOrderIds.isEmpty()) {
-                errorList.add(
-                    "You can only serve other people in the case if there is a C6A. Go back to the previous page to select it."
-                        + " If the C6A is not there, you will need to create it in manage orders.");
+                errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();
@@ -2232,14 +2222,8 @@ public class ServiceOfApplicationService {
 
             boolean isPresent = c6aOrderIds.stream().anyMatch(selectedSoaScreenOrders::contains);
 
-            log.info("c6aOrderIdssss ->> {}", c6aOrderIds);
-            log.info("selectedSoaScreenOrders ->> {}", selectedSoaScreenOrders);
-            log.info("Resulttt ->> {}", isPresent);
-
             if (!isPresent) {
-                errorList.add(
-                    "You can only serve other people in the case if there is a C6A. Go back to the previous page to select it."
-                        + " If the C6A is not there, you will need to create it in manage orders.");
+                errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();

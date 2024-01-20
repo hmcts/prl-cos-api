@@ -10,9 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import static org.hamcrest.Matchers.equalTo;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 
 
 @Slf4j
@@ -22,6 +26,14 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 public class ServiceOfApplicationControllerFT {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
+
+    private static final String VALID_REQUEST_BODY_WITHOUT_OTHER_PEOPLE = "requests/soa-with-out-other-people.json";
+
+    private static final String VALID_REQUEST_BODY_WITH_OTHER_PEOPLE = "requests/soa-with-other-people.json";
+
+    private static final String VALID_REQUEST_BODY_WITH_OUT_CA6_ORDERS = "requests/soa-with-out-c6a-orders.json";
+
+
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -36,6 +48,8 @@ public class ServiceOfApplicationControllerFT {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
+    private String requestBodyForOtherPeopleSelection;
 
     @Test
     public void givenRequestWithCaseData_ResponseContainsHeaderAndCollapsable() throws Exception {
@@ -87,4 +101,76 @@ public class ServiceOfApplicationControllerFT {
             .then()
             .assertThat().statusCode(200);
     }
+
+    /**
+     * When Other people not selected.
+     * then error should not appear at all during the service of application submission.
+     *
+     */
+    @Test
+    public void givenRequestWithCaseData_MidEvent_whenOtherpeopleNotSelected_then_c6A_isNotRequired() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITHOUT_OTHER_PEOPLE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/check-c6a-order-existence-for-soa-parties")
+            .then()
+            .body("errors", equalTo(null))
+            .assertThat().statusCode(200);
+    }
+
+
+    /**
+     * When Other people selected, but C6a Order not selected.
+     * then error should appear during Service of application submission.
+     *
+     */
+    @Test
+    public void givenCaseData_whenOtherpeopleSelectedButCa6_NotSelected_then_ValidationError() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_OTHER_PEOPLE);
+
+        AboutToStartOrSubmitCallbackResponse response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/check-c6a-order-existence-for-soa-parties")
+            .then()
+            .body("errors[0]", equalTo(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR))
+            .assertThat().statusCode(200)
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+        System.out.println("MMMMM " + response);
+    }
+
+
+    /**
+     * When Other people selected, but C6a Order not event present in the order collection.
+     * then error should appear during Service of application submission.
+     *
+     */
+    @Test
+    public void givenCaseData_whenOtherpeopleSelectedButCa6_NotEvenPresent_then_ValidationError() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_OUT_CA6_ORDERS);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/check-c6a-order-existence-for-soa-parties")
+            .then()
+            .body("errors[0]", equalTo(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR))
+            .assertThat().statusCode(200);
+    }
+
 }

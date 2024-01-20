@@ -102,7 +102,7 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return serviceOfApplicationService.checkC6AOrderExistenceForSoaParties(callbackRequest, authorisation);
+            return serviceOfApplicationService.checkC6AOrderExistenceForSoaParties(callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

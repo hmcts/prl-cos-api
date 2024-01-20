@@ -881,4 +881,8 @@ public class PrlAppsConstants {
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
     public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
+
+    public static final String OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR = "You can only serve other people in the case if there is a C6A."
+        + " Go back to the previous page to select it. If the C6A is not there, you will need to create it in manage orders.";
+
 }
