@@ -91,18 +91,18 @@ public class ServiceOfApplicationController {
         }
     }
 
-    @PostMapping(path = "/other-people", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Callback to populate the header")
+    @PostMapping(path = "/check-c6a-order-existence-for-soa-parties", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to check C6A Order Existence For Soa Parties")
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Populated Headers"),
+        @ApiResponse(responseCode = "200", description = "C6A order existence for Soa Parties"),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public AboutToStartOrSubmitCallbackResponse otherSelectedForC6a(
+    public AboutToStartOrSubmitCallbackResponse checkC6AOrderExistenceForSoaParties(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            return serviceOfApplicationService.handleSelectedOrder(callbackRequest, authorisation);
+            return serviceOfApplicationService.checkC6AOrderExistenceForSoaParties(callbackRequest, authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

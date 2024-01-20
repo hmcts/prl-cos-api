@@ -2193,7 +2193,7 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    public AboutToStartOrSubmitCallbackResponse handleSelectedOrder(CallbackRequest callbackRequest,
+    public AboutToStartOrSubmitCallbackResponse checkC6AOrderExistenceForSoaParties(CallbackRequest callbackRequest,
                                                                     String authorisation) throws JsonProcessingException {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
@@ -2203,22 +2203,50 @@ public class ServiceOfApplicationService {
         ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("SSSHOWWWWW ----> " + result);
+        System.out.println("CAseDataa ----> " + result);
 
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
 
-        log.info("AAAAAA {}", caseData.getServiceOfApplication().getSoaOtherParties());
-
         List<String> errorList = new ArrayList<>();
-        if (caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
-            errorList.add("This order is not available to be drafted");
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
-        } else {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(caseDataUpdated)
-                .build();
+
+        if (!caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
+
+            log.info("getSoaOtherParties {}", caseData.getServiceOfApplication().getSoaOtherParties());
+
+            List<String> c6aOrderIds = caseData.getOrderCollection().stream()
+                .filter(element -> element.getValue() != null && element.getValue().getOrderTypeId().equals(
+                    CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()))
+                .map(s -> s.getId().toString()).toList();
+
+            if (c6aOrderIds.isEmpty()) {
+                errorList.add(
+                    "You can only serve other people in the case if there is a C6A. Go back to the previous page to select it."
+                        + " If the C6A is not there, you will need to create it in manage orders.");
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
+
+            List<String> selectedSoaScreenOrders = caseData.getServiceOfApplicationScreen1().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
+
+            boolean isPresent = c6aOrderIds.stream().anyMatch(selectedSoaScreenOrders::contains);
+
+            log.info("c6aOrderIdssss ->> {}", c6aOrderIds);
+            log.info("selectedSoaScreenOrders ->> {}", selectedSoaScreenOrders);
+            log.info("Resulttt ->> {}", isPresent);
+
+            if (!isPresent) {
+                errorList.add(
+                    "You can only serve other people in the case if there is a C6A. Go back to the previous page to select it."
+                        + " If the C6A is not there, you will need to create it in manage orders.");
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
         }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .build();
     }
 }
