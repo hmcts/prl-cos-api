@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Requested
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -64,8 +63,6 @@ public class RoleAssignmentService {
         }
         log.info("actor id is {}", actorId);
         UserDetails userDetails = userService.getUserDetails(authorization);
-        var roleCategory = CaseUtils.getUserRole(userDetails);
-        log.debug("user: {} has roleCategory: {}", userDetails.getFullName(), roleCategory);
 
         RoleRequest roleRequest = RoleRequest.roleRequest()
             .assignerId(userDetails.getId())
