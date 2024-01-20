@@ -57,9 +57,10 @@ public class RoleAssignmentService {
                                      boolean replaceExisting,
                                      String roleName) {
         String actorId = populateActorId(authorization, (HashMap<String, Object>) caseDetails.getData());
-
+        String roleCategory = RoleCategory.JUDICIAL.name();
         if (actorId.split(UNDERSCORE)[1].equals(LEGAL_ADVISER)) {
             roleName = "allocated-legal-adviser";
+            roleCategory = RoleCategory.LEGAL_OPERATIONS.name();
         }
         log.info("actor id is {}", actorId);
         UserDetails userDetails = userService.getUserDetails(authorization);
@@ -80,7 +81,7 @@ public class RoleAssignmentService {
                                                           .roleName(roleName)
                                                           .classification(Classification.RESTRICTED.name())
                                                           .grantType(GrantType.SPECIFIC.name())
-                                                          .roleCategory(RoleCategory.JUDICIAL.name())
+                                                          .roleCategory(roleCategory)
                                                           .readOnly(false)
                                                           .beginTime(Instant.now())
                                                           .attributes(Attributes.attributes()
