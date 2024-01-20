@@ -2203,7 +2203,8 @@ public class ServiceOfApplicationService {
 
         List<String> errorList = new ArrayList<>();
 
-        if (!caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
+        if (null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()
+            && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
 
             List<String> c6aOrderIds = caseData.getOrderCollection().stream()
                 .filter(element -> element.getValue() != null && element.getValue().getOrderTypeId().equals(
