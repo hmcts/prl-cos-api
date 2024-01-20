@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -1086,6 +1087,8 @@ public class ManageOrderEmailServiceTest {
                 .state(State.PREPARE_FOR_HEARING_CONDUCT_HEARING)
                 .manageOrders(ManageOrders.builder()
                         .serveOrderDynamicList(dynamicMultiSelectList)
+                                  .serveToRespondentOptions(YesOrNo.Yes)
+                                  .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                         .build())
                 .orderCollection(List.of(element(uuid,orderDetails)))
                 .build();

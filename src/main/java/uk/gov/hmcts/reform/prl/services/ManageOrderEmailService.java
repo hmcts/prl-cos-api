@@ -74,6 +74,8 @@ public class ManageOrderEmailService {
     public static final String NEW = "new";
     public static final String ORDERS = "#Orders";
     public static final String NAME = "name";
+    public static final String THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION =
+        "There is a failure in sending email to solicitor on {} with exception {}";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
@@ -425,8 +427,8 @@ public class ManageOrderEmailService {
                         .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
                 );
             } catch (IOException e) {
-                log.error("There is a failure in sending email to solicitor on {} with exception {}",
-                          firstApplicantSolicitor.getKey(),e.getMessage());
+                log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
+                          firstApplicantSolicitor.getKey(), e.getMessage());
             }
         }
     }
@@ -459,7 +461,6 @@ public class ManageOrderEmailService {
 
         emailInformation.forEach(value -> {
             try {
-                log.info("** dynamicDataForEmail : {}", dynamicData);
                 sendgridService.sendEmailUsingTemplateWithAttachments(
                     SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
                     authorisation,
@@ -669,7 +670,6 @@ public class ManageOrderEmailService {
                 if (isSolicitorEmailExists(partyData)) {
                     try {
                         dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
-                        log.info("** dynamicDataForEmail : {}", dynamicDataForEmail);
                         sendgridService.sendEmailUsingTemplateWithAttachments(
                             SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR,
                             authorisation,
@@ -678,8 +678,8 @@ public class ManageOrderEmailService {
                                 .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
                         );
                     } catch (IOException e) {
-                        log.error("There is a failure in sending email to solicitor on {} with exception {}",
-                                  partyData.getSolicitorEmail(),e.getMessage());
+                        log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
+                                  partyData.getSolicitorEmail(), e.getMessage());
                     }
                 } else if (isPartyProvidedWithEmail(partyData)) {
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
@@ -709,7 +709,6 @@ public class ManageOrderEmailService {
                 if (isSolicitorEmailExists(partyData)) {
                     try {
                         dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
-                        log.info("** dynamicDataForEmail : {}", dynamicDataForEmail);
                         sendgridService.sendEmailUsingTemplateWithAttachments(
                             SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR,
                             authorisation,
@@ -718,8 +717,8 @@ public class ManageOrderEmailService {
                                 .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
                         );
                     } catch (IOException e) {
-                        log.error("There is a failure in sending email to solicitor on {} with exception {}",
-                                  partyData.getSolicitorEmail(),e.getMessage());
+                        log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
+                                  partyData.getSolicitorEmail(), e.getMessage());
                     }
                 } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
                             && isPartyProvidedWithEmail(partyData)) {
