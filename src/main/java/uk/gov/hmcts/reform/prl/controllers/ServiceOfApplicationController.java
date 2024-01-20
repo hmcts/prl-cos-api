@@ -91,7 +91,7 @@ public class ServiceOfApplicationController {
         }
     }
 
-    @PostMapping(path = "/other-people-selected-for-c6a", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @PostMapping(path = "/other-people", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to populate the header")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Populated Headers"),
