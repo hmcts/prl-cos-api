@@ -67,8 +67,9 @@ import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_OTHER_PARTIES;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CA_ADDRESS_MISSED_FOR_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.DA_ADDRESS_MISSED_FOR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -1314,7 +1315,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
-        assertEquals(ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
+        assertEquals(DA_ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
     }
 
     @Test
@@ -1395,7 +1396,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
-        assertEquals(ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
+        assertEquals(DA_ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
     }
 
     @Test
@@ -1556,7 +1557,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
-        assertEquals(ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
+        assertEquals(CA_ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
     }
 
     @Test
@@ -1636,7 +1637,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
-        assertEquals(ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
+        assertEquals(CA_ADDRESS_MISSED_FOR_RESPONDENT, soaCaseFieldsMap.get(MISSING_ADDRESS_WARNING_TEXT));
     }
 
     @Test
