@@ -1550,7 +1550,8 @@ public class ServiceOfApplicationService {
         collapsible.add(
             "This includes");
         collapsible.add(
-            "<ul><li>an application form</li><li>witness statement</li><li>privacy notice</li><li>cover letter</li></ul>");
+            "<ul><li>an application form (FL401)</li>"
+                + "<li>witness statement</li><li>privacy notice</li><li>cover letter (if not represented)</li></ul>");
         collapsible.add(
             "You do not need to upload these documents yourself");
         collapsible.add("</div>");
