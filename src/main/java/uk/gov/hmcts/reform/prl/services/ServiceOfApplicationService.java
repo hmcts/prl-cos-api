@@ -2206,10 +2206,14 @@ public class ServiceOfApplicationService {
         if (null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
 
-            List<String> c6aOrderIds = caseData.getOrderCollection().stream()
-                .filter(element -> element.getValue() != null && element.getValue().getOrderTypeId().equals(
-                    CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()))
-                .map(s -> s.getId().toString()).toList();
+            List<String> c6aOrderIds = new ArrayList<>();
+
+            if (null != caseData.getOrderCollection()) {
+                c6aOrderIds = caseData.getOrderCollection().stream()
+                    .filter(element -> element.getValue() != null && element.getValue().getOrderTypeId().equals(
+                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()))
+                    .map(s -> s.getId().toString()).toList();
+            }
 
             if (c6aOrderIds.isEmpty()) {
                 errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
