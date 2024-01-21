@@ -42,8 +42,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHOUT_NOTICE_REJECTION;
 
 @Slf4j
 @RestController
@@ -122,7 +122,7 @@ public class ListOnNoticeController {
             );
             if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
                 CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
-                    REASONS_SELECTED_FOR_LIST_ON_NOTICE,
+                    WITHOUT_NOTICE_REJECTION,
                     selectedAndAdditionalReasons,
                     userService.getUserDetails(authorisation)
                 );
