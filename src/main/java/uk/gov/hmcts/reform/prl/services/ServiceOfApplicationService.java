@@ -1505,7 +1505,16 @@ public class ServiceOfApplicationService {
                     break;
                 }
             }
-            if (CollectionUtils.isNotEmpty(caseData.getOthersToNotify())) {
+            if (CollectionUtils.isNotEmpty(caseData.getOtherPartyInTheCaseRevised())) {
+                for (Element<PartyDetails> otherParty : caseData.getOtherPartyInTheCaseRevised()) {
+                    if (No.equals(otherParty.getValue().getIsCurrentAddressKnown())
+                        || ObjectUtils.isEmpty(otherParty.getValue().getAddress())
+                        || StringUtils.isEmpty(otherParty.getValue().getAddress().getAddressLine1())) {
+                        isOtherPeopleAddressPresent = false;
+                        break;
+                    }
+                }
+            } else if (CollectionUtils.isNotEmpty(caseData.getOthersToNotify())) {
                 for (Element<PartyDetails> otherParty : caseData.getOthersToNotify()) {
                     if (No.equals(otherParty.getValue().getIsCurrentAddressKnown())
                         || ObjectUtils.isEmpty(otherParty.getValue().getAddress())
