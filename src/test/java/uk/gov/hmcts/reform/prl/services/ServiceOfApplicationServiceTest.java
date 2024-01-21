@@ -1219,7 +1219,7 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        dynamicListElements.add(DynamicListElement.builder().code("Confidential-").build());
+        dynamicListElements.add(DynamicListElement.builder().label("Confidential-").build());
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
@@ -1297,7 +1297,7 @@ public class ServiceOfApplicationServiceTest {
             objectMapper
         )).thenReturn(caseData);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        dynamicListElements.add(DynamicListElement.builder().code("").build());
+        dynamicListElements.add(DynamicListElement.builder().label("").build());
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
