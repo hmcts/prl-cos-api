@@ -672,13 +672,13 @@ public class ServiceOfApplicationService {
                 confirmationBody = CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX;
             } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
-                || SoaCitizenServingRespondentsEnum.courtAdmin
-                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+                || SoaSolicitorServingRespondentsEnum.courtAdmin
+                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
                 confirmationBody = CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX;
             } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
-                || SoaCitizenServingRespondentsEnum.courtBailiff
-                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+                || SoaSolicitorServingRespondentsEnum.courtBailiff
+                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
                 confirmationBody = CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX;
             }
         }
