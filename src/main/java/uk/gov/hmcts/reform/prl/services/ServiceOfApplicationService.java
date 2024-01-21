@@ -140,6 +140,18 @@ public class ServiceOfApplicationService {
     public static final String BY_POST = "By post";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
     public static final String PROCEED_TO_SERVING = "proceedToServing";
+    public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = "<div class='govuk-warning-text'>"
+        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!"
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
+        + "other people in the case</strong></div>";
+    public static final String ADDRESS_MISSED_FOR_RESPONDENT = "<div class='govuk-warning-text'>"
+        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!"
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for respondent"
+        + "</strong></div>";
+    public static final String ADDRESS_MISSED_FOR_OTHER_PARTIES = "<div class='govuk-warning-text'>"
+        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!"
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for other people in the "
+        + "case</strong></div>";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
@@ -1498,56 +1510,50 @@ public class ServiceOfApplicationService {
         boolean isOtherPeopleAddressPresent = true;
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                if (No.equals(respondent.getValue().getIsCurrentAddressKnown())
-                    || ObjectUtils.isEmpty(respondent.getValue().getAddress())
-                    || StringUtils.isEmpty(respondent.getValue().getAddress().getAddressLine1())) {
+                if (!isPartiesAddressPresent(respondent.getValue())) {
                     isRespondentAddressPresent = false;
                     break;
                 }
             }
             if (CollectionUtils.isNotEmpty(caseData.getOtherPartyInTheCaseRevised())) {
                 for (Element<PartyDetails> otherParty : caseData.getOtherPartyInTheCaseRevised()) {
-                    if (No.equals(otherParty.getValue().getIsCurrentAddressKnown())
-                        || ObjectUtils.isEmpty(otherParty.getValue().getAddress())
-                        || StringUtils.isEmpty(otherParty.getValue().getAddress().getAddressLine1())) {
+                    if (!isPartiesAddressPresent(otherParty.getValue())) {
                         isOtherPeopleAddressPresent = false;
                         break;
                     }
                 }
             } else if (CollectionUtils.isNotEmpty(caseData.getOthersToNotify())) {
                 for (Element<PartyDetails> otherParty : caseData.getOthersToNotify()) {
-                    if (No.equals(otherParty.getValue().getIsCurrentAddressKnown())
-                        || ObjectUtils.isEmpty(otherParty.getValue().getAddress())
-                        || StringUtils.isEmpty(otherParty.getValue().getAddress().getAddressLine1())) {
+                    if (!isPartiesAddressPresent(otherParty.getValue())) {
                         isOtherPeopleAddressPresent = false;
                         break;
                     }
                 }
             }
         } else {
-            if (No.equals(caseData.getRespondentsFL401().getIsCurrentAddressKnown())
-                || ObjectUtils.isEmpty(caseData.getRespondentsFL401().getAddress())
-                || StringUtils.isEmpty(caseData.getRespondentsFL401().getAddress().getAddressLine1())) {
-                isRespondentAddressPresent = false;
-            }
+            isRespondentAddressPresent = isPartiesAddressPresent(caseData.getRespondentsFL401());
         }
         if (!isRespondentAddressPresent && !isOtherPeopleAddressPresent) {
-            warningText = "<div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!"
-                + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
-                + "other people in the case</strong></div>";
+            warningText = ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
         } else if (!isRespondentAddressPresent) {
-            warningText = "<div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!"
-                + "</span><strong class='govuk-warning-text__text'>There is no postal address for respondent"
-                + "</strong></div>";
+            warningText = ADDRESS_MISSED_FOR_RESPONDENT;
         } else if (!isOtherPeopleAddressPresent) {
-            warningText = "<div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!"
-                + "</span><strong class='govuk-warning-text__text'>There is no postal address for other people in the "
-                + "case</strong></div>";
+            warningText = ADDRESS_MISSED_FOR_OTHER_PARTIES;
         }
         log.info("isRespondentAddressPresent ==> " + isRespondentAddressPresent);
         log.info("isOtherPeopleAddressPresent ==> " + isOtherPeopleAddressPresent);
         log.info("warningText ==> " + warningText);
         return warningText;
+    }
+
+    private static boolean isPartiesAddressPresent(PartyDetails partyDetails) {
+        boolean isAddressPresent = true;
+        if (No.equals(partyDetails.getIsCurrentAddressKnown())
+            || ObjectUtils.isEmpty(partyDetails.getAddress())
+            || StringUtils.isEmpty(partyDetails.getAddress().getAddressLine1())) {
+            isAddressPresent = false;
+        }
+        return isAddressPresent;
     }
 
     private boolean isRespondentDetailsConfidential(CaseData caseData) {
