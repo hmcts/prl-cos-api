@@ -655,7 +655,10 @@ public class ServiceOfApplicationService {
         log.info("Confidential details are NOT present");
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         String confirmationBody = "";
-        String confirmationHeader = "";
+        String confirmationHeader;
+        log.info("Respondent options {}", caseData.getServiceOfApplication().getSoaServeToRespondentOptions());
+        log.info("serving respondent options da {}", caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA());
+        log.info("citien serving respondent options ca {}", caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA());
         if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
             && YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             confirmationBody = CONFIRMATION_BODY_PREFIX;
@@ -679,6 +682,9 @@ public class ServiceOfApplicationService {
                 confirmationBody = CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX;
             }
         }
+        log.info("Body {}", confirmationBody);
+        log.info("Header {}", confirmationHeader);
+
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
