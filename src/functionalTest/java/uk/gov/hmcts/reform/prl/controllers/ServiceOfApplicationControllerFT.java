@@ -31,9 +31,7 @@ public class ServiceOfApplicationControllerFT {
 
     private static final String VALID_REQUEST_BODY_WITH_OTHER_PEOPLE = "requests/soa-with-other-people.json";
 
-    private static final String VALID_REQUEST_BODY_WITH_OUT_CA6_ORDERS = "requests/soa-with-out-c6a-orders.json";
-
-
+    private static final String VALID_REQUEST_BODY_WITH_OUT_C6A_ORDERS = "requests/soa-with-out-c6a-orders.json";
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -48,8 +46,6 @@ public class ServiceOfApplicationControllerFT {
         );
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
-
-    private String requestBodyForOtherPeopleSelection;
 
     @Test
     public void givenRequestWithCaseData_ResponseContainsHeaderAndCollapsable() throws Exception {
@@ -131,7 +127,7 @@ public class ServiceOfApplicationControllerFT {
      *
      */
     @Test
-    public void givenCaseData_whenOtherpeopleSelectedButCa6_NotSelected_then_ValidationError() throws Exception {
+    public void givenCaseData_whenOtherpeopleSelectedButC6A_NotSelected_then_ValidationError() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_OTHER_PEOPLE);
 
@@ -157,9 +153,9 @@ public class ServiceOfApplicationControllerFT {
      *
      */
     @Test
-    public void givenCaseData_whenOtherpeopleSelectedButCa6_NotEvenPresent_then_ValidationError() throws Exception {
+    public void givenCaseData_whenOtherpeopleSelectedButC6A_NotEvenPresent_then_ValidationError() throws Exception {
 
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_OUT_CA6_ORDERS);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_OUT_C6A_ORDERS);
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())

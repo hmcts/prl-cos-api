@@ -1380,7 +1380,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void checkC6AOrderExistenceForSoaParties_whenCa6NoteventPresent() throws JsonProcessingException, JsonProcessingException {
+    public void checkC6AOrderExistenceForSoaParties_whenC6aNotevenPresent() throws JsonProcessingException, JsonProcessingException {
 
         DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement.builder().code(
             "code").label("label").build();
