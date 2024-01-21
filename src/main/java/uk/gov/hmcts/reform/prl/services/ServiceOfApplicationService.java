@@ -78,6 +78,7 @@ import static java.util.Optional.ofNullable;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
@@ -90,6 +91,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
@@ -1393,7 +1395,8 @@ public class ServiceOfApplicationService {
             "soaIsOrderListEmpty",
             "noticeOfSafetySupportLetter",
             "additionalDocumentsList",
-            PROCEED_TO_SERVING
+            PROCEED_TO_SERVING,
+            MISSING_ADDRESS_WARNING_TEXT
         ));
 
         if (removeCafcassFields) {
@@ -1482,7 +1485,58 @@ public class ServiceOfApplicationService {
         log.info("** dynamic list 1 ** {}", documentDynamicListLa);
         caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
         log.info("** dynamic list 2 ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
+        caseDataUpdated.put(
+            MISSING_ADDRESS_WARNING_TEXT,
+            checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
+        );
         return caseDataUpdated;
+    }
+
+    private String checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData caseData) {
+        String warningText = BLANK_STRING;
+        boolean isRespondentAddressPresent = true;
+        boolean isOtherPeopleAddressPresent = true;
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                if (No.equals(respondent.getValue().getIsCurrentAddressKnown())
+                    || ObjectUtils.isEmpty(respondent.getValue().getAddress())
+                    || StringUtils.isEmpty(respondent.getValue().getAddress().getAddressLine1())) {
+                    isRespondentAddressPresent = false;
+                    break;
+                }
+            }
+            for (Element<PartyDetails> otherParty : caseData.getOthersToNotify()) {
+                if (No.equals(otherParty.getValue().getIsCurrentAddressKnown())
+                    || ObjectUtils.isEmpty(otherParty.getValue().getAddress())
+                    || StringUtils.isEmpty(otherParty.getValue().getAddress().getAddressLine1())) {
+                    isOtherPeopleAddressPresent = false;
+                    break;
+                }
+            }
+        } else {
+            if (No.equals(caseData.getRespondentsFL401().getIsCurrentAddressKnown())
+                || ObjectUtils.isEmpty(caseData.getRespondentsFL401().getAddress())
+                || StringUtils.isEmpty(caseData.getRespondentsFL401().getAddress().getAddressLine1())) {
+                isRespondentAddressPresent = false;
+            }
+        }
+        if (!isRespondentAddressPresent && !isOtherPeopleAddressPresent) {
+            warningText = "<div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!"
+                + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
+                + "other people in the case</strong></div>";
+        } else if (!isRespondentAddressPresent) {
+            warningText = "<div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!"
+                + "</span><strong class='govuk-warning-text__text'>There is no postal address for respondent"
+                + "</strong></div>";
+        } else if (!isOtherPeopleAddressPresent) {
+            warningText = "<div class='govuk-warning-text'><span class='govuk-warning-text__icon' aria-hidden='true'>!"
+                + "</span><strong class='govuk-warning-text__text'>There is no postal address for other people in the "
+                + "case</strong></div>";
+        }
+        log.info("isRespondentAddressPresent ==> " + isRespondentAddressPresent);
+        log.info("isOtherPeopleAddressPresent ==> " + isOtherPeopleAddressPresent);
+        log.info("warningText ==> " + warningText);
+        return warningText;
     }
 
     private boolean isRespondentDetailsConfidential(CaseData caseData) {
