@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR;
@@ -371,7 +372,7 @@ public class ReviewDocumentService {
                         caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
                         uuid
                     );
-                userRole = COURT_STAFF;
+                userRole = JUDGE;
                 processDocumentsAfterReviewNew(
                     caseData,
                     caseDataUpdated,

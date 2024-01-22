@@ -192,8 +192,8 @@ public class ManageDocumentsService {
                     userRole
                 );
             } else {
-                moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
                 setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
     }
@@ -294,9 +294,9 @@ public class ManageDocumentsService {
             //move document into confidential category/folder
             .notes(manageDocument.getDocumentDetails())
             //PRL-4320 - Manage documents redesign
-            .isConfidential(isCourtPartySelected ? null : manageDocument.getIsConfidential())
-            .isRestricted(isCourtPartySelected ? null : manageDocument.getIsRestricted())
-            .restrictedDetails(isCourtPartySelected ? null : manageDocument.getRestrictedDetails())
+            .isConfidential(manageDocument.getIsConfidential())
+            .isRestricted(manageDocument.getIsRestricted())
+            .restrictedDetails(manageDocument.getRestrictedDetails())
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
             .uploaderRole(loggedInUserType)
@@ -314,9 +314,9 @@ public class ManageDocumentsService {
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())) {
-            updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
-        } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+        } else {
+            updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
         }
     }
 
