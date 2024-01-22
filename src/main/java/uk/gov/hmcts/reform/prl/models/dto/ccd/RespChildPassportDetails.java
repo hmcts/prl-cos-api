@@ -16,7 +16,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RespChildPassportDetails {
 
-    @JsonProperty("childPassportPossession")
+    @JsonProperty("respChildPassportPossession")
     private List<RespPassportPossessionEnum> respChildPassportPossession;
     private YesOrNo respChildHasMultiplePassports;
     private String respChildPassportPossessionOtherDetails;
