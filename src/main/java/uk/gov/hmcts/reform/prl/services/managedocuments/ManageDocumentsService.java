@@ -203,7 +203,7 @@ public class ManageDocumentsService {
         String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
         if (restrcitedKey != null) {
-            if (!userRole.equals(COURT_ADMIN)) {
+            if (!userRole.equals(COURT_ADMIN) || !DocumentPartyEnum.COURT.equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
                 Document updatedConfidentialDocument = downloadAndDeleteDocument(
@@ -221,7 +221,7 @@ public class ManageDocumentsService {
                 quarantineLegalDoc,
                 userDetails
             );
-            if (userRole.equals(COURT_ADMIN)) {
+            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(quarantineLegalDoc.getDocumentParty())) {
                 finalConfidentialDocument = finalConfidentialDocument.toBuilder()
                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
                     .build();
