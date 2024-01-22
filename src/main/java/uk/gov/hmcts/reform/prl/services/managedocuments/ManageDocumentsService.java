@@ -605,7 +605,7 @@ public class ManageDocumentsService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
         String userRole = CaseUtils.getUserRole(userDetails);
-        if (userRole.equals(COURT_ADMIN)) {
+        if (userRole.equals(COURT_ADMIN) || userRole.equals(COURT_STAFF)) {
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
                 List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getConfidentialDocuments());
