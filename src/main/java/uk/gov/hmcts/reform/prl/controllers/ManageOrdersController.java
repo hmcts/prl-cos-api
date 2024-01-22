@@ -533,9 +533,12 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)
-        && C100_CASE_TYPE.equals(callbackRequest.getCaseDetails().getData().get(CASE_TYPE_OF_APPLICATION))) {
-            return manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            if(C100_CASE_TYPE.equals(callbackRequest.getCaseDetails().getData().get(CASE_TYPE_OF_APPLICATION))) {
+                return manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+            }
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(callbackRequest.getCaseDetails().getData()).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
