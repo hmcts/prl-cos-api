@@ -1333,7 +1333,7 @@ public class ServiceOfApplicationServiceTest {
                              .build())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.checkC6AOrderExistenceForSoaParties(
+        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
             callbackRequest
         );
         assertNull(response.getErrors());
@@ -1371,7 +1371,7 @@ public class ServiceOfApplicationServiceTest {
                              .build())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.checkC6AOrderExistenceForSoaParties(
+        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
             callbackRequest
         );
 
@@ -1410,7 +1410,7 @@ public class ServiceOfApplicationServiceTest {
                              .build())
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.checkC6AOrderExistenceForSoaParties(
+        AboutToStartOrSubmitCallbackResponse response = serviceOfApplicationService.soaValidation(
             callbackRequest
         );
 

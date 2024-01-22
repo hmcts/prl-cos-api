@@ -2193,7 +2193,7 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    public AboutToStartOrSubmitCallbackResponse checkC6AOrderExistenceForSoaParties(CallbackRequest callbackRequest) throws JsonProcessingException {
+    public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest) throws JsonProcessingException {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class

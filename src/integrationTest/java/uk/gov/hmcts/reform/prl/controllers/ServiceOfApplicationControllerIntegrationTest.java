@@ -73,7 +73,7 @@ public class ServiceOfApplicationControllerIntegrationTest {
     @Test
     public void testServiceOfApplicationOtherPeopleC6AOrdersEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/check-c6a-order-existence-for-soa-parties");
+        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/soa-validation");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
         httpPost.addHeader("serviceAuthorization", "s2sToken");

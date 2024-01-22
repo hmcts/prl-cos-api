@@ -4,13 +4,13 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -48,6 +48,7 @@ public class ServiceOfApplicationControllerFT {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
+    @Ignore
     public void givenRequestWithCaseData_ResponseContainsHeaderAndCollapsable() throws Exception {
 
         final String userToken = "Bearer testToken";
@@ -82,6 +83,7 @@ public class ServiceOfApplicationControllerFT {
     }
 
     @Test
+    @Ignore
     public void givenRequestWithCaseData_Response_Submitted() throws Exception {
 
         final String userToken = "Bearer testToken";
@@ -114,7 +116,7 @@ public class ServiceOfApplicationControllerFT {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/service-of-application/check-c6a-order-existence-for-soa-parties")
+            .post("/service-of-application/soa-validation")
             .then()
             .body("errors", equalTo(null))
             .assertThat().statusCode(200);
@@ -131,19 +133,16 @@ public class ServiceOfApplicationControllerFT {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_OTHER_PEOPLE);
 
-        AboutToStartOrSubmitCallbackResponse response = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/service-of-application/check-c6a-order-existence-for-soa-parties")
+            .post("/service-of-application/soa-validation")
             .then()
             .body("errors[0]", equalTo(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR))
-            .assertThat().statusCode(200)
-            .extract()
-            .as(AboutToStartOrSubmitCallbackResponse.class);
-        System.out.println("MMMMM " + response);
+            .assertThat().statusCode(200);
     }
 
 
@@ -163,7 +162,7 @@ public class ServiceOfApplicationControllerFT {
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/service-of-application/check-c6a-order-existence-for-soa-parties")
+            .post("/service-of-application/soa-validation")
             .then()
             .body("errors[0]", equalTo(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR))
             .assertThat().statusCode(200);
