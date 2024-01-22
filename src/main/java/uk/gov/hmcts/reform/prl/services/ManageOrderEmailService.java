@@ -418,18 +418,30 @@ public class ManageOrderEmailService {
             Map.Entry<String,String> firstApplicantSolicitor = applicantSolicitors.entrySet().iterator().next();
             dynamicDataForEmail.put(NAME, firstApplicantSolicitor.getValue());
             log.info("*** Dynamic content {}", dynamicDataForEmail);
-            try {
-                sendgridService.sendEmailUsingTemplateWithAttachments(
-                    SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR,
-                    authorisation,
-                    SendgridEmailConfig.builder().toEmailAddress(firstApplicantSolicitor.getKey())
-                        .dynamicTemplateData(dynamicDataForEmail)
-                        .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
-                );
-            } catch (IOException e) {
-                log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
-                          firstApplicantSolicitor.getKey(), e.getMessage());
-            }
+            sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, firstApplicantSolicitor.getKey(),
+                                 SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR);
+        }
+    }
+
+    private void sendEmailViaSendGrid(String authorisation,
+                                      List<Document> orderDocuments,
+                                      Map<String, Object> dynamicDataForEmail,
+                                      String emailAddress,
+                                      SendgridEmailTemplateNames sendgridEmailTemplateName) {
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                sendgridEmailTemplateName,
+                authorisation,
+                SendgridEmailConfig.builder()
+                    .toEmailAddress(emailAddress)
+                    .dynamicTemplateData(dynamicDataForEmail)
+                    .listOfAttachments(orderDocuments)
+                    .languagePreference(LanguagePreference.english)
+                    .build()
+            );
+        } catch (IOException e) {
+            log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
+                      emailAddress, e.getMessage());
         }
     }
 
@@ -450,7 +462,7 @@ public class ManageOrderEmailService {
             );
             //respondents
             sendEmailToSolicitorOrPostToRespondent(recipientsOptions.getValue(),
-                                                   caseData.getRespondents(), isFinalOrder, caseData,
+                                                   caseData.getRespondents(), caseData,
                                                    authorisation, orderDocuments, bulkPrintOrderDetails, dynamicDataForEmail
             );
         }
@@ -459,19 +471,13 @@ public class ManageOrderEmailService {
     private void sendEmailToOtherOrganisation(List<EmailInformation> emailInformation,
                                               String authorisation, List<Document> orderDocuments, Map<String, Object> dynamicData) {
 
-        emailInformation.forEach(value -> {
-            try {
-                sendgridService.sendEmailUsingTemplateWithAttachments(
-                    SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
-                    authorisation,
-                    SendgridEmailConfig.builder().toEmailAddress(
-                        value.getEmailAddress()).dynamicTemplateData(dynamicData)
-                        .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
-                );
-            } catch (IOException e) {
-                log.error("there is a failure in sending email for email {} with exception {}", value.getEmailAddress(),e.getMessage());
-            }
-        });
+        emailInformation.forEach(value ->
+            sendEmailViaSendGrid(authorisation,
+                                 orderDocuments,
+                                 dynamicData,
+                                 value.getEmailAddress(),
+                                 SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION)
+        );
     }
 
     private Map<String, Object> getDynamicDataForEmail(CaseData caseData) {
@@ -668,19 +674,12 @@ public class ManageOrderEmailService {
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
                 if (isSolicitorEmailExists(partyData)) {
-                    try {
-                        dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
-                        sendgridService.sendEmailUsingTemplateWithAttachments(
-                            SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR,
-                            authorisation,
-                            SendgridEmailConfig.builder().toEmailAddress(partyData.getSolicitorEmail())
-                                .dynamicTemplateData(dynamicDataForEmail)
-                                .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
-                        );
-                    } catch (IOException e) {
-                        log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
-                                  partyData.getSolicitorEmail(), e.getMessage());
-                    }
+                    dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
+                    sendEmailViaSendGrid(authorisation,
+                                         orderDocuments,
+                                         dynamicDataForEmail,
+                                         partyData.getSolicitorEmail(),
+                                         SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
                 } else if (isPartyProvidedWithEmail(partyData)) {
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
                                                      buildApplicantRespondentEmail(
@@ -696,30 +695,23 @@ public class ManageOrderEmailService {
 
     private void sendEmailToSolicitorOrPostToRespondent(List<DynamicMultiselectListElement> value,
                                                         List<Element<PartyDetails>> partyDetails,
-                                                        SelectTypeOfOrderEnum isFinalOrder,
                                                         CaseData caseData, String authorisation,
                                                         List<Document> orderDocuments,
                                                         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                         Map<String, Object> dynamicDataForEmail) {
+        SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         value.forEach(element -> {
             Optional<Element<PartyDetails>> partyDataOptional = partyDetails.stream()
                     .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
             if (partyDataOptional.isPresent()) {
                 PartyDetails partyData = partyDataOptional.get().getValue();
+                dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
                 if (isSolicitorEmailExists(partyData)) {
-                    try {
-                        dynamicDataForEmail.put(NAME, partyData.getRepresentativeFullName());
-                        sendgridService.sendEmailUsingTemplateWithAttachments(
-                            SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR,
-                            authorisation,
-                            SendgridEmailConfig.builder().toEmailAddress(partyData.getSolicitorEmail())
-                                .dynamicTemplateData(dynamicDataForEmail)
-                                .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
-                        );
-                    } catch (IOException e) {
-                        log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
-                                  partyData.getSolicitorEmail(), e.getMessage());
-                    }
+                    sendEmailViaSendGrid(authorisation,
+                                         orderDocuments,
+                                         dynamicDataForEmail,
+                                         partyData.getSolicitorEmail(),
+                                         SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
                 } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
                             && isPartyProvidedWithEmail(partyData)) {
                     log.info("Contact preference set as email");
