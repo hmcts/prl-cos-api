@@ -22,6 +22,7 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -36,6 +37,8 @@ public class AbilityToParticipateCheckerTest {
 
     CaseData caseData;
     PartyDetails respondent;
+
+    PartyDetails respondent2;
 
     @Before
     public void setUp() {
@@ -53,6 +56,17 @@ public class AbilityToParticipateCheckerTest {
                           .build())
             .build();
 
+        respondent2 = PartyDetails.builder()
+            .user(user)
+            .response(Response.builder().abilityToParticipate(
+                    AbilityToParticipate.builder()
+                        .factorsAffectingAbilityToParticipate(No)
+                        .detailsOfReferralOrAssessment("Test")
+                        .build())
+                          .build())
+            .build();
+
+
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
         doNothing().when(respondentTaskErrorService).addEventError(Mockito.any(), Mockito.any(), Mockito.any());
@@ -66,6 +80,14 @@ public class AbilityToParticipateCheckerTest {
 
         assertTrue(anyNonEmpty);
     }
+
+    @Test
+    public void isStartedTest_scenario2() {
+        boolean anyNonEmpty = abilityToParticipateChecker.isStarted(respondent2);
+
+        assertTrue(anyNonEmpty);
+    }
+
 
     @Test
     public void isStartedNotTest() {
