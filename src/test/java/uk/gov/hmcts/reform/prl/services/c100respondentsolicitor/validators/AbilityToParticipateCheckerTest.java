@@ -46,6 +46,8 @@ public class AbilityToParticipateCheckerTest {
             .response(Response.builder().abilityToParticipate(
                     AbilityToParticipate.builder()
                     .factorsAffectingAbilityToParticipate(Yes)
+                    .detailsOfReferralOrAssessment("Test")
+                    .giveDetailsAffectingLitigationCapacity("Test")
                     .provideDetailsForFactorsAffectingAbilityToParticipate("test")
                     .build())
                           .build())
