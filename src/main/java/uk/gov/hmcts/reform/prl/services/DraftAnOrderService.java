@@ -2029,13 +2029,15 @@ public class DraftAnOrderService {
         }
 
         List<String> errorList = new ArrayList<>();
-        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
+        if (Arrays.stream(ManageOrdersUtils.PROHIBITED_ORDER_IDS_FOR_SOLICITORS)
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getCreateSelectOrderOptions().toString()))) {
             errorList.add("This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        } else if (getErrorsForOrdersProhibitedForC100FL401(
+        }
+
+        if (getErrorsForOrdersProhibitedForC100FL401(
             caseData,
             caseData.getCreateSelectOrderOptions(),
             errorList
