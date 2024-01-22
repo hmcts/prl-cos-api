@@ -1076,64 +1076,6 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailWhenOrderServed() throws IOException {
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
-            .builder()
-            .code("00000000-0000-0000-0000-000000000000")
-            .build();
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-            .value(List.of(dynamicMultiselectListElement))
-            .build();
-        caseData = caseData.toBuilder()
-            .caseTypeOfApplication("C100")
-            .issueDate(LocalDate.now())
-            .othersToNotify(List.of(Element.<PartyDetails>builder().id(uuid)
-                                        .value(PartyDetails.builder()
-                                                   .canYouProvideEmailAddress(YesOrNo.Yes)
-                                                   .email("test")
-                                                   .build()).build()))
-            .manageOrders(ManageOrders.builder()
-                              .cafcassCymruServedOptions(YesOrNo.Yes)
-                              .cafcassEmailAddress(List.of(element("test")))
-                              .serveToRespondentOptions(YesOrNo.No)
-                              .recipientsOptions(dynamicMultiSelectList)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
-                              .deliveryByOptionsCA(DeliveryByEnum.email)
-                              .emailInformationCA(List.of(Element.<EmailInformation>builder()
-                                                              .id(uuid)
-                                                              .value(EmailInformation
-                                                                         .builder()
-                                                                         .emailAddress("test")
-                                                                         .build())
-                                                              .build()))
-                              .otherParties(dynamicMultiSelectList)
-                              .serveOrderDynamicList(dynamicMultiSelectList)
-                              .build())
-            .orderCollection(List.of(Element.<OrderDetails>builder()
-                                         .id(uuid)
-                                         .value(OrderDetails.builder().serveOrderDetails(ServeOrderDetails.builder().additionalDocuments(
-                                                 List.of(element(Document.builder().build()))).build())
-                                                    .typeOfOrder("Final").build())
-                                         .build()))
-            .build();
-        Map<String, Object> dataMap = new HashMap<>();
-        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(
-            any(SendgridEmailTemplateNames.class),
-            anyString(),
-            any(SendgridEmailConfig.class)
-        );
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-
-        Mockito.verify(emailService, Mockito.times(1)).send(Mockito.anyString(),
-                                                            Mockito.any(),
-                                                            Mockito.any(), Mockito.any()
-        );
-    }
-
-    @Test
     public void testServeOrdersToOtherOrganisation() {
         PostalInformation address = PostalInformation.builder()
             .postalAddress(Address.builder()
@@ -1867,54 +1809,6 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
     }
-
-    @Test
-    public void testSendEmailWhenOrderServed() {
-        CaseDetails caseDetails = CaseDetails.builder().build();
-        DynamicMultiselectListElement dynamicMultiselectListElement = DynamicMultiselectListElement
-                .builder()
-                .code("00000000-0000-0000-0000-000000000000")
-                .build();
-        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
-                .value(List.of(dynamicMultiselectListElement))
-                .build();
-        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
-                .builder()
-                .code(uuid.toString())
-                .build();
-        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
-                .value(List.of(serveOrderDynamicMultiselectListElement))
-                .build();
-        applicant = applicant.toBuilder()
-                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                .representativeLastName("")
-                .representativeFirstName("")
-                .solicitorEmail("test@gmail.com")
-                .build();
-        caseData = caseData.toBuilder()
-                .caseTypeOfApplication("")
-                .applicantsFL401(applicant)
-                .respondentsFL401(applicant)
-                .issueDate(LocalDate.now())
-                .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
-                        .serveToRespondentOptions(YesOrNo.No)
-                        .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
-                        .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
-                        .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
-                                .serveByPostOrEmail(DeliveryByEnum.email)
-                                .emailInformation(EmailInformation.builder()
-                                        .emailAddress("test").build())
-                                .build())))
-                        .recipientsOptions(dynamicMultiSelectList)
-                        .cafcassEmailId("test").build())
-                .build();
-        Map<String, Object> dataMap = new HashMap<>();
-
-        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
-        Mockito.verify(emailService,Mockito.times(0)).send(Mockito.any(), any(), any(), any());
-    }
-
-
     @Test
     public void testSendOrderAndAdditionalDocsToOtherPersonViaPost() throws Exception {
         //Given
@@ -2457,6 +2351,11 @@ public class ManageOrderEmailServiceTest {
                                                               .build()))
                               .otherParties(dynamicMultiSelectList)
                               .serveOrderDynamicList(dynamicMultiSelectList)
+                              .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
+                                                                       .serveByPostOrEmail(DeliveryByEnum.email)
+                                                                       .emailInformation(EmailInformation.builder()
+                                                                                             .emailAddress("test").build())
+                                                                       .build())))
                               .build())
             .orderCollection(List.of(Element.<OrderDetails>builder()
                                          .id(uuid)
