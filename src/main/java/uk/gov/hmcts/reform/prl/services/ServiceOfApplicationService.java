@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
 import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
-import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
@@ -138,7 +137,9 @@ public class ServiceOfApplicationService {
     public static final String BY_POST = "By post";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
     public static final String PROCEED_TO_SERVING = "proceedToServing";
-    private final LaunchDarklyClient launchDarklyClient;
+
+    @Value("${xui.url}")
+    private String manageCaseUrl;
 
     public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
     public static final String APPLICATION_SERVED_HEADER = "# Application served";
@@ -152,7 +153,7 @@ public class ServiceOfApplicationService {
     public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
         ### What happens next
         The service pack needs to be reviewed for confidential details before it can be served.
-        You can view the service packs in the service of application tab.
+        You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
     public static final String CONFIRMATION_HEADER_NON_PERSONAL = "# The application has been served";
@@ -160,28 +161,28 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_BODY_PREFIX = """
         ### What happens next
         The service pack has been served on the parties selected.
-            You can view the service packs in the service of application tab.
+            You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX = """
         ### What happens next
         The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
             The applicant has been served.
 
-        You can view the service packs in the <a href="">service of application</a> tab.
+        You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX = """
         ### What happens next
         You need to arrange service on the respondent based on the judge's directions.
             The service pack has been served on the applicant.
 
-        You can view the service packs in the service of application tab.
+        You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX = """
         ### What happens next
         You need to arrange for a court bailiff to personally serve the respondent.
             The service pack has been served on the applicant.
 
-        You can view the service packs in the service of application tab.
+        You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
     @Autowired
@@ -665,23 +666,43 @@ public class ServiceOfApplicationService {
             confirmationHeader = CONFIRMATION_HEADER_NON_PERSONAL;
         } else {
             confirmationHeader = CONFIRMATION_HEADER_PERSONAL;
-            if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
-                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
-                || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
-                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
-                confirmationBody = CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX;
-            } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
-                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
-                || SoaSolicitorServingRespondentsEnum.courtAdmin
-                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-                confirmationBody = CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX;
-            } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
-                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
-                || SoaSolicitorServingRespondentsEnum.courtBailiff
-                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-                confirmationBody = CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX;
+            if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
+                    || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+                    confirmationBody = CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX;
+                } else if (SoaCitizenServingRespondentsEnum.courtAdmin
+                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())
+                    || SoaSolicitorServingRespondentsEnum.courtAdmin
+                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
+                    confirmationBody = CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX;
+                } else if (SoaCitizenServingRespondentsEnum.courtBailiff
+                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())
+                    || SoaSolicitorServingRespondentsEnum.courtBailiff
+                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
+                    confirmationBody = CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX;
+                }
+            } else {
+                if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
+                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
+                    || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
+                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
+                    confirmationBody = CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX;
+                } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
+                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
+                    || SoaCitizenServingRespondentsEnum.courtAdmin
+                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
+                    confirmationBody = CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX;
+                } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
+                    .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
+                    || SoaCitizenServingRespondentsEnum.courtBailiff
+                    .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
+                    confirmationBody = CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX;
+                }
             }
         }
+        confirmationBody = String.format(confirmationBody, manageCaseUrl + "/" + caseData.getId() + "#Service of application");
         log.info("Body {}", confirmationBody);
         log.info("Header {}", confirmationHeader);
 
