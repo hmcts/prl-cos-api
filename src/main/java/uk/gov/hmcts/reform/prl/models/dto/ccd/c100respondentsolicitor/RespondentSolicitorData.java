@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.SubmitConsentEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
@@ -49,10 +48,6 @@ public class RespondentSolicitorData {
      */
     private final CitizenInternationalElements internationalElementChild;
 
-    /**
-     * Respondent solicitor's allegations of harm.
-     */
-    private final YesOrNo respondentAohYesNo;
 
     @JsonUnwrapped
     private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;

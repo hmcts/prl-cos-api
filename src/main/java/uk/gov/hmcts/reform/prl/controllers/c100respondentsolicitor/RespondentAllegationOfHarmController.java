@@ -66,17 +66,16 @@ public class RespondentAllegationOfHarmController extends AbstractCallbackContro
             log.info("pre-populate-child-data: Aoh pre populate child data");
             List<String> errorList = new ArrayList<>();
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-            Map<String, Object> caseDataMap = respondentAllegationOfHarmService.getPrePopulatedChildData(
-                    caseData);
-            caseDataMap.putAll(respondentSolicitorService.populateAboutToStartCaseData(
-                    callbackRequest
-            ));
+            Map<String, Object> caseDataUpdated = respondentSolicitorService.populateAboutToStartCaseData(
+                    callbackRequest);
+            respondentAllegationOfHarmService.prePopulatedChildData(
+                            caseData,caseDataUpdated);
             log.info("caseData {}",new Gson().toJson(AboutToStartOrSubmitCallbackResponse
                     .builder()
-                    .data(caseDataMap).errors(errorList).build()));
+                    .data(caseDataUpdated).errors(errorList).build()));
             return AboutToStartOrSubmitCallbackResponse
                     .builder()
-                    .data(caseDataMap).errors(errorList).build();
+                    .data(caseDataUpdated).errors(errorList).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

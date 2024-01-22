@@ -9,12 +9,11 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.MappableObject;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespDomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildAbuseBehaviour;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildAbuseBehaviour;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespChildPassportDetails;
 
 import java.time.LocalDate;
@@ -23,7 +22,7 @@ import java.util.List;
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
-public class RespondentAllegationsOfHarmData implements MappableObject {
+public class RespondentAllegationsOfHarmData {
 
     private final YesOrNo respAohYesOrNo;
 
@@ -128,7 +127,7 @@ public class RespondentAllegationsOfHarmData implements MappableObject {
 
     @JsonIgnore
     @JsonProperty("respChildAbuseBehavioursDocmosis")
-    private final  List<Element<ChildAbuseBehaviour>> respChildAbuseBehavioursDocmosis;
+    private final  List<Element<RespChildAbuseBehaviour>> respChildAbuseBehavioursDocmosis;
 
     @JsonProperty("respAllChildrenAreRiskPhysicalAbuse")
     private YesOrNo respAllChildrenAreRiskPhysicalAbuse;
