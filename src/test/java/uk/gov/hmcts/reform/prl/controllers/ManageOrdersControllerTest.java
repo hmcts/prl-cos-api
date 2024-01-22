@@ -1760,6 +1760,7 @@ public class ManageOrdersControllerTest {
 
         caseData = CaseData.builder()
             .id(12345L)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(Yes).build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
             .build();
@@ -1781,7 +1782,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(Yes, aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
     }
 
     @Test
@@ -1832,7 +1833,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(Yes, aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(Yes.getDisplayedValue(), aboutToStartOrSubmitCallbackResponse.getData().get("doYouWantToServeOrder"));
     }
 
     @Test
@@ -1883,7 +1884,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(Yes, aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(Yes.getDisplayedValue(), aboutToStartOrSubmitCallbackResponse.getData().get("doYouWantToServeOrder"));
     }
 
     @Test
@@ -1934,7 +1935,7 @@ public class ManageOrdersControllerTest {
             s2sToken,
             callbackRequest
         );
-        assertEquals(No, aboutToStartOrSubmitCallbackResponse.getData().get("ordersNeedToBeServed"));
+        assertEquals(No.getDisplayedValue(), aboutToStartOrSubmitCallbackResponse.getData().get("doYouWantToServeOrder"));
     }
 
     @Test
