@@ -14,7 +14,7 @@ public enum RespondentSolicitorEvents {
     KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep your details private", "keepContactDetailsPrivate"),
     CONFIRM_EDIT_CONTACT_DETAILS(
         "c100ResSolConfirmOrEditContactDetails",
-        "Edit your contact details",
+        "Enter respondent's contact details",
         "resSolConfirmEditContactDetails"
     ),
     ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "Attending the court", "respondentAttendingTheCourt"),
