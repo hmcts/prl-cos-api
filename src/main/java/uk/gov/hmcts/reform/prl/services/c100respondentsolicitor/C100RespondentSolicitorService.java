@@ -379,10 +379,6 @@ public class C100RespondentSolicitorService {
     }
 
     private Response buildAbilityToParticipateResponse(CaseData caseData, Response buildResponseForRespondent) {
-        log.info("FactorsAffectingAbilityToParticipate : {}",caseData.getRespondentSolicitorData()
-            .getAbilityToParticipateInProceedings().getFactorsAffectingAbilityToParticipate());
-        log.info("ProvideDetailsForFactorsAffectingAbilityToParticipate : {}",caseData.getRespondentSolicitorData()
-            .getAbilityToParticipateInProceedings().getProvideDetailsForFactorsAffectingAbilityToParticipate());
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
             .abilityToParticipate(AbilityToParticipate.builder()
                                       .detailsOfReferralOrAssessment(caseData.getRespondentSolicitorData()
