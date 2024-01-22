@@ -104,6 +104,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
@@ -4012,6 +4013,7 @@ public class ManageOrderServiceTest {
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .otherPartyInTheCaseRevised(otherParties)
             .build();
 
@@ -4045,6 +4047,7 @@ public class ManageOrderServiceTest {
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .otherPartyInTheCaseRevised(otherParties)
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .serveToRespondentOptions(YesOrNo.Yes).build())

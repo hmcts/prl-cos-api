@@ -125,6 +125,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_JUDGE_LA_REVIEW_REQUIRED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
@@ -2914,10 +2915,13 @@ public class ManageOrderService {
             checkPartyAddressAndReturnError(caseData.getRespondents(), selectedRespondentIds, errorList, true);
 
         }
-        if (null != caseData.getManageOrders().getOtherParties() && null != caseData.getOtherPartyInTheCaseRevised()) {
+        List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
+
+        if (null != caseData.getManageOrders().getOtherParties() && null != otherPeopleInCase) {
             List<String> selectedOtherPartyIds = caseData.getManageOrders().getOtherParties().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
-            checkPartyAddressAndReturnError(caseData.getOtherPartyInTheCaseRevised(), selectedOtherPartyIds, errorList, false);
+            checkPartyAddressAndReturnError(otherPeopleInCase, selectedOtherPartyIds, errorList, false);
         }
 
         if (isNotEmpty(errorList)) {
