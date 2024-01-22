@@ -1809,6 +1809,7 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verify(emailService,Mockito.times(2)).send(Mockito.any(), any(), any(), any());
     }
+
     @Test
     public void testSendOrderAndAdditionalDocsToOtherPersonViaPost() throws Exception {
         //Given
