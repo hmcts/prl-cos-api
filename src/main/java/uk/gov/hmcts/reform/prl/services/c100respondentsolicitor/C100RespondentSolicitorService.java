@@ -370,11 +370,10 @@ public class C100RespondentSolicitorService {
                 }
             }
         }
-        log.info("VVVVVV {}");
         return buildResponseForRespondent.toBuilder()
             .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
                                                      .getCurrentOrPastProceedingsForChildren())
-            //.respondentExistingProceedings(respondentExistingProceedings)
+            .respondentExistingProceedings(respondentExistingProceedings)
             .build();
     }
 
