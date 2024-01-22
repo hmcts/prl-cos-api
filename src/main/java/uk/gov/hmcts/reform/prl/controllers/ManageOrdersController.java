@@ -49,6 +49,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -532,7 +533,8 @@ public class ManageOrdersController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)
+        && C100_CASE_TYPE.equals(callbackRequest.getCaseDetails().getData().get(CASE_TYPE_OF_APPLICATION))) {
             return manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
