@@ -56,6 +56,9 @@ public class ManageOrdersUtils {
     private static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
         "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
 
+    public static final String[] PROHIBITED_ORDER_IDS_FOR_SOLICITORS = {"noticeOfProceedings","noticeOfProceedingsParties",
+        "noticeOfProceedingsNonParties", "standardDirectionsOrder","directionOnIssue"};
+
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
                                                            CreateSelectOrderOptionsEnum selectedOrderType,
                                                            boolean isSolicitorOrdersHearings) {
