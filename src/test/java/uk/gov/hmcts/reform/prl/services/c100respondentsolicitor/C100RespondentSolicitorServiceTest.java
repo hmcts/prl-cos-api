@@ -1620,7 +1620,7 @@ public class C100RespondentSolicitorServiceTest {
                                          .respondentExistingProceedings(proceedingsList)
                                          .abilityToParticipateInProceedings(AbilityToParticipate.builder()
                                                                                 .factorsAffectingAbilityToParticipate(
-                                                                                    Yes)
+                                                                                    No)
                                                                                 .build())
                                          .internationalElementChild(CitizenInternationalElements.builder()
                                                                         .childrenLiveOutsideOfEnWl(Yes)
