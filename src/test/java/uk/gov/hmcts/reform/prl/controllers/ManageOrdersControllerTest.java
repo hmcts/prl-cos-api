@@ -3296,6 +3296,7 @@ public class ManageOrdersControllerTest {
     @Test
     public void testAddressValidationError() throws Exception {
         CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
         List<String> errors = new ArrayList<>();
         errors.add("This order cannot be served by post until the respondent's " + "address is given.");
