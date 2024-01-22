@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.workflows.ApplicationConsiderationTimetableValida
 import uk.gov.hmcts.reform.prl.workflows.ValidateMiamApplicationOrExemptionWorkflow;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -112,7 +113,113 @@ public class RelationshipsControllerTest {
 
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
             relationshipsController.prePopulateApplicantToChildRelation("test",
-                                                                          callbackRequest);
+                                                                        callbackRequest);
+
+        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
+        assertNotNull(caseDetailsRespnse.get("applicantChildRelationsList"));
+    }
+
+    @Test
+    public void testPrePopulateAmendApplicantsToChildRelation() throws NotFoundException {
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).id(UUID.randomUUID()).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChildren =
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        List<Element<ChildrenAndApplicantRelation>> childrenApplicantRelations = new ArrayList<Element<ChildrenAndApplicantRelation>>();
+        childrenApplicantRelations.add(Element.<ChildrenAndApplicantRelation>builder().value(
+            ChildrenAndApplicantRelation.builder().build()).build());
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .newChildDetails(listOfChildren)
+            .relations(Relations.builder().childAndApplicantRelations(childrenApplicantRelations).build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantChildRelationsList", "test1 test22");
+
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+                                                      .data(caseDataUpdated).build()).build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            relationshipsController.prePopulateAmendApplicantToChildRelation("test",
+                                                                        callbackRequest);
+
+        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
+        assertNotNull(caseDetailsRespnse.get("applicantChildRelationsList"));
+    }
+
+
+    @Test
+    public void testPrePopulateAmendApplicantsToChildRelation_scenario2() throws NotFoundException {
+
+        PartyDetails applicant1 = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant1).id(UUID.randomUUID()).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChildren =
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        List<Element<ChildrenAndApplicantRelation>> childrenApplicantRelations = new ArrayList<Element<ChildrenAndApplicantRelation>>();
+        childrenApplicantRelations.add(Element.<ChildrenAndApplicantRelation>builder().value(
+            ChildrenAndApplicantRelation.builder().applicantId(String.valueOf(wrappedApplicant.getId())).childId(String.valueOf(
+                wrappedChildren.getId())).applicantFullName("test").childFullName("test").build()).build());
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(applicantList)
+            .newChildDetails(listOfChildren)
+            .relations(Relations.builder().childAndApplicantRelations(childrenApplicantRelations).build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        caseDataUpdated.put("applicantChildRelationsList", "test1 test22");
+
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+                                                      .data(caseDataUpdated).build()).build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            relationshipsController.prePopulateAmendApplicantToChildRelation("test",
+                                                                        callbackRequest);
 
         Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
         assertNotNull(caseDetailsRespnse.get("applicantChildRelationsList"));
@@ -158,7 +265,8 @@ public class RelationshipsControllerTest {
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .applicants(applicantList)
             .newChildDetails(listOfChildren)
-            .relations(Relations.builder().childAndApplicantRelations(listOfwrappedChildrenAndApplicantRelation).build())
+            .relations(Relations.builder().childAndApplicantRelations(listOfwrappedChildrenAndApplicantRelation)
+                           .buffChildAndApplicantRelations(listOfwrappedChildrenAndApplicantRelation).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
