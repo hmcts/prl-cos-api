@@ -890,6 +890,9 @@ public class C100RespondentSolicitorServiceTest {
                                          .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
                                          .respondentExistingProceedings(proceedingsList2)
                                          .abilityToParticipateInProceedings(AbilityToParticipate.builder()
+                                                                                .provideDetailsForFactorsAffectingAbilityToParticipate("Test")
+                                                                                .detailsOfReferralOrAssessment("Test")
+                                                                                .giveDetailsAffectingLitigationCapacity("Test")
                                                                                 .factorsAffectingAbilityToParticipate(
                                                                                     Yes)
                                                                                 .build())
