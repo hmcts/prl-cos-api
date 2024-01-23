@@ -976,7 +976,7 @@ public class ServiceOfApplicationServiceTest {
 
 
     @Test
-    public void testSendNotificationForSoaCitizenC100() throws Exception {
+    public void testSendNotificationForSoaCitizenC100ServeOtherParties() throws Exception {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -996,15 +996,20 @@ public class ServiceOfApplicationServiceTest {
         List<Element<PartyDetails>> applicants = new ArrayList<>();
         Element applicantElement = element(partyDetails);
         applicants.add(applicantElement);
+        dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder().code(testUuid.toString()).label(authorization).build()))
+            .build();
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
+            .othersToNotify(applicants)
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
+                .soaOtherParties(dynamicMultiSelectList)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassServedOptions(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
@@ -1024,6 +1029,52 @@ public class ServiceOfApplicationServiceTest {
             authorization
         );
         assertEquals("By email", servedApplicationDetails.getModeOfService());
+    }
+
+    @Test
+    public void testSendNotificationForSoaCitizenC100() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantsFL401(partyDetails)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaCitizenServingRespondentsOptionsDA(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .build();
+
+        when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
+            .forename("first")
+            .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            authorization
+        );
+        assertEquals("first test", servedApplicationDetails.getServedBy());
     }
 
     @Test
