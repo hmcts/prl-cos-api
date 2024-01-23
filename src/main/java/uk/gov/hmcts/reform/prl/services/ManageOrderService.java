@@ -2918,7 +2918,7 @@ public class ManageOrderService {
         List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
             ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
 
-        if (null != caseData.getManageOrders().getOtherParties() && null != otherPeopleInCase) {
+        if (null != caseData.getManageOrders().getOtherParties()) {
             List<String> selectedOtherPartyIds = caseData.getManageOrders().getOtherParties().getValue()
                 .stream().map(DynamicMultiselectListElement::getCode).toList();
             checkPartyAddressAndReturnError(otherPeopleInCase, selectedOtherPartyIds, errorList, false);

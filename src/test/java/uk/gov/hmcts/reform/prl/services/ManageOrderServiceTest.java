@@ -3823,7 +3823,7 @@ public class ManageOrderServiceTest {
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder().respondents(respondents)
-            .otherPartyInTheCaseRevised(otherParties)
+            .othersToNotify(otherParties)
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -3856,6 +3856,7 @@ public class ManageOrderServiceTest {
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .otherPartyInTheCaseRevised(otherParties).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -3887,6 +3888,7 @@ public class ManageOrderServiceTest {
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .otherPartyInTheCaseRevised(otherParties).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -3919,6 +3921,7 @@ public class ManageOrderServiceTest {
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder()
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .id(123L).respondents(respondents)
             .otherPartyInTheCaseRevised(otherParties).build();
 
@@ -3950,7 +3953,11 @@ public class ManageOrderServiceTest {
                     .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder()
-            .id(123L).respondents(respondents).build();
+            .id(123L).respondents(respondents)
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .otherParties(null)
+                              .serveToRespondentOptions(YesOrNo.Yes).build())
+            .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
@@ -3980,7 +3987,9 @@ public class ManageOrderServiceTest {
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder()
             .id(123L).respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .manageOrders(caseData.getManageOrders().toBuilder()
+                              .otherParties(null)
                               .serveToRespondentOptions(YesOrNo.Yes).build()).build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -4086,6 +4095,7 @@ public class ManageOrderServiceTest {
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder()
             .id(123L).respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
             .otherPartyInTheCaseRevised(otherParties)
             .build();
 
