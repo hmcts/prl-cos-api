@@ -60,6 +60,9 @@ public class ManageOrdersUtils {
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
+    public static final String[] PROHIBITED_ORDER_IDS_FOR_SOLICITORS = {"noticeOfProceedings","noticeOfProceedingsParties",
+        "noticeOfProceedingsNonParties", "standardDirectionsOrder","directionOnIssue"};
+
     public static List<String> getHearingScreenValidations(List<Element<HearingData>> ordersHearingDetails,
                                                            CreateSelectOrderOptionsEnum selectedOrderType,
                                                            boolean isSolicitorOrdersHearings) {
