@@ -322,16 +322,14 @@ public class ApplicationsTabServiceHelperTest {
             .addressLivedLessThan5YearsDetails("test")
             .isAtAddressLessThan5Years(YesOrNo.Yes)
             .addressLivedLessThan5YearsDetails("Test")
-            .gender("other")
-            .otherGender("test other")
+            .gender("Female")
             .lastName("lastName")
             .previousName("testPreviousname")
             .isDateOfBirthKnown(YesOrNo.Yes)
             .isCurrentAddressKnown(YesOrNo.No)
             .build();
 
-        Element<OtherPersonInTheCaseRevised> otherPersonWrapped = Element.<OtherPersonInTheCaseRevised>builder()
-            .value(otherPerson.toBuilder().gender("They identify in another way").otherGender("Test other").build()).build();
+        Element<OtherPersonInTheCaseRevised> otherPersonWrapped = Element.<OtherPersonInTheCaseRevised>builder().value(otherPerson).build();
         List<Element<OtherPersonInTheCaseRevised>> listOfOtherPerson = Collections.singletonList(otherPersonWrapped);
 
         CaseData caseData = CaseData.builder()
