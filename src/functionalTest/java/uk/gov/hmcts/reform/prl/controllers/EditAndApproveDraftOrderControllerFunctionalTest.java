@@ -6,13 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -20,15 +20,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
-
-
-import static org.hamcrest.Matchers.equalTo;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,6 +51,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
+    @MockBean
+    private DraftAnOrderService draftAnOrderService;
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
@@ -60,7 +62,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private static final String VALID_DRAFT_ORDER_REQUEST_BODY1 = "requests/draft-order-with-options-request.json";
 
-    private static final String VALID_DRAFT_ORDER_REQUEST_BODY2 = "requests/draft-order-sdo-with-options-request.json";
+    private static final String VALID_DRAFT_ORDER_REQUEST_BODY = "requests/draft-order-sdo-with-options-request.json";
 
     private static final String DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY
         = "requests/draft-ordr-judge-edit-approve-soli-1hearing-jugappr-request.json";
@@ -98,7 +100,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenPopulate_draft_order_dropdown_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
+        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
         Map<String, Object> drafOrderMap = new HashMap<>();
         drafOrderMap.put("draftOrder1", "SDO");
         drafOrderMap.put("draftOrder2", "C21");
@@ -121,7 +123,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenJudge_admin_populate_draft_order_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
+        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("orderName", "C21");
         caseDataMap.put("orderUploadedAsDraftFlag", "Yes");
@@ -157,7 +159,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenJudge_or_admin_populate_draft_order_custom_fields_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
+        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("appointedGuardianName", "John");
         caseDataMap.put("parentName", "Smith");
@@ -178,7 +180,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     @Test
     public void givenRequestBody_whenJudge_or_admin_populate_draft_order_common_fields_then200Response() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
+        //String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
 
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("orderType", "C21");
@@ -200,7 +202,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBodyWhenPostRequestTohandleEditAndApproveSubmitted() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY1);
         mockMvc.perform(post("/edit-and-approve/submitted")
