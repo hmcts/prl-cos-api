@@ -761,7 +761,7 @@ public class ServiceOfApplicationPostServiceTest {
     }
 
     @Test
-    public void shouldNotGetCoverSheetInfoWhenAddressNotPresent() throws Exception{
+    public void shouldNotGetCoverSheetInfoWhenAddressNotPresent() throws Exception {
         CaseData caseData = CaseData.builder().build();
         final Address address = Address.builder().build();
         GeneratedDocumentInfo generatedDocumentInfo = serviceOfApplicationPostService
