@@ -48,6 +48,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
@@ -784,7 +785,10 @@ public class ServiceOfApplicationServiceTest {
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
-
+        List<Element<DocumentListForLa>> documentsForLa = new ArrayList<>();
+        documentsForLa.add(Element.<DocumentListForLa>builder().value(DocumentListForLa.builder()
+                                                                          .documentsListForLa(DynamicList.builder().build())
+                                                                          .build()).build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(partyList)
@@ -796,8 +800,11 @@ public class ServiceOfApplicationServiceTest {
                                          .build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
+                                      .soaServeLocalAuthorityYesOrNo(Yes)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassServedOptions(Yes)
+                                      .soaLaEmailAddress("la@gmail.com")
+                                      .soaDocumentDynamicListForLa(documentsForLa)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
@@ -865,17 +872,26 @@ public class ServiceOfApplicationServiceTest {
                                .label("recipient1")
                                .build()))
             .build();
+        List<Element<DocumentListForLa>> documentsForLa = new ArrayList<>();
+        documentsForLa.add(Element.<DocumentListForLa>builder().value(DocumentListForLa.builder()
+                                                                          .documentsListForLa(DynamicList.builder().build())
+                                                                          .build()).build());
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(partyList)
             .respondents(partyList)
             .applicantCaseName("Test Case 45678")
+            .c8Document(Document.builder().build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassServedOptions(Yes)
+                                      .soaServeLocalAuthorityYesOrNo(Yes)
+                                      .soaLaEmailAddress("La@gmail.com")
+                                      .soaDocumentDynamicListForLa(documentsForLa)
+                                      .soaServeC8ToLocalAuthorityYesOrNo(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
@@ -1352,6 +1368,164 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
+    public void testValidateRespondentConfidentialDetailsCA() {
+
+        final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
+
+        final CaseInvite caseInvite = CaseInvite.builder()
+            .caseInviteEmail("inviteemail@test.com")
+            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
+            .isApplicant(Yes)
+            .build();
+
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        Element caseInviteElement = element(caseInvite);
+        caseInviteList.add(caseInviteElement);
+
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("of").lastName("ol")
+            .isAddressConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("ofl@test.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .respondents(List.of(element(otherPerson)))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInviteList)
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
+            .build();
+
+        List<DynamicMultiselectListElement> otherPeopleList = List.of(DynamicMultiselectListElement.builder()
+            .label("otherPeople")
+            .code("otherPeople")
+            .build());
+
+        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData)).thenReturn(otherPeopleList);
+
+        Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
+
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(caseDatatMap).build();
+
+        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+
+
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
+        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+
+        assertNotNull(soaCaseFieldsMap);
+
+        assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
+        assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
+        assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
+    }
+
+    @Test
+    public void testValidateRespondentConfidentialDetailsCaWithConfidentialDetails() {
+
+        final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
+
+        final CaseInvite caseInvite = CaseInvite.builder()
+            .caseInviteEmail("inviteemail@test.com")
+            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
+            .isApplicant(Yes)
+            .build();
+
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        Element caseInviteElement = element(caseInvite);
+        caseInviteList.add(caseInviteElement);
+
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("of").lastName("ol")
+            .isAddressConfidential(No)
+            .isEmailAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("ofl@test.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .respondents(List.of(element(otherPerson)))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInviteList)
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
+            .build();
+
+        List<DynamicMultiselectListElement> otherPeopleList = List.of(DynamicMultiselectListElement.builder()
+            .label("otherPeople")
+            .code("otherPeople")
+            .build());
+
+        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData)).thenReturn(otherPeopleList);
+
+        Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
+
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(caseDatatMap).build();
+
+        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+
+
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
+        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+
+        assertNotNull(soaCaseFieldsMap);
+
+        assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
+        assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
+        assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
+    }
+
+    @Test
     public void testHandleSoaSubmitted() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -1521,5 +1695,383 @@ public class ServiceOfApplicationServiceTest {
 
         assertNotNull(document);
         assertEquals("documentURL", document.getDocumentURL());
+    }
+
+    @Test
+    public void testGetNotificationPack() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "A", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackB() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "B", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackC() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "C", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackD() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "D", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackE() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "E", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackF() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "F", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackG() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "G", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackH() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "H", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackI() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "I", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackJ() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "J", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackK() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "K", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackL() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "L", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackM() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "M", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackN() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "N", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackO() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "O", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackP() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "P", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackQ() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "Q", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackR() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "R", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackS() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "S", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackHI() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "HI", packN);
+        assertNotNull(listOfDocuments);
+    }
+
+    @Test
+    public void testGetNotificationPackZ() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("FL401")
+            .applicantCaseName("Test Case 45678")
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .build();
+
+        List<Document> packN = new ArrayList<>();
+        packN.add(Document.builder().documentFileName("C1A_Blank.pdf").build());
+
+        List<Document> listOfDocuments = serviceOfApplicationService.getNotificationPack(caseData, "Z", packN);
+        assertNotNull(listOfDocuments);
     }
 }
