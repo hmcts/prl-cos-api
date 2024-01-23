@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -58,20 +57,6 @@ public class RoleAssignmentServiceTest {
 
         Map<String, Object> dataMap = new HashMap<>();
         caseDetails = CaseDetails.builder().data(dataMap).id(123L).build();
-    }
-
-
-    @Ignore
-    @Test
-    public void testCreateRoleAssignment() {
-        List<String> roles = new ArrayList();
-        roles.add("caseworker-privatelaw-judge");
-        userDetails = UserDetails.builder().id("1").roles(roles).build();
-
-        when(userService.getUserDetails(auth)).thenReturn(userDetails);
-        when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
-        assertEquals("1", userDetails.getId());
     }
 
     @Test
@@ -178,11 +163,10 @@ public class RoleAssignmentServiceTest {
         assertEquals("1", userDetails.getId());
     }
 
-    @Ignore
     @Test
     public void testCreateRoleAssignmentNameOfJudgeToReviewOrderNotNull() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
-        caseDetailsMap.put("nameOfJudgeToReviewOrder", "");
+        caseDetailsMap.put("nameOfJudgeToReviewOrder", "Test");
         List<String> roles = new ArrayList();
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
@@ -198,11 +182,10 @@ public class RoleAssignmentServiceTest {
         assertEquals("1", userDetails.getId());
     }
 
-    @Ignore
     @Test
     public void testCreateRoleAssignmentNameOfLaToReviewOrderNotNull() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
-        caseDetailsMap.put("nameOfLaToReviewOrder", "");
+        caseDetailsMap.put("isJudgeOrLegalAdviserGatekeeping", "Yes");
         caseDetailsMap.put("legalAdviserList", "");
         List<String> roles = new ArrayList();
         roles.add("caseworker-privatelaw-judge");
