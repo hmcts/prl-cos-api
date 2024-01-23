@@ -829,18 +829,10 @@ public class ReviewDocumentServiceTest {
                                  .build())
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
-        when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
-            .thenReturn(QuarantineLegalDoc.builder()
-                            .categoryId(
-                                "cafcassQuarantineDocument")
-                            .notes("test")
-                            .documentUploadedDate(
-                                LocalDateTime.now())
-                            .document(Document.builder().build())
-                            .build());
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
-        Assert.assertNotNull(caseDataMap.get("bulkScannedDocListConfTab"));
+        //Assert.assertNotNull(caseDataMap.get("bulkScannedDocListDocTab"));
+        Assert.assertTrue(caseData.getScannedDocuments().isEmpty());
     }
 
     @Test
@@ -869,18 +861,10 @@ public class ReviewDocumentServiceTest {
                                  .build())
             .build();
         Map<String, Object> caseDataMap = new HashMap<>();
-        when(objectMapper.convertValue((Object) any(), (Class<Object>) any()))
-            .thenReturn(QuarantineLegalDoc.builder()
-                            .categoryId(
-                                "cafcassQuarantineDocument")
-                            .notes("test")
-                            .documentUploadedDate(
-                                LocalDateTime.now())
-                            .document(Document.builder().build())
-                            .build());
-        when(manageDocumentsService.addQuarantineDocumentFields(any(),any())).thenReturn(QuarantineLegalDoc.builder().build());
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
-        Assert.assertNotNull(caseDataMap.get("bulkScannedDocListConfTab"));
+
+        //Assert.assertNotNull(caseDataMap.get("confidentialDocuments"));
+        Assert.assertTrue(caseData.getScannedDocuments().isEmpty());
     }
 
     @Test

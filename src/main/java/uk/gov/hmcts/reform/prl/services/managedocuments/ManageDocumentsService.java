@@ -277,6 +277,14 @@ public class ManageDocumentsService {
             .uploadedBy(quarantineLegalDoc.getUploadedBy())
             .uploadedByIdamId(quarantineLegalDoc.getUploadedByIdamId())
             .uploaderRole(quarantineLegalDoc.getUploaderRole())
+            //PRL-5006 - bulk scan fields
+            .fileName(quarantineLegalDoc.getFileName())
+            .controlNumber(quarantineLegalDoc.getControlNumber())
+            .type(quarantineLegalDoc.getType())
+            .subtype(quarantineLegalDoc.getSubtype())
+            .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
+            .scannedDate(quarantineLegalDoc.getScannedDate())
+            .deliveryDate(quarantineLegalDoc.getDeliveryDate())
             .build();
 
     }
@@ -336,7 +344,7 @@ public class ManageDocumentsService {
      * !ifConfidential && isRestricted - RESTRICTED
      * ifConfidential && !isRestricted - CONFIDENTIAL
      */
-    public String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
+    private String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
         if (quarantineLegalDoc.getIsConfidential() != null) {
             if (!(YesOrNo.No.equals(quarantineLegalDoc.getIsConfidential())
                 && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted()))) {
@@ -547,8 +555,12 @@ public class ManageDocumentsService {
             case COURT_ADMIN:
                 if (isDocumentTab) {
                     caseDataUpdated.put("courtStaffUploadDocListDocTab", quarantineDocs);
-                } else {
-                    caseDataUpdated.put("courtStaffUploadDocListConfTab", quarantineDocs);
+                }
+                break;
+
+            case BULK_SCAN:
+                if (isDocumentTab) {
+                    caseDataUpdated.put("bulkScannedDocListDocTab", quarantineDocs);
                 }
                 break;
 
@@ -584,7 +596,12 @@ public class ManageDocumentsService {
             case COURT_ADMIN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
                     isDocumentTab,
                     caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab(),
-                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()
+                    caseData.getReviewDocuments().getCourtStaffUploadDocListConfTab()//not in use
+            );
+            case BULK_SCAN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
+                isDocumentTab,
+                caseData.getReviewDocuments().getBulkScannedDocListDocTab(),
+                caseData.getReviewDocuments().getBulkScannedDocListConfTab()//not in use
             );
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         };
