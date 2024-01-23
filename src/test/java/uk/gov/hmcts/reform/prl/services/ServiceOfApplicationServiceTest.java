@@ -1368,6 +1368,164 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
+    public void testValidateRespondentConfidentialDetailsCA() {
+
+        final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
+
+        final CaseInvite caseInvite = CaseInvite.builder()
+            .caseInviteEmail("inviteemail@test.com")
+            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
+            .isApplicant(Yes)
+            .build();
+
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        Element caseInviteElement = element(caseInvite);
+        caseInviteList.add(caseInviteElement);
+
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("of").lastName("ol")
+            .isAddressConfidential(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("ofl@test.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .respondents(List.of(element(otherPerson)))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInviteList)
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
+            .build();
+
+        List<DynamicMultiselectListElement> otherPeopleList = List.of(DynamicMultiselectListElement.builder()
+            .label("otherPeople")
+            .code("otherPeople")
+            .build());
+
+        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData)).thenReturn(otherPeopleList);
+
+        Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
+
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(caseDatatMap).build();
+
+        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+
+
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
+        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+
+        assertNotNull(soaCaseFieldsMap);
+
+        assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
+        assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
+        assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
+    }
+
+    @Test
+    public void testValidateRespondentConfidentialDetailsCaWithConfidentialDetails() {
+
+        final String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
+
+        final CaseInvite caseInvite = CaseInvite.builder()
+            .caseInviteEmail("inviteemail@test.com")
+            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
+            .isApplicant(Yes)
+            .build();
+
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        Element caseInviteElement = element(caseInvite);
+        caseInviteList.add(caseInviteElement);
+
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("of").lastName("ol")
+            .isAddressConfidential(No)
+            .isEmailAddressConfidential(No)
+            .isPhoneNumberConfidential(No)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("ofl@test.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .respondents(List.of(element(otherPerson)))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .soaServeToRespondentOptions(No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassServedOptions(Yes)
+                .soaCafcassEmailId("cymruemail@test.com")
+                .soaCafcassCymruEmail("cymruemail@test.com")
+                .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseInvites(caseInviteList)
+            .othersToNotify(Collections.singletonList(element(otherPerson)))
+            .build();
+
+        List<DynamicMultiselectListElement> otherPeopleList = List.of(DynamicMultiselectListElement.builder()
+            .label("otherPeople")
+            .code("otherPeople")
+            .build());
+
+        when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData)).thenReturn(otherPeopleList);
+
+        Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
+
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345L)
+            .data(caseDatatMap).build();
+
+        when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
+
+
+        when(CaseUtils.getCaseData(
+            caseDetails,
+            objectMapper
+        )).thenReturn(caseData);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
+        when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
+
+        assertNotNull(soaCaseFieldsMap);
+
+        assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
+        assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
+        assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
+    }
+
+    @Test
     public void testHandleSoaSubmitted() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(12345L)
