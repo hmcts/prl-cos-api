@@ -1011,7 +1011,7 @@ public class ServiceOfApplicationService {
         return null;
     }
 
-    private List<Document> getNotificationPack(CaseData caseData, String requiredPack, List<Document> staticDocs) {
+    public List<Document> getNotificationPack(CaseData caseData, String requiredPack, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         switch (requiredPack) {
             case PrlAppsConstants.A:
@@ -1511,6 +1511,7 @@ public class ServiceOfApplicationService {
         return false;
     }
 
+    //cover this
     private boolean validateRespondentConfidentialDetailsCA(CaseData caseData) {
         // Checking the Respondent Details..
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
