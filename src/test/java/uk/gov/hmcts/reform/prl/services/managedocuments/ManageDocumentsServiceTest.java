@@ -40,7 +40,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
@@ -99,8 +98,6 @@ public class ManageDocumentsServiceTest {
     @Mock
     private UserService userService;
 
-    @Mock
-    private ReviewDocumentService reviewDocumentService;
     private final String auth = "auth-token";
 
     private final String serviceAuthToken = "Bearer testServiceAuth";
@@ -474,7 +471,10 @@ public class ManageDocumentsServiceTest {
             .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").build()).build())
             .isRestricted(YesOrNo.Yes)
             .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().categoryId("test").build())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().categoryId("test")
+                          .documentFileName("test")
+                          .documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba")
+                          .build())
             .build();
 
         HashMap hashMap = new HashMap();
@@ -594,7 +594,9 @@ public class ManageDocumentsServiceTest {
             .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
             .isRestricted(YesOrNo.Yes)
             .isConfidential(YesOrNo.Yes)
-            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentFileName("test")
+                          .documentUrl("http://test.com/documents/d848addb-c53f-4ac0-a8ce-0a9e7f4d17ba").build())
             .build();
         HashMap hashMap = new HashMap();
         hashMap.put("testDocument", manageDocuments.getDocument());
