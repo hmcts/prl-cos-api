@@ -192,8 +192,8 @@ public class ManageDocumentsService {
                     userRole
                 );
             } else {
-                moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
                 setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
     }
@@ -203,7 +203,7 @@ public class ManageDocumentsService {
         String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
         if (restrcitedKey != null) {
-            if (!userRole.equals(COURT_ADMIN)) {
+            if (!userRole.equals(COURT_ADMIN) || !DocumentPartyEnum.COURT.equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
                 Document updatedConfidentialDocument = downloadAndDeleteDocument(
@@ -221,7 +221,7 @@ public class ManageDocumentsService {
                 quarantineLegalDoc,
                 userDetails
             );
-            if (userRole.equals(COURT_ADMIN)) {
+            if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.equals(quarantineLegalDoc.getDocumentParty())) {
                 finalConfidentialDocument = finalConfidentialDocument.toBuilder()
                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
                     .build();
@@ -302,9 +302,9 @@ public class ManageDocumentsService {
             //move document into confidential category/folder
             .notes(manageDocument.getDocumentDetails())
             //PRL-4320 - Manage documents redesign
-            .isConfidential(isCourtPartySelected ? null : manageDocument.getIsConfidential())
-            .isRestricted(isCourtPartySelected ? null : manageDocument.getIsRestricted())
-            .restrictedDetails(isCourtPartySelected ? null : manageDocument.getRestrictedDetails())
+            .isConfidential(manageDocument.getIsConfidential())
+            .isRestricted(manageDocument.getIsRestricted())
+            .restrictedDetails(manageDocument.getRestrictedDetails())
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
             .uploaderRole(loggedInUserType)
@@ -322,9 +322,9 @@ public class ManageDocumentsService {
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())) {
-            updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
-        } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
+        } else {
+            updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
         }
     }
 
@@ -622,7 +622,7 @@ public class ManageDocumentsService {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         UserDetails userDetails = userService.getUserDetails(authorization);
         String userRole = CaseUtils.getUserRole(userDetails);
-        if (userRole.equals(COURT_ADMIN)) {
+        if (userRole.equals(COURT_ADMIN) || userRole.equals(COURT_STAFF)) {
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
                 List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getConfidentialDocuments());
