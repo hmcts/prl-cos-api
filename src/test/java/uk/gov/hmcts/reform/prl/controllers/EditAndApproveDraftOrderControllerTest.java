@@ -45,7 +45,6 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
-import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -771,7 +770,7 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData)).thenReturn(caseDataMap);
-        when(ManageOrdersUtils.isOrderEdited(Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(true);
+        //when(ManageOrdersUtils.isOrderEdited(Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(true);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
             .populateCommonFields(authToken, s2sToken, callbackRequest);
