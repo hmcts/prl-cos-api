@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDeta
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
+import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -92,6 +93,9 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
+
+    @Mock
+    private FL401CaseInviteService fl401CaseInviteService;
 
     @Mock
     WelshCourtEmail welshCourtEmail;
@@ -542,36 +546,52 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
-        CaseData caseData = CaseData.builder().id(12345L)
-            .applicants(parties)
-            .respondents(parties)
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
-            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .othersToNotify(parties)
-            .serviceOfApplication(ServiceOfApplication.builder()
-                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
-                                                                                .builder()
-                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
-                                                                                .build()))
-                                      .soaServeToRespondentOptions(YesOrNo.No)
-                                      .soaCitizenServingRespondentsOptionsCA(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
-                                      .soaRecipientsOptions(dynamicMultiSelectList)
-                                      .unServedApplicantPack(SoaPack.builder().build())
-                                      .applicationServedYesNo(YesOrNo.No)
-                                      .soaOtherParties(dynamicMultiSelectList)
-                                      .rejectionReason("pack contain confidential address")
-                                      .build()).build();
-        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .state(CASE_ISSUED.getValue())
-            .data(dataMap)
+        final CaseInvite caseInvite = CaseInvite.builder()
+            .caseInviteEmail("inviteemail@test.com")
+            .partyId(UUID.fromString("ecc87361-d2bb-4400-a910-e5754888385b"))
+            .isApplicant(Yes)
             .build();
-        CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
 
-        assertNotNull(serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
+        List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
+        Element caseInviteElement = element(caseInvite);
+        caseInviteList.add(caseInviteElement);
+
+        String[] caseTypes = {"C100", "FL401"};
+        for (String caseType : caseTypes) {
+
+            CaseData caseData = CaseData.builder().id(12345L)
+                .applicants(parties)
+                .respondents(parties)
+                .caseInvites(caseInviteList)
+                .caseTypeOfApplication(caseType)
+                .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+                .othersToNotify(parties)
+                .serviceOfApplication(ServiceOfApplication.builder()
+                                          .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                    .builder()
+                                                                                    .confidentialityCheckRejectReason(
+                                                                                        "pack contain confidential info")
+                                                                                    .build()))
+                                          .soaServeToRespondentOptions(YesOrNo.No)
+                                          .soaCitizenServingRespondentsOptionsCA(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                                          .soaRecipientsOptions(dynamicMultiSelectList)
+                                          .unServedApplicantPack(SoaPack.builder().build())
+                                          .applicationServedYesNo(YesOrNo.No)
+                                          .soaOtherParties(dynamicMultiSelectList)
+                                          .rejectionReason("pack contain confidential address")
+                                          .build()).build();
+            Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+            CaseDetails caseDetails = CaseDetails.builder()
+                .id(123L)
+                .state(CASE_ISSUED.getValue())
+                .data(dataMap)
+                .build();
+            CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+            when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+            when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
+
+            assertNotNull(serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
+        }
     }
 
     @Test
