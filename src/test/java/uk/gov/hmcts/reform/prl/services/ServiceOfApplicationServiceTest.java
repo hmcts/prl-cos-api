@@ -49,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -723,6 +724,10 @@ public class ServiceOfApplicationServiceTest {
             .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
 
+        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+
+        DocumentListForLa documentListForLa = DocumentListForLa.builder().documentsListForLa(documentList).build();
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(partyList)
@@ -736,6 +741,9 @@ public class ServiceOfApplicationServiceTest {
                                       .soaServeToRespondentOptions(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassServedOptions(Yes)
+                                      .soaServeLocalAuthorityYesOrNo(Yes)
+                                      .soaDocumentDynamicListForLa(List.of(element(documentListForLa)))
+                                      .soaLaEmailAddress("soala@test.com")
                                       .soaCafcassEmailId("cymruemail@test.com")
                                       .soaCafcassCymruEmail("cymruemail@test.com")
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
