@@ -869,4 +869,6 @@ public class PrlAppsConstants {
     public static final String HEARING_JUDGE_ROLE = "hearing-judge";
     public static final String GATEKEEPING_JUDGE_ROLE = "gatekeeping-judge";
     public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
+
+    public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
 }
