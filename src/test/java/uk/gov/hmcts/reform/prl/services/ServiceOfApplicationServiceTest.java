@@ -10,9 +10,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.*;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,8 +58,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
@@ -112,6 +112,12 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    CoreCaseDataApi coreCaseDataApi;
+
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
 
     private final String authorization = "authToken";
     private final String testString = "test";
@@ -392,6 +398,30 @@ public class ServiceOfApplicationServiceTest {
             .caseDetails(CaseDetails.builder()
                              .id(12345L)
                              .data(caseDetails).build()).build();
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
+    }
+
+    @Test
+    public void testsendNotificationsForUnServedLAPack() {
+        CaseData caseData = CaseData.builder().id(12345L)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                    .builder()
+                    .confidentialityCheckRejectReason("pack contain confidential info")
+                    .build()))
+                .unServedLaPack(SoaPack.builder().build())
+                .applicationServedYesNo(No)
+                .soaCafcassCymruServedOptions(Yes)
+                .soaCafcassCymruEmail("test@hmcts.net")
+                .rejectionReason("pack contain confidential address")
+                .build()).build();
+        Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                .id(12345L)
+                .data(caseDetails).build()).build();
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization));
     }
@@ -1309,5 +1339,62 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(Yes, soaCaseFieldsMap.get("soaOtherPeoplePresentInCaseFlag"));
         assertEquals(No, soaCaseFieldsMap.get("isCafcass"));
         assertEquals("cafcassCymruEmailAddress@email.com", soaCaseFieldsMap.get("soaCafcassCymruEmail"));
+    }
+
+    @Test
+    public void testGetSelectedDocumentFromDynamicListReturnsNull() {
+        uk.gov.hmcts.reform.ccd.client.model.Document documents =
+            new uk.gov.hmcts.reform.ccd.client.model
+                .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(documents), null);
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("test");
+        when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
+            .thenReturn(categoriesAndDocuments);
+        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+        uk.gov.hmcts.reform.ccd.client.model.Document document = serviceOfApplicationService
+            .getSelectedDocumentFromDynamicList(authorization, documentList, "1");
+
+        assertNull(document);
+    }
+
+    @Test
+    public void testGetSelectedDocumentFromDynamicListWithCategories() {
+        uk.gov.hmcts.reform.ccd.client.model.Document documents =
+            new uk.gov.hmcts.reform.ccd.client.model
+                .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category blankCategory = new Category("categoryId", "categoryName", 2, List.of(documents), null);
+        Category category = new Category("categoryId", "categoryName", 2, null, List.of(blankCategory));
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("5be65243-f199-4edb-8565-f837ba46f1e6");
+        when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
+            .thenReturn(categoriesAndDocuments);
+        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code("5be65243-f199-4edb-8565-f837ba46f1e6").build()).build();
+        uk.gov.hmcts.reform.ccd.client.model.Document document = serviceOfApplicationService
+            .getSelectedDocumentFromDynamicList(authorization, documentList, "1");
+
+        assertNotNull(document);
+        assertEquals("documentURL", document.getDocumentURL());
+    }
+
+    @Test
+    public void testGetSelectedDocumentFromDynamicList() {
+        uk.gov.hmcts.reform.ccd.client.model.Document documents =
+            new uk.gov.hmcts.reform.ccd.client.model
+                .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(documents), null);
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("5be65243-f199-4edb-8565-f837ba46f1e6");
+        when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
+            .thenReturn(categoriesAndDocuments);
+        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code("5be65243-f199-4edb-8565-f837ba46f1e6").build()).build();
+        uk.gov.hmcts.reform.ccd.client.model.Document document = serviceOfApplicationService
+            .getSelectedDocumentFromDynamicList(authorization, documentList, "1");
+
+        assertNotNull(document);
+        assertEquals("documentURL", document.getDocumentURL());
     }
 }
