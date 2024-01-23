@@ -12,7 +12,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.*;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -61,9 +65,9 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -409,7 +413,7 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testsendNotificationsForUnServedLAPack() {
+    public void testsendNotificationsForUnServedLaPack() {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -1490,7 +1494,8 @@ public class ServiceOfApplicationServiceTest {
         when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("5be65243-f199-4edb-8565-f837ba46f1e6");
         when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
             .thenReturn(categoriesAndDocuments);
-        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code("5be65243-f199-4edb-8565-f837ba46f1e6").build()).build();
+        DynamicList documentList = DynamicList.builder().value(DynamicListElement
+            .builder().code("5be65243-f199-4edb-8565-f837ba46f1e6").build()).build();
         uk.gov.hmcts.reform.ccd.client.model.Document document = serviceOfApplicationService
             .getSelectedDocumentFromDynamicList(authorization, documentList, "1");
 
@@ -1509,7 +1514,8 @@ public class ServiceOfApplicationServiceTest {
         when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("5be65243-f199-4edb-8565-f837ba46f1e6");
         when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
             .thenReturn(categoriesAndDocuments);
-        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code("5be65243-f199-4edb-8565-f837ba46f1e6").build()).build();
+        DynamicList documentList = DynamicList.builder().value(DynamicListElement
+            .builder().code("5be65243-f199-4edb-8565-f837ba46f1e6").build()).build();
         uk.gov.hmcts.reform.ccd.client.model.Document document = serviceOfApplicationService
             .getSelectedDocumentFromDynamicList(authorization, documentList, "1");
 
