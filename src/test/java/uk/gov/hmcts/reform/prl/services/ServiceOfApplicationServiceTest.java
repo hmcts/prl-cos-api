@@ -889,6 +889,7 @@ public class ServiceOfApplicationServiceTest {
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassServedOptions(Yes)
                                       .soaServeLocalAuthorityYesOrNo(Yes)
+                                      .soaLaEmailAddress("La@gmail.com")
                                       .soaDocumentDynamicListForLa(documentsForLa)
                                       .soaServeC8ToLocalAuthorityYesOrNo(Yes)
                                       .soaCafcassEmailId("cymruemail@test.com")
