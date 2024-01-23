@@ -23,10 +23,10 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 @Slf4j
 @SuppressWarnings("ALL")
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ResponseSubmitChecker implements RespondentEventChecker {
     @Lazy
-    @Autowired
-    RespondentEventsChecker respondentEventsChecker;
+    private RespondentEventsChecker respondentEventsChecker;
 
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
