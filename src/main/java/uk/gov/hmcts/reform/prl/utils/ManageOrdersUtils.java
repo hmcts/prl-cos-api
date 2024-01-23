@@ -6,8 +6,11 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApproveAndServeClearFieldsEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
@@ -353,4 +356,22 @@ public class ManageOrdersUtils {
             caseDataUpdated.remove(field.getValue());
         }
     }
+
+    public static boolean isOrderEdited(CaseData caseData, String eventId, boolean isOrderEdited) {
+        if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(eventId)) {
+            if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+                isOrderEdited = true;
+            }
+        } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
+            .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
+            && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
+            .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
+            || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
+            .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
+            isOrderEdited = true;
+        }
+        return isOrderEdited;
+    }
 }
+
