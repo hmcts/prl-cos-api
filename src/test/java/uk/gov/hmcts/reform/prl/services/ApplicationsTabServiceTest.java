@@ -344,15 +344,13 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender("other") //the new POJOs use strings as the enums are causing errors
-            .otherGender("other gender")
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
             .build();
 
-        Element<Applicant> applicantElement = Element.<Applicant>builder().value(
-            applicant.toBuilder().gender("They identify in another way").otherGender("Other gender").build()).build();
+        Element<Applicant> applicantElement = Element.<Applicant>builder().value(applicant.toBuilder().gender("Male").build()).build();
         List<Element<Applicant>> expectedApplicantList = Collections.singletonList(applicantElement);
         Applicant emptyApplicant = Applicant.builder().build();
         Element<Applicant> emptyApplicantElement = Element.<Applicant>builder().value(emptyApplicant).build();
@@ -635,8 +633,7 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender("other") //the new POJOs use strings as the enums are causing errors
-            .otherGender("other gender")
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .isAtAddressLessThan5YearsWithDontKnow("dontKnow")
@@ -647,8 +644,7 @@ public class ApplicationsTabServiceTest {
         Element<Respondent> expectedRespondent = Element.<Respondent>builder().value(
             respondent
                 .toBuilder()
-                .gender("They identify in another way")
-                .otherGender("Other gender")
+                .gender("Male")
                 .isAtAddressLessThan5YearsWithDontKnow("Don't know")
                 .doTheyHaveLegalRepresentation("Don't know")
                 .build())
@@ -1022,8 +1018,7 @@ public class ApplicationsTabServiceTest {
             .firstName("First name")
             .lastName("Last name")
             .dateOfBirth(LocalDate.of(1989, 11, 30))
-            .gender("other") //the new POJOs use strings as the enums are causing errors
-            .otherGender("other gender")
+            .gender("male") //the new POJOs use strings as the enums are causing errors
             .address(address)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
@@ -1033,12 +1028,7 @@ public class ApplicationsTabServiceTest {
             OtherPersonRelationshipToChild.builder().personRelationshipToChild("Bro").build()).build());
 
         Element<OtherPersonInTheCase> otherPersonElement = Element.<OtherPersonInTheCase>builder()
-            .value(otherPerson
-                       .toBuilder()
-                       .gender("They identify in another way")
-                       .otherGender("Other gender")
-                       .relationshipToChild(expectedRelationship)
-                       .build()).build();
+            .value(otherPerson.toBuilder().gender("Male").relationshipToChild(expectedRelationship).build()).build();
         List<Element<OtherPersonInTheCase>> expectedList = Collections.singletonList(otherPersonElement);
         OtherPersonInTheCase emptyOtherPerson = OtherPersonInTheCase.builder().build();
         Element<OtherPersonInTheCase> emptyOtherElement = Element.<OtherPersonInTheCase>builder()
