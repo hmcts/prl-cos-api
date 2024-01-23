@@ -258,7 +258,7 @@ public class EditAndApproveDraftOrderController {
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder);
             boolean isOrderEdited = false;
-            isOrderEdited = draftAnOrderService.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited);
+            isOrderEdited = ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited);
             if (isOrderEdited) {
                 response.put("doYouWantToEditTheOrder", Yes);
             }

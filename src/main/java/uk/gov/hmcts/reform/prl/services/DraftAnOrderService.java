@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
-import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
@@ -178,6 +177,7 @@ public class DraftAnOrderService {
     private static final String DATE_ORDER_MADE = "dateOrderMade";
     private static final String SELECTED_ORDER = "selectedOrder";
     public static final String LEGAL_REP_INSTRUCTIONS_PLACE_HOLDER = "legalRepInstructionsPlaceHolder";
+    public static final String DRAFT_ORDERS_DYNAMIC_LIST = "draftOrdersDynamicList";
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -252,11 +252,12 @@ public class DraftAnOrderService {
                 }
             }
         );
-        caseDataMap.put("draftOrdersDynamicList", ElementUtils.asDynamicList(
+        caseDataMap.put(DRAFT_ORDERS_DYNAMIC_LIST, ElementUtils.asDynamicList(
             supportedDraftOrderList,
             null,
             DraftOrder::getLabelForOrdersDynamicList
         ));
+
         String cafcassCymruEmailAddress = welshCourtEmail
             .populateCafcassCymruEmailInManageOrders(caseData);
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -780,7 +781,7 @@ public class DraftAnOrderService {
         Map<String, Object> caseDataMap = new HashMap<>();
         log.info("selected order: {}", selectedOrder);
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
-        caseDataMap.put("draftOrdersDynamicList", caseData.getDraftOrdersDynamicList());
+        caseDataMap.put(DRAFT_ORDERS_DYNAMIC_LIST, caseData.getDraftOrdersDynamicList());
         caseDataMap.put("orderType", selectedOrder.getOrderType());
         caseDataMap.put("isTheOrderByConsent", selectedOrder.getIsTheOrderByConsent());
         caseDataMap.put(DATE_ORDER_MADE, selectedOrder.getDateOrderMade());
@@ -921,7 +922,7 @@ public class DraftAnOrderService {
             if (e.getId().equals(selectedOrderId)) {
                 DraftOrder draftOrder = e.getValue();
                 boolean isOrderEdited = false;
-                isOrderEdited = isOrderEdited(caseData, eventId, isOrderEdited);
+                isOrderEdited = ManageOrdersUtils.isOrderEdited(caseData, eventId, isOrderEdited);
                 if (isOrderEdited || (caseData.getManageOrders() != null
                     && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
@@ -954,26 +955,6 @@ public class DraftAnOrderService {
             Comparator.reverseOrder()
         ));
         return Map.of(DRAFT_ORDER_COLLECTION, draftOrderCollection);
-    }
-
-    public boolean isOrderEdited(CaseData caseData, String eventId, boolean isOrderEdited) {
-        if (Event.EDIT_RETURNED_ORDER.getId()
-            .equalsIgnoreCase(eventId)) {
-            isOrderEdited = true;
-        } else if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(eventId)) {
-            if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
-                isOrderEdited = true;
-            }
-        } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
-            .equalsIgnoreCase(eventId) && (caseData.getManageOrders() != null
-            && (OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe
-                .equals(caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin())
-            || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
-                .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
-            isOrderEdited = true;
-        }
-        return isOrderEdited;
     }
 
     private DraftOrder getDraftOrderWithUpdatedStatus(CaseData caseData, String eventId, String loggedInUserType, DraftOrder draftOrder) {
@@ -1015,7 +996,7 @@ public class DraftAnOrderService {
             orderDocumentEng = caseData.getManageOrders().getEditedUploadOrderDoc();
         } else {
             boolean isOrderEdited = false;
-            if (isOrderEdited(caseData, eventId, isOrderEdited)) {
+            if (ManageOrdersUtils.isOrderEdited(caseData, eventId, isOrderEdited)) {
                 orderDocumentEng = caseData.getPreviewOrderDoc();
                 orderDocumentWelsh = caseData.getPreviewOrderDocWelsh();
             } else {
@@ -2158,7 +2139,7 @@ public class DraftAnOrderService {
                                                                                        .getRejectedOrdersDynamicList());
             }
             boolean isOrderEdited = false;
-            if (isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited)) {
+            if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited)) {
                 errorList = validateEditedOrderDetails(caseData, draftOrder);
                 if (!errorList.isEmpty()) {
                     return Map.of("errorList", errorList);
@@ -2219,7 +2200,7 @@ public class DraftAnOrderService {
             occupationErrorList.addAll(getErrorForOccupationScreen(caseData, draftOrder.getOrderType()));
             if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
                 boolean isOrderEdited = false;
-                if (isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited)) {
+                if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited)) {
                     existingOrderHearingDetails = caseData.getManageOrders().getOrdersHearingDetails();
 
                     //PRL-4260 - hearing screen validations
