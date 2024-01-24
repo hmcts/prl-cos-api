@@ -60,6 +60,20 @@ public class RoleAssignmentServiceTest {
     }
 
     @Test
+    public void testCreateRoleAssignmentActorIdIsNull() {
+        Map<String, Object> caseDetailsMap = new HashMap<>();
+        List<String> roles = new ArrayList();
+        roles.add("caseworker-privatelaw-judge");
+        userDetails = UserDetails.builder().id("1").roles(roles).build();
+        caseDetails.setData(caseDetailsMap);
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetails);
+        when(authTokenGenerator.generate()).thenReturn("test");
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, true, "Judge");
+        assertEquals("1", userDetails.getId());
+    }
+
+    @Test
     public void testCreateRoleAssignmentJudgeWithName() {
         Map<String, Object> caseDetailsMap = new HashMap<>();
         caseDetailsMap.put("isJudgeOrLegalAdviser", "judge");
