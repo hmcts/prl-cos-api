@@ -1511,7 +1511,6 @@ public class ServiceOfApplicationService {
         return false;
     }
 
-    //cover this
     private boolean validateRespondentConfidentialDetailsCA(CaseData caseData) {
         // Checking the Respondent Details..
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
