@@ -6,9 +6,9 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -30,14 +30,14 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 @RestController
 @RequestMapping("/confidentiality-check")
 @Slf4j
+@RequiredArgsConstructor
 public class ConfidentialityCheckController {
 
     public static final String NO_PACKS_AVAILABLE_FOR_CONFIDENTIAL_DETAILS_CHECK = "There are no packs available for confidential details check";
-    @Autowired
-    private ServiceOfApplicationService serviceOfApplicationService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ServiceOfApplicationService serviceOfApplicationService;
+
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Confidentiality check about to start event")
