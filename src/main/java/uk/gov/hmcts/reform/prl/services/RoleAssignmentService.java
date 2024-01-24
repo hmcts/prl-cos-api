@@ -57,49 +57,52 @@ public class RoleAssignmentService {
                                      String roleName) {
         String actorId = populateActorId(authorization, (HashMap<String, Object>) caseDetails.getData());
         String roleCategory = RoleCategory.JUDICIAL.name();
-        if (actorId.split(UNDERSCORE)[1].equals(LEGAL_ADVISER)) {
-            roleName = "allocated-legal-adviser";
-            roleCategory = RoleCategory.LEGAL_OPERATIONS.name();
+        if (null != actorId) {
+            if (actorId.split(UNDERSCORE)[1].equals(LEGAL_ADVISER)) {
+                roleName = "allocated-legal-adviser";
+                roleCategory = RoleCategory.LEGAL_OPERATIONS.name();
+            }
+
+            log.info("actor id is {}", actorId);
+            UserDetails userDetails = userService.getUserDetails(authorization);
+
+            RoleRequest roleRequest = RoleRequest.roleRequest()
+                .assignerId(userDetails.getId())
+                .process("CCD")
+                .reference(createRoleRequestReference(caseDetails, userDetails.getId()))
+                .replaceExisting(replaceExisting)
+                .build();
+            String actorIdForService = actorId.split(UNDERSCORE)[0];
+            List<RequestedRoles> requestedRoles = List.of(RequestedRoles.requestedRoles()
+                .actorIdType("IDAM")
+                .actorId(actorIdForService)
+                .roleType(RoleType.CASE.name())
+                .roleName(roleName)
+                .classification(Classification.RESTRICTED.name())
+                .grantType(GrantType.SPECIFIC.name())
+                .roleCategory(roleCategory)
+                .readOnly(false)
+                .beginTime(Instant.now())
+                .attributes(Attributes.attributes()
+                    .jurisdiction(caseDetails.getJurisdiction())
+                    .caseType(caseDetails.getCaseTypeId())
+                    .caseId(caseDetails.getId().toString())
+                    .build())
+
+                .build());
+
+            RoleAssignmentRequest assignmentRequest = RoleAssignmentRequest.roleAssignmentRequest()
+                .roleRequest(roleRequest)
+                .requestedRoles(requestedRoles)
+                .build();
+            log.info("assignmentRequest----{}", assignmentRequest);
+            roleAssignmentApi.updateRoleAssignment(
+                authorization,
+                authTokenGenerator.generate(),
+                null,
+                assignmentRequest
+            );
         }
-        log.info("actor id is {}", actorId);
-        UserDetails userDetails = userService.getUserDetails(authorization);
-
-        RoleRequest roleRequest = RoleRequest.roleRequest()
-            .assignerId(userDetails.getId())
-            .process("CCD")
-            .reference(createRoleRequestReference(caseDetails, userDetails.getId()))
-            .replaceExisting(replaceExisting)
-            .build();
-        String actorIdForService = actorId.split(UNDERSCORE)[0];
-        List<RequestedRoles> requestedRoles = List.of(RequestedRoles.requestedRoles()
-                                                          .actorIdType("IDAM")
-                                                          .actorId(actorIdForService)
-                                                          .roleType(RoleType.CASE.name())
-                                                          .roleName(roleName)
-                                                          .classification(Classification.RESTRICTED.name())
-                                                          .grantType(GrantType.SPECIFIC.name())
-                                                          .roleCategory(roleCategory)
-                                                          .readOnly(false)
-                                                          .beginTime(Instant.now())
-                                                          .attributes(Attributes.attributes()
-                                                                          .jurisdiction(caseDetails.getJurisdiction())
-                                                                          .caseType(caseDetails.getCaseTypeId())
-                                                                          .caseId(caseDetails.getId().toString())
-                                                                          .build())
-
-                                                          .build());
-
-        RoleAssignmentRequest assignmentRequest = RoleAssignmentRequest.roleAssignmentRequest()
-            .roleRequest(roleRequest)
-            .requestedRoles(requestedRoles)
-            .build();
-        log.info("assignmentRequest----{}", assignmentRequest);
-        roleAssignmentApi.updateRoleAssignment(
-            authorization,
-            authTokenGenerator.generate(),
-            null,
-            assignmentRequest
-        );
     }
 
     private String populateActorId(String authorization, HashMap<String, Object> caseDataUpdated) {
