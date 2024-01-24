@@ -1518,7 +1518,7 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
-        assertEquals("# The application is served", response.getBody().getConfirmationHeader());
+        assertEquals("# The application has been served", response.getBody().getConfirmationHeader());
     }
 
     @Test
@@ -1556,7 +1556,7 @@ public class ServiceOfApplicationServiceTest {
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
-        assertEquals("# The application is served", response.getBody().getConfirmationHeader());
+        assertEquals("# The application is ready to be personally served", response.getBody().getConfirmationHeader());
     }
 
     @Test
