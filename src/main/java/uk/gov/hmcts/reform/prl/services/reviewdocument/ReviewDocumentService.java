@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.reviewdocument;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -98,6 +97,22 @@ public class ReviewDocumentService {
             + GOVUK_LIST_BULLET_LABEL;
     public static final String  RESTRICTION_REASON_LABEL =
         "<h3 class='govuk-heading-s'>Reasons to restrict access</h3><label class='govuk-label' for='more-detail'>"
+            + GOVUK_LIST_BULLET_LABEL;
+
+    public static final String  BULK_SCAN_TYPE_LABEL =
+        "<h3 class='govuk-heading-s'>Type</h3><label class='govuk-label' for='more-detail'>"
+            + GOVUK_LIST_BULLET_LABEL;
+    public static final String  BULK_SCAN_SUB_TYPE_LABEL =
+        "<h3 class='govuk-heading-s'>Sub type</h3><label class='govuk-label' for='more-detail'>"
+            + GOVUK_LIST_BULLET_LABEL;
+    public static final String  BULK_SCAN_EXCEPTION_RECORD_REF_LABEL =
+        "<h3 class='govuk-heading-s'>Exception record reference</h3><label class='govuk-label' for='more-detail'>"
+            + GOVUK_LIST_BULLET_LABEL;
+    public static final String  BULK_SCAN_SCANNED_DATE_LABEL =
+        "<h3 class='govuk-heading-s'>Scanned date</h3><label class='govuk-label' for='more-detail'>"
+            + GOVUK_LIST_BULLET_LABEL;
+    public static final String  BULK_SCAN_DELIVERY_DATE_LABEL =
+        "<h3 class='govuk-heading-s'>Delivery date</h3><label class='govuk-label' for='more-detail'>"
             + GOVUK_LIST_BULLET_LABEL;
 
     public static final String DOC_TO_BE_REVIEWED = "docToBeReviewed";
@@ -220,14 +235,7 @@ public class ReviewDocumentService {
         QuarantineLegalDoc quarantineLegalDoc = quarantineDocElement.getValue();
         log.info("** Quarantine Doc ** {}", quarantineLegalDoc);
 
-        String docTobeReviewed = formatDocumentTobeReviewed(
-            submittedBy,
-            quarantineLegalDoc.getCategoryName(),
-            quarantineLegalDoc.getNotes(),
-            quarantineLegalDoc.getIsRestricted(),
-            quarantineLegalDoc.getIsConfidential(),
-            quarantineLegalDoc.getRestrictedDetails()
-        );
+        String docTobeReviewed = formatDocumentTobeReviewed(submittedBy, quarantineLegalDoc);
 
         caseDataUpdated.put(DOC_TO_BE_REVIEWED, docTobeReviewed);
         caseDataUpdated.put(DOC_LABEL,LABEL_WITH_HINT);
@@ -440,15 +448,8 @@ public class ReviewDocumentService {
         return scannedDocumentElements.stream().map(
                 scannedDocumentElement -> {
                     ScannedDocument scannedDocument = scannedDocumentElement.getValue();
-                    return element(scannedDocumentElement.getId(), QuarantineLegalDoc.builder()
-                            .fileName(scannedDocument.getFileName())
-                            .controlNumber(scannedDocument.getControlNumber())
-                            .type(scannedDocument.getType())
-                            .subtype(scannedDocument.getSubtype())
-                            .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
-                            .url(scannedDocument.getUrl())
-                            .scannedDate(scannedDocument.getScannedDate())
-                            .deliveryDate(scannedDocument.getDeliveryDate())
+                    return element(scannedDocumentElement.getId(),
+                                   getBulkScanQuarantineDoc(scannedDocument)
                             .build());
                 }).toList();
     }
@@ -462,20 +463,23 @@ public class ReviewDocumentService {
             .orElse(null);
 
         if (null != scannedDocument) {
-            return Optional.of(element(uuid, QuarantineLegalDoc.builder()
-                .fileName(scannedDocument.getFileName())
-                .controlNumber(scannedDocument.getControlNumber())
-                .type(scannedDocument.getType())
-                .subtype(scannedDocument.getSubtype())
-                .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
-                .url(scannedDocument.getUrl())
-                .scannedDate(scannedDocument.getScannedDate())
-                .deliveryDate(scannedDocument.getDeliveryDate())
-                .isConfidential(YesOrNo.Yes) //bulk scan docs always go to confidential if decision is Yes
-                .uploaderRole(BULK_SCAN)
-                .build()));
+            return Optional.of(element(uuid, getBulkScanQuarantineDoc(scannedDocument).build()));
         }
         return Optional.empty();
+    }
+
+    private static QuarantineLegalDoc.QuarantineLegalDocBuilder getBulkScanQuarantineDoc(ScannedDocument scannedDocument) {
+        return QuarantineLegalDoc.builder()
+            .fileName(scannedDocument.getFileName())
+            .controlNumber(scannedDocument.getControlNumber())
+            .type(scannedDocument.getType())
+            .subtype(scannedDocument.getSubtype())
+            .exceptionRecordReference(scannedDocument.getExceptionRecordReference())
+            .url(scannedDocument.getUrl())
+            .scannedDate(scannedDocument.getScannedDate())
+            .deliveryDate(scannedDocument.getDeliveryDate())
+            .isConfidential(YesOrNo.Yes) //bulk scan docs always go to confidential if decision is Yes
+            .uploaderRole(BULK_SCAN);
     }
 
     public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
@@ -519,33 +523,68 @@ public class ReviewDocumentService {
     }
 
     private String formatDocumentTobeReviewed(String submittedBy,
-                                              String category,
-                                              String notes,
-                                              YesOrNo isRestricted,
-                                              YesOrNo isConfidential,
-                                              String restrictedDetails) {
-        if (BULK_SCAN.equals(submittedBy)) {
-            return String.join(
-                format(SUBMITTED_BY_LABEL, submittedBy)
-            );
-        }
+                                              QuarantineLegalDoc quarantineDoc) {
         StringBuilder reviewDetailsBuilder = new StringBuilder();
         reviewDetailsBuilder.append(format(SUBMITTED_BY_LABEL, submittedBy));
-        reviewDetailsBuilder.append(format(DOCUMENT_CATEGORY_LABEL, category));
-        if (StringUtils.isNotEmpty(notes)) {
-            reviewDetailsBuilder.append(format(DOCUMENT_COMMENTS_LABEL, notes));
-        }
-        if (null != isConfidential) {
-            reviewDetailsBuilder.append(format(CONFIDENTIAL_INFO_LABEL, isConfidential.getDisplayedValue()));
-        }
-        if (null != isRestricted) {
-            reviewDetailsBuilder.append(format(RESTRICTED_INFO_LABEL, isRestricted.getDisplayedValue()));
-        }
-        if (StringUtils.isNotEmpty(restrictedDetails)) {
-            reviewDetailsBuilder.append(format(RESTRICTION_REASON_LABEL, restrictedDetails));
+        //append quarantine document details for solicitor, cafcass & court staff
+        appendQuarantineDocumentDetails(reviewDetailsBuilder, quarantineDoc);
+
+        //PRL-5006 bulk scan fields
+        if (BULK_SCAN.equals(submittedBy)) {
+            appendBulkScanDocumentDetails(reviewDetailsBuilder, quarantineDoc);
         }
         reviewDetailsBuilder.append("<br/>");
         return reviewDetailsBuilder.toString();
+    }
+
+    private void appendQuarantineDocumentDetails(StringBuilder reviewDetailsBuilder,
+                                                 QuarantineLegalDoc quarantineDoc) {
+        if (CommonUtils.isNotEmpty(quarantineDoc.getCategoryName())) {
+            reviewDetailsBuilder.append(format(DOCUMENT_CATEGORY_LABEL,
+                                               quarantineDoc.getCategoryName()));
+        }
+        if (CommonUtils.isNotEmpty(quarantineDoc.getNotes())) {
+            reviewDetailsBuilder.append(format(DOCUMENT_COMMENTS_LABEL,
+                                               quarantineDoc.getNotes()));
+        }
+        if (null != quarantineDoc.getIsConfidential()) {
+            reviewDetailsBuilder.append(format(CONFIDENTIAL_INFO_LABEL,
+                                               quarantineDoc.getIsConfidential().getDisplayedValue()));
+        }
+        if (null != quarantineDoc.getIsRestricted()) {
+            reviewDetailsBuilder.append(format(RESTRICTED_INFO_LABEL,
+                                               quarantineDoc.getIsRestricted().getDisplayedValue()));
+        }
+        if (CommonUtils.isNotEmpty(quarantineDoc.getRestrictedDetails())) {
+            reviewDetailsBuilder.append(format(RESTRICTION_REASON_LABEL,
+                                               quarantineDoc.getRestrictedDetails()));
+        }
+    }
+
+    private void appendBulkScanDocumentDetails(StringBuilder reviewDetailsBuilder,
+                                               QuarantineLegalDoc quarantineDoc) {
+        if (CommonUtils.isNotEmpty(quarantineDoc.getType())) {
+            reviewDetailsBuilder.append(format(BULK_SCAN_TYPE_LABEL,
+                                               quarantineDoc.getType()));
+        }
+        if (CommonUtils.isNotEmpty(quarantineDoc.getSubtype())) {
+            reviewDetailsBuilder.append(format(BULK_SCAN_SUB_TYPE_LABEL,
+                                               quarantineDoc.getSubtype()));
+        }
+        if (CommonUtils.isNotEmpty(quarantineDoc.getExceptionRecordReference())) {
+            reviewDetailsBuilder.append(format(BULK_SCAN_EXCEPTION_RECORD_REF_LABEL,
+                                               quarantineDoc.getExceptionRecordReference()));
+        }
+        if (null != quarantineDoc.getScannedDate()) {
+            reviewDetailsBuilder.append(format(BULK_SCAN_SCANNED_DATE_LABEL,
+                                               formatDateTime(DATE_TIME_PATTERN,
+                                                              quarantineDoc.getScannedDate())));
+        }
+        if (null != quarantineDoc.getDeliveryDate()) {
+            reviewDetailsBuilder.append(format(BULK_SCAN_DELIVERY_DATE_LABEL,
+                                               formatDateTime(DATE_TIME_PATTERN,
+                                                              quarantineDoc.getDeliveryDate())));
+        }
     }
 
 }
