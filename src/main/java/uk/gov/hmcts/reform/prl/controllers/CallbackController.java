@@ -515,12 +515,14 @@ public class CallbackController {
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
 
-            roleAssignmentService.createRoleAssignment(
-                authorisation,
-                callbackRequest.getCaseDetails(),
-                false,
-                GATEKEEPING_JUDGE_ROLE
-            );
+            if (gatekeepingDetails.getIsSpecificGateKeeperNeeded().equals(Yes)) {
+                roleAssignmentService.createRoleAssignment(
+                    authorisation,
+                    callbackRequest.getCaseDetails(),
+                    false,
+                    GATEKEEPING_JUDGE_ROLE
+                );
+            }
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
