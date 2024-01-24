@@ -140,14 +140,12 @@ public class ServiceOfApplicationService {
     public static final String PROCEED_TO_SERVING = "proceedToServing";
     private final LaunchDarklyClient launchDarklyClient;
 
-    public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
+    public static final String RETURNED_TO_ADMIN_HEADER = "# The application cannot be served";
     public static final String APPLICATION_SERVED_HEADER = "# Application served";
     public static final String CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX = """
         ### What happens next
-        The application will be served to relevant people in the case""";
-    public static final String CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX = """
-           ### What happens next
-           The application cannot be served. The packs will be sent to the filling team to be redacted.""";
+        A new service pack will need to be created by admin as this version will be deleted.""";
+
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
     public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
         ### What happens next
@@ -2101,7 +2099,7 @@ public class ServiceOfApplicationService {
         response = ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
                       .confirmationBody(
-                          CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX).build());
+                          CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX).build());
         return response;
     }
 

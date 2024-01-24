@@ -23,9 +23,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 
 @RestController
 @RequestMapping("/confidentiality-check")
@@ -38,6 +41,12 @@ public class ConfidentialityCheckController {
     private final ServiceOfApplicationService serviceOfApplicationService;
 
     private final ObjectMapper objectMapper;
+
+    public static final String CONFIDENTIALITY_CHECK_WARNING_TEXT = "confidentialityCheckWarningText";
+
+    public static final String CONFIDENTIALITY_CHECK_WARNING_TEXT_MESSAGE = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>You need to check the confidential details tab and review the"
+        + " service packs in the service of application tab before continuing.</strong></div>";
 
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Confidentiality check about to start event")
@@ -58,7 +67,9 @@ public class ConfidentialityCheckController {
 
         if (CaseUtils.unServedPacksPresent(caseData)) {
             log.info("Packs present to serve");
-            return AboutToStartOrSubmitCallbackResponse.builder().build();
+            Map<String, Object> caseDataUpdated = new HashMap<>();
+            caseDataUpdated.put(CONFIDENTIALITY_CHECK_WARNING_TEXT, CONFIDENTIALITY_CHECK_WARNING_TEXT_MESSAGE);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         }
 
         return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
