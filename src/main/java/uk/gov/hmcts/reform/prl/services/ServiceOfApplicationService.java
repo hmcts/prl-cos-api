@@ -142,7 +142,6 @@ public class ServiceOfApplicationService {
     private String manageCaseUrl;
 
     public static final String RETURNED_TO_ADMIN_HEADER = "# The application cannot be served";
-    public static final String APPLICATION_SERVED_HEADER = "# Application served";
     public static final String CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX = """
         ### What happens next
         A new service pack will need to be created by admin as this version will be deleted.""";
@@ -181,6 +180,13 @@ public class ServiceOfApplicationService {
             The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
+        """;
+
+    public static final String CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL = "# The application is ready for personally service";
+
+    public static final String CONFIDENTIALITY_CONFIRMATION_BODY_PERSONAL = """
+        ### What happens next
+        The person arranging personal service will be notified
         """;
 
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
@@ -2186,6 +2192,8 @@ public class ServiceOfApplicationService {
                                                                                         Map<String, Object> caseDataMap) {
         final ResponseEntity<SubmittedCallbackResponse> response;
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+        String confirmationBody;
+        String confirmationHeader;
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         } else {
@@ -2198,10 +2206,20 @@ public class ServiceOfApplicationService {
 
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
 
+        if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+            && YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            confirmationBody = CONFIRMATION_BODY_PREFIX;
+            confirmationHeader = CONFIRMATION_HEADER_NON_PERSONAL;
+            confirmationBody = String.format(confirmationBody, manageCaseUrl + "/" + caseData.getId() + "#Service of application");
+        }else {
+            confirmationBody = CONFIDENTIALITY_CONFIRMATION_BODY_PERSONAL;
+            confirmationHeader = CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
+        }
+
         response = ok(SubmittedCallbackResponse.builder()
-                          .confirmationHeader(APPLICATION_SERVED_HEADER)
+                          .confirmationHeader(confirmationHeader)
                           .confirmationBody(
-                              CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX).build());
+                              confirmationBody).build());
         return response;
     }
 

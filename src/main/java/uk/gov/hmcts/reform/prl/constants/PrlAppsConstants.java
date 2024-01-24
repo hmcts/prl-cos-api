@@ -884,6 +884,4 @@ public class PrlAppsConstants {
 
     public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
 
-    public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
-        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
 }
