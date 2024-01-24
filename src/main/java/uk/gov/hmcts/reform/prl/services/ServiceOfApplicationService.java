@@ -2212,7 +2212,7 @@ public class ServiceOfApplicationService {
             confirmationHeader = CONFIRMATION_HEADER_NON_PERSONAL;
             confirmationBody = String.format(
                 confirmationBody,
-                manageCaseUrl + "/" + caseData.getId() + "#Service of application"
+                "/cases/case-details/" + caseData.getId() + "/#Service%20of%20application"
             );
         } else {
             confirmationBody = CONFIDENTIALITY_CONFIRMATION_BODY_PERSONAL;
