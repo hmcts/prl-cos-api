@@ -22,9 +22,9 @@ public enum SdoHearingsAndNextStepsEnum {
     @JsonProperty("hearingNotNeeded")
     hearingNotNeeded("hearingNotNeeded", "Hearing is not needed"),
     @JsonProperty("fhdra")
-    fhdra("fhdra", "First hearing dispute resolution (FHDRA)"),
+    fhdra("fhdra", "First hearing dispute resolution appointment (FHDRA)"),
     @JsonProperty("positionStatement")
-    positionStatement("positionStatement", "Position statements"),
+    positionStatement("positionStatement", "Position statement"),
     @JsonProperty("participationDirections")
     participationDirections("participationDirections", "Participation directions"),
     @JsonProperty("miamAttendance")

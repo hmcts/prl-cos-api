@@ -18,11 +18,14 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherOrganisationOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.BulkPrintOrderDetail;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -31,6 +34,8 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
@@ -44,12 +49,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -58,49 +65,31 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S3776", "java:S6204"})
 public class ManageOrderEmailService {
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private CourtFinderService courtLocatorService;
+    public static final String NEW_AND_FINAL = "newAndFinal";
+    public static final String FINAL = "final";
+    public static final String NEW = "new";
 
     @Value("${uk.gov.notify.email.application.email-id}")
     private String courtEmail;
-
     @Value("${xui.url}")
     private String manageCaseUrl;
-
     @Value("${citizen.url}")
     private String citizenDashboardUrl;
 
     private static final String URL_STRING = "/";
     private static final String URGENT_CASE = "Urgent ";
     private static final String DATE_FORMAT = "dd-MM-yyyy";
-
-    @Autowired
-    private final ServiceOfApplicationService serviceOfApplicationService;
-    @Autowired
-    private ServiceOfApplicationPostService serviceOfApplicationPostService;
-
-    @Autowired
-    private BulkPrintService bulkPrintService;
-
     private static final String ORDER_TYPE = "OrderPack";
 
-    @Autowired
-    private final OrganisationService organisationService;
-    @Autowired
-    private final SystemUserService systemUserService;
-    @Autowired
+    private final EmailService emailService;
+    private final ServiceOfApplicationPostService serviceOfApplicationPostService;
+    private final BulkPrintService bulkPrintService;
     private final SendgridService sendgridService;
-
-    @Autowired
-    private Time dateTime;
-
+    private final Time dateTime;
+    private final CourtFinderService courtLocatorService;
 
     public void sendEmail(CaseDetails caseDetails) {
         List<String> emailList = new ArrayList<>();
@@ -241,6 +230,11 @@ public class ManageOrderEmailService {
                                                   String emailAddress,
                                                   EmailTemplateVars email,
                                                   CaseData caseData) {
+        log.info("*** Email addt {}", emailAddress);
+        log.info("*** Email {}", email);
+        log.info("*** final order {}", isFinalOrder);
+        log.info("*** languahge pref {}", caseData.getWelshLanguageRequirement());
+
         emailService.send(
             emailAddress,
             (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL
@@ -411,78 +405,149 @@ public class ManageOrderEmailService {
     public void sendEmailWhenOrderIsServed(String authorisation,
                                            CaseData caseData,
                                            Map<String, Object> caseDataMap) {
-        List<String> listOfOtherAndCafcassEmails = new ArrayList<>();
+        List<EmailInformation> otherOrganisationEmailList = new ArrayList<>();
+        List<PostalInformation> otherOrganisationPostList = new ArrayList<>();
         ManageOrders manageOrders = caseData.getManageOrders();
         String caseTypeofApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails = new ArrayList<>();
+        List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
+        log.info("inside SendEmailWhenOrderIsServed**");
 
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            List<Document> orderDocuments = getServedOrderDocumentsAndAdditionalDocuments(caseData);
-            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())
-                || YesOrNo.No.equals(manageOrders.getServeToRespondentOptionsOnlyC47a())) {
+            if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("** CA case email notifications***");
-                DynamicMultiSelectList recipientsOptions = isNotEmpty(manageOrders.getRecipientsOptions()) && CollectionUtils.isNotEmpty(
-                    manageOrders.getRecipientsOptions().getValue())
-                    ? manageOrders.getRecipientsOptions() : manageOrders.getRecipientsOptionsOnlyC47a();
-                //applicants
-                sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
-                                                caseData.getApplicants(),
-                                                isFinalOrder, caseData
-                );
-                //respondents
-                sendEmailToSolicitorOrPostToRespondent(recipientsOptions.getValue(),
-                                                       caseData.getRespondents(), isFinalOrder, caseData,
-                                                       authorisation, orderDocuments, bulkPrintOrderDetails
-                );
-            }
-            if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
-                .contains(OtherOrganisationOptions.anotherOrganisation)
-                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCA())) {
-                manageOrders.getEmailInformationCA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
-            } else if (manageOrders.getServeOtherPartiesCaOnlyC47a() != null && manageOrders.getServeOtherPartiesCaOnlyC47a()
-                .contains(OtherOrganisationOptions.anotherOrganisation)
-                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsCaOnlyC47a())) {
-                manageOrders.getEmailInformationCaOnlyC47a().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
+                DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
+                if (recipientsOptions != null) {
+                    //applicants
+                    sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
+                                                    caseData.getApplicants(),
+                                                    isFinalOrder, caseData
+                    );
+                    //respondents
+                    sendEmailToSolicitorOrPostToRespondent(recipientsOptions.getValue(),
+                                                           caseData.getRespondents(), isFinalOrder, caseData,
+                                                           authorisation, orderDocuments, bulkPrintOrderDetails
+                    );
+                }
             }
             //PRL-4225 - send order & additional docs to other people via post only
-            if (isNotEmpty(manageOrders.getOtherParties()) || isNotEmpty(manageOrders.getOtherPartiesOnlyC47a())) {
-                DynamicMultiSelectList otherParties = isNotEmpty(manageOrders.getOtherParties())
-                    ? manageOrders.getOtherParties() : manageOrders.getOtherPartiesOnlyC47a();
+            if (isNotEmpty(manageOrders.getOtherParties())) {
                 serveOrderToOtherPersons(authorisation,
-                                         otherParties, caseData, orderDocuments, bulkPrintOrderDetails
+                                         manageOrders.getOtherParties(), caseData, orderDocuments, bulkPrintOrderDetails
                 );
             }
             //Send email notification to Cafcass or Cafcass cymru based on selection
-            if (getCafcassEmail(manageOrders) != null) {
-                listOfOtherAndCafcassEmails.add(getCafcassEmail(manageOrders));
+            String cafcassOrCymruEmail = getCafcassEmail(manageOrders);
+            if (cafcassOrCymruEmail != null) {
+                otherOrganisationEmailList.add(EmailInformation.builder().emailAddress(cafcassOrCymruEmail).build());
             }
-
-            //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
-            addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
-            caseDataMap.put("orderCollection", caseData.getOrderCollection());
-
+            //get email and postal information for other organisations.
+            if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
+                .contains(OtherOrganisationOptions.anotherOrganisation)) {
+                manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
+                    if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
+                        otherOrganisationEmailList.add(value.getEmailInformation());
+                    } else {
+                        otherOrganisationPostList.add(value.getPostalInformation());
+                    }
+                });
+            }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
             sendEmailForFlCaseType(caseData, isFinalOrder);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
-                .contains(ServeOtherPartiesOptions.other)
-                && DeliveryByEnum.email.equals(manageOrders.getDeliveryByOptionsDA())) {
-                manageOrders.getEmailInformationDA().stream().map(Element::getValue).forEach(value -> listOfOtherAndCafcassEmails
-                    .add(value.getEmailAddress()));
+                .contains(ServeOtherPartiesOptions.other)) {
+                manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
+                    if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
+                        otherOrganisationEmailList.add(value.getEmailInformation());
+                    } else {
+                        otherOrganisationPostList.add(value.getPostalInformation());
+                    }
+                });
             }
         }
-        // Send email notification to other organisations
-        listOfOtherAndCafcassEmails.forEach(email ->
-                                                emailService.send(
-                                                    email,
-                                                    EmailTemplateNames.CAFCASS_OTHER,
-                                                    buildEmailToCafcassAndOtherParties(caseData),
-                                                    LanguagePreference.english
-                                                )
-        );
+        if (!otherOrganisationPostList.isEmpty()) {
+            serveOrdersToOtherOrganisation(caseData, authorisation, orderDocuments, bulkPrintOrderDetails, otherOrganisationPostList);
+        }
 
+        //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
+        addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
+        caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
+
+        // Send email notification to other organisations
+        if (!otherOrganisationEmailList.isEmpty()) {
+            sendEmailToOtherOrganisation(caseData, otherOrganisationEmailList, authorisation, orderDocuments);
+        }
+    }
+
+    private void sendEmailToOtherOrganisation(CaseData caseData, List<EmailInformation> emailInformation,
+                                              String authorisation, List<Document> orderDocuments) {
+
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+
+        if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
+            List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
+            AtomicBoolean newOrdersExists = new AtomicBoolean(false);
+            AtomicBoolean finalOrdersExists = new AtomicBoolean(false);
+            caseData.getOrderCollection().stream()
+                .filter(order -> selectedOrderIds.contains(order.getId().toString()))
+                .forEach(order -> {
+                    if (StringUtils.equals(
+                        order.getValue().getTypeOfOrder(),
+                        SelectTypeOfOrderEnum.interim.getDisplayedValue()
+                    ) || StringUtils.equals(
+                        order.getValue().getTypeOfOrder(),
+                        SelectTypeOfOrderEnum.general.getDisplayedValue()
+                    )) {
+                        log.info("New order is selected to serve {}",order.getId());
+                        newOrdersExists.set(true);
+                    } else if (StringUtils.equals(
+                        order.getValue().getTypeOfOrder(),
+                        SelectTypeOfOrderEnum.finl.getDisplayedValue()
+                    )) {
+                        log.info("Final order is selected to serve {}",order.getId());
+                        finalOrdersExists.set(true);
+                    }
+                });
+            setOrderSpecificDynamicFields(dynamicData,newOrdersExists,finalOrdersExists,selectedOrderIds);
+        }
+        emailInformation.forEach(value -> {
+            try {
+                sendgridService.sendEmailUsingTemplateWithAttachments(
+                    SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION,
+                    authorisation,
+                    SendgridEmailConfig.builder().toEmailAddress(
+                        value.getEmailAddress()).dynamicTemplateData(dynamicData)
+                        .listOfAttachments(orderDocuments).languagePreference(LanguagePreference.english).build()
+                );
+            } catch (IOException e) {
+                log.error("there is a failure in sending email for email {} with exception {}", value.getEmailAddress(),e.getMessage());
+            }
+        });
+    }
+
+    private void setOrderSpecificDynamicFields(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists,
+                                               AtomicBoolean finalOrdersExists, List<String> selectedOrderIds) {
+        setTypeOfOrderForEmail(dynamicData, newOrdersExists, finalOrdersExists);
+        setMultipleOrdersForEmail(dynamicData, selectedOrderIds);
+    }
+
+    private void setMultipleOrdersForEmail(Map<String, Object> dynamicData, List<String> selectedOrderIds) {
+        dynamicData.put("multipleOrders", CollectionUtils.size(selectedOrderIds) > 1);
+    }
+
+    private void setTypeOfOrderForEmail(Map<String, Object> dynamicData, AtomicBoolean newOrdersExists, AtomicBoolean finalOrdersExists) {
+        dynamicData.put(NEW_AND_FINAL, false);
+        dynamicData.put(FINAL, false);
+        dynamicData.put(NEW, false);
+        if (newOrdersExists.get() && finalOrdersExists.get()) {
+            dynamicData.put(NEW_AND_FINAL, true);
+        } else if (newOrdersExists.get()) {
+            dynamicData.put(NEW, true);
+        } else if (finalOrdersExists.get()) {
+            dynamicData.put(FINAL, true);
+        }
     }
 
     private SelectTypeOfOrderEnum isOrderFinal(CaseData caseData) {
@@ -518,6 +583,31 @@ public class ManageOrderEmailService {
                         }));
     }
 
+    private void serveOrdersToOtherOrganisation(CaseData caseData, String authorisation,
+                                                List<Document> orderDocuments, List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
+                                                List<PostalInformation> postalInformation) {
+        postalInformation.forEach(organisationPostalInfo -> {
+            if ((isNotEmpty(organisationPostalInfo.getPostalAddress()))
+                    && isNotEmpty(organisationPostalInfo.getPostalAddress().getAddressLine1())) {
+                try {
+                    UUID bulkPrintId = sendOrderDocumentViaPost(caseData, organisationPostalInfo.getPostalAddress(),
+                            organisationPostalInfo.getPostalName(), authorisation, orderDocuments);
+                    log.info("** bulk print id {}", bulkPrintId);
+                    //PRL-4225 save bulk print details
+                    bulkPrintOrderDetails.add(element(
+                            buildBulkPrintOrderDetail(bulkPrintId, String.valueOf(organisationPostalInfo.hashCode()),
+                                    organisationPostalInfo.getPostalName())));
+                } catch (Exception e) {
+                    log.error("Error in sending order docs to other person {}", organisationPostalInfo.hashCode());
+                    log.error("Exception occurred in sending order docs to other person", e);
+                }
+            } else {
+                log.info("Couldn't send serve order details to other person, address is null/empty for {}",
+                         organisationPostalInfo.hashCode());
+            }
+        });
+    }
+
     private void serveOrderToOtherPersons(String authorisation,
                                           DynamicMultiSelectList otherParties,
                                           CaseData caseData,
@@ -531,7 +621,8 @@ public class ManageOrderEmailService {
                     if (isNotEmpty(otherPerson) && (isNotEmpty(otherPerson.getAddress())
                             && isNotEmpty(otherPerson.getAddress().getAddressLine1()))) {
                         try {
-                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, otherPerson, authorisation, orderDocuments);
+                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, otherPerson.getAddress(),
+                                    otherPerson.getLabelForDynamicList(), authorisation, orderDocuments);
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
                                     buildBulkPrintOrderDetail(bulkPrintId, id,
@@ -658,11 +749,12 @@ public class ManageOrderEmailService {
                 } else {
                     try {
                         if (isNotEmpty(partyData.getAddress()) && isNotEmpty(partyData.getAddress().getAddressLine1())) {
-                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData, authorisation, orderDocuments);
+                            UUID bulkPrintId = sendOrderDocumentViaPost(caseData, partyData.getAddress(),
+                                    partyData.getLabelForDynamicList(), authorisation, orderDocuments);
                             //PRL-4225 save bulk print details
                             bulkPrintOrderDetails.add(element(
-                                    buildBulkPrintOrderDetail(bulkPrintId, element.getCode(),
-                                            partyData.getLabelForDynamicList()))
+                                buildBulkPrintOrderDetail(bulkPrintId, element.getCode(),
+                                                          partyData.getLabelForDynamicList()))
                             );
                         } else {
                             log.info("Couldn't send serve order details to respondent, address is null/empty for {}", element.getCode());
@@ -677,7 +769,8 @@ public class ManageOrderEmailService {
     }
 
     private UUID sendOrderDocumentViaPost(CaseData caseData,
-                                          PartyDetails partyData,
+                                          Address address,
+                                          String name,
                                           String authorisation,
                                           List<Document> orderDocuments) throws Exception {
         List<Document> documents = new ArrayList<>();
@@ -685,8 +778,8 @@ public class ManageOrderEmailService {
         List<Document> coverLetterDocs = serviceOfApplicationPostService.getCoverLetter(
                 caseData,
                 authorisation,
-                partyData.getAddress(),
-                partyData.getLabelForDynamicList()
+                address,
+                name
         );
         if (CollectionUtils.isNotEmpty(coverLetterDocs)) {
             documents.addAll(coverLetterDocs);
@@ -700,7 +793,7 @@ public class ManageOrderEmailService {
                 authorisation,
                 ORDER_TYPE,
                 documents,
-                partyData.getLabelForDynamicList()
+                name
         );
     }
 
@@ -718,8 +811,8 @@ public class ManageOrderEmailService {
                     if (isNotEmpty(order.getValue().getOrderDocumentWelsh())) {
                         orderDocuments.add(order.getValue().getOrderDocumentWelsh());
                     }
-                    if (CollectionUtils.isNotEmpty(order.getValue().getServeOrderDetails().getAdditionalDocuments())) {
-                        order.getValue().getServeOrderDetails().getAdditionalDocuments().forEach(
+                    if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderAdditionalDocuments())) {
+                        caseData.getManageOrders().getServeOrderAdditionalDocuments().forEach(
                             additionalDocumentEl -> orderDocuments.add(additionalDocumentEl.getValue()));
                     }
                 });
