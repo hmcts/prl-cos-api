@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -78,35 +77,7 @@ import static java.util.Optional.ofNullable;
 import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
@@ -137,7 +108,6 @@ public class ServiceOfApplicationService {
     public static final String BY_EMAIL_AND_POST = "By email and post";
     public static final String BY_POST = "By post";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
-    public static final String PROCEED_TO_SERVING = "proceedToServing";
     private final LaunchDarklyClient launchDarklyClient;
 
     public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
@@ -262,6 +232,67 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
+    public ServedApplicationDetails sendNotificationForServiceOfApplicationRefactor(CaseData caseData, String authorization)
+        throws Exception {
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        String whoIsResponsibleForServing;
+
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                whoIsResponsibleForServing = handleNotificationsForCitizenCreatedCase(caseData,
+                                                                                      authorization,
+                                                                                      emailNotificationDetails,
+                                                                                      bulkPrintDetails
+                );
+            } else {
+                whoIsResponsibleForServing = handleNotificationsCaSolicitorCreatedCase(caseData,
+                                                                                       authorization,
+                                                                                       emailNotificationDetails,
+                                                                                       bulkPrintDetails
+                );
+            }
+            checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
+            List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
+            if (!CollectionUtils.isEmpty(docsForLa)) {
+                emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                         .sendEmailNotificationToLocalAuthority(
+                                                             authorization,
+                                                             caseData,
+                                                             caseData.getServiceOfApplication()
+                                                                 .getSoaLaEmailAddress(),
+                                                             docsForLa,
+                                                             PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY
+                                                         )));
+            }
+        } else {
+            if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                whoIsResponsibleForServing = handleNotificationsForCitizenCreatedCase(caseData,
+                                                                                      authorization,
+                                                                                      emailNotificationDetails,
+                                                                                      bulkPrintDetails
+                );
+            } else {
+                whoIsResponsibleForServing = handleNotificationsDaSolicitorCreatedCase(
+                    caseData,
+                    authorization,
+                    emailNotificationDetails
+                );
+            }
+        }
+
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+        log.info("*** Email notification details {}", emailNotificationDetails);
+        return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+            .servedBy(userService.getUserDetails(authorization).getFullName())
+            .servedAt(formatter)
+            .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
+            .whoIsResponsible(whoIsResponsibleForServing)
+            .bulkPrintDetails(bulkPrintDetails).build();
+    }
+
+
     public ServedApplicationDetails sendNotificationForServiceOfApplication(CaseData caseData, String authorization)
         throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
@@ -276,16 +307,6 @@ public class ServiceOfApplicationService {
                                                        bulkPrintDetails);
         }
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            //serving cafcass will be enabled after business confirmation
-            /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-            && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-            log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
-            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-            caseData,
-            caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-            PrlAppsConstants.SERVED_PARTY_CAFCASS
-            ));
-            }*/
             //serving cafcass cymru
             checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         }
@@ -401,7 +422,8 @@ public class ServiceOfApplicationService {
                                                              packHiDocs,
                                                              SERVED_PARTY_APPLICANT_SOLICITOR
                                                          )));
-            } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
+            }
+            else if (SoaSolicitorServingRespondentsEnum.courtBailiff
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
                 || SoaSolicitorServingRespondentsEnum.courtAdmin
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
@@ -582,10 +604,6 @@ public class ServiceOfApplicationService {
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        if (ObjectUtils.isEmpty(caseDataMap.get(PROCEED_TO_SERVING))) {
-            caseDataMap.put(PROCEED_TO_SERVING, Yes);
-            log.info("SOA proceed to serving {}", caseDataMap.get(PROCEED_TO_SERVING));
-        }
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
@@ -642,10 +660,12 @@ public class ServiceOfApplicationService {
                             ? generatePacksForConfidentialCheckC100(callbackRequest.getCaseDetails(), authorisation)
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
         List<Document> docsForLa = getDocsToBeServedToLa(authorisation, caseData);
-        caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
-            .servedBy(userService.getUserDetails(authorisation).getFullName())
-            .packCreatedDate(LocalDateTime.now().toString())
-            .build());
+        if(!CollectionUtils.isEmpty(docsForLa)){
+            caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
+                .servedBy(userService.getUserDetails(authorisation).getFullName())
+                .packCreatedDate(LocalDateTime.now().toString())
+                .build());
+        }
         cleanUpSoaSelections(caseDataMap, false);
 
         log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
@@ -1382,7 +1402,7 @@ public class ServiceOfApplicationService {
             "soaIsOrderListEmpty",
             "noticeOfSafetySupportLetter",
             "additionalDocumentsList",
-            PROCEED_TO_SERVING
+            "soaDocumentDynamicListForLa"
         ));
 
         if (removeCafcassFields) {
@@ -1465,7 +1485,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, isRespondentDetailsConfidential(caseData)
             || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
+        caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
         List<Element<DocumentListForLa>> documentDynamicListLa = getDocumentsDynamicListForLa(authorisation,
                                                                                               String.valueOf(caseData.getId()));
         log.info("** dynamic list 1 ** {}", documentDynamicListLa);
@@ -2049,7 +2069,6 @@ public class ServiceOfApplicationService {
         if (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
             && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
             response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
-            caseDataMap.put(PROCEED_TO_SERVING, Yes);
             CaseUtils.setCaseState(callbackRequest, caseDataMap);
             log.info("**** Case status :  {}", caseDataMap.get("caseStatus"));
         } else {

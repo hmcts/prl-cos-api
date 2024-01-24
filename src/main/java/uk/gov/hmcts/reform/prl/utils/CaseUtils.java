@@ -107,6 +107,7 @@ public class CaseUtils {
     }
 
 
+
     public static String getOrderSelectionType(CaseData caseData) {
         String orderSelectionType = null;
         if (caseData.getManageOrdersOptions() != null) {
@@ -130,6 +131,18 @@ public class CaseUtils {
             noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
         return noOfDaysRemaining;
+    }
+
+    /*
+    Below method checks for Both if the case is created by
+    citizen or the main applicant in the case is not represented.
+    * **/
+    public static boolean isCaseCreatedByCitizen(CaseData caseData) {
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) || Yes.equals(caseData.getIsCourtNavCase())) {
+            return true;
+        }
+        return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? hasLegalRepresentation(caseData.getApplicants().get(
+            0).getValue()) : hasLegalRepresentation(caseData.getApplicantsFL401());
     }
 
     public static Map<String, Object> getCourtDetails(Optional<CourtVenue> courtVenue, String baseLocationId) {
