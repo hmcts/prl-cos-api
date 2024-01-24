@@ -510,8 +510,6 @@ public class PaymentRequestServiceTest {
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
-
-
     }
 
     @Test
@@ -612,8 +610,6 @@ public class PaymentRequestServiceTest {
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
-
-
     }
 
     @Test
@@ -712,7 +708,6 @@ public class PaymentRequestServiceTest {
             createPaymentRequest
         );
         assertNotNull(paymentResponse);
-
     }
 
 
@@ -768,7 +763,6 @@ public class PaymentRequestServiceTest {
         );
         assertNotNull(paymentResponse);
         assertNotNull(paymentResponse.getPaymentReference());
-
     }
 
     @Test
@@ -872,16 +866,19 @@ public class PaymentRequestServiceTest {
     @Test
     public void testCreateServiceRequestFromCcdCallack() throws Exception {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
+        when(authTokenGenerator.generate()).thenReturn(serviceAuthToken);
+        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(paymentApi.createPaymentServiceRequest(anyString(), anyString(), any(PaymentServiceRequest.class)))
+            .thenReturn(PaymentServiceResponse.builder().serviceRequestReference("response").build());
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest ccdCallbackRequest
             = uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().data(stringObjectMap)
                              .build()).build();
 
-        when(feeService.fetchFeeDetails(FeeType.C100_SUBMISSION_FEE)).thenReturn(feeResponse);
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-
-        paymentRequestService.createServiceRequestFromCcdCallack(ccdCallbackRequest, authToken);
+        PaymentServiceResponse paymentServiceResponse = paymentRequestService
+            .createServiceRequestFromCcdCallack(ccdCallbackRequest, authToken);
+        assertEquals("response", paymentServiceResponse.getServiceRequestReference());
     }
 
     @Test
@@ -893,7 +890,7 @@ public class PaymentRequestServiceTest {
             .thenReturn(paymentServiceResponse);
         PaymentServiceResponse paymentResponse = paymentRequestService
             .createServiceRequestForAdditionalApplications(caseData, authToken, feeResponse, "test");
-        assertNotNull(paymentResponse);
+        assertEquals("response", paymentServiceResponse.getServiceRequestReference());
     }
 }
 
