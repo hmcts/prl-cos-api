@@ -157,37 +157,26 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_HEADER = "# The application is served";
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";
 
-    @Autowired
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
-
-    @Autowired
     private final CaseInviteManager caseInviteManager;
-
     private final C100CaseInviteService c100CaseInviteService;
 
     @Autowired
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
-
-    @Autowired
     private final ObjectMapper objectMapper;
     private final UserService userService;
-
     private final FL401CaseInviteService fl401CaseInviteService;
-
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final WelshCourtEmail welshCourtEmail;
-
-    @Autowired
-    ConfidentialDetailsGenerator confidentialDetailsGenerator;
+    private final ConfidentialDetailsGenerator confidentialDetailsGenerator;
 
     private final DgsService dgsService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
 
-    @Autowired
     private final CoreCaseDataService coreCaseDataService;
 
     private final SendAndReplyService sendAndReplyService;
@@ -472,11 +461,8 @@ public class ServiceOfApplicationService {
 
     private String handleNotificationsDaSolicitorCreatedCase(CaseData caseData, String authorization,
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails) {
-        String whoIsResponsibleForServing = COURT;
         List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
-
-
-        whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
+        String whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
         log.info("Fl401 case journey for caseId {}", caseData.getId());
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                        .getSoaServingRespondentsOptionsDA())) {
