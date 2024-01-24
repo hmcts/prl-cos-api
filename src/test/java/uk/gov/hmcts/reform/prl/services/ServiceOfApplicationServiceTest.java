@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,6 +60,7 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -68,6 +68,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -147,6 +148,8 @@ public class ServiceOfApplicationServiceTest {
     private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
     private final String template = "TEMPLATE";
     private CaseInvite caseInvite;
+    private static final String SOA_FL415_FILENAME = "FL415.pdf";
+    private static final String SOA_FL416_FILENAME = "FL416.pdf";
 
     @Before
     public void setup() throws Exception {
@@ -1970,5 +1973,24 @@ public class ServiceOfApplicationServiceTest {
             authorization
         );
         assertNotNull(servedApplicationDetails);
+    }
+
+    @Test
+    public void testGetNotificationPacks() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseCreatedBy(CaseCreatedBy.SOLICITOR)
+            .finalDocument(Document.builder().build())
+            .serviceOfApplication(ServiceOfApplication.builder().build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        for (String i : new ArrayList<>(Arrays.asList("E", "F", "G", "I", "L", "M", "O", "P", "Z"))) {
+            List<Document> documentPack = serviceOfApplicationService.getNotificationPack(caseData,i,List.of(Document.builder()
+                                                                                   .documentFileName(SOA_FL415_FILENAME).build(),
+                                                                               Document.builder()
+                                                                                   .documentFileName(SOA_FL416_FILENAME).build()));
+            assertFalse(documentPack.isEmpty());
+        }
     }
 }
