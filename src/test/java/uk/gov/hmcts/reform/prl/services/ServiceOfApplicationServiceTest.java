@@ -77,6 +77,7 @@ import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum.unrepresentedApplicant;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -369,7 +370,7 @@ public class ServiceOfApplicationServiceTest {
 
         final String confirmationBody = response.getBody().getConfirmationHeader();
 
-        assertEquals("# Application served", confirmationBody);
+        assertEquals(CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL, confirmationBody);
     }
 
     @Test

@@ -23,9 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 

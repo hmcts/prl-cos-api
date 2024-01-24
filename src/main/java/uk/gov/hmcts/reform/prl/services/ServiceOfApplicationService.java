@@ -2210,8 +2210,11 @@ public class ServiceOfApplicationService {
             && YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             confirmationBody = CONFIRMATION_BODY_PREFIX;
             confirmationHeader = CONFIRMATION_HEADER_NON_PERSONAL;
-            confirmationBody = String.format(confirmationBody, manageCaseUrl + "/" + caseData.getId() + "#Service of application");
-        }else {
+            confirmationBody = String.format(
+                confirmationBody,
+                manageCaseUrl + "/" + caseData.getId() + "#Service of application"
+            );
+        } else {
             confirmationBody = CONFIDENTIALITY_CONFIRMATION_BODY_PERSONAL;
             confirmationHeader = CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
         }
