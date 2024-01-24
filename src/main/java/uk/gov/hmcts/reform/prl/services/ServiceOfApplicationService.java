@@ -109,6 +109,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
@@ -140,8 +141,6 @@ public class ServiceOfApplicationService {
     public static final String BY_POST = "By post";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
     public static final String PROCEED_TO_SERVING = "proceedToServing";
-    public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
-        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
     public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
         + "other people in the case</strong></div>";
