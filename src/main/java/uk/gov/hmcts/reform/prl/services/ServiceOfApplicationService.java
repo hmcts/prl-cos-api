@@ -140,22 +140,20 @@ public class ServiceOfApplicationService {
     public static final String BY_POST = "By post";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
     public static final String PROCEED_TO_SERVING = "proceedToServing";
-    public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = "<div class='govuk-warning-text'>"
-        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!"
+    public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
+        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
+    public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
         + "other people in the case</strong></div>";
-    public static final String CA_ADDRESS_MISSED_FOR_RESPONDENT = "<div class='govuk-warning-text'>"
-        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!"
+    public static final String CA_ADDRESS_MISSED_FOR_RESPONDENT = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent"
         + "</strong></div>";
 
-    public static final String DA_ADDRESS_MISSED_FOR_RESPONDENT = "<div class='govuk-warning-text'>"
-        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!"
+    public static final String DA_ADDRESS_MISSED_FOR_RESPONDENT = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for the respondent"
         + "</strong></div>";
 
-    public static final String ADDRESS_MISSED_FOR_OTHER_PARTIES = "<div class='govuk-warning-text'>"
-        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!"
+    public static final String ADDRESS_MISSED_FOR_OTHER_PARTIES = WARNING_TEXT_DIV
         + "</span><strong class='govuk-warning-text__text'>There is no postal address for other people in the "
         + "case</strong></div>";
 
