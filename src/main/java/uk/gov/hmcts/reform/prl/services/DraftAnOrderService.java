@@ -203,7 +203,8 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> orderDetails = element(getCurrentOrderDetails(caseData, loggedInUserType, authorisation));
         //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
-        if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())) {
+        if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
+            && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())) {
             orderDetails.getValue().getManageOrderHearingDetails()
                 .forEach(hearingDataElement -> hearingDataElement.getValue()
                     .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
@@ -1929,13 +1930,15 @@ public class DraftAnOrderService {
         }
 
         List<String> errorList = new ArrayList<>();
-        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())
-            || CreateSelectOrderOptionsEnum.directionOnIssue.equals(caseData.getCreateSelectOrderOptions())) {
+        if (Arrays.stream(ManageOrdersUtils.PROHIBITED_ORDER_IDS_FOR_SOLICITORS)
+            .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getCreateSelectOrderOptions().toString()))) {
             errorList.add("This order is not available to be drafted");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .errors(errorList)
                 .build();
-        } else if (getErrorsForOrdersProhibitedForC100FL401(
+        }
+
+        if (getErrorsForOrdersProhibitedForC100FL401(
             caseData,
             caseData.getCreateSelectOrderOptions(),
             errorList
