@@ -168,21 +168,21 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX = """
         ### What happens next
             The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
-                The applicant has been served.
+                \n The applicant has been served.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX = """
         ### What happens next
             You need to arrange service on the respondent based on the judge's directions.
-                The service pack has been served on the applicant.
+                \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX = """
         ### What happens next
             You need to arrange for a court bailiff to personally serve the respondent.
-                The service pack has been served on the applicant.
+                \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
@@ -620,7 +620,7 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
-        if (CaseUtils.isC8Present(caseData)) {
+        if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
         return processNonConfidentialSoa(authorisation, caseData, caseDataMap);
