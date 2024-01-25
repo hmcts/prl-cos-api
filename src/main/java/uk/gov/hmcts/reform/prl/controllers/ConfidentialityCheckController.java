@@ -39,8 +39,6 @@ public class ConfidentialityCheckController {
 
     private final ObjectMapper objectMapper;
 
-    public static final String CONFIDENTIALITY_CHECK_WARNING_TEXT = "confidentialityCheckWarningText";
-
     @PostMapping(path = "/about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for Confidentiality check about to start event")
     @ApiResponses(value = {
