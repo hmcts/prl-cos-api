@@ -798,6 +798,277 @@ public class RelationshipsControllerTest {
     }
 
     @Test
+    public void testPrePopulateAmendOtherPeopleToChildRelation() throws NotFoundException {
+
+        PartyDetails otherPeople = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedOtherPeople = Element.<PartyDetails>builder().value(otherPeople).id(UUID.randomUUID()).build();
+        List<Element<PartyDetails>> otherPeopleList = Collections.singletonList(wrappedOtherPeople);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+        Element<ChildDetailsRevised> wrappedChildren =
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation
+            .builder()
+            .childId(wrappedChildren.getId().toString())
+            .otherPeopleId(wrappedOtherPeople.getId().toString())
+            .childAndOtherPeopleRelation(RelationshipsEnum.father)
+            .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .build();
+        Element<ChildrenAndOtherPeopleRelation> wrappedRelation =
+            Element.<ChildrenAndOtherPeopleRelation>builder().value(relation).id(UUID.randomUUID()).build();
+        List<Element<ChildrenAndOtherPeopleRelation>> relationList = Collections.singletonList(wrappedRelation);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .otherPartyInTheCaseRevised(otherPeopleList)
+            .newChildDetails(listOfChildren)
+            .relations(Relations.builder().childAndOtherPeopleRelations(relationList).build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+                                                      .data(caseDataUpdated).build()).build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            relationshipsController.prePopulateAmendOtherPeopleToChildRelation("test",
+                                                                              callbackRequest);
+
+        ChildrenAndOtherPeopleRelation expectedRelation = ChildrenAndOtherPeopleRelation
+            .builder()
+            .childFullName("Test Name")
+            .childId(wrappedChildren.getId().toString())
+            .otherPeopleId(wrappedOtherPeople.getId().toString())
+            .otherPeopleFullName("test1 test22")
+            .childAndOtherPeopleRelation(RelationshipsEnum.father)
+            .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .build();
+        List<Element<ChildrenAndOtherPeopleRelation>> expectedRelations = Collections
+            .singletonList(Element.<ChildrenAndOtherPeopleRelation>builder().value(expectedRelation).build());
+
+        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
+        assertEquals(expectedRelations, caseDetailsRespnse.get("buffChildAndOtherPeopleRelations"));
+    }
+
+    @Test
+    public void testPrePopulateAmendOtherPeopleToChildRelationWhenNoExistingRelations() throws NotFoundException {
+
+        PartyDetails otherPeople = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedOtherPeople = Element.<PartyDetails>builder().value(otherPeople).id(UUID.randomUUID()).build();
+        List<Element<PartyDetails>> otherPeopleList = Collections.singletonList(wrappedOtherPeople);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+        Element<ChildDetailsRevised> wrappedChildren =
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .otherPartyInTheCaseRevised(otherPeopleList)
+            .newChildDetails(listOfChildren)
+            .relations(Relations.builder().build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+                                                      .data(caseDataUpdated).build()).build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            relationshipsController.prePopulateAmendOtherPeopleToChildRelation("test",
+                                                                              callbackRequest);
+
+        ChildrenAndOtherPeopleRelation expectedRelation = ChildrenAndOtherPeopleRelation
+            .builder()
+            .childFullName("Test Name")
+            .childId(wrappedChildren.getId().toString())
+            .otherPeopleId(wrappedOtherPeople.getId().toString())
+            .otherPeopleFullName("test1 test22")
+            .childAndOtherPeopleRelation(null)
+            .childLivesWith(null)
+            .isChildLivesWithPersonConfidential(null)
+            .build();
+        List<Element<ChildrenAndOtherPeopleRelation>> expectedRelations = Collections
+            .singletonList(Element.<ChildrenAndOtherPeopleRelation>builder().value(expectedRelation).build());
+
+        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
+        assertEquals(expectedRelations, caseDetailsRespnse.get("buffChildAndOtherPeopleRelations"));
+    }
+
+    @Test
+    public void testPrePopulateAmendOtherPeopleToChildRelationWhenIdsDoNotMatch() throws NotFoundException {
+
+        PartyDetails otherPeople = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedOtherPeople = Element.<PartyDetails>builder().value(otherPeople).id(UUID.randomUUID()).build();
+        List<Element<PartyDetails>> otherPeopleList = Collections.singletonList(wrappedOtherPeople);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+        Element<ChildDetailsRevised> wrappedChildren =
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation
+            .builder()
+            .childId(UUID.randomUUID().toString())
+            .otherPeopleId(UUID.randomUUID().toString())
+            .childAndOtherPeopleRelation(RelationshipsEnum.father)
+            .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .build();
+        Element<ChildrenAndOtherPeopleRelation> wrappedRelation =
+            Element.<ChildrenAndOtherPeopleRelation>builder().value(relation).id(UUID.randomUUID()).build();
+        List<Element<ChildrenAndOtherPeopleRelation>> relationList = Collections.singletonList(wrappedRelation);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .otherPartyInTheCaseRevised(otherPeopleList)
+            .newChildDetails(listOfChildren)
+            .relations(Relations.builder().childAndOtherPeopleRelations(relationList).build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+                                                      .data(caseDataUpdated).build()).build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            relationshipsController.prePopulateAmendOtherPeopleToChildRelation("test",
+                                                                              callbackRequest);
+
+        ChildrenAndOtherPeopleRelation expectedRelation = ChildrenAndOtherPeopleRelation
+            .builder()
+            .childFullName("Test Name")
+            .childId(wrappedChildren.getId().toString())
+            .otherPeopleId(wrappedOtherPeople.getId().toString())
+            .otherPeopleFullName("test1 test22")
+            .childAndOtherPeopleRelation(null)
+            .childLivesWith(null)
+            .build();
+        List<Element<ChildrenAndOtherPeopleRelation>> expectedRelations = Collections
+            .singletonList(Element.<ChildrenAndOtherPeopleRelation>builder().value(expectedRelation).build());
+
+        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
+        assertEquals(expectedRelations, caseDetailsRespnse.get("buffChildAndOtherPeopleRelations"));
+    }
+
+    @Test
+    public void testPrePopulateAmendOtherPeopleToChildRelationWhenChildIdDoesNotMatch() throws NotFoundException {
+
+        PartyDetails otherPeople = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedOtherPeople = Element.<PartyDetails>builder().value(otherPeople).id(UUID.randomUUID()).build();
+        List<Element<PartyDetails>> otherPeopleList = Collections.singletonList(wrappedOtherPeople);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChildren =
+            Element.<ChildDetailsRevised>builder().value(child).id(UUID.randomUUID()).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        ChildrenAndOtherPeopleRelation relation = ChildrenAndOtherPeopleRelation
+            .builder()
+            .childId(UUID.randomUUID().toString())
+            .otherPeopleId(wrappedOtherPeople.getId().toString())
+            .childAndOtherPeopleRelation(RelationshipsEnum.father)
+            .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .build();
+        Element<ChildrenAndOtherPeopleRelation> wrappedRelation =
+            Element.<ChildrenAndOtherPeopleRelation>builder().value(relation).id(UUID.randomUUID()).build();
+        List<Element<ChildrenAndOtherPeopleRelation>> relationList = Collections.singletonList(wrappedRelation);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .otherPartyInTheCaseRevised(otherPeopleList)
+            .newChildDetails(listOfChildren)
+            .relations(Relations.builder().childAndOtherPeopleRelations(relationList).build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+                                                      .data(caseDataUpdated).build()).build();
+
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            relationshipsController.prePopulateAmendOtherPeopleToChildRelation("test",
+                                                                              callbackRequest);
+
+        ChildrenAndOtherPeopleRelation expectedRelation = ChildrenAndOtherPeopleRelation
+            .builder()
+            .childFullName("Test Name")
+            .childId(wrappedChildren.getId().toString())
+            .otherPeopleId(wrappedOtherPeople.getId().toString())
+            .otherPeopleFullName("test1 test22")
+            .childAndOtherPeopleRelation(null)
+            .childLivesWith(null)
+            .build();
+        List<Element<ChildrenAndOtherPeopleRelation>> expectedRelations = Collections
+            .singletonList(Element.<ChildrenAndOtherPeopleRelation>builder().value(expectedRelation).build());
+
+        Map<String, Object> caseDetailsRespnse = aboutToStartOrSubmitCallbackResponse.getData();
+        assertEquals(expectedRelations, caseDetailsRespnse.get("buffChildAndOtherPeopleRelations"));
+    }
+
+    @Test
     public void testPopulateOtherPeopleToChildRelation() throws NotFoundException {
 
         PartyDetails applicant1 = PartyDetails.builder()
@@ -857,8 +1128,9 @@ public class RelationshipsControllerTest {
         ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = ChildrenAndOtherPeopleRelation.builder()
             .otherPeopleFullName("Test")
             .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.father)
-            .childLivesWith(YesOrNo.Yes)
+            .childLivesWith(YesOrNo.No)
             .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .childAndOtherPeopleRelationOtherDetails("test")
             .build();
 
         Element<ChildrenAndOtherPeopleRelation> wrappedChildrenAndOtherPeopleRelation =
@@ -872,21 +1144,91 @@ public class RelationshipsControllerTest {
             .applicants(applicantList)
             .othersToNotify(listOfPartyDetails)
             .newChildDetails(listOfChildren)
-            .relations(Relations.builder().childAndOtherPeopleRelations(listOfChildrenAndOtherPeopleRelation).build())
+            .relations(Relations.builder().buffChildAndOtherPeopleRelations(listOfChildrenAndOtherPeopleRelation).build())
             .build();
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        caseDataUpdated.put("childAndOtherPeopleRelations", "test1 test22");
-
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
 
         CallbackRequest callbackRequest =
             CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
                                                       .data(caseDataUpdated).build()).build();
 
+        ChildrenAndOtherPeopleRelation expectedRelation = ChildrenAndOtherPeopleRelation.builder()
+            .otherPeopleFullName("Test")
+            .childFullName("Name")
+            .childAndOtherPeopleRelation(RelationshipsEnum.father)
+            .childLivesWith(YesOrNo.No)
+            .childAndOtherPeopleRelationOtherDetails(null)
+            .isChildLivesWithPersonConfidential(null)
+            .build();
+        List<Element<ChildrenAndOtherPeopleRelation>> expectedRelationList = Collections.singletonList(
+            Element.<ChildrenAndOtherPeopleRelation>builder().value(expectedRelation).build());
 
-        assertNotNull(relationshipsController.populateOtherPeopleToChildRelation("test",
-                                                                                 callbackRequest));
+        AboutToStartOrSubmitCallbackResponse response = relationshipsController.populateOtherPeopleToChildRelation(
+            "test",
+            callbackRequest
+        );
+        assertEquals(expectedRelationList, response.getData().get("childAndOtherPeopleRelations"));
+    }
+
+    @Test
+    public void testPopulateOtherPeopleToChildRelationWhenRelationIsOtherAndChildLivesWithIsYes() throws NotFoundException {
+
+        PartyDetails otherPerson = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .build();
+        Element<PartyDetails> wrappedOtherPeople = Element.<PartyDetails>builder().id(UUID.randomUUID()).value(otherPerson).build();
+        List<Element<PartyDetails>> otherPeopleList = Collections.singletonList(wrappedOtherPeople);
+
+        ChildDetailsRevised child = ChildDetailsRevised.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<ChildDetailsRevised> wrappedChildren =
+            Element.<ChildDetailsRevised>builder().id(UUID.randomUUID()).value(child).build();
+        List<Element<ChildDetailsRevised>> listOfChildren = Collections.singletonList(wrappedChildren);
+
+        ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation = ChildrenAndOtherPeopleRelation.builder()
+            .otherPeopleFullName("Test")
+            .childFullName("Name").childAndOtherPeopleRelation(RelationshipsEnum.other)
+            .childAndOtherPeopleRelationOtherDetails("test")
+            .childLivesWith(YesOrNo.Yes)
+            .isChildLivesWithPersonConfidential(YesOrNo.Yes)
+            .build();
+
+        Element<ChildrenAndOtherPeopleRelation> wrappedChildrenAndOtherPeopleRelation =
+            Element.<ChildrenAndOtherPeopleRelation>builder().value(childrenAndOtherPeopleRelation).build();
+        List<Element<ChildrenAndOtherPeopleRelation>> listOfWrappedChildrenAndOtherPeopleRelation =
+            Collections.singletonList(wrappedChildrenAndOtherPeopleRelation);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(otherPeopleList)
+            .newChildDetails(listOfChildren)
+            .relations(Relations.builder().buffChildAndOtherPeopleRelations(listOfWrappedChildrenAndOtherPeopleRelation).build())
+            .build();
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
+
+        CallbackRequest callbackRequest =
+            CallbackRequest.builder().caseDetails(CaseDetails.builder().id(123L)
+                                                      .data(caseDataUpdated).build()).build();
+
+        AboutToStartOrSubmitCallbackResponse response = relationshipsController.populateOtherPeopleToChildRelation(
+            "test",
+            callbackRequest
+        );
+        assertEquals(listOfWrappedChildrenAndOtherPeopleRelation, response.getData().get("childAndOtherPeopleRelations"));
     }
 
 }
