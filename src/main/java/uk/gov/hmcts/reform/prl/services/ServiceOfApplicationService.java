@@ -75,8 +75,40 @@ import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.*;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP8;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
@@ -378,8 +410,7 @@ public class ServiceOfApplicationService {
                                                              packHiDocs,
                                                              SERVED_PARTY_APPLICANT_SOLICITOR
                                                          )));
-            }
-            else if (SoaSolicitorServingRespondentsEnum.courtBailiff
+            } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
                 || SoaSolicitorServingRespondentsEnum.courtAdmin
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
@@ -450,7 +481,7 @@ public class ServiceOfApplicationService {
                                                  .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
                                                                 .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
                                                  .build()));
-        List<Document> packkDocs = getDocumentsForCaORBailiffToServeApplicantSolcitor(caseData, authorization, c100StaticDocs);
+        List<Document> packkDocs = getDocumentsForCaOrBailiffToServeApplicantSolcitor(caseData, authorization, c100StaticDocs);
         emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                  .sendEmailNotificationToSolicitor(
                                                      authorization, caseData,
@@ -461,7 +492,8 @@ public class ServiceOfApplicationService {
                                                  )));
     }
 
-    private List<Document> getDocumentsForCaorBailiffToServeRespondents(CaseData caseData, String authorization, List<Document> c100StaticDocs) {
+    private List<Document> getDocumentsForCaorBailiffToServeRespondents(CaseData caseData, String authorization,
+                                                                        List<Document> c100StaticDocs) {
         List<Document> re5Letters = new ArrayList<>();
         for (Element<PartyDetails> respondent: caseData.getRespondents()) {
             re5Letters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
@@ -472,7 +504,8 @@ public class ServiceOfApplicationService {
         return packjDocs;
     }
 
-    private List<Document> getDocumentsForCaORBailiffToServeApplicantSolcitor(CaseData caseData, String authorization, List<Document> c100StaticDocs) {
+    private List<Document> getDocumentsForCaOrBailiffToServeApplicantSolcitor(CaseData caseData, String authorization,
+                                                                              List<Document> c100StaticDocs) {
         List<Document> ap8Letters = new ArrayList<>();
         for (Element<PartyDetails> applicant: caseData.getApplicants()) {
             ap8Letters.add(generateAccessCodeLetter(authorization, caseData, applicant, null,
@@ -1692,7 +1725,7 @@ public class ServiceOfApplicationService {
                 || SoaCitizenServingRespondentsEnum.courtAdmin
                 .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
                 List<Document> packjDocs = getDocumentsForCaorBailiffToServeRespondents(caseData, authorization, c100StaticDocs);
-                List<Document> packkDocs = getDocumentsForCaORBailiffToServeApplicantSolcitor(caseData, authorization, c100StaticDocs);
+                List<Document> packkDocs = getDocumentsForCaOrBailiffToServeApplicantSolcitor(caseData, authorization, c100StaticDocs);
                 final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packjDocs))
                     .partyIds(wrapElements(caseData.getApplicants().get(0).getValue().getSolicitorPartyId().toString()))
                     .servedBy(PRL_COURT_ADMIN)
