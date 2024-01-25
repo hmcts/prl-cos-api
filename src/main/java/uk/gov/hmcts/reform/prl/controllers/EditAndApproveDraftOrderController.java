@@ -144,7 +144,7 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse saveServeOrderDetails(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             manageOrderService.resetChildOptions(callbackRequest);
