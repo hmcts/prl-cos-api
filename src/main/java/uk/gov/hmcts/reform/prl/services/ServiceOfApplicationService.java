@@ -150,34 +150,36 @@ public class ServiceOfApplicationService {
     public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
         ### What happens next
         The service pack needs to be reviewed for confidential details before it can be served.
-        You can view the service packs in the <a href="%s">service of application</a> tab.
+
+            You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
     public static final String CONFIRMATION_HEADER_NON_PERSONAL = "# The application has been served";
     public static final String CONFIRMATION_HEADER_PERSONAL = "# The application is ready to be personally served";
     public static final String CONFIRMATION_BODY_PREFIX = """
         ### What happens next
-        The service pack has been served on the parties selected.
-            You can view the service packs in the <a href="%s">service of application</a> tab.
+            The service pack has been served on the parties selected.
+
+        You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX = """
         ### What happens next
-        The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
-            The applicant has been served.
+            The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
+                The applicant has been served.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX = """
         ### What happens next
-        You need to arrange service on the respondent based on the judge's directions.
-            The service pack has been served on the applicant.
+            You need to arrange service on the respondent based on the judge's directions.
+                The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX = """
         ### What happens next
-        You need to arrange for a court bailiff to personally serve the respondent.
-            The service pack has been served on the applicant.
+            You need to arrange for a court bailiff to personally serve the respondent.
+                The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
@@ -308,16 +310,6 @@ public class ServiceOfApplicationService {
                                                        bulkPrintDetails);
         }
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            //serving cafcass will be enabled after business confirmation
-            /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-            && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-            log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
-            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-            caseData,
-            caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-            PrlAppsConstants.SERVED_PARTY_CAFCASS
-            ));
-            }*/
             //serving cafcass cymru
             checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         }
@@ -724,11 +716,7 @@ public class ServiceOfApplicationService {
         caseDataMap = CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)
                             ? generatePacksForConfidentialCheckC100(callbackRequest.getCaseDetails(), authorisation)
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
-        List<Document> docsForLa = getDocsToBeServedToLa(authorisation, caseData);
-        caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
-            .servedBy(userService.getUserDetails(authorisation).getFullName())
-            .packCreatedDate(LocalDateTime.now().toString())
-            .build());
+
         cleanUpSoaSelections(caseDataMap, false);
 
         log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
@@ -775,7 +763,7 @@ public class ServiceOfApplicationService {
                                                             SERVED_PARTY_APPLICANT);
                     }
                 } else {
-                    log.info("Access to be granted");
+                    log.info("Access not yet granted");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
                         Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedApplicant, caseInvite,
                                                                       Templates.AP6_LETTER);
@@ -856,21 +844,6 @@ public class ServiceOfApplicationService {
         } catch (Exception e) {
             log.error("Failed to send notification to applicant {}", e.getMessage());
         }
-    }
-
-    private List<Element<BulkPrintDetails>> sendPostToCitizen(String authorization, CaseData caseData,
-                                                                      Element<PartyDetails> party, List<Document> docs,
-                                                              String servedParty) {
-        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        log.info("*** docs {}", docs);
-        bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
-            caseData,
-            authorization,
-            party.getValue(),
-            docs,
-            servedParty
-        )));
-        return bulkPrintDetails;
     }
 
     private String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails,
@@ -1769,6 +1742,13 @@ public class ServiceOfApplicationService {
         } else {
             caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
         }
+        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
+        if (CollectionUtils.isNotEmpty(docsForLa)) {
+            caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
+                .servedBy(userService.getUserDetails(authorization).getFullName())
+                .packCreatedDate(LocalDateTime.now().toString())
+                .build());
+        }
         return caseDataUpdated;
     }
 
@@ -1935,17 +1915,6 @@ public class ServiceOfApplicationService {
         if (unServedOthersPack != null) {
             sendNotificationForOthersPack(caseData, authorization, bulkPrintDetails, unServedOthersPack);
         }
-
-        //serving cafcass will be eneabled after business confirmation
-        /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-            && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-            log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
-            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                caseData,
-                caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-                PrlAppsConstants.SERVED_PARTY_CAFCASS
-            ));
-        }*/
 
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
         if (unServedLaPack != null) {
