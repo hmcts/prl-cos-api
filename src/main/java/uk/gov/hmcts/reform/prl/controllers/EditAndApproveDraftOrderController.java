@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -166,18 +165,7 @@ public class EditAndApproveDraftOrderController {
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
 
-                ObjectMapper om = new ObjectMapper();
-                objectMapper.registerModule(new JavaTimeModule());
-                String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-                log.info("CCCCCCC--->{}", result);
-
                 manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated,callbackRequest.getEventId(),loggedInUserType);
-                log.info("isHearingTaskNeeded--- EDIT--{}",caseDataUpdated.get("isHearingTaskNeeded"));
-                log.info("isMultipleHearingSelected--- EDIT--{}",caseDataUpdated.get("isMultipleHearingSelected"));
-                log.info("hearingOptionSelected--- EDIT--{}",caseDataUpdated.get("hearingOptionSelected"));
-                log.info("isOrderApproved--- EDIT--{}",caseDataUpdated.get("isOrderApproved"));
-                log.info("whoApprovedTheOrder--- EDIT--{}",caseDataUpdated.get("whoApprovedTheOrder"));
-                log.info("judgeLaManagerReviewRequired--- EDIT--{}",caseDataUpdated.get("judgeLaManagerReviewRequired"));
 
                 caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService.getDraftOrderNameForWA(caseData, true));
                 caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
