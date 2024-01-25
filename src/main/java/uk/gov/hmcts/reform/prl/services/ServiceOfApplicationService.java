@@ -1759,16 +1759,15 @@ public class ServiceOfApplicationService {
             } else {
                 caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, null);
             }
-
-            //serving other people in case
-            if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-                && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
-                buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
-            } else {
-                caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
-            }
         } else if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             log.error("#SOA TO DO .. Personal Service to be added - for 4 options");
+        }
+        //serving other people in case
+        if (null != caseData.getServiceOfApplication().getSoaOtherParties()
+            && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
+            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+        } else {
+            caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
         }
         return caseDataUpdated;
     }
