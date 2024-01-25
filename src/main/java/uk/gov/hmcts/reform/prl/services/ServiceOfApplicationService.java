@@ -157,37 +157,26 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_HEADER = "# The application is served";
     public static final String CONFIRMATION_BODY_PREFIX = "### What happens next \n\n The document packs will be served to parties ";
 
-    @Autowired
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
-
-    @Autowired
     private final CaseInviteManager caseInviteManager;
-
     private final C100CaseInviteService c100CaseInviteService;
 
     @Autowired
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
-
-    @Autowired
     private final ObjectMapper objectMapper;
     private final UserService userService;
-
     private final FL401CaseInviteService fl401CaseInviteService;
-
     private final DynamicMultiSelectListService dynamicMultiSelectListService;
     private final WelshCourtEmail welshCourtEmail;
-
-    @Autowired
-    ConfidentialDetailsGenerator confidentialDetailsGenerator;
+    private final ConfidentialDetailsGenerator confidentialDetailsGenerator;
 
     private final DgsService dgsService;
 
     @Value("${citizen.url}")
     private String citizenUrl;
 
-    @Autowired
     private final CoreCaseDataService coreCaseDataService;
 
     private final SendAndReplyService sendAndReplyService;
@@ -472,11 +461,8 @@ public class ServiceOfApplicationService {
 
     private String handleNotificationsDaSolicitorCreatedCase(CaseData caseData, String authorization,
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails) {
-        String whoIsResponsibleForServing = COURT;
         List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
-
-
-        whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
+        String whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
         log.info("Fl401 case journey for caseId {}", caseData.getId());
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                        .getSoaServingRespondentsOptionsDA())) {
@@ -655,11 +641,7 @@ public class ServiceOfApplicationService {
         caseDataMap = CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)
                             ? generatePacksForConfidentialCheckC100(callbackRequest.getCaseDetails(), authorisation)
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
-        List<Document> docsForLa = getDocsToBeServedToLa(authorisation, caseData);
-        caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
-            .servedBy(userService.getUserDetails(authorisation).getFullName())
-            .packCreatedDate(LocalDateTime.now().toString())
-            .build());
+
         cleanUpSoaSelections(caseDataMap, false);
 
         log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
@@ -1011,7 +993,7 @@ public class ServiceOfApplicationService {
         return null;
     }
 
-    private List<Document> getNotificationPack(CaseData caseData, String requiredPack, List<Document> staticDocs) {
+    public List<Document> getNotificationPack(CaseData caseData, String requiredPack, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         switch (requiredPack) {
             case PrlAppsConstants.A:
@@ -1691,16 +1673,22 @@ public class ServiceOfApplicationService {
             } else {
                 caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, null);
             }
-
-            //serving other people in case
-            if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-                && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
-                buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
-            } else {
-                caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
-            }
         } else if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             log.error("#SOA TO DO .. Personal Service to be added - for 4 options");
+        }
+        //serving other people in case
+        if (null != caseData.getServiceOfApplication().getSoaOtherParties()
+            && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
+            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+        } else {
+            caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
+        }
+        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
+        if (CollectionUtils.isNotEmpty(docsForLa)) {
+            caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
+                .servedBy(userService.getUserDetails(authorization).getFullName())
+                .packCreatedDate(LocalDateTime.now().toString())
+                .build());
         }
         return caseDataUpdated;
     }
