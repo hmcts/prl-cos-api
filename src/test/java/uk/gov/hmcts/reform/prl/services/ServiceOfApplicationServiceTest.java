@@ -84,7 +84,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationServiceTest {
 
-
     @InjectMocks
     private ServiceOfApplicationService serviceOfApplicationService;
 
@@ -997,7 +996,7 @@ public class ServiceOfApplicationServiceTest {
         );
 
         assertNotNull(servedApplicationDetails);
-        assertEquals("repFirstName repLastName", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
 
     }
 
@@ -1171,7 +1170,7 @@ public class ServiceOfApplicationServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .applicantsFL401(partyDetails)
+            .applicants(parties)
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
@@ -1218,7 +1217,7 @@ public class ServiceOfApplicationServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .applicantsFL401(partyDetails)
+            .applicants(parties)
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
@@ -1270,6 +1269,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
+            .applicantsFL401(otherPerson)
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondentsFL401(otherPerson)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -1361,6 +1361,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
+            .applicants(partyElementList)
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondents(partyElementList)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -1434,6 +1435,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondentsFL401(otherPerson)
+            .applicantsFL401(otherPerson)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
                                       .soaCafcassCymruServedOptions(Yes)

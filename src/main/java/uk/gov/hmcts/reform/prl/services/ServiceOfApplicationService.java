@@ -233,7 +233,7 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    public ServedApplicationDetails sendNotificationForServiceOfApplicationRefactor(CaseData caseData, String authorization)
+    public ServedApplicationDetails sendNotificationForServiceOfApplication(CaseData caseData, String authorization)
         throws Exception {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
@@ -282,50 +282,6 @@ public class ServiceOfApplicationService {
             }
         }
 
-        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
-        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
-        log.info("*** Email notification details {}", emailNotificationDetails);
-        return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
-            .servedBy(userService.getUserDetails(authorization).getFullName())
-            .servedAt(formatter)
-            .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
-            .whoIsResponsible(whoIsResponsibleForServing)
-            .bulkPrintDetails(bulkPrintDetails).build();
-    }
-
-
-    public ServedApplicationDetails sendNotificationForServiceOfApplication(CaseData caseData, String authorization)
-        throws Exception {
-        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        String whoIsResponsibleForServing;
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-            whoIsResponsibleForServing = handleNotificationsForCitizenCreatedCase(caseData, authorization,
-                                                                                  emailNotificationDetails, bulkPrintDetails);
-        } else {
-            log.info("Not created by citizen");
-            whoIsResponsibleForServing = handleNotificationsForSolicitorCreatedCase(caseData, authorization, emailNotificationDetails,
-                                                       bulkPrintDetails);
-        }
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            //serving cafcass cymru
-            checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
-        }
-        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
-        log.info("Sending notifiction to LA");
-        if (!docsForLa.isEmpty()) {
-            try {
-                emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                         .sendEmailNotificationToLocalAuthority(authorization,
-                                                                            caseData,
-                                                                            caseData.getServiceOfApplication()
-                                                                                .getSoaLaEmailAddress(),
-                                                                            docsForLa,
-                                                                            PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
-            } catch (IOException e) {
-                log.error("Failed to serve email to Local Authority");
-            }
-        }
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         log.info("*** Email notification details {}", emailNotificationDetails);
@@ -1729,14 +1685,6 @@ public class ServiceOfApplicationService {
         } else {
             caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
         }
-        //serving Local authority in the case
-        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
-        if(!CollectionUtils.isEmpty(docsForLa)){
-            caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
-                .servedBy(userService.getUserDetails(authorization).getFullName())
-                .packCreatedDate(LocalDateTime.now().toString())
-                .build());
-        }
         //serving other people in case
         if (null != caseData.getServiceOfApplication().getSoaOtherParties()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
@@ -1744,6 +1692,7 @@ public class ServiceOfApplicationService {
         } else {
             caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
         }
+        //serving Local authority in the case
         List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
         if (CollectionUtils.isNotEmpty(docsForLa)) {
             caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
