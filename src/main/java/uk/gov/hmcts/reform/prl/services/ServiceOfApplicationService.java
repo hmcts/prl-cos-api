@@ -641,11 +641,7 @@ public class ServiceOfApplicationService {
         caseDataMap = CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(C100_CASE_TYPE)
                             ? generatePacksForConfidentialCheckC100(callbackRequest.getCaseDetails(), authorisation)
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
-        List<Document> docsForLa = getDocsToBeServedToLa(authorisation, caseData);
-        caseDataMap.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
-            .servedBy(userService.getUserDetails(authorisation).getFullName())
-            .packCreatedDate(LocalDateTime.now().toString())
-            .build());
+
         cleanUpSoaSelections(caseDataMap, false);
 
         log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
@@ -1685,6 +1681,13 @@ public class ServiceOfApplicationService {
             buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
         } else {
             caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
+        }
+        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
+        if (CollectionUtils.isNotEmpty(docsForLa)) {
+            caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
+                .servedBy(userService.getUserDetails(authorization).getFullName())
+                .packCreatedDate(LocalDateTime.now().toString())
+                .build());
         }
         return caseDataUpdated;
     }
