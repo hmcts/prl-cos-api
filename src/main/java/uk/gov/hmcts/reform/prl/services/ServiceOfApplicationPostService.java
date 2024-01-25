@@ -227,7 +227,7 @@ public class ServiceOfApplicationPostService {
         return Collections.emptyList();
     }
 
-    private CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
+    public CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
         return CaseData
             .builder()
             .id(caseData.getId())
@@ -235,7 +235,7 @@ public class ServiceOfApplicationPostService {
             .build();
     }
 
-    private List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {
+    public List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {
         List<GeneratedDocumentInfo> docs = new ArrayList<>();
         Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
         Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
@@ -245,14 +245,14 @@ public class ServiceOfApplicationPostService {
         return docs;
     }
 
-    private Document getFinalDocument(CaseData caseData) {
+    public Document getFinalDocument(CaseData caseData) {
         if (!welshCase(caseData)) {
             return caseData.getFinalDocument();
         }
         return caseData.getFinalWelshDocument();
     }
 
-    private Optional<Document> getC1aDocument(CaseData caseData) {
+    public Optional<Document> getC1aDocument(CaseData caseData) {
         if (hasAllegationsOfHarm(caseData)) {
             if (!welshCase(caseData)) {
                 return Optional.of(caseData.getC1ADocument());

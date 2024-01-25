@@ -885,4 +885,7 @@ public class PrlAppsConstants {
     public static final String OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR = "You can only serve other people in the case if there is a C6A."
         + " Go back to the previous page to select it. If the C6A is not there, you will need to create it in manage orders.";
 
+
+    public static final String BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS = "buffChildAndOtherPeopleRelations";
+    public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
 }
