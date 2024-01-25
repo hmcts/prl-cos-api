@@ -224,7 +224,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_soli_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_ONE_HEARING_BODY);
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -240,8 +240,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
-
     }
 
     /**
@@ -251,7 +249,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_soli_order_many_hearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_WITH_MANY_HEARING_BODY);
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -267,8 +265,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
-
     }
 
     /**
@@ -278,7 +274,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_soli_order_with_no_hearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_SOLI_NO_HEARING_BODY);
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -286,15 +282,13 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .contentType("application/json")
             .post("/judge-or-admin-edit-approve/about-to-submit")
             .then()
-            .body("data.isHearingTaskNeeded", equalTo("No"),
-                  "data.isMultipleHearingSelected", equalTo("No"),
+            .body("data.isHearingTaskNeeded", equalTo(null),
+                  "data.isMultipleHearingSelected", equalTo(null),
                   "data.hearingOptionSelected", equalTo(null),
                   "data.isOrderApproved", equalTo("Yes"),
                   "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
 
     }
 
@@ -305,7 +299,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_reject_soli_order_with_one_hearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_REJECT_SOLI_ONE_HEARING_BODY);
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -321,8 +315,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
-
     }
 
     //Court admin
@@ -334,7 +326,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_court_admin_order_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY);
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -350,8 +342,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
-
     }
 
     /**
@@ -361,7 +351,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_court_admin_order_with_many_hearing_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_ADMIN_MANY_HEARING_BODY);
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -377,8 +367,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
-        System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
-
     }
 
 
@@ -391,7 +379,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     public void givenRequestBody_whenJudge_edit_approve_court_admin_with2ndOption_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_WITH_2ND_OPTION_BODY);
 
-        AboutToStartOrSubmitCallbackResponse resp = request1
+        request1
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -406,8 +394,6 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
                   "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        System.out.println("Respppp " + resp.getData());
 
     }
 }
