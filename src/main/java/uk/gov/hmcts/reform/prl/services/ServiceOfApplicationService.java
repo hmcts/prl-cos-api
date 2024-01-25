@@ -153,7 +153,8 @@ public class ServiceOfApplicationService {
     public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
         ### What happens next
         The service pack needs to be reviewed for confidential details before it can be served.
-        You can view the service packs in the <a href="%s">service of application</a> tab.
+
+            You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
     public static final String CONFIRMATION_HEADER_NON_PERSONAL = "# The application has been served";
@@ -161,7 +162,8 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_BODY_PREFIX = """
         ### What happens next
         The service pack has been served on the parties selected.
-            You can view the service packs in the <a href="%s">service of application</a> tab.
+
+        You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX = """
         ### What happens next
