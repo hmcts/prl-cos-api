@@ -1737,6 +1737,20 @@ public class ServiceOfApplicationService {
                 .packCreatedDate(LocalDateTime.now().toString())
                 .build());
         }
+        //serving other people in case
+        if (null != caseData.getServiceOfApplication().getSoaOtherParties()
+            && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
+            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
+        } else {
+            caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
+        }
+        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
+        if (CollectionUtils.isNotEmpty(docsForLa)) {
+            caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
+                .servedBy(userService.getUserDetails(authorization).getFullName())
+                .packCreatedDate(LocalDateTime.now().toString())
+                .build());
+        }
         return caseDataUpdated;
     }
 
