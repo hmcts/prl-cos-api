@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -627,26 +626,26 @@ public class ManageDocumentsService {
         String userRole = CaseUtils.getUserRole(userDetails);
         if (userRole.equals(COURT_ADMIN) || userRole.equals(COURT_STAFF)) {
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getConfidentialDocuments())) {
-                List<Element<QuarantineLegalDoc>> confidentialDocuments = renameConfidentialDocumentForCourtAdmin(
+                renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getConfidentialDocuments());
-                caseDataUpdated.put("confidentialDocuments", confidentialDocuments);
+                caseDataUpdated.put("confidentialDocuments", caseData.getReviewDocuments().getConfidentialDocuments());
             }
             if (CollectionUtils.isNotEmpty(caseData.getReviewDocuments().getRestrictedDocuments())) {
-                List<Element<QuarantineLegalDoc>> restrictedDocuments = renameConfidentialDocumentForCourtAdmin(
+                renameConfidentialDocumentForCourtAdmin(
                     caseData.getReviewDocuments().getRestrictedDocuments());
-                caseDataUpdated.put("restrictedDocuments", restrictedDocuments);
+                caseDataUpdated.put("restrictedDocuments", caseData.getReviewDocuments().getRestrictedDocuments());
             }
         }
         caseDataUpdated.remove("manageDocuments");
         return caseDataUpdated;
     }
 
-    private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
+    private void renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
         final @NotNull @Valid QuarantineLegalDoc[] quarantineLegalDoc = new QuarantineLegalDoc[1];
-        return confidentialDocuments.stream()
+        confidentialDocuments.stream()
             .filter(element -> YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())
             )
-            .map(
+            .forEach(
                 element -> {
                     quarantineLegalDoc[0] = element.getValue();
 
@@ -674,9 +673,8 @@ public class ManageDocumentsService {
 
                     log.info("renameConfidentialDocumentForCourtAdmin -- {}", quarantineLegalDoc[0]);
                     log.info("updatedQuarantineLegalDocumentObject -- {}", updatedQuarantineLegalDocumentObject);
-                    return element(element.getId(), updatedQuarantineLegalDocumentObject);
                 }
-            ).collect(Collectors.toList());
+            );
     }
 
     public void updateCaseData(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
