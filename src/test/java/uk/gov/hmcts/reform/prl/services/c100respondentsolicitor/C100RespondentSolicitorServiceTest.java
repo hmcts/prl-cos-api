@@ -189,7 +189,7 @@ public class C100RespondentSolicitorServiceTest {
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
                           .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
+                                    .willingToAttendMiam(Yes)
                                     .reasonNotAttendingMiam("test").build())
                           .respondentExistingProceedings(proceedingsList)
                           .citizenInternationalElements(CitizenInternationalElements
@@ -310,7 +310,7 @@ public class C100RespondentSolicitorServiceTest {
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
-                          .miam(Miam.builder().attendedMiam(No)
+                          .miam(Miam.builder().attendedMiam(Yes)
                                     .willingToAttendMiam(No)
                                     .reasonNotAttendingMiam("test").build())
                           .respondentExistingProceedings(proceedingsList)
