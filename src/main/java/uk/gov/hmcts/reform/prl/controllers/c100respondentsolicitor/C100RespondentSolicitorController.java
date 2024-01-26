@@ -108,9 +108,12 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("/keep-details-private-list mid event callback");
+            log.info("original case data: {}", callbackRequest.getCaseDetails().getData());
             Map<String, Object> updatedCaseData = respondentSolicitorService.generateConfidentialityDynamicSelectionDisplay(
                 callbackRequest);
             CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+            log.info("updated case data: {}", caseData);
             return CallbackResponse.builder()
                 .data(caseData.toBuilder()
                           .id(callbackRequest.getCaseDetails().getId())
