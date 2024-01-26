@@ -189,7 +189,7 @@ public class C100RespondentSolicitorServiceTest {
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
                           .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(Yes)
+                                    .willingToAttendMiam(No)
                                     .reasonNotAttendingMiam("test").build())
                           .respondentExistingProceedings(proceedingsList)
                           .citizenInternationalElements(CitizenInternationalElements
@@ -530,7 +530,7 @@ public class C100RespondentSolicitorServiceTest {
                                                                               .build())
                                          .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
                                                                                      .attendedMiam(No)
-                                                                                     .willingToAttendMiam(No)
+                                                                                     .willingToAttendMiam(Yes)
                                                                                      .reasonNotAttendingMiam("test")
                                                                                      .build())
                                          .build())
@@ -598,8 +598,8 @@ public class C100RespondentSolicitorServiceTest {
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums2)
                                                   .build())
-                          .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
+                          .miam(Miam.builder().attendedMiam(Yes)
+                                    .willingToAttendMiam(Yes)
                                     .reasonNotAttendingMiam("test").build())
                           .respondentExistingProceedings(proceedingsList2)
                           .citizenInternationalElements(CitizenInternationalElements
