@@ -867,7 +867,6 @@ public class PrlAppsConstants {
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
 
     public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
-
   
     // PRL-5025
     public static final String WA_IS_ORDER_APPROVED = "isOrderApproved";
@@ -878,8 +877,7 @@ public class PrlAppsConstants {
     public static final String WA_IS_HEARING_TASK_NEEDED = "isHearingTaskNeeded";
     public static final String WA_MULTIPLE_OPTIONS_SELECTED_VALUE = "multipleOptionSelected";
 
-
-
+    public static final String BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS = "buffChildAndOtherPeopleRelations";
     public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
 
 }
