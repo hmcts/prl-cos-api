@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -1923,13 +1924,12 @@ public class DraftAnOrderService {
 
         List<String> errorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
-            if (Arrays.stream(ManageOrdersUtils.PROHIBITED_ORDER_IDS_FOR_SOLICITORS)
-                .anyMatch(orderId -> (null != caseData.getChildArrangementOrders()
-                    && orderId.equalsIgnoreCase(caseData.getChildArrangementOrders().toString()))
-                    || (null != caseData.getDomesticAbuseOrders()
-                    && orderId.equalsIgnoreCase(caseData.getDomesticAbuseOrders().toString()))
-                    || (null != caseData.getFcOrders()
-                    && orderId.equalsIgnoreCase(caseData.getFcOrders().toString())))) {
+            if ((null != caseData.getChildArrangementOrders()
+                && ChildArrangementOrdersEnum.standardDirectionsOrder
+                .name()
+                .equalsIgnoreCase(caseData
+                    .getChildArrangementOrders()
+                    .toString()))) {
                 return prohibitedOrdersForSolicitor(errorList);
             }
 
