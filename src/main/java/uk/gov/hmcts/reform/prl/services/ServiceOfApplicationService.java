@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -1719,22 +1718,19 @@ public class ServiceOfApplicationService {
             if (SoaSolicitorServingRespondentsEnum.courtAdmin
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
                 || SoaSolicitorServingRespondentsEnum.courtBailiff
-                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
-                || SoaCitizenServingRespondentsEnum.courtBailiff
-                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())
-                || SoaCitizenServingRespondentsEnum.courtAdmin
-                .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
+                .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
                 List<Document> packjDocs = getDocumentsForCaorBailiffToServeRespondents(caseData, authorization, c100StaticDocs);
                 List<Document> packkDocs = getDocumentsForCaOrBailiffToServeApplicantSolcitor(caseData, authorization, c100StaticDocs);
                 final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packjDocs))
-                    .partyIds(wrapElements(caseData.getApplicants().get(0).getValue().getSolicitorPartyId().toString()))
+                    .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
                     .servedBy(PRL_COURT_ADMIN)
                     .packCreatedDate(dateCreated)
+                    .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().toString())
                     .build();
                 caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
                 final SoaPack unServedApplicantPack = SoaPack.builder()
                     .packDocument(wrapElements(packkDocs))
-                    .partyIds(wrapElements(caseData.getApplicants().get(0).getValue().getSolicitorPartyId().toString()))
+                    .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
                     .servedBy(PRL_COURT_ADMIN)
                     .packCreatedDate(dateCreated)
                     .build();
@@ -1881,7 +1877,7 @@ public class ServiceOfApplicationService {
         log.info("selected Applicant ========= {}", selectedApplicants.size());
         log.info("selected Applicant PartyIds ========= {}", selectedPartyIds);
         List<Element<Document>> packDocs = new ArrayList<>();
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+        if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
         } else {
             packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs)));
@@ -1906,21 +1902,48 @@ public class ServiceOfApplicationService {
         }
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         if (unServedRespondentPack != null) {
-
-            final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
-            log.info("Sending notification for Respondents ==> {}", partyIds);
-
-            final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
-                partyIds);
-
-            final List<Document> packR = unwrapElements(unServedRespondentPack.getPackDocument());
-            if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
-                sendNotificationsToCitizenRespondentsC100(authorization, respondentList, caseData, bulkPrintDetails,
-                                                          packR, false);
+            if (null != unServedRespondentPack.getPersonalServiceBy()) {
+                if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+                    emailNotificationDetails.add(element(EmailNotificationDetails.builder()
+                                                             .emailAddress(caseData.getApplicants().get(0).getValue().getSolicitorEmail())
+                                                             .servedParty(PRL_COURT_ADMIN)
+                                                             .docs(unServedRespondentPack.getPackDocument())
+                                                             .attachedDocs(String.join(",", unServedRespondentPack
+                                                                 .getPackDocument().stream()
+                                                                 .map(Element::getValue)
+                                                                 .map(Document::getDocumentFileName).toList()))
+                                                             .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
+                                                                            .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                                             .build()));
+                } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
+                    .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+                    bulkPrintDetails.add(element(BulkPrintDetails.builder()
+                                                     .servedParty(PRL_COURT_ADMIN)
+                                                     .printedDocs(String.join(",", unServedRespondentPack
+                                                         .getPackDocument().stream()
+                                                         .map(Element::getValue)
+                                                         .map(Document::getDocumentFileName).toList()))
+                                                     .printDocs(unServedRespondentPack.getPackDocument())
+                                                     .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
+                                                                    .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                                                     .build()));
+                }
             } else {
-                // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
-                sendNotificationToRespondentNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails,
-                                                        respondentList, packR, packR);
+                final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
+                log.info("Sending notification for Respondents ==> {}", partyIds);
+
+                final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
+                    partyIds);
+
+                final List<Document> packR = unwrapElements(unServedRespondentPack.getPackDocument());
+                if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                    sendNotificationsToCitizenRespondentsC100(authorization, respondentList, caseData, bulkPrintDetails,
+                                                              packR, false);
+                } else {
+                    // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
+                    sendNotificationToRespondentNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails,
+                                                            respondentList, packR, packR);
+                }
             }
         }
         // send notification for others
@@ -1929,17 +1952,6 @@ public class ServiceOfApplicationService {
         if (unServedOthersPack != null) {
             sendNotificationForOthersPack(caseData, authorization, bulkPrintDetails, unServedOthersPack);
         }
-
-        //serving cafcass will be eneabled after business confirmation
-        /*if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassServedOptions())
-            && null != caseData.getServiceOfApplication().getSoaCafcassEmailId()) {
-            log.info("serving cafcass email : " + caseData.getServiceOfApplication().getSoaCafcassEmailId());
-            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
-                caseData,
-                caseData.getServiceOfApplication().getSoaCafcassEmailId(),
-                PrlAppsConstants.SERVED_PARTY_CAFCASS
-            ));
-        }*/
 
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
         if (unServedLaPack != null) {
@@ -2093,8 +2105,8 @@ public class ServiceOfApplicationService {
             partyIds);
 
         log.info("Sending notification for Applicants ====> {}", partyIds);
-        log.info("Case created by {}", caseData.getCaseCreatedBy());
-        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
+        log.info("Case created by {}", CaseUtils.isCaseCreatedByCitizen(caseData));
+        if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(authorization,applicantList,caseData,
                                                                              bulkPrintDetails,
