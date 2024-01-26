@@ -798,7 +798,7 @@ public class ServiceOfApplicationServiceTest {
 
         assertNotNull(servedApplicationDetails);
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("repFirstName repLastName", servedApplicationDetails.getWhoIsResponsible());
 
     }
 
@@ -1015,7 +1015,7 @@ public class ServiceOfApplicationServiceTest {
         );
 
         assertNotNull(servedApplicationDetails);
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals("repFirstName repLastName", servedApplicationDetails.getWhoIsResponsible());
 
     }
 
