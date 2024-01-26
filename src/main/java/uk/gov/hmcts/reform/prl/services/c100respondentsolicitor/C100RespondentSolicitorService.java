@@ -726,7 +726,7 @@ public class C100RespondentSolicitorService {
             .getConfidentialityList().contains(ConfidentialityListEnum.email)) {
             keepDetailsPrivateList.put("isEmailAddressConfidential", YesOrNo.Yes);
         }
-        keepDetailsPrivateList.put("respondentNameForResponse", caseData.getRespondentSolicitorData().getRespondentNameForResponse());
+        keepDetailsPrivateList.put(RESPONDENT_NAME_FOR_RESPONSE, caseData.getRespondentSolicitorData().getRespondentNameForResponse());
         return keepDetailsPrivateList;
     }
 
