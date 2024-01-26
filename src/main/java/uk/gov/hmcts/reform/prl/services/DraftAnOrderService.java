@@ -438,7 +438,7 @@ public class DraftAnOrderService {
                     );
                 }
                 if (documentLanguage.isGenWelsh() && fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH) != null) {
-                    generatedDocumentInfoWelsh = dgsService.generateDocument(
+                    generatedDocumentInfoWelsh = dgsService.generateWelshDocument(
                         auth,
                         CaseDetails.builder().caseData(caseData).build(),
                         fieldMap.get(PrlAppsConstants.FINAL_TEMPLATE_WELSH)
