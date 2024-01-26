@@ -133,12 +133,8 @@ public class ManageDocumentsController extends AbstractCallbackController {
             throw new RuntimeException(e);
         }
 
-        Map<String, Object> caseDataUpdated = manageDocumentsService.appendConfidentialDocumentNameForCourtAdmin(
-            callbackRequest,
-            authorisation
-        );
         //update all tabs
-        manageDocumentsService.updateCaseData(callbackRequest, caseDataUpdated);
+        manageDocumentsService.updateCaseData(callbackRequest, callbackRequest.getCaseDetails().getData());
 
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIRMATION_HEADER)
