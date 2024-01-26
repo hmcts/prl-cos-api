@@ -187,7 +187,7 @@ public class CaseUtils {
     }
 
     public static boolean hasLegalRepresentation(PartyDetails partyDetails) {
-        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || null != partyDetails.getSolicitorEmail();
     }
 
     public static Map<String, String> getApplicantsToNotify(CaseData caseData, UUID excludeId) {
