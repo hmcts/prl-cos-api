@@ -1655,11 +1655,13 @@ public class ServiceOfApplicationService {
     }
 
     private CaseInvite getCaseInvite(UUID partyId, List<Element<CaseInvite>> caseInvites) {
-        if (caseInvites != null) {
+        if (CollectionUtils.isNotEmpty(caseInvites)) {
             Optional<Element<CaseInvite>> caseInvite = caseInvites.stream()
                 .filter(caseInviteElement -> caseInviteElement.getValue().getPartyId().equals(partyId)
             ).findFirst();
-            return caseInvite.map(Element::getValue).orElse(null);
+            if (caseInvite.isPresent()) {
+                return caseInvite.map(Element::getValue).orElse(null);
+            }
         }
         return null;
     }
