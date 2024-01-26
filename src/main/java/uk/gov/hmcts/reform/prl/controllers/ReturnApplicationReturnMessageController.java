@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.caseworkeremailnotification.CaseWorkerEmailNotificationEventEnum;
 import uk.gov.hmcts.reform.prl.events.CaseWorkerNotificationEmailEvent;
-import uk.gov.hmcts.reform.prl.handlers.CaseEventHandler;
+import uk.gov.hmcts.reform.prl.handlers.service.CaseEventHandlerService;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -41,7 +41,7 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
     private final ReturnApplicationService returnApplicationService;
     private final AllTabServiceImpl allTabsService;
     private final AuthorisationService authorisationService;
-    private final CaseEventHandler caseEventHandler;
+    private final CaseEventHandlerService caseEventHandlerService;
 
     @Autowired
     public ReturnApplicationReturnMessageController(ObjectMapper objectMapper,
@@ -50,13 +50,13 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
                                                     ReturnApplicationService returnApplicationService,
                                                     AllTabServiceImpl allTabsService,
                                                     AuthorisationService authorisationService,
-                                                    CaseEventHandler caseEventHandler) {
+                                                    CaseEventHandlerService caseEventHandlerService) {
         super(objectMapper, eventPublisher);
         this.userService = userService;
         this.returnApplicationService = returnApplicationService;
         this.allTabsService = allTabsService;
         this.authorisationService = authorisationService;
-        this.caseEventHandler = caseEventHandler;
+        this.caseEventHandlerService = caseEventHandlerService;
     }
 
     @PostMapping(path = "/return-application-return-message", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -105,7 +105,7 @@ public class ReturnApplicationReturnMessageController extends AbstractCallbackCo
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put("taskListReturn", returnApplicationService.getReturnMessageForTaskList(caseData));
 
-            String updatedTaskList = caseEventHandler.getUpdatedTaskList(caseData);
+            String updatedTaskList = caseEventHandlerService.getUpdatedTaskList(caseData);
             caseDataUpdated.put("taskList", updatedTaskList);
 
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
