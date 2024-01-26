@@ -104,6 +104,9 @@ public class PrlAppsConstants {
     public static final String PENDING_STATE = State.SUBMITTED_NOT_PAID.getValue();
     public static final String ISSUED_STATE = State.CASE_ISSUED.getValue();
     public static final String JUDICIAL_REVIEW_STATE = State.JUDICIAL_REVIEW.getValue();
+    public static final String ALL_FINAL_ORDERS_ISSUED_STATE = State.ALL_FINAL_ORDERS_ISSUED.getValue();
+    public static final String PREPARE_FOR_HEARING_CONDUCT_HEARING_STATE = State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue();
+    public static final String DECISION_OUTCOME_STATE = State.DECISION_OUTCOME.getValue();
 
     public static final String C8_HINT = "C8";
     public static final String C1A_HINT = "C1A";
