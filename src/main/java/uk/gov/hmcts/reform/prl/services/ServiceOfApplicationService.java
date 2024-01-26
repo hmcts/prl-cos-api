@@ -1516,6 +1516,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
         List<Element<DocumentListForLa>> documentDynamicListLa = getDocumentsDynamicListForLa(authorisation,
                                                                                               String.valueOf(caseData.getId()));
+        log.info("** case created by ** {}", caseDataUpdated.get(CASE_CREATED_BY));
         log.info("** dynamic list 1 ** {}", documentDynamicListLa);
         caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
         log.info("** dynamic list 2 ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
