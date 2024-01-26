@@ -2093,7 +2093,7 @@ public class ServiceOfApplicationService {
             partyIds);
 
         log.info("Sending notification for Applicants ====> {}", partyIds);
-
+        log.info("Case created by {}", caseData.getCaseCreatedBy());
         if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy())) {
             //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(authorization,applicantList,caseData,
