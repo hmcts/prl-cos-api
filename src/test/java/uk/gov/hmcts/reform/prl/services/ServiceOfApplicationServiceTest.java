@@ -400,7 +400,6 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(response);
     }
 
-
     @Test
     public void testsendNotificationsForUnServedPacks() {
         CaseData caseData = CaseData.builder().id(12345L)
@@ -412,10 +411,14 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder().build())
-                                      .unServedRespondentPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .packDocument(List.of(element(Document.builder()
+                                                                                                    .documentFileName("").build())))
+                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
+                                                                                         .courtAdmin.toString()).build())
                                       .unServedOthersPack(SoaPack.builder().build())
-                                      .applicationServedYesNo(YesOrNo.No)
-                                      .soaCafcassCymruServedOptions(YesOrNo.Yes)
+                                      .applicationServedYesNo(No)
+                                      .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassCymruEmail("test@hmcts.net")
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
@@ -437,7 +440,10 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .unServedLaPack(SoaPack.builder().build())
+                                      .unServedLaPack(SoaPack.builder()
+                                                          .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtBailiff.toString())
+                                                          .packDocument(List.of(element(Document.builder().build())))
+                                                          .build())
                                       .applicationServedYesNo(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassCymruEmail("test@hmcts.net")
