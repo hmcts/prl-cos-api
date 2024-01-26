@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -642,12 +641,11 @@ public class ManageDocumentsService {
     }
 
     private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
+        List<Element<QuarantineLegalDoc>> confidentialTabDocuments = new ArrayList<>();
         final @NotNull @Valid QuarantineLegalDoc[] quarantineLegalDoc = new QuarantineLegalDoc[1];
-        return confidentialDocuments.stream()
-            .filter(element -> YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())
-            )
-            .map(
-                element -> {
+        confidentialDocuments.parallelStream().forEach(
+            element -> {
+                if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
                     quarantineLegalDoc[0] = element.getValue();
 
                     String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc[0].getCategoryId());
@@ -674,9 +672,13 @@ public class ManageDocumentsService {
 
                     log.info("renameConfidentialDocumentForCourtAdmin -- {}", quarantineLegalDoc[0]);
                     log.info("updatedQuarantineLegalDocumentObject -- {}", updatedQuarantineLegalDocumentObject);
-                    return element(element.getId(), updatedQuarantineLegalDocumentObject);
+                    confidentialTabDocuments.add(element(element.getId(), updatedQuarantineLegalDocumentObject));
+                } else {
+                    confidentialTabDocuments.add(element);
                 }
-            ).collect(Collectors.toList());
+            }
+        );
+        return confidentialTabDocuments;
     }
 
     public void updateCaseData(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
