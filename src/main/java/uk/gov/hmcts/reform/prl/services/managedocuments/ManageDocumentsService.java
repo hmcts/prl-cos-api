@@ -204,7 +204,7 @@ public class ManageDocumentsService {
 
         if (restrcitedKey != null) {
             if (!userRole.equals(COURT_ADMIN)
-                || !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
+                && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
                 Document updatedConfidentialDocument = downloadAndDeleteDocument(
@@ -217,7 +217,9 @@ public class ManageDocumentsService {
                     loggedInUserType,
                     quarantineLegalDoc
                 );
+
             }
+
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,
                 userDetails
