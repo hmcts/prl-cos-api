@@ -148,8 +148,8 @@ public class CaseUtils {
         }
         log.info("case created by {}", caseData.getCaseCreatedBy());
 
-        return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? hasLegalRepresentation(caseData.getApplicants().get(
-            0).getValue()) : hasLegalRepresentation(caseData.getApplicantsFL401());
+        return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
+            0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
     }
 
     public static Map<String, Object> getCourtDetails(Optional<CourtVenue> courtVenue, String baseLocationId) {
