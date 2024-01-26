@@ -564,7 +564,7 @@ public class C100RespondentSolicitorService {
                       .willingToAttendMiam(attendedMiam ? null : caseData.getRespondentSolicitorData()
                           .getRespondentSolicitorHaveYouAttendedMiam().getWillingToAttendMiam())
                       .reasonNotAttendingMiam(
-                          willingToAttendMiam ? null : caseData
+                          attendedMiam ||  willingToAttendMiam ? null : caseData
                               .getRespondentSolicitorData().getRespondentSolicitorHaveYouAttendedMiam()
                               .getReasonNotAttendingMiam()).build()).build();
         return buildResponseForRespondent;
