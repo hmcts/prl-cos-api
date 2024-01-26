@@ -24,7 +24,7 @@ public enum RespondentSolicitorEvents {
         "respondentSolicitorHaveYouAttendedMiam,"
             + "whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
     ),
-    CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Other proceedings",
+    CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Current or past proceedings",
                                     "currentOrPastProceedingsForChildren,respondentExistingProceedings"
     ),
     ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", "respondentAohYesNo,"
