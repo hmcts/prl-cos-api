@@ -3,13 +3,15 @@ package uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytopa
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 
 
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class AbilityToParticipate {
-    private final YesNoDontKnow factorsAffectingAbilityToParticipate;
+    private final YesOrNo factorsAffectingAbilityToParticipate;
     private final String provideDetailsForFactorsAffectingAbilityToParticipate;
+    private final String giveDetailsAffectingLitigationCapacity;
+    private final String detailsOfReferralOrAssessment;
 }
