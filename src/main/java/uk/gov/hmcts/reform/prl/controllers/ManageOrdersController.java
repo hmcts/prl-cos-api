@@ -240,7 +240,6 @@ public class ManageOrdersController {
             // The following can be removed or utilised based on requirement
             /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
-            manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
 
             //SNI-4330 fix
