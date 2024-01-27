@@ -678,6 +678,10 @@ public class ManageDocumentsService {
                 }
             }
         );
+        confidentialTabDocuments.stream().sorted(Comparator.comparing(
+            m -> m.getValue().getDocumentUploadedDate(),
+            Comparator.reverseOrder()
+        ));
         return confidentialTabDocuments;
     }
 
