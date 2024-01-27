@@ -163,7 +163,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         Map<String, Object> caseDataMap = new HashMap<>();
         caseDataMap.put("appointedGuardianName", "John");
         caseDataMap.put("parentName", "Smith");
-        Mockito.when(draftAnOrderService.populateDraftOrderCustomFields(ArgumentMatchers.any()))
+        Mockito.when(draftAnOrderService.populateDraftOrderCustomFields(ArgumentMatchers.any(), ArgumentMatchers.any()))
             .thenReturn(caseDataMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/judge-or-admin-populate-draft-order-custom-fields")
@@ -186,7 +186,7 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
         caseDataMap.put("orderType", "C21");
         caseDataMap.put("isTheOrderByConsent", "Yes");
         Mockito.when(draftAnOrderService
-                         .populateCommonDraftOrderFields(ArgumentMatchers.any(),ArgumentMatchers.any()))
+                         .populateCommonDraftOrderFields(ArgumentMatchers.any(), ArgumentMatchers.any(), ArgumentMatchers.any()))
             .thenReturn(caseDataMap);
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         mockMvc.perform(post("/judge-or-admin-populate-draft-order-common-fields")

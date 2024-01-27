@@ -2210,7 +2210,7 @@ public class ManageOrderEmailServiceTest {
             .id(12345L)
             .applicantCaseName("TestCaseName")
             .caseTypeOfApplication("C100")
-            .manageOrders(ManageOrders.builder().instructionsToLegalRepresentaive("test").build())
+            .manageOrders(ManageOrders.builder().instructionsToLegalRepresentative("test").build())
             .applicantSolicitorEmailAddress("test@test.com")
             .issueDate(LocalDate.now())
             .orderCollection(List.of(element(OrderDetails.builder().build())))

@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
+import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -53,6 +54,7 @@ public class EditAndApproveDraftOrderController {
     private final ManageOrderService manageOrderService;
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
+    private final EditReturnedOrderService editReturnedOrderService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -63,7 +65,6 @@ public class EditAndApproveDraftOrderController {
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP = """
         ### What happens next \nYour message has been sent to the legal representative.
         """;
-
 
     @PostMapping(path = "/populate-draft-order-dropdown", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Populate draft order dropdown")
@@ -163,6 +164,11 @@ public class EditAndApproveDraftOrderController {
                 ));
             } else if (Event.EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
+                if (Event.EDIT_AND_APPROVE_ORDER.getId()
+                    .equalsIgnoreCase(callbackRequest.getEventId())) {
+                    caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService
+                        .getDraftOrderNameForWA(caseData, true));
+                }
 
                 manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated,callbackRequest.getEventId(),loggedInUserType);
 
@@ -172,6 +178,9 @@ public class EditAndApproveDraftOrderController {
                     authorisation,
                     callbackRequest.getEventId()
                 ));
+            } else if (Event.EDIT_RETURNED_ORDER.getId()
+                .equalsIgnoreCase(callbackRequest.getEventId())) {
+                caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
@@ -206,16 +215,25 @@ public class EditAndApproveDraftOrderController {
             }
 
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+            Object dynamicList = caseData.getDraftOrdersDynamicList();
+            if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
+                if (Yes.getDisplayedValue().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("orderUploadedAsDraftFlag")))) {
+                    return AboutToStartOrSubmitCallbackResponse.builder()
+                        .data(caseDataUpdated).build();
+                }
+                dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
+            }
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                                        dynamicList);
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
                 caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
-                caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData));
+                caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
-                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData)).build();
+                .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, selectedOrder)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -238,7 +256,12 @@ public class EditAndApproveDraftOrderController {
                 CaseData.class
             );
             log.info("*** draft order dynamic list: {}", callbackRequest.getCaseDetails().getData().get("draftOrdersDynamicList"));
-            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData);
+            Object dynamicList = caseData.getDraftOrdersDynamicList();
+            if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
+                dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
+            }
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder);
             boolean isOrderEdited = false;
             isOrderEdited = ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited);
             if (isOrderEdited) {
@@ -348,7 +371,8 @@ public class EditAndApproveDraftOrderController {
                 log.info("*** Draft order dynamic list : {}", caseData.getDraftOrdersDynamicList());
                 log.info("*** Draft order collection : {}", caseData.getDraftOrderCollection());
                 try {
-                    DraftOrder draftOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData);
+                    DraftOrder draftOrder = draftAnOrderService
+                        .getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
                     manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(callbackRequest.getCaseDetails(), draftOrder);
                 } catch (Exception e) {
                     log.error("Failed to send email to solicitor : {}", e.getMessage());
@@ -359,7 +383,7 @@ public class EditAndApproveDraftOrderController {
                                              .build());
             }
             log.info("Case reference : {}", callbackRequest.getCaseDetails().getId());
-            log.info("judgeDirectionsToAdmin : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
+            log.info("judgeDirectionsToAdmin 2 : {}", caseDataUpdated.get("judgeDirectionsToAdmin"));
             log.info("map size after : {}", caseDataUpdated.size());
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             draftAnOrderService.updateCaseData(callbackRequest, caseDataUpdated);

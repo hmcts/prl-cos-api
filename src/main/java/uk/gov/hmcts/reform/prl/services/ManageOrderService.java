@@ -1352,8 +1352,7 @@ public class ManageOrderService {
 
     private YesOrNo getIsUploadedFlag(ManageOrdersOptionsEnum manageOrdersOptions, String loggedInUserType) {
         YesOrNo isUploaded = No;
-        if (UserRoles.SOLICITOR.name().equals(loggedInUserType) || (null != manageOrdersOptions && uploadAnOrder.equals(
-            manageOrdersOptions))) {
+        if (UserRoles.SOLICITOR.name().equals(loggedInUserType) || (uploadAnOrder.equals(manageOrdersOptions))) {
             isUploaded = Yes;
         }
         return isUploaded;
@@ -1369,6 +1368,8 @@ public class ManageOrderService {
             } else {
                 currentOrderStatus = OrderStatusEnum.reviewedByManager.getDisplayedValue();
             }
+        } else if (Event.EDIT_RETURNED_ORDER.getId().equals(eventId)) {
+            return OrderStatusEnum.draftedByLR.getDisplayedValue();
         } else if (createAnOrder.toString().equals(orderSelectionType) || uploadAnOrder.toString().equals(
             orderSelectionType) || amendOrderUnderSlipRule.toString().equals(orderSelectionType)
             || draftAnOrder.toString().equals(orderSelectionType)) {
