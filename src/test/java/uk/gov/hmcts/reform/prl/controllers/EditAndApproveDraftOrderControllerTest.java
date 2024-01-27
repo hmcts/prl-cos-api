@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
@@ -163,7 +164,7 @@ public class EditAndApproveDraftOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(draftAnOrderService.getDraftOrderDynamicList(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), authToken)).thenReturn(caseDataMap);
         AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
-            .generateDraftOrderDropDown(authToken,s2sToken,callbackRequest);
+            .generateDraftOrderDropDown(authToken,s2sToken, callbackRequest);
         Assert.assertNotNull(response);
     }
 
@@ -777,7 +778,7 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testSaveServeOrderDetails() {
+    public void testSaveServeOrderDetails() throws JsonProcessingException {
 
         final String authorisation = "Bearer someAuthorisationToken";
 
@@ -843,7 +844,7 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testSaveServeOrderDetailsUpdateDraftOrders() {
+    public void testSaveServeOrderDetailsUpdateDraftOrders() throws JsonProcessingException {
 
         final String authorisation = "Bearer someAuthorisationToken";
 

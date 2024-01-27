@@ -15,12 +15,14 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -40,6 +42,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -102,8 +105,10 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
@@ -162,6 +167,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private RefDataUserService refDataUserService;
+
+    @Mock
+    private DraftAnOrderService draftAnOrderService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -3389,7 +3397,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId");
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
@@ -3412,7 +3420,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId");
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_ADMIN_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_ADMIN_CREATED));
@@ -3436,7 +3444,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId");
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
@@ -3798,7 +3806,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateServeOrderDetailsr() {
+    public void testPopulateServeOrderDetails() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3815,4 +3823,182 @@ public class ManageOrderServiceTest {
         assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
         assertEquals(FL401_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
     }
+
+    @Test
+    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.Yes)
+            .manageOrders(manageOrders).build();
+        //when(manageOrderService.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), false)).thenReturn(true);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated, Event.EDIT_AND_APPROVE_ORDER.getId(),"JUDGE");
+        assertEquals(HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+        assertEquals("Yes",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+    @Test
+    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNo() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.sendToAdminToServe);
+
+        DraftOrder draftOrder = DraftOrder.builder().manageOrderHearingDetails(hearingDataList).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+
+        Element<DraftOrder> draftOrderElement = element(uuid,draftOrder);
+        draftOrderCollection.add(draftOrderElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.No)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(manageOrders).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        //when(manageOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
+        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.EDIT_AND_APPROVE_ORDER.getId(),"JUDGE");
+        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+        assertEquals("Yes",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+    @Test
+    public void testWaSetHearingOptionDetailsForTask_whenManagerOrdersJourney() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.sendToAdminToServe);
+
+        DraftOrder draftOrder = DraftOrder.builder().manageOrderHearingDetails(hearingDataList).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+
+        Element<DraftOrder> draftOrderElement = element(uuid,draftOrder);
+        draftOrderCollection.add(draftOrderElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.No)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(manageOrders).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        //when(manageOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
+        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.MANAGE_ORDERS.getId(),"JUDGE");
+        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+        assertNull(caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertNull(caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+    @Test
+    public void testWaIsHearingTaskNeeded_whenRejected_thenHearingTaskNeeded_shuldbe_No() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+
+        String isOrderApproved = "No";
+        String eventId = Event.EDIT_AND_APPROVE_ORDER.getId();
+        AmendOrderCheckEnum amendOrderCheck = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck;
+
+        manageOrderService.setIsHearingTaskNeeded(manageOrders.getOrdersHearingDetails(),
+                                                  caseDataUpdated,
+                                                  isOrderApproved,
+                                                  amendOrderCheck,
+                                                  eventId);
+        assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
+    }
+
+    @Test
+    public void testWaIsHearingTaskNeeded_whenJudgeLaReviewRequired_thenHearingTaskNeeded_shuldbe_No() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+
+        String isOrderApproved = "Yes";
+        String eventId = Event.MANAGE_ORDERS.getId();
+        AmendOrderCheckEnum amendOrderCheck = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck;
+
+        manageOrderService.setIsHearingTaskNeeded(manageOrders.getOrdersHearingDetails(),
+                                                  caseDataUpdated,
+                                                  isOrderApproved,
+                                                  amendOrderCheck,
+                                                  eventId);
+        assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
+    }
+
+    @Test
+    public void testWaIsHearingTaskNeeded_whenManagerReviewRequired_thenHearingTaskNeeded_shuldbe_No() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+
+        String isOrderApproved = "Yes";
+        String eventId = Event.MANAGE_ORDERS.getId();
+        AmendOrderCheckEnum amendOrderCheck = AmendOrderCheckEnum.managerCheck;
+
+        manageOrderService.setIsHearingTaskNeeded(manageOrders.getOrdersHearingDetails(),
+                                                  caseDataUpdated,
+                                                  isOrderApproved,
+                                                  amendOrderCheck,
+                                                  eventId);
+        assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
+    }
+
 }
