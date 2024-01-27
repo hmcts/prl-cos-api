@@ -265,8 +265,8 @@ public class EditReturnedOrderServiceTest {
                              .build())
             .build();
         AboutToStartOrSubmitCallbackResponse response = editReturnedOrderService.populateInstructionsAndFieldsForLegalRep(authToken, callbackRequest);
-        Assert.assertEquals(response.getData().get("instructionsToLegalRepresentative"),"u");
-        Assert.assertEquals(response.getData().get("orderName"),"<span class='heading-h3'>General form of undertaking (N117)</span>");
+        Assert.assertEquals("u", response.getData().get("instructionsToLegalRepresentative"));
+        Assert.assertEquals("<span class='heading-h3'>General form of undertaking (N117)</span>", response.getData().get("orderName"));
     }
 
     @Test
