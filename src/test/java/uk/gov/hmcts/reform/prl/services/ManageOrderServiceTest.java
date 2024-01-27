@@ -4001,4 +4001,51 @@ public class ManageOrderServiceTest {
         assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
     }
 
+    @Test
+    public void  testUpdateOrderFieldsForDocmosis() {
+
+        DraftOrder draftOrder = DraftOrder.builder().judgeOrMagistratesLastName("testJudge").build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.No)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+
+        CaseData response = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
+        assertEquals("testJudge", response.getJudgeOrMagistratesLastName());
+
+    }
+
+    @Test
+    public void  testHandleFetchOrderDetails() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isSdoSelected(YesOrNo.Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
+
+    }
+
 }
