@@ -34,26 +34,20 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 @Slf4j
 @RestController
 @RequestMapping("/edit-returned-order")
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EditReturnedOrderController {
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper;
 
-    @Autowired
-    private ManageOrderService manageOrderService;
+    private final ManageOrderService manageOrderService;
 
-    @Autowired
-    private DraftAnOrderService draftAnOrderService;
+    private final DraftAnOrderService draftAnOrderService;
 
-    @Autowired
-    EditReturnedOrderService editReturnedOrderService;
+    private final EditReturnedOrderService editReturnedOrderService;
 
-    @Autowired
-    private AuthorisationService authorisationService;
+    private final AuthorisationService authorisationService;
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
+    private final CoreCaseDataService coreCaseDataService;
 
     private static final String CONFIRMATION_HEADER = "# Draft order resubmitted";
     private static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """

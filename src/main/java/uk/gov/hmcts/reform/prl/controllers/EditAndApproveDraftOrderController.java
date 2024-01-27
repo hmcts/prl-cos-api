@@ -149,12 +149,10 @@ public class EditAndApproveDraftOrderController {
             String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
             manageOrderService.resetChildOptions(callbackRequest);
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            log.info("*** draft order dynamic list: {}", caseDataUpdated.get("draftOrdersDynamicList"));
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            log.info("*** draft order dynamic list: {}", caseData.getDraftOrdersDynamicList());
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
@@ -255,7 +253,6 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            log.info("*** draft order dynamic list: {}", callbackRequest.getCaseDetails().getData().get("draftOrdersDynamicList"));
             Object dynamicList = caseData.getDraftOrdersDynamicList();
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
