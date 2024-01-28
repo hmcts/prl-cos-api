@@ -4048,4 +4048,90 @@ public class ManageOrderServiceTest {
 
     }
 
+
+
+    @Test
+    public void  testGetHearingDataFromExistingHearingData() {
+
+        List<Element<HearingData>> hearingDataList  = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(List.of(Element.<HearingData>builder().build()));
+
+        List<Element<HearingData>> hearingDataListResp
+            = manageOrderService.getHearingDataFromExistingHearingData("testAuth", hearingDataList,caseData);
+
+        assertNotNull(hearingDataListResp);
+    }
+
+    @Test
+    public void testPopulateFinalOrderFromCaseDataForUploadAnOrder() throws Exception {
+
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
+                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .dateOrderMade(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders.toBuilder()
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+        Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData);
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>)response.get("orderCollection");
+        assertEquals("Financial compensation order following C79 enforcement application (C82)",orderCollection.get(0).getValue().getOrderTypeId());
+        assertNotNull(response);
+
+    }
+
 }
