@@ -100,7 +100,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
@@ -4129,9 +4131,62 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData);
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>)response.get("orderCollection");
+
         assertEquals("Financial compensation order following C79 enforcement application (C82)",orderCollection.get(0).getValue().getOrderTypeId());
         assertNotNull(response);
 
+    }
+
+    @Test
+    public void testGenerateOrderDocumentFromDocmosis() throws Exception {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        manageOrders = ManageOrders.builder()
+            .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
+            .isCaseWithdrawn(YesOrNo.No)
+            .ordersHearingDetails(hearingDataList)
+            .childOption(
+                dynamicMultiSelectList
+            )
+            .build();
+
+        StandardDirectionOrder cafcass = StandardDirectionOrder.builder().sdoNewPartnerPartiesCafcass(
+                dynamicMultiSelectList)
+            .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
+
+        StandardDirectionOrder cymru = StandardDirectionOrder.builder().sdoNewPartnerPartiesCafcassCymru(
+                dynamicMultiSelectList)
+            .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
+        StandardDirectionOrder[] sdoNewPartnerParties = {cafcass, cymru};
+
+        for (StandardDirectionOrder sdo : sdoNewPartnerParties) {
+
+            CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .doYouWantToEditTheOrder(YesOrNo.No)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .manageOrders(manageOrders)
+                .standardDirectionOrder(sdo)
+                .build();
+
+            doCallRealMethod().when(dynamicMultiSelectListService).getStringFromDynamicMultiSelectList(any());
+            when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+                .thenReturn(generatedDocumentInfo);
+            Map<String, Object> caseDataUpdated = manageOrderService.generateOrderDocumentFromDocmosis(
+                "testauth",
+                caseData,
+                CreateSelectOrderOptionsEnum.standardDirectionsOrder
+            );
+
+            assertEquals("Yes",caseDataUpdated.get("isEngDocGen"));
+            assertNotNull(caseDataUpdated.get("ordersHearingDetails"));
+        }
     }
 
 }
