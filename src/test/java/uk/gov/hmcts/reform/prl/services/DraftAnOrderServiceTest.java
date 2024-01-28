@@ -3885,6 +3885,7 @@ public class DraftAnOrderServiceTest {
             .caseTypeOfApplication("C100")
             .draftOrderCollection(draftOrderCollection)
             .manageOrders(ManageOrders.builder()
+                              .whatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe)
                               .isTheOrderAboutChildren(Yes)
                               .build())
             .draftOrdersDynamicList(TEST_UUID)
