@@ -96,21 +96,28 @@ public class EditReturnedOrderServiceTest {
                 .status(OrderStatusEnum.rejectedByJudge.getDisplayedValue())
                 .orderCreatedByEmailId("test@gmail.com")
                 .build()).build()).build());
-        CaseData caseData = CaseData.builder()
-            .id(123L)
-            .caseTypeOfApplication(C100_CASE_TYPE)
-            .draftOrderCollection(draftOrderCollection)
-            .state(State.CASE_ISSUED)
-            .build();
-        Map<String, Object> caseDataMap = new HashMap<>();
-        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(caseDataMap)
-                             .build())
-            .build();
-        assertNotNull(editReturnedOrderService.handleAboutToStartCallback(testAuth, callbackRequest));
+
+        List<List<Element<DraftOrder>>> listOfDraftOrderList = new ArrayList<>();
+        listOfDraftOrderList.add(draftOrderCollection);
+        listOfDraftOrderList.add(null);
+
+        for (List<Element<DraftOrder>> obj : listOfDraftOrderList) {
+            CaseData caseData = CaseData.builder()
+                .id(123L)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .draftOrderCollection(obj)
+                .state(State.CASE_ISSUED)
+                .build();
+            Map<String, Object> caseDataMap = new HashMap<>();
+            when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+            CallbackRequest callbackRequest = CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                 .id(123L)
+                                 .data(caseDataMap)
+                                 .build())
+                .build();
+            assertNotNull(editReturnedOrderService.handleAboutToStartCallback(testAuth, callbackRequest));
+        }
     }
 
     @Test
