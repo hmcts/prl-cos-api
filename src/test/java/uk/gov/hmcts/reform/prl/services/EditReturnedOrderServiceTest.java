@@ -140,14 +140,26 @@ public class EditReturnedOrderServiceTest {
 
     @Test
     public void testReturnedOrderDynamicList() {
-        List<Element<DraftOrder>> draftOrderCollection = List.of(Element.<DraftOrder>builder().value(DraftOrder.builder().otherDetails(
-                                                                         OtherDraftOrderDetails.builder()
-                                                                             .status(OrderStatusEnum.rejectedByJudge.getDisplayedValue())
-                                                                             .orderCreatedByEmailId("test@gmail.com")
-                                                                             .build()).build()).build());
-        CaseData caseData = CaseData.builder()
-            .draftOrderCollection(draftOrderCollection).build();
-        assertNotNull(editReturnedOrderService.getReturnedOrdersDynamicList(testAuth, caseData));
+        List<Element<DraftOrder>> draftOrderCollection1 = List.of(Element.<DraftOrder>builder().value(DraftOrder.builder().otherDetails(
+            OtherDraftOrderDetails.builder()
+                .status(OrderStatusEnum.rejectedByJudge.getDisplayedValue())
+                .orderCreatedByEmailId("test@gmail.com")
+                .build()).build()).build());
+        List<Element<DraftOrder>> draftOrderCollection2 = List.of(Element.<DraftOrder>builder().value(DraftOrder.builder().otherDetails(
+            OtherDraftOrderDetails.builder()
+                .status(OrderStatusEnum.draftedByLR.getDisplayedValue())
+                .orderCreatedByEmailId("test1@gmail.com")
+                .build()).build()).build());
+
+        List<List<Element<DraftOrder>>> listOfDraftOrderList = new ArrayList<>();
+        listOfDraftOrderList.add(draftOrderCollection1);
+        listOfDraftOrderList.add(draftOrderCollection2);
+
+        for (List<Element<DraftOrder>> obj : listOfDraftOrderList) {
+            CaseData caseData = CaseData.builder()
+                .draftOrderCollection(obj).build();
+            assertNotNull(editReturnedOrderService.getReturnedOrdersDynamicList(testAuth, caseData));
+        }
     }
 
     @Test
