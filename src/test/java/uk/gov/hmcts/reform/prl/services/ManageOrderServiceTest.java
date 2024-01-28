@@ -4214,4 +4214,43 @@ public class ManageOrderServiceTest {
         assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
     }
 
+    @Test
+    public void setHearingSelectedInfoForTaskWithMultipleHearings() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata1));
+        hearingDataList.add(element(hearingdata2));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertEquals("multipleOptionSelected",caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("Yes",caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
+    @Test
+    public void setHearingSelectedInfoForTaskWitNoHearings() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertNull(caseDataUpdated.get("hearingOptionSelected"));
+        assertNull(caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
 }
