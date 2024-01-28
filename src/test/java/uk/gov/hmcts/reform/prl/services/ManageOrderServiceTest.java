@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -3853,6 +3854,7 @@ public class ManageOrderServiceTest {
         assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
     }
 
+
     @Test
     public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNo() {
 
@@ -4187,6 +4189,29 @@ public class ManageOrderServiceTest {
             assertEquals("Yes",caseDataUpdated.get("isEngDocGen"));
             assertNotNull(caseDataUpdated.get("ordersHearingDetails"));
         }
+    }
+
+    @Test
+    public void testIsOrderApprovedSolicitorCreated() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderSolicitor(OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.Yes)
+            .manageOrders(manageOrders).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.isOrderApproved(caseData, caseDataUpdated,"JUDGE");
+        assertEquals("Yes",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
     }
 
 }

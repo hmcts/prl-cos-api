@@ -2905,8 +2905,6 @@ public class ManageOrderService {
             } else if (null != performingUser && performingUser.equalsIgnoreCase(UserRoles.JUDGE.toString())) {
                 waFieldsMap.put(WA_ORDER_NAME_JUDGE_CREATED, orderNameForWA);
             }
-
-
         }
         waFieldsMap.put(WA_PERFORMING_USER, performingUser);
         waFieldsMap.put(WA_PERFORMING_ACTION, performingAction);
