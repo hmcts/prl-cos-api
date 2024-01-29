@@ -523,7 +523,7 @@ public class ServiceOfApplicationService {
         );
         final SoaPack unservedRespondentPack = SoaPack.builder()
             .packDocument(wrapElements(packdDocs))
-            .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
+            .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(ZonedDateTime.now(ZoneId.of(
                 EUROPE_LONDON_TIME_ZONE))))
@@ -1879,7 +1879,7 @@ public class ServiceOfApplicationService {
             log.error("#SOA TO DO... Personal courtadmin / court bailiff - case created by- citizen/solicitor");
             List<Document> packdDocs = getNotificationPack(caseData, PrlAppsConstants.D, fl401StaticDocs);
             final SoaPack unservedRespondentPack = SoaPack.builder().packDocument(wrapElements(packdDocs))
-                .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
+                .partyIds(wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
                 .servedBy(PRL_COURT_ADMIN)
                 .packCreatedDate(dateCreated)
                 .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
