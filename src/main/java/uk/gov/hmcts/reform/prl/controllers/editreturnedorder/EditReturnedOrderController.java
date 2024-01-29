@@ -32,6 +32,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 
 @Slf4j
 @RestController
+@SuppressWarnings({"squid:S5665"})
 @RequestMapping("/edit-returned-order")
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class EditReturnedOrderController {
