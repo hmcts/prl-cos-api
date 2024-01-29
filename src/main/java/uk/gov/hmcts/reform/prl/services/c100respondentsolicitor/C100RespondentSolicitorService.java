@@ -554,7 +554,7 @@ public class C100RespondentSolicitorService {
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
         boolean attendedMiam = Yes.equals(caseData.getRespondentSolicitorData()
                                               .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam());
-        boolean willingToAttendMiam = attendedMiam && Yes.equals(caseData.getRespondentSolicitorData()
+        boolean willingToAttendMiam = !attendedMiam && Yes.equals(caseData.getRespondentSolicitorData()
                                                                      .getRespondentSolicitorHaveYouAttendedMiam()
                                                                      .getWillingToAttendMiam());
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
@@ -564,7 +564,7 @@ public class C100RespondentSolicitorService {
                       .willingToAttendMiam(attendedMiam ? null : caseData.getRespondentSolicitorData()
                           .getRespondentSolicitorHaveYouAttendedMiam().getWillingToAttendMiam())
                       .reasonNotAttendingMiam(
-                          attendedMiam ||  willingToAttendMiam ? null : caseData
+                         willingToAttendMiam ? null : caseData
                               .getRespondentSolicitorData().getRespondentSolicitorHaveYouAttendedMiam()
                               .getReasonNotAttendingMiam()).build()).build();
         return buildResponseForRespondent;
