@@ -10,7 +10,6 @@ public enum RespondentEventErrorsEnum {
     CONSENT_ERROR("Ensure all mandatory (marked with *) information has been added"),
     KEEP_DETAILS_PRIVATE_ERROR("Ensure all mandatory (marked with *) information has been added"),
     CONFIRM_EDIT_CONTACT_DETAILS_ERROR("Ensure all mandatory (marked with *) information has been added"),
-    ATTENDING_THE_COURT_ERROR("Ensure all mandatory (marked with *) information has been added"),
     MIAM_ERROR("Ensure all mandatory (marked with *) information has been added"),
     CURRENT_OR_PREVIOUS_PROCEEDINGS_ERROR("Ensure all mandatory (marked with *) information has been added"),
     ALLEGATION_OF_HARM_ERROR("Ensure all mandatory (marked with *) information has been added"),

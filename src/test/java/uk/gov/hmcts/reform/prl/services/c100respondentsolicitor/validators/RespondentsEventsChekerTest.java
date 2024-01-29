@@ -13,7 +13,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
@@ -36,9 +35,6 @@ public class RespondentsEventsChekerTest {
 
     @Mock
     AbilityToParticipateChecker abilityToParticipateChecker;
-
-    @Mock
-    AttendToCourtChecker attendToCourtChecker;
 
     @Mock
     CurrentOrPastProceedingsChecker currentOrPastProceedingsChecker;
@@ -106,12 +102,6 @@ public class RespondentsEventsChekerTest {
     }
 
     @Test
-    public void checkAttendToCourtEventStatus() {
-        when(attendToCourtChecker.isFinished(respondent)).thenReturn(true);
-        assertTrue(respondentEventsChecker.isFinished(ATTENDING_THE_COURT, respondent));
-    }
-
-    @Test
     public void checkGetEventStatus() {
         assertTrue(respondentEventsChecker.getEventStatus().containsKey(CURRENT_OR_PREVIOUS_PROCEEDINGS));
         assertTrue(respondentEventsChecker.getEventStatus().containsValue(currentOrPastProceedingsChecker));
@@ -128,7 +118,6 @@ public class RespondentsEventsChekerTest {
         assertNotNull(respondentEventsChecker.getConsentToApplicationChecker());
         assertNotNull(respondentEventsChecker.getKeepDetailsPrivateChecker());
         assertNotNull(respondentEventsChecker.getRespondentMiamChecker());
-        assertNotNull(respondentEventsChecker.getAttendToCourtChecker());
         assertNotNull(respondentEventsChecker.getAbilityToParticipateChecker());
         assertNotNull(respondentEventsChecker.getInternationalElementsChecker());
         assertNotNull(respondentEventsChecker.getViewDraftResponseChecker());

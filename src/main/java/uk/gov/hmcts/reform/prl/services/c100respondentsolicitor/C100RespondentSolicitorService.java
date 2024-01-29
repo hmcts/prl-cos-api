@@ -36,7 +36,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Cons
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
@@ -166,12 +165,6 @@ public class C100RespondentSolicitorService {
                             .placeOfBirth(ofNullable(citizenDetails.getPlaceOfBirth()).orElse(partyDetails.getPlaceOfBirth()))
                             .previousName(ofNullable(citizenDetails.getPreviousName()).orElse(partyDetails.getPreviousName()))
                             .build()
-                    );
-                    break;
-                case ATTENDING_THE_COURT:
-                    caseDataUpdated.put(
-                        event.getCaseFieldName(),
-                        solicitorRepresentedRespondent.getValue().getResponse().getAttendToCourt()
                     );
                     break;
                 case MIAM:
@@ -307,13 +300,6 @@ public class C100RespondentSolicitorService {
                 break;
             case CONFIRM_EDIT_CONTACT_DETAILS:
                 buildResponseForRespondent = buildCitizenDetailsResponse(caseData, buildResponseForRespondent);
-                break;
-            case ATTENDING_THE_COURT:
-                AttendToCourt attendToCourt = optimiseAttendingCourt(caseData.getRespondentSolicitorData()
-                                                                         .getRespondentAttendingTheCourt());
-                buildResponseForRespondent = buildResponseForRespondent.toBuilder()
-                    .attendToCourt(attendToCourt)
-                    .build();
                 break;
             case MIAM:
                 buildResponseForRespondent = buildMiamResponse(caseData, buildResponseForRespondent);
@@ -636,21 +622,6 @@ public class C100RespondentSolicitorService {
                                     .confidentialityList(confList)
                                     .build()).build();
         return buildResponseForRespondent;
-    }
-
-    private AttendToCourt optimiseAttendingCourt(AttendToCourt attendToCourt) {
-        return attendToCourt.toBuilder()
-            .respondentWelshNeedsList(YesOrNo.No.equals(attendToCourt.getRespondentWelshNeeds()) ? null
-                                          : attendToCourt.getRespondentWelshNeedsList())
-            .respondentInterpreterNeeds(YesOrNo.No.equals(attendToCourt.getIsRespondentNeededInterpreter()) ? null
-                                            : attendToCourt.getRespondentInterpreterNeeds())
-            .disabilityNeeds(YesOrNo.No.equals(attendToCourt.getHaveAnyDisability()) ? null
-                                 : attendToCourt.getDisabilityNeeds())
-            .respondentSpecialArrangementDetails(YesOrNo.No.equals(attendToCourt.getRespondentSpecialArrangements()) ? null
-                                                     : attendToCourt.getRespondentSpecialArrangementDetails())
-            .respondentIntermediaryNeedDetails(YesOrNo.No.equals(attendToCourt.getRespondentIntermediaryNeeds()) ? null
-                                                   : attendToCourt.getRespondentIntermediaryNeedDetails())
-            .build();
     }
 
     private Consent optimiseConsent(Consent consent) {
@@ -1045,7 +1016,6 @@ public class C100RespondentSolicitorService {
             solicitorRepresentedRespondent.getValue().getUser().getSolicitorRepresented()
         );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
-        dataMap.put("attendingTheCourt", response.getAttendToCourt());
     }
 
     private void populatePartyDetails(Element<PartyDetails> solicitorRepresentedRespondent, Response response, Map<String, Object> dataMap) {

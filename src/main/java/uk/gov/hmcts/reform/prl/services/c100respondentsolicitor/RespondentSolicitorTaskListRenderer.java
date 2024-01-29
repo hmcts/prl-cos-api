@@ -85,8 +85,7 @@ public class RespondentSolicitorTaskListRenderer {
 
         final RespondentTaskSection yourDetails = newSection("2. Your details")
             .withTask(tasks.get(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE))
-            .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS))
-            .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));
+            .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS));
 
         final RespondentTaskSection applicationDetails = newSection("3. Application details")
             .withTask(tasks.get(RespondentSolicitorEvents.MIAM))

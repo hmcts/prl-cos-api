@@ -17,7 +17,6 @@ public enum RespondentSolicitorEvents {
         "Edit your contact details",
         "resSolConfirmEditContactDetails"
     ),
-    ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "Attending the court", "respondentAttendingTheCourt"),
     MIAM(
         "c100ResSolMiam",
         "MIAM",
@@ -58,7 +57,6 @@ public enum RespondentSolicitorEvents {
             CONSENT,
             KEEP_DETAILS_PRIVATE,
             CONFIRM_EDIT_CONTACT_DETAILS,
-            ATTENDING_THE_COURT,
             MIAM,
             CURRENT_OR_PREVIOUS_PROCEEDINGS,
             ALLEGATION_OF_HARM,

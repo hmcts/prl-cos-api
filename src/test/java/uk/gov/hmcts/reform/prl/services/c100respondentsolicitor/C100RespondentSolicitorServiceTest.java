@@ -19,7 +19,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
-import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -44,11 +43,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationa
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -403,8 +400,7 @@ public class C100RespondentSolicitorServiceTest {
             .organisations(Organisations.builder().contactInformation(contactInformation).build())
             .build();
 
-        List<RespondentWelshNeedsListEnum> welshNeedsListEnum = new ArrayList<>();
-        welshNeedsListEnum.add(RespondentWelshNeedsListEnum.speakWelsh);
+
         List<PartyEnum> party = new ArrayList<>();
         party.add(PartyEnum.respondent);
 
@@ -418,13 +414,6 @@ public class C100RespondentSolicitorServiceTest {
             .addressLine1("test")
             .postCode("test")
             .build();
-        RespondentInterpreterNeeds interpreterNeeds = RespondentInterpreterNeeds.builder()
-            .party(party)
-            .relationName("Test")
-            .requiredLanguage("Cornish")
-            .build();
-        Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder()
-            .value(interpreterNeeds).build();
         DynamicListElement dynamicListElement = DynamicListElement
             .builder().code("1afdfa01-8280-4e2c-b810-ab7cf741988a").build();
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
@@ -440,7 +429,6 @@ public class C100RespondentSolicitorServiceTest {
         respondentList.add(wrappedRespondents2);
         respondentList.add(wrappedRespondents);
         respondentList.add(wrappedRespondents);
-        List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         RespondentDocs respondentDocs = RespondentDocs.builder().build();
@@ -463,18 +451,6 @@ public class C100RespondentSolicitorServiceTest {
                                                                              .consentToTheApplication(Yes)
                                                                              .permissionFromCourt(No)
                                                                              .build())
-                                         .respondentAttendingTheCourt(AttendToCourt.builder()
-                                                                          .respondentWelshNeeds(Yes)
-                                                                          .respondentWelshNeedsList(welshNeedsListEnum)
-                                                                          .isRespondentNeededInterpreter(Yes)
-                                                                          .respondentInterpreterNeeds(interpreterList)
-                                                                          .haveAnyDisability(Yes)
-                                                                          .disabilityNeeds("Test")
-                                                                          .respondentSpecialArrangements(Yes)
-                                                                          .respondentSpecialArrangementDetails("Test")
-                                                                          .respondentIntermediaryNeeds(Yes)
-                                                                          .respondentIntermediaryNeedDetails("Test")
-                                                                          .build())
                                          .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
                                          .respondentExistingProceedings(proceedingsList)
                                          .abilityToParticipateInProceedings(AbilityToParticipate.builder()
@@ -817,8 +793,6 @@ public class C100RespondentSolicitorServiceTest {
             .organisations(Organisations.builder().contactInformation(contactInformation2).build())
             .build();
 
-        List<RespondentWelshNeedsListEnum> welshNeedsListEnum2 = new ArrayList<>();
-        welshNeedsListEnum2.add(RespondentWelshNeedsListEnum.speakWelsh);
         List<PartyEnum> party2 = new ArrayList<>();
         party2.add(PartyEnum.respondent);
 
@@ -832,13 +806,6 @@ public class C100RespondentSolicitorServiceTest {
             .addressLine1("test")
             .postCode("test")
             .build();
-        RespondentInterpreterNeeds interpreterNeeds2 = RespondentInterpreterNeeds.builder()
-            .party(party)
-            .relationName("Test")
-            .requiredLanguage("Cornish")
-            .build();
-        Element<RespondentInterpreterNeeds> wrappedInterpreter2 = Element.<RespondentInterpreterNeeds>builder()
-            .value(interpreterNeeds2).build();
         Element<PartyDetails> wrappedRespondents3 = Element.<PartyDetails>builder()
             .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
             .value(respondent3).build();
@@ -852,7 +819,6 @@ public class C100RespondentSolicitorServiceTest {
         respondentList2.add(wrappedRespondents4);
         respondentList2.add(wrappedRespondents3);
         respondentList2.add(wrappedRespondents4);
-        List<Element<RespondentInterpreterNeeds>> interpreterList2 = Collections.singletonList(wrappedInterpreter2);
         Element<Address> wrappedAddress2 = Element.<Address>builder().value(address2).build();
         List<Element<Address>> addressList2 = Collections.singletonList(wrappedAddress2);
         RespondentDocs respondentDocs2 = RespondentDocs.builder().build();
@@ -875,18 +841,6 @@ public class C100RespondentSolicitorServiceTest {
                                                                              .consentToTheApplication(Yes)
                                                                              .permissionFromCourt(No)
                                                                              .build())
-                                         .respondentAttendingTheCourt(AttendToCourt.builder()
-                                                                          .respondentWelshNeeds(Yes)
-                                                                          .respondentWelshNeedsList(welshNeedsListEnum2)
-                                                                          .isRespondentNeededInterpreter(Yes)
-                                                                          .respondentInterpreterNeeds(interpreterList2)
-                                                                          .haveAnyDisability(Yes)
-                                                                          .disabilityNeeds("Test")
-                                                                          .respondentSpecialArrangements(Yes)
-                                                                          .respondentSpecialArrangementDetails("Test")
-                                                                          .respondentIntermediaryNeeds(Yes)
-                                                                          .respondentIntermediaryNeedDetails("Test")
-                                                                          .build())
                                          .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
                                          .respondentExistingProceedings(proceedingsList2)
                                          .abilityToParticipateInProceedings(AbilityToParticipate.builder()
@@ -976,7 +930,7 @@ public class C100RespondentSolicitorServiceTest {
     @Test
     public void populateAboutToStartCaseDataResSolConsentingToApplicationTest() {
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivateA",
-            "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA",
+            "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA",
             "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA", "c100ResSolLitigationCapacityA",
             "c100ResSolViewResponseDraftDocumentA"};
         for (String event : events) {
@@ -1259,7 +1213,7 @@ public class C100RespondentSolicitorServiceTest {
 
         when(responseSubmitChecker.isFinished(respondent3)).thenReturn(mandatoryFinished);
 
-        String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
+        String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA",
             "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
             "c100ResSolLitigationCapacityA", "c100ResSolConsentingToApplicationA"};
         for (String event : events) {
@@ -1544,8 +1498,6 @@ public class C100RespondentSolicitorServiceTest {
             .organisations(Organisations.builder().contactInformation(contactInformation).build())
             .build();
 
-        List<RespondentWelshNeedsListEnum> welshNeedsListEnum = new ArrayList<>();
-        welshNeedsListEnum.add(RespondentWelshNeedsListEnum.speakWelsh);
         List<PartyEnum> party = new ArrayList<>();
         party.add(PartyEnum.respondent);
 
@@ -1559,13 +1511,6 @@ public class C100RespondentSolicitorServiceTest {
             .addressLine1("test")
             .postCode("test")
             .build();
-        RespondentInterpreterNeeds interpreterNeeds = RespondentInterpreterNeeds.builder()
-            .party(party)
-            .relationName("Test")
-            .requiredLanguage("Cornish")
-            .build();
-        Element<RespondentInterpreterNeeds> wrappedInterpreter = Element.<RespondentInterpreterNeeds>builder()
-            .value(interpreterNeeds).build();
         DynamicListElement dynamicListElement = DynamicListElement
             .builder().code("1afdfa01-8280-4e2c-b810-ab7cf741988a").build();
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
@@ -1581,7 +1526,6 @@ public class C100RespondentSolicitorServiceTest {
         respondentList.add(wrappedRespondents2);
         respondentList.add(wrappedRespondents);
         respondentList.add(wrappedRespondents);
-        List<Element<RespondentInterpreterNeeds>> interpreterList = Collections.singletonList(wrappedInterpreter);
         Element<Address> wrappedAddress = Element.<Address>builder().value(address).build();
         List<Element<Address>> addressList = Collections.singletonList(wrappedAddress);
         RespondentDocs respondentDocs = RespondentDocs.builder().build();
@@ -1604,18 +1548,6 @@ public class C100RespondentSolicitorServiceTest {
                                                                              .consentToTheApplication(Yes)
                                                                              .permissionFromCourt(No)
                                                                              .build())
-                                         .respondentAttendingTheCourt(AttendToCourt.builder()
-                                                                          .respondentWelshNeeds(Yes)
-                                                                          .respondentWelshNeedsList(welshNeedsListEnum)
-                                                                          .isRespondentNeededInterpreter(Yes)
-                                                                          .respondentInterpreterNeeds(interpreterList)
-                                                                          .haveAnyDisability(Yes)
-                                                                          .disabilityNeeds("Test")
-                                                                          .respondentSpecialArrangements(Yes)
-                                                                          .respondentSpecialArrangementDetails("Test")
-                                                                          .respondentIntermediaryNeeds(Yes)
-                                                                          .respondentIntermediaryNeedDetails("Test")
-                                                                          .build())
                                          .currentOrPastProceedingsForChildren(YesNoDontKnow.yes)
                                          .respondentExistingProceedings(proceedingsList)
                                          .abilityToParticipateInProceedings(AbilityToParticipate.builder()
@@ -1693,7 +1625,7 @@ public class C100RespondentSolicitorServiceTest {
 
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
 
-        String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
+        String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA",
             "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
             "c100ResSolLitigationCapacityA", "c100ResSolConsentingToApplicationA"};
         for (String event : events) {
@@ -1861,7 +1793,7 @@ public class C100RespondentSolicitorServiceTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
-            "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
+            "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
             "c100ResSolInternationalElement", "c100ResSolLitigationCapacity", Optional.empty().toString()};
         for (String event : events) {
             CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
