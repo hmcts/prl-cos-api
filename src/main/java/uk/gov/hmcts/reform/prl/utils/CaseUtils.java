@@ -470,6 +470,9 @@ public class CaseUtils {
 
     private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
         Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
+        log.info("Inside getFL401PartyDetailsMeta caseData {}", caseData);
+        log.info("Inside getFL401PartyDetailsMeta partyId {}", partyId);
+        log.info("Inside getFL401PartyDetailsMeta getApplicantsFL401 {}", caseData.getApplicantsFL401());
         if (isNotEmpty(Collections.singleton(caseData.getApplicantsFL401()))
             && caseData.getApplicantsFL401().getPartyId().toString().equals(partyId)) {
             partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
@@ -533,8 +536,10 @@ public class CaseUtils {
         if (null != party
             && isNotBlank(party.getRepresentativeFirstName())
             && isNotBlank(party.getRepresentativeLastName())) {
-            return concat(party.getRepresentativeFirstName(),
-                          concat(" ", party.getRepresentativeLastName()));
+            return concat(
+                party.getRepresentativeFirstName(),
+                concat(" ", party.getRepresentativeLastName())
+            );
         }
         return null;
     }
