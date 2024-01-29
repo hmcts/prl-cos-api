@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -22,12 +21,11 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 
 @Slf4j
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S6813"})
 public class ResponseSubmitChecker implements RespondentEventChecker {
     @Autowired
     @Lazy
-    private RespondentEventsChecker respondentEventsChecker;
+    RespondentEventsChecker respondentEventsChecker;
 
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
