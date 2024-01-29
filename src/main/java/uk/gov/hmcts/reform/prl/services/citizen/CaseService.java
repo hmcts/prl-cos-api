@@ -405,7 +405,15 @@ public class CaseService {
             caseData.getCaseTypeOfApplication(),
             caseData
         );
-        log.info("Party details meta received ");
+
+        if (partyDetailsMeta.isPresent()) {
+            log.info("Party details meta {}", partyDetailsMeta.get().getPartyDetails());
+            log.info(
+                "Party details meta labelForDynamicList {}",
+                partyDetailsMeta.get().getPartyDetails().getLabelForDynamicList()
+            );
+        }
+
         if (partyDetailsMeta.isPresent()
             && partyDetailsMeta.get().getPartyDetails() != null
             && !StringUtils.isEmpty(partyDetailsMeta.get().getPartyDetails().getLabelForDynamicList())) {
