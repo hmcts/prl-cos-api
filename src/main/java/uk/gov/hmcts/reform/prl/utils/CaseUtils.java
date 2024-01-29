@@ -526,4 +526,14 @@ public class CaseUtils {
     public static List<Element<String>> getPartyIdList(List<Element<PartyDetails>> parties) {
         return parties.stream().map(Element::getId).map(uuid -> element(uuid.toString())).toList();
     }
+
+    public static boolean isCaseWithoutNotice(CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+            return true;
+        } else if (null != caseData.getOrderWithoutGivingNoticeToRespondent()) {
+            return YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
+        }
+        return false;
+    }
 }

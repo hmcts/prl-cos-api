@@ -1845,13 +1845,7 @@ public class ServiceOfApplicationService {
         } else {
             caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
         }
-        //serving other people in case
-        if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-            && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
-            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
-        } else {
-            caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
-        }
+
         //serving Local authority in the case
         List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
         if (CollectionUtils.isNotEmpty(docsForLa)) {
@@ -1859,6 +1853,8 @@ public class ServiceOfApplicationService {
                 .servedBy(userService.getUserDetails(authorization).getFullName())
                 .packCreatedDate(LocalDateTime.now().toString())
                 .build());
+        } else {
+            caseDataUpdated.put(UNSERVED_LA_PACK, null);
         }
         return caseDataUpdated;
     }
@@ -2240,7 +2236,8 @@ public class ServiceOfApplicationService {
         List<Document> packDocs = new ArrayList<>();
         if (unServedApplicantPack.getPersonalServiceBy() != null
             && (SoaSolicitorServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
-            || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))) {
+            || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))
+            && !CaseUtils.isCaseWithoutNotice(caseData)) {
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
                 packDocs.add(generateAccessCodeLetter(authorization, caseData, applicant, null, PRL_LET_ENG_AP8));
             }
