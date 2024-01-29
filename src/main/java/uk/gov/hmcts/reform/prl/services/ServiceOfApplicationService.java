@@ -362,7 +362,6 @@ public class ServiceOfApplicationService {
                              .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                                  C7_BLANK_DOCUMENT_FILENAME))
                              .collect(Collectors.toList()));
-        log.info("selected Applicants " + selectedApplicants.size());
         if (selectedApplicants != null
             && !selectedApplicants.isEmpty()) {
             emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
@@ -431,10 +430,9 @@ public class ServiceOfApplicationService {
             );
             uk.gov.hmcts.reform.ccd.client.model.Document selectedDoc = null;
             selectedDoc = getSelectedDocumentFromCategories(categoriesAndDocuments.getCategories(),selectedDocument);
-            log.info("** Selected doc {}", selectedDoc);
+
             if (selectedDoc == null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document: categoriesAndDocuments.getUncategorisedDocuments()) {
-                    log.info("code {} url {}", selectedDocument.getValue().getCode(), document.getDocumentURL());
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
                         .equalsIgnoreCase(selectedDocument.getValue().getCode())) {
                         selectedDoc = document;
@@ -456,19 +454,15 @@ public class ServiceOfApplicationService {
             if (category.getDocuments() != null) {
                 for (uk.gov.hmcts.reform.ccd.client.model.Document document : category.getDocuments()) {
                     String[] codes = selectedDocument.getValue().getCode().split(ARROW_SEPARATOR);
-                    log.info("** code*{}*codes*{}*", sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL()),
-                             codes[codes.length - 1]);
-                    log.info("** Document {}", document.getDocumentURL());
+
                     if (sendAndReplyService.fetchDocumentIdFromUrl(document.getDocumentURL())
                         .equalsIgnoreCase(codes[codes.length - 1])) {
                         documentSelected = document;
-                        log.info("Document matched {}", documentSelected);
                         break;
                     }
                 }
             }
             if (null == documentSelected && category.getSubCategories() != null) {
-                log.info("subcategories present");
                 documentSelected = getSelectedDocumentFromCategories(
                     category.getSubCategories(),
                     selectedDocument
@@ -983,7 +977,6 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
         caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, getDocumentsDynamicListForLa(authorisation,
                                                                                            String.valueOf(caseData.getId())));
-        log.info("**SOA options *** {}",caseDataUpdated);
         return caseDataUpdated;
     }
 
