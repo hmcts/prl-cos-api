@@ -2171,7 +2171,7 @@ public class ServiceOfApplicationService {
         caseDataMap.put(REJECTION_REASON, null);
         caseDataMap.put(UNSERVED_APPLICANT_PACK, null);
         if (null != caseData.getServiceOfApplication().getUnServedRespondentPack()
-        && null == caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()) {
+            && null == caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()) {
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
         }
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
