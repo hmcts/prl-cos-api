@@ -21,11 +21,13 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.mockito.Mockito.times;
@@ -304,5 +306,18 @@ public class ServiceOfApplicationEmailServiceTest {
                                                Mockito.any(),
                                                Mockito.any(), Mockito.any()
         );
+    }
+
+    @Test
+    public void testsendEmailUsingTemplateWithAttachments() throws Exception {
+        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments("test",
+                                                                               "",
+                                                                               List.of(Document.builder().build()),
+                                                                               SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                                                               new HashMap<>(),
+                                                                               PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR);
+
+        verify(sendgridService, times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 }
