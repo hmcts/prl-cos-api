@@ -142,7 +142,8 @@ public class ServiceOfApplicationService {
     public static final String DA_APPLICANT_NAME = "daApplicantName";
     public static final String PRL_COURT_ADMIN = "PRL Court admin";
     private final LaunchDarklyClient launchDarklyClient;
-
+    @Value("${xui.url}")
+    private String manageCaseUrl;
     public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
     public static final String APPLICATION_SERVED_HEADER = "# Application served";
     public static final String CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX = """
@@ -394,6 +395,8 @@ public class ServiceOfApplicationService {
                 packHiDocs.addAll(c100StaticDocs);
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
+                dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId() + "service of application");
+
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                          .sendEmailUsingTemplateWithAttachments(
                                                              authorization, caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
@@ -466,6 +469,8 @@ public class ServiceOfApplicationService {
         List<Document> packjDocs = getDocumentsForCaOrBailiffToServeApplicantSolcitor(caseData, authorization, c100StaticDocs,
                                                                                       true);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
+        dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId() + "service of application");
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                    caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                                                    packjDocs,
@@ -920,6 +925,7 @@ public class ServiceOfApplicationService {
                     );
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
+                    dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId() + "service of application");
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailUsingTemplateWithAttachments(
                                                                  authorization, party.get().getValue().getSolicitorEmail(),
