@@ -1760,13 +1760,7 @@ public class ServiceOfApplicationService {
         } else {
             caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
         }
-        //serving other people in case
-        if (null != caseData.getServiceOfApplication().getSoaOtherParties()
-            && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
-            buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
-        } else {
-            caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
-        }
+
         //serving Local authority in the case
         List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
         if (CollectionUtils.isNotEmpty(docsForLa)) {
@@ -1774,6 +1768,8 @@ public class ServiceOfApplicationService {
                 .servedBy(userService.getUserDetails(authorization).getFullName())
                 .packCreatedDate(LocalDateTime.now().toString())
                 .build());
+        } else {
+            caseDataUpdated.put(UNSERVED_LA_PACK, null);
         }
         return caseDataUpdated;
     }
