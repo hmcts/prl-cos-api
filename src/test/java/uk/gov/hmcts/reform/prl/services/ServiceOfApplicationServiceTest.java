@@ -686,7 +686,8 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -793,7 +794,8 @@ public class ServiceOfApplicationServiceTest {
             .thenReturn(categoriesAndDocuments);
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -879,7 +881,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -955,7 +958,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -1011,7 +1015,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -1066,7 +1071,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertEquals("By email", servedApplicationDetails.getModeOfService());
     }
@@ -1117,7 +1123,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -1164,7 +1171,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -1212,7 +1220,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -1259,7 +1268,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -1992,7 +2002,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2078,7 +2089,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2146,7 +2158,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2215,7 +2228,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2283,7 +2297,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2334,7 +2349,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2387,7 +2403,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
     }

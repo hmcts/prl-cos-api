@@ -58,6 +58,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
@@ -519,5 +520,9 @@ public class CaseUtils {
             );
         }
         return null;
+    }
+
+    public static List<Element<String>> getPartyIdList(List<Element<PartyDetails>> parties) {
+        return parties.stream().map(Element::getId).map(uuid -> element(uuid.toString())).toList();
     }
 }

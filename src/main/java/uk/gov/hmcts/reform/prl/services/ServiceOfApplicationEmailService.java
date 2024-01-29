@@ -19,6 +19,8 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.CafcassEma
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
@@ -38,6 +40,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Service
 @Slf4j
@@ -227,5 +230,34 @@ public class ServiceOfApplicationEmailService {
                                                                       caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         email, docs, servedParty);
+    }
+
+    public EmailNotificationDetails sendEmailUsingTemplateWithAttachments(String authorization,
+                                                      String email,
+                                                      List<Document> docs,
+                                                      SendgridEmailTemplateNames template,
+                                                      Map<String, Object> dynamicData,
+                                                                          String servedParty) {
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                template,
+                authorization,
+                SendgridEmailConfig.builder()
+                    .toEmailAddress(email)
+                    .dynamicTemplateData(dynamicData)
+                    .listOfAttachments(docs).languagePreference(LanguagePreference.english).build()
+            );
+            return EmailNotificationDetails.builder()
+                .emailAddress(email)
+                .servedParty(servedParty)
+                .docs(wrapElements(docs))
+                .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
+                .timeStamp(DateTimeFormatter
+                               .ofPattern("dd MMM yyyy HH:mm:ss")
+                               .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
+        } catch (IOException e) {
+            log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage());
+        }
+        return null;
     }
 }
