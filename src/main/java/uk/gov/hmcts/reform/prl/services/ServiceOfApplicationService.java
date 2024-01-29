@@ -1888,7 +1888,7 @@ public class ServiceOfApplicationService {
             List<Document> packcDocs = getNotificationPack(caseData, PrlAppsConstants.C, fl401StaticDocs);
             final SoaPack unServedApplicantPack = SoaPack.builder()
                 .packDocument(wrapElements(packcDocs))
-                .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
+                .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
                 .servedBy(PRL_COURT_ADMIN)
                 .packCreatedDate(dateCreated)
                 .build();
