@@ -8,11 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.notify.CitizenCaseSubmissionEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.CafcassEmail;
@@ -21,7 +19,6 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.Respondent
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
@@ -34,12 +31,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIEW_ONLINE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
-import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Service
@@ -173,40 +167,6 @@ public class ServiceOfApplicationEmailService {
             .caseName(caseData.getApplicantCaseName())
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
             .build();
-    }
-
-    public void sendEmailToC100Applicants(CaseData caseData) {
-
-        Map<String, String> applicantEmails = caseData.getApplicants().stream()
-            .map(Element::getValue)
-            .filter(applicant -> !CaseUtils.hasLegalRepresentation(applicant)
-                && Yes.equals(applicant.getCanYouProvideEmailAddress()))
-            .collect(Collectors.toMap(
-                PartyDetails::getEmail,
-                party -> party.getFirstName() + " " + party.getLastName(),
-                (x, y) -> x
-            ));
-
-        if (!applicantEmails.isEmpty()) {
-            applicantEmails.forEach(
-                (key, value) ->
-                    emailService.sendSoa(
-                        key,
-                        EmailTemplateNames.CA_APPLICANT_SERVICE_APPLICATION,
-                        buildApplicantEmailVars(caseData, value),
-                        LanguagePreference.getPreferenceLanguage(caseData)
-                    ));
-        }
-    }
-
-    private EmailTemplateVars buildApplicantEmailVars(CaseData caseData, String applicantName) {
-        return CitizenCaseSubmissionEmail.builder()
-            .caseNumber(String.valueOf(caseData.getId()))
-            .applicantName(applicantName)
-            .caseName(caseData.getApplicantCaseName())
-            .caseLink(citizenUrl + CITIZEN_DASHBOARD)
-            .build();
-
     }
 
     public EmailNotificationDetails sendEmailNotificationToApplicant(String authorization, CaseData caseData,

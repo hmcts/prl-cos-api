@@ -392,12 +392,14 @@ public class ServiceOfApplicationService {
                 // if multiple applicants are present only the first applicant solicitor will receive notification
                 List<Document> packHiDocs = getNotificationPack(caseData, PrlAppsConstants.HI, c100StaticDocs);
                 packHiDocs.addAll(c100StaticDocs);
+                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                         .sendEmailNotificationToSolicitor(
-                                                             authorization, caseData,
-                                                             caseData.getApplicants().get(0).getValue(),
-                                                             EmailTemplateNames.APPLICANT_SOLICITOR_CA,
+                                                         .sendEmailUsingTemplateWithAttachments(
+                                                             authorization, caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                                                              packHiDocs,
+                                                             SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                                             dynamicData,
                                                              SERVED_PARTY_APPLICANT_SOLICITOR
                                                          )));
             } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
@@ -900,15 +902,12 @@ public class ServiceOfApplicationService {
                                                                                         List<Document> packQ, String servedParty) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<PartyDetails>> applicantsInCase;
-        EmailTemplateNames templateName;
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             applicantsInCase = caseData.getApplicants();
-            templateName = EmailTemplateNames.APPLICANT_SOLICITOR_CA;
         } else {
             applicantsInCase = List.of(Element.<PartyDetails>builder()
                                            .id(caseData.getApplicantsFL401().getPartyId())
                                            .value(caseData.getApplicantsFL401()).build());
-            templateName = EmailTemplateNames.APPLICANT_SOLICITOR_DA;
         }
 
         selectedApplicants.forEach(applicant -> {
@@ -919,15 +918,8 @@ public class ServiceOfApplicationService {
                         "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
                         caseData.getId()
                     );
-
-                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                             .sendEmailNotificationToApplicantSolicitor(
-                                                                 authorization, caseData, party.get().getValue(),
-                                                                 templateName,
-                                                                 packQ,
-                                                                 servedParty
-                                                             )));
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                    dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailUsingTemplateWithAttachments(
                                                                  authorization, party.get().getValue().getSolicitorEmail(),
