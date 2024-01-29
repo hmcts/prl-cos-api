@@ -81,11 +81,9 @@ public class EditReturnedOrderService {
 
     public DynamicList getReturnedOrdersDynamicList(String authorisation, CaseData caseData) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        log.info("** UserDetails {}", userDetails);
         List<Element<DraftOrder>> supportedDraftOrderList = new ArrayList<>();
         caseData.getDraftOrderCollection().forEach(
             draftOrderElement -> {
-                log.info("** order created by email {}", draftOrderElement.getValue().getOtherDetails().getOrderCreatedByEmailId());
                 if (OrderStatusEnum.rejectedByJudge.getDisplayedValue()
                     .equalsIgnoreCase(draftOrderElement.getValue().getOtherDetails().getStatus())
 
@@ -94,8 +92,6 @@ public class EditReturnedOrderService {
                 }
             }
         );
-        log.info("*** draftoo order collection : {}", caseData.getDraftOrderCollection());
-        log.info("*** draft order list for drop down : {}", supportedDraftOrderList);
         return ElementUtils.asDynamicList(
             supportedDraftOrderList,
             null,
@@ -160,7 +156,6 @@ public class EditReturnedOrderService {
         } else {
             caseDataMap.putAll(draftAnOrderService.updateDraftOrderCollection(caseData,authorisation, Event.EDIT_RETURNED_ORDER.getId()));
         }
-        log.info("*** Draft Order Collection : {}",caseDataMap.get(DRAFT_ORDER_COLLECTION));
         return caseDataMap;
     }
 
