@@ -927,6 +927,15 @@ public class ServiceOfApplicationService {
                                                                  packQ,
                                                                  servedParty
                                                              )));
+                    Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                             .sendEmailUsingTemplateWithAttachments(
+                                                                 authorization, party.get().getValue().getSolicitorEmail(),
+                                                                 packQ,
+                                                                 SendgridEmailTemplateNames.SOA_PERSONAL_SERVICE_APPLICANT_SOLICITOR,
+                                                                 dynamicData,
+                                                                 servedParty
+                                                             )));
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
