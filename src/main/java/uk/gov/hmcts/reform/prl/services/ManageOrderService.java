@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
@@ -24,11 +25,12 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.DeliveryByEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OrderRecipientsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.enums.manageorders.ServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -143,27 +145,25 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S3776","java:S6204"})
 public class ManageOrderService {
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
 
     public static final String IS_THE_ORDER_ABOUT_ALL_CHILDREN = "isTheOrderAboutAllChildren";
+    public static final String PREVIEW_ORDER_DOC = "previewOrderDoc";
 
     public static final String CHILD_OPTION = "childOption";
 
     public static final String IS_ONLY_C_47_A_ORDER_SELECTED_TO_SERVE = "isOnlyC47aOrderSelectedToServe";
     public static final String OTHER_PEOPLE_PRESENT_IN_CASE_FLAG = "otherPeoplePresentInCaseFlag";
     public static final String C_47_A = "C47A";
-    public static final String RECIPIENTS_OPTIONS_ONLY_C_47_A = "recipientsOptionsOnlyC47a";
-    public static final String OTHER_PARTIES_ONLY_C_47_A = "otherPartiesOnlyC47a";
-    @Autowired
-    LocationRefDataService locationRefDataService;
-
+    public static final String DISPLAY_LEGAL_REP_OPTION = "displayLegalRepOption";
     public static final String CAFCASS_SERVED = "cafcassServed";
     public static final String CAFCASS_EMAIL = "cafcassEmail";
     public static final String CAFCASS_CYMRU_SERVED = "cafcassCymruServed";
+    public static final String SERVE_RECIPIENT_NAME = "servingRecipientName";
     public static final String SERVE_ON_RESPONDENT = "serveOnRespondent";
     public static final String OTHER_PARTIES_SERVED = "otherPartiesServed";
     public static final String SERVING_RESPONDENTS_OPTIONS = "servingRespondentsOptions";
@@ -172,6 +172,8 @@ public class ManageOrderService {
 
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
+    public static final String EMAIL = "email";
+    public static final String POST = "post";
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
@@ -558,15 +560,9 @@ public class ManageOrderService {
     private static final String BOLD_BEGIN = "<span class='heading-h3'>";
     private static final String BOLD_END = "</span>";
 
-    @Autowired
     private final UserService userService;
-
-    @Autowired
     private final HearingService hearingService;
-
     private final HearingDataService hearingDataService;
-
-    @Autowired
     private final WelshCourtEmail welshCourtEmail;
 
 
@@ -627,11 +623,6 @@ public class ManageOrderService {
             RECIPIENTS_OPTIONS, DynamicMultiSelectList.builder()
                 .listItems(applicantRespondentList)
                 .build());
-        headerMap.put(
-            RECIPIENTS_OPTIONS_ONLY_C_47_A, DynamicMultiSelectList.builder()
-                .listItems(applicantRespondentList)
-                .build());
-
     }
 
     public List<DynamicMultiselectListElement> getPartyDynamicMultiselectList(CaseData caseData) {
@@ -658,10 +649,6 @@ public class ManageOrderService {
             OTHER_PARTIES, DynamicMultiSelectList.builder()
                 .listItems(otherPeopleList)
                 .build());
-        headerMap.put(
-            OTHER_PARTIES_ONLY_C_47_A, DynamicMultiSelectList.builder()
-                .listItems(otherPeopleList)
-                .build());
         if (otherPeopleList.isEmpty()) {
             headerMap.put(
                 OTHER_PEOPLE_PRESENT_IN_CASE_FLAG, No);
@@ -676,13 +663,13 @@ public class ManageOrderService {
 
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         caseDataUpdated.put("childrenList", dynamicMultiSelectListService
-                              .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                       .getChildOption()));
+            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                     .getChildOption()));
         caseDataUpdated.put("childListForSpecialGuardianship", dynamicMultiSelectListService
-                                                                   .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                                                                            .getChildOption()));
+            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
+                                                     .getChildOption()));
         caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData) != null
-                ? BOLD_BEGIN + getSelectedOrderInfo(caseData) + BOLD_END : "");
+            ? BOLD_BEGIN + getSelectedOrderInfo(caseData) + BOLD_END : "");
         return caseDataUpdated;
     }
 
@@ -890,7 +877,7 @@ public class ManageOrderService {
         return selectedOrder.toString();
     }
 
-    private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData)
+    private List<Element<OrderDetails>> getCurrentOrderDetails(String authorisation, CaseData caseData, String currentUserFullName)
         throws Exception {
 
         String flagSelectedOrder = caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder
@@ -921,64 +908,66 @@ public class ManageOrderService {
 
             return orderCollection;
         } else {
-            return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId);
+            return getListOfOrders(authorisation, caseData, flagSelectedOrder, flagSelectedOrderId, currentUserFullName);
         }
     }
 
     private List<Element<OrderDetails>> getListOfOrders(String authorisation,
                                                         CaseData caseData,
                                                         String flagSelectedOrder,
-                                                        String flagSelectedOrderId) {
+                                                        String flagSelectedOrderId,
+                                                        String currentUserFullName) {
         ServeOrderData serveOrderData = CaseUtils.getServeOrderData(caseData);
         String loggedInUserType = getLoggedInUserType(authorisation);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
         newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrder)
-                                   .orderTypeId(flagSelectedOrderId)
-                                   .orderDocument(caseData.getUploadOrderDoc())
-                                   .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
-                                   .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
-                                   .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
-                                   .otherDetails(OtherOrderDetails.builder()
-                                                     .createdBy(caseData.getJudgeOrMagistratesLastName())
-                                                     .orderCreatedDate(dateTime.now()
-                                                                           .format(DateTimeFormatter.ofPattern(
-                                                                               PrlAppsConstants.D_MMM_YYYY,
-                                                                               Locale.ENGLISH
-                                                                           )))
-                                                     .orderMadeDate(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(
-                                                         DateTimeFormatter.ofPattern(
-                                                             PrlAppsConstants.D_MMM_YYYY,
-                                                             Locale.ENGLISH
-                                                         )) : null)
-                                                     .approvalDate(caseData.getApprovalDate() != null ? caseData.getApprovalDate().format(
-                                                         DateTimeFormatter.ofPattern(
-                                                             PrlAppsConstants.D_MMM_YYYY,
-                                                             Locale.ENGLISH
-                                                         )) : null)
-                                                     .orderRecipients(caseData.getManageOrdersOptions().equals(
-                                                         ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
-                                                         caseData) : null)
-                                                     .status(getOrderStatus(
-                                                         orderSelectionType,
-                                                         loggedInUserType,
-                                                         null,
-                                                         null
-                                                     ))
-                                                     .build())
-                                   .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
-                                                    ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
-                                   .typeOfOrder(typeOfOrder != null
-                                                    ? typeOfOrder.getDisplayedValue() : null)
-                                   .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
-                                                        ? caseData.getDoesOrderClosesCase() : null)
-                                   .serveOrderDetails(buildServeOrderDetails(serveOrderData))
-                                   .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
-                                                            ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
-                                   .childOption(getChildOption(caseData))
-                                   .isOrderUploaded(Yes)
-                                   .build()));
+                                        .orderTypeId(flagSelectedOrderId)
+                                        .orderDocument(caseData.getUploadOrderDoc())
+                                        .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
+                                        .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
+                                        .childrenList(getSelectedChildInfoFromMangeOrder(caseData))
+                                        .otherDetails(OtherOrderDetails.builder()
+                                                          .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                                          .orderCreatedBy(currentUserFullName)
+                                                          .orderCreatedDate(dateTime.now()
+                                                                                .format(DateTimeFormatter.ofPattern(
+                                                                                    PrlAppsConstants.D_MMM_YYYY,
+                                                                                    Locale.ENGLISH
+                                                                                )))
+                                                          .orderMadeDate(caseData.getDateOrderMade() != null ? caseData.getDateOrderMade().format(
+                                                              DateTimeFormatter.ofPattern(
+                                                                  PrlAppsConstants.D_MMM_YYYY,
+                                                                  Locale.ENGLISH
+                                                              )) : null)
+                                                          .approvalDate(caseData.getApprovalDate() != null ? caseData.getApprovalDate().format(
+                                                              DateTimeFormatter.ofPattern(
+                                                                  PrlAppsConstants.D_MMM_YYYY,
+                                                                  Locale.ENGLISH
+                                                              )) : null)
+                                                          .orderRecipients(caseData.getManageOrdersOptions().equals(
+                                                              ManageOrdersOptionsEnum.createAnOrder) ? getAllRecipients(
+                                                              caseData) : null)
+                                                          .status(getOrderStatus(
+                                                              orderSelectionType,
+                                                              loggedInUserType,
+                                                              null,
+                                                              null
+                                                          ))
+                                                          .build())
+                                        .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
+                                                         ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
+                                        .typeOfOrder(typeOfOrder != null
+                                                         ? typeOfOrder.getDisplayedValue() : null)
+                                        .orderClosesCase(SelectTypeOfOrderEnum.finl.equals(typeOfOrder)
+                                                             ? caseData.getDoesOrderClosesCase() : null)
+                                        .serveOrderDetails(buildServeOrderDetails(serveOrderData))
+                                        .selectedHearingType(null != caseData.getManageOrders().getHearingsType()
+                                                                 ? caseData.getManageOrders().getHearingsType().getValueCode() : null)
+                                        .childOption(getChildOption(caseData))
+                                        .isOrderUploaded(Yes)
+                                        .build()));
         return newOrderDetails;
     }
 
@@ -1086,25 +1075,27 @@ public class ManageOrderService {
 
     public Map<String, Object> addOrderDetailsAndReturnReverseSortedList(String authorisation, CaseData caseData) throws Exception {
         String loggedInUserType = getLoggedInUserType(authorisation);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserFullName = userDetails.getFullName();
         boolean saveAsDraft = isNotEmpty(caseData.getServeOrderData()) && No.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())
             && WhatToDoWithOrderEnum.saveAsDraft.equals(caseData.getServeOrderData().getWhatDoWithOrder());
         if (UserRoles.JUDGE.name().equals(loggedInUserType)) {
-            return setDraftOrderCollection(caseData, loggedInUserType);
+            return setDraftOrderCollection(caseData, loggedInUserType,currentUserFullName);
         } else if (UserRoles.COURT_ADMIN.name().equals(loggedInUserType)) {
             if (!AmendOrderCheckEnum.noCheck.equals(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                 || saveAsDraft) {
-                return setDraftOrderCollection(caseData, loggedInUserType);
+                return setDraftOrderCollection(caseData, loggedInUserType,currentUserFullName);
             } else {
-                return setFinalOrderCollection(authorisation, caseData);
+                return setFinalOrderCollection(authorisation, caseData, currentUserFullName);
             }
         }
         return new HashMap<>();
     }
 
-    private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData) throws Exception {
+    private Map<String, Object> setFinalOrderCollection(String authorisation, CaseData caseData, String currentUserFullName) throws Exception {
         List<Element<OrderDetails>> orderCollection;
         orderCollection = caseData.getOrderCollection() != null ? caseData.getOrderCollection() : new ArrayList<>();
-        List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData);
+        List<Element<OrderDetails>> newOrderDetails = getCurrentOrderDetails(authorisation, caseData, currentUserFullName);
         if (isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList())
             && CollectionUtils.isNotEmpty(caseData.getManageOrders().getServeOrderDynamicList().getValue())
             && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder())) {
@@ -1130,8 +1121,8 @@ public class ManageOrderService {
     }
 
     public static void updateCurrentOrderId(DynamicMultiSelectList serveOrderDynamicList,
-                                             List<Element<OrderDetails>> existingOrderCollection,
-                                             List<Element<OrderDetails>> newOrderDetails) {
+                                            List<Element<OrderDetails>> existingOrderCollection,
+                                            List<Element<OrderDetails>> newOrderDetails) {
         String currentOrderId;
         List<String> selectedOrderIds = serveOrderDynamicList.getValue()
             .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
@@ -1149,13 +1140,13 @@ public class ManageOrderService {
         }
     }
 
-    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType) {
+    public Map<String, Object> setDraftOrderCollection(CaseData caseData, String loggedInUserType,String currentUserFullName) {
         List<Element<DraftOrder>> draftOrderList = new ArrayList<>();
         Element<DraftOrder> draftOrderElement = null;
         if (caseData.getManageOrdersOptions().equals(uploadAnOrder)) {
-            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType));
+            draftOrderElement = element(getCurrentUploadDraftOrderDetails(caseData, loggedInUserType, currentUserFullName));
         } else {
-            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType));
+            draftOrderElement = element(getCurrentCreateDraftOrderDetails(caseData, loggedInUserType, currentUserFullName));
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -1171,7 +1162,7 @@ public class ManageOrderService {
         );
     }
 
-    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType) {
+    public DraftOrder getCurrentCreateDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserFullName) {
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         return DraftOrder.builder().orderType(caseData.getCreateSelectOrderOptions())
@@ -1186,19 +1177,26 @@ public class ManageOrderService {
             .orderDocumentWelsh(caseData.getPreviewOrderDocWelsh())
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .orderCreatedBy(currentUserFullName)
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                                         || AmendOrderCheckEnum.managerCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
-                                                            ? No : Yes)
+                                                         || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
+                                                         ? No : Yes)
                               .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                               .nameOfJudgeForReview(caseData.getManageOrders().getNameOfJudgeAmendOrder())
                               .nameOfLaForReview(caseData.getManageOrders().getNameOfLaAmendOrder())
                               .nameOfJudgeForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfJudgeToReviewOrder()))
                               .nameOfLaForReviewOrder(String.valueOf(caseData.getManageOrders().getNameOfLaToReviewOrder()))
+                              .additionalRequirementsForHearingReq(getAdditionalRequirementsForHearingReq(
+                                                                           caseData.getManageOrders().getOrdersHearingDetails(),
+                                                                           true,
+                                                                           caseData.getStandardDirectionOrder(),
+                                                                           caseData.getCreateSelectOrderOptions(),
+                                                                           caseData.getManageOrders().getC21OrderOptions()))
                               .build())
             .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .dateOrderMade(caseData.getDateOrderMade())
@@ -1302,7 +1300,7 @@ public class ManageOrderService {
         return null;
     }
 
-    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType) {
+    public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, String currentUserFullName) {
         String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
@@ -1318,14 +1316,15 @@ public class ManageOrderService {
                               ? getSelectedChildInfoFromMangeOrder(caseData) : null)
             .otherDetails(OtherDraftOrderDetails.builder()
                               .createdBy(caseData.getJudgeOrMagistratesLastName())
+                              .orderCreatedBy(currentUserFullName)
                               .dateCreated(dateTime.now())
                               .status(getOrderStatus(orderSelectionType, loggedInUserType, null, null))
                               .isJudgeApprovalNeeded(AmendOrderCheckEnum.noCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                            || AmendOrderCheckEnum.managerCheck.equals(
+                                                         || AmendOrderCheckEnum.managerCheck.equals(
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
-                                                            || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
-                                                            ? No : Yes)
+                                                         || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
+                                                         ? No : Yes)
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
@@ -1401,22 +1400,34 @@ public class ManageOrderService {
     }
 
     private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
-        ServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
+        YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if (!caseData.getManageOrders().getServeOtherPartiesDA().isEmpty()) {
-            if (caseData.getManageOrders().getEmailInformationDA() != null) {
-                emailInformation = caseData.getManageOrders().getEmailInformationDA();
-            }
-            if (caseData.getManageOrders().getPostalInformationDA() != null) {
-                postalInformation = caseData.getManageOrders().getPostalInformationDA();
-            }
+        PartyDetails partyDetails = caseData.getApplicantsFL401();
+        String serveRecipientName = null;
+        if (null != partyDetails && null != partyDetails.getRepresentativeFullName()) {
+            serveRecipientName =  partyDetails.getRepresentativeFullName();
+        }
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesDA())) {
+            otherPartiesServed = Yes;
+            Map<String, Object> emailOrPostalInfo = new HashMap<>();
+            getEmailAndPostalInfoOfOrg(caseData, emailOrPostalInfo);
+            postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get(POST);
+            emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get(EMAIL);
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
+        servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
+
+        if (null != serveRecipientName
+            && null != servingRespondentsOptions
+            && servingRespondentsOptions.toString().equals(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())) {
+            servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
+        }
 
         updateServedOrderDetails(
             servedOrderDetails,
@@ -1430,29 +1441,31 @@ public class ManageOrderService {
 
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
-        YesOrNo serveOnRespondentOnly47a = caseData.getManageOrders().getServeToRespondentOptionsOnlyC47a();
-        ServingRespondentsEnum servingRespondentsOptions = null;
+        Element<PartyDetails> partyDetailsElement = caseData.getApplicants().get(0);
+        String serveRecipientName = null;
+        if (null != partyDetailsElement.getValue().getRepresentativeFullName()) {
+            serveRecipientName =  partyDetailsElement.getValue().getRepresentativeFullName();
+        }
+
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
-        String otherParties;
-        if (Yes.equals(serveOnRespondent) || Yes.equals(serveOnRespondentOnly47a)) {
+        if (Yes.equals(serveOnRespondent)) {
             servingRespondentsOptions = getServingRespondentsOptions(caseData);
         } else {
             recipients = getRecipients(caseData);
         }
+
+        String otherParties;
         otherParties = getOtherParties(caseData);
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
-        if ((ObjectUtils.isNotEmpty(caseData.getManageOrders().getOtherParties())
-            && isNotEmpty(caseData.getManageOrders().getOtherParties().getValue()))
-            || (ObjectUtils.isNotEmpty(caseData.getManageOrders().getOtherPartiesOnlyC47a())
-            && isNotEmpty(caseData.getManageOrders().getOtherPartiesOnlyC47a().getValue()))) {
+        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())) {
             otherPartiesServed = Yes;
-        }
-        if (isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCA())
-            || isNotEmpty(caseData.getManageOrders().getServeOtherPartiesCaOnlyC47a())) {
-            emailInformation = getEmailInformationCA(caseData);
-            postalInformation = getPostalInformationCA(caseData);
+            Map<String, Object> emailOrPostalInfo = new HashMap<>();
+            getEmailAndPostalInfoOfOrg(caseData, emailOrPostalInfo);
+            postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get(POST);
+            emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get(EMAIL);
         }
         YesOrNo cafcassServedOptions = No;
         YesOrNo cafcassCymruServedOptions = No;
@@ -1465,6 +1478,7 @@ public class ManageOrderService {
             cafcassCymruServedOptions = caseData.getManageOrders().getCafcassCymruServedOptions();
             cafcassCymruEmail = caseData.getManageOrders().getCafcassCymruEmail();
         }
+
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
@@ -1477,6 +1491,11 @@ public class ManageOrderService {
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
 
+        if (null != serveRecipientName
+            && null != servingRespondentsOptions
+            && servingRespondentsOptions.toString().equals(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())) {
+            servedOrderDetails.put(SERVE_RECIPIENT_NAME, serveRecipientName + " (" + servingRespondentsOptions.getDisplayedValue() + ")");
+        }
         updateServedOrderDetails(
             servedOrderDetails,
             cafcassCymruEmail,
@@ -1495,64 +1514,48 @@ public class ManageOrderService {
                 .getServedPartyDetailsFromDynamicSelectList(caseData
                                                                 .getManageOrders()
                                                                 .getRecipientsOptions());
-        } else if (caseData.getManageOrders()
-            .getRecipientsOptionsOnlyC47a() != null) {
-            servedParties = dynamicMultiSelectListService
-                .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
-                                                         .getRecipientsOptionsOnlyC47a());
         }
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             if (caseData.getManageOrders().getChildOption() != null) {
                 servedParties.addAll(dynamicMultiSelectListService
-                                     .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
-                                                                                     .getChildOption()));
+                                         .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
+                                                                                         .getChildOption()));
             }
             if (caseData.getManageOrders().getOtherParties() != null) {
                 servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
                     caseData.getManageOrders().getOtherParties()
-                ));
-            } else if (caseData.getManageOrders().getOtherPartiesOnlyC47a() != null) {
-                servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
-                    caseData.getManageOrders().getOtherPartiesOnlyC47a()
                 ));
             }
         }
         return servedParties;
     }
 
-    private static ServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
-        ServingRespondentsEnum servingRespondentsOptions = null;
+    private static SoaSolicitorServingRespondentsEnum getServingRespondentsOptions(CaseData caseData) {
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         if (caseData.getManageOrders()
             .getServingRespondentsOptionsCA() != null) {
             servingRespondentsOptions = caseData.getManageOrders()
                 .getServingRespondentsOptionsCA();
-        } else if (caseData.getManageOrders()
-            .getServingRespondentsOptionsCaOnlyC47a() != null) {
-            servingRespondentsOptions = caseData.getManageOrders()
-                .getServingRespondentsOptionsCaOnlyC47a();
         }
         return servingRespondentsOptions;
     }
 
-    private static List<Element<PostalInformation>> getPostalInformationCA(CaseData caseData) {
-        List<Element<PostalInformation>> postalInformation = null;
-        if (caseData.getManageOrders().getPostalInformationCA() != null) {
-            postalInformation = caseData.getManageOrders().getPostalInformationCA();
-        } else if (caseData.getManageOrders().getPostalInformationCaOnlyC47a() != null) {
-            postalInformation = caseData.getManageOrders().getPostalInformationCaOnlyC47a();
+    private static void getEmailAndPostalInfoOfOrg(CaseData caseData, Map<String, Object> emailOrPostalInfo) {
+        List<Element<PostalInformation>> postalInformation = new ArrayList<>();
+        List<Element<EmailInformation>> emailInformation = new ArrayList<>();
+        if (null != caseData.getManageOrders().getServeOrgDetailsList()) {
+            caseData.getManageOrders().getServeOrgDetailsList().stream().map(Element::getValue)
+                .forEach(serveOther -> {
+                    if (DeliveryByEnum.post.equals(serveOther.getServeByPostOrEmail())) {
+                        postalInformation.add(element(serveOther.getPostalInformation()));
+                    } else if (DeliveryByEnum.email.equals(serveOther.getServeByPostOrEmail())) {
+                        emailInformation.add(element(serveOther.getEmailInformation()));
+                    }
+                });
         }
-        return postalInformation;
-    }
-
-    private static List<Element<EmailInformation>> getEmailInformationCA(CaseData caseData) {
-        List<Element<EmailInformation>> emailInformation = null;
-        if (caseData.getManageOrders().getEmailInformationCA() != null) {
-            emailInformation = caseData.getManageOrders().getEmailInformationCA();
-        } else if (caseData.getManageOrders().getEmailInformationCaOnlyC47a() != null) {
-            emailInformation = caseData.getManageOrders().getEmailInformationCaOnlyC47a();
-        }
-        return emailInformation;
+        emailOrPostalInfo.put(EMAIL, emailInformation);
+        emailOrPostalInfo.put(POST, postalInformation);
     }
 
     private static String getOtherParties(CaseData caseData) {
@@ -1563,13 +1566,6 @@ public class ManageOrderService {
             .getOtherParties().getValue() != null) {
             for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
                 .getOtherParties().getValue()) {
-                otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
-            }
-        } else if (caseData.getManageOrders()
-            .getOtherPartiesOnlyC47a() != null && caseData.getManageOrders()
-            .getOtherPartiesOnlyC47a().getValue() != null) {
-            for (DynamicMultiselectListElement dynamicMultiselectChildElement : caseData.getManageOrders()
-                .getOtherPartiesOnlyC47a().getValue()) {
                 otherPartiesList.add(dynamicMultiselectChildElement.getLabel());
             }
         }
@@ -1584,11 +1580,6 @@ public class ManageOrderService {
             recipients = dynamicMultiSelectListService
                 .getStringFromDynamicMultiSelectList(caseData.getManageOrders().getRecipientsOptions());
 
-        } else if (caseData.getManageOrders()
-            .getRecipientsOptionsOnlyC47a() != null) {
-            recipients = dynamicMultiSelectListService
-                .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                         .getRecipientsOptionsOnlyC47a());
         }
         return recipients;
     }
@@ -1601,11 +1592,12 @@ public class ManageOrderService {
         String cafcassEmail = null;
         YesOrNo serveOnRespondent = null;
         YesOrNo otherPartiesServed = null;
-        ServingRespondentsEnum servingRespondentsOptions = null;
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
         String recipients = null;
         String otherParties = null;
         List<Element<ServedParties>> servedParties = new ArrayList<>();
 
+        String serveRecipientName = null;
 
         if (servedOrderDetails.containsKey(CAFCASS_EMAIL) && null != servedOrderDetails.get(CAFCASS_EMAIL)) {
             cafcassEmail = (String) servedOrderDetails.get(CAFCASS_EMAIL);
@@ -1623,7 +1615,7 @@ public class ManageOrderService {
             otherPartiesServed = (YesOrNo) servedOrderDetails.get(OTHER_PARTIES_SERVED);
         }
         if (servedOrderDetails.containsKey(SERVING_RESPONDENTS_OPTIONS)) {
-            servingRespondentsOptions = (ServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
+            servingRespondentsOptions = (SoaSolicitorServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
         }
         if (servedOrderDetails.containsKey(RECIPIENTS_OPTIONS)) {
             recipients = (String) servedOrderDetails.get(RECIPIENTS_OPTIONS);
@@ -1634,12 +1626,33 @@ public class ManageOrderService {
         if (servedOrderDetails.containsKey(SERVED_PARTIES)) {
             servedParties = (List<Element<ServedParties>>)servedOrderDetails.get(SERVED_PARTIES);
         }
+        if (servedOrderDetails.containsKey(SERVE_RECIPIENT_NAME)) {
+            serveRecipientName = (String) servedOrderDetails.get(SERVE_RECIPIENT_NAME);
+        }
         ServeOrderDetails tempServeOrderDetails;
         if (order.getValue().getServeOrderDetails() != null) {
             tempServeOrderDetails = order.getValue().getServeOrderDetails();
         } else {
             tempServeOrderDetails = ServeOrderDetails.builder().build();
         }
+
+        List<String> orgNameList = new ArrayList<>();
+        String organisationsName = null;
+        if (null != postalInformation) {
+            orgNameList.addAll(postalInformation.stream()
+                .map(postalInfoElem -> postalInfoElem.getValue().getPostalName()).collect(Collectors.toList()));
+        }
+
+        if (null != emailInformation) {
+            orgNameList.addAll(emailInformation.stream()
+                .map(emailInfoElem -> emailInfoElem.getValue().getEmailName()).collect(Collectors.toList()));
+        }
+
+        if (!orgNameList.isEmpty()) {
+            organisationsName = String.join(", ", orgNameList);
+        }
+
+
         ServeOrderDetails serveOrderDetails = tempServeOrderDetails.toBuilder().serveOnRespondent(serveOnRespondent)
             .servingRespondent(servingRespondentsOptions)
             .recipientsOptions(recipients)
@@ -1651,7 +1664,9 @@ public class ManageOrderService {
             .otherPartiesServed(otherPartiesServed)
             .postalInformation(postalInformation)
             .emailInformation(emailInformation)
+            .organisationsName(organisationsName)
             .servedParties(servedParties)
+            .servingRecipientName(serveRecipientName)
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
@@ -1663,22 +1678,17 @@ public class ManageOrderService {
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
+
         orders.set(orders.indexOf(order), element(order.getId(), amended));
     }
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
-        return OtherOrderDetails.builder()
-            .createdBy(otherDetails.getCreatedBy())
-            .orderCreatedDate(otherDetails.getOrderCreatedDate())
-            .orderAmendedDate(otherDetails.getOrderAmendedDate())
-            .orderMadeDate(otherDetails.getOrderMadeDate())
-            .approvalDate(otherDetails.getApprovalDate())
-            .orderRecipients(otherDetails.getOrderRecipients())
+        return otherDetails.toBuilder()
+            .orderCreatedBy(otherDetails.getOrderCreatedBy())
             .orderServedDate(LocalDate.now().format(DateTimeFormatter.ofPattern(
                 PrlAppsConstants.D_MMM_YYYY,
                 Locale.ENGLISH
             )))
-            .status(otherDetails.getStatus())
             .build();
     }
 
@@ -1716,7 +1726,6 @@ public class ManageOrderService {
         throws Exception {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         try {
-            GeneratedDocumentInfo generatedDocumentInfo;
             populateChildrenListForDocmosis(caseData);
 
             if (CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
@@ -1747,7 +1756,7 @@ public class ManageOrderService {
                 CaseDetails.builder().caseData(caseData).build(),
                 fieldsMap.get(PrlAppsConstants.TEMPLATE)
             );
-            caseDataUpdated.put("previewOrderDoc", Document.builder()
+            caseDataUpdated.put(PREVIEW_ORDER_DOC, Document.builder()
                 .documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
@@ -1793,7 +1802,7 @@ public class ManageOrderService {
                         CaseDetails.builder().caseData(caseData).build(),
                         fieldsMap.get(PrlAppsConstants.TEMPLATE)
                     );
-                caseDataUpdated.put("previewOrderDoc", Document.builder()
+                caseDataUpdated.put(PREVIEW_ORDER_DOC, Document.builder()
                         .documentUrl(generatedDocumentInfo.getUrl())
                         .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
                         .documentHash(generatedDocumentInfo.getHashToken())
@@ -1802,15 +1811,15 @@ public class ManageOrderService {
             if (documentLanguage.isGenWelsh() && fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH) != null) {
                 caseDataUpdated.put("isWelshDocGen", Yes.toString());
                 generatedDocumentInfo = dgsService.generateWelshDocument(
-                        authorisation,
-                        CaseDetails.builder().caseData(caseData).build(),
-                        fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
-                    );
+                    authorisation,
+                    CaseDetails.builder().caseData(caseData).build(),
+                    fieldsMap.get(PrlAppsConstants.DRAFT_TEMPLATE_WELSH)
+                );
                 caseDataUpdated.put("previewOrderDocWelsh", Document.builder()
-                        .documentUrl(generatedDocumentInfo.getUrl())
-                        .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                        .documentHash(generatedDocumentInfo.getHashToken())
-                        .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
+                    .documentUrl(generatedDocumentInfo.getUrl())
+                    .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                    .documentHash(generatedDocumentInfo.getHashToken())
+                    .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
             }
         } catch (Exception ex) {
             log.info("Error occured while generating Draft document ==> " + ex.getMessage());
@@ -2079,9 +2088,17 @@ public class ManageOrderService {
                 )).build();
             }
         }
+
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        String currentUserFullName = userDetails.getFullName();
+
         return element(orderDetails.toBuilder()
                            .otherDetails(OtherOrderDetails.builder()
                                              .createdBy(caseData.getJudgeOrMagistratesLastName())
+                                             .orderCreatedBy(
+                                                 (null != orderDetails.getOtherDetails()
+                                                     && null != orderDetails.getOtherDetails().getOrderCreatedBy())
+                                                            ? orderDetails.getOtherDetails().getOrderCreatedBy() : currentUserFullName)
                                              .orderCreatedDate(dateTime.now().format(DateTimeFormatter.ofPattern(
                                                  PrlAppsConstants.D_MMM_YYYY,
                                                  Locale.ENGLISH
@@ -2100,6 +2117,12 @@ public class ManageOrderService {
                                              .status(getOrderStatus(CaseUtils.getOrderSelectionType(caseData),
                                                                     getLoggedInUserType(authorisation), null, null
                                              ))
+                                             .additionalRequirementsForHearingReq(getAdditionalRequirementsForHearingReq(
+                                                     caseData.getManageOrders().getOrdersHearingDetails(),
+                                                     false,
+                                                     caseData.getStandardDirectionOrder(),
+                                                     caseData.getCreateSelectOrderOptions(),
+                                                     caseData.getManageOrders().getC21OrderOptions()))
                                              .build())
                            .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                             ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : dateTime.now())
@@ -2215,7 +2238,7 @@ public class ManageOrderService {
 
             }
         } else {
-            caseDataUpdated.put("previewOrderDoc", caseData.getUploadOrderDoc());
+            caseDataUpdated.put(PREVIEW_ORDER_DOC, caseData.getUploadOrderDoc());
         }
         return caseDataUpdated;
     }
@@ -2248,10 +2271,29 @@ public class ManageOrderService {
         }
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
+        log.info(" serve order dynamic select listoo {}", caseDataUpdated.get("serveOrderDynamicList"));
+        caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
+        log.info("---- Check display legal rep options  ----");
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            log.info("---- C100 check ----");
+            caseData.getApplicants().stream().findFirst().ifPresent(party ->
+                populateLegalRepFlag(party.getValue().getSolicitorEmail(), caseDataUpdated));
+        } else {
+            populateLegalRepFlag(caseData.getApplicantsFL401().getSolicitorEmail(), caseDataUpdated);
+        }
+        log.info("---- display Legal rep ----{}", caseDataUpdated.get(DISPLAY_LEGAL_REP_OPTION));
         return caseDataUpdated;
     }
 
-    //Needs reverting, changed for testing purposes. case reference number is wrong
+    private void populateLegalRepFlag(String email, Map<String, Object> caseDataUpdated) {
+        log.info("---- Legal rep present ----{}", email);
+        if (org.apache.commons.lang3.StringUtils.isNotEmpty(email)) {
+            log.info("---- Legal rep present ----");
+            caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
+        }
+    }
+
+
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
@@ -2331,8 +2373,9 @@ public class ManageOrderService {
     }
 
     public void setMarkedToServeEmailNotification(CaseData caseData, Map<String, Object> caseDataUpdated) {
-        if ((null != caseData.getManageOrders() && Yes.equals(caseData.getManageOrders().getOrdersNeedToBeServed()))
+        if (servedSavedOrders.equals(caseData.getManageOrdersOptions())
             || (null != caseData.getServeOrderData() && Yes.equals(caseData.getServeOrderData().getDoYouWantToServeOrder()))) {
+            log.info("inside Mark to serve email notification");
             caseDataUpdated.put("markedToServeEmailNotification", Yes);
         } else {
             caseDataUpdated.put("markedToServeEmailNotification", No);
@@ -2481,8 +2524,8 @@ public class ManageOrderService {
     }
 
     private CaseData updateExistingHearingData(String authorisation,
-                                           CaseData caseData,
-                                           Map<String, Object> caseDataUpdated) {
+                                               CaseData caseData,
+                                               Map<String, Object> caseDataUpdated) {
         String caseReferenceNumber = String.valueOf(caseData.getId());
         Hearings hearings = hearingService.getHearings(authorisation, caseReferenceNumber);
         if (isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())) {
@@ -2527,7 +2570,7 @@ public class ManageOrderService {
                                                      .toList())
                             .servedOrders(null != caseData.getManageOrders().getServeOrderDynamicList()
                                               ? getDynamicMultiSelectedValueLabels(
-                                                  caseData.getManageOrders().getServeOrderDynamicList().getValue())
+                                caseData.getManageOrders().getServeOrderDynamicList().getValue())
                                               : null)
                             .build()
                 )
@@ -2542,11 +2585,11 @@ public class ManageOrderService {
     public CaseData updateOrderFieldsForDocmosis(DraftOrder draftOrder,CaseData caseData) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseData = caseData.toBuilder()
-                    .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
-                    .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
-                    .magistrateLastName(draftOrder.getMagistrateLastName())
-                    .dateOrderMade(draftOrder.getDateOrderMade() != null ? draftOrder.getDateOrderMade() : null)
-            .build();
+                .judgeOrMagistratesLastName(draftOrder.getJudgeOrMagistratesLastName())
+                .justiceLegalAdviserFullName(draftOrder.getJusticeLegalAdviserFullName())
+                .magistrateLastName(draftOrder.getMagistrateLastName())
+                .dateOrderMade(draftOrder.getDateOrderMade() != null ? draftOrder.getDateOrderMade() : null)
+                .build();
 
         }
         return  caseData;
@@ -2621,7 +2664,7 @@ public class ManageOrderService {
     }
 
     public HearingData getHearingData(String authorization,
-                                       CaseData caseData) {
+                                      CaseData caseData) {
         String caseReferenceNumber = String.valueOf(caseData.getId());
         log.info("Inside Prepopulate getHearingData for the case id {}", caseReferenceNumber);
         Hearings hearings = hearingService.getHearings(authorization, caseReferenceNumber);
@@ -2672,7 +2715,7 @@ public class ManageOrderService {
     }
 
     public Document getGeneratedDocument(GeneratedDocumentInfo generatedDocumentInfo,
-                                          boolean isWelsh, Map<String, String> fieldMap) {
+                                         boolean isWelsh, Map<String, String> fieldMap) {
         if (generatedDocumentInfo != null) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
@@ -2739,5 +2782,107 @@ public class ManageOrderService {
         }
         return  caseData;
 
+    }
+
+    public String getAdditionalRequirementsForHearingReq(List<Element<HearingData>> ordersHearingDetails,
+                                                         boolean isDraftOrder,
+                                                         StandardDirectionOrder standardDirectionOrder,
+                                                         CreateSelectOrderOptionsEnum orderType,
+                                                         C21OrderOptionsEnum c21OrderOptions) {
+        log.info("inside getAdditionalRequirementsForHearingReq");
+        List<String> additionalRequirementsForHearingReqList = new ArrayList<>();
+        if (isHearingPageNeeded(orderType, c21OrderOptions) && CollectionUtils.isNotEmpty(ordersHearingDetails)) {
+            getAdditionalRequirementsForHearingReqForOtherOrders(
+                ordersHearingDetails,
+                isDraftOrder,
+                additionalRequirementsForHearingReqList
+            );
+        } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(orderType) && ObjectUtils.isNotEmpty(standardDirectionOrder)) {
+            getAdditionalRequirementsForHearingReqForSdo(
+                standardDirectionOrder,
+                isDraftOrder,
+                additionalRequirementsForHearingReqList
+            );
+        }
+        log.info("additionalRequirementsForHearingReqList " + additionalRequirementsForHearingReqList);
+        if (CollectionUtils.isNotEmpty(additionalRequirementsForHearingReqList)) {
+            return String.join(", ", additionalRequirementsForHearingReqList);
+        } else {
+            return null;
+        }
+    }
+
+    private void getAdditionalRequirementsForHearingReqForOtherOrders(List<Element<HearingData>> ordersHearingDetails,
+                                                                             boolean isDraftOrder,
+                                                                             List<String> additionalRequirementsForHearingReqList) {
+        ordersHearingDetails.stream()
+            .map(Element::getValue)
+            .forEach(hearingData -> populateAdditionalRequirementsForHearingReqList(isDraftOrder,
+                                                                                    additionalRequirementsForHearingReqList,
+                                                                                    hearingData));
+    }
+
+    private void populateAdditionalRequirementsForHearingReqList(boolean isDraftOrder,
+                                                                        List<String> additionalRequirementsForHearingReqList,
+                                                                        HearingData hearingData) {
+        boolean isOption3Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+            && HearingDateConfirmOptionEnum.dateConfirmedByListingTeam
+            .equals(hearingData.getHearingDateConfirmOptionEnum());
+        boolean isOption4Selected = ObjectUtils.isNotEmpty(hearingData.getHearingDateConfirmOptionEnum())
+            && HearingDateConfirmOptionEnum.dateToBeFixed
+            .equals(hearingData.getHearingDateConfirmOptionEnum());
+        if (((isDraftOrder && (isOption3Selected || isOption4Selected))
+            || (!isDraftOrder && isOption4Selected))
+            && ObjectUtils.isNotEmpty(hearingData.getAdditionalDetailsForHearingDateOptions())) {
+            additionalRequirementsForHearingReqList.add(hearingData.getAdditionalDetailsForHearingDateOptions());
+        }
+    }
+
+    private void getAdditionalRequirementsForHearingReqForSdo(StandardDirectionOrder standardDirectionOrder,
+                                                                     boolean isDraftOrder,
+                                                                     List<String> additionalRequirementsForHearingReqList) {
+
+        if (ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoUrgentHearingDetails())) {
+            populateAdditionalRequirementsForHearingReqList(
+                isDraftOrder,
+                additionalRequirementsForHearingReqList,
+                standardDirectionOrder.getSdoUrgentHearingDetails()
+            );
+        }
+        if (ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoPermissionHearingDetails())) {
+            populateAdditionalRequirementsForHearingReqList(
+                isDraftOrder,
+                additionalRequirementsForHearingReqList,
+                standardDirectionOrder.getSdoPermissionHearingDetails()
+            );
+        }
+        if (ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoSecondHearingDetails())) {
+            populateAdditionalRequirementsForHearingReqList(
+                isDraftOrder,
+                additionalRequirementsForHearingReqList,
+                standardDirectionOrder.getSdoSecondHearingDetails()
+            );
+        }
+        if (ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoFhdraHearingDetails())) {
+            populateAdditionalRequirementsForHearingReqList(
+                isDraftOrder,
+                additionalRequirementsForHearingReqList,
+                standardDirectionOrder.getSdoFhdraHearingDetails()
+            );
+        }
+        if (ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoDraHearingDetails())) {
+            populateAdditionalRequirementsForHearingReqList(
+                isDraftOrder,
+                additionalRequirementsForHearingReqList,
+                standardDirectionOrder.getSdoDraHearingDetails()
+            );
+        }
+        if (ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoSettlementHearingDetails())) {
+            populateAdditionalRequirementsForHearingReqList(
+                isDraftOrder,
+                additionalRequirementsForHearingReqList,
+                standardDirectionOrder.getSdoSettlementHearingDetails()
+            );
+        }
     }
 }

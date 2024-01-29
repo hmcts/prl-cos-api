@@ -62,7 +62,7 @@ public class CourtNavCaseService {
     private final AllTabServiceImpl allTabService;
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
-    public CaseDetails createCourtNavCase(String authToken, CaseData caseData) throws Exception {
+    public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
         caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
@@ -121,7 +121,6 @@ public class CourtNavCaseService {
             );
             log.info("Document uploaded successfully through caseDocumentClient");
             CaseData updatedCaseData = updateCaseDataWithUploadedDocs(
-                caseId,
                 document.getOriginalFilename(),
                 typeOfDocument,
                 tempCaseData,
@@ -160,7 +159,7 @@ public class CourtNavCaseService {
         return null;
     }
 
-    private CaseData updateCaseDataWithUploadedDocs(String caseId, String fileName, String typeOfDocument,
+    private CaseData updateCaseDataWithUploadedDocs(String fileName, String typeOfDocument,
                                                 CaseData tempCaseData, Document document) {
         String partyName = tempCaseData.getApplicantCaseName() != null
             ? tempCaseData.getApplicantCaseName() : COURTNAV;

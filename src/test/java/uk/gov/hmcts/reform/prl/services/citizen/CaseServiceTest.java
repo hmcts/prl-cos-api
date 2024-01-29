@@ -315,7 +315,7 @@ public class CaseServiceTest {
 
     @Test
     public void testupdateCaseCitizenUpdate() throws JsonProcessingException {
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "", "", "citizen-case-submit", "123");
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCase(caseData, "", "", "", "citizen-case-update", "123");
         assertNotNull(caseDetailsAfterUpdate);
     }
 

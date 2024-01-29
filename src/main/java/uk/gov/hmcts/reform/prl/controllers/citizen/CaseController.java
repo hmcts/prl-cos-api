@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.mapper.citizen.ReasonableAdjustmentsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
@@ -36,7 +38,6 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -44,25 +45,16 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CaseController {
 
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    HearingService hearingService;
-
-    @Autowired
-    CaseService caseService;
-
-    @Autowired
-    AuthorisationService authorisationService;
-
-    @Autowired
-    ConfidentialDetailsMapper confidentialDetailsMapper;
-
-    @Autowired
-    AuthTokenGenerator authTokenGenerator;
+    private final ObjectMapper objectMapper;
+    private final HearingService hearingService;
+    private final CaseService caseService;
+    private final AuthorisationService authorisationService;
+    private final ConfidentialDetailsMapper confidentialDetailsMapper;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final ReasonableAdjustmentsMapper reasonableAdjustmentsMapper;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
@@ -111,6 +103,13 @@ public class CaseController {
             );
             CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
+            updatedCaseData = reasonableAdjustmentsMapper.mapRAforC100MainApplicant(
+                caseData.getC100RebuildData().getC100RebuildApplicantDetails(),
+                updatedCaseData,
+                eventId,
+                authorisation
+            );
+
             return updatedCaseData
                 .toBuilder().id(caseDetails.getId()).build();
         } else {
@@ -193,7 +192,7 @@ public class CaseController {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-        return caseDataList.stream().map(this::buildCitizenCaseData).collect(Collectors.toList());
+        return caseDataList.stream().map(this::buildCitizenCaseData).toList();
     }
 
     private CitizenCaseData buildCitizenCaseData(CaseData caseData) {

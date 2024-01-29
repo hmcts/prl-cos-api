@@ -41,6 +41,7 @@ public class CaseInitiationControllerTest {
 
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
+
     CaseData caseData;
     CallbackRequest callbackRequest;
 
