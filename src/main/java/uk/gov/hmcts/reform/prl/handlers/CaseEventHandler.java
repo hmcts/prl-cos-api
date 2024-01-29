@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.handlers.service.CaseEventHandlerService;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -41,6 +42,8 @@ public class CaseEventHandler {
 
     @EventListener
     public void handleCaseDataChange(final CaseDataChanged event) {
+        log.info("handleCaseDataChange started at:: %s", LocalDateTime.now());
+        log.info("handleCaseDataChange System thread is:: %s", Thread.currentThread().getName());
         final CaseData caseData = event.getCaseData();
 
         final String taskList = caseEventHandlerService.getUpdatedTaskList(caseData);
@@ -74,6 +77,7 @@ public class CaseEventHandler {
                 String.valueOf(caseData.getId())
             )
         );
+        log.info("handleCaseDataChange ended at:: %s", LocalDateTime.now());
     }
 }
 

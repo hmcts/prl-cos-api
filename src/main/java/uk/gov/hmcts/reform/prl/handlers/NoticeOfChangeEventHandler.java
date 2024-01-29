@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangeContentProv
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,6 +34,8 @@ public class NoticeOfChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent eq 'Add Legal Representation'")
     public void notifyLegalRepresentative(final NoticeOfChangeEvent event) {
+        log.info("notifyLegalRepresentative started at:: %s", LocalDateTime.now());
+        log.info("notifyLegalRepresentative System thread is:: %s", Thread.currentThread().getName());
         CaseData caseData = event.getCaseData();
         //PRL-3211 - notify new LR
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_SOLICITOR_NOC);
@@ -48,6 +51,7 @@ public class NoticeOfChangeEventHandler {
 
         //PRL-3211 - notify applicants/respondents LRs
         sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC);
+        log.info("notifyLegalRepresentative ended at:: %s", LocalDateTime.now());
     }
 
     private void sendEmailToAppRespSolicitors(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateNames) {

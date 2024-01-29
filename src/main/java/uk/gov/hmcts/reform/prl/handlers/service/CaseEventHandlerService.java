@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +41,7 @@ public class CaseEventHandlerService {
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     public String getUpdatedTaskList(CaseData caseData) {
+        log.info("getUpdatedTaskList started at:: %s", LocalDateTime.now());
         String taskList = "";
         if (caseData.getState() != null
             && (caseData.getState().equals(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -64,10 +66,13 @@ public class CaseEventHandlerService {
                     caseData
                 );
         }
+        log.info("getUpdatedTaskList ended at:: %s", LocalDateTime.now());
         return taskList;
     }
 
     public String getRespondentTaskList(CaseData caseData, String respondent) {
+        log.info("getRespondentTaskList started at:: %s", LocalDateTime.now());
+        log.info("getRespondentTaskList respondent is:: %s", respondent);
         String respondentTaskList = "";
         if (caseData.getRespondents() != null
             && !caseData.getRespondents().isEmpty()) {
@@ -110,6 +115,7 @@ public class CaseEventHandlerService {
                 }
             }
         }
+        log.info("getRespondentTaskList ended at:: %s", LocalDateTime.now());
         return respondentTaskList;
     }
 }

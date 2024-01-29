@@ -61,6 +61,7 @@ import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.NoticeOfChangePartiesConverter;
 import uk.gov.hmcts.reform.prl.utils.noticeofchange.RespondentPolicyConverter;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -243,6 +244,8 @@ public class NoticeOfChangePartiesService {
     }
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest) {
+        log.info("nocRequestSubmitted started at:: %s", LocalDateTime.now());
+        log.info("nocRequestSubmitted System thread is:: %s", Thread.currentThread().getName());
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
 
         String systemAuthorisation = systemUserService.getSysUserToken();
@@ -305,7 +308,7 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateEventRequestData,
             allTabsUpdateCaseData
         );
-
+        log.info("nocRequestSubmitted mid following updatePartyDetailsForNoc at:: %s", LocalDateTime.now());
         //TODO: We must avoid this ccd call and use the response from line 280 as the latest
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(
             systemAuthorisation,
@@ -322,6 +325,7 @@ public class NoticeOfChangePartiesService {
             solicitorDetails,
             solicitorRole
         );
+        log.info("nocRequestSubmitted ended at:: %s", LocalDateTime.now());
     }
 
     private void sendEmailOnAddLegalRepresentative(CaseData caseData,
