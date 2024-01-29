@@ -1008,7 +1008,7 @@ public class ServiceOfApplicationService {
                         caseData.getId()
                     );
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
-                    dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
+                    dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                     dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
                         + PrlAppsConstants.URL_STRING + "#Service of application");
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
