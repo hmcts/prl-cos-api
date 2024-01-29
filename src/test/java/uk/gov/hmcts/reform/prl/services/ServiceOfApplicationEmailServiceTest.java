@@ -313,7 +313,7 @@ public class ServiceOfApplicationEmailServiceTest {
         serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments("test",
                                                                                "",
                                                                                List.of(Document.builder().build()),
-                                                                               SendgridEmailTemplateNames.SOA_PERSONAL_SERVICE_APPLICANT_SOLICITOR,
+                                                                               SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
                                                                                new HashMap<>(),
                                                                                PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR);
 

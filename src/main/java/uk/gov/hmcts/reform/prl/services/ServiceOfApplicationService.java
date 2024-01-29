@@ -467,7 +467,7 @@ public class ServiceOfApplicationService {
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                    caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                                                    packjDocs,
-                                                   SendgridEmailTemplateNames.SOA_PERSONAL_SERVICE_APPLICANT_SOLICITOR,
+                                                   SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
                                                    dynamicData,
                                                    PRL_COURT_ADMIN);
         if (null != emailNotification) {
@@ -932,7 +932,7 @@ public class ServiceOfApplicationService {
                                                              .sendEmailUsingTemplateWithAttachments(
                                                                  authorization, party.get().getValue().getSolicitorEmail(),
                                                                  packQ,
-                                                                 SendgridEmailTemplateNames.SOA_PERSONAL_SERVICE_APPLICANT_SOLICITOR,
+                                                                 SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
                                                                  dynamicData,
                                                                  servedParty
                                                              )));
