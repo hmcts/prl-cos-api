@@ -1747,6 +1747,7 @@ public class ServiceOfApplicationService {
                     .packDocument(wrapElements(packjDocs))
                     .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
                     .servedBy(PRL_COURT_ADMIN)
+                    .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().toString())
                     .packCreatedDate(dateCreated)
                     .build();
                 caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
