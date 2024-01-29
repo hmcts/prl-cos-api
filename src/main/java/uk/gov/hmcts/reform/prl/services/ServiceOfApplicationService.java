@@ -2140,7 +2140,8 @@ public class ServiceOfApplicationService {
         List<Document> packDocs = new ArrayList<>();
         if (unServedApplicantPack.getPersonalServiceBy() != null
             && (SoaSolicitorServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
-            || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))) {
+            || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))
+            && !CaseUtils.isCaseWithoutNotice(caseData)) {
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
                 packDocs.add(generateAccessCodeLetter(authorization, caseData, applicant, null, PRL_LET_ENG_AP8));
             }
