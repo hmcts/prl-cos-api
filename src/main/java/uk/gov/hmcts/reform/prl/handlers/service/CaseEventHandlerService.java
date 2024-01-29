@@ -41,7 +41,7 @@ public class CaseEventHandlerService {
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     public String getUpdatedTaskList(CaseData caseData) {
-        log.info("getUpdatedTaskList started at:: %s", LocalDateTime.now());
+        log.info("getUpdatedTaskList started at:: {}", LocalDateTime.now());
         String taskList = "";
         if (caseData.getState() != null
             && (caseData.getState().equals(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -71,8 +71,8 @@ public class CaseEventHandlerService {
     }
 
     public String getRespondentTaskList(CaseData caseData, String respondent) {
-        log.info("getRespondentTaskList started at:: %s", LocalDateTime.now());
-        log.info("getRespondentTaskList respondent is:: %s", respondent);
+        log.info("getRespondentTaskList started at:: {}", LocalDateTime.now());
+        log.info("getRespondentTaskList respondent is:: {}", respondent);
         String respondentTaskList = "";
         if (caseData.getRespondents() != null
             && !caseData.getRespondents().isEmpty()) {
@@ -115,7 +115,7 @@ public class CaseEventHandlerService {
                 }
             }
         }
-        log.info("getRespondentTaskList ended at:: %s", LocalDateTime.now());
+        log.info("getRespondentTaskList ended at:: {}", LocalDateTime.now());
         return respondentTaskList;
     }
 }

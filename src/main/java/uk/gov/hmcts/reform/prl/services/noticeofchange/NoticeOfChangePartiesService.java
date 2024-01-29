@@ -244,8 +244,8 @@ public class NoticeOfChangePartiesService {
     }
 
     public void nocRequestSubmitted(CallbackRequest callbackRequest) {
-        log.info("nocRequestSubmitted started at:: %s", LocalDateTime.now());
-        log.info("nocRequestSubmitted System thread is:: %s", Thread.currentThread().getName());
+        log.info("nocRequestSubmitted started at:: {}", LocalDateTime.now());
+        log.info("nocRequestSubmitted System thread is:: {}", Thread.currentThread().getName());
         CaseData oldCaseData = getCaseData(callbackRequest.getCaseDetailsBefore(), objectMapper);
 
         String systemAuthorisation = systemUserService.getSysUserToken();
@@ -308,7 +308,7 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateEventRequestData,
             allTabsUpdateCaseData
         );
-        log.info("nocRequestSubmitted mid following updatePartyDetailsForNoc at:: %s", LocalDateTime.now());
+        log.info("nocRequestSubmitted mid following updatePartyDetailsForNoc at:: {}", LocalDateTime.now());
         //TODO: We must avoid this ccd call and use the response from line 280 as the latest
         CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(
             systemAuthorisation,
@@ -325,7 +325,7 @@ public class NoticeOfChangePartiesService {
             solicitorDetails,
             solicitorRole
         );
-        log.info("nocRequestSubmitted ended at:: %s", LocalDateTime.now());
+        log.info("nocRequestSubmitted ended at:: {}", LocalDateTime.now());
     }
 
     private void sendEmailOnAddLegalRepresentative(CaseData caseData,
