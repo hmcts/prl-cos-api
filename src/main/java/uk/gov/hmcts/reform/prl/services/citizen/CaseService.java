@@ -396,6 +396,8 @@ public class CaseService {
     }
 
     public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {
+        log.info("Inside getPartyCaseFlags caseId {}", caseId);
+        log.info("Inside getPartyCaseFlags partyId {}", partyId);
         CaseDetails caseDetails = getCase(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         Optional<PartyDetailsMeta> partyDetailsMeta = getPartyDetailsMeta(
@@ -403,10 +405,11 @@ public class CaseService {
             caseData.getCaseTypeOfApplication(),
             caseData
         );
-
+        log.info("Party details meta received ");
         if (partyDetailsMeta.isPresent()
             && partyDetailsMeta.get().getPartyDetails() != null
             && !StringUtils.isEmpty(partyDetailsMeta.get().getPartyDetails().getLabelForDynamicList())) {
+            log.info("Party details meta is valid ");
             Optional<String> partyExternalCaseFlagField = getPartyExternalCaseFlagField(
                 caseData.getCaseTypeOfApplication(),
                 partyDetailsMeta.get().getPartyType(),
@@ -414,6 +417,9 @@ public class CaseService {
             );
 
             if (partyExternalCaseFlagField.isPresent()) {
+                log.info("partyExternalCaseFlagField is present:: {}", partyExternalCaseFlagField.get());
+                log.info("data is present as well:: {}", caseDetails.getData().get(partyExternalCaseFlagField.get()));
+                log.info(" validating the data with entire case details:: {}", caseDetails.getData());
                 return objectMapper.convertValue(
                     caseDetails.getData().get(partyExternalCaseFlagField.get()),
                     Flags.class
