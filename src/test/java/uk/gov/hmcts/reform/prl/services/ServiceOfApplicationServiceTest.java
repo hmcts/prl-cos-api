@@ -330,7 +330,7 @@ public class ServiceOfApplicationServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .servedParty("ApplicantSolicitor")
             .build();
-        when(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(Mockito.anyString(),Mockito.any(),
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
                                                                                         Mockito.any(),Mockito.any(),Mockito.any(),
                                                                                         Mockito.anyString()))
             .thenReturn(emailNotificationDetails);
