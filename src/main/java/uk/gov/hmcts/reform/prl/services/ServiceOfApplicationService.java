@@ -2138,8 +2138,8 @@ public class ServiceOfApplicationService {
         log.info("Case created by {}", CaseUtils.isCaseCreatedByCitizen(caseData));
         List<Document> packDocs = new ArrayList<>();
         if (unServedApplicantPack.getPersonalServiceBy() != null
-        && (SoaSolicitorServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
-        || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))) {
+            && (SoaSolicitorServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
+            || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))) {
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
                 packDocs.add(generateAccessCodeLetter(authorization, caseData, applicant, null, PRL_LET_ENG_AP8));
             }
