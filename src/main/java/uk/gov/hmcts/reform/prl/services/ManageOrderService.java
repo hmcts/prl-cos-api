@@ -1634,8 +1634,6 @@ public class ManageOrderService {
         } else {
             tempServeOrderDetails = ServeOrderDetails.builder().build();
         }
-        log.info("*** EMail info {}", emailInformation);
-        log.info("*** Postal info {}", postalInformation);
 
         List<String> orgNameList = new ArrayList<>();
         String organisationsName = null;
@@ -1669,7 +1667,6 @@ public class ManageOrderService {
             .servedParties(servedParties)
             .servingRecipientName(serveRecipientName)
             .build();
-        log.info("*** Serve order details {}", servedOrderDetails);
 
         OrderDetails amended = order.getValue().toBuilder()
             .orderDocument(order.getValue().getOrderDocument())
@@ -1680,11 +1677,8 @@ public class ManageOrderService {
             .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
-        log.info("*** order details {}", order);
 
         orders.set(orders.indexOf(order), element(order.getId(), amended));
-        log.info("*** orders details {}", orders);
-
     }
 
     private static OtherOrderDetails updateOtherOrderDetails(OtherOrderDetails otherDetails) {
@@ -2277,9 +2271,6 @@ public class ManageOrderService {
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
         populateOtherServeOrderDetails(caseData, caseDataUpdated);
         log.info(" serve order dynamic select listoo {}", caseDataUpdated.get("serveOrderDynamicList"));
-        log.info("end OrdersHearingDetails {}",
-                 CollectionUtils.isNotEmpty(caseData.getManageOrders().getOrdersHearingDetails())
-                     ? caseData.getManageOrders().getOrdersHearingDetails().get(0).getValue().getAdditionalHearingDetails() : null);
         caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "No");
         log.info("---- Check display legal rep options  ----");
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
