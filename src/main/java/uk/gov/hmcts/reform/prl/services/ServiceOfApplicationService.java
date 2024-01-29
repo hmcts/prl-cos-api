@@ -504,6 +504,9 @@ public class ServiceOfApplicationService {
         List<Document> packcDocs = getDocumentsForDaOrBailiffToServeApplicantSolicitor(caseData, staticDocs);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         //Add dynamicData - name & manageCaseUrl
+        dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
+        dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+            + PrlAppsConstants.URL_STRING + "#Service of application");
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
             authorization,
             caseData.getApplicantsFL401().getSolicitorEmail(),
