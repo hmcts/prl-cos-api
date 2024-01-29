@@ -45,6 +45,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_J
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
+@SuppressWarnings({"squid:S5665"})
 @RestController
 @RequiredArgsConstructor
 public class EditAndApproveDraftOrderController {
