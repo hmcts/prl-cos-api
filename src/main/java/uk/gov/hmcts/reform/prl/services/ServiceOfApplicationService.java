@@ -395,7 +395,8 @@ public class ServiceOfApplicationService {
                 packHiDocs.addAll(c100StaticDocs);
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-                dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId() + "service of application");
+                dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+                    + PrlAppsConstants.URL_STRING + "#Service of application");
 
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                          .sendEmailUsingTemplateWithAttachments(
@@ -470,7 +471,8 @@ public class ServiceOfApplicationService {
                                                                                       true);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-        dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId() + "service of application");
+        dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+            + PrlAppsConstants.URL_STRING + "#Service of application");
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                    caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                                                    packjDocs,
@@ -925,7 +927,8 @@ public class ServiceOfApplicationService {
                     );
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-                    dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId() + "service of application");
+                    dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+                        + PrlAppsConstants.URL_STRING + "#Service of application");
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailUsingTemplateWithAttachments(
                                                                  authorization, party.get().getValue().getSolicitorEmail(),
@@ -1628,9 +1631,8 @@ public class ServiceOfApplicationService {
         dataMap.put("serviceUrl", citizenUrl);
         dataMap.put("address", party.getValue().getAddress());
         dataMap.put("name", party.getValue().getFirstName() + " " + party.getValue().getLastName());
-        if (null != caseInvite) {
-            dataMap.put("accessCode", getAccessCode(caseInvite, party.getValue().getAddress(), party.getValue().getLabelForDynamicList()));
-        }
+        dataMap.put("accessCode", getAccessCode(caseInvite, party.getValue().getAddress(), party.getValue().getLabelForDynamicList()));
+
         dataMap.put("c1aExists", doesC1aExists(caseData));
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
@@ -1639,17 +1641,20 @@ public class ServiceOfApplicationService {
     }
 
     private AccessCode getAccessCode(CaseInvite caseInvite, Address address, String name) {
+        String code = null;
+        String isLinked = null;
         if (null != caseInvite) {
-            return AccessCode.builder()
-                .code(caseInvite.getAccessCode())
-                .recipientName(name)
-                .address(address)
-                .isLinked(caseInvite.getHasLinked())
-                .currentDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")))
-                .respondByDate(LocalDate.now().plusDays(14).format(DateTimeFormatter.ofPattern("dd MMM yyyy")))
-                .build();
+            code = caseInvite.getAccessCode();
+            isLinked = caseInvite.getHasLinked();
         }
-        return null;
+        return AccessCode.builder()
+            .code(code)
+            .recipientName(name)
+            .address(address)
+            .isLinked(isLinked)
+            .currentDate(LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")))
+            .respondByDate(LocalDate.now().plusDays(14).format(DateTimeFormatter.ofPattern("dd MMM yyyy")))
+            .build();
     }
 
     private YesOrNo doesC1aExists(CaseData caseData) {
@@ -2131,14 +2136,22 @@ public class ServiceOfApplicationService {
 
         log.info("Sending notification for Applicants ====> {}", partyIds);
         log.info("Case created by {}", CaseUtils.isCaseCreatedByCitizen(caseData));
+        List<Document> packDocs = new ArrayList<>();
+        if (unServedApplicantPack.getPersonalServiceBy() != null
+        && (SoaSolicitorServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
+        || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))) {
+            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
+                packDocs.add(generateAccessCodeLetter(authorization, caseData, applicant, null, PRL_LET_ENG_AP8));
+            }
+        }
+        packDocs.addAll(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(authorization,applicantList,caseData,
-                                                                             bulkPrintDetails,
-                                                                   unwrapElements(unServedApplicantPack.getPackDocument())));
+                                                                             bulkPrintDetails, packDocs));
         } else {
             emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(caseData, authorization, applicantList,
-                                                                                 unwrapElements(unServedApplicantPack.getPackDocument()),
+                                                                                 packDocs,
                                                                                  SERVED_PARTY_APPLICANT_SOLICITOR
             ));
         }
