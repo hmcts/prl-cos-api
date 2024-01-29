@@ -133,7 +133,6 @@ public class CaseData extends BaseCaseData implements MappableObject {
 
     private String respondentName;
 
-
     private String childName;
 
     /**

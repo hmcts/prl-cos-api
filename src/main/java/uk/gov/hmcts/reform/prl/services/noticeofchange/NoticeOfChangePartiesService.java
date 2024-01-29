@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListEleme
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentTaskLists;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.ChangeOrganisationRequest;
 import uk.gov.hmcts.reform.prl.models.noticeofchange.NoticeOfChangeParties;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -309,18 +310,9 @@ public class NoticeOfChangePartiesService {
             allTabsUpdateCaseData
         );
         log.info("nocRequestSubmitted mid following updatePartyDetailsForNoc at:: {}", LocalDateTime.now());
-        //TODO: We must avoid this ccd call and use the response from line 280 as the latest
-        CaseDetails caseDetails = ccdCoreCaseDataService.findCaseById(
-            systemAuthorisation,
-            String.valueOf(allTabsUpdateCaseData.getId())
-        );
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
-        //TODO: this event call we will avoid
-        //eventPublisher.publishEvent(new CaseDataChanged(caseData));
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(changeOrganisationRequest);
         sendEmailOnAddLegalRepresentative(
-            caseData,
+            allTabsUpdateCaseData,
             changeOrganisationRequest,
             solicitorDetails,
             solicitorRole
@@ -422,10 +414,8 @@ public class NoticeOfChangePartiesService {
                     .element(partyDetailsElement.getId(), updPartyDetails);
             }
             caseData.getRespondents().set(partyIndex, updatedRepresentedRespondentElement);
-            //TODO: Find the task list and set it to appropriate section of the casedata
-            //Finding is done - need to set it now
-            // next step is remove the case data event change event
-            caseEventHandlerService.getRespondentTaskList(caseData, findRespondentIndex(partyIndex));
+            caseData = findRespondentAndUpdateTaskLists(caseData, partyIndex);
+            log.info("casedata is now {}", caseData);
 
         } else if (CAAPPLICANT.equals(representing)) {
             updatedRepresentedRespondentElement = ElementUtils
@@ -434,34 +424,69 @@ public class NoticeOfChangePartiesService {
         }
     }
 
-    private String findRespondentIndex(int partyIndex) {
-        String respondent = "";
+    private CaseData findRespondentAndUpdateTaskLists(CaseData caseData, int partyIndex) {
         switch (partyIndex) {
             case 0: {
-                respondent = C100_RESPONDENT_EVENTS_A;
+                caseData = caseData
+                    .toBuilder()
+                    .respondentTaskLists(
+                        RespondentTaskLists
+                            .builder()
+                            .respondentTaskListA(caseEventHandlerService.getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_A))
+                            .build())
+                    .build();
+
                 break;
             }
             case 1: {
-                respondent = C100_RESPONDENT_EVENTS_B;
+                caseData = caseData
+                    .toBuilder()
+                    .respondentTaskLists(
+                        RespondentTaskLists
+                            .builder()
+                            .respondentTaskListB(caseEventHandlerService.getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_B))
+                            .build())
+                    .build();
                 break;
             }
             case 2: {
-                respondent = C100_RESPONDENT_EVENTS_C;
+                caseData = caseData
+                    .toBuilder()
+                    .respondentTaskLists(
+                        RespondentTaskLists
+                            .builder()
+                            .respondentTaskListC(caseEventHandlerService.getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_C))
+                            .build())
+                    .build();
                 break;
             }
             case 3: {
-                respondent = C100_RESPONDENT_EVENTS_D;
+                caseData = caseData
+                    .toBuilder()
+                    .respondentTaskLists(
+                        RespondentTaskLists
+                            .builder()
+                            .respondentTaskListD(caseEventHandlerService.getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_D))
+                            .build())
+                    .build();
                 break;
             }
             case 4: {
-                respondent = C100_RESPONDENT_EVENTS_E;
+                caseData = caseData
+                    .toBuilder()
+                    .respondentTaskLists(
+                        RespondentTaskLists
+                            .builder()
+                            .respondentTaskListE(caseEventHandlerService.getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_E))
+                            .build())
+                    .build();
                 break;
             }
             default: {
                 break;
             }
         }
-        return respondent;
+        return caseData;
     }
 
     private CaseData updateFl401PartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
