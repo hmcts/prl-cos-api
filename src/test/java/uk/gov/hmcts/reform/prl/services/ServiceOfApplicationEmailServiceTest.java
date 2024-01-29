@@ -81,7 +81,6 @@ public class ServiceOfApplicationEmailServiceTest {
             .id(12345L)
             .caseTypeOfApplication("C100")
             .applicants(List.of(element(PartyDetails.builder()
-                                            .solicitorEmail("test@gmail.com")
                                             .representativeLastName("LastName")
                                             .representativeFirstName("FirstName")
                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
@@ -122,7 +121,6 @@ public class ServiceOfApplicationEmailServiceTest {
             .caseTypeOfApplication("C100")
             .applicants(List.of(
                 element(PartyDetails.builder()
-                            .solicitorEmail("test1@gmail.com")
                             .representativeLastName("LastName")
                             .representativeFirstName("FirstName")
                             .doTheyHaveLegalRepresentation(YesNoDontKnow.dontKnow)
@@ -130,7 +128,6 @@ public class ServiceOfApplicationEmailServiceTest {
                             .email("test1@applicant.com")
                             .build()),
                 element(PartyDetails.builder()
-                            .solicitorEmail("test2@gmail.com")
                             .representativeLastName("LastName1")
                             .representativeFirstName("FirstName1")
                             .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
