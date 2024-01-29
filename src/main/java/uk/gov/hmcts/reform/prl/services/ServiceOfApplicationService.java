@@ -1747,6 +1747,7 @@ public class ServiceOfApplicationService {
                     .packDocument(wrapElements(packjDocs))
                     .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
                     .servedBy(PRL_COURT_ADMIN)
+                    .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().toString())
                     .packCreatedDate(dateCreated)
                     .build();
                 caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
@@ -2134,7 +2135,7 @@ public class ServiceOfApplicationService {
         final List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
             partyIds);
 
-        log.info("Sending notification for Applicants ====> {}", partyIds);
+        log.info("Sending notification for Applicants ====> {}", unServedApplicantPack);
         log.info("Case created by {}", CaseUtils.isCaseCreatedByCitizen(caseData));
         List<Document> packDocs = new ArrayList<>();
         if (unServedApplicantPack.getPersonalServiceBy() != null
@@ -2143,6 +2144,7 @@ public class ServiceOfApplicationService {
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
                 packDocs.add(generateAccessCodeLetter(authorization, caseData, applicant, null, PRL_LET_ENG_AP8));
             }
+            log.info("**8 pack docs {}", packDocs);
         }
         packDocs.addAll(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
