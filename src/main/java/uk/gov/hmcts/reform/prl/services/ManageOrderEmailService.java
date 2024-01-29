@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -181,11 +182,6 @@ public class ManageOrderEmailService {
                                                   String emailAddress,
                                                   EmailTemplateVars email,
                                                   CaseData caseData) {
-        log.info("*** Email addt {}", emailAddress);
-        log.info("*** Email {}", email);
-        log.info("*** final order {}", isFinalOrder);
-        log.info("*** languahge pref {}", caseData.getWelshLanguageRequirement());
-
         emailService.send(
             emailAddress,
             (isFinalOrder == SelectTypeOfOrderEnum.finl) ? EmailTemplateNames.CA_DA_FINAL_ORDER_EMAIL
@@ -801,5 +797,24 @@ public class ManageOrderEmailService {
 
     private boolean isSolicitorEmailExists(PartyDetails party) {
         return StringUtils.isNotEmpty(party.getSolicitorEmail());
+    }
+
+    public void sendEmailToLegalRepresentativeOnRejection(CaseDetails caseDetails, DraftOrder draftOrder) {
+        CaseData caseData = emailService.getCaseData(caseDetails);
+        EmailTemplateVars emailTemplateVars = ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .caseName(caseData.getApplicantCaseName())
+            .fullName(draftOrder.getOtherDetails().getOrderCreatedBy())
+            .orderLink(manageCaseUrl + "/" + caseData.getId())
+            .instructions(caseData.getManageOrders().getInstructionsToLegalRepresentative())
+            .build();
+        log.info("** Email tempplate vars : {}", emailTemplateVars);
+        log.info("*** Draft oder {}", draftOrder);
+        emailService.send(
+            draftOrder.getOtherDetails().getOrderCreatedByEmailId(),
+            EmailTemplateNames.EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER,
+            emailTemplateVars,
+            LanguagePreference.english
+        );
     }
 }
