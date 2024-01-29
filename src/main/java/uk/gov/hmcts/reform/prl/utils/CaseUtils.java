@@ -473,8 +473,10 @@ public class CaseUtils {
         log.info("Inside getFL401PartyDetailsMeta caseData {}", caseData);
         log.info("Inside getFL401PartyDetailsMeta partyId {}", partyId);
         log.info("Inside getFL401PartyDetailsMeta getApplicantsFL401 {}", caseData.getApplicantsFL401());
-        if (isNotEmpty(Collections.singleton(caseData.getApplicantsFL401()))
-            && caseData.getApplicantsFL401().getPartyId().toString().equals(partyId)) {
+        if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401())
+            && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser())
+            && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser().getIdamId())
+            && caseData.getApplicantsFL401().getUser().getIdamId().equals(partyId)) {
             partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
                                                        .builder()
                                                        .partyType(PartyEnum.applicant)
@@ -484,8 +486,10 @@ public class CaseUtils {
             return partyDetailsMeta;
         }
 
-        if (isNotEmpty(Collections.singleton(caseData.getRespondentsFL401()))
-            && caseData.getRespondentsFL401().getPartyId().toString().equals(partyId)) {
+        if (ObjectUtils.isNotEmpty(caseData.getRespondentsFL401())
+            && ObjectUtils.isNotEmpty(caseData.getRespondentsFL401().getUser())
+            && ObjectUtils.isNotEmpty(caseData.getRespondentsFL401().getUser().getIdamId())
+            && caseData.getRespondentsFL401().getUser().getIdamId().equals(partyId)) {
             partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
                                                        .builder()
                                                        .partyType(PartyEnum.respondent)
