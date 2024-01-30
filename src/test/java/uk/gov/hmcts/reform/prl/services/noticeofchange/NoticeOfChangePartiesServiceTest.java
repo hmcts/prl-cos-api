@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
@@ -643,12 +644,15 @@ public class NoticeOfChangePartiesServiceTest {
         when(organisationService.getOrganisationSolicitorDetails("test", changeOrganisationRequest
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
                 OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
+        when(organisationService.getOrganisationDetails("test", changeOrganisationRequest
+            .getOrganisationToAdd().getOrganisationID())).thenReturn(
+            Organisations.builder().organisationIdentifier("test").name("test").build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-            caseData.toBuilder().respondentsFL401(updPartyDetails).build(),
-            0,
-            PartyRole.Representing.DARESPONDENTSOLICITOR,
-            true
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
         )).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -721,10 +725,10 @@ public class NoticeOfChangePartiesServiceTest {
                 OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-            caseData.toBuilder().applicantsFL401(updPartyDetails).build(),
-            0,
-            PartyRole.Representing.DAAPPLICANTSOLICITOR,
-            true
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
         )).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
