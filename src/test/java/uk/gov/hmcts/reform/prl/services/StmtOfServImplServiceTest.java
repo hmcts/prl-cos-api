@@ -36,6 +36,9 @@ public class StmtOfServImplServiceTest {
     @Mock
     private ObjectMapper objectMapper;
 
+    @Mock
+    private ServiceOfApplicationService serviceOfApplicationService;
+
     private DynamicList dynamicList;
     private PartyDetails respondent;
     private Element<PartyDetails> wrappedRespondents;
@@ -204,7 +207,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails);
+        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, "testAuth");
 
         assertNotNull(updatedCaseData);
 
@@ -257,7 +260,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails);
+        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, "testAuth");
 
         assertNotNull(updatedCaseData);
 

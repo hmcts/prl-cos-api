@@ -2093,10 +2093,11 @@ public class ServiceOfApplicationService {
     }
 
     // Use this method once respondent packs personally served to respondents by court admin or bailiff
-    private void checkAndServeRespondentPacksCaOrBailiffPersonalService(CaseData caseData,
+    public ServedApplicationDetails checkAndServeRespondentPacksCaOrBailiffPersonalService(CaseData caseData,
                                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                                        SoaPack unServedRespondentPack) {
+                                                                        SoaPack unServedRespondentPack,
+                                                                        String authorization) {
         if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             emailNotificationDetails.add(element(EmailNotificationDetails.builder()
                                                      .emailAddress(caseData.getApplicants().get(0).getValue().getSolicitorEmail())
@@ -2122,6 +2123,14 @@ public class ServiceOfApplicationService {
                                                             .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
                                              .build()));
         }
+        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
+        String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
+        return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+            .servedBy(userService.getUserDetails(authorization).getFullName())
+            .servedAt(formatter)
+            .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
+            .whoIsResponsible(COURT)
+            .bulkPrintDetails(bulkPrintDetails).build();
     }
 
     private void checkAndSendCafcassCymruEmails(CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails) {

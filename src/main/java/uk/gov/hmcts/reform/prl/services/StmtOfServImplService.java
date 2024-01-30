@@ -10,7 +10,10 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
 
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -29,6 +33,8 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StmtOfServImplService {
     private final ObjectMapper objectMapper;
+
+    private final ServiceOfApplicationService serviceOfApplicationService;
 
     public Map<String, Object> retrieveRespondentsList(CaseDetails caseDetails) {
         CaseData caseData = objectMapper.convertValue(
@@ -53,7 +59,7 @@ public class StmtOfServImplService {
 
     }
 
-    public CaseData retrieveAllRespondentNames(CaseDetails caseDetails) {
+    public CaseData retrieveAllRespondentNames(CaseDetails caseDetails, String authorisation) {
         CaseData caseData = objectMapper.convertValue(
             caseDetails.getData(),
             CaseData.class
@@ -109,6 +115,10 @@ public class StmtOfServImplService {
                     .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
                     .servedDateTimeOption(recipient.getServedDateTimeOption())
                     .build();
+                if (isNotEmpty(caseData.getServiceOfApplication())
+                    && isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack())) {
+                    caseData = cleanupDaRespondentPacksCaOrBailiffPersonalService(caseData, authorisation);
+                }
             }
             elementList.add(element(recipient));
         }
@@ -117,6 +127,26 @@ public class StmtOfServImplService {
             .build();
 
         return caseData;
+    }
+
+    private CaseData cleanupDaRespondentPacksCaOrBailiffPersonalService(CaseData caseData, String authorisation) {
+        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList = new ArrayList<>();
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
+        if (caseData.getFinalServedApplicationDetailsList() != null) {
+            finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
+        }
+        finalServedApplicationDetailsList.add(element(serviceOfApplicationService.checkAndServeRespondentPacksCaOrBailiffPersonalService(
+            caseData,
+            emailNotificationDetails,
+            bulkPrintDetails,
+            caseData.getServiceOfApplication().getUnServedRespondentPack(),
+            authorisation
+        )));
+        return caseData.toBuilder()
+            .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
+            .serviceOfApplication(caseData.getServiceOfApplication().toBuilder().unServedApplicantPack(null).build())
+            .build();
     }
 
     private List<DynamicListElement> getRespondentsList(CaseData caseData) {
