@@ -469,8 +469,7 @@ public class HearingDataService {
         if (judgeDetailsSelected.isPresent() && judgeDetailsSelected.get().getPersonalCode() != null
             && !judgeDetailsSelected.get().getPersonalCode().isEmpty()) {
             Optional<List<JudicialUsersApiResponse>> judgeApiResponse = ofNullable(getJudgeDetails(hearingData.getHearingJudgeNameAndEmail()));
-            if (judgeApiResponse.isPresent()
-                && !judgeApiResponse.get().isEmpty()) {
+            if (judgeApiResponse.isPresent() && !judgeApiResponse.get().isEmpty()) {
                 judgeApiResponse.get().stream().findFirst().ifPresent(x -> {
                     hearingData.setHearingJudgeLastName(x.getSurname());
                     hearingData.setHearingJudgeEmailAddress(x.getEmailId());
@@ -736,6 +735,37 @@ public class HearingDataService {
         }
         dynamicList.setListItems(dynamicListElements);
         return dynamicList;
+    }
+
+    public List<DynamicListElement> getListOfRequestedStatusHearings(String authorisation, String caseReference, List<String> status) {
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        try {
+            log.info("Fetching Completed and Awaiting hearings for the case {}", caseReference);
+            Hearings hearingsList = hearingService.getHearings(
+                authorisation,
+                caseReference
+            );
+
+            if (hearingsList != null) {
+                hearingsList.getCaseHearings().stream()
+                    .filter(caseHearing -> status.contains(caseHearing.getHmcStatus()))
+                    .forEach(
+                        hearingFromHmc ->
+                            dynamicListElements.add(
+                                DynamicListElement
+                                    .builder()
+                                    .code(caseReference + UNDERSCORE + hearingFromHmc.getHearingID())
+                                    .label(caseReference + UNDERSCORE + hearingFromHmc.getHearingTypeValue()
+                                               + HYPHEN_SEPARATOR
+                                               + hearingFromHmc.getNextHearingDate().format(
+                                        customDateTimeFormatter))
+                                    .build()));
+            }
+
+        } catch (Exception e) {
+            log.error("Exception occurred in Linked case method for hmc api calls ", e);
+        }
+        return dynamicListElements;
     }
 
     public void populatePartiesAndSolicitorsNames(CaseData caseData,
