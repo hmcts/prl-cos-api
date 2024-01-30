@@ -14,7 +14,7 @@ JUnit 5 is now enabled by default in the project. Please refrain from using JUni
 
 ### Building and deploying the application
 
-#### Building the applications
+### Building the applications
 
 The project uses [Gradle](https://gradle.org) as a build tool. It already contains
 `./gradlew` wrapper script, so there's no need to install gradle.
