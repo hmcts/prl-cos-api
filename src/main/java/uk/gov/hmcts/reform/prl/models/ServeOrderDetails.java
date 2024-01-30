@@ -43,5 +43,5 @@ public class ServeOrderDetails {
     private final List<Element<ServedParties>> servedParties;
     private final String servingRecipientName;
     private final String organisationsName;
-    private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptions;
+    private final SoaSolicitorServingRespondentsEnum courtPersonalService;
 }

@@ -183,7 +183,6 @@ public class ManageOrderService {
 
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
-    public static final String SERVED_RESPONDENT_OPTION = "soaServingRespondentsOptions";
     public static final String EMAIL = "email";
     public static final String POST = "post";
 
@@ -1440,8 +1439,6 @@ public class ManageOrderService {
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
         servedOrderDetails.put(OTHER_PARTIES_SERVED, otherPartiesServed);
-        servedOrderDetails.put(SERVED_RESPONDENT_OPTION,
-                               caseData.getManageOrders().getServingRespondentsOptionsDA());
 
         if (null != serveRecipientName
             && null != servingRespondentsOptions
@@ -1510,8 +1507,6 @@ public class ManageOrderService {
         servedOrderDetails.put(RECIPIENTS_OPTIONS, recipients);
         servedOrderDetails.put(OTHER_PARTIES, otherParties);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
-        servedOrderDetails.put(SERVED_RESPONDENT_OPTION, caseData
-            .getManageOrders().getServingRespondentsOptionsCA());
 
         if (null != serveRecipientName
             && null != servingRespondentsOptions
@@ -1615,6 +1610,7 @@ public class ManageOrderService {
         YesOrNo serveOnRespondent = null;
         YesOrNo otherPartiesServed = null;
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = null;
+        SoaSolicitorServingRespondentsEnum courtPersonalService = null;
         String recipients = null;
         String otherParties = null;
         List<Element<ServedParties>> servedParties = new ArrayList<>();
@@ -1638,6 +1634,10 @@ public class ManageOrderService {
         }
         if (servedOrderDetails.containsKey(SERVING_RESPONDENTS_OPTIONS)) {
             servingRespondentsOptions = (SoaSolicitorServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
+            if (SoaSolicitorServingRespondentsEnum.courtBailiff.equals(servingRespondentsOptions)
+                || SoaSolicitorServingRespondentsEnum.courtAdmin.equals(servingRespondentsOptions)) {
+                courtPersonalService = (SoaSolicitorServingRespondentsEnum) servedOrderDetails.get(SERVING_RESPONDENTS_OPTIONS);
+            }
         }
         if (servedOrderDetails.containsKey(RECIPIENTS_OPTIONS)) {
             recipients = (String) servedOrderDetails.get(RECIPIENTS_OPTIONS);
@@ -1689,6 +1689,7 @@ public class ManageOrderService {
             .organisationsName(organisationsName)
             .servedParties(servedParties)
             .servingRecipientName(serveRecipientName)
+            .courtPersonalService(courtPersonalService)
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
