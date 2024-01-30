@@ -4,7 +4,6 @@ public enum ServeOrderFieldsEnum {
 
     serveOrderAdditionalDocuments("serveOrderAdditionalDocuments"),
     isCafcass("isCafcass"),
-    otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
     isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     serveOrderDynamicList("serveOrderDynamicList"),
     serveToRespondentOptions("serveToRespondentOptions"),

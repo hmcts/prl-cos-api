@@ -244,7 +244,6 @@ public class ManageOrdersController {
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
-            cleanUpSelectedManageOrderOptions(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             caseDataUpdated.put(STATE, caseData.getState());
             coreCaseDataService.triggerEvent(
@@ -313,6 +312,7 @@ public class ManageOrdersController {
             //Added below fields for WA purpose
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
