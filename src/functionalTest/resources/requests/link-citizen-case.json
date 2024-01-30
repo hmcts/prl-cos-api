@@ -371,32 +371,6 @@
             "anotherCountryAskedInformation": "Yes",
             "anotherCountryAskedInformationDetaails": "string"
           },
-          "attendToCourt": {
-            "respondentWelshNeeds": "Yes",
-            "respondentWelshNeedsList": [
-              "Will need to speak Welsh"
-            ],
-            "isRespondentNeededInterpreter": "Yes",
-            "respondentInterpreterNeeds": [
-              {
-                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "value": {
-                  "party": [
-                    "Applicant"
-                  ],
-                  "relationName": "string",
-                  "requiredLanguage": "string",
-                  "respondentOtherAssistance": "string"
-                }
-              }
-            ],
-            "haveAnyDisability": "Yes",
-            "disabilityNeeds": "string",
-            "respondentSpecialArrangements": "Yes",
-            "respondentSpecialArrangementDetails": "string",
-            "respondentIntermediaryNeeds": "Yes",
-            "respondentIntermediaryNeedDetails": "string"
-          },
           "citizenFlags": {
             "isApplicationViewed": "Yes",
             "isAllegationOfHarmViewed": "Yes",
@@ -954,32 +928,6 @@
             "anotherPersonOrderOutsideEnWlDetails": "string",
             "anotherCountryAskedInformation": "Yes",
             "anotherCountryAskedInformationDetaails": "string"
-          },
-          "attendToCourt": {
-            "respondentWelshNeeds": "Yes",
-            "respondentWelshNeedsList": [
-              "Will need to speak Welsh"
-            ],
-            "isRespondentNeededInterpreter": "Yes",
-            "respondentInterpreterNeeds": [
-              {
-                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "value": {
-                  "party": [
-                    "Applicant"
-                  ],
-                  "relationName": "string",
-                  "requiredLanguage": "string",
-                  "respondentOtherAssistance": "string"
-                }
-              }
-            ],
-            "haveAnyDisability": "Yes",
-            "disabilityNeeds": "string",
-            "respondentSpecialArrangements": "Yes",
-            "respondentSpecialArrangementDetails": "string",
-            "respondentIntermediaryNeeds": "Yes",
-            "respondentIntermediaryNeedDetails": "string"
           },
           "citizenFlags": {
             "isApplicationViewed": "Yes",
@@ -1649,32 +1597,6 @@
             "anotherPersonOrderOutsideEnWlDetails": "string",
             "anotherCountryAskedInformation": "Yes",
             "anotherCountryAskedInformationDetaails": "string"
-          },
-          "attendToCourt": {
-            "respondentWelshNeeds": "Yes",
-            "respondentWelshNeedsList": [
-              "Will need to speak Welsh"
-            ],
-            "isRespondentNeededInterpreter": "Yes",
-            "respondentInterpreterNeeds": [
-              {
-                "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                "value": {
-                  "party": [
-                    "Applicant"
-                  ],
-                  "relationName": "string",
-                  "requiredLanguage": "string",
-                  "respondentOtherAssistance": "string"
-                }
-              }
-            ],
-            "haveAnyDisability": "Yes",
-            "disabilityNeeds": "string",
-            "respondentSpecialArrangements": "Yes",
-            "respondentSpecialArrangementDetails": "string",
-            "respondentIntermediaryNeeds": "Yes",
-            "respondentIntermediaryNeedDetails": "string"
           },
           "citizenFlags": {
             "isApplicationViewed": "Yes",
@@ -4377,32 +4299,6 @@
         "anotherCountryAskedInformation": "Yes",
         "anotherCountryAskedInformationDetaails": "string"
       },
-      "attendToCourt": {
-        "respondentWelshNeeds": "Yes",
-        "respondentWelshNeedsList": [
-          "Will need to speak Welsh"
-        ],
-        "isRespondentNeededInterpreter": "Yes",
-        "respondentInterpreterNeeds": [
-          {
-            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "value": {
-              "party": [
-                "Applicant"
-              ],
-              "relationName": "string",
-              "requiredLanguage": "string",
-              "respondentOtherAssistance": "string"
-            }
-          }
-        ],
-        "haveAnyDisability": "Yes",
-        "disabilityNeeds": "string",
-        "respondentSpecialArrangements": "Yes",
-        "respondentSpecialArrangementDetails": "string",
-        "respondentIntermediaryNeeds": "Yes",
-        "respondentIntermediaryNeedDetails": "string"
-      },
       "citizenFlags": {
         "isApplicationViewed": "Yes",
         "isAllegationOfHarmViewed": "Yes",
@@ -4894,32 +4790,6 @@
         "anotherPersonOrderOutsideEnWlDetails": "string",
         "anotherCountryAskedInformation": "Yes",
         "anotherCountryAskedInformationDetaails": "string"
-      },
-      "attendToCourt": {
-        "respondentWelshNeeds": "Yes",
-        "respondentWelshNeedsList": [
-          "Will need to speak Welsh"
-        ],
-        "isRespondentNeededInterpreter": "Yes",
-        "respondentInterpreterNeeds": [
-          {
-            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-            "value": {
-              "party": [
-                "Applicant"
-              ],
-              "relationName": "string",
-              "requiredLanguage": "string",
-              "respondentOtherAssistance": "string"
-            }
-          }
-        ],
-        "haveAnyDisability": "Yes",
-        "disabilityNeeds": "string",
-        "respondentSpecialArrangements": "Yes",
-        "respondentSpecialArrangementDetails": "string",
-        "respondentIntermediaryNeeds": "Yes",
-        "respondentIntermediaryNeedDetails": "string"
       },
       "citizenFlags": {
         "isApplicationViewed": "Yes",
