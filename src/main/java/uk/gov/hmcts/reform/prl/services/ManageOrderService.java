@@ -2646,23 +2646,19 @@ public class ManageOrderService {
     }
 
     public void setHearingSelectedInfoForTask(List<Element<HearingData>> ordersHearingDetails, Map<String,Object> caseDataUpdated) {
-        String isMultipleHearingSelected = NO;
+        String isMultipleHearingSelected = null;
         String hearingOptionSelected = null;
 
-        //In case if no hearings at all, then default value for isMultipleHearingSelected should be null
-        if (CollectionUtils.isEmpty(ordersHearingDetails)) {
-            isMultipleHearingSelected = null;
-        } else if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
+        if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
 
             List<Element<HearingData>> hearingsWithOptionsSelected = ordersHearingDetails.stream()
                 .filter(elem -> null != elem.getValue().getHearingDateConfirmOptionEnum()).toList();
 
-            if (hearingsWithOptionsSelected.size() == 0) {
-                isMultipleHearingSelected = null;
-            } else if (hearingsWithOptionsSelected.size() == 1) {
+            if (hearingsWithOptionsSelected.size() == 1) {
                 hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum().toString();
+                isMultipleHearingSelected = NO;
             } else if (hearingsWithOptionsSelected.size() > 1) {
                 hearingOptionSelected = WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
                 isMultipleHearingSelected = YES;
