@@ -113,6 +113,7 @@ uk:
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
             CA_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
             RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373
+            EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER: 91c41b6a-378f-4787-a660-aaa7a0deab98
             CA_DA_APPLICANT_RESPONDENT_NOC: 27e885c4-907c-479f-8746-0c8d82125513
             CA_DA_OTHER_PARTIES_NOC: d1b1da64-995f-49c6-86cf-63f11404038f
             CA_DA_SOLICITOR_NOC: 576b0181-eae7-4f38-b4f6-321a8c94177d
@@ -140,8 +141,12 @@ send-grid:
       templates:
         english:
           SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
+          SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: d-26fd4bac10854d3b858dc57ee07f5bc3
+          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: d-b5cf52c69837403dbefda498f6dae888
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
+          SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: d-26fd4bac10854d3b858dc57ee07f5bc3
+          SERVE_ORDER_NON_PERSONAL_SOLLICITOR: d-b5cf52c69837403dbefda498f6dae888
   rpa:
     email:
       to: ${RPA_NOTIFY_TO_EMAIL:xxxxxxxx}
@@ -220,9 +225,8 @@ test-url: ${TEST_URL:http://localhost:4044}
 
 core_case_data:
   api:
-    #url: http://ccd-data-store-api-aat.service.core-compute-aat.internal
-    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1818.preview.platform.hmcts.net/}
-    #url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1252.service.core-compute-preview.internal}
+    #url: ${CORE_CASE_DATA_API_URL:http://ccd-data-store-api-aat.service.core-compute-aat.internal}
+    url: ${CORE_CASE_DATA_API_URL:https://ccd-data-store-api-prl-ccd-definitions-pr-1794.preview.platform.hmcts.net/}
 
 auth:
   idam:
