@@ -184,7 +184,7 @@ public class NoticeOfChangeEventHandler {
         return partyDetailsElement;
     }
 
-
+    @Async
     @EventListener(condition = "#event.typeOfEvent eq 'Remove Legal Representation'")
     public void notifyWhenLegalRepresentativeRemoved(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
