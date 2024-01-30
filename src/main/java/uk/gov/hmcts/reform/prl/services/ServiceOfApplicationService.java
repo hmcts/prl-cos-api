@@ -2100,10 +2100,10 @@ public class ServiceOfApplicationService {
                                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                                         SoaPack unServedRespondentPack,
-                                                                        String authorization) {
+                                                                        String authorization, String solicitorEmail) {
         if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             emailNotificationDetails.add(element(EmailNotificationDetails.builder()
-                                                     .emailAddress(caseData.getApplicants().get(0).getValue().getSolicitorEmail())
+                                                     .emailAddress(solicitorEmail)
                                                      .servedParty(PRL_COURT_ADMIN)
                                                      .docs(unServedRespondentPack.getPackDocument())
                                                      .attachedDocs(String.join(",", unServedRespondentPack

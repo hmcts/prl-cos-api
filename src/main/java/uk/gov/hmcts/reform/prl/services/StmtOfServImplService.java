@@ -141,7 +141,8 @@ public class StmtOfServImplService {
             emailNotificationDetails,
             bulkPrintDetails,
             caseData.getServiceOfApplication().getUnServedRespondentPack(),
-            authorisation
+            authorisation,
+            caseData.getRespondentsFL401().getSolicitorEmail()
         )));
         return caseData.toBuilder()
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
