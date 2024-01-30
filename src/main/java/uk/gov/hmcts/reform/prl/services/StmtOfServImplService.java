@@ -145,7 +145,7 @@ public class StmtOfServImplService {
         )));
         return caseData.toBuilder()
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
-            .serviceOfApplication(caseData.getServiceOfApplication().toBuilder().unServedApplicantPack(null).build())
+            .serviceOfApplication(caseData.getServiceOfApplication().toBuilder().unServedRespondentPack(null).build())
             .build();
     }
 
