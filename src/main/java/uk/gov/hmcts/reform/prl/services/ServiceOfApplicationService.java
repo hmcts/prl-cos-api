@@ -502,7 +502,7 @@ public class ServiceOfApplicationService {
         log.info("serving other people in case");
 
         List<DynamicMultiselectListElement> othersToNotify = getSelectedApplicantsOrRespondents(
-            caseData.getOthersToNotify(),
+            CaseUtils.getOthersToNotifyInCase(caseData),
             caseData.getServiceOfApplication().getSoaOtherParties().getValue());
 
         List<Document> packNDocs = c100StaticDocs.stream().filter(d -> d.getDocumentFileName()
@@ -1811,9 +1811,7 @@ public class ServiceOfApplicationService {
                                          List<Document> c100StaticDocs) {
         log.info("serving other people in case");
         log.info("Before caseData.getOthersToNotify {}", caseData.getOthersToNotify());
-        List<Element<PartyDetails>> otherPartiesToNotify = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
-            ? caseData.getOtherPartyInTheCaseRevised()
-            : caseData.getOthersToNotify();
+        List<Element<PartyDetails>> otherPartiesToNotify = CaseUtils.getOthersToNotifyInCase(caseData);
         final List<DynamicMultiselectListElement> otherParties = getSelectedApplicantsOrRespondents(
             otherPartiesToNotify,
             caseData.getServiceOfApplication().getSoaOtherParties().getValue()
