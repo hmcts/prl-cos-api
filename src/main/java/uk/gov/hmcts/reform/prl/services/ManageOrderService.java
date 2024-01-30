@@ -2234,7 +2234,7 @@ public class ManageOrderService {
 
     public static void cleanUpSelectedManageOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ManageOrderFieldsEnum field : ManageOrderFieldsEnum.values()) {
-            caseDataUpdated.remove(field.getValue());
+            caseDataUpdated.put(field.getValue(), null);
         }
     }
 
@@ -2872,9 +2872,7 @@ public class ManageOrderService {
 
     public static void cleanUpServeOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ServeOrderFieldsEnum field : ServeOrderFieldsEnum.values()) {
-            if (caseDataUpdated.containsKey(field.getValue())) {
-                caseDataUpdated.put(field.getValue(), null);
-            }
+            caseDataUpdated.put(field.getValue(), null);
         }
     }
 
