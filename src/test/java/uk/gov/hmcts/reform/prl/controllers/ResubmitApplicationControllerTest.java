@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -36,6 +35,9 @@ import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -47,6 +49,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8;
@@ -113,10 +116,10 @@ public class ResubmitApplicationControllerTest {
 
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "s2s AuthToken";
+    public static final String currentDate = DateTimeFormatter.ISO_LOCAL_DATE.format(ZonedDateTime.now(ZoneId.of("Europe/London")));
 
     @Before
     public void init() throws Exception {
-        MockitoAnnotations.openMocks(this);
 
         allegationOfHarm = AllegationOfHarm.builder()
             .allegationsOfHarmYesNo(Yes).build();
@@ -131,6 +134,7 @@ public class ResubmitApplicationControllerTest {
             .id(12345L)
             .state(State.SUBMITTED_PAID)
             .allegationOfHarm(allegationOfHarm)
+            .dateSubmitted(currentDate)
             .build();
 
         caseDataIssued = CaseData.builder()
@@ -420,6 +424,8 @@ public class ResubmitApplicationControllerTest {
         assertTrue(response.getData().containsKey("isNotificationSent"));
         assertTrue(response.getData().containsKey(STATE_FIELD));
         assertTrue(response.getData().containsKey(CASE_DATE_AND_TIME_SUBMITTED_FIELD));
+        assertTrue(response.getData().containsKey(DATE_SUBMITTED_FIELD));
+        assertEquals(currentDate, response.getData().get(DATE_SUBMITTED_FIELD));
 
     }
 
