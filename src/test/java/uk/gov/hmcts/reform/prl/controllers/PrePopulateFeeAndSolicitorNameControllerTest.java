@@ -8,7 +8,6 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -140,7 +139,6 @@ public class PrePopulateFeeAndSolicitorNameControllerTest {
     @Before
     public void setUp() {
 
-        MockitoAnnotations.openMocks(this);
 
         feeResponse = FeeResponse.builder()
             .amount(BigDecimal.valueOf(232.00))

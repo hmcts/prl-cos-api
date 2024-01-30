@@ -1,0 +1,12 @@
+{
+  "emailProps": {
+    "subject": "Case documents for : ",
+    "content": "Case details",
+    "attachmentType": "pdf",
+    "disposition": "attachment",
+    "specialNote": "Yes"
+  },
+  "toEmailAddress": "test@test.com",
+  "listOfAttachments": [],
+  "servedParty": "servedParty"
+}

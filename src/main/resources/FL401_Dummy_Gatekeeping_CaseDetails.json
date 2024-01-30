@@ -827,6 +827,7 @@
       }
     ],
     "courtName": "Swansea Civil And Family Justice Centre",
+    "courtSeal": "[userImage:familycourtseal-bilingual.png]",
     "urgencyDetails": {
       "urgencyStatus": "With notice"
     },
@@ -1540,7 +1541,7 @@
       "isEmailAddressConfidential": "Yes",
       "applicantContactInstructions": null,
       "respondentLivedWithApplicant": null,
-      "doTheyHaveLegalRepresentation": null,
+      "doTheyHaveLegalRepresentation": "yes",
       "addressLivedLessThan5YearsDetails": null,
       "otherPersonRelationshipToChildren": [
       ],
