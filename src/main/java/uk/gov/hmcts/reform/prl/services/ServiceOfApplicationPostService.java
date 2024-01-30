@@ -37,18 +37,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS_PATH;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -70,8 +59,10 @@ public class ServiceOfApplicationPostService {
                                                         String authorisation,
                                                         PartyDetails partyDetails,
                                                         List<Document> docs, String servedParty) {
+        Address partyAddress = partyDetails.getIsAddressConfidential() == YesOrNo.Yes ?
+            Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build() : partyDetails.getAddress();
         // Sends post
-        return sendBulkPrint(caseData, authorisation, docs, partyDetails.getAddress(),
+        return sendBulkPrint(caseData, authorisation, docs, partyAddress,
                              partyDetails.getLabelForDynamicList(), servedParty
         );
     }
