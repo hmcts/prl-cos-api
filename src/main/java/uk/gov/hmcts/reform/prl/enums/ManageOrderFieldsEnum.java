@@ -50,7 +50,6 @@ public enum ManageOrderFieldsEnum {
     whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
     isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
-    otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
     selectTypeOfOrder("selectTypeOfOrder"),

@@ -18,6 +18,7 @@ public enum ServeOrderFieldsEnum {
     deliveryByOptionsCA("deliveryByOptionsCA"),
     postalInformationCA("postalInformationCA"),
     emailInformationCA("emailInformationCA"),
+    otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
     servingRespondentsOptionsDA("servingRespondentsOptionsDA"),
     serveOtherPartiesDA("serveOtherPartiesDA"),
     deliveryByOptionsDA("deliveryByOptionsDA"),
