@@ -2656,9 +2656,14 @@ public class ManageOrderService {
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
 
-            if (ordersHearingDetails.size() == 1) {
+            List<Element<HearingData>> hearingsWithOptionsSelected = ordersHearingDetails.stream()
+                .filter(elem -> null != elem.getValue().getHearingDateConfirmOptionEnum()).toList();
+
+            if (hearingsWithOptionsSelected.size() == 0) {
+                isMultipleHearingSelected = null;
+            } else if (hearingsWithOptionsSelected.size() == 1) {
                 hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum().toString();
-            } else if (!ordersHearingDetails.isEmpty()) {
+            } else if (hearingsWithOptionsSelected.size() > 1) {
                 hearingOptionSelected = WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
                 isMultipleHearingSelected = YES;
             }
