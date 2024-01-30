@@ -47,7 +47,6 @@ public enum ManageOrderFieldsEnum {
     isHearingPageNeeded("isHearingPageNeeded"),
     postalInformationCA("postalInformationCA"),
     cafcassCymruDocuments("cafcassCymruDocuments"),
-    draftOrdersDynamicList("draftOrdersDynamicList"),
     previewDraftOrderWelsh("previewDraftOrderWelsh"),
     whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
@@ -304,6 +303,8 @@ public enum ManageOrderFieldsEnum {
     nameOfLaToReviewOrder("nameOfLaToReviewOrder"),
     manageOrdersDocumentToAmend("manageOrdersDocumentToAmend"),
     draftOrderOptions("draftOrderOptions"),
+    legalRepInstructionsPlaceHolder("legalRepInstructionsPlaceHolder"),
+    editOrderTextInstructions("editOrderTextInstructions"),
     orderNameForWA("orderNameForWA");
 
     private final String value;
