@@ -28,7 +28,7 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
 
     @Autowired
     @Lazy
-    private RespondentEventsChecker respondentEventsChecker;
+    RespondentEventsChecker respondentEventsChecker;
 
     @Override
     public boolean isStarted(PartyDetails respondingParty) {

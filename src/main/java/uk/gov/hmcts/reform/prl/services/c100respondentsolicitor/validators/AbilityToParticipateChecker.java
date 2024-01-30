@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytoparticipate.AbilityToParticipate;
@@ -65,9 +65,9 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
         if (abilityToParticipate.isPresent()) {
             fields.add(ofNullable(abilityToParticipate.get().getFactorsAffectingAbilityToParticipate()));
 
-            Optional<YesNoDontKnow> abilityToParticipateYesOrNo = ofNullable(abilityToParticipate.get().getFactorsAffectingAbilityToParticipate());
+            Optional<YesOrNo> abilityToParticipateYesOrNo = ofNullable(abilityToParticipate.get().getFactorsAffectingAbilityToParticipate());
             fields.add(abilityToParticipateYesOrNo);
-            if (abilityToParticipateYesOrNo.isPresent() && YesNoDontKnow.yes.equals(abilityToParticipateYesOrNo.get())) {
+            if (abilityToParticipateYesOrNo.isPresent() && YesOrNo.Yes.equals(abilityToParticipateYesOrNo.get())) {
                 fields.add(ofNullable(abilityToParticipate.get().getProvideDetailsForFactorsAffectingAbilityToParticipate()));
             }
         }
