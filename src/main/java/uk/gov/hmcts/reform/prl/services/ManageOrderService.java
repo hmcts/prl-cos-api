@@ -1417,8 +1417,6 @@ public class ManageOrderService {
     }
 
     private void servedFL401Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
-        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
-            .getServingRespondentsOptionsDA();
         YesOrNo otherPartiesServed = No;
         List<Element<PostalInformation>> postalInformation = null;
         List<Element<EmailInformation>> emailInformation = null;
@@ -1435,6 +1433,16 @@ public class ManageOrderService {
             emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get(EMAIL);
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
+        if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
+            .getServeOrderDetails().getServedParties()) {
+            servedParties.addAll(order.getValue()
+                                     .getServeOrderDetails().getServedParties());
+            servedParties = servedParties.stream()
+                .distinct()
+                .toList();
+        }
+        SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
+            .getServingRespondentsOptionsDA();
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(SERVING_RESPONDENTS_OPTIONS, servingRespondentsOptions);
         servedOrderDetails.put(SERVED_PARTIES, servedParties);
