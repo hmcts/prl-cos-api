@@ -240,11 +240,11 @@ public class ManageOrdersController {
             // The following can be removed or utilised based on requirement
             /* final CaseDetails caseDetails = callbackRequest.getCaseDetails();
             manageOrderEmailService.sendEmailToCafcassAndOtherParties(caseDetails);
-            manageOrderEmailService.sendEmailToApplicantAndRespondent(caseDetails);
             manageOrderEmailService.sendFinalOrderIssuedNotification(caseDetails); */
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
+            cleanUpSelectedManageOrderOptions(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
             caseDataUpdated.put(STATE, caseData.getState());
             coreCaseDataService.triggerEvent(
@@ -278,6 +278,7 @@ public class ManageOrdersController {
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
+
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -310,9 +311,8 @@ public class ManageOrdersController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             //Added below fields for WA purpose
-            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData));
+            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
-            cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
