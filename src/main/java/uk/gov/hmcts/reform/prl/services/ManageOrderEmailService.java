@@ -352,7 +352,9 @@ public class ManageOrderEmailService {
                     dynamicDataForEmail
                 );
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())
-                && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(manageOrders.getServingRespondentsOptionsCA())) {
+                && (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(manageOrders.getServingRespondentsOptionsCA())
+                || SoaSolicitorServingRespondentsEnum.courtBailiff.equals(manageOrders.getServingRespondentsOptionsCA())
+                || SoaSolicitorServingRespondentsEnum.courtAdmin.equals(manageOrders.getServingRespondentsOptionsCA()))) {
                 log.info("*** CA personal service email notifications ***");
                 handleSolicitorPersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail);
             }
