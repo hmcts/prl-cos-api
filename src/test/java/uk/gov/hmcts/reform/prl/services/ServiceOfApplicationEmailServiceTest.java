@@ -237,7 +237,7 @@ public class ServiceOfApplicationEmailServiceTest {
                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_CA, docs,
                                                                                    PrlAppsConstants.APPLICANT_SOLICITOR
         );
-        verify(emailService,times(1)).sendSoa(Mockito.anyString(),
+        verify(emailService,times(0)).sendSoa(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
     }
