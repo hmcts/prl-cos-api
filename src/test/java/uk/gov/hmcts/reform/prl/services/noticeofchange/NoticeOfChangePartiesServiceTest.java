@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.noticeofchange;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -595,7 +594,6 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    @Ignore
     public void testNocRequestSubmittedForFL401RespondentSolicitor() {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[FL401RESPONDENTSOLICITOR]")
@@ -651,10 +649,10 @@ public class NoticeOfChangePartiesServiceTest {
             Organisations.builder().organisationIdentifier("test").name("test").build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-            caseData.toBuilder().respondentsFL401(updPartyDetails).build(),
-            0,
-            PartyRole.Representing.DARESPONDENTSOLICITOR,
-            true
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
         )).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -674,7 +672,6 @@ public class NoticeOfChangePartiesServiceTest {
     }
 
     @Test
-    @Ignore
     public void testNocRequestSubmittedForFL401ApplicantSolicitor() throws JsonProcessingException {
         DynamicListElement dynamicListElement = DynamicListElement.builder()
             .code("[APPLICANTSOLICITOR]")
@@ -728,10 +725,10 @@ public class NoticeOfChangePartiesServiceTest {
                 OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
         when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
-            caseData.toBuilder().applicantsFL401(updPartyDetails).build(),
-            0,
-            PartyRole.Representing.DAAPPLICANTSOLICITOR,
-            true
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
         )).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
