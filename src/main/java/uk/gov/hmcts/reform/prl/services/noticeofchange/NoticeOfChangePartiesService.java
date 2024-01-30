@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.noticeofchange;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -262,22 +261,11 @@ public class NoticeOfChangePartiesService {
             changeOrganisationRequest.getOrganisationToAdd().getOrganisationID()
         );
 
-        try {
-            log.info("OrgSolicitors ===>" + objectMapper.writeValueAsString(orgSolicitors));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-
         Organisations organisations =
             organisationService.getOrganisationDetails(
                 systemAuthorisation,
                 changeOrganisationRequest.getOrganisationToAdd().getOrganisationID()
             );
-        try {
-            log.info("Organisations found as  ===>" + objectMapper.writeValueAsString(organisations));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
 
         Optional<SolicitorUser> solicitorDetails = Optional.empty();
         if (null != orgSolicitors
