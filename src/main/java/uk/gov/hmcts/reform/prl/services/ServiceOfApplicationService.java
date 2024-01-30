@@ -724,11 +724,12 @@ public class ServiceOfApplicationService {
             INTERNAL_UPDATE_ALL_TABS,
             caseDataMap
         );
-
+        String confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX,
+                                                manageCaseUrl + "/" + caseData.getId() + "/#Service of application");
         log.info("Confidential details are present, case needs to be reviewed and served later");
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIDENTIAL_CONFIRMATION_HEADER)
-                      .confirmationBody(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX).build());
+                      .confirmationBody(confirmationBody).build());
     }
 
     private List<Element<EmailNotificationDetails>> sendNotificationsToCitizenApplicantsC100(String authorization,
