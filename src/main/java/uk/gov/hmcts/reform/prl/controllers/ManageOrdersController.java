@@ -245,7 +245,6 @@ public class ManageOrdersController {
             //SNI-4330 fix
             //update caseSummaryTab with latest state
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
-            caseDataUpdated.put(STATE, caseData.getState());
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
