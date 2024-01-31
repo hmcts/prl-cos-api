@@ -50,15 +50,8 @@ public class ServiceOfApplicationEmailService {
     private final SendgridService sendgridService;
 
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
-                                                                              PartyDetails partyDetails, EmailTemplateNames templateName,
+                                                                              PartyDetails partyDetails,
                                                                               List<Document> docs,String servedParty) throws Exception {
-        /*emailService.sendSoa(
-            partyDetails.getSolicitorEmail(),
-            templateName,
-            buildApplicantSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName()
-                + " " + partyDetails.getRepresentativeLastName()),
-            LanguagePreference.getPreferenceLanguage(caseData)
-        );*/
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         EmailUtils.getEmailProps(null, false, partyDetails.getRepresentativeFullName(),
                                                                                  null, caseData.getApplicantCaseName(),

@@ -584,7 +584,8 @@ public class ServiceOfApplicationService {
         return reLetters;
     }
 
-    private List<Document> getCoverLettersForDaApplicantSolicitorPersonalService(CaseData caseData, String authorization) {
+    private List<Document> getCoverLettersAndRespondentPacksForDaApplicantSolicitor(CaseData caseData, String authorization,
+                                                                                    List<Document> packA, List<Document> packB) {
         List<Document> reLetters = new ArrayList<>();
         Element<PartyDetails> respondent = Element.<PartyDetails>builder()
             .id(caseData.getRespondentsFL401().getPartyId())
@@ -600,6 +601,21 @@ public class ServiceOfApplicationService {
             reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
                                                    PRL_LET_ENG_FL401_RE3
             ));
+        }
+        if (CollectionUtils.isNotEmpty(packA) && CollectionUtils.isNotEmpty(packB)) {
+            for (Document packBDocument : packB) {
+                boolean isPresentInPackA = false;
+                for (Document packADocument : packA) {
+                    if (isNotEmpty(packADocument) && isNotEmpty(packBDocument)
+                        && packADocument.getDocumentBinaryUrl().equalsIgnoreCase(packBDocument.getDocumentBinaryUrl())) {
+                        isPresentInPackA = true;
+                        break;
+                    }
+                }
+                if (!isPresentInPackA) {
+                    reLetters.add(packBDocument);
+                }
+            }
         }
         return reLetters;
     }
@@ -994,23 +1010,12 @@ public class ServiceOfApplicationService {
                 )));*/
                 //Respondent's pack
                 log.error("#SOA TO DO With notice add RE3 letter, without notice add RE2, gov notification not required so remove it");
-                finalDocumentList.addAll(getCoverLettersForDaApplicantSolicitorPersonalService(caseData, authorization));
-                finalDocumentList.addAll(packB);
-                if (CollectionUtils.isNotEmpty(packA)) {
-                    for (Document packADocument : packA) {
-                        packB.forEach(packBDocument -> {
-                            if (isNotEmpty(packADocument) && isNotEmpty(packBDocument)
-                                && !packADocument.getDocumentBinaryUrl().equalsIgnoreCase(packBDocument.getDocumentBinaryUrl())) {
-                                finalDocumentList.add(packADocument);
-                            }
-                        });
-                    }
-                }
+                finalDocumentList.addAll(getCoverLettersAndRespondentPacksForDaApplicantSolicitor(caseData, authorization, packA, packB));
+                finalDocumentList.addAll(packA);
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
                     authorization,
                     caseData,
                     applicant,
-                    EmailTemplateNames.APPLICANT_SOLICITOR_DA,
                     finalDocumentList,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 )));
@@ -2057,11 +2062,12 @@ public class ServiceOfApplicationService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
+        final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
+
         if (unServedApplicantPack != null) {
             sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                      unServedApplicantPack, bulkPrintDetails);
         }
-        final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         if (unServedRespondentPack != null) {
             if (null == unServedRespondentPack.getPersonalServiceBy()) {
                 final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
@@ -2301,7 +2307,7 @@ public class ServiceOfApplicationService {
         final List<Element<String>> partyIds = unServedApplicantPack.getPartyIds();
         final List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
             partyIds);
-
+        boolean emailAlreadySent = false;
         log.info("Sending notification for Applicants ====> {}", unServedApplicantPack);
         log.info("Case created by {}", CaseUtils.isCaseCreatedByCitizen(caseData));
         List<Document> packDocs = new ArrayList<>();
@@ -2313,17 +2319,45 @@ public class ServiceOfApplicationService {
                 packDocs.add(generateAccessCodeLetter(authorization, caseData, applicant, null, PRL_LET_ENG_AP8));
             }
             log.info("**8 pack docs {}", packDocs);
+        } else if (unServedApplicantPack.getPersonalServiceBy() != null
+            && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
+            unServedApplicantPack.getPersonalServiceBy())) {
+            if (isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack())) {
+                if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                    if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                        //#SOA TO DO... for citizen created case to send email to applicantLegalRepresentative
+                    } else {
+                        emailNotificationDetails.addAll(sendNotificationToFl401Solicitor(
+                            caseData,
+                            authorization,
+                            unwrapElements(unServedApplicantPack.getPackDocument()),
+                            unwrapElements(caseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument())
+                        ));
+                    }
+                    emailAlreadySent = true;
+                }
+            }
         }
         packDocs.addAll(unwrapElements(unServedApplicantPack.getPackDocument()));
-        if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-            //#SOA TO DO... Add a new method to handle after check emails
-            emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(authorization,applicantList,caseData,
-                                                                             bulkPrintDetails, packDocs));
-        } else {
-            emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(caseData, authorization, applicantList,
-                                                                                 packDocs,
-                                                                                 SERVED_PARTY_APPLICANT_SOLICITOR
-            ));
+        if (!emailAlreadySent) {
+            if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                //#SOA TO DO... Add a new method to handle after check emails
+                emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
+                    authorization,
+                    applicantList,
+                    caseData,
+                    bulkPrintDetails,
+                    packDocs
+                ));
+            } else {
+                emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
+                    caseData,
+                    authorization,
+                    applicantList,
+                    packDocs,
+                    SERVED_PARTY_APPLICANT_SOLICITOR
+                ));
+            }
         }
     }
 
