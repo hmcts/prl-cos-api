@@ -1435,12 +1435,13 @@ public class ManageOrderService {
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
             .getServeOrderDetails().getServedParties()) {
-            List<ServedParties> servedPartiesExisting = order.getValue()
+            List<String> servedPartiesExisting = order.getValue()
                 .getServeOrderDetails().getServedParties().stream()
-                .map(element -> element.getValue())
+                .map(element -> element.getValue().getPartyId())
                 .collect(Collectors.toList());
+            log.info("existing ids {} ",servedPartiesExisting);
             List<Element<ServedParties>> amendedServeParties = servedParties.stream()
-                .filter(element -> !servedPartiesExisting.contains(element))
+                .filter(element -> !servedPartiesExisting.contains(element.getValue().getPartyId()))
                 .collect(Collectors.toList());
             amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
             servedParties = amendedServeParties;
@@ -1509,16 +1510,15 @@ public class ManageOrderService {
         }
 
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
-        log.info("order detail data {}", order);
-        log.info("order list {}", orders);
         if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
             .getServeOrderDetails().getServedParties()) {
-            List<ServedParties> servedPartiesExisting = order.getValue()
+            List<String> servedPartiesExisting = order.getValue()
                 .getServeOrderDetails().getServedParties().stream()
-                .map(element -> element.getValue())
+                .map(element -> element.getValue().getPartyId())
                 .collect(Collectors.toList());
+            log.info("existing ids {} ",servedPartiesExisting);
             List<Element<ServedParties>> amendedServeParties = servedParties.stream()
-                .filter(element -> !servedPartiesExisting.contains(element))
+                .filter(element -> !servedPartiesExisting.contains(element.getValue().getPartyId()))
                 .collect(Collectors.toList());
             amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
             servedParties = amendedServeParties;
