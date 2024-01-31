@@ -2084,6 +2084,7 @@ public class ServiceOfApplicationService {
                                                                                                  unServedRespondentPackDocument)
                                                                                              .build())
                                                                                      .build()).build();
+                            log.info("unServedRespondentPack ===> " + caseData.getServiceOfApplication().getUnServedRespondentPack());
                         }
                     }
                 }
@@ -2338,6 +2339,7 @@ public class ServiceOfApplicationService {
             caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()))) {
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
         } else {
+            log.info("unservedRespondentPack ===> ", caseData.getServiceOfApplication().getUnServedRespondentPack());
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, caseData.getServiceOfApplication().getUnServedRespondentPack());
         }
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
