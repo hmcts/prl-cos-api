@@ -24,8 +24,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -67,6 +69,10 @@ public class CaseUtils {
     private CaseUtils() {
 
     }
+
+    private static final String BY_EMAIL = "By email";
+    private static final String BY_EMAIL_AND_POST = "By email and post";
+    private static final String BY_POST = "By post";
 
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
@@ -535,5 +541,21 @@ public class CaseUtils {
             return YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
         }
         return false;
+    }
+
+    public static String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                    List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        String temp = null;
+        if (null != emailNotificationDetails && !emailNotificationDetails.isEmpty()) {
+            temp = BY_EMAIL;
+        }
+        if (null != bulkPrintDetails && !bulkPrintDetails.isEmpty()) {
+            if (null != temp) {
+                temp = BY_EMAIL_AND_POST;
+            } else {
+                temp = BY_POST;
+            }
+        }
+        return temp;
     }
 }
