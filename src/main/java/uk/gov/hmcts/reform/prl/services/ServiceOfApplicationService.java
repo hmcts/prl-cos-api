@@ -2026,7 +2026,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
     }
 
-    public ServedApplicationDetails sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
+    public CaseData sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
 
         log.info("Inside sendNotificationsForUnServedPacks method");
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
@@ -2105,13 +2105,20 @@ public class ServiceOfApplicationService {
         checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
-
-        return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
-            .servedBy(userService.getUserDetails(authorization).getFullName())
-            .servedAt(formatter)
-            .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
-            .whoIsResponsible(COURT)
-            .bulkPrintDetails(bulkPrintDetails).build();
+        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
+        if (caseData.getFinalServedApplicationDetailsList() != null) {
+            finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
+        } else {
+            finalServedApplicationDetailsList = new ArrayList<>();
+        }
+        finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+                                                          .servedBy(userService.getUserDetails(authorization).getFullName())
+                                                          .servedAt(formatter)
+                                                          .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
+                                                          .whoIsResponsible(COURT)
+                                                          .bulkPrintDetails(bulkPrintDetails).build()));
+        caseData.setFinalServedApplicationDetailsList(finalServedApplicationDetailsList);
+        return caseData;
     }
 
     private void sendNotificationApplicantLegalRepPersonal(CaseData caseData, String authorization,
@@ -2338,9 +2345,6 @@ public class ServiceOfApplicationService {
             || SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
             caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy()))) {
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
-        } else {
-            log.info("unservedRespondentPack ===> ", caseData.getServiceOfApplication().getUnServedRespondentPack());
-            caseDataMap.put(UNSERVED_RESPONDENT_PACK, caseData.getServiceOfApplication().getUnServedRespondentPack());
         }
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
         caseDataMap.put(UNSERVED_LA_PACK, null);
@@ -2391,19 +2395,13 @@ public class ServiceOfApplicationService {
     private ResponseEntity<SubmittedCallbackResponse> servePacksWithConfidentialDetails(String authorisation, CaseData caseData,
                                                                                         Map<String, Object> caseDataMap) {
         final ResponseEntity<SubmittedCallbackResponse> response;
-        List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
-        if (caseData.getFinalServedApplicationDetailsList() != null) {
-            finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
-        } else {
-            finalServedApplicationDetailsList = new ArrayList<>();
-        }
-        finalServedApplicationDetailsList.add(element(sendNotificationsForUnServedPacks(
+        caseData = sendNotificationsForUnServedPacks(
             caseData,
             authorisation
-        )));
+        );
 
-        caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
-
+        caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, caseData.getFinalServedApplicationDetailsList());
+        caseDataMap.put(UNSERVED_RESPONDENT_PACK, caseData.getServiceOfApplication().getUnServedRespondentPack());
         response = ok(SubmittedCallbackResponse.builder()
                           .confirmationHeader(APPLICATION_SERVED_HEADER)
                           .confirmationBody(

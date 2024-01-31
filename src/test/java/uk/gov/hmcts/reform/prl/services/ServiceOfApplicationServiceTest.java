@@ -1765,12 +1765,12 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService
+        CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization);
-        assertNotNull(servedApplicationDetails);
-        assertEquals("solicitorResp test", servedApplicationDetails.getServedBy());
-        assertEquals("By email and post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
+        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
     @Test
@@ -1842,12 +1842,12 @@ public class ServiceOfApplicationServiceTest {
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
-        ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService
+        CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization);
-        assertNotNull(servedApplicationDetails);
-        assertEquals("solicitorResp test", servedApplicationDetails.getServedBy());
-        assertEquals("By post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
     @Test
@@ -1913,12 +1913,12 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(c100CaseInviteService.generateCaseInvite(any(),any()))
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
-        ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService
+        CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization);
-        assertNotNull(servedApplicationDetails);
-        assertEquals("solicitorResp test", servedApplicationDetails.getServedBy());
-        assertEquals("By post", servedApplicationDetails.getModeOfService());
-        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+        assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
+        assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
+        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
     @Test
