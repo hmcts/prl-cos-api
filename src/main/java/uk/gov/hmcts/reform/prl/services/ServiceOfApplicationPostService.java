@@ -48,7 +48,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILEN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -71,7 +70,6 @@ public class ServiceOfApplicationPostService {
                                                         String authorisation,
                                                         PartyDetails partyDetails,
                                                         List<Document> docs, String servedParty) {
-
         // Sends post
         return sendBulkPrint(caseData, authorisation, docs, partyDetails.getAddress(),
                              partyDetails.getLabelForDynamicList(), servedParty
