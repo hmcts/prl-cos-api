@@ -1506,6 +1506,14 @@ public class ManageOrderService {
 
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
+        if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
+            .getServeOrderDetails().getServedParties()) {
+            servedParties.addAll(order.getValue()
+                                     .getServeOrderDetails().getServedParties());
+            servedParties = servedParties.stream()
+                .distinct()
+                .toList();
+        }
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
         servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
         servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail);
