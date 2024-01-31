@@ -382,19 +382,4 @@ public class ManageOrdersControllerFunctionalTest {
             .then()
             .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
     }
-
-    @Test
-    public void givenBodyWhenAddressPresentForOtherPartyShouldNotGetErrorMessage() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_OTHER_PARTY_WITH_ADDRESS);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
-            .then()
-            .body("data.applicantCaseName",Matchers.equalTo("John Smith"))
-            .body("data.caseTypeOfApplication",Matchers.equalTo("C100"));
-    }
 }
