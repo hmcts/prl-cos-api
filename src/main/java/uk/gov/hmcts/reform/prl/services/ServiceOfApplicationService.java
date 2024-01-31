@@ -988,7 +988,7 @@ public class ServiceOfApplicationService {
                     authorization,
                     caseData.getApplicantsFL401().getSolicitorEmail(),
                     finalDocumentList,
-                    SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                    SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
                     dynamicData,
                     PRL_COURT_ADMIN
                 )));
@@ -2070,7 +2070,6 @@ public class ServiceOfApplicationService {
                         .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
                         || SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
                         .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-                        log.info("unServedRespondentPack ===> " + unServedRespondentPack.getPersonalServiceBy());
                         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                             List<Element<Document>> unServedRespondentPackDocument = new ArrayList<>();
                             unServedRespondentPackDocument.addAll(wrapElements(
@@ -2084,7 +2083,6 @@ public class ServiceOfApplicationService {
                                                                                                  unServedRespondentPackDocument)
                                                                                              .build())
                                                                                      .build()).build();
-                            log.info("unServedRespondentPack ===> " + caseData.getServiceOfApplication().getUnServedRespondentPack());
                         }
                     }
                 }
@@ -2141,8 +2139,7 @@ public class ServiceOfApplicationService {
     private void checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization,
                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
-        log.info("unServedLaPack ===> " + unServedLaPack);
-        if (unServedLaPack != null) {
+        if (unServedLaPack != null && CollectionUtils.isNotEmpty(unServedLaPack.getPackDocument())) {
             try {
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                     .sendEmailNotificationToLocalAuthority(
