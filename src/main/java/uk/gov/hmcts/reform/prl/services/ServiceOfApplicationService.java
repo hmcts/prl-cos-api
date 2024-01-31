@@ -135,13 +135,9 @@ public class ServiceOfApplicationService {
     public static final String EMAIL = "email";
     public static final String POST = "post";
     public static final String COURT = "Court";
-    public static final String BY_EMAIL = "By email";
-    public static final String BY_EMAIL_AND_POST = "By email and post";
-    public static final String BY_POST = "By post";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
     public static final String PRL_COURT_ADMIN = "PRL Court admin";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
-    public static final String SERVICE_OF_APPLICATION = "#Service of application";
     public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
 
     @Value("${xui.url}")
@@ -355,7 +351,7 @@ public class ServiceOfApplicationService {
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
-            .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
+            .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(whoIsResponsibleForServing)
             .bulkPrintDetails(bulkPrintDetails).build();
     }
@@ -427,8 +423,7 @@ public class ServiceOfApplicationService {
                 packHiDocs.addAll(c100StaticDocs);
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
-                    + PrlAppsConstants.URL_STRING + SERVICE_OF_APPLICATION);
+                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
 
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                          .sendEmailUsingTemplateWithAttachments(
@@ -503,8 +498,7 @@ public class ServiceOfApplicationService {
                                                                                       true);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
-            + PrlAppsConstants.URL_STRING + SERVICE_OF_APPLICATION);
+        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                    caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                                                    packjDocs,
@@ -911,22 +905,6 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                    List<Element<BulkPrintDetails>> bulkPrintDetails) {
-        String temp = null;
-        if (null != emailNotificationDetails && !emailNotificationDetails.isEmpty()) {
-            temp = BY_EMAIL;
-        }
-        if (null != bulkPrintDetails && !bulkPrintDetails.isEmpty()) {
-            if (null != temp) {
-                temp = BY_EMAIL_AND_POST;
-            } else {
-                temp = BY_POST;
-            }
-        }
-        return temp;
-    }
-
     private List<Element<EmailNotificationDetails>> sendNotificationToFl401Solicitor(CaseData caseData, String authorization, List<Document> packA,
                                                                                      List<Document> packB) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
@@ -996,8 +974,7 @@ public class ServiceOfApplicationService {
                     );
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-                    dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
-                        + PrlAppsConstants.URL_STRING + SERVICE_OF_APPLICATION);
+                    dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailUsingTemplateWithAttachments(
                                                                  authorization, party.get().getValue().getSolicitorEmail(),
@@ -1202,8 +1179,7 @@ public class ServiceOfApplicationService {
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                             C1A_BLANK_DOCUMENT_FILENAME))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                            C7_BLANK_DOCUMENT_FILENAME))
-                        .collect(Collectors.toList()));
+                            C7_BLANK_DOCUMENT_FILENAME)).toList());
         return docs;
     }
 
@@ -1214,8 +1190,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getSoaSelectedOrders(caseData));
         // Annex Y to be excluded
         docs.addAll(staticDocs.stream()
-            .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME))
-            .collect(Collectors.toList()));
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_C9_PERSONAL_SERVICE_FILENAME)).toList());
         return docs;
     }
 
@@ -2019,7 +1994,7 @@ public class ServiceOfApplicationService {
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
-            .modeOfService(getModeOfService(emailNotificationDetails, bulkPrintDetails))
+            .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
             .whoIsResponsible(COURT)
             .bulkPrintDetails(bulkPrintDetails).build();
     }
@@ -2040,38 +2015,6 @@ public class ServiceOfApplicationService {
             } catch (IOException e) {
                 log.error("Failed to serve application via email notification to La {}", e.getMessage());
             }
-        }
-    }
-
-    // Use this method once respondent packs personally served to respondents by court admin or bailiff
-    private void checkAndServeRespondentPacksCaOrBailiffPersonalService(CaseData caseData,
-                                                                        List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                                        List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                                        SoaPack unServedRespondentPack) {
-        if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-            emailNotificationDetails.add(element(EmailNotificationDetails.builder()
-                                                     .emailAddress(caseData.getApplicants().get(0).getValue().getSolicitorEmail())
-                                                     .servedParty(PRL_COURT_ADMIN)
-                                                     .docs(unServedRespondentPack.getPackDocument())
-                                                     .attachedDocs(String.join(",", unServedRespondentPack
-                                                         .getPackDocument().stream()
-                                                         .map(Element::getValue)
-                                                         .map(Document::getDocumentFileName).toList()))
-                                                     .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
-                                                                    .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
-                                                     .build()));
-        } else if (SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
-            .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-            bulkPrintDetails.add(element(BulkPrintDetails.builder()
-                                             .servedParty(PRL_COURT_ADMIN)
-                                             .printedDocs(String.join(",", unServedRespondentPack
-                                                 .getPackDocument().stream()
-                                                 .map(Element::getValue)
-                                                 .map(Document::getDocumentFileName).toList()))
-                                             .printDocs(unServedRespondentPack.getPackDocument())
-                                             .timeStamp(DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss")
-                                                            .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
-                                             .build()));
         }
     }
 
