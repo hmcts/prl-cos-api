@@ -1916,7 +1916,8 @@ public class ServiceOfApplicationService {
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
         if (unServedApplicantPack != null) {
             sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
-                                                     unServedApplicantPack, bulkPrintDetails);
+                                                     unServedApplicantPack, bulkPrintDetails
+            );
         }
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
         if (unServedRespondentPack != null) {
@@ -1930,38 +1931,71 @@ public class ServiceOfApplicationService {
                 final List<Document> packR = unwrapElements(unServedRespondentPack.getPackDocument());
                 if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                     sendNotificationsToCitizenRespondentsC100(authorization, respondentList, caseData, bulkPrintDetails,
-                                                              packR, false);
+                                                              packR, false
+                    );
                 } else {
                     // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
-                    sendNotificationToRespondentNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails,
-                                                            respondentList, packR, packR);
+                    sendNotificationToRespondentNonPersonal(caseData,
+                                                            authorization,
+                                                            emailNotificationDetails,
+                                                            bulkPrintDetails,
+                                                            respondentList,
+                                                            packR,
+                                                            packR
+                    );
                 }
 
-            try {
-                log.info("partyIds before unwrapping ===>" + objectMapper.writeValueAsString(partyIds));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
-            final List<String> partyDetailsIds = ElementUtils.unwrapElements(partyIds);
-            try {
-                log.info("partyDetailsIds after unwrapping ===>" + objectMapper.writeValueAsString(partyDetailsIds));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
-            for (String partyId : partyDetailsIds) {
-                log.info("Executing now for partyId {}", partyId);
-                // if (caseData.getCaseTypeOfApplication().equals("C100")) {
-                if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                    for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                        log.info("Executing now for respondent and respondent.getId() is {}", respondent.getId());
-                        log.info("Verifying the value for respondent and respondent.getValue().getPartyId() {}",
-                                 respondent.getValue().getPartyId()
-                        );
+                try {
+                    log.info("partyIds before unwrapping ===>" + objectMapper.writeValueAsString(partyIds));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+                final List<String> partyDetailsIds = ElementUtils.unwrapElements(partyIds);
+                try {
+                    log.info("partyDetailsIds after unwrapping ===>" + objectMapper.writeValueAsString(partyDetailsIds));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
+                for (String partyId : partyDetailsIds) {
+                    log.info("Executing now for partyId {}", partyId);
+                    // if (caseData.getCaseTypeOfApplication().equals("C100")) {
+                    if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                        for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                            log.info("Executing now for respondent and respondent.getId() is {}", respondent.getId());
+                            log.info(
+                                "Verifying the value for respondent and respondent.getValue().getPartyId() {}",
+                                respondent.getValue().getPartyId()
+                            );
 //                        if (Objects.equals(respondent.getValue().getPartyId().toString(), partyId.toString())
 //                            && respondent.getValue().getIsAddressConfidential().equals(Yes)) {
-                        if (respondent.getValue().getPartyId() != null // I have doubt here. this partyId must be respondent.getId()
-                            && String.valueOf(respondent.getId()).equalsIgnoreCase(partyId)
-                            && YesOrNo.Yes.equals(respondent.getValue().getIsAddressConfidential())) {
+                            if (respondent.getValue().getPartyId() != null // I have doubt here. this partyId must be respondent.getId()
+                                && String.valueOf(respondent.getId()).equalsIgnoreCase(partyId)
+                                && YesOrNo.Yes.equals(respondent.getValue().getIsAddressConfidential())) {
+                                try {
+                                    log.info("bulkPrintDetails before changes ===>" + objectMapper.writeValueAsString(
+                                        bulkPrintDetails));
+                                } catch (JsonProcessingException e) {
+                                    log.info("error");
+                                }
+                                for (Element<BulkPrintDetails> bulkPrintDetail : bulkPrintDetails) {
+                                    bulkPrintDetail.getValue().toBuilder().postalAddress(Address.builder().addressLine1(
+                                        THIS_INFORMATION_IS_CONFIDENTIAL).build()).build();
+                                    //Doubt here it won't work
+                                }
+                                try {
+                                    log.info("bulkPrintDetails after changes ===>" + objectMapper.writeValueAsString(
+                                        bulkPrintDetails));
+                                } catch (JsonProcessingException e) {
+                                    log.info("error");
+                                }
+                            }
+                        }
+                    } else {
+                        // if (Objects.equals(caseData.getRespondentsFL401().getPartyId().toString(), partyId.toString())
+                        if (Objects.equals(
+                            String.valueOf(caseData.getRespondentsFL401().getPartyId()),
+                            partyId
+                        ) && Yes.equals(caseData.getRespondentsFL401().getIsAddressConfidential())) {
                             try {
                                 log.info("bulkPrintDetails before changes ===>" + objectMapper.writeValueAsString(
                                     bulkPrintDetails));
@@ -1971,7 +2005,6 @@ public class ServiceOfApplicationService {
                             for (Element<BulkPrintDetails> bulkPrintDetail : bulkPrintDetails) {
                                 bulkPrintDetail.getValue().toBuilder().postalAddress(Address.builder().addressLine1(
                                     THIS_INFORMATION_IS_CONFIDENTIAL).build()).build();
-                                //Doubt here it won't work
                             }
                             try {
                                 log.info("bulkPrintDetails after changes ===>" + objectMapper.writeValueAsString(
@@ -1981,33 +2014,9 @@ public class ServiceOfApplicationService {
                             }
                         }
                     }
-                } else {
-                    // if (Objects.equals(caseData.getRespondentsFL401().getPartyId().toString(), partyId.toString())
-                    if (Objects.equals(
-                        String.valueOf(caseData.getRespondentsFL401().getPartyId()),
-                        partyId
-                    ) && Yes.equals(caseData.getRespondentsFL401().getIsAddressConfidential())) {
-                        try {
-                            log.info("bulkPrintDetails before changes ===>" + objectMapper.writeValueAsString(
-                                bulkPrintDetails));
-                        } catch (JsonProcessingException e) {
-                            log.info("error");
-                        }
-                        for (Element<BulkPrintDetails> bulkPrintDetail : bulkPrintDetails) {
-                            bulkPrintDetail.getValue().toBuilder().postalAddress(Address.builder().addressLine1(
-                                THIS_INFORMATION_IS_CONFIDENTIAL).build()).build();
-                        }
-                        try {
-                            log.info("bulkPrintDetails after changes ===>" + objectMapper.writeValueAsString(
-                                bulkPrintDetails));
-                        } catch (JsonProcessingException e) {
-                            log.info("error");
-                        }
-                    }
                 }
-            }
-        } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
-            .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+            } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
+                .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                 // TO be covered for applicant legal rep personal service
             }
         }
