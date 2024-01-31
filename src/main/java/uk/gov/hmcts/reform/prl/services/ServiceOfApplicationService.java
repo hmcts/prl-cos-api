@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -70,6 +71,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -107,6 +109,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
@@ -1847,6 +1850,76 @@ public class ServiceOfApplicationService {
                 // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
                 sendNotificationToRespondentNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails,
                                                         respondentList, packR, packR);
+            }
+
+            try {
+                log.info("partyIds before unwrapping ===>" + objectMapper.writeValueAsString(partyIds));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
+            final List<String> partyDetailsIds = ElementUtils.unwrapElements(partyIds);
+            try {
+                log.info("partyDetailsIds after unwrapping ===>" + objectMapper.writeValueAsString(partyDetailsIds));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
+            for (String partyId : partyDetailsIds) {
+                log.info("Executing now for partyId {}", partyId);
+                // if (caseData.getCaseTypeOfApplication().equals("C100")) {
+                if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+                    for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                        log.info("Executing now for respondent and respondent.getId() is {}", respondent.getId());
+                        log.info("Verifying the value for respondent and respondent.getValue().getPartyId() {}",
+                                 respondent.getValue().getPartyId()
+                        );
+//                        if (Objects.equals(respondent.getValue().getPartyId().toString(), partyId.toString())
+//                            && respondent.getValue().getIsAddressConfidential().equals(Yes)) {
+                        if (respondent.getValue().getPartyId() != null // I have doubt here. this partyId must be respondent.getId()
+                            && String.valueOf(respondent.getId()).equalsIgnoreCase(partyId)
+                            && YesOrNo.Yes.equals(respondent.getValue().getIsAddressConfidential())) {
+                            try {
+                                log.info("bulkPrintDetails before changes ===>" + objectMapper.writeValueAsString(
+                                    bulkPrintDetails));
+                            } catch (JsonProcessingException e) {
+                                log.info("error");
+                            }
+                            for (Element<BulkPrintDetails> bulkPrintDetail : bulkPrintDetails) {
+                                bulkPrintDetail.getValue().toBuilder().postalAddress(Address.builder().addressLine1(
+                                    THIS_INFORMATION_IS_CONFIDENTIAL).build()).build();
+                                //Doubt here it won't work
+                            }
+                            try {
+                                log.info("bulkPrintDetails after changes ===>" + objectMapper.writeValueAsString(
+                                    bulkPrintDetails));
+                            } catch (JsonProcessingException e) {
+                                log.info("error");
+                            }
+                        }
+                    }
+                } else {
+                    // if (Objects.equals(caseData.getRespondentsFL401().getPartyId().toString(), partyId.toString())
+                    if (Objects.equals(
+                        String.valueOf(caseData.getRespondentsFL401().getPartyId()),
+                        partyId
+                    ) && Yes.equals(caseData.getRespondentsFL401().getIsAddressConfidential())) {
+                        try {
+                            log.info("bulkPrintDetails before changes ===>" + objectMapper.writeValueAsString(
+                                bulkPrintDetails));
+                        } catch (JsonProcessingException e) {
+                            log.info("error");
+                        }
+                        for (Element<BulkPrintDetails> bulkPrintDetail : bulkPrintDetails) {
+                            bulkPrintDetail.getValue().toBuilder().postalAddress(Address.builder().addressLine1(
+                                THIS_INFORMATION_IS_CONFIDENTIAL).build()).build();
+                        }
+                        try {
+                            log.info("bulkPrintDetails after changes ===>" + objectMapper.writeValueAsString(
+                                bulkPrintDetails));
+                        } catch (JsonProcessingException e) {
+                            log.info("error");
+                        }
+                    }
+                }
             }
         }
         // send notification for others

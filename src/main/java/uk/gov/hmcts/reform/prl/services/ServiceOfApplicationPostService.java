@@ -71,10 +71,9 @@ public class ServiceOfApplicationPostService {
                                                         String authorisation,
                                                         PartyDetails partyDetails,
                                                         List<Document> docs, String servedParty) {
-        Address partyAddress = partyDetails.getIsAddressConfidential() == YesOrNo.Yes ?
-            Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build() : partyDetails.getAddress();
+
         // Sends post
-        return sendBulkPrint(caseData, authorisation, docs, partyAddress,
+        return sendBulkPrint(caseData, authorisation, docs, partyDetails.getAddress(),
                              partyDetails.getLabelForDynamicList(), servedParty
         );
     }
