@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
@@ -34,17 +33,15 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.respondent;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CourtFinderService {
-
     public static final String FAMILY_COURT = "Family Courts";
     public static final String FAMILY_PUBLIC_LAW_CHILDREN_IN_CARE = "Family public law (children in care)";
     public static final String PAPER_PROCESS_INCLUDING_C_100_APPLICATIONS = "Paper process including C100 applications";
     public static final String FAMILY = "Family";
     public static final String C_100_APPLICATIONS = "C100 applications";
     public static final String CHILD = "child";
-    @Autowired
-    private CourtFinderApi courtFinderApi;
+    private final CourtFinderApi courtFinderApi;
 
     public Court getNearestFamilyCourt(CaseData caseData) throws NotFoundException {
         ServiceArea serviceArea = null;
@@ -197,7 +194,7 @@ public class CourtFinderService {
         return c.getPersonWhoLivesWithChild()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList())
+            .toList()
             .get(0);
 
     }
