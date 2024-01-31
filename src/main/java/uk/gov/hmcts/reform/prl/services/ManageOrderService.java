@@ -1506,6 +1506,8 @@ public class ManageOrderService {
 
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         Map<String, Object> servedOrderDetails = new HashMap<>();
+        log.info("order detail data {}", order);
+        log.info("order list {}", orders);
         if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
             .getServeOrderDetails().getServedParties()) {
             servedParties.addAll(order.getValue()
