@@ -72,6 +72,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
@@ -998,6 +999,7 @@ public class ServiceOfApplicationServiceTest {
             .id(12345L)
             .applicantCaseName("Test Case 45678")
             .applicantsFL401(partyDetails)
+            .respondentsFL401(partyDetails)
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
@@ -1012,7 +1014,10 @@ public class ServiceOfApplicationServiceTest {
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
                                                                        .surname("test").build());
-
+        List<Document> staticDocs = new ArrayList<>();
+        staticDocs.add(Document.builder().documentBinaryUrl("testUrl").documentFileName("Blank.pdf").build());
+        when(serviceOfApplicationPostService.getStaticDocs(anyString(),anyString()))
+            .thenReturn(staticDocs);
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
             authorization,

@@ -180,9 +180,10 @@ public class ServiceOfApplicationEmailServiceTest {
                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_CA, docs,
                                                                                    PrlAppsConstants.APPLICANT_SOLICITOR
         );
-        verify(emailService,times(1)).sendSoa(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(),Mockito.any());
+        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(),
+                                                                   Mockito.any(),
+                                                                   Mockito.anyString(), Mockito.any(), Mockito.anyString()
+        );
     }
 
     @Test

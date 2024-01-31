@@ -80,6 +80,8 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE1;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE2;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -368,9 +370,9 @@ public class ServiceOfApplicationService {
                     .build();
                 CaseInvite caseInvite = getCaseInvite(applicant.getId(), caseData.getCaseInvites());
                 if (Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
-                    generateAccessCodeLetter(authorization, caseData, applicant,caseInvite,Templates.PRL_LET_ENG_FL401_RE2);
+                    generateAccessCodeLetter(authorization, caseData, applicant, caseInvite, PRL_LET_ENG_FL401_RE2);
                 } else {
-                    generateAccessCodeLetter(authorization, caseData, applicant,caseInvite,Templates.PRL_LET_ENG_FL401_RE3);
+                    generateAccessCodeLetter(authorization, caseData, applicant, caseInvite, PRL_LET_ENG_FL401_RE3);
                 }
             } else {
                 getNotificationPack(caseData, PrlAppsConstants.C, c100StaticDocs);
@@ -530,7 +532,7 @@ public class ServiceOfApplicationService {
             .servedBy(PRL_COURT_ADMIN)
             .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(ZonedDateTime.now(ZoneId.of(
                 EUROPE_LONDON_TIME_ZONE))))
-            .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().toString())
+            .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
     }
@@ -555,7 +557,6 @@ public class ServiceOfApplicationService {
         if (attachLetters) {
             packdDocs.addAll(getCoverLettertsforDaCourtAdminCourtBailiffPersonalService(caseData, authorization));
         }
-
         packdDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.D, staticDocs));
         return packdDocs;
     }
@@ -566,8 +567,7 @@ public class ServiceOfApplicationService {
             .id(caseData.getRespondentsFL401().getPartyId())
             .value(caseData.getRespondentsFL401())
             .build();
-        boolean applyOrderWithoutGivingNoticeToRespondent = isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
-            && YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
+        boolean applyOrderWithoutGivingNoticeToRespondent = CaseUtils.isApplyOrderWithoutGivingNoticeToRespondent(caseData);
 
         if (applyOrderWithoutGivingNoticeToRespondent) {
             reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
@@ -578,7 +578,26 @@ public class ServiceOfApplicationService {
                                                    PRL_LET_ENG_FL401_RE1
             ));
         }
+        return reLetters;
+    }
 
+    private List<Document> getCoverLettersForDaApplicantSolicitorPersonalService(CaseData caseData, String authorization) {
+        List<Document> reLetters = new ArrayList<>();
+        Element<PartyDetails> respondent = Element.<PartyDetails>builder()
+            .id(caseData.getRespondentsFL401().getPartyId())
+            .value(caseData.getRespondentsFL401())
+            .build();
+        boolean applyOrderWithoutGivingNoticeToRespondent = CaseUtils.isApplyOrderWithoutGivingNoticeToRespondent(caseData);
+
+        if (applyOrderWithoutGivingNoticeToRespondent) {
+            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
+                                                   PRL_LET_ENG_FL401_RE2
+            ));
+        } else {
+            reLetters.add(generateAccessCodeLetter(authorization, caseData, respondent, null,
+                                                   PRL_LET_ENG_FL401_RE3
+            ));
+        }
         return reLetters;
     }
 
@@ -954,6 +973,7 @@ public class ServiceOfApplicationService {
                                                                                      List<Document> packB) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
+        List<Document> finalDocumentList = new ArrayList<>();
         if (applicant.getSolicitorEmail() != null) {
             try {
                 log.info(
@@ -961,22 +981,34 @@ public class ServiceOfApplicationService {
                     caseData.getId()
                 );
                 //Applicant's pack
-                emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
+                /*emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
                     authorization,
                     caseData,
                     applicant,
                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
                     packA,
                     SERVED_PARTY_APPLICANT_SOLICITOR
-                )));
+                )));*/
                 //Respondent's pack
                 log.error("#SOA TO DO With notice add RE3 letter, without notice add RE2, gov notification not required so remove it");
+                finalDocumentList.addAll(getCoverLettersForDaApplicantSolicitorPersonalService(caseData, authorization));
+                finalDocumentList.addAll(packB);
+                if (CollectionUtils.isNotEmpty(packA)) {
+                    for (Document packADocument : packA) {
+                        packB.forEach(packBDocument -> {
+                            if (isNotEmpty(packADocument) && isNotEmpty(packBDocument)
+                                && !packADocument.getDocumentBinaryUrl().equalsIgnoreCase(packBDocument.getDocumentBinaryUrl())) {
+                                finalDocumentList.add(packADocument);
+                            }
+                        });
+                    }
+                }
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(
                     authorization,
                     caseData,
                     applicant,
                     EmailTemplateNames.APPLICANT_SOLICITOR_DA,
-                    packB,
+                    finalDocumentList,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 )));
             } catch (Exception e) {
@@ -1367,7 +1399,8 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
-        docs.addAll(staticDocs);
+        docs.addAll(staticDocs.stream()
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL416_FILENAME)).toList());
         return docs;
     }
 
@@ -1376,7 +1409,9 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
-        docs.addAll(staticDocs);
+        docs.addAll(staticDocs.stream()
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL416_FILENAME))
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
         return docs;
     }
 
@@ -1898,6 +1933,7 @@ public class ServiceOfApplicationService {
                 .partyIds(wrapElements(caseData.getApplicantsFL401().getPartyId().toString()))
                 .servedBy(PRL_COURT_ADMIN)
                 .packCreatedDate(dateCreated)
+                .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
                 .build();
             caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
 
@@ -1927,12 +1963,14 @@ public class ServiceOfApplicationService {
             .partyIds(wrapElements(partyId))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .packCreatedDate(dateCreated)
+            .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .build();
         caseDataUpdated.put(UNSERVED_APPLICANT_PACK, unServedApplicantPack);
 
         final SoaPack unServedRespondentPack = SoaPack.builder().packDocument(wrapElements(packBDocs)).partyIds(
                 wrapElements(caseData.getRespondentsFL401().getPartyId().toString()))
             .servedBy(userService.getUserDetails(authorization).getFullName())
+            .personalServiceBy(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().toString())
             .packCreatedDate(dateCreated)
             .build();
 
@@ -2046,10 +2084,12 @@ public class ServiceOfApplicationService {
                 || SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
                 .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
                 if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                    unServedRespondentPack.getPackDocument().addAll(wrapElements(
+                    List<Element<Document>> unServedRespondentPackDocument = new ArrayList<>();
+                    unServedRespondentPackDocument.addAll(wrapElements(
                         getCoverLettertsforDaCourtAdminCourtBailiffPersonalService(caseData, authorization)));
+                    unServedRespondentPackDocument.addAll(unServedRespondentPack.getPackDocument());
                     caseData = caseData.toBuilder().serviceOfApplication(caseData.getServiceOfApplication().toBuilder().unServedRespondentPack(
-                        unServedRespondentPack).build()).build();
+                        unServedRespondentPack.toBuilder().packDocument(unServedRespondentPackDocument).build()).build()).build();
                 }
             }
         }

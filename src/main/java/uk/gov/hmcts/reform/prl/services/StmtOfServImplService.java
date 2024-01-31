@@ -142,7 +142,7 @@ public class StmtOfServImplService {
             bulkPrintDetails,
             caseData.getServiceOfApplication().getUnServedRespondentPack(),
             authorisation,
-            caseData.getRespondentsFL401().getSolicitorEmail()
+            caseData.getRespondentsFL401().getEmail()
         )));
         return caseData.toBuilder()
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
