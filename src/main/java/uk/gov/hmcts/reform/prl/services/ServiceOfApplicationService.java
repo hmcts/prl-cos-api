@@ -1936,10 +1936,6 @@ public class ServiceOfApplicationService {
                     sendNotificationToRespondentNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails,
                                                             respondentList, packR, packR);
                 }
-            } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
-                .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-                // TO be covered for applicant legal rep personal service
-            }
 
             try {
                 log.info("partyIds before unwrapping ===>" + objectMapper.writeValueAsString(partyIds));
@@ -2010,7 +2006,12 @@ public class ServiceOfApplicationService {
                     }
                 }
             }
+        } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
+            .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+                // TO be covered for applicant legal rep personal service
+            }
         }
+
         // send notification for others
         final SoaPack unServedOthersPack = caseData.getServiceOfApplication().getUnServedOthersPack();
 
