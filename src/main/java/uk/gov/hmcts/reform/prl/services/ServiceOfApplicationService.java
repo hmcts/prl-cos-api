@@ -146,6 +146,9 @@ public class ServiceOfApplicationService {
     public static final String BY_POST = "By post";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
     public static final String PRL_COURT_ADMIN = "PRL Court admin";
+    public static final String DASH_BOARD_LINK = "dashBoardLink";
+    public static final String SERVICE_OF_APPLICATION = "#Service of application";
+    public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
     private final LaunchDarklyClient launchDarklyClient;
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -401,8 +404,8 @@ public class ServiceOfApplicationService {
                 packHiDocs.addAll(c100StaticDocs);
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-                dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
-                    + PrlAppsConstants.URL_STRING + "#Service of application");
+                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+                    + PrlAppsConstants.URL_STRING + SERVICE_OF_APPLICATION);
 
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                          .sendEmailUsingTemplateWithAttachments(
@@ -477,8 +480,8 @@ public class ServiceOfApplicationService {
                                                                                       true);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
-        dynamicData.put("dashBoardLink", manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
-            + PrlAppsConstants.URL_STRING + "#Service of application");
+        dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+            + PrlAppsConstants.URL_STRING + SERVICE_OF_APPLICATION);
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                    caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                                                    packjDocs,
@@ -488,7 +491,7 @@ public class ServiceOfApplicationService {
         if (null != emailNotification) {
             emailNotificationDetails.add(element(emailNotification));
         }
-        List<Document> packkDocs = getDocumentsForCaorBailiffToServeRespondents(caseData, authorization, c100StaticDocs, false);
+        List<Document> packkDocs = getDocumentsForCaorBailiffToServeRespondents(caseData, authorization, c100StaticDocs, true);
         final SoaPack unservedRespondentPack = SoaPack.builder()
             .packDocument(wrapElements(packkDocs))
             .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
@@ -753,7 +756,7 @@ public class ServiceOfApplicationService {
         log.info(" {}", emailNotificationDetails);
     }
 
-    public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) throws Exception {
+    public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
@@ -1563,7 +1566,7 @@ public class ServiceOfApplicationService {
             "soaIsOrderListEmpty",
             "noticeOfSafetySupportLetter",
             "additionalDocumentsList",
-            "soaDocumentDynamicListForLa"
+            SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA
         ));
 
         if (removeCafcassFields) {
@@ -1651,8 +1654,8 @@ public class ServiceOfApplicationService {
                                                                                               String.valueOf(caseData.getId()));
         log.info("** case created by ** {}", caseDataUpdated.get(CASE_CREATED_BY));
         log.info("** dynamic list 1 ** {}", documentDynamicListLa);
-        caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
-        log.info("** dynamic list 2 ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
+        caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, documentDynamicListLa);
+        log.info("** dynamic list 2 ** {}", caseDataUpdated.get(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA));
         return caseDataUpdated;
     }
 
@@ -1862,7 +1865,7 @@ public class ServiceOfApplicationService {
                 List<Document> packjDocs = getDocumentsForCaOrBailiffToServeApplicantSolcitor(caseData, authorization, c100StaticDocs,
                                                                                               false);
                 List<Document> packkDocs = getDocumentsForCaorBailiffToServeRespondents(caseData, authorization, c100StaticDocs,
-                                                                                        false);
+                                                                                        true);
                 final SoaPack unservedRespondentPack = SoaPack.builder()
                     .packDocument(wrapElements(packkDocs))
                     .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
