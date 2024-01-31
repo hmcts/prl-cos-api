@@ -1438,11 +1438,12 @@ public class ManageOrderService {
             List<ServedParties> servedPartiesExisting = order.getValue()
                 .getServeOrderDetails().getServedParties().stream()
                 .map(element -> element.getValue())
-                    .collect(Collectors.toList());
-            servedParties = servedParties.stream()
+                .collect(Collectors.toList());
+            List<Element<ServedParties>> amendedServeParties = servedParties.stream()
                 .filter(element -> !servedPartiesExisting.contains(element))
                 .toList();
-            servedParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
+            amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
+            servedParties = amendedServeParties;
         }
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
@@ -1516,10 +1517,11 @@ public class ManageOrderService {
                 .getServeOrderDetails().getServedParties().stream()
                 .map(element -> element.getValue())
                 .collect(Collectors.toList());
-            servedParties = servedParties.stream()
+            List<Element<ServedParties>> amendedServeParties = servedParties.stream()
                 .filter(element -> !servedPartiesExisting.contains(element))
                 .toList();
-            servedParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
+            amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
+            servedParties = amendedServeParties;
         }
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
