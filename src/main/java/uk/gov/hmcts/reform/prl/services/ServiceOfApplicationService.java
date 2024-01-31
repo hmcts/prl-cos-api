@@ -1960,8 +1960,8 @@ public class ServiceOfApplicationService {
                                     log.info("error");
                                 }
                                 for (Element<BulkPrintDetails> bulkPrintDetail : bulkPrintDetails) {
-                                    bulkPrintDetail.getValue().toBuilder().postalAddress(Address.builder().addressLine1(
-                                        THIS_INFORMATION_IS_CONFIDENTIAL).build()).build();
+                                    bulkPrintDetail.getValue().setPostalAddress(Address.builder().addressLine1(
+                                        THIS_INFORMATION_IS_CONFIDENTIAL).build());
                                     //Doubt here it won't work
                                 }
                                 try {
