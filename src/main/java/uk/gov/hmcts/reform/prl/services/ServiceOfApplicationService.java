@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
@@ -91,6 +93,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
@@ -2248,5 +2251,51 @@ public class ServiceOfApplicationService {
             caseData.setCaseInvites(caseInvites);
         });
         return emailNotificationDetails;
+    }
+
+    public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest) throws JsonProcessingException {
+        CaseData caseData = objectMapper.convertValue(
+            callbackRequest.getCaseDetails().getData(),
+            CaseData.class
+        );
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        List<String> errorList = new ArrayList<>();
+
+        if (null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()
+            && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
+
+            List<String> c6aOrderIds = new ArrayList<>();
+
+            if (null != caseData.getOrderCollection()) {
+                c6aOrderIds = caseData.getOrderCollection().stream()
+                    .filter(element -> element.getValue() != null && element.getValue().getOrderTypeId().equals(
+                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()))
+                    .map(s -> s.getId().toString()).toList();
+            }
+
+            if (c6aOrderIds.isEmpty()) {
+                errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
+
+            List<String> selectedSoaScreenOrders = caseData.getServiceOfApplicationScreen1().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
+
+            boolean isPresent = c6aOrderIds.stream().anyMatch(selectedSoaScreenOrders::contains);
+
+            if (!isPresent) {
+                errorList.add(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR);
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .errors(errorList)
+                    .build();
+            }
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(caseDataUpdated)
+            .build();
     }
 }

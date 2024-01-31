@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -23,12 +26,13 @@ import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
-
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 
 @Slf4j
 @SpringBootTest
@@ -37,6 +41,12 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 public class ServiceOfApplicationControllerFT {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
+
+    private static final String VALID_REQUEST_BODY_WITHOUT_OTHER_PEOPLE = "requests/soa-with-out-other-people.json";
+
+    private static final String VALID_REQUEST_BODY_WITH_OTHER_PEOPLE = "requests/soa-with-other-people.json";
+
+    private static final String VALID_REQUEST_BODY_WITH_OUT_C6A_ORDERS = "requests/soa-with-out-c6a-orders.json";
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -48,6 +58,15 @@ public class ServiceOfApplicationControllerFT {
 
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
+
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
 
     @Before
     public void setUp() {
@@ -105,4 +124,73 @@ public class ServiceOfApplicationControllerFT {
             .andExpect(status().isOk())
             .andReturn();
     }
+
+    /**
+     * When Other people not selected.
+     * then error should not appear at all during the service of application submission.
+     *
+     */
+    @Test
+    public void givenRequestWithCaseData_MidEvent_whenOtherpeopleNotSelected_then_c6A_isNotRequired() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITHOUT_OTHER_PEOPLE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/soa-validation")
+            .then()
+            .body("errors", equalTo(null))
+            .assertThat().statusCode(200);
+    }
+
+
+    /**
+     * When Other people selected, but C6a Order not selected.
+     * then error should appear during Service of application submission.
+     *
+     */
+    @Test
+    public void givenCaseData_whenOtherpeopleSelectedButC6A_NotSelected_then_ValidationError() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_OTHER_PEOPLE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/soa-validation")
+            .then()
+            .body("errors[0]", equalTo(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR))
+            .assertThat().statusCode(200);
+    }
+
+
+    /**
+     * When Other people selected, but C6a Order not even present in the order collection.
+     * then error should appear during Service of application submission.
+     *
+     */
+    @Test
+    public void givenCaseData_whenOtherpeopleSelectedButC6A_NotEvenPresent_then_ValidationError() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_OUT_C6A_ORDERS);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/soa-validation")
+            .then()
+            .body("errors[0]", equalTo(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR))
+            .assertThat().statusCode(200);
+    }
+
 }
