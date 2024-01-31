@@ -2314,7 +2314,8 @@ public class ServiceOfApplicationService {
         if (unServedApplicantPack.getPersonalServiceBy() != null
             && (SoaSolicitorServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
             || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))
-            && !CaseUtils.isCaseWithoutNotice(caseData)) {
+            && !CaseUtils.isCaseWithoutNotice(caseData)
+            && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             for (Element<PartyDetails> applicant : caseData.getApplicants()) {
                 packDocs.add(generateAccessCodeLetter(authorization, caseData, applicant, null, PRL_LET_ENG_AP8));
             }
