@@ -977,6 +977,8 @@ public class ServiceOfApplicationService {
                     finalDocs.add(generateAccessCodeLetter(authorization, caseData,respondent, null, PRL_LET_ENG_C100_RE6))
                 );
                 finalDocs.addAll(packHiDocs);
+                log.info("applicant docs {}", packHiDocs);
+                log.info("final docs {}", finalDocs);
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
                 dynamicData.put("c100", true);
