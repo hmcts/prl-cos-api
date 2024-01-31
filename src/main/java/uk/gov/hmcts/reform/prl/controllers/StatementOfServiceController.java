@@ -75,7 +75,7 @@ public class StatementOfServiceController {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
             return CallbackResponse.builder()
-                .data(stmtOfServImplService.retrieveAllRespondentNames(callbackRequest.getCaseDetails())).build();
+                .data(stmtOfServImplService.retrieveAllRespondentNames(callbackRequest.getCaseDetails(), authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
