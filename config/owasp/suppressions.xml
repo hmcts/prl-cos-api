@@ -4,6 +4,7 @@
     <notes><![CDATA[
       spring-core-5.3.20.jar ]]></notes>
     <cve>CVE-2016-1000027</cve>
+    <cve>CVE-2023-31582</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
