@@ -354,6 +354,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder().build())
                                       .applicationServedYesNo(YesOrNo.Yes)
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
@@ -470,6 +471,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder().build())
                                       .applicationServedYesNo(YesOrNo.No)
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
