@@ -2320,7 +2320,7 @@ public class ManageOrderService {
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
-            String.valueOf(caseData.getId())
+            caseData.getTempHearingCaseId()//String.valueOf(caseData.getId())
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         final List<String> hearingStatusFilterList = Arrays.asList(hearingStatusesToFilter.split("\\s*,\\s*"));
