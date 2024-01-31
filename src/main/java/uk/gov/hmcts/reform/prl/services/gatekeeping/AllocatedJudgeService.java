@@ -62,8 +62,8 @@ public class AllocatedJudgeService {
                         allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
                         allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
                         allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
-                        allocatedJudgeBuilder.tierOfJudge(CollectionUtils.isNotEmpty(judgeDetail.getAppointments())
-                                                              ? judgeDetail.getAppointments().get(0).getAppointment()
+                        allocatedJudgeBuilder.tierOfJudge(CollectionUtils.isNotEmpty(judgeDetails.get(0).getAppointments())
+                                                              ? judgeDetails.get(0).getAppointments().get(0).getAppointment()
                                                               : null);
                     }
                 } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
