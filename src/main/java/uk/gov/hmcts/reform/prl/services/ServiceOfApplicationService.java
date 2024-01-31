@@ -84,37 +84,7 @@ import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL4
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE3;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_FL401_RE4;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_SOLICITOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
@@ -646,7 +616,7 @@ public class ServiceOfApplicationService {
                                                                                        .getSoaServingRespondentsOptionsDA())) {
             List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
             List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, staticDocs);
-            emailNotificationDetails.addAll(sendNotificationToFl401Solicitor(caseData, authorization, packADocs, packBDocs));
+            emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, packBDocs));
 
         } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
@@ -951,23 +921,43 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private List<Element<BulkPrintDetails>> sendPostToCitizen(String authorization, CaseData caseData,
-                                                                      Element<PartyDetails> party, List<Document> docs,
-                                                              String servedParty) {
-        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        log.info("*** docs {}", docs);
-        bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
-            caseData,
-            authorization,
-            party.getValue(),
-            docs,
-            servedParty
-        )));
-        return bulkPrintDetails;
+    private List<Element<EmailNotificationDetails>> sendEmailCaPersonalApplicantLegalRep(CaseData caseData, String authorization, List<Document> packHiDocs) {
+        List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
+        PartyDetails applicant = caseData.getApplicantsFL401();
+        List<Document> finalDocs = new ArrayList<>();
+        if (applicant.getSolicitorEmail() != null) {
+            try {
+                log.info(
+                    "Sending the email notification to applicant solicitor for FL401 Application for caseId {}",
+                    caseData.getId()
+                );
+                //Respondent's pack
+                log.error("#SOA TO DO With notice add RE3 letter, without notice add RE2, gov notification not required so remove it");
+                caseData.getRespondents().forEach(respondent ->
+                    finalDocs.add(generateAccessCodeLetter(authorization, caseData,respondent, null, PRL_LET_ENG_RE5))
+                );
+                finalDocs.addAll(packHiDocs);
+                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
+                dynamicData.put("c100", true);
+                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                    authorization,
+                    caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
+                    finalDocs,
+                    SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
+                    dynamicData,
+                    APPLICANT_SOLICITOR
+                )));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return emailNotificationDetails;
     }
 
-    private List<Element<EmailNotificationDetails>> sendNotificationToFl401Solicitor(CaseData caseData, String authorization, List<Document> packA,
-                                                                                     List<Document> packB) {
+    private List<Element<EmailNotificationDetails>> sendEmailDaPersonalApplicantLegalRep(CaseData caseData, String authorization, List<Document> packA,
+                                                                                         List<Document> packB) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
         List<Document> finalDocumentList = new ArrayList<>();
@@ -988,9 +978,9 @@ public class ServiceOfApplicationService {
                     authorization,
                     caseData.getApplicantsFL401().getSolicitorEmail(),
                     finalDocumentList,
-                    SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                    SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
                     dynamicData,
-                    PRL_COURT_ADMIN
+                    APPLICANT_SOLICITOR
                 )));
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -2054,18 +2044,15 @@ public class ServiceOfApplicationService {
                         final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
                             partyIds);
 
-                        final List<Document> packR = unwrapElements(unServedRespondentPack.getPackDocument());
+                        final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
                         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                             sendNotificationsToCitizenRespondentsC100(authorization, respondentList, caseData, bulkPrintDetails,
-                                                                      packR, false);
+                                                                      respondentDocs, false);
                         } else {
                             // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
                             sendNotificationToRespondentNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails,
-                                                                    respondentList, packR, packR);
+                                                                    respondentList, respondentDocs, respondentDocs);
                         }
-                    } else if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString()
-                        .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
-                        // TO be covered for applicant legal rep personal service
                     } else if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString()
                         .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
                         || SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
@@ -2117,16 +2104,18 @@ public class ServiceOfApplicationService {
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                            SoaPack unServedApplicantPack, SoaPack unServedRespondentPack) {
         if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-                //#SOA TO DO... for citizen created case to send email to applicantLegalRepresentative
-            } else {
-                emailNotificationDetails.addAll(sendNotificationToFl401Solicitor(
-                    caseData,
-                    authorization,
-                    unwrapElements(unServedApplicantPack.getPackDocument()),
-                    unwrapElements(unServedRespondentPack.getPackDocument())
-                ));
-            }
+            emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(
+                caseData,
+                authorization,
+                unwrapElements(unServedApplicantPack.getPackDocument()),
+                unwrapElements(unServedRespondentPack.getPackDocument())
+            ));
+        } else {
+            emailNotificationDetails.addAll(sendEmailCaPersonalApplicantLegalRep(
+                caseData,
+                authorization,
+                unwrapElements(unServedApplicantPack.getPackDocument())
+            ));
         }
     }
 
