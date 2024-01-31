@@ -59,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
@@ -108,6 +109,7 @@ public class CaseUtils {
     }
 
 
+
     public static String getOrderSelectionType(CaseData caseData) {
         String orderSelectionType = null;
         if (caseData.getManageOrdersOptions() != null) {
@@ -131,6 +133,25 @@ public class CaseUtils {
             noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
         return noOfDaysRemaining;
+    }
+
+    /*
+    Below method checks for Both if the case is created by
+    citizen or the main applicant in the case is not represented.
+    * **/
+    public static boolean isCaseCreatedByCitizen(CaseData caseData) {
+        log.info("case created by {}", caseData.getCaseCreatedBy());
+        log.info("is this courtnav case {}", caseData.getIsCourtNavCase());
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) || Yes.equals(caseData.getIsCourtNavCase())) {
+            return true;
+        }
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            log.info("Applicant 1 {}", caseData.getApplicants().get(0));
+        }
+        log.info("case created by {}", caseData.getCaseCreatedBy());
+
+        return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
+            0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
     }
 
     public static Map<String, Object> getCourtDetails(Optional<CourtVenue> courtVenue, String baseLocationId) {
@@ -500,5 +521,19 @@ public class CaseUtils {
             );
         }
         return null;
+    }
+
+    public static List<Element<String>> getPartyIdList(List<Element<PartyDetails>> parties) {
+        return parties.stream().map(Element::getId).map(uuid -> element(uuid.toString())).toList();
+    }
+
+    public static boolean isCaseWithoutNotice(CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+            return true;
+        } else if (null != caseData.getOrderWithoutGivingNoticeToRespondent()) {
+            return YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
+        }
+        return false;
     }
 }
