@@ -141,18 +141,18 @@ public class ManageOrderControllerIntegrationTest {
 
     @Test
     public void testValidateAddressErrorMessageEndpoint() throws Exception {
-    String requestBody = ResourceLoader.loadJson(VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS);
-    HttpPost httpPost = new HttpPost(serviceUrl + addressValidationEndpoint);
-    httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-    httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
-    httpPost.addHeader("serviceAuthorization", "s2sToken");
-    StringEntity body = new StringEntity(requestBody);
-    httpPost.setEntity(body);
-    HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
-    String content = EntityUtils.toString(httpResponse.getEntity());
-    JSONObject jsonObj = new JSONObject(content);
-    Assert.assertNotNull(jsonObj.getJSONObject("data"));
-    Assert.assertNotNull("1647373355918192", jsonObj.getJSONObject("data").get("id"));
-    Assert.assertNotNull("John Smith", jsonObj.getJSONObject("data").get("applicantCaseName"));
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS);
+        HttpPost httpPost = new HttpPost(serviceUrl + addressValidationEndpoint);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        String content = EntityUtils.toString(httpResponse.getEntity());
+        JSONObject jsonObj = new JSONObject(content);
+        Assert.assertNotNull(jsonObj.getJSONObject("data"));
+        Assert.assertNotNull("1647373355918192", jsonObj.getJSONObject("data").get("id"));
+        Assert.assertNotNull("John Smith", jsonObj.getJSONObject("data").get("applicantCaseName"));
 }
 }
