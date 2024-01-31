@@ -2646,19 +2646,21 @@ public class ManageOrderService {
     }
 
     public void setHearingSelectedInfoForTask(List<Element<HearingData>> ordersHearingDetails, Map<String,Object> caseDataUpdated) {
-        String isMultipleHearingSelected = NO;
+        String isMultipleHearingSelected = null;
         String hearingOptionSelected = null;
 
-        //In case if no hearings at all, then default value for isMultipleHearingSelected should be null
-        if (CollectionUtils.isEmpty(ordersHearingDetails)) {
-            isMultipleHearingSelected = null;
-        } else if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
+        if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
 
-            if (ordersHearingDetails.size() == 1) {
-                hearingOptionSelected =  String.valueOf(hearingList.get(0).getHearingDateConfirmOptionEnum());
-            } else if (!ordersHearingDetails.isEmpty()) {
+
+            List<Element<HearingData>> hearingsWithOptionsSelected = ordersHearingDetails.stream()
+                .filter(elem -> null != elem.getValue().getHearingDateConfirmOptionEnum()).toList();
+
+            if (hearingsWithOptionsSelected.size() == 1) {
+                hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum().toString();
+                isMultipleHearingSelected = NO;
+            } else if (hearingsWithOptionsSelected.size() > 1) {
                 hearingOptionSelected = WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
                 isMultipleHearingSelected = YES;
             }
@@ -2871,9 +2873,7 @@ public class ManageOrderService {
 
     public static void cleanUpServeOrderOptions(Map<String, Object> caseDataUpdated) {
         for (ServeOrderFieldsEnum field : ServeOrderFieldsEnum.values()) {
-            if (caseDataUpdated.containsKey(field.getValue())) {
-                caseDataUpdated.put(field.getValue(), null);
-            }
+            caseDataUpdated.put(field.getValue(), null);
         }
     }
 
