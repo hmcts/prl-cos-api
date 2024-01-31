@@ -1433,18 +1433,10 @@ public class ManageOrderService {
             emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get(EMAIL);
         }
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
-        if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
-            .getServeOrderDetails().getServedParties()) {
-            List<String> servedPartiesExisting = order.getValue()
-                .getServeOrderDetails().getServedParties().stream()
-                .map(element -> element.getValue().getPartyId())
-                .collect(Collectors.toList());
-            log.info("existing ids {} ",servedPartiesExisting);
-            List<Element<ServedParties>> amendedServeParties = servedParties.stream()
-                .filter(element -> !servedPartiesExisting.contains(element.getValue().getPartyId()))
-                .collect(Collectors.toList());
-            amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
-            servedParties = amendedServeParties;
+        if (null != order.getValue().getServeOrderDetails() && CollectionUtils
+            .isNotEmpty(order.getValue()
+            .getServeOrderDetails().getServedParties())) {
+            servedParties = getAmendedParties(order, servedParties);
         }
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
@@ -1467,6 +1459,19 @@ public class ManageOrderService {
             postalInformation,
             emailInformation
         );
+    }
+
+    private List<Element<ServedParties>> getAmendedParties(Element<OrderDetails> order, List<Element<ServedParties>> servedParties) {
+        List<String> servedPartiesExisting = order.getValue()
+            .getServeOrderDetails().getServedParties().stream()
+            .map(element -> element.getValue().getPartyId())
+            .collect(Collectors.toList());
+        log.info("existing ids {} ",servedPartiesExisting);
+        List<Element<ServedParties>> amendedServeParties = servedParties.stream()
+            .filter(element -> !servedPartiesExisting.contains(element.getValue().getPartyId()))
+            .collect(Collectors.toList());
+        amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
+        return amendedServeParties;
     }
 
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
@@ -1510,18 +1515,10 @@ public class ManageOrderService {
         }
 
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
-        if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
-            .getServeOrderDetails().getServedParties()) {
-            List<String> servedPartiesExisting = order.getValue()
-                .getServeOrderDetails().getServedParties().stream()
-                .map(element -> element.getValue().getPartyId())
-                .collect(Collectors.toList());
-            log.info("existing ids {} ",servedPartiesExisting);
-            List<Element<ServedParties>> amendedServeParties = servedParties.stream()
-                .filter(element -> !servedPartiesExisting.contains(element.getValue().getPartyId()))
-                .collect(Collectors.toList());
-            amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
-            servedParties = amendedServeParties;
+        if (null != order.getValue().getServeOrderDetails() && CollectionUtils
+            .isNotEmpty(order.getValue()
+                            .getServeOrderDetails().getServedParties())) {
+            servedParties = getAmendedParties(order, servedParties);
         }
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
