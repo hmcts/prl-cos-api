@@ -189,6 +189,8 @@ public class ServiceOfApplicationService {
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
+    private static final String SERVICE_OF_APPLICATION_ENDPOINT = PrlAppsConstants.URL_STRING + "#Service of application";
+
     private final ServiceOfApplicationEmailService serviceOfApplicationEmailService;
     private final ServiceOfApplicationPostService serviceOfApplicationPostService;
     private final CaseInviteManager caseInviteManager;
@@ -742,7 +744,8 @@ public class ServiceOfApplicationService {
                 }
             }
         }
-        confirmationBody = String.format(confirmationBody, manageCaseUrl + "/" + caseData.getId() + "#Service of application");
+        confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
+            + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT);
         log.info("Body {}", confirmationBody);
         log.info("Header {}", confirmationHeader);
 
@@ -787,7 +790,8 @@ public class ServiceOfApplicationService {
             caseDataMap
         );
         String confirmationBody = String.format(CONFIDENTIAL_CONFIRMATION_BODY_PREFIX,
-                                                manageCaseUrl + "/" + caseData.getId() + "/#Service of application");
+                                                manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId()
+                                                    + SERVICE_OF_APPLICATION_ENDPOINT);
         log.info("Confidential details are present, case needs to be reviewed and served later");
         return ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(CONFIDENTIAL_CONFIRMATION_HEADER)
