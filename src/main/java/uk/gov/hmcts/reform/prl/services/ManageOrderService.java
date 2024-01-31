@@ -1435,11 +1435,14 @@ public class ManageOrderService {
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
             .getServeOrderDetails().getServedParties()) {
-            servedParties.addAll(order.getValue()
-                                     .getServeOrderDetails().getServedParties());
+            List<ServedParties> servedPartiesExisting = order.getValue()
+                .getServeOrderDetails().getServedParties().stream()
+                .map(element -> element.getValue())
+                    .collect(Collectors.toList());
             servedParties = servedParties.stream()
-                .distinct()
+                .filter(element -> !servedPartiesExisting.contains(element))
                 .toList();
+            servedParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
         }
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
@@ -1509,11 +1512,14 @@ public class ManageOrderService {
         log.info("order list {}", orders);
         if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
             .getServeOrderDetails().getServedParties()) {
-            servedParties.addAll(order.getValue()
-                                     .getServeOrderDetails().getServedParties());
+            List<ServedParties> servedPartiesExisting = order.getValue()
+                .getServeOrderDetails().getServedParties().stream()
+                .map(element -> element.getValue())
+                .collect(Collectors.toList());
             servedParties = servedParties.stream()
-                .distinct()
+                .filter(element -> !servedPartiesExisting.contains(element))
                 .toList();
+            servedParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
         }
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
