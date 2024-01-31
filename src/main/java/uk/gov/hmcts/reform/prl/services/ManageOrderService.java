@@ -1504,8 +1504,7 @@ public class ManageOrderService {
             cafcassCymruEmail = caseData.getManageOrders().getCafcassCymruEmail();
         }
 
-        List<Element<ServedParties>> servedParties  = getServedParties(caseData);
-        Map<String, Object> servedOrderDetails = new HashMap<>();
+        List<Element<ServedParties>> servedParties  = getServedParties(caseData)
         log.info("order detail data {}", order);
         log.info("order list {}", orders);
         if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
@@ -1516,6 +1515,7 @@ public class ManageOrderService {
                 .distinct()
                 .toList();
         }
+        Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
         servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
         servedOrderDetails.put(CAFCASS_EMAIL, cafCassEmail);
