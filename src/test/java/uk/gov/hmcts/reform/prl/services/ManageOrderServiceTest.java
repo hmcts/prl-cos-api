@@ -4259,4 +4259,88 @@ public class ManageOrderServiceTest {
         assertNull(caseDataUpdated.get("isMultipleHearingSelected"));
     }
 
+    @Test
+    public void setHearingSelectedInfoForTaskWitHearingsButNoHearingDateConfirmOptionEnum() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(null)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata1));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertNull(caseDataUpdated.get("hearingOptionSelected"));
+        assertNull(caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
+    @Test
+    public void setHearingSelectedInfoForTaskWitMultipleHearingsButOnlyOneHearingDateConfirmOptionEnum() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(null)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata3 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(null)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata1));
+        hearingDataList.add(element(hearingdata2));
+        hearingDataList.add(element(hearingdata3));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertEquals(HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
+    @Test
+    public void setHearingSelectedInfoForTaskWitMultipleHearingsButMoreThnOneHearingDateConfirmOptionEnum() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata3 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(null)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata1));
+        hearingDataList.add(element(hearingdata2));
+        hearingDataList.add(element(hearingdata3));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertEquals("multipleOptionSelected",
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
 }
