@@ -1966,8 +1966,8 @@ public class ServiceOfApplicationService {
                                 "Verifying the value for respondent and respondent.getValue().getPartyId() {}",
                                 respondent.getValue().getPartyId()
                             );
-//                        if (Objects.equals(respondent.getValue().getPartyId().toString(), partyId.toString())
-//                            && respondent.getValue().getIsAddressConfidential().equals(Yes)) {
+                            // if (Objects.equals(respondent.getValue().getPartyId().toString(), partyId.toString())
+                            // && respondent.getValue().getIsAddressConfidential().equals(Yes)) {
                             if (respondent.getValue().getPartyId() != null // I have doubt here. this partyId must be respondent.getId()
                                 && String.valueOf(respondent.getId()).equalsIgnoreCase(partyId)
                                 && YesOrNo.Yes.equals(respondent.getValue().getIsAddressConfidential())) {
