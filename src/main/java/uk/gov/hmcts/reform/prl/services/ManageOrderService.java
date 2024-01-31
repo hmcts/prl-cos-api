@@ -117,7 +117,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -552,6 +551,9 @@ public class ManageOrderService {
 
     @Value("${document.templates.common.prl_fl404b_blank_welsh_final_filename}")
     protected String fl404bBlankWelshFile;
+
+    @Value("${hearing_component.hearingStatusesToFilter}")
+    private String hearingStatusesToFilter;
 
     private final DocumentLanguageService documentLanguageService;
 
@@ -2321,12 +2323,13 @@ public class ManageOrderService {
             String.valueOf(caseData.getId())
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
-        List<CaseHearing> completedHearings = caseHearings.stream()
-            .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
+        final List<String> hearingStatusFilterList = Arrays.asList(hearingStatusesToFilter.split("\\s*,\\s*"));
+        List<CaseHearing> filteredHearings = caseHearings.stream()
+            .filter(caseHearing -> hearingStatusFilterList.contains(caseHearing.getHmcStatus()))
             .toList();
 
         //get hearings dropdown
-        List<DynamicListElement> hearingDropdowns = completedHearings.stream()
+        List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
             .map(caseHearing -> {
                 //get hearingType
                 String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
