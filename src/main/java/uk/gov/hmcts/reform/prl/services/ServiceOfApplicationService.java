@@ -1960,17 +1960,22 @@ public class ServiceOfApplicationService {
                     log.info("Executing now for partyId {}", partyId);
                     // if (caseData.getCaseTypeOfApplication().equals("C100")) {
                     if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                        for (Element<PartyDetails> respondent : caseData.getRespondents()) {
-                            log.info("Executing now for respondent and respondent.getId() is {}", respondent.getId());
+                        List<PartyDetails> respondents = caseData.getRespondents()
+                            .stream()
+                            .map(Element::getValue).toList();
+                        for (PartyDetails respondent : respondents) {
                             log.info(
-                                "Verifying the value for respondent and respondent.getValue().getPartyId() {}",
-                                respondent.getValue().getPartyId()
+                                "the value for respondents and respondent.getValue().getPartyId() {}",
+                                respondent.getPartyId()
+                            );
+                            log.info(
+                                "Verifying the value for respondent and respondent.getIsAddressConfidential() {}",
+                                respondent.getIsAddressConfidential()
                             );
                             // if (Objects.equals(respondent.getValue().getPartyId().toString(), partyId.toString())
                             // && respondent.getValue().getIsAddressConfidential().equals(Yes)) {
-                            if (respondent.getValue().getPartyId() != null // I have doubt here. this partyId must be respondent.getId()
-                                && String.valueOf(respondent.getId()).equalsIgnoreCase(partyId)
-                                && YesOrNo.Yes.equals(respondent.getValue().getIsAddressConfidential())) {
+                            if ( String.valueOf(respondent.getPartyId()).equalsIgnoreCase(partyId)
+                                && YesOrNo.Yes.equals(respondent.getIsAddressConfidential())) {
                                 try {
                                     log.info("bulkPrintDetails before changes ===>" + objectMapper.writeValueAsString(
                                         bulkPrintDetails));
