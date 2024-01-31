@@ -1441,7 +1441,7 @@ public class ManageOrderService {
                 .collect(Collectors.toList());
             List<Element<ServedParties>> amendedServeParties = servedParties.stream()
                 .filter(element -> !servedPartiesExisting.contains(element))
-                .toList();
+                .collect(Collectors.toList());
             amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
             servedParties = amendedServeParties;
         }
@@ -1519,7 +1519,7 @@ public class ManageOrderService {
                 .collect(Collectors.toList());
             List<Element<ServedParties>> amendedServeParties = servedParties.stream()
                 .filter(element -> !servedPartiesExisting.contains(element))
-                .toList();
+                .collect(Collectors.toList());
             amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
             servedParties = amendedServeParties;
         }
