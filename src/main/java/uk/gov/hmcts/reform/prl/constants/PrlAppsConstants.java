@@ -789,6 +789,8 @@ public class PrlAppsConstants {
     public static final String SOA_FL416_FILENAME = "FL416.pdf";
 
     public static final String SOA_MULTIPART_FILE = "files";
+    public static final String SOA_CITIZEN = "CITIZEN";
+    public static final String SOA_SOLICITOR = "SOLICITOR";
 
 
     public static final String COURT_ADMIN = "Court admin";

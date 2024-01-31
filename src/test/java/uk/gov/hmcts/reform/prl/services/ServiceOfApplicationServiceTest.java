@@ -84,7 +84,6 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class ServiceOfApplicationServiceTest {
 
-
     @InjectMocks
     private ServiceOfApplicationService serviceOfApplicationService;
 
@@ -331,7 +330,7 @@ public class ServiceOfApplicationServiceTest {
         EmailNotificationDetails emailNotificationDetails = EmailNotificationDetails.builder()
             .servedParty("ApplicantSolicitor")
             .build();
-        when(serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(Mockito.anyString(),Mockito.any(),
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
                                                                                         Mockito.any(),Mockito.any(),Mockito.any(),
                                                                                         Mockito.anyString()))
             .thenReturn(emailNotificationDetails);
@@ -346,6 +345,7 @@ public class ServiceOfApplicationServiceTest {
     public void testConfidentialyCheckSuccess() {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(parties)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
@@ -400,21 +400,25 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(response);
     }
 
-
     @Test
     public void testsendNotificationsForUnServedPacks() {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(parties)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder().build())
-                                      .unServedRespondentPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .packDocument(List.of(element(Document.builder()
+                                                                                                    .documentFileName("").build())))
+                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
+                                                                                         .courtAdmin.toString()).build())
                                       .unServedOthersPack(SoaPack.builder().build())
-                                      .applicationServedYesNo(YesOrNo.No)
-                                      .soaCafcassCymruServedOptions(YesOrNo.Yes)
+                                      .applicationServedYesNo(No)
+                                      .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassCymruEmail("test@hmcts.net")
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
@@ -436,7 +440,10 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .builder()
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
-                                      .unServedLaPack(SoaPack.builder().build())
+                                      .unServedLaPack(SoaPack.builder()
+                                                          .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtBailiff.toString())
+                                                          .packDocument(List.of(element(Document.builder().build())))
+                                                          .build())
                                       .applicationServedYesNo(No)
                                       .soaCafcassCymruServedOptions(Yes)
                                       .soaCafcassCymruEmail("test@hmcts.net")
@@ -455,6 +462,7 @@ public class ServiceOfApplicationServiceTest {
     public void testsendNotificationsForUnServedRespondentPacks() {
         CaseData caseData = CaseData.builder().id(12345L)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .applicants(parties)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
                                                                                 .builder()
@@ -601,7 +609,6 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testSendNotificationForSoaServeToRespondentOptionsNoC100() throws Exception {
-
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
             .representativeLastName("repLastName")
             .gender(Gender.male)
@@ -641,12 +648,14 @@ public class ServiceOfApplicationServiceTest {
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
-
+        List<Element<CaseInvite>> caseInvites = new ArrayList<>();
+        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(PrlAppsConstants.TEST_UUID)).build()));
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(partyList)
             .respondents(partyList)
             .applicantCaseName("Test Case 45678")
+            .caseInvites(caseInvites)
             .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
                                                                                .orderTypeId("Blank order or directions (C21)")
                                                                                .build())
@@ -673,10 +682,12 @@ public class ServiceOfApplicationServiceTest {
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
                                                                        .surname("test").build());
-
+        when(c100CaseInviteService.generateCaseInvite(any(),any()))
+            .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -772,10 +783,19 @@ public class ServiceOfApplicationServiceTest {
         when(userService.getUserDetails(authorization)).thenReturn(UserDetails.builder()
                                                                        .forename("first")
                                                                        .surname("test").build());
+        uk.gov.hmcts.reform.ccd.client.model.Document documents =
+            new uk.gov.hmcts.reform.ccd.client.model
+                .Document("documentURL", "fileName", "binaryUrl", "attributePath", LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(documents), null);
 
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(documents));
+        when(sendAndReplyService.fetchDocumentIdFromUrl("documentURL")).thenReturn("test");
+        when(coreCaseDataApi.getCategoriesAndDocuments(authorization, authTokenGenerator.generate(), "1"))
+            .thenReturn(categoriesAndDocuments);
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -861,7 +881,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -937,7 +958,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -993,7 +1015,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            casedata
         );
 
         assertNotNull(servedApplicationDetails);
@@ -1048,7 +1071,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertEquals("By email", servedApplicationDetails.getModeOfService());
     }
@@ -1099,7 +1123,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -1146,7 +1171,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -1171,7 +1197,7 @@ public class ServiceOfApplicationServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .applicantsFL401(partyDetails)
+            .applicants(parties)
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
@@ -1194,7 +1220,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -1218,7 +1245,7 @@ public class ServiceOfApplicationServiceTest {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
-            .applicantsFL401(partyDetails)
+            .applicants(parties)
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
@@ -1241,7 +1268,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -1270,6 +1298,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
+            .applicantsFL401(otherPerson)
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondentsFL401(otherPerson)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -1361,6 +1390,7 @@ public class ServiceOfApplicationServiceTest {
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicantCaseName("Test Case 45678")
+            .applicants(partyElementList)
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondents(partyElementList)
             .serviceOfApplication(ServiceOfApplication.builder()
@@ -1434,6 +1464,7 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .respondentsFL401(otherPerson)
+            .applicantsFL401(otherPerson)
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
                                       .soaCafcassCymruServedOptions(Yes)
@@ -1971,7 +2002,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2057,7 +2089,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2125,7 +2158,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2194,7 +2228,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2262,7 +2297,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2313,7 +2349,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertNotNull(servedApplicationDetails);
     }
@@ -2366,7 +2403,8 @@ public class ServiceOfApplicationServiceTest {
 
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
-            authorization
+            authorization,
+            new HashMap<>()
         );
         assertEquals("By email and post", servedApplicationDetails.getModeOfService());
     }

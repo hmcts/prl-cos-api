@@ -45,6 +45,7 @@ public class ServiceOfApplication {
     private final YesOrNo soaCafcassCymruServedOptions;
     private final String soaCafcassCymruEmail;
 
+    //Not in use anymore as it was added for intermim confidentiality check
     private final YesOrNo proceedToServing;
 
     // Confidentiality check related fields
