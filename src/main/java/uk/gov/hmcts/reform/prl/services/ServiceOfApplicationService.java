@@ -964,9 +964,8 @@ public class ServiceOfApplicationService {
     private List<Element<EmailNotificationDetails>> sendEmailCaPersonalApplicantLegalRep(CaseData caseData, String authorization,
                                                                                          List<Document> packHiDocs) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        PartyDetails applicant = caseData.getApplicantsFL401();
         List<Document> finalDocs = new ArrayList<>();
-        if (applicant.getSolicitorEmail() != null) {
+        if (caseData.getApplicants().get(0).getValue().getSolicitorEmail() != null) {
             try {
                 log.info(
                     "Sending the email notification to applicant solicitor for FL401 Application for caseId {}",
