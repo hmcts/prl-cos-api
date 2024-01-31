@@ -1953,7 +1953,7 @@ public class ServiceOfApplicationService {
                             );
                             // if (Objects.equals(respondent.getValue().getPartyId().toString(), partyId.toString())
                             // && respondent.getValue().getIsAddressConfidential().equals(Yes)) {
-                            if ( String.valueOf(respondent.getPartyId()).equalsIgnoreCase(partyId)
+                            if (String.valueOf(respondent.getPartyId()).equalsIgnoreCase(partyId)
                                 && YesOrNo.Yes.equals(respondent.getIsAddressConfidential())) {
                                 try {
                                     log.info("bulkPrintDetails before changes ===>" + objectMapper.writeValueAsString(
