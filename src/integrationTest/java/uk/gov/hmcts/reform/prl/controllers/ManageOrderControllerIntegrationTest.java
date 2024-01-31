@@ -154,5 +154,5 @@ public class ManageOrderControllerIntegrationTest {
         Assert.assertNotNull(jsonObj.getJSONObject("data"));
         Assert.assertNotNull("1647373355918192", jsonObj.getJSONObject("data").get("id"));
         Assert.assertNotNull("John Smith", jsonObj.getJSONObject("data").get("applicantCaseName"));
-}
+    }
 }
