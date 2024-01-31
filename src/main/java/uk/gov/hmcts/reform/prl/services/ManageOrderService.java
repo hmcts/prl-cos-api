@@ -1461,19 +1461,6 @@ public class ManageOrderService {
         );
     }
 
-    private List<Element<ServedParties>> getAmendedParties(Element<OrderDetails> order, List<Element<ServedParties>> servedParties) {
-        List<String> servedPartiesExisting = order.getValue()
-            .getServeOrderDetails().getServedParties().stream()
-            .map(element -> element.getValue().getPartyId())
-            .collect(Collectors.toList());
-        log.info("existing ids {} ",servedPartiesExisting);
-        List<Element<ServedParties>> amendedServeParties = servedParties.stream()
-            .filter(element -> !servedPartiesExisting.contains(element.getValue().getPartyId()))
-            .collect(Collectors.toList());
-        amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
-        return amendedServeParties;
-    }
-
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
         YesOrNo serveOnRespondent = caseData.getManageOrders().getServeToRespondentOptions();
         Element<PartyDetails> partyDetailsElement = caseData.getApplicants().get(0);
@@ -1544,6 +1531,20 @@ public class ManageOrderService {
             postalInformation,
             emailInformation
         );
+    }
+
+    private List<Element<ServedParties>> getAmendedParties(Element<OrderDetails> order, List<Element<ServedParties>> servedParties) {
+        List<Element<ServedParties>> amendedServeParties = new ArrayList<>();
+        List<String> servedPartiesExisting = order.getValue()
+            .getServeOrderDetails().getServedParties().stream()
+            .map(element -> element.getValue().getPartyId())
+            .collect(Collectors.toList());
+        log.info("existing ids {} ",servedPartiesExisting);
+        amendedServeParties.addAll(servedParties.stream()
+            .filter(element -> !servedPartiesExisting.contains(element.getValue().getPartyId()))
+            .collect(Collectors.toList()));
+        amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
+        return amendedServeParties;
     }
 
     private List<Element<ServedParties>> getServedParties(CaseData caseData) {
