@@ -1504,7 +1504,7 @@ public class ManageOrderService {
             cafcassCymruEmail = caseData.getManageOrders().getCafcassCymruEmail();
         }
 
-        List<Element<ServedParties>> servedParties  = getServedParties(caseData)
+        List<Element<ServedParties>> servedParties  = getServedParties(caseData);
         log.info("order detail data {}", order);
         log.info("order list {}", orders);
         if (null != order.getValue().getServeOrderDetails() && null != order.getValue()
