@@ -2657,7 +2657,7 @@ public class ManageOrderService {
                 .map(Element::getValue).toList();
 
             if (ordersHearingDetails.size() == 1) {
-                hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum().toString();
+                hearingOptionSelected =  String.valueOf(hearingList.get(0).getHearingDateConfirmOptionEnum());
             } else if (!ordersHearingDetails.isEmpty()) {
                 hearingOptionSelected = WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
                 isMultipleHearingSelected = YES;
