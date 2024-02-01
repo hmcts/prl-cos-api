@@ -478,6 +478,7 @@ public class ReviewDocumentService {
             .scannedDate(scannedDocument.getScannedDate())
             .deliveryDate(scannedDocument.getDeliveryDate())
             .isConfidential(YesOrNo.Yes) //bulk scan docs always go to confidential if decision is Yes
+            .isRestricted(YesOrNo.No) //fix to getRestrictedOrConfidentialKey=confidential
             .uploaderRole(BULK_SCAN);
     }
 
