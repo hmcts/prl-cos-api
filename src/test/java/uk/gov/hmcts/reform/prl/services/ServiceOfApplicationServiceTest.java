@@ -457,6 +457,7 @@ public class ServiceOfApplicationServiceTest {
                                       .unServedLaPack(SoaPack.builder()
                                                           .partyIds(List.of(element("test12345")))
                                                           .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtBailiff.toString())
+                                                          .partyIds(List.of(element("")))
                                                           .packDocument(List.of(element(Document.builder().build())))
                                                           .build())
                                       .applicationServedYesNo(No)
