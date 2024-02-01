@@ -2233,17 +2233,7 @@ public class ServiceOfApplicationService {
 
         log.info("Sending notification for Applicants ====> {}", unServedApplicantPack);
         log.info("Case created by {}", CaseUtils.isCaseCreatedByCitizen(caseData));
-        List<Document> packDocs = new ArrayList<>();
-        if (unServedApplicantPack.getPersonalServiceBy() != null
-            && (SoaSolicitorServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
-            || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))
-            && !CaseUtils.isCaseWithoutNotice(caseData)) {
-            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
-                packDocs.add(generateAccessCodeLetter(authorization, caseData, applicant, null, PRL_LET_ENG_AP8));
-            }
-            log.info("**8 pack docs {}", packDocs);
-        }
-        packDocs.addAll(unwrapElements(unServedApplicantPack.getPackDocument()));
+        List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(authorization,applicantList,caseData,
