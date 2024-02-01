@@ -2024,14 +2024,14 @@ public class ServiceOfApplicationService {
     private void checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization,
                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
-        if (unServedLaPack != null) {
+        if (!ObjectUtils.isEmpty(unServedLaPack)) {
+            log.info("*** La pack present *** {}", unServedLaPack);
             try {
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                     .sendEmailNotificationToLocalAuthority(
                         authorization,
                         caseData,
-                        caseData.getServiceOfApplication()
-                                                               .getSoaLaEmailAddress(),
+                        caseData.getServiceOfApplication().getSoaLaEmailAddress(),
                         ElementUtils.unwrapElements(unServedLaPack.getPackDocument()),
                         PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
             } catch (IOException e) {
