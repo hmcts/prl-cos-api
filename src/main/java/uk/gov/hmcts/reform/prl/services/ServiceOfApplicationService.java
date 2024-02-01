@@ -1837,6 +1837,7 @@ public class ServiceOfApplicationService {
                 caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
                     .servedBy(userService.getUserDetails(authorization).getFullName())
                     .packCreatedDate(LocalDateTime.now().toString())
+                        .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaLaEmailAddress())))
                     .build());
             }
         } else {
@@ -2031,14 +2032,14 @@ public class ServiceOfApplicationService {
     private void checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization,
                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
-        if (!ObjectUtils.isEmpty(unServedLaPack)) {
+        if (!ObjectUtils.isEmpty(unServedLaPack) && StringUtils.isNotEmpty(unServedLaPack.getPartyIds().get(0).getValue())) {
             log.info("*** La pack present *** {}", unServedLaPack);
             try {
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                     .sendEmailNotificationToLocalAuthority(
                         authorization,
                         caseData,
-                        caseData.getServiceOfApplication().getSoaLaEmailAddress(),
+                        unServedLaPack.getPartyIds().get(0).getValue(),
                         ElementUtils.unwrapElements(unServedLaPack.getPackDocument()),
                         PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
             } catch (IOException e) {
