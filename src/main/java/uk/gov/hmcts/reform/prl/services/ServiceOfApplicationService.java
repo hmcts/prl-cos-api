@@ -2233,7 +2233,7 @@ public class ServiceOfApplicationService {
     private void checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization,
                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
-        if (!ObjectUtils.isEmpty(unServedLaPack) && StringUtils.isNotEmpty(unServedLaPack.getPartyIds().get(0).getValue())) {
+        if (!ObjectUtils.isEmpty(unServedLaPack) && CollectionUtils.isNotEmpty(unServedLaPack.getPartyIds())) {
             log.info("*** La pack present *** {}", unServedLaPack);
             try {
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
