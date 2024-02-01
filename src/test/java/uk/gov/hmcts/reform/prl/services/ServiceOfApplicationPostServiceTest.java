@@ -57,7 +57,13 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FILE_NAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -767,7 +773,7 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void shouldReturnEmptyBulkPrintIdWhenBulkPrintServiceFails() {
-        CaseData caseData = CaseData.builder().build();
+
         Document finalDoc = Document.builder()
             .documentUrl("finalDoc")
             .documentBinaryUrl("finalDoc")
@@ -796,6 +802,7 @@ public class ServiceOfApplicationPostServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
+        CaseData caseData = CaseData.builder().build();
 
         when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
         when(bulkPrintService.send(
@@ -816,7 +823,6 @@ public class ServiceOfApplicationPostServiceTest {
 
     @Test
     public void shouldReturnEmptyBulkPrintIdWhenBulkPrintServiceFailsOne() {
-        CaseData caseData = CaseData.builder().build();
         Document finalDoc = Document.builder()
             .documentUrl("finalDoc")
             .documentBinaryUrl("finalDoc")
@@ -845,7 +851,7 @@ public class ServiceOfApplicationPostServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
-
+        CaseData caseData = CaseData.builder().build();
         when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
         when(bulkPrintService.send(
             Mockito.any(),
