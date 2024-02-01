@@ -455,6 +455,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .confidentialityCheckRejectReason("pack contain confidential info")
                                                                                 .build()))
                                       .unServedLaPack(SoaPack.builder()
+                                                          .partyIds(List.of(element("test12345")))
                                                           .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtBailiff.toString())
                                                           .packDocument(List.of(element(Document.builder().build())))
                                                           .build())
