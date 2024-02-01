@@ -10,9 +10,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
@@ -283,8 +281,9 @@ public class ServiceOfApplicationPostService {
         } catch (Exception e) {
             log.error("The bulk print service has failed", e);
         }
-        Address address = Yes.equals(partyDetails.getIsAddressConfidential()) ?
-            Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build() : partyDetails.getAddress();
+        Address address = Yes.equals(partyDetails.getIsAddressConfidential())
+            ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
+            : partyDetails.getAddress();
 
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
