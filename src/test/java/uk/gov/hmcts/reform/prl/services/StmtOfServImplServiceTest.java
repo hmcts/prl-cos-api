@@ -285,4 +285,62 @@ public class StmtOfServImplServiceTest {
         assertNotNull(updatedCaseData);
 
     }
+
+    @Test
+    public void testToRetrieveAllRespondentNamesForC100Scenario2() {
+
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(List.of(DynamicListElement.builder().code(TEST_UUID).label("").build()))
+            .value(DynamicListElement.builder().code(TEST_UUID).label(ALL_RESPONDENTS).build())
+            .build();
+
+        StmtOfServiceAddRecipient stmtOfServiceAddRecipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(dynamicList)
+            .stmtOfServiceDocument(Document.builder()
+                                       .documentUrl(generatedDocumentInfo.getUrl())
+                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                       .documentHash(generatedDocumentInfo.getHashToken())
+                                       .documentFileName("testFile.pdf")
+                                       .build())
+            .build();
+
+        Element<StmtOfServiceAddRecipient> wrappedSos = Element.<StmtOfServiceAddRecipient>builder()
+            .id(UUID.fromString(TEST_UUID))
+            .value(stmtOfServiceAddRecipient).build();
+        List<Element<StmtOfServiceAddRecipient>> listOfSos = Collections.singletonList(wrappedSos);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .respondents(listOfRespondents)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .unServedRespondentPack(SoaPack.builder()
+                                                                  .personalServiceBy(SoaSolicitorServingRespondentsEnum
+                                                                                         .courtAdmin.toString())
+                                                                  .packDocument(List.of(Element.<Document>builder()
+                                                                                            .value(Document.builder().build())
+                                                                                            .build()))
+                                                                  .build()).build())
+            .stmtOfServiceAddRecipient(listOfSos)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+
+        assertNotNull(updatedCaseData);
+
+    }
 }
