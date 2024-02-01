@@ -51,17 +51,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FILE_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_OTHER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -809,10 +801,61 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(),
             Mockito.any()
         )).thenThrow(new RuntimeException());
+        partyDetails.setIsAddressConfidential(Yes);
         BulkPrintDetails bulkPrintOrderDetail =
             serviceOfApplicationPostService.sendPostNotificationToParty(caseData, AUTH,
                                                                         partyDetails, documentList, "test name");
         assertNotNull(bulkPrintOrderDetail);
         assertTrue(bulkPrintOrderDetail.getBulkPrintId().isEmpty());
+        assertEquals(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build(),bulkPrintOrderDetail.getPostalAddress());
+    }
+
+    @Test
+    public void shouldReturnEmptyBulkPrintIdWhenBulkPrintServiceFailsOne() {
+        CaseData caseData = CaseData.builder().build();
+        Document finalDoc = Document.builder()
+            .documentUrl("finalDoc")
+            .documentBinaryUrl("finalDoc")
+            .documentHash("finalDoc")
+            .build();
+
+        Document coverSheet = Document.builder()
+            .documentUrl("coverSheet")
+            .documentBinaryUrl("coverSheet")
+            .documentHash("coverSheet")
+            .build();
+
+        final List<Document> documentList = List.of(coverSheet, finalDoc);
+
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+        when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
+        when(bulkPrintService.send(
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.any()
+        )).thenThrow(new RuntimeException());
+        partyDetails.setIsAddressConfidential(No);
+        BulkPrintDetails bulkPrintOrderDetail =
+            serviceOfApplicationPostService.sendPostNotificationToParty(caseData, AUTH,
+                                                                        partyDetails, documentList, "test name");
+        assertNotNull(bulkPrintOrderDetail);
+        assertTrue(bulkPrintOrderDetail.getBulkPrintId().isEmpty());
+        assertNotEquals(Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build(),bulkPrintOrderDetail.getPostalAddress());
     }
 }
