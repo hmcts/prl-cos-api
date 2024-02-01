@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -23,8 +24,10 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
+import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -58,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
 @Slf4j
@@ -65,6 +69,10 @@ public class CaseUtils {
     private CaseUtils() {
 
     }
+
+    private static final String BY_EMAIL = "By email";
+    private static final String BY_EMAIL_AND_POST = "By email and post";
+    private static final String BY_POST = "By post";
 
     public static CaseData getCaseDataFromStartUpdateEventResponse(StartEventResponse startEventResponse, ObjectMapper objectMapper) {
         CaseDetails caseDetails = startEventResponse.getCaseDetails();
@@ -107,6 +115,7 @@ public class CaseUtils {
     }
 
 
+
     public static String getOrderSelectionType(CaseData caseData) {
         String orderSelectionType = null;
         if (caseData.getManageOrdersOptions() != null) {
@@ -130,6 +139,25 @@ public class CaseUtils {
             noOfDaysRemaining = PrlAppsConstants.CASE_SUBMISSION_THRESHOLD - noDaysPassed;
         }
         return noOfDaysRemaining;
+    }
+
+    /*
+    Below method checks for Both if the case is created by
+    citizen or the main applicant in the case is not represented.
+    * **/
+    public static boolean isCaseCreatedByCitizen(CaseData caseData) {
+        log.info("case created by {}", caseData.getCaseCreatedBy());
+        log.info("is this courtnav case {}", caseData.getIsCourtNavCase());
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) || Yes.equals(caseData.getIsCourtNavCase())) {
+            return true;
+        }
+        if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            log.info("Applicant 1 {}", caseData.getApplicants().get(0));
+        }
+        log.info("case created by {}", caseData.getCaseCreatedBy());
+
+        return C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData)) ? !hasLegalRepresentation(caseData.getApplicants().get(
+            0).getValue()) : !hasLegalRepresentation(caseData.getApplicantsFL401());
     }
 
     public static Map<String, Object> getCourtDetails(Optional<CourtVenue> courtVenue, String baseLocationId) {
@@ -174,7 +202,7 @@ public class CaseUtils {
     }
 
     public static boolean hasLegalRepresentation(PartyDetails partyDetails) {
-        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || StringUtils.hasLength(partyDetails.getSolicitorEmail());
     }
 
     public static Map<String, String> getApplicantsToNotify(CaseData caseData, UUID excludeId) {
@@ -499,5 +527,35 @@ public class CaseUtils {
             );
         }
         return null;
+    }
+
+    public static List<Element<String>> getPartyIdList(List<Element<PartyDetails>> parties) {
+        return parties.stream().map(Element::getId).map(uuid -> element(uuid.toString())).toList();
+    }
+
+    public static boolean isCaseWithoutNotice(CaseData caseData) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && Yes.equals(caseData.getDoYouNeedAWithoutNoticeHearing())) {
+            return true;
+        } else if (null != caseData.getOrderWithoutGivingNoticeToRespondent()) {
+            return YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
+        }
+        return false;
+    }
+
+    public static String getModeOfService(List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                    List<Element<BulkPrintDetails>> bulkPrintDetails) {
+        String temp = null;
+        if (null != emailNotificationDetails && !emailNotificationDetails.isEmpty()) {
+            temp = BY_EMAIL;
+        }
+        if (null != bulkPrintDetails && !bulkPrintDetails.isEmpty()) {
+            if (null != temp) {
+                temp = BY_EMAIL_AND_POST;
+            } else {
+                temp = BY_POST;
+            }
+        }
+        return temp;
     }
 }

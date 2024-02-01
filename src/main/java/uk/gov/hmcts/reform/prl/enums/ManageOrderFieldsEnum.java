@@ -45,16 +45,11 @@ public enum ManageOrderFieldsEnum {
     orderType("orderType"),
     previewDraftOrder("previewDraftOrder"),
     isHearingPageNeeded("isHearingPageNeeded"),
-    postalInformationCA("postalInformationCA"),
     cafcassCymruDocuments("cafcassCymruDocuments"),
-    draftOrdersDynamicList("draftOrdersDynamicList"),
     previewDraftOrderWelsh("previewDraftOrderWelsh"),
     whenReportsMustBeFiled("whenReportsMustBeFiled"),
     doYouWantToEditTheOrder("doYouWantToEditTheOrder"),
     isOrderCreatedBySolicitor("isOrderCreatedBySolicitor"),
-    servingRespondentsOptionsCA("servingRespondentsOptionsCA"),
-    otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
-    isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     cafcassOrCymruNeedToProvideReport("cafcassOrCymruNeedToProvideReport"),
     orderEndsInvolvementOfCafcassOrCymru("orderEndsInvolvementOfCafcassOrCymru"),
     selectTypeOfOrder("selectTypeOfOrder"),
@@ -304,6 +299,8 @@ public enum ManageOrderFieldsEnum {
     nameOfLaToReviewOrder("nameOfLaToReviewOrder"),
     manageOrdersDocumentToAmend("manageOrdersDocumentToAmend"),
     draftOrderOptions("draftOrderOptions"),
+    legalRepInstructionsPlaceHolder("legalRepInstructionsPlaceHolder"),
+    editOrderTextInstructions("editOrderTextInstructions"),
     orderNameForWA("orderNameForWA");
 
     private final String value;
