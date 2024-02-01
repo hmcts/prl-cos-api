@@ -2653,7 +2653,6 @@ public class ManageOrderService {
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
 
-
             List<Element<HearingData>> hearingsWithOptionsSelected = ordersHearingDetails.stream()
                 .filter(elem -> null != elem.getValue().getHearingDateConfirmOptionEnum()).toList();
 
