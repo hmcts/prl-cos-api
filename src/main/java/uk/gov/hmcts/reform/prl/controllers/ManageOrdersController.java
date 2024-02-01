@@ -55,7 +55,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.amendOrderUnderSlipRule;
 import static uk.gov.hmcts.reform.prl.enums.manageorders.ManageOrdersOptionsEnum.createAnOrder;
@@ -244,9 +243,7 @@ public class ManageOrdersController {
 
             //SNI-4330 fix
             //update caseSummaryTab with latest state
-            cleanUpSelectedManageOrderOptions(caseDataUpdated);
             ManageOrderService.cleanUpServeOrderOptions(caseDataUpdated);
-            caseDataUpdated.put(STATE, caseData.getState());
             coreCaseDataService.triggerEvent(
                 JURISDICTION,
                 CASE_TYPE,
@@ -278,6 +275,7 @@ public class ManageOrdersController {
             caseData = manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData);
             Map<String, Object> caseDataUpdated = caseDetails.getData();
             setIsWithdrawnRequestSent(caseData, caseDataUpdated);
+
             if (caseData.getManageOrdersOptions().equals(amendOrderUnderSlipRule)) {
                 caseDataUpdated.putAll(amendOrderService.updateOrder(caseData, authorisation));
             } else if (caseData.getManageOrdersOptions().equals(createAnOrder)
@@ -310,8 +308,9 @@ public class ManageOrdersController {
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
 
             //Added below fields for WA purpose
-            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData));
+            caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            cleanUpSelectedManageOrderOptions(caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
