@@ -802,7 +802,6 @@ public class ServiceOfApplicationPostServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
-        CaseData caseData = CaseData.builder().build();
 
         when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
         when(bulkPrintService.send(
@@ -813,6 +812,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any()
         )).thenThrow(new RuntimeException());
         partyDetails.setIsAddressConfidential(Yes);
+        CaseData caseData = CaseData.builder().build();
         BulkPrintDetails bulkPrintOrderDetail =
             serviceOfApplicationPostService.sendPostNotificationToParty(caseData, AUTH,
                                                                         partyDetails, documentList, "test name");
@@ -851,7 +851,6 @@ public class ServiceOfApplicationPostServiceTest {
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
             .address(Address.builder().addressLine1("line1").build())
             .build();
-        CaseData caseData = CaseData.builder().build();
         when(launchDarklyClient.isFeatureEnabled("soa-bulk-print")).thenReturn(true);
         when(bulkPrintService.send(
             Mockito.any(),
@@ -861,6 +860,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any()
         )).thenThrow(new RuntimeException());
         partyDetails.setIsAddressConfidential(No);
+        CaseData caseData = CaseData.builder().build();
         BulkPrintDetails bulkPrintOrderDetail =
             serviceOfApplicationPostService.sendPostNotificationToParty(caseData, AUTH,
                                                                         partyDetails, documentList, "test name");
