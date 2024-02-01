@@ -10,27 +10,24 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -60,32 +57,6 @@ public class ServiceOfApplicationEmailServiceTest {
 
     @Mock
     SendgridService sendgridService;
-
-    @Test
-    public void testC100EmailNotification() throws Exception {
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicants(List.of(element(PartyDetails.builder()
-                                            .email("test@gmail.com")
-                                            .solicitorEmail("test@gmail.com")
-                                            .representativeLastName("LastName")
-                                            .representativeFirstName("FirstName")
-                                            .build())))
-            .respondents(List.of(element(PartyDetails.builder()
-                                             .solicitorEmail("test@gmail.com")
-                                             .representativeLastName("LastName")
-                                             .representativeFirstName("FirstName")
-                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
-                                             .build())))
-
-            .build();
-        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
-        serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
-        verifyNoMoreInteractions(emailService);
-    }
-
-
 
     @Test
     public void testC100EmailNotificationForMultipleApplicants() throws Exception {
@@ -185,34 +156,6 @@ public class ServiceOfApplicationEmailServiceTest {
     }
 
     @Test
-    public void testSendEmailToC100Applicants() {
-        PartyDetails applicant = PartyDetails.builder()
-            .firstName("first")
-            .lastName("last")
-            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
-            .canYouProvideEmailAddress(YesOrNo.Yes)
-            .email("app@gmail.com")
-            .build();
-        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
-        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
-        CaseData caseData = CaseData.builder()
-            .id(12345L)
-            .caseTypeOfApplication("C100")
-            .applicantCaseName("Test Case 45678")
-            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
-            .caseCreatedBy(CaseCreatedBy.CITIZEN)
-            .applicants(applicantList)
-            .build();
-
-        serviceOfApplicationEmailService.sendEmailToC100Applicants(caseData);
-
-        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
-    }
-
-    @Test
     public void testSendEmailNotificationToApplicantSolicitor() throws Exception {
         String authorization = "";
         List<Document> docs = new ArrayList<>();
@@ -237,7 +180,7 @@ public class ServiceOfApplicationEmailServiceTest {
                                                                                    EmailTemplateNames.APPLICANT_SOLICITOR_CA, docs,
                                                                                    PrlAppsConstants.APPLICANT_SOLICITOR
         );
-        verify(emailService,times(1)).sendSoa(Mockito.anyString(),
+        verify(emailService,times(0)).sendSoa(Mockito.anyString(),
                                            Mockito.any(),
                                            Mockito.any(),Mockito.any());
     }
@@ -304,5 +247,18 @@ public class ServiceOfApplicationEmailServiceTest {
                                                Mockito.any(),
                                                Mockito.any(), Mockito.any()
         );
+    }
+
+    @Test
+    public void testsendEmailUsingTemplateWithAttachments() throws Exception {
+        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments("test",
+                                                                               "", List.of(Document.builder().build()),
+                                                                               SendgridEmailTemplateNames
+                                                                                   .SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                                                               new HashMap<>(),
+                                                                               PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR);
+
+        verify(sendgridService, times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 }
