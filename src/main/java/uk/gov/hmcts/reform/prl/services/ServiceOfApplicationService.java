@@ -156,7 +156,7 @@ public class ServiceOfApplicationService {
         ### What happens next
         The service pack needs to be reviewed for confidential details before it can be served.
 
-            You can view the service packs in the <a href="%s">service of application</a> tab.
+            <span>You can view the service packs in the <a href="%s">service of application</a> tab.</span>
         """;
 
     public static final String CONFIRMATION_HEADER_NON_PERSONAL = "# The application has been served";
