@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StmtOfServImplService {
+    public static final String RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_COURT = "Respondent will be served personally by Court";
     private final ObjectMapper objectMapper;
     private final UserService userService;
 
@@ -213,6 +214,7 @@ public class StmtOfServImplService {
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             bulkPrintDetails.add(element(BulkPrintDetails.builder()
                                              .servedParty(PRL_COURT_ADMIN)
+                                             .bulkPrintId(RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_COURT)
                                              .printedDocs(String.join(",", unServedRespondentPack
                                                  .getPackDocument().stream()
                                                  .map(Element::getValue)
