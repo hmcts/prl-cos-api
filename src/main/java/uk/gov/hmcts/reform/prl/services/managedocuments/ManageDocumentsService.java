@@ -262,7 +262,7 @@ public class ManageDocumentsService {
         Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
 
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put(DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId()), document);
+        hashMap.put(DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId(), loggedInUserType), document);
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
         return finalQuarantineDocument.toBuilder()
@@ -649,7 +649,7 @@ public class ManageDocumentsService {
                 if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
                     quarantineLegalDoc[0] = element.getValue();
 
-                    String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc[0].getCategoryId());
+                    String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc[0].getCategoryId(), null);
                     Document existingDocument = objectMapper.convertValue(
                         objectMapper.convertValue(quarantineLegalDoc[0], Map.class).get(attributeName),
                         Document.class

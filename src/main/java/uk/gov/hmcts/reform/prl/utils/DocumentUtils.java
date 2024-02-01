@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
@@ -154,8 +155,8 @@ public class DocumentUtils {
                                                                              boolean confidentialFlag) {
 
         HashMap<String, Object> hashMap = new HashMap<>();
-
-        hashMap.put(populateAttributeNameFromCategoryId(categoryId), document);
+        String loggedInUserType = getLoggedInUserType(userDetails);
+        hashMap.put(populateAttributeNameFromCategoryId(categoryId, loggedInUserType), document);
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc quarantineLegalDoc = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
 
@@ -173,11 +174,14 @@ public class DocumentUtils {
             .restrictedDetails(confidentialFlag ? manageDocument.getRestrictedDetails() : null)
             .uploadedBy(userDetails.getFullName())
             .uploadedByIdamId(userDetails.getId())
-            .uploaderRole(getLoggedInUserType(userDetails))
+            .uploaderRole(loggedInUserType)
             .build();
     }
 
-    public static String populateAttributeNameFromCategoryId(String categoryId) {
+    public static String populateAttributeNameFromCategoryId(String categoryId, String userRole) {
+        if (BULK_SCAN.equals(userRole)) {
+            return "url";
+        }
         String wierdAttributeName = returnAttributeNameForWierdCategories(categoryId);
         if (wierdAttributeName == null) {
             String[] splittedCategory = StringUtils.splitByCharacterTypeCamelCase(categoryId);
@@ -231,7 +235,7 @@ public class DocumentUtils {
         } else if (roles.contains(Roles.CITIZEN.getValue())) {
             loggedInUserType = UserRoles.CITIZEN.name();
         } else if (roles.contains(Roles.BULK_SCAN.getValue())) {
-            loggedInUserType = UserRoles.BULK_SCAN.name();
+            loggedInUserType = BULK_SCAN;
         } else {
             loggedInUserType = CAFCASS;
         }
