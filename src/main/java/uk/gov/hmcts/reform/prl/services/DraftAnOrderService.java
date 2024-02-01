@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
@@ -312,7 +313,8 @@ public class DraftAnOrderService {
             && UserRoles.COURT_ADMIN.name().equals(loggedInUserType)
             && (AmendOrderCheckEnum.noCheck.equals(draftOrder.getOtherDetails().getReviewRequiredBy())
             || OrderStatusEnum.reviewedByManager.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus())
-            || OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus()));
+            || OrderStatusEnum.reviewedByJudge.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus())
+            || OrderStatusEnum.createdByJudge.getDisplayedValue().equals(draftOrder.getOtherDetails().getStatus()));
     }
 
     public Map<String, Object> removeDraftOrderAndAddToFinalOrder(String authorisation, CaseData caseData, String eventId) {
@@ -1973,7 +1975,17 @@ public class DraftAnOrderService {
         caseDataUpdated.put("childOption", DynamicMultiSelectList.builder()
             .listItems(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).build());
 
+        List<String> errorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.uploadAnOrder.equals(caseData.getDraftOrderOptions())) {
+            if ((null != caseData.getChildArrangementOrders()
+                && ChildArrangementOrdersEnum.standardDirectionsOrder
+                .name()
+                .equalsIgnoreCase(caseData
+                    .getChildArrangementOrders()
+                    .toString()))) {
+                return prohibitedOrdersForSolicitor(errorList);
+            }
+
             caseDataUpdated.put(SELECTED_ORDER, manageOrderService.getSelectedOrderInfoForUpload(caseData));
 
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -1981,13 +1993,9 @@ public class DraftAnOrderService {
                 .build();
         }
 
-        List<String> errorList = new ArrayList<>();
         if (Arrays.stream(ManageOrdersUtils.PROHIBITED_ORDER_IDS_FOR_SOLICITORS)
             .anyMatch(orderId -> orderId.equalsIgnoreCase(caseData.getCreateSelectOrderOptions().toString()))) {
-            errorList.add("This order is not available to be drafted");
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(errorList)
-                .build();
+            return prohibitedOrdersForSolicitor(errorList);
         }
 
         if (getErrorsForOrdersProhibitedForC100FL401(
@@ -2027,6 +2035,13 @@ public class DraftAnOrderService {
                 .data(caseDataUpdated)
                 .build();
         }
+    }
+
+    private AboutToStartOrSubmitCallbackResponse prohibitedOrdersForSolicitor(List<String> errorList) {
+        errorList.add("This order is not available to be drafted");
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .errors(errorList)
+            .build();
     }
 
     private List<String> validateDraftOrderDetails(CaseData caseData) {
