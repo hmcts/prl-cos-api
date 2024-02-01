@@ -1651,13 +1651,14 @@ public class ServiceOfApplicationService {
         collapsible.add("</summary>");
         collapsible.add("<div class='govuk-details__text'>");
         collapsible.add(
-            "Certain documents will be automatically included in the pack this is served on parties(the people in the case)");
+            "Certain documents will be automatically included in the pack that is sent out on parties (the people in the case).");
         collapsible.add(
-            "This includes");
+            "This includes:");
         collapsible.add(
-            "<ul><li>an application form</li><li>witness statement</li><li>privacy notice</li><li>cover letter</li></ul>");
+            "<ul><li>an application form (FL401)</li>"
+                + "<li>witness statement</li><li>privacy notice</li><li>cover letter (if not represented)</li></ul>");
         collapsible.add(
-            "You do not need to upload these documents yourself");
+            "You do not need to upload these documents yourself.");
         collapsible.add("</div>");
         collapsible.add("</details>");
         return String.join("\n\n", collapsible);
