@@ -445,12 +445,19 @@ public class DraftAnOrderService {
             }
             if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
                 && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
-                caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder().manageOrdersApplicant(
-                        CaseUtils.getApplicant(caseData))
+                caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
+                                                                 .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
                                                                  .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
                                                                      caseData))
-                                                                 .manageOrdersRespondent(CaseUtils.getRespondent(
-                                                                     caseData)).build()).build();
+                                                                 .manageOrdersRespondent(CaseUtils.getRespondent(caseData))
+                                                                 .manageOrdersRespondentReference(
+                                                                     caseData.getRespondentsFL401().getSolicitorReference() != null
+                                                                         ? caseData.getRespondentsFL401().getSolicitorReference() : "")
+                                                                 .manageOrdersRespondentDob(
+                                                                     null != caseData.getRespondentsFL401().getDateOfBirth()
+                                                                         ? caseData.getRespondentsFL401().getDateOfBirth() : null)
+                                                                 .build())
+                    .build();
             }
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
                 caseData = manageOrderService.populateJudgeNames(caseData);

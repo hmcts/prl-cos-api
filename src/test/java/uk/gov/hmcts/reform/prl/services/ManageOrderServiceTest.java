@@ -1703,8 +1703,7 @@ public class ManageOrderServiceTest {
             .lastName("ln")
             .dateOfBirth(LocalDate.now())
             .address(Address.builder().build())
-            .representativeFirstName("rpfn")
-            .representativeLastName("rpln")
+            .solicitorReference("solRef")
             .build();
         CaseData caseData = CaseData.builder()
             .applicantsFL401(partyDetails)
