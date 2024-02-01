@@ -311,18 +311,22 @@ public class ServiceOfApplicationService {
                 );
             }
             checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
-            List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
-            if (!CollectionUtils.isEmpty(docsForLa)) {
-                emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                         .sendEmailNotificationToLocalAuthority(
-                                                             authorization,
-                                                             caseData,
-                                                             caseData.getServiceOfApplication()
-                                                                 .getSoaLaEmailAddress(),
-                                                             docsForLa,
-                                                             PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY
-                                                         )));
+            if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
+                && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
+                List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
+                if (!CollectionUtils.isEmpty(docsForLa)) {
+                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                                                             .sendEmailNotificationToLocalAuthority(
+                                                                 authorization,
+                                                                 caseData,
+                                                                 caseData.getServiceOfApplication()
+                                                                     .getSoaLaEmailAddress(),
+                                                                 docsForLa,
+                                                                 PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY
+                                                             )));
+                }
             }
+
         } else {
             if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                 whoIsResponsibleForServing = handleNotificationsForCitizenCreatedCase(caseData,
@@ -1826,12 +1830,16 @@ public class ServiceOfApplicationService {
         }
 
         //serving Local authority in the case
-        List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
-        if (CollectionUtils.isNotEmpty(docsForLa)) {
-            caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
-                .servedBy(userService.getUserDetails(authorization).getFullName())
-                .packCreatedDate(LocalDateTime.now().toString())
-                .build());
+        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
+            && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
+            List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
+            if (CollectionUtils.isNotEmpty(docsForLa)) {
+                caseDataUpdated.put(UNSERVED_LA_PACK, SoaPack.builder().packDocument(wrapElements(docsForLa))
+                    .servedBy(userService.getUserDetails(authorization).getFullName())
+                    .packCreatedDate(LocalDateTime.now().toString())
+                        .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaLaEmailAddress())))
+                    .build());
+            }
         } else {
             caseDataUpdated.put(UNSERVED_LA_PACK, null);
         }
@@ -2024,14 +2032,14 @@ public class ServiceOfApplicationService {
     private void checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization,
                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
-        if (unServedLaPack != null) {
+        if (!ObjectUtils.isEmpty(unServedLaPack) && CollectionUtils.isNotEmpty(unServedLaPack.getPartyIds())) {
+            log.info("*** La pack present *** {}", unServedLaPack);
             try {
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                     .sendEmailNotificationToLocalAuthority(
                         authorization,
                         caseData,
-                        caseData.getServiceOfApplication()
-                                                               .getSoaLaEmailAddress(),
+                        unServedLaPack.getPartyIds().get(0).getValue(),
                         ElementUtils.unwrapElements(unServedLaPack.getPackDocument()),
                         PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
             } catch (IOException e) {
@@ -2052,28 +2060,24 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> getDocsToBeServedToLa(String authorisation, CaseData caseData) {
-        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
-            && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
-            List<Document> docs = new ArrayList<>();
-            if (null != caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
-                for (Element<DocumentListForLa> laDocument: caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
-                    uk.gov.hmcts.reform.ccd.client.model.Document document = getSelectedDocumentFromDynamicList(
-                        authorisation,
-                        laDocument.getValue().getDocumentsListForLa(),
-                        String.valueOf(caseData.getId())
-                    );
-                    log.info("** Document selected {}", document);
-                    if (null != document) {
-                        docs.add(CaseUtils.convertDocType(document));
-                    }
+        List<Document> docs = new ArrayList<>();
+        if (null != caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
+            for (Element<DocumentListForLa> laDocument: caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
+                uk.gov.hmcts.reform.ccd.client.model.Document document = getSelectedDocumentFromDynamicList(
+                    authorisation,
+                    laDocument.getValue().getDocumentsListForLa(),
+                    String.valueOf(caseData.getId())
+                );
+                log.info("** Document selected {}", document);
+                if (null != document) {
+                    docs.add(CaseUtils.convertDocType(document));
                 }
             }
-            if (Yes.equals(caseData.getServiceOfApplication().getSoaServeC8ToLocalAuthorityYesOrNo())) {
-                docs.add(caseData.getC8Document());
-            }
-            return docs;
         }
-        return new ArrayList<>();
+        if (Yes.equals(caseData.getServiceOfApplication().getSoaServeC8ToLocalAuthorityYesOrNo())) {
+            docs.add(caseData.getC8Document());
+        }
+        return docs;
     }
 
     public uk.gov.hmcts.reform.ccd.client.model.Document getSelectedDocumentFromDynamicList(String authorisation,
