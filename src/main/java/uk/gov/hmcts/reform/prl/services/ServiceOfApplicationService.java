@@ -183,7 +183,7 @@ public class ServiceOfApplicationService {
     public static final String CONFIRMATION_HEADER_PERSONAL = "# The application is ready to be personally served";
     public static final String CONFIRMATION_BODY_PREFIX = """
         ### What happens next
-            The service pack has been served on the parties selected.
+        The service pack has been served on the parties selected.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
