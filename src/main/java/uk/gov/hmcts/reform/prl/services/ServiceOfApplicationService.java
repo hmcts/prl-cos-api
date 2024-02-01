@@ -179,35 +179,35 @@ public class ServiceOfApplicationService {
         ### What happens next
         The service pack needs to be reviewed for confidential details before it can be served.
 
-            <span>You can view the service packs in the <a href="%s">service of application</a> tab.</span>
+        You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
     public static final String CONFIRMATION_HEADER_NON_PERSONAL = "# The application has been served";
     public static final String CONFIRMATION_HEADER_PERSONAL = "# The application is ready to be personally served";
     public static final String CONFIRMATION_BODY_PREFIX = """
         ### What happens next
-            The service pack has been served on the parties selected.
+        The service pack has been served on the parties selected.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX = """
         ### What happens next
-            The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
-                \n The applicant has been served.
+        The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
+        \n The applicant has been served.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX = """
         ### What happens next
-            You need to arrange service on the respondent based on the judge's directions.
-                \n The service pack has been served on the applicant.
+        You need to arrange service on the respondent based on the judge's directions.
+        \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX = """
         ### What happens next
-            You need to arrange for a court bailiff to personally serve the respondent.
-                \n The service pack has been served on the applicant.
+        You need to arrange for a court bailiff to personally serve the respondent.
+        \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
