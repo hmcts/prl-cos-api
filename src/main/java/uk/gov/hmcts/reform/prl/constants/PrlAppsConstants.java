@@ -900,5 +900,8 @@ public class PrlAppsConstants {
 
     public static final String BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS = "buffChildAndOtherPeopleRelations";
     public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
+    public static final String MISSING_ADDRESS_WARNING_TEXT = "missingAddressWarningText";
 
+    public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
+        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
 }

@@ -81,6 +81,7 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP7;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_AP8;
 import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_RE5;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
@@ -93,6 +94,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_T
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
@@ -113,6 +115,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.SendAndReplyService.ARROW_SEPARATOR;
@@ -140,6 +143,22 @@ public class ServiceOfApplicationService {
     public static final String POST = "post";
     public static final String COURT = "Court";
     public static final String DA_APPLICANT_NAME = "daApplicantName";
+    public static final String PROCEED_TO_SERVING = "proceedToServing";
+    public static final String ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent and "
+        + "other people in the case</strong></div>";
+    public static final String CA_ADDRESS_MISSED_FOR_RESPONDENT = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for a respondent"
+        + "</strong></div>";
+
+    public static final String DA_ADDRESS_MISSED_FOR_RESPONDENT = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for the respondent"
+        + "</strong></div>";
+
+    public static final String ADDRESS_MISSED_FOR_OTHER_PARTIES = WARNING_TEXT_DIV
+        + "</span><strong class='govuk-warning-text__text'>There is no postal address for other people in the "
+        + "case</strong></div>";
+
     public static final String PRL_COURT_ADMIN = "PRL Court admin";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
     public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
@@ -1416,6 +1435,8 @@ public class ServiceOfApplicationService {
             "soaIsOrderListEmpty",
             "noticeOfSafetySupportLetter",
             "additionalDocumentsList",
+            PROCEED_TO_SERVING,
+            MISSING_ADDRESS_WARNING_TEXT,
             SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA
         ));
 
@@ -1504,9 +1525,69 @@ public class ServiceOfApplicationService {
                                                                                               String.valueOf(caseData.getId()));
         log.info("** case created by ** {}", caseDataUpdated.get(CASE_CREATED_BY));
         log.info("** dynamic list 1 ** {}", documentDynamicListLa);
+        caseDataUpdated.put(
+            MISSING_ADDRESS_WARNING_TEXT,
+            checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
+        );
         caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, documentDynamicListLa);
         log.info("** dynamic list 2 ** {}", caseDataUpdated.get(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA));
         return caseDataUpdated;
+    }
+
+    private String checkIfPostalAddressMissedForRespondentAndOtherParties(CaseData caseData) {
+        String warningText = BLANK_STRING;
+        boolean isRespondentAddressPresent = true;
+        boolean isOtherPeopleAddressPresent = true;
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            for (Element<PartyDetails> respondent : caseData.getRespondents()) {
+                if (!isPartiesAddressPresent(respondent.getValue())) {
+                    isRespondentAddressPresent = false;
+                    break;
+                }
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getOtherPartyInTheCaseRevised())) {
+                for (Element<PartyDetails> otherParty : caseData.getOtherPartyInTheCaseRevised()) {
+                    if (!isPartiesAddressPresent(otherParty.getValue())) {
+                        isOtherPeopleAddressPresent = false;
+                        break;
+                    }
+                }
+            } else if (CollectionUtils.isNotEmpty(caseData.getOthersToNotify())) {
+                for (Element<PartyDetails> otherParty : caseData.getOthersToNotify()) {
+                    if (!isPartiesAddressPresent(otherParty.getValue())) {
+                        isOtherPeopleAddressPresent = false;
+                        break;
+                    }
+                }
+            }
+        } else {
+            isRespondentAddressPresent = isPartiesAddressPresent(caseData.getRespondentsFL401());
+        }
+        if (!isRespondentAddressPresent && !isOtherPeopleAddressPresent) {
+            warningText = ADDRESS_MISSED_FOR_RESPONDENT_AND_OTHER_PARTIES;
+        } else if (!isRespondentAddressPresent
+            && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            warningText = CA_ADDRESS_MISSED_FOR_RESPONDENT;
+        } else if (!isRespondentAddressPresent
+            && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            warningText = DA_ADDRESS_MISSED_FOR_RESPONDENT;
+        } else if (!isOtherPeopleAddressPresent) {
+            warningText = ADDRESS_MISSED_FOR_OTHER_PARTIES;
+        }
+        log.info("isRespondentAddressPresent ==> " + isRespondentAddressPresent);
+        log.info("isOtherPeopleAddressPresent ==> " + isOtherPeopleAddressPresent);
+        log.info("warningText ==> " + warningText);
+        return warningText;
+    }
+
+    private static boolean isPartiesAddressPresent(PartyDetails partyDetails) {
+        boolean isAddressPresent = true;
+        if (No.equals(partyDetails.getIsCurrentAddressKnown())
+            || ObjectUtils.isEmpty(partyDetails.getAddress())
+            || StringUtils.isEmpty(partyDetails.getAddress().getAddressLine1())) {
+            isAddressPresent = false;
+        }
+        return isAddressPresent;
     }
 
     private boolean isRespondentDetailsConfidential(CaseData caseData) {
