@@ -101,7 +101,6 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.logging.log4j.util.Strings.concat;
-import static org.apache.logging.log4j.util.Strings.isNotBlank;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
@@ -1932,11 +1931,11 @@ public class ManageOrderService {
                 caseData.getRespondentsFL401().getFirstName(),
                 caseData.getRespondentsFL401().getLastName()
             ))
-            .manageOrdersApplicantReference(String.format(
-                PrlAppsConstants.FORMAT,
-                caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                caseData.getApplicantsFL401().getRepresentativeLastName()
-            ))
+            .manageOrdersApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
+                                                ? caseData.getApplicantsFL401().getSolicitorReference() : "")
+            //PRL-5137
+            .manageOrdersRespondentReference(caseData.getRespondentsFL401().getSolicitorReference() != null
+                                                 ? caseData.getRespondentsFL401().getSolicitorReference() : "")
             .build();
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
@@ -1946,15 +1945,6 @@ public class ManageOrderService {
         if (ofNullable(caseData.getRespondentsFL401().getDateOfBirth()).isPresent()) {
             orderData = orderData.toBuilder()
                 .manageOrdersRespondentDob(caseData.getRespondentsFL401().getDateOfBirth()).build();
-        }
-        //PRL-5137 - populate respondent solicitor ref
-        if (isNotBlank(caseData.getRespondentsFL401().getRepresentativeFirstName())
-            && isNotBlank(caseData.getRespondentsFL401().getRepresentativeLastName())) {
-            orderData = orderData.toBuilder()
-                .manageOrdersRespondentReference(String.format(PrlAppsConstants.FORMAT,
-                                                               caseData.getRespondentsFL401().getRepresentativeFirstName(),
-                                                               caseData.getRespondentsFL401().getRepresentativeLastName()))
-                .build();
         }
 
         return caseData.toBuilder().manageOrders(orderData)
