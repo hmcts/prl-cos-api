@@ -49,6 +49,7 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -517,6 +518,25 @@ public class ManageOrdersController {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
                 .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/manage-orders/recipients-validations",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to validate respondent Lip and other person address")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateRespondentAndOtherPersonAddress(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            if (C100_CASE_TYPE.equals(callbackRequest.getCaseDetails().getData().get(CASE_TYPE_OF_APPLICATION))) {
+                return manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+            }
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(callbackRequest.getCaseDetails().getData()).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
