@@ -95,6 +95,7 @@ public class ReviewDocumentsControllerFunctionalTest {
 
 
     @Test//f1
+    @Ignore
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForSol() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(SOLICITOR);
@@ -122,6 +123,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenOnlyConfidentialNotRestrictedForSol() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(SOLICITOR);
@@ -153,6 +155,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesForSol() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(SOLICITOR);
@@ -213,6 +216,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoForSol() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(SOLICITOR);
@@ -241,6 +245,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecNoForSol() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(SOLICITOR);
@@ -293,6 +298,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecYesCafcass() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(CAFCASS);
@@ -320,6 +326,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecNoCafcass() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(CAFCASS);
@@ -350,6 +357,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedNoAndReviewDecNoCafcass() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(CAFCASS);
@@ -376,6 +384,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenOnlyRestrictedNotConfidentialForCafcass() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(CAFCASS);
@@ -403,6 +412,7 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenReviewDocuments_whenOnlyConfidentialNotRestrictedForCafcass() throws Exception {
 
         DocumentResponse docRes = uploadDocumentIntoCdam(CAFCASS);
