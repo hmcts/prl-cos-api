@@ -60,32 +60,16 @@ public class ServiceOfApplicationEmailService {
     }
 
     public EmailNotificationDetails sendEmailNotificationToSolicitor(String authorization, CaseData caseData,
-                                                                                   PartyDetails partyDetails, EmailTemplateNames templateName,
-                                                                                   List<Document> docs,String servedParty) throws Exception {
-        EmailTemplateVars templateVars;
-        LanguagePreference languagePreference = LanguagePreference.english;
+                                                                     PartyDetails partyDetails,
+                                                                     List<Document> docs, String servedParty) throws Exception {
         Map<String, String> temp = new HashMap<>();
-        if (PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR.equalsIgnoreCase(servedParty)) {
-            templateVars = buildRespondentSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName() + " "
-                                              + partyDetails.getRepresentativeLastName(),
-                                          partyDetails.getFirstName() + " "
-                                              + partyDetails.getLastName()
-            );
-        } else {
-            templateVars = buildApplicantSolicitorEmail(caseData, partyDetails.getRepresentativeFirstName()
-                + " " + partyDetails.getRepresentativeLastName());
-            languagePreference = LanguagePreference.getPreferenceLanguage(caseData);
+        if (!PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR.equalsIgnoreCase(servedParty)) {
             temp.put("specialNote", "Yes");
         }
         log.info("Runtime.getRuntime().totalMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().totalMemory()));
         log.info("Runtime.getRuntime().maxMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().maxMemory()));
         log.info("Runtime.getRuntime().freeMemory() {}", FileUtils.byteCountToDisplaySize(Runtime.getRuntime().freeMemory()));
-        emailService.sendSoa(
-            partyDetails.getSolicitorEmail(),
-            templateName,
-            templateVars,
-            languagePreference
-        );
+
         temp.putAll(EmailUtils.getEmailProps(null, false, partyDetails.getRepresentativeFullName(),
                                              null, caseData.getApplicantCaseName(), String.valueOf(caseData.getId())));
         return sendgridService.sendEmailWithAttachments(authorization,

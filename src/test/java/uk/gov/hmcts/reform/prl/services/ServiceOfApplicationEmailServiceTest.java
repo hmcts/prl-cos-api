@@ -117,8 +117,7 @@ public class ServiceOfApplicationEmailServiceTest {
                                                       Mockito.any(), Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
         serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
-                                                                                EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                                List.of(Document.builder().build()),
+                List.of(Document.builder().build()),
                                                                                         "Applicant");
 
         verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
@@ -146,8 +145,7 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
         serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
-                                                                                    EmailTemplateNames.RESPONDENT_SOLICITOR,
-                                                                                    List.of(Document.builder().build()),
+                List.of(Document.builder().build()),
                                                                                     "Respondent");
         verify(emailService, times(1)).sendSoa(Mockito.anyString(),
                                             Mockito.any(),
@@ -235,8 +233,7 @@ public class ServiceOfApplicationEmailServiceTest {
                                                       Mockito.any(), Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
         serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
-                                                                          EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                          List.of(Document.builder().build()),
+                List.of(Document.builder().build()),
                                                                           PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR);
 
         verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
