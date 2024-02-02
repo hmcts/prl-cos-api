@@ -1482,6 +1482,8 @@ public class ManageOrderEmailServiceTest {
                               .serveToRespondentOptions(YesOrNo.No)
                               .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                               .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
+                              .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                                               .applicantLegalRepresentative)
                               .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                                                                          .serveByPostOrEmail(DeliveryByEnum.post)
                                                                          .emailInformation(EmailInformation.builder()
@@ -1530,6 +1532,8 @@ public class ManageOrderEmailServiceTest {
                 .issueDate(LocalDate.now())
                 .manageOrders(ManageOrders.builder().cafcassServedOptions(YesOrNo.Yes)
                         .serveToRespondentOptions(YesOrNo.No)
+                                  .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                                                   .applicantLegalRepresentative)
                         .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                         .serveOtherPartiesDA(null)
                         .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
@@ -1579,6 +1583,8 @@ public class ManageOrderEmailServiceTest {
                         .serveToRespondentOptions(YesOrNo.No)
                         .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
                         .serveOtherPartiesDA(List.of())
+                                  .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                                                   .applicantLegalRepresentative)
                         .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder()
                                 .serveByPostOrEmail(DeliveryByEnum.email)
                                 .emailInformation(EmailInformation.builder()
@@ -2045,6 +2051,8 @@ public class ManageOrderEmailServiceTest {
                 .serveToRespondentOptions(YesOrNo.No)
                 .recipientsOptions(dynamicMultiSelectList)
                 .serveOrderDynamicList(dynamicMultiSelectList)
+            .servingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum
+                                             .applicantLegalRepresentative)
                 .serveOtherPartiesDA(List.of(ServeOtherPartiesOptions.other))
                 .serveOrgDetailsList(List.of(element(ServeOrgDetails.builder().serveByPostOrEmail(DeliveryByEnum.email)
                         .emailInformation(EmailInformation.builder().emailName("").build())
