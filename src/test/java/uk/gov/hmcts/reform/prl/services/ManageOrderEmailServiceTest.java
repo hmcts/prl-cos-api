@@ -1327,9 +1327,9 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+        Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
+                                                                                               Mockito.any(),
+                                                                                               Mockito.any());
     }
 
     @Test
@@ -1377,9 +1377,9 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(2)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+        Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
+                                                                                               Mockito.any(),
+                                                                                               Mockito.any());
     }
 
     @Test
@@ -1445,9 +1445,9 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
-                                                           Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+        Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
+                                                                                               Mockito.any(),
+                                                                                               Mockito.any());
     }
 
     @Test
@@ -2155,9 +2155,9 @@ public class ManageOrderEmailServiceTest {
         assertNotNull(orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
         assertEquals(bulkPrintId.toString(), orderCollection.get(0).getValue().getBulkPrintOrderDetails().get(0).getValue().getBulkPrintId());
 
-        Mockito.verify(emailService,Mockito.times(1)).send(Mockito.anyString(),
+        Mockito.verify(sendgridService,Mockito.times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
                                                            Mockito.any(),
-                                                           Mockito.any(),Mockito.any());
+                                                           Mockito.any());
     }
 
     @Test
