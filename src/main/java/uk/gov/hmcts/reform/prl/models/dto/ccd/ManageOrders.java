@@ -10,6 +10,8 @@ import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ApplicantOccupationEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
@@ -198,7 +200,7 @@ public class ManageOrders implements MappableObject {
     private final String cafcassCymruEmail;
     @JsonProperty("serveOtherPartiesCA")
     private final List<OtherOrganisationOptions> serveOtherPartiesCA;
-    @JsonProperty("serveOptionsCaDaOther")
+    @JsonProperty("serveOrgDetailsList")
     private final List<Element<ServeOrgDetails>> serveOrgDetailsList;
 
     private final SoaSolicitorServingRespondentsEnum servingRespondentsOptionsDA;
@@ -276,6 +278,16 @@ public class ManageOrders implements MappableObject {
     //PRL-4216 - serve order additional documents
     @JsonProperty("additionalOrderDocuments")
     private List<Element<AdditionalOrderDocument>> additionalOrderDocuments;
+
+    @JsonProperty("whatToDoWithOrderSolicitor")
+    private OrderApprovalDecisionsForSolicitorOrderEnum whatToDoWithOrderSolicitor;
+    @JsonProperty("whatToDoWithOrderCourtAdmin")
+    private OrderApprovalDecisionsForCourtAdminOrderEnum whatToDoWithOrderCourtAdmin;
+    @JsonProperty("instructionsToLegalRepresentative")
+    private String instructionsToLegalRepresentative;
+
+    private Object rejectedOrdersDynamicList;
+    private String editOrderTextInstructions;
 
     @JsonProperty("displayLegalRepOption")
     private String displayLegalRepOption;
