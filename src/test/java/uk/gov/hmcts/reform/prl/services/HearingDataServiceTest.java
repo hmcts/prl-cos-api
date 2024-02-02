@@ -43,6 +43,7 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -51,10 +52,13 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_IN_HEARINGS_TAB;
@@ -104,6 +108,9 @@ public class HearingDataServiceTest {
     CoreCaseDataApi coreCaseDataApi;
     @Mock
     AllocatedJudgeService allocatedJudgeService;
+
+    @Mock
+    DateTimeFormatter dateTimeFormatter;
 
     public static final String authToken = "Bearer TestAuthToken";
     @Mock
@@ -1175,5 +1182,42 @@ public class HearingDataServiceTest {
                                       .build())).build();
         when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
         assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData));
+    }
+
+    @Test
+    public void testFetchingAwaitingAndCompletedHearings() {
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hmcStatus(COMPLETED)
+                                      .nextHearingDate(LocalDateTime.now())
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
+        assertFalse(hearingDataService.getListOfRequestedStatusHearings(authToken, "123", List.of(COMPLETED)).isEmpty());
+    }
+
+    @Test
+    public void testFetchingAwaitingAndCompletedHearingsForException() {
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hmcStatus(COMPLETED)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        when(hearingService.getHearings(authToken,"123")).thenThrow(new RuntimeException());
+        assertTrue(hearingDataService.getListOfRequestedStatusHearings(authToken, "123", List.of(COMPLETED)).isEmpty());
     }
 }
