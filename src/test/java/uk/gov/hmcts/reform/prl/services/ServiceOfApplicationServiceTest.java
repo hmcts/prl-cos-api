@@ -488,6 +488,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                 .build()))
                                       .unServedLaPack(SoaPack.builder()
                                                           .personalServiceBy(SoaSolicitorServingRespondentsEnum.courtBailiff.toString())
+                                                          .partyIds(List.of(element("")))
                                                           .packDocument(List.of(element(Document.builder().build())))
                                                           .build())
                                       .applicationServedYesNo(No)
