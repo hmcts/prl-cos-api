@@ -12,16 +12,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.ApplicantSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.CafcassEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
-import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.RespondentSolicitorEmail;
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
-import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
-import uk.gov.service.notify.NotificationClient;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -95,46 +91,6 @@ public class ServiceOfApplicationEmailService {
             .docs(Collections.emptyList())
             .attachedDocs(CAFCASS_CAN_VIEW_ONLINE)
             .timeStamp(currentDate).build();
-    }
-
-    private EmailTemplateVars buildApplicantSolicitorEmail(CaseData caseData, String solicitorName)
-        throws Exception {
-
-        Map<String, Object> privacy = new HashMap<>();
-        privacy.put(
-            "file",
-            NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
-                .get("file")
-        );
-        return ApplicantSolicitorEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .solicitorName(solicitorName)
-            .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
-            .privacyNoticeLink(privacy)
-            .issueDate(caseData.getIssueDate())
-            .build();
-    }
-
-    private EmailTemplateVars buildRespondentSolicitorEmail(CaseData caseData, String solicitorName,
-                                                            String respondentName) throws Exception {
-
-        Map<String, Object> privacy = new HashMap<>();
-        privacy.put(
-            "file",
-            NotificationClient.prepareUpload(ResourceLoader.loadResource("Privacy_Notice.pdf"))
-                .get("file")
-        );
-        return RespondentSolicitorEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .solicitorName(solicitorName)
-            .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
-            .privacyNoticeLink(privacy)
-            .respondentName(respondentName)
-            .issueDate(caseData.getIssueDate())
-            .respondentName(respondentName)
-            .build();
     }
 
     private EmailTemplateVars buildCafcassEmail(CaseData caseData) {
