@@ -204,7 +204,7 @@ public class ManageDocumentsService {
 
         if (restrcitedKey != null) {
             if (!userRole.equals(COURT_ADMIN)
-                || !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
+                && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
                 Document updatedConfidentialDocument = downloadAndDeleteDocument(
@@ -217,7 +217,9 @@ public class ManageDocumentsService {
                     loggedInUserType,
                     quarantineLegalDoc
                 );
+
             }
+
             QuarantineLegalDoc finalConfidentialDocument = convertQuarantineDocumentToRightCategoryDocument(
                 quarantineLegalDoc,
                 userDetails
@@ -260,7 +262,7 @@ public class ManageDocumentsService {
         Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
 
         HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put(DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId()), document);
+        hashMap.put(DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc.getCategoryId(), loggedInUserType), document);
         objectMapper.registerModule(new ParameterNamesModule());
         QuarantineLegalDoc finalQuarantineDocument = objectMapper.convertValue(hashMap, QuarantineLegalDoc.class);
         return finalQuarantineDocument.toBuilder()
@@ -640,16 +642,14 @@ public class ManageDocumentsService {
     }
 
     private List<Element<QuarantineLegalDoc>> renameConfidentialDocumentForCourtAdmin(List<Element<QuarantineLegalDoc>> confidentialDocuments) {
+        List<Element<QuarantineLegalDoc>> confidentialTabDocuments = new ArrayList<>();
         final @NotNull @Valid QuarantineLegalDoc[] quarantineLegalDoc = new QuarantineLegalDoc[1];
-        return confidentialDocuments.stream()
-            .filter(element -> element.getValue().getUploaderRole().equals(COURT_STAFF)
-                && element.getValue().getHasTheConfidentialDocumentBeenRenamed().equals(YesOrNo.No)
-            )
-            .map(
-                element -> {
+        confidentialDocuments.parallelStream().forEach(
+            element -> {
+                if (YesOrNo.No.equals(element.getValue().getHasTheConfidentialDocumentBeenRenamed())) {
                     quarantineLegalDoc[0] = element.getValue();
 
-                    String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc[0].getCategoryId());
+                    String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineLegalDoc[0].getCategoryId(), null);
                     Document existingDocument = objectMapper.convertValue(
                         objectMapper.convertValue(quarantineLegalDoc[0], Map.class).get(attributeName),
                         Document.class
@@ -673,9 +673,16 @@ public class ManageDocumentsService {
 
                     log.info("renameConfidentialDocumentForCourtAdmin -- {}", quarantineLegalDoc[0]);
                     log.info("updatedQuarantineLegalDocumentObject -- {}", updatedQuarantineLegalDocumentObject);
-                    return element(element.getId(), updatedQuarantineLegalDocumentObject);
+                    confidentialTabDocuments.add(element(element.getId(), updatedQuarantineLegalDocumentObject));
+                } else {
+                    confidentialTabDocuments.add(element);
                 }
-            ).collect(Collectors.toList());
+            }
+        );
+        return confidentialTabDocuments.stream().sorted(Comparator.comparing(
+            m -> m.getValue().getDocumentUploadedDate(),
+            Comparator.reverseOrder()
+        )).collect(Collectors.toList());
     }
 
     public void updateCaseData(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {
