@@ -190,27 +190,50 @@ public class ServiceOfApplicationService {
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
-    public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX = """
+    public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA = """
+        ### What happens next
+        The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
+        \n The applicant and any other selected parties have been served.
+
+        You can view the service packs in the <a href="%s">service of application</a> tab.
+        """;
+    public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA = """
+        ### What happens next
+        You need to arrange service on the respondent based on the judge's directions.
+        \n The service pack has been served on the applicant and any other selected parties.
+
+        You can view the service packs in the <a href="%s">service of application</a> tab.
+        """;
+    public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA = """
+        ### What happens next
+        You need to arrange for a court bailiff to personally serve the respondent.
+        \n The service pack has been served on the applicant and any other selected parties.
+
+        You can view the service packs in the <a href="%s">service of application</a> tab.
+        """;
+
+    public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA = """
         ### What happens next
         The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
         \n The applicant has been served.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
-    public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX = """
+    public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA = """
         ### What happens next
         You need to arrange service on the respondent based on the judge's directions.
         \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
-    public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX = """
+    public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA = """
         ### What happens next
         You need to arrange for a court bailiff to personally serve the respondent.
         \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
+
 
     private static final String SERVICE_OF_APPLICATION_ENDPOINT = PrlAppsConstants.URL_STRING + "#Service of application";
 
@@ -740,34 +763,34 @@ public class ServiceOfApplicationService {
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
                     || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
                     .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
-                    confirmationBody = CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX;
+                    confirmationBody = CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_CA;
                 } else if (SoaCitizenServingRespondentsEnum.courtAdmin
                     .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())
                     || SoaSolicitorServingRespondentsEnum.courtAdmin
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-                    confirmationBody = CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX;
+                    confirmationBody = CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_CA;
                 } else if (SoaCitizenServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())
                     || SoaSolicitorServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())) {
-                    confirmationBody = CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX;
+                    confirmationBody = CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_CA;
                 }
             } else {
                 if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
                     || SoaCitizenServingRespondentsEnum.unrepresentedApplicant
                     .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
-                    confirmationBody = CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX;
+                    confirmationBody = CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX_DA;
                 } else if (SoaSolicitorServingRespondentsEnum.courtAdmin
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
                     || SoaCitizenServingRespondentsEnum.courtAdmin
                     .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
-                    confirmationBody = CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX;
+                    confirmationBody = CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX_DA;
                 } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
                     || SoaCitizenServingRespondentsEnum.courtBailiff
                     .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA())) {
-                    confirmationBody = CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX;
+                    confirmationBody = CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX_DA;
                 }
             }
         }
