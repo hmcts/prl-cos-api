@@ -543,7 +543,6 @@ public class ReviewDocumentsControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenReviewDocuments_whenBothConfidentialAndRestrictedYesAndReviewDecYesCourtAdmin() throws Exception {
 
         DocumentResponse docRes = uploadDocument(COURT_ADMIN);
