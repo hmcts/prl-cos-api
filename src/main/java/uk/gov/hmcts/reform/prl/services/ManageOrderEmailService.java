@@ -414,15 +414,19 @@ public class ManageOrderEmailService {
                                                              SoaSolicitorServingRespondentsEnum respondentOption) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-            nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> sendApplicantSolicitorOrderNotifications(
-                party.getValue().getSolicitorEmail(),
-                respondentOption,
-                authorisation,
-                orderDocuments,
-                dynamicDataForEmail
-            ));
+            nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
+                dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
+                sendApplicantSolicitorOrderNotifications(
+                    party.getValue().getSolicitorEmail(),
+                    respondentOption,
+                    authorisation,
+                    orderDocuments,
+                    dynamicDataForEmail
+                );
+            });
         } else {
             String solicitorEmail = caseData.getApplicantsFL401().getSolicitorEmail();
+            dynamicDataForEmail.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
             sendApplicantSolicitorOrderNotifications(
                 solicitorEmail,
                 respondentOption,
