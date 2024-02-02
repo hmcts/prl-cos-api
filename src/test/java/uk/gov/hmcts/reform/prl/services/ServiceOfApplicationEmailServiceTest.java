@@ -28,6 +28,7 @@ import java.util.List;
 
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -124,10 +125,6 @@ public class ServiceOfApplicationEmailServiceTest {
                                                                    Mockito.anyString(),
                                                                    Mockito.any(), Mockito.anyString()
         );
-        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
     }
 
 
@@ -147,10 +144,7 @@ public class ServiceOfApplicationEmailServiceTest {
         serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
                 List.of(Document.builder().build()),
                                                                                     "Respondent");
-        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
+        verifyNoMoreInteractions(emailService);
     }
 
     @Test
@@ -239,10 +233,6 @@ public class ServiceOfApplicationEmailServiceTest {
         verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
                                                                    Mockito.anyString(),
                                                                    Mockito.any(), Mockito.anyString()
-        );
-        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
-                                               Mockito.any(),
-                                               Mockito.any(), Mockito.any()
         );
     }
 
