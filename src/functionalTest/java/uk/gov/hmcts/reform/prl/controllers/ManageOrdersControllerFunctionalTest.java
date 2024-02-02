@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matchers;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,6 +28,8 @@ import static org.hamcrest.Matchers.equalTo;
 @ContextConfiguration
 public class ManageOrdersControllerFunctionalTest {
 
+    public static final String MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT
+        = "/manage-orders/recipients-validations";
     private final String userToken = "Bearer testToken";
 
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
@@ -47,6 +50,18 @@ public class ManageOrdersControllerFunctionalTest {
     private static final String VALID_INPUT_JSON_FOR_DRAFT = "CallBackRequestForDraft.json";
 
     private static final String VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER = "CallBckReqForCreateOrUpdOrder.json";
+
+    private static final String VALID_REQUEST_RESPONDENT_LIP_WITH_NO_ADDRESS
+        = "requests/manage-orders/serve-order-request-respondent-lip-noaddress-present.json";
+
+    private static final String VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS
+        = "requests/manage-orders/serve-order-request-respondent-lip-address-present.json";
+
+    private static final String VALID_REQUEST_OTHER_PARTY_WITH_ADDRESS
+        = "requests/manage-orders/serve-order-request-otherParty-address-present.json";
+
+    private static final String VALID_REQUEST_OTHER_PARTY_WITHOUT_ADDRESS
+        = "requests/manage-orders/serve-order-request-otherParty-noaddress-present.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -224,9 +239,22 @@ public class ManageOrdersControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
         System.out.println("Respppp " + resp.getData());
-
     }
 
+    @Test
+    public void givenBodyWhenAddressPresentForOtherPartyShouldNotGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_OTHER_PARTY_WITH_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
+            .then()
+            .body("data.applicantCaseName",Matchers.equalTo("John Smith"))
+            .body("data.caseTypeOfApplication",Matchers.equalTo("C100"));
+    }
 
     /**
      * Court Admin manageOrders journey - creates the order with many hearings with approval required.
@@ -310,5 +338,48 @@ public class ManageOrdersControllerFunctionalTest {
 
         System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
 
+    }
+
+    @Test
+    public void givenBodyWhenAddressNotPresentForRespondentLipShouldGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_RESPONDENT_LIP_WITH_NO_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
+            .then()
+            .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenBodyWhenAddressPresentForRespondentLipShouldNotGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
+            .then()
+            .body("data.applicantCaseName",Matchers.equalTo("John Smith"))
+            .body("data.caseTypeOfApplication",Matchers.equalTo("C100"));
+    }
+
+    @Test
+    public void givenBodyWhenAddressNotPresentOtherPartyShouldGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_OTHER_PARTY_WITHOUT_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
+            .then()
+            .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
     }
 }
