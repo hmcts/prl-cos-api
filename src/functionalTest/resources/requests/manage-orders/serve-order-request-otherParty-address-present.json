@@ -4,6 +4,7 @@
     "id": "1647373355918192",
     "case_data": {
       "chooseSendOrReply": "SEND",
+      "taskListVersion": "v2",
       "messageObject": {
         "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
         "recipientEmail": null,

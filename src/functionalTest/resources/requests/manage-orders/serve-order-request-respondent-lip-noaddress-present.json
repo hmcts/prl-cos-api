@@ -4,6 +4,7 @@
     "id": "1647373355918192",
     "case_data": {
       "chooseSendOrReply": "SEND",
+      "taskListVersion": "v2",
       "messageObject": {
         "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
         "recipientEmail": null,
@@ -182,20 +183,6 @@
           {
             "code": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
             "label": "Test child (Applicant 1)"
-          }
-        ]
-      },
-      "otherParties": {
-        "value": [
-          {
-            "code": "6bb5e9ac-df97-4593-8b22-3969dc0bb4e1",
-            "label": "Sam Nolan"
-          }
-        ],
-        "list_items": [
-          {
-            "code": "6bb5e9ac-df97-4593-8b22-3969dc0bb4e1",
-            "label": "Sam Nolan"
           }
         ]
       },
