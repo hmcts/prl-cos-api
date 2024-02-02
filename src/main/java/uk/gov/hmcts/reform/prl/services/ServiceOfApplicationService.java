@@ -176,7 +176,7 @@ public class ServiceOfApplicationService {
         ### What happens next
         The service pack needs to be reviewed for confidential details before it can be served.
 
-            <span>You can view the service packs in the <a href="%s">service of application</a> tab.</span>
+        You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
     public static final String CONFIRMATION_HEADER_NON_PERSONAL = "# The application has been served";
@@ -189,22 +189,22 @@ public class ServiceOfApplicationService {
         """;
     public static final String CONFIRMATION_BODY_APPLICANT_LR_SERVICE_PREFIX = """
         ### What happens next
-            The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
-                \n The applicant has been served.
+        The respondent's service pack has been sent to the applicant or their legal representative to personally serve the respondent.
+        \n The applicant has been served.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_COURT_ADMIN_SERVICE_PREFIX = """
         ### What happens next
-            You need to arrange service on the respondent based on the judge's directions.
-                \n The service pack has been served on the applicant.
+        You need to arrange service on the respondent based on the judge's directions.
+        \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
     public static final String CONFIRMATION_BODY_BAILIFF_SERVICE_PREFIX = """
         ### What happens next
-            You need to arrange for a court bailiff to personally serve the respondent.
-                \n The service pack has been served on the applicant.
+        You need to arrange for a court bailiff to personally serve the respondent.
+        \n The service pack has been served on the applicant.
 
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
@@ -2237,17 +2237,7 @@ public class ServiceOfApplicationService {
 
         log.info("Sending notification for Applicants ====> {}", unServedApplicantPack);
         log.info("Case created by {}", CaseUtils.isCaseCreatedByCitizen(caseData));
-        List<Document> packDocs = new ArrayList<>();
-        if (unServedApplicantPack.getPersonalServiceBy() != null
-            && (SoaSolicitorServingRespondentsEnum.courtBailiff.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy())
-            || SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedApplicantPack.getPersonalServiceBy()))
-            && !CaseUtils.isCaseWithoutNotice(caseData)) {
-            for (Element<PartyDetails> applicant : caseData.getApplicants()) {
-                packDocs.add(generateAccessCodeLetter(authorization, caseData, applicant, null, PRL_LET_ENG_AP8));
-            }
-            log.info("**8 pack docs {}", packDocs);
-        }
-        packDocs.addAll(unwrapElements(unServedApplicantPack.getPackDocument()));
+        List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(authorization,applicantList,caseData,
