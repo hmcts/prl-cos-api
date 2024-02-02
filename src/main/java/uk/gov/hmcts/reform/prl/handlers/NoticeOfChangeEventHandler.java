@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -28,7 +30,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STR
 public class NoticeOfChangeEventHandler {
     private final EmailService emailService;
     private final NoticeOfChangeContentProvider noticeOfChangeContentProvider;
+    private final LaunchDarklyClient launchDarklyClient;
 
+    @Async
     @EventListener(condition = "#event.typeOfEvent eq 'Add Legal Representation'")
     public void notifyLegalRepresentative(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
@@ -182,7 +186,7 @@ public class NoticeOfChangeEventHandler {
         return partyDetailsElement;
     }
 
-
+    @Async
     @EventListener(condition = "#event.typeOfEvent eq 'Remove Legal Representation'")
     public void notifyWhenLegalRepresentativeRemoved(final NoticeOfChangeEvent event) {
         CaseData caseData = event.getCaseData();
@@ -190,7 +194,8 @@ public class NoticeOfChangeEventHandler {
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
         //Access code will not generate if the case has not reached to Hearing state yet
-        if (StringUtils.isNotEmpty(event.getAccessCode())) {
+        if (StringUtils.isNotEmpty(event.getAccessCode())
+            && launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")) {
             //PRL-3215 - notify LiP
             sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC);
             //PRL-3215 - notify applicants/respondents other parties except litigant
