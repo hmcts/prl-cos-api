@@ -10,9 +10,11 @@ import org.junit.platform.commons.util.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.ManageOrderFieldsEnum;
@@ -33,6 +35,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.exception.ManageOrderRuntimeException;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
@@ -124,6 +127,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_D
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_HEARING_OPTION_SELECTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_HEARING_TASK_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_MULTIPLE_HEARING_SELECTED;
@@ -183,6 +187,12 @@ public class ManageOrderService {
 
     public static final String OTHER_PARTIES = "otherParties";
     public static final String SERVED_PARTIES = "servedParties";
+
+    public static final String VALIDATION_ADDRESS_ERROR_RESPONDENT = "This order cannot be served by post until the respondent's "
+        + "address is given.";
+    public static final String VALIDATION_ADDRESS_ERROR_OTHER_PARTY = "This order cannot be served by post until the other"
+        + " people's address is given.";
+
     public static final String EMAIL = "email";
     public static final String POST = "post";
 
@@ -3037,5 +3047,66 @@ public class ManageOrderService {
                 standardDirectionOrder.getSdoSettlementHearingDetails()
             );
         }
+    }
+
+    public AboutToStartOrSubmitCallbackResponse validateRespondentLipAndOtherPersonAddress(CallbackRequest callbackRequest) {
+        List<String> errorList = new ArrayList<>();
+        CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        if (null != caseData.getManageOrders().getRecipientsOptions()
+            && No.equals(caseData.getManageOrders().getServeToRespondentOptions())) {
+            List<String> selectedRespondentIds = caseData.getManageOrders().getRecipientsOptions().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
+            checkPartyAddressAndReturnError(caseData.getRespondents(), selectedRespondentIds, errorList, true);
+
+        }
+        List<Element<PartyDetails>> otherPeopleInCase = TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
+
+        if (null != caseData.getManageOrders().getOtherParties()) {
+            List<String> selectedOtherPartyIds = caseData.getManageOrders().getOtherParties().getValue()
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
+            checkPartyAddressAndReturnError(otherPeopleInCase, selectedOtherPartyIds, errorList, false);
+        }
+
+        if (isNotEmpty(errorList)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(errorList)
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(callbackRequest.getCaseDetails().getData())
+            .build();
+
+    }
+
+    private void checkPartyAddressAndReturnError(List<Element<PartyDetails>> partyDetails,
+                                                 List<String> selectedPartyIds, List<String> errorList,
+                                                 Boolean isRespondent) {
+        List<Element<PartyDetails>> selectedPartyList = partyDetails.stream()
+            .filter(party -> selectedPartyIds.contains(party.getId().toString()))
+            .collect(Collectors.toList());
+        for (Element<PartyDetails> party : selectedPartyList) {
+            if ((isRespondent
+                && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
+                && checkForContactPreference(party) && !checkIfAddressIsPresent(party.getValue().getAddress())) {
+                errorList.add(VALIDATION_ADDRESS_ERROR_RESPONDENT);
+            } else if (Boolean.FALSE.equals(isRespondent) && !(checkIfAddressIsPresent(party.getValue().getAddress()))) {
+                errorList.add(VALIDATION_ADDRESS_ERROR_OTHER_PARTY);
+            }
+            if (!errorList.isEmpty()) {
+                break;
+            }
+        }
+    }
+
+    private boolean checkForContactPreference(Element<PartyDetails> party) {
+        return null == party.getValue().getContactPreferences()
+            || party.getValue().getContactPreferences().equals(ContactPreferences.post)
+            || null == party.getValue().getEmail();
+    }
+
+    private boolean checkIfAddressIsPresent(Address address) {
+        return null != address
+            && null != address.getAddressLine1();
     }
 }
