@@ -2097,7 +2097,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedWhenCourtBaillifOptionSelected() throws IOException {
+    public void sendServeOrderEmailWhenCourtBailiffOptionSelected() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2189,7 +2189,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedEmailWhenCourtAdminOptionSelected() throws IOException {
+    public void sendServeOrderEmailWhenCourtAdminOptionSelected() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2281,7 +2281,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedWhenCourtBaillifOptionSelectedForC100Case() throws IOException {
+    public void sendServeOrderEmailWhenCourtBailiffOptionSelectedForC100Case() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")
@@ -2374,7 +2374,7 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
-    public void sendEmailWhenOrderIsServedEmailWhenCourtAdminOptionSelectedForC100Case() throws IOException {
+    public void sendServeOrderEmailWhenCourtAdminOptionSelectedForC100Case() throws IOException {
         applicant = PartyDetails.builder()
             .firstName("TestFirst")
             .lastName("TestLast")

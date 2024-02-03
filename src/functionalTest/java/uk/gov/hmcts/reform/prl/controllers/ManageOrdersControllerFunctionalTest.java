@@ -15,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -62,6 +63,12 @@ public class ManageOrdersControllerFunctionalTest {
 
     private static final String VALID_REQUEST_OTHER_PARTY_WITHOUT_ADDRESS
         = "requests/manage-orders/serve-order-request-otherParty-noaddress-present.json";
+
+    private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN =
+        "CallBckReqForFinaliseServeOrder_courtadmin.json";
+
+    private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF =
+        "CallBckReqForFinaliseServeOrder_courtbailif.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -381,5 +388,37 @@ public class ManageOrdersControllerFunctionalTest {
             .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
             .then()
             .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+    }
+
+    @Test
+    public void givenBody_ServeOrderForPersonalServiceWithCourtBailiffOptionSelected() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .body("data.orderCollection[0].value.serveOrderDetails.courtPersonalService",
+                  equalTo(SoaSolicitorServingRespondentsEnum.courtBailiff.name()));
+
+    }
+
+    @Test
+    public void givenBody_ServeOrderForPersonalServiceWithCourtAdminOptionSelected() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .body("data.orderCollection[0].value.serveOrderDetails.courtPersonalService",
+                  equalTo(SoaSolicitorServingRespondentsEnum.courtAdmin.name()));
+
     }
 }
