@@ -421,4 +421,42 @@ public class ManageOrdersControllerFunctionalTest {
                   equalTo(SoaSolicitorServingRespondentsEnum.courtAdmin.name()));
 
     }
+
+    @Test
+    public void givenRequestBody_ForPersonalServiceWhenCourtAdminSelected() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case-order-email-notification")
+            .then()
+            .body("data.recipientsOptions", equalTo(null))
+            .body("data.cafcassCymruEmail", equalTo(null))
+            .body("data.serveOrderDynamicList", equalTo(null))
+            .body("data.serveOtherPartiesCA", equalTo(null))
+            .body("data.applicants[0].value.solicitorEmail", equalTo("test@test.com"));
+    }
+
+    @Test
+    public void givenRequestBody_ForPersonalServiceWhenBailiffSelected() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case-order-email-notification")
+            .then()
+            .body("data.recipientsOptions", equalTo(null))
+            .body("data.cafcassCymruEmail", equalTo(null))
+            .body("data.serveOrderDynamicList", equalTo(null))
+            .body("data.serveOtherPartiesCA", equalTo(null))
+            .body("data.applicants[0].value.solicitorEmail", equalTo("test@test.com"));
+    }
 }

@@ -1,8 +1,9 @@
 {
   "case_details": {
     "state": "AWAITING_SUBMISSION_TO_HMCTS",
-    "id": "1647373355918192",
+    "id": "1706997775517206",
     "case_data": {
+      "id": "1706997775517206",
       "chooseSendOrReply": "SEND",
       "messageObject": {
         "senderEmail": "fprl_caseworker_solicitor@mailinator.com",
@@ -13,6 +14,7 @@
       "applicantOrRespondentCaseName": "testString",
       "servingRespondentsOptionsCA": "courtBailiff",
       "serveToRespondentOptions": "Yes",
+      "markedToServeEmailNotification": "Yes",
       "gatekeeper": [
         {
           "id": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
@@ -78,7 +80,7 @@
             "isAtAddressLessThan5YearsWithDontKnow": null,
             "doTheyHaveLegalRepresentation": null,
             "sendSignUpLink": null,
-            "solicitorEmail": null
+            "solicitorEmail": "test@test.com"
           }
         }
       ],
@@ -270,20 +272,6 @@
             "doesOrderClosesCase": "Yes",
             "orderType": "string",
             "orderTypeId": "string",
-            "orderDocument": {
-              "document_url": "string",
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_hash": "string",
-              "document_creation_date": "2023-01-23T11:05:27.265Z"
-            },
-            "orderDocumentWelsh": {
-              "document_url": "string",
-              "document_binary_url": "string",
-              "document_filename": "string",
-              "document_hash": "string",
-              "document_creation_date": "2023-01-23T11:05:27.265Z"
-            },
             "otherDetails": {
               "createdBy": "string",
               "orderCreatedDate": "string",
