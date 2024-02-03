@@ -45,6 +45,7 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("AAAAAAA");
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService
                                                                            .getSoaCaseFieldsMap(authorisation,
                 callbackRequest.getCaseDetails())).build();
@@ -64,6 +65,7 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("CCCCCCCCC");
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.handleAboutToSubmit(
                 callbackRequest)).build();
         } else {
@@ -82,6 +84,7 @@ public class ServiceOfApplicationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("EEEEEE");
             return serviceOfApplicationService
                 .handleSoaSubmitted(authorisation, callbackRequest);
         } else {

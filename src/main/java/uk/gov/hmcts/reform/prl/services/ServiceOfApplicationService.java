@@ -594,6 +594,7 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) throws Exception {
+        log.info("DDDDDDD ");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         if (ObjectUtils.isEmpty(caseDataMap.get(PROCEED_TO_SERVING))) {
@@ -1485,6 +1486,7 @@ public class ServiceOfApplicationService {
         log.info("** dynamic list 1 ** {}", documentDynamicListLa);
         caseDataUpdated.put("soaDocumentDynamicListForLa", documentDynamicListLa);
         log.info("** dynamic list 2 ** {}", caseDataUpdated.get("soaDocumentDynamicListForLa"));
+        log.info("BBBBBBBB {}", caseDataUpdated);
         return caseDataUpdated;
     }
 
