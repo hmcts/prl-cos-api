@@ -1442,12 +1442,7 @@ public class ManageOrderService {
             postalInformation = (List<Element<PostalInformation>>) emailOrPostalInfo.get(POST);
             emailInformation = (List<Element<EmailInformation>>) emailOrPostalInfo.get(EMAIL);
         }
-        List<Element<ServedParties>> servedParties  = getServedParties(caseData);
-        if (null != order.getValue().getServeOrderDetails() && CollectionUtils
-            .isNotEmpty(order.getValue()
-            .getServeOrderDetails().getServedParties())) {
-            servedParties = getAmendedParties(order, servedParties);
-        }
+        List<Element<ServedParties>> servedParties = getUpdatedServedParties(caseData, order);
         SoaSolicitorServingRespondentsEnum servingRespondentsOptions = caseData.getManageOrders()
             .getServingRespondentsOptionsDA();
         Map<String, Object> servedOrderDetails = new HashMap<>();
@@ -1469,6 +1464,16 @@ public class ManageOrderService {
             postalInformation,
             emailInformation
         );
+    }
+
+    private List<Element<ServedParties>> getUpdatedServedParties(CaseData caseData, Element<OrderDetails> order) {
+        List<Element<ServedParties>> servedParties  = getServedParties(caseData);
+        if (null != order.getValue().getServeOrderDetails() && CollectionUtils
+            .isNotEmpty(order.getValue()
+            .getServeOrderDetails().getServedParties())) {
+            servedParties = getAmendedParties(order, servedParties);
+        }
+        return servedParties;
     }
 
     private void servedC100Order(CaseData caseData, List<Element<OrderDetails>> orders, Element<OrderDetails> order) {
@@ -1511,12 +1516,7 @@ public class ManageOrderService {
             cafcassCymruEmail = caseData.getManageOrders().getCafcassCymruEmail();
         }
 
-        List<Element<ServedParties>> servedParties  = getServedParties(caseData);
-        if (null != order.getValue().getServeOrderDetails() && CollectionUtils
-            .isNotEmpty(order.getValue()
-                            .getServeOrderDetails().getServedParties())) {
-            servedParties = getAmendedParties(order, servedParties);
-        }
+        List<Element<ServedParties>> servedParties = getUpdatedServedParties(caseData, order);
         Map<String, Object> servedOrderDetails = new HashMap<>();
         servedOrderDetails.put(CAFCASS_SERVED, cafcassServedOptions);
         servedOrderDetails.put(CAFCASS_CYMRU_SERVED, cafcassCymruServedOptions);
