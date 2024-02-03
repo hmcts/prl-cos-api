@@ -11,6 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -26,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -247,6 +249,37 @@ public class ServiceOfApplicationEmailServiceTest {
                                                Mockito.any(),
                                                Mockito.any(), Mockito.any()
         );
+    }
+
+    @Test
+    public void testLocalAuthorityEmailNotification() throws Exception {
+        when(sendgridService.sendEmailWithAttachments(Mockito.anyString(),Mockito.any(),Mockito.anyString(),Mockito.any(),
+                                                      Mockito.anyString())).thenReturn(EmailNotificationDetails.builder().build());
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .applicants(List.of(element(PartyDetails.builder()
+                                            .solicitorEmail("test@gmail.com")
+                                            .representativeLastName("LastName")
+                                            .representativeFirstName("FirstName")
+                                            .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                                            .canYouProvideEmailAddress(YesOrNo.Yes)
+                                            .email("test@applicant.com")
+                                            .build())))
+            .respondents(List.of(element(PartyDetails.builder()
+                                             .solicitorEmail("test@gmail.com")
+                                             .representativeLastName("LastName")
+                                             .representativeFirstName("FirstName")
+                                             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                                             .build())))
+
+            .build();
+        EmailNotificationDetails emailNotificationDetails = serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority("", caseData,
+                                                                               "test@applicant.com",
+                                                                               List.of(Document.builder().build()),
+                                                                               PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY);
+
+        assertNotNull(emailNotificationDetails);
     }
 
     @Test

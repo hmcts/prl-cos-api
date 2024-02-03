@@ -887,7 +887,7 @@ public class PrlAppsConstants {
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
 
     public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
-  
+
     // PRL-5025
     public static final String WA_IS_ORDER_APPROVED = "isOrderApproved";
     public static final String WA_WHO_APPROVED_THE_ORDER = "whoApprovedTheOrder";
