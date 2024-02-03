@@ -298,7 +298,11 @@ public class ReviewDocumentService {
         Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional;
         if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())
             || YesNoNotSure.yes.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-            if (null != caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
+            List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList = caseData.getDocumentManagementDetails().getTempQuarantineDocumentList();
+            Element<QuarantineLegalDoc> quarantineLegalDocElement =
+                getQuarantineDocumentById(tempQuarantineDocumentList, uuid).get();
+
+            if (quarantineLegalDocElement.getValue().getUploaderRole().equals(SOLICITOR)) {
                 quarantineLegalDocElementOptional =
                     getQuarantineDocumentById(
                         caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList(),
@@ -319,7 +323,7 @@ public class ReviewDocumentService {
                     caseDataUpdated,
                     "legalProfQuarantineDocsList"
                 );
-            } else if (null != caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList()) {
+            } else if (quarantineLegalDocElement.getValue().getUploaderRole().equals(CAFCASS)) {
                 quarantineLegalDocElementOptional =
                     getQuarantineDocumentById(
                         caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList(),
@@ -338,7 +342,7 @@ public class ReviewDocumentService {
                     caseDataUpdated,
                     "cafcassQuarantineDocsList"
                 );
-            } else if (null != caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()) {
+            } else if (quarantineLegalDocElement.getValue().getUploaderRole().equals(COURT_STAFF)) {
                 quarantineLegalDocElementOptional =
                     getQuarantineDocumentById(
                         caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList(),
@@ -378,7 +382,8 @@ public class ReviewDocumentService {
                         caseDataUpdated.put(CITIZEN_UPLOAD_DOC_LIST_CONF_TAB, List.of(quarantineCitizenDocElement));
                     }
                 }
-            } else if (isNotEmpty(caseData.getScannedDocuments())) {
+            } else if (isNotEmpty(caseData.getScannedDocuments()) && quarantineLegalDocElement.getValue().getUploaderRole().equals(
+                BULK_SCAN)) {
                 quarantineLegalDocElementOptional = getQuarantineBulkScanDocElement(caseData, uuid);
                 processDocumentsAfterReviewNew(
                     caseData,
