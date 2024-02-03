@@ -189,6 +189,7 @@ public class ServiceOfApplicationService {
     private final CaseInviteManager caseInviteManager;
     private final C100CaseInviteService c100CaseInviteService;
 
+    @Autowired
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
     private final ObjectMapper objectMapper;
@@ -688,7 +689,8 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
         if (CaseUtils.isC8Present(caseData)) {
-            //return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
+            log.info("c8 presenttt---");
+            return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
         return processNonConfidentialSoa(authorisation, caseData, caseDataMap);
     }
@@ -703,6 +705,7 @@ public class ServiceOfApplicationService {
             log.info("*** finalServedApplicationDetailsList is empty in case data ***");
             finalServedApplicationDetailsList = new ArrayList<>();
         }
+        log.info("AAAAAAAAAAAA");
         finalServedApplicationDetailsList.add(element(sendNotificationForServiceOfApplication(caseData, authorisation, caseDataMap)));
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
         cleanUpSoaSelections(caseDataMap, true);
@@ -1593,6 +1596,7 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(SOA_CONFIDENTIAL_DETAILS_PRESENT, isRespondentDetailsConfidential(caseData)
             || CaseUtils.isC8Present(caseData) ? Yes : No);
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
+        caseDataUpdated.put(CASE_CREATED_BY, caseData.getCaseCreatedBy());
         caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, getDocumentsDynamicListForLa(authorisation,
                                                                                            String.valueOf(caseData.getId())));
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);

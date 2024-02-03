@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -2119,7 +2118,6 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    @Ignore
     public void testHandleSoaSubmittedForConfidential() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -2443,7 +2441,6 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    @Ignore
     public void testHandleSoaSubmittedWithC8() throws Exception {
         CaseData caseData = CaseData.builder()
             .id(12345L)
