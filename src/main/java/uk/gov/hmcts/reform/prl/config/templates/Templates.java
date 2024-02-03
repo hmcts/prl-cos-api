@@ -60,7 +60,7 @@ public class Templates {
         + "\n"
         + "Dear %s,\n"
         + "\n"
-        + "We have made a decision on how to progress this case. The application has now been served on the parties in the case.\n"
+        + "We have madee a decision on how to progress this case. The application has now been served on the parties in the case.\n"
         + "\n"
         + "The case documents are attached to this email.\n"
         + "\n"

@@ -160,10 +160,11 @@ public class SendgridService {
     public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
                                                              String toEmailAddress, List<Document> listOfAttachments, String servedParty)
         throws IOException {
-
+        log.info("11111aaaaa");
         Content content;
         String subject = emailProps.get("subject");
         if (emailProps.containsKey("orderURLLinkNeeded")) {
+            log.info("222222222");
             subject = emailProps.get("orderSubject");
             emailProps.put("orderUrLLink", manageCaseUrl + URL_STRING + emailProps.get(CASE_NUMBER) + "#Orders");
             String title = emailProps.containsKey("finalOrder") ? FINAL_ORDER_TITLE : NEW_ORDER_TITLE;
@@ -184,6 +185,7 @@ public class SendgridService {
 
             content = new Content("text/html", String.format("%s%s%s%s", title, emailStart, body, emailEnd));
         } else {
+
             content = new Content("text/plain", String.format(
                     (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
                             .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
@@ -191,6 +193,7 @@ public class SendgridService {
                     emailProps.get(CASE_NUMBER),
                     emailProps.get("solicitorName")
             ));
+            log.info("33333333 {}",content);
         }
         Mail mail = new Mail(new Email(fromEmail), subject + emailProps.get(CASE_NAME), new Email(toEmailAddress), content);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
@@ -199,12 +202,14 @@ public class SendgridService {
             attachFiles(authorization, mail, emailProps, listOfAttachments);
         }
 
+
         if (launchDarklyClient.isFeatureEnabled("soa-sendgrid")) {
             log.info("******Sendgrid service is enabled****");
             Request request = new Request();
             try {
                 request.setMethod(Method.POST);
                 request.setEndpoint(MAIL_SEND);
+                log.info("444444 {}",mail.attachments);
                 request.setBody(mail.build());
                 Response response = sendGrid.api(request);
                 log.info("Sendgrid status code {}", response.getStatusCode());

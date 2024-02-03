@@ -310,6 +310,7 @@ public class ServiceOfApplicationService {
                     caseDataMap
                 );
             }
+            log.info("AAAAAAAAAAAA");
             checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
             if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
                 && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
