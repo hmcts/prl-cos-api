@@ -601,6 +601,8 @@ public class ManageOrderService {
                 populateServeOrderDetails(caseData, headerMap);
             }
         }
+        //PRL-4854 - Set isSdoSelected=No default
+        headerMap.put("isSdoSelected", No);
         return headerMap;
     }
 

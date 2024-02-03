@@ -445,8 +445,6 @@ public class ManageOrdersController {
             }
             //PRL-4212 - populate fields only when it's needed
             caseDataUpdated.putAll(manageOrderService.populateHeader(caseData));
-            //PRL-4854 - Set isSdoSelected=No for upload
-            caseDataUpdated.put("isSdoSelected", No);
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
