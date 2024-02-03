@@ -64,7 +64,7 @@ public class ServiceOfApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
-    ) throws Exception {
+    ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.handleAboutToSubmit(
                 callbackRequest)).build();
@@ -100,12 +100,11 @@ public class ServiceOfApplicationController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
-    ) throws JsonProcessingException {
+    ) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return serviceOfApplicationService.soaValidation(callbackRequest);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-
 }

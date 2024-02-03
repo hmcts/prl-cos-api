@@ -177,7 +177,7 @@ public class ServiceOfApplicationEmailServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().build();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
         serviceOfApplicationEmailService.sendEmailNotificationToApplicantSolicitor(authorization, caseData, caseData.getApplicantsFL401(),
-                                                                                   EmailTemplateNames.APPLICANT_SOLICITOR_CA, docs,
+                                                                                   docs,
                                                                                    PrlAppsConstants.APPLICANT_SOLICITOR
         );
         verify(emailService,times(0)).sendSoa(Mockito.anyString(),

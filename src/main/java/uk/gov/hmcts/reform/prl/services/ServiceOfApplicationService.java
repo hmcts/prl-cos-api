@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -768,7 +767,7 @@ public class ServiceOfApplicationService {
                                                             SERVED_PARTY_APPLICANT);
                     }
                 } else {
-                    log.info("Access to be granted");
+                    log.info("Access yet to be granted");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
                         Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedApplicant, caseInvite,
                                                                       Templates.AP6_LETTER);
@@ -851,21 +850,6 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private List<Element<BulkPrintDetails>> sendPostToCitizen(String authorization, CaseData caseData,
-                                                                      Element<PartyDetails> party, List<Document> docs,
-                                                              String servedParty) {
-        List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
-        log.info("*** docs {}", docs);
-        bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
-            caseData,
-            authorization,
-            party.getValue(),
-            docs,
-            servedParty
-        )));
-        return bulkPrintDetails;
-    }
-
     private List<Element<EmailNotificationDetails>> sendNotificationToFl401Solicitor(CaseData caseData, String authorization, List<Document> packA,
                                                                                      List<Document> packB) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
@@ -881,7 +865,6 @@ public class ServiceOfApplicationService {
                     authorization,
                     caseData,
                     applicant,
-                    EmailTemplateNames.APPLICANT_SOLICITOR_DA,
                     packA,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 )));
@@ -891,7 +874,6 @@ public class ServiceOfApplicationService {
                     authorization,
                     caseData,
                     applicant,
-                    EmailTemplateNames.APPLICANT_SOLICITOR_DA,
                     packB,
                     SERVED_PARTY_APPLICANT_SOLICITOR
                 )));
@@ -1937,20 +1919,14 @@ public class ServiceOfApplicationService {
                                              List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedRespondents) {
         final List<String> selectedPartyIds = selectedRespondents.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
-
         log.info("selected respondents ========= {}", selectedRespondents.size());
         log.info("selected Respondent PartyIds ========= {}", selectedPartyIds);
-
         List<Element<Document>> packRDocs = wrapElements(getNotificationPack(caseData, PrlAppsConstants.R, c100StaticDocs));
-
-        // TODO - do we need respondent pack with bullk print cover letter?
-
         final SoaPack unServedRespondentPack = SoaPack.builder().packDocument(packRDocs).partyIds(
             wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .packCreatedDate(dateCreated)
             .build();
-
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
     }
 
@@ -2330,7 +2306,7 @@ public class ServiceOfApplicationService {
         return emailNotificationDetails;
     }
 
-    public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest) throws JsonProcessingException {
+    public AboutToStartOrSubmitCallbackResponse soaValidation(CallbackRequest callbackRequest) {
         CaseData caseData = objectMapper.convertValue(
             callbackRequest.getCaseDetails().getData(),
             CaseData.class

@@ -50,8 +50,8 @@ public class ServiceOfApplicationEmailService {
     private final SendgridService sendgridService;
 
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
-                                                                              PartyDetails partyDetails, EmailTemplateNames templateName,
-                                                                              List<Document> docs,String servedParty) throws Exception {
+                                                                              PartyDetails partyDetails,
+                                                                              List<Document> docs, String servedParty) throws IOException {
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         EmailUtils.getEmailProps(null, false, partyDetails.getRepresentativeFullName(),
                                                                                  null, caseData.getApplicantCaseName(),

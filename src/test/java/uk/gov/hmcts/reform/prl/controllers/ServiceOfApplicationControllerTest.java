@@ -146,7 +146,7 @@ public class ServiceOfApplicationControllerTest {
     }
 
     @Test
-    public void testExceptionForHandleAboutToSubmit() throws Exception {
+    public void testExceptionForHandleAboutToSubmit() {
         CaseData cd = CaseData.builder()
             .caseInvites(Collections.emptyList())
             .build();
@@ -157,9 +157,8 @@ public class ServiceOfApplicationControllerTest {
             .caseDetails(CaseDetails.builder()
                              .id(1L)
                              .data(caseData).build()).build();
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
         when(objectMapper.convertValue(cd,  Map.class)).thenReturn(caseData);
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
             serviceOfApplicationController.handleSubmitted(authToken, s2sToken, callbackRequest);
         }, RuntimeException.class, "Invalid Client");
@@ -178,6 +177,36 @@ public class ServiceOfApplicationControllerTest {
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
             .handleAboutToSubmit("","", callbackRequest);
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
+
+    @Test
+    public void handleValidateSoa() {
+        Map<String, Object> caseData = new HashMap<>();
+        CallbackRequest callbackRequest = CallbackRequest
+            .builder()
+            .caseDetails(CaseDetails
+                             .builder().data(caseData)
+                             .build())
+            .build();
+        when(serviceOfApplicationService.soaValidation(Mockito.any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().build());
+        when(authorisationService.isAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = serviceOfApplicationController
+            .soaValidation("","", callbackRequest);
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
+
+    @Test
+    public void testExceptionForSoaValidation() throws Exception {
+
+        final CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(CaseDetails.builder()
+                             .id(1L)
+                             .data(new HashMap<>()).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(false);
+        assertExpectedException(() -> {
+            serviceOfApplicationController.soaValidation(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
