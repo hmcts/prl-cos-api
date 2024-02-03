@@ -688,7 +688,7 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
         if (CaseUtils.isC8Present(caseData)) {
-            return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
+            //return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
         return processNonConfidentialSoa(authorisation, caseData, caseDataMap);
     }
