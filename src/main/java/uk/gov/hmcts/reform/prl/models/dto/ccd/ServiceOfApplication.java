@@ -46,6 +46,11 @@ public class ServiceOfApplication {
     private final String soaCafcassCymruEmail;
 
     //Not in use anymore as it was added for intermim confidentiality check
+    private final YesOrNo soaServeLocalAuthorityYesOrNo;
+    private final String soaLaEmailAddress;
+    private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
+    @JsonProperty("soaDocumentDynamicListForLa")
+    private List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
     private final YesOrNo proceedToServing;
 
     // Confidentiality check related fields
@@ -59,10 +64,4 @@ public class ServiceOfApplication {
     private final String rejectionReason;
 
     private List<Element<ConfidentialCheckFailed>> confidentialCheckFailed;
-
-    private final YesOrNo soaServeLocalAuthorityYesOrNo;
-    private final String soaLaEmailAddress;
-    private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
-    @JsonProperty("soaDocumentDynamicListForLa")
-    private List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
 }
