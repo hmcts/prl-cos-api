@@ -34,7 +34,6 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Service
@@ -222,14 +221,16 @@ public class ServiceOfApplicationEmailService {
                     combinedMap).listOfAttachments(
                     docs).languagePreference(LanguagePreference.english).build()
             );
-            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
-            String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+
             return EmailNotificationDetails.builder()
                 .emailAddress(email)
                 .servedParty(servedParty)
-                .docs(docs.stream().map(s -> element(s)).toList())
-                .attachedDocs(String.join(",", docs.stream().map(a -> a.getDocumentFileName()).toList()))
-                .timeStamp(currentDate).build();
+                .docs(wrapElements(docs))
+                .attachedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
+                .timeStamp(DateTimeFormatter
+                               .ofPattern("dd MMM yyyy HH:mm:ss")
+                               .format(ZonedDateTime.now(ZoneId.of("Europe/London")))).build();
+
         } catch (IOException e) {
             log.error("there is a failure in sending email to Local Authority {} with exception {}",
                       email, e.getMessage()
