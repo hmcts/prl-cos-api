@@ -310,13 +310,10 @@ public class ServiceOfApplicationService {
                     caseDataMap
                 );
             }
-            log.info("AAAAAAAAAAAA");
             checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
             if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeLocalAuthorityYesOrNo())
                 && null != caseData.getServiceOfApplication().getSoaLaEmailAddress()) {
-                log.info("LOCALLL Authrity");
                 List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
-                log.info("docsss--->{}",docsForLa);
                 if (!docsForLa.isEmpty()) {
                     try {
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService
@@ -688,15 +685,12 @@ public class ServiceOfApplicationService {
 
     public ResponseEntity<SubmittedCallbackResponse> handleSoaSubmitted(String authorisation, CallbackRequest callbackRequest) throws Exception {
 
-        log.info("handleSoaSubmitted--->");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
         if (CaseUtils.isC8Present(caseData)) {
-            log.info("c8 presenttt---");
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
-        log.info("c8 nottt presenttt---");
         return processNonConfidentialSoa(authorisation, caseData, caseDataMap);
     }
 
@@ -710,7 +704,6 @@ public class ServiceOfApplicationService {
             log.info("*** finalServedApplicationDetailsList is empty in case data ***");
             finalServedApplicationDetailsList = new ArrayList<>();
         }
-        log.info("AAAAAAAAAAAA");
         finalServedApplicationDetailsList.add(element(sendNotificationForServiceOfApplication(caseData, authorisation, caseDataMap)));
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
         cleanUpSoaSelections(caseDataMap, true);
@@ -2104,7 +2097,6 @@ public class ServiceOfApplicationService {
 
     private void checkAndServeLocalAuthorityEmail(CaseData caseData, String authorization,
                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails) {
-        log.info("checkAndServeLocalAuthorityEmail---------->");
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
         if (!ObjectUtils.isEmpty(unServedLaPack) && CollectionUtils.isNotEmpty(unServedLaPack.getPartyIds())) {
             log.info("*** La pack present *** {}", unServedLaPack);

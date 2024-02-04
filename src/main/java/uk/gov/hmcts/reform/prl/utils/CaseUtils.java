@@ -381,7 +381,6 @@ public class CaseUtils {
     }
 
     public static boolean unServedPacksPresent(CaseData caseData) {
-        log.info("unServedPacksPresent or notttttt {}",caseData.getServiceOfApplication());
         if (caseData.getServiceOfApplication() != null && ((caseData.getServiceOfApplication().getUnServedApplicantPack() != null
             && caseData.getServiceOfApplication().getUnServedApplicantPack().getPackDocument() != null)
             || (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
@@ -390,7 +389,6 @@ public class CaseUtils {
             && caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument() != null)
             || (caseData.getServiceOfApplication().getUnServedLaPack() != null
             && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null))) {
-            log.info("unServedPacksPresent is present");
             return true;
         }
         return false;

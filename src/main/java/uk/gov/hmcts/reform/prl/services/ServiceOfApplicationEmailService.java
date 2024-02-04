@@ -236,10 +236,6 @@ public class ServiceOfApplicationEmailService {
                       email, e.getMessage()
             );
         }
-
-        //return sendgridService.sendEmailWithAttachments(authorization,
-        //                                                combinedMap,
-        //                                                email, docs, servedParty);
         return null;
     }
 }
