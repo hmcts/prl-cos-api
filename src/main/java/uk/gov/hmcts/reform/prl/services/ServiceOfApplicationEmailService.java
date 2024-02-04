@@ -34,6 +34,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_CAN_VIEW_ONLINE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 @Service
@@ -206,13 +207,38 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
                                                                           String email,
                                                                           List<Document> docs,String servedParty) throws IOException {
-        Map<String, String> combinedMap = new HashMap<>();
+        Map<String, Object> combinedMap = new HashMap<>();
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", servedParty);
         combinedMap.putAll(EmailUtils.getCommonEmailProps());
-        return sendgridService.sendEmailWithAttachments(authorization,
-                                                        combinedMap,
-                                                        email, docs, servedParty);
+
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                SendgridEmailTemplateNames.SOA_CA_LOCAL_AUTHORITY,
+                authorization,
+                SendgridEmailConfig.builder().toEmailAddress(
+                    email).dynamicTemplateData(
+                    combinedMap).listOfAttachments(
+                    docs).languagePreference(LanguagePreference.english).build()
+            );
+            ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+            String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
+            return EmailNotificationDetails.builder()
+                .emailAddress(email)
+                .servedParty(servedParty)
+                .docs(docs.stream().map(s -> element(s)).toList())
+                .attachedDocs(String.join(",", docs.stream().map(a -> a.getDocumentFileName()).toList()))
+                .timeStamp(currentDate).build();
+        } catch (IOException e) {
+            log.error("there is a failure in sending email to Local Authority {} with exception {}",
+                      email, e.getMessage()
+            );
+        }
+
+        //return sendgridService.sendEmailWithAttachments(authorization,
+        //                                                combinedMap,
+        //                                                email, docs, servedParty);
+        return null;
     }
 }

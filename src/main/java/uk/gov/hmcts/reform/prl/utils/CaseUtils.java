@@ -381,7 +381,7 @@ public class CaseUtils {
     }
 
     public static boolean unServedPacksPresent(CaseData caseData) {
-        log.info("unServedPacksPresent or notttttt");
+        log.info("unServedPacksPresent or notttttt {}",caseData.getServiceOfApplication());
         if (caseData.getServiceOfApplication() != null && ((caseData.getServiceOfApplication().getUnServedApplicantPack() != null
             && caseData.getServiceOfApplication().getUnServedApplicantPack().getPackDocument() != null)
             || (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
