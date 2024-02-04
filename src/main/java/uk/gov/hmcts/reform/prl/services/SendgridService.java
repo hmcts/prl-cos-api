@@ -160,6 +160,7 @@ public class SendgridService {
     public EmailNotificationDetails sendEmailWithAttachments(String authorization, Map<String, String> emailProps,
                                                              String toEmailAddress, List<Document> listOfAttachments, String servedParty)
         throws IOException {
+
         Content content;
         String subject = emailProps.get("subject");
         if (emailProps.containsKey("orderURLLinkNeeded")) {
@@ -183,7 +184,6 @@ public class SendgridService {
 
             content = new Content("text/html", String.format("%s%s%s%s", title, emailStart, body, emailEnd));
         } else {
-
             content = new Content("text/plain", String.format(
                     (emailProps.containsKey("specialNote") && emailProps.get("specialNote")
                             .equalsIgnoreCase("Yes")) ? SPECIAL_INSTRUCTIONS_EMAIL_BODY : EMAIL_BODY,
