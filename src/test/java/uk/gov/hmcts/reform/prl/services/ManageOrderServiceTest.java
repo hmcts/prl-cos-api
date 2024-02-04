@@ -4790,6 +4790,6 @@ public class ManageOrderServiceTest {
         assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0));
         assertEquals(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0).getValue()
                          .getPartyId(),
-        (orders.getValue().getServeOrderDetails().getServedParties().get(0).getValue().getPartyId()));
+                     (orders.getValue().getServeOrderDetails().getServedParties().get(0).getValue().getPartyId()));
     }
 }
