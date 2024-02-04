@@ -15,14 +15,6 @@
       "servingRespondentsOptionsCA": "courtAdmin",
       "serveToRespondentOptions": "Yes",
       "markedToServeEmailNotification": "Yes",
-      "gatekeeper": [
-        {
-          "id": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
-          "value": {
-            "email": "test@email.com"
-          }
-        }
-      ],
       "isCaseUrgent": "No",
       "id": 0,
       "applicantCaseName": "John Smith",
@@ -229,20 +221,6 @@
         }
       ],
       "manageOrdersOptions": "servedSavedOrders",
-      "manageOrdersDocumentToAmend": {
-        "document_url": "string",
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_hash": "string",
-        "document_creation_date": "2023-01-23T11:05:27.265Z"
-      },
-      "manageOrdersAmendedOrder": {
-        "document_url": "string",
-        "document_binary_url": "string",
-        "document_filename": "string",
-        "document_hash": "string",
-        "document_creation_date": "2023-01-23T11:05:27.265Z"
-      },
       "amendOrderDynamicList": {
         "value": {
           "code": "69d21c76-d7a5-4584-89be-647de99c3181",
@@ -283,18 +261,6 @@
             "judgeNotes": "string",
             "adminNotes": "string",
             "serveOrderDetails": {
-              "additionalDocuments": [
-                {
-                  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
-                  "value": {
-                    "document_url": "string",
-                    "document_binary_url": "string",
-                    "document_filename": "string",
-                    "document_hash": "string",
-                    "document_creation_date": "2023-01-23T11:05:27.265Z"
-                  }
-                }
-              ],
               "serveOnRespondent": "Yes",
               "servingRespondent": "courtBailiff",
               "cafcassServed": "Yes",
@@ -337,10 +303,7 @@
         }
       ],
       "doYouWantToServeOrder": "Yes",
-      "whatDoWithOrder": "finalizeSaveToServeLater",
-      "manageOrders": {
-
-      }
+      "whatDoWithOrder": "finalizeSaveToServeLater"
     }
   },
   "event_id": "litigationCapacity"

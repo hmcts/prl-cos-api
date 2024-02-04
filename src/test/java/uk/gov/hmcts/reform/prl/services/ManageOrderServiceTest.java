@@ -4782,9 +4782,14 @@ public class ManageOrderServiceTest {
             .thenReturn(generatedDocumentInfo);
 
         when(dateTime.now()).thenReturn(LocalDateTime.now());
-
-        assertNotNull(manageOrderService.serveOrder(caseData,orderList));
-
+        List<Element<OrderDetails>> orderDetails = manageOrderService.serveOrder(caseData,orderList);
+        assertNotNull(orderDetails);
+        assertNotNull(orderDetails.get(0));
+        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails());
+        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties());
+        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0));
+        assertEquals(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0).getValue()
+                         .getPartyId(),
+        (orders.getValue().getServeOrderDetails().getServedParties().get(0).getValue().getPartyId()));
     }
-
 }
