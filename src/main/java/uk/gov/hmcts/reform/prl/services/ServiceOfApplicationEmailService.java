@@ -208,7 +208,7 @@ public class ServiceOfApplicationEmailService {
                                                                           List<Document> docs,String servedParty) throws IOException {
         Map<String, Object> combinedMap = new HashMap<>();
         combinedMap.put("caseName", caseData.getApplicantCaseName());
-        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("caseReference", String.valueOf(caseData.getId()));
         combinedMap.put("solicitorName", servedParty);
         combinedMap.putAll(EmailUtils.getCommonEmailProps());
 
