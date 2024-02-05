@@ -2583,7 +2583,7 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
-        for (String i : new ArrayList<>(Arrays.asList("E", "F", "G", "I", "L", "M", "O", "P", "Z"))) {
+        for (String i : new ArrayList<>(Arrays.asList("E", "F", "G", "H", "I", "L", "M", "O", "P", "Z"))) {
             List<Document> documentPack = serviceOfApplicationService.getNotificationPack(caseData,i,List.of(Document.builder()
                                                                                    .documentFileName(SOA_FL415_FILENAME).build(),
                                                                                Document.builder()
