@@ -1352,6 +1352,7 @@ public class ManageOrderService {
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                          || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
                                                          ? No : Yes)
+                              .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) //PRL-4854
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
@@ -1364,6 +1365,8 @@ public class ManageOrderService {
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
             //PRL-4854 - persist hearingsType dynamicList
             .hearingsType(caseData.getManageOrders().getHearingsType())
+            .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .build();
     }
 
