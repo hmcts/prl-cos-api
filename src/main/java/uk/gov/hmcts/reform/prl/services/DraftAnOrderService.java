@@ -183,6 +183,10 @@ public class DraftAnOrderService {
     private static final String SELECTED_ORDER = "selectedOrder";
     public static final String LEGAL_REP_INSTRUCTIONS_PLACE_HOLDER = "legalRepInstructionsPlaceHolder";
     public static final String DRAFT_ORDERS_DYNAMIC_LIST = "draftOrdersDynamicList";
+    public static final String SDO_WHO_MADE_ALLEGATIONS_TEXT_FIELD = "sdoWhoMadeAllegationsText";
+    public static final String SDO_WHO_NEEDS_TO_RESPOND_ALLEGATIONS_TEXT_FIELD = "sdoWhoNeedsToRespondAllegationsText";
+    public static final String SDO_WHO_MADE_ALLEGATIONS_LIST = "sdoWhoMadeAllegationsList";
+    public static final String SDO_WHO_NEEDS_TO_RESPOND_ALLEGATIONS_LIST = "sdoWhoNeedsToRespondAllegationsList";
     private final Time dateTime;
     private final ElementUtils elementUtils;
     private final ObjectMapper objectMapper;
@@ -1601,18 +1605,30 @@ public class DraftAnOrderService {
             && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoPermissionHearingDirections())) {
             caseDataUpdated.put("sdoPermissionHearingDirections", SDO_PERMISSION_HEARING);
         }
-        if (caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(factFindingHearing)
-            && StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoNextStepsAfterSecondGK())) {
-            caseDataUpdated.put("sdoWhoMadeAllegationsText", WHO_MADE_ALLEGATIONS_TEXT);
-            caseDataUpdated.put("sdoWhoNeedsToRespondAllegationsText", WHO_NEEDS_TO_RESPOND_ALLEGATIONS_TEXT);
+        if (caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(factFindingHearing)) {
+            populateDirectionFactFindingsHearingDetails(caseData, caseDataUpdated, applicantRespondentList);
+        }
+    }
+
+    private static void populateDirectionFactFindingsHearingDetails(CaseData caseData, Map<String, Object> caseDataUpdated,
+                                                                    List<DynamicMultiselectListElement> applicantRespondentList) {
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoWhoMadeAllegationsText())) {
+            caseDataUpdated.put(SDO_WHO_MADE_ALLEGATIONS_TEXT_FIELD, WHO_MADE_ALLEGATIONS_TEXT);
+        }
+        if (StringUtils.isBlank(caseData.getStandardDirectionOrder().getSdoWhoNeedsToRespondAllegationsText())) {
+            caseDataUpdated.put(SDO_WHO_NEEDS_TO_RESPOND_ALLEGATIONS_TEXT_FIELD, WHO_NEEDS_TO_RESPOND_ALLEGATIONS_TEXT);
+        }
+        if (isEmpty(caseData.getStandardDirectionOrder().getSdoWhoMadeAllegationsList())) {
             caseDataUpdated.put(
-                "sdoWhoMadeAllegationsList",
+                SDO_WHO_MADE_ALLEGATIONS_LIST,
                 DynamicMultiSelectList.builder()
                     .listItems(applicantRespondentList)
                     .build()
             );
+        }
+        if (isEmpty(caseData.getStandardDirectionOrder().getSdoWhoNeedsToRespondAllegationsList())) {
             caseDataUpdated.put(
-                "sdoWhoNeedsToRespondAllegationsList",
+                SDO_WHO_NEEDS_TO_RESPOND_ALLEGATIONS_LIST,
                 DynamicMultiSelectList.builder()
                     .listItems(applicantRespondentList)
                     .build()
