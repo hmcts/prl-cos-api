@@ -32,13 +32,16 @@ public class AuthorisationService {
         String callingService;
         try {
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
+            log.info(callingService);
             if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
                 .contains(callingService)) {
+                log.info("service authorised");
                 return true;
             }
         } catch (Exception ex) {
             log.error("S2S token is not authorised");
         }
+        log.info("service not authorised");
         return false;
     }
 
@@ -47,8 +50,10 @@ public class AuthorisationService {
             userInfo = idamClient.getUserInfo(authorisation);
             log.info("Logged in user roles", userInfo.getRoles());
             if (null != userInfo) {
+                log.info("Logged in user authorised");
                 return true;
             }
+            log.info("Logged in user not authorised");
         } catch (Exception ex) {
             log.error("User token is invalid");
         }
