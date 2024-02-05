@@ -1362,6 +1362,8 @@ public class ManageOrderService {
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
+            //PRL-4854 - persist hearingsType dynamicList
+            .hearingsType(caseData.getManageOrders().getHearingsType())
             .build();
     }
 
