@@ -64,4 +64,7 @@ public class BaseCaseData {
 
     @JsonProperty("tempHearingCaseId")
     private String tempHearingCaseId;
+
+    @JsonProperty("tempHearingCaseIdUpload")
+    private String tempHearingCaseIdUpload;
 }

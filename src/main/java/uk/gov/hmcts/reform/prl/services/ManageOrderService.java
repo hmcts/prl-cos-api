@@ -2333,9 +2333,12 @@ public class ManageOrderService {
 
 
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
+        String tempCaseId = uploadAnOrder.equals(caseData.getManageOrdersOptions())
+            ? caseData.getTempHearingCaseIdUpload() : caseData.getTempHearingCaseId();
+        log.info("Temp caseId to fetch AAT hearings {}", tempCaseId);
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
             authorization,
-            caseData.getTempHearingCaseId()//String.valueOf(caseData.getId())
+            tempCaseId//String.valueOf(caseData.getId())
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
         List<String> hearingStatusFilterList = Arrays.stream(hearingStatusesToFilter.trim().split(COMMA)).map(String::trim).toList();
