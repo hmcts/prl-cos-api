@@ -544,8 +544,3 @@ sendandreply:
 
 hearing_component:
   futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: full
