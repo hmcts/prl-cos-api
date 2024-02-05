@@ -660,7 +660,7 @@ public class SendAndReplyService {
         });
     }
 
-    private String fetchDocumentIdFromUrl(String documentUrl) {
+    public String fetchDocumentIdFromUrl(String documentUrl) {
 
         return documentUrl.substring(documentUrl.lastIndexOf("/") + 1);
 
