@@ -1468,10 +1468,9 @@ public class ManageOrderService {
 
     private List<Element<ServedParties>> getUpdatedServedParties(CaseData caseData, Element<OrderDetails> order) {
         List<Element<ServedParties>> servedParties  = getServedParties(caseData);
-        if (null != order.getValue().getServeOrderDetails() && CollectionUtils
-            .isNotEmpty(order.getValue()
-            .getServeOrderDetails().getServedParties())) {
-            servedParties = getAmendedParties(order, servedParties);
+        if (null != order.getValue().getServeOrderDetails()
+            && CollectionUtils.isNotEmpty(order.getValue().getServeOrderDetails().getServedParties())) {
+            servedParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
         }
         return servedParties;
     }
@@ -1543,22 +1542,9 @@ public class ManageOrderService {
         );
     }
 
-    private List<Element<ServedParties>> getAmendedParties(Element<OrderDetails> order, List<Element<ServedParties>> servedParties) {
-        List<Element<ServedParties>> amendedServeParties = new ArrayList<>();
-        List<String> servedPartiesExisting = order.getValue()
-            .getServeOrderDetails().getServedParties().stream()
-            .map(element -> element.getValue().getPartyId())
-            .collect(Collectors.toList());
-        log.info("existing ids {} ",servedPartiesExisting);
-        amendedServeParties.addAll(servedParties.stream()
-            .filter(element -> !servedPartiesExisting.contains(element.getValue().getPartyId()))
-            .collect(Collectors.toList()));
-        amendedServeParties.addAll(order.getValue().getServeOrderDetails().getServedParties());
-        return amendedServeParties;
-    }
-
     private List<Element<ServedParties>> getServedParties(CaseData caseData) {
         List<Element<ServedParties>> servedParties = new ArrayList<>();
+        //applicants & respondents
         if (caseData.getManageOrders()
             .getRecipientsOptions() != null) {
             servedParties = dynamicMultiSelectListService
@@ -1568,17 +1554,33 @@ public class ManageOrderService {
         }
 
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            if (caseData.getManageOrders().getChildOption() != null) {
-                servedParties.addAll(dynamicMultiSelectListService
-                                         .getServedPartyDetailsFromDynamicSelectList(caseData.getManageOrders()
-                                                                                         .getChildOption()));
-            }
+            //other parties
             if (caseData.getManageOrders().getOtherParties() != null) {
                 servedParties.addAll(dynamicMultiSelectListService.getServedPartyDetailsFromDynamicSelectList(
                     caseData.getManageOrders().getOtherParties()
                 ));
             }
+            //personal service
+            if (null != caseData.getManageOrders().getServingRespondentsOptionsCA()) {
+                servedParties.add(element(ServedParties.builder()
+                                              .partyId("00000000-0000-0000-0000-000000000000")//adding some default value
+                                              .partyName(caseData.getManageOrders()
+                                                             .getServingRespondentsOptionsCA().getDisplayedValue())
+                                              .servedDateTime(LocalDateTime.now())
+                                              .build()));
+            }
         }
+        //FL401 - personal service
+        if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && null != caseData.getManageOrders().getServingRespondentsOptionsDA()) {
+            servedParties.add(element(ServedParties.builder()
+                                          .partyId("00000000-0000-0000-0000-000000000000")//adding some default value
+                                          .partyName(caseData.getManageOrders()
+                                                         .getServingRespondentsOptionsDA().getDisplayedValue())
+                                          .servedDateTime(LocalDateTime.now())
+                                          .build()));
+        }
+
         return servedParties;
     }
 
