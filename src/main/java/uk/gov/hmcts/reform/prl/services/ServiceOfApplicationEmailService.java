@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.utils.EmailUtils;
 import uk.gov.hmcts.reform.prl.utils.ResourceLoader;
 import uk.gov.service.notify.NotificationClient;
 
+import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -207,5 +208,18 @@ public class ServiceOfApplicationEmailService {
             .caseLink(citizenUrl + CITIZEN_DASHBOARD)
             .build();
 
+    }
+
+    public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
+                                                                          String email,
+                                                                          List<Document> docs,String servedParty) throws IOException {
+        Map<String, String> combinedMap = new HashMap<>();
+        combinedMap.put("caseName", caseData.getApplicantCaseName());
+        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("solicitorName", servedParty);
+        combinedMap.putAll(EmailUtils.getCommonEmailProps());
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                        combinedMap,
+                                                        email, docs, servedParty);
     }
 }

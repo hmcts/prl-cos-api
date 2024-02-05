@@ -131,16 +131,9 @@ uk:
             CA_APPLICANT_SOLICITOR_RES_NOTIFICATION: a08975e3-6438-4f58-a0f6-827c0dcab291
             CA_RESPONDENT_SOLICITOR_RES_NOTIFICATION: b6224e6a-f55c-46f8-bfc7-631d273070a4
             CA_CITIZEN_RES_NOTIFICATION: a34023e7-c545-4352-b509-574d15c84f52
-            prl_c6_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Final.docx
-            prl_c6_filename: Notice_Of_Parties_Order_C6.pdf
-            prl_c6_draft_template: PRL-GOR-ENG-C6-Notice-of-parties-Order-Draft.docx
-            prl_c6_draft_filename: Notice_Of_Parties_Order_C6_draft.pdf
-            prl_c6a_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Final.docx
-            prl_c6a_filename: Notice_Of_Parties_Order_C6a.pdf
-            prl_c6a_draft_template: PRL-GOR-ENG-C6a-Notice-of-nonparties-Order-Draft.docx
-            prl_c6a_draft_filename: Notice_Of_Parties_Order_C6a_draft.pdf
             CA_AWAITING_PAYMENT: 3cf67615-8b67-4814-9e61-1ce786b986a1
             RETURN_APPLICATION_CONSENT_ORDER: 96e26a9a-ca28-4b63-bd59-38e8ad14e373
+            EMAIL_TO_LEGAL_REP_JUDGE_REJECTED_ORDER: 91c41b6a-378f-4787-a660-aaa7a0deab98
             CA_DA_APPLICANT_RESPONDENT_NOC: 27e885c4-907c-479f-8746-0c8d82125513
             CA_DA_OTHER_PARTIES_NOC: d1b1da64-995f-49c6-86cf-63f11404038f
             CA_DA_SOLICITOR_NOC: 576b0181-eae7-4f38-b4f6-321a8c94177d
@@ -561,3 +554,8 @@ sendandreply:
 
 hearing_component:
   futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
+
+refdata:
+  api:
+    url: ${REFDATA_API_URL:http://rd-commondata-api-demo.service.core-compute-demo.internal}
+  category-id: HearingType
