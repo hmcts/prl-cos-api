@@ -2336,7 +2336,7 @@ public class ManageOrderService {
 
 
     public DynamicList populateHearingsDropdown(String authorization, CaseData caseData) {
-        String tempCaseId = uploadAnOrder.equals(caseData.getManageOrdersOptions())
+        String tempCaseId = null != caseData.getTempHearingCaseIdUpload()
             ? caseData.getTempHearingCaseIdUpload() : caseData.getTempHearingCaseId();
         log.info("Temp caseId to fetch AAT hearings {}", tempCaseId);
         Optional<Hearings> hearings = Optional.ofNullable(hearingService.getHearings(
