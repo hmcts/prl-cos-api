@@ -1357,8 +1357,7 @@ public class ServiceOfApplicationService {
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
                             C1A_BLANK_DOCUMENT_FILENAME))
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(
-                            C7_BLANK_DOCUMENT_FILENAME))
-                        .collect(Collectors.toList()));
+                            C7_BLANK_DOCUMENT_FILENAME)).toList());
         return docs;
     }
 
@@ -2426,7 +2425,7 @@ public class ServiceOfApplicationService {
 
     private ResponseEntity<SubmittedCallbackResponse> rejectPacksWithConfidentialDetails(CaseData caseData, Map<String, Object> caseDataMap) {
         final ResponseEntity<SubmittedCallbackResponse> response;
-        // TODO  - create work allocation task
+        // SOA - TO DO  - create work allocation task
 
         log.info("Confidential check failed, Applicantion, can't be served");
 
