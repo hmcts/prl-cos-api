@@ -2360,10 +2360,11 @@ public class ServiceOfApplicationService {
                             sendNotificationToRespondentOrSolicitorNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails,
                                                                     respondentList, respondentDocs, respondentDocs);
                         }
-                    } else if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString()
+                    } else if ((SoaSolicitorServingRespondentsEnum.courtAdmin.toString()
                         .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())
                         || SoaSolicitorServingRespondentsEnum.courtBailiff.toString()
-                        .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
+                        .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy()))
+                        && FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
                         log.info(
                             "SOA - Generate cover letters for respondent packs for DA cases while serving by court admin/bailiff");
                         List<Element<Document>> unServedRespondentPackDocument = new ArrayList<>();
