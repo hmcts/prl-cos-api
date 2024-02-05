@@ -61,6 +61,31 @@ public class ReturnApplicationServiceTest {
         + "Kind regards,\n"
         + "solicitor@example.com Solicitor";
 
+    String otherSelectedFl401 = "Case name: null\n"
+        + "Reference code: 0\n"
+        + "\n"
+        + "Dear John Smith,\n"
+        + "\n"
+        + "Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n"
+        + "\n"
+        + "Application incomplete\n"
+        + "\n"
+        + "Your application has been returned because the application is not complete and does not contain the all required information.\n"
+        + "You may need to request additional information to progress the case.\n"
+        + "\n"
+        + "Next steps\n"
+        + "\n"
+        + "Please check the application and ensure all relevant sections have been completed in full.\n"
+        + "\n"
+        + "\n"
+        + "Other reason\n"
+        + "\n"
+        + "\n"
+        + "Please resolve these issues and resubmit your application.\n"
+        + "\n"
+        + "Kind regards,\n"
+        + "solicitor@example.com Solicitor";
+
     @Before
     public void setUp() {
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
@@ -105,7 +130,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testOtherOptionSelectedFirst() {
+    public void testOtherC1000therOptionSelectedFirst() {
 
         List<RejectReasonEnum>  rejectReasonList = new ArrayList<>();
         rejectReasonList.add(RejectReasonEnum.otherReason);
@@ -120,7 +145,7 @@ public class ReturnApplicationServiceTest {
     }
 
     @Test
-    public void testOtherOptionSelectedSecond() {
+    public void testOtherOptionC100OtherOptionSelectedSecond() {
 
         List<RejectReasonEnum>  rejectReasonList = new ArrayList<>();
         rejectReasonList.add(consentOrderNotProvided);
@@ -132,6 +157,40 @@ public class ReturnApplicationServiceTest {
             .build();
 
         assertEquals(otherSelected, returnApplicationService.getReturnMessage(casedata, userDetails));
+    }
+
+    @Test
+    public void testOtherOptionFl401OtherOptionSelectedFirst() {
+
+        List<FL401RejectReasonEnum>  rejectReasonList = new ArrayList<>();
+        rejectReasonList.add(FL401RejectReasonEnum.otherReason);
+        rejectReasonList.add(FL401RejectReasonEnum.applicationIncomplete);
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
+        caseDataFl401 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .fl401RejectReason(rejectReasonList)
+            .build();
+
+        assertEquals(otherSelectedFl401, returnApplicationService.getReturnMessage(caseDataFl401, userDetails));
+    }
+
+    @Test
+    public void testOtherOptionFl401OtherOptionSelectedSecond() {
+
+        List<FL401RejectReasonEnum>  rejectReasonList = new ArrayList<>();
+        rejectReasonList.add(FL401RejectReasonEnum.applicationIncomplete);
+        rejectReasonList.add(FL401RejectReasonEnum.otherReason);
+
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("John").representativeLastName("Smith").build();
+        caseDataFl401 = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.FL401_CASE_TYPE)
+            .applicantsFL401(applicant)
+            .fl401RejectReason(rejectReasonList)
+            .build();
+
+        assertEquals(otherSelectedFl401, returnApplicationService.getReturnMessage(caseDataFl401, userDetails));
     }
 
     @Test

@@ -96,7 +96,14 @@ public class ReturnApplicationService {
             }
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
+                if (reasonEnum.equals(FL401RejectReasonEnum.otherReason)) {
+                    otherFlag = true;
+                    continue;
+                }
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
+            }
+            if (otherFlag) {
+                returnMsgStr.append(FL401RejectReasonEnum.otherReason.getReturnMsgText());
             }
         }
 
