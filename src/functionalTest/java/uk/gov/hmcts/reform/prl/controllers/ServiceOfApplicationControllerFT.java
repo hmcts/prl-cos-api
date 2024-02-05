@@ -42,7 +42,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_OTHER_PARTIES;
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_PERSONAL;
 
 @Slf4j
 @SpringBootTest
@@ -251,7 +251,7 @@ public class ServiceOfApplicationControllerFT {
 
         String json = res.getResponse().getContentAsString();
         assertTrue(json.contains("confirmation_header"));
-        assertTrue(json.contains(CONFIRMATION_HEADER));
+        assertTrue(json.contains(CONFIRMATION_HEADER_PERSONAL));
         verify(serviceOfApplicationEmailService,times(1)).sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
                                                                Mockito.any(), Mockito.any(), Mockito.any(),
                                                                Mockito.anyString());
@@ -279,7 +279,7 @@ public class ServiceOfApplicationControllerFT {
 
         String json = res.getResponse().getContentAsString();
         assertTrue(json.contains("confirmation_header"));
-        assertTrue(json.contains(CONFIRMATION_HEADER));
+        assertTrue(json.contains(CONFIRMATION_HEADER_PERSONAL));
         verify(serviceOfApplicationEmailService,times(1)).sendEmailUsingTemplateWithAttachments(Mockito.anyString(), Mockito.anyString(),
                                                                                                 Mockito.any(), Mockito.any(), Mockito.any(),
                                                                                                 Mockito.anyString());
