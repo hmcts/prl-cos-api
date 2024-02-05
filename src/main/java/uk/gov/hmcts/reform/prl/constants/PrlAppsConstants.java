@@ -538,7 +538,7 @@ public class PrlAppsConstants {
     public static final String WHO_MADE_ALLEGATIONS_TEXT = "a) The list must be signed and dated. Each incident must be numbered and set "
         + "out in date order, giving the date each incident happened so far as possible and giving a brief description of what "
         + "happened and where. If someone else was there at the time of the incident, and/or the incident was reported to the police "
-        + "or medical attention was sought, details should be given.\n"
+        + "or medical attention was sought, details should be given."
         + System.lineSeparator()
         + "b) If possible, the list of allegations shall be set out in the form of a table with headings. An example table is attached to this order."
         + System.lineSeparator()
