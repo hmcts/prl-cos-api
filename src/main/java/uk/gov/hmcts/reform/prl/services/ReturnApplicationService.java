@@ -81,30 +81,10 @@ public class ReturnApplicationService {
 
                         """);
 
-        boolean otherFlag = false;
-
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
-                if (reasonEnum.equals(RejectReasonEnum.otherReason)) {
-                    otherFlag = true;
-                    continue;
-                }
-                returnMsgStr.append(reasonEnum.getReturnMsgText());
-            }
-            if (otherFlag) {
-                returnMsgStr.append(RejectReasonEnum.otherReason.getReturnMsgText());
-            }
+            returnMessageC100(caseData, returnMsgStr);
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
-                if (reasonEnum.equals(FL401RejectReasonEnum.otherReason)) {
-                    otherFlag = true;
-                    continue;
-                }
-                returnMsgStr.append(reasonEnum.getReturnMsgText());
-            }
-            if (otherFlag) {
-                returnMsgStr.append(FL401RejectReasonEnum.otherReason.getReturnMsgText());
-            }
+            returnMessageFl402(caseData, returnMsgStr);
         }
 
         returnMsgStr.append("Please resolve these issues and resubmit your application.\n\n")
@@ -113,6 +93,36 @@ public class ReturnApplicationService {
 
         return returnMsgStr.toString();
 
+    }
+
+    private void returnMessageC100(CaseData caseData, StringBuilder returnMsgStr) {
+        boolean otherFlag = false;
+
+        for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
+            if (reasonEnum.equals(RejectReasonEnum.otherReason)) {
+                otherFlag = true;
+                continue;
+            }
+            returnMsgStr.append(reasonEnum.getReturnMsgText());
+        }
+        if (otherFlag) {
+            returnMsgStr.append(RejectReasonEnum.otherReason.getReturnMsgText());
+        }
+    }
+
+    private void returnMessageFl402(CaseData caseData, StringBuilder returnMsgStr) {
+        boolean otherFlag = false;
+
+        for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
+            if (reasonEnum.equals(FL401RejectReasonEnum.otherReason)) {
+                otherFlag = true;
+                continue;
+            }
+            returnMsgStr.append(reasonEnum.getReturnMsgText());
+        }
+        if (otherFlag) {
+            returnMsgStr.append(FL401RejectReasonEnum.otherReason.getReturnMsgText());
+        }
     }
 
     public String getReturnMessageForTaskList(CaseData caseData) {
