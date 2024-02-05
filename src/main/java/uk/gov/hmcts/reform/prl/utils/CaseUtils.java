@@ -374,6 +374,13 @@ public class CaseUtils {
         }
     }
 
+    public static Document convertDocType(uk.gov.hmcts.reform.ccd.client.model.Document document) {
+        return Document.builder().documentUrl(document.getDocumentURL())
+            .documentBinaryUrl(document.getDocumentBinaryURL())
+            .documentFileName(document.getDocumentFilename())
+            .build();
+    }
+
     public static boolean unServedPacksPresent(CaseData caseData) {
         if (caseData.getServiceOfApplication() != null && ((caseData.getServiceOfApplication().getUnServedApplicantPack() != null
             && caseData.getServiceOfApplication().getUnServedApplicantPack().getPackDocument() != null)
@@ -384,13 +391,6 @@ public class CaseUtils {
             return true;
         }
         return false;
-    }
-
-    public static Document convertDocType(uk.gov.hmcts.reform.ccd.client.model.Document document) {
-        return Document.builder().documentUrl(document.getDocumentURL())
-            .documentBinaryUrl(document.getDocumentBinaryURL())
-            .documentFileName(document.getDocumentFilename())
-            .build();
     }
 
     public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {
