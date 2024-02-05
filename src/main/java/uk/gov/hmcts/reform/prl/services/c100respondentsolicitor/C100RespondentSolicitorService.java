@@ -365,11 +365,17 @@ public class C100RespondentSolicitorService {
     private Response buildAbilityToParticipateResponse(CaseData caseData, Response buildResponseForRespondent) {
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
             .abilityToParticipate(AbilityToParticipate.builder()
+                                      .detailsOfReferralOrAssessment(caseData.getRespondentSolicitorData()
+                                                                         .getAbilityToParticipateInProceedings()
+                                                                         .getDetailsOfReferralOrAssessment())
+                                      .giveDetailsAffectingLitigationCapacity(caseData.getRespondentSolicitorData()
+                                                                                  .getAbilityToParticipateInProceedings()
+                                                                                  .getGiveDetailsAffectingLitigationCapacity())
                                       .factorsAffectingAbilityToParticipate(caseData.getRespondentSolicitorData()
                                                                                 .getAbilityToParticipateInProceedings()
                                                                                 .getFactorsAffectingAbilityToParticipate())
                                       .provideDetailsForFactorsAffectingAbilityToParticipate(
-                                          YesNoDontKnow.yes.equals(
+                                          Yes.equals(
                                               caseData.getRespondentSolicitorData()
                                                   .getAbilityToParticipateInProceedings().getFactorsAffectingAbilityToParticipate())
                                               ? caseData.getRespondentSolicitorData()

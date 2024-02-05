@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
@@ -155,7 +156,7 @@ public class TestingSupportServiceTest {
                           .c7ResponseSubmitted(No)
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
