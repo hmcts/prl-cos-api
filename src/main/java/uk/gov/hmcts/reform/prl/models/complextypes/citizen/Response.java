@@ -25,6 +25,7 @@ import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
+@JasonIgnore(null)
 @AllArgsConstructor
 public class Response {
     private final YesOrNo legalRepresentation;
@@ -53,6 +54,7 @@ public class Response {
     @JsonUnwrapped
     @Builder.Default
     private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
+    private final ResponseToAllgeationsofHarm responseToAllgeationsofHarm;
 
     private final YesOrNo c7ResponseSubmitted;
     private final YesOrNo c1AResponseSubmitted;

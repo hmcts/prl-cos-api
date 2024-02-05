@@ -11,17 +11,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import java.util.EnumMap;
 import java.util.Map;
 
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.MIAM;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.SUBMIT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.*;
 
 @Getter
 @Service
@@ -36,6 +26,7 @@ public class RespondentEventsChecker {
     private final InternationalElementsChecker internationalElementsChecker;
     private final RespondentContactDetailsChecker respondentContactDetailsChecker;
     private final RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
+    private final ResponseToAllegationofHarmChecker responseToAllegationofHarmChecker;
     private final ViewDraftResponseChecker viewDraftResponseChecker;
     private final ResponseSubmitChecker responseSubmitChecker;
 
@@ -50,6 +41,7 @@ public class RespondentEventsChecker {
         eventStatus.put(MIAM, respondentMiamChecker);
         eventStatus.put(CURRENT_OR_PREVIOUS_PROCEEDINGS, currentOrPastProceedingsChecker);
         eventStatus.put(ALLEGATION_OF_HARM, respondentAllegationsOfHarmChecker);
+        eventStatus.put(RESPOND_ALLEGATION_OF_HARM , responseToAllegationofHarmChecker);
         eventStatus.put(INTERNATIONAL_ELEMENT, internationalElementsChecker);
         eventStatus.put(CONFIRM_EDIT_CONTACT_DETAILS, respondentContactDetailsChecker);
         eventStatus.put(VIEW_DRAFT_RESPONSE, viewDraftResponseChecker);
