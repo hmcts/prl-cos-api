@@ -22,12 +22,13 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 
 @Slf4j
 @Service
+@SuppressWarnings({"java:S6813"})
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ResponseSubmitChecker implements RespondentEventChecker {
 
     @Autowired
     @Lazy
-    private RespondentEventsChecker respondentEventsChecker;
+    RespondentEventsChecker respondentEventsChecker;
 
     @Override
     public boolean isStarted(PartyDetails respondingParty) {

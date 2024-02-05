@@ -29,5 +29,7 @@ public class OtherDraftOrderDetails {
     private final String nameOfLaForReviewOrder;
     private final YesOrNo isJudgeApprovalNeeded;
     private final String orderCreatedBy;
+    private String orderCreatedByEmailId;
     private final String additionalRequirementsForHearingReq;
+    private final String instructionsToLegalRepresentative;
 }
