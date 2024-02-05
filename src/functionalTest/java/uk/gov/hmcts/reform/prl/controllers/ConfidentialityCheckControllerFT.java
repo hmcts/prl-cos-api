@@ -27,6 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
 
 
@@ -74,7 +75,7 @@ public class ConfidentialityCheckControllerFT {
     }
 
     @Test
-    public void givenRequestWithCaseData_ResponseContainsYesOrNo() throws Exception {
+    public void givenRequestWithCaseData_ResponseContainsNo() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(), anyLong(), anyString(), anyMap());
@@ -90,5 +91,24 @@ public class ConfidentialityCheckControllerFT {
         String json = res.getResponse().getContentAsString();
         assertTrue(json.contains("confirmation_header"));
         assertTrue(json.contains(RETURNED_TO_ADMIN_HEADER));
+    }
+
+    @Test
+    public void givenRequestWithCaseData_ResponseContainsYes() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson("requests/service-of-application-ready-to-serve.json");
+        doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(), anyLong(), anyString(), anyMap());
+        MvcResult res = mockMvc.perform(post("/confidentiality-check/submitted")
+                                            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+                                            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .content(requestBody)
+                                            .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andReturn();
+
+        String json = res.getResponse().getContentAsString();
+        assertTrue(json.contains("confirmation_header"));
+        assertTrue(json.contains(CONFIRMATION_HEADER_NON_PERSONAL));
     }
 }
