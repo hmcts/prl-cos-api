@@ -2592,6 +2592,8 @@ public class ServiceOfApplicationService {
     private ResponseEntity<SubmittedCallbackResponse> servePacksWithConfidentialDetails(String authorisation, CaseData caseData,
                                                                                         Map<String, Object> caseDataMap) {
         final ResponseEntity<SubmittedCallbackResponse> response;
+        String confirmationHeader;
+        String confirmationBody;
         caseData = sendNotificationsForUnServedPacks(
             caseData,
             authorisation

@@ -408,6 +408,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder().build())
                                       .applicationServedYesNo(YesOrNo.Yes)
                                       .soaServeToRespondentOptions(No)
                                       .build()).build();
