@@ -80,12 +80,19 @@ public class ReturnApplicationService {
                         Thank you for your application. Your application has been reviewed and is being returned for the following reasons:
 
                         """);
+
+        boolean otherFlag = false;
+
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            log.info("rejectReasonList {}", caseData.getRejectReason());
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
-                log.info("rejectReason {}", reasonEnum.getReturnMsgText());
+                if (reasonEnum.equals(RejectReasonEnum.otherReason)) {
+                    otherFlag = true;
+                    continue;
+                }
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
-                log.info("rejectReason {}", returnMsgStr);
+            }
+            if (otherFlag) {
+                returnMsgStr.append(RejectReasonEnum.otherReason.getReturnMsgText());
             }
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
