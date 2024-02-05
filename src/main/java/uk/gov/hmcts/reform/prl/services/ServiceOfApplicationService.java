@@ -1472,7 +1472,7 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
-        docs.addAll(staticDocs.stream().toList());
+        docs.addAll(staticDocs);
         return docs;
     }
 
