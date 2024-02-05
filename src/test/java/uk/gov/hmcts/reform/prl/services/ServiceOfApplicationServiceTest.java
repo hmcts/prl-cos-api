@@ -24,6 +24,8 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -40,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
@@ -75,13 +78,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -3024,5 +3029,111 @@ public class ServiceOfApplicationServiceTest {
         assertEquals(OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR, response.getErrors().get(0));
     }
 
+
+    @Test
+    public void checkC100SoaWaFieldsWhenConfidentialDetailsPresentForNonPersonalService() {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.no).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+        List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
+        Element applicantElement = element(partyDetails);
+        partyDetailsList.add(applicantElement);
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().isConfidential(Yes).soaServeToRespondentOptions(
+            No).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serviceOfApplication(serviceOfApplication)
+            .applicants(partyDetailsList)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
+            caseData,
+            Event.SOA.getId()
+        );
+        assertEquals("Yes", resultMap.get("isC8CheckNeeded"));
+        assertNull(resultMap.get("responsibleForService"));
+    }
+
+    @Test
+    public void checkC100SoaWaFieldsWhenConfidentialDetailsPresent() {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+        List<Element<PartyDetails>> partyDetailsList = new ArrayList<>();
+        Element applicantElement = element(partyDetails);
+        partyDetailsList.add(applicantElement);
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().isConfidential(Yes).soaServeToRespondentOptions(
+            Yes).soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .serviceOfApplication(serviceOfApplication)
+            .applicants(partyDetailsList)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
+            caseData,
+            Event.SOA.getId()
+        );
+        assertEquals("Yes", resultMap.get("isC8CheckNeeded"));
+        assertEquals(
+            SoaSolicitorServingRespondentsEnum.courtAdmin.getDisplayedValue(),
+            resultMap.get("responsibleForService")
+        );
+    }
+
+
+    @Test
+    public void checkFL401SoaWaFieldsWhenConfidentialDetailsPresent() {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder()
+            .isConfidential(Yes).soaServingRespondentsOptionsDA(SoaSolicitorServingRespondentsEnum.courtAdmin).build();
+        CaseData caseData = CaseData.builder()
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(Collections.singletonList(
+                FL401OrderTypeEnum.occupationOrder)).build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .applicantsFL401(partyDetails)
+            .serviceOfApplication(serviceOfApplication)
+            .build();
+        Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
+            caseData,
+            Event.SOA.getId()
+        );
+        assertEquals(YES, resultMap.get("isC8CheckNeeded"));
+        assertEquals(
+            SoaSolicitorServingRespondentsEnum.courtAdmin.getDisplayedValue(),
+            resultMap.get("responsibleForService")
+        );
+        assertEquals(YES, resultMap.get("isOccupationOrderSelected"));
+    }
+
+
+    @Test
+    public void checkFL401ConfidentialCheckWaFieldsWhenConfidentialDetailsPresent() {
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
+            SoaPack.builder().build()).build();
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(serviceOfApplication)
+            .build();
+        Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
+            caseData,
+            Event.CONFIDENTIAL_CHECK.getId()
+        );
+        assertEquals(YES, resultMap.get("isC8CheckApproved"));
+    }
 
 }
