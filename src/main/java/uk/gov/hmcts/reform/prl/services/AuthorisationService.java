@@ -32,17 +32,13 @@ public class AuthorisationService {
         String callingService;
         try {
             callingService = serviceAuthorisationApi.getServiceName(serviceAuthHeader);
-            log.info(callingService);
-            log.info(s2sAuthorisedServices);
             if (callingService != null && Arrays.asList(s2sAuthorisedServices.split(","))
                 .contains(callingService)) {
-                log.info("service authorised");
                 return true;
             }
         } catch (Exception ex) {
             log.error("S2S token is not authorised");
         }
-        log.info("service not authorised");
         return false;
     }
 
