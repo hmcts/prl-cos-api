@@ -168,6 +168,15 @@ public class ManageOrdersUtils {
             && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.nextStepsAfterGateKeeping)) {
             validateHearingEstimatedTimings(errorList, standardDirectionOrder.getSdoSecondHearingDetails());
         }
+        if (CollectionUtils.isNotEmpty(standardDirectionOrder.getSdoHearingsAndNextStepsList())
+            && standardDirectionOrder.getSdoHearingsAndNextStepsList().contains(SdoHearingsAndNextStepsEnum.factFindingHearing)
+            && ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
+            && ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails().getHearingDateConfirmOptionEnum())) {
+            validateHearingEstimatedTimings(
+                errorList,
+                standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
+            );
+        }
         return errorList;
     }
 

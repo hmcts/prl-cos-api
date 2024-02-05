@@ -2550,6 +2550,22 @@ public class ManageOrderService {
                 ))
                 .build();
         }
+        if (isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
+            && isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
+                              .getHearingDateConfirmOptionEnum())) {
+            hearingData = hearingDataService.getHearingDataForSdo(
+                standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails(),
+                hearingDataPrePopulatedDynamicLists,
+                caseData
+            );
+            standardDirectionOrder = standardDirectionOrder.toBuilder()
+                .sdoDirectionsForFactFindingHearingDetails(hearingDataService.getHearingDataForSelectedHearingForSdo(
+                    hearingData,
+                    hearings,
+                    caseData
+                ))
+                .build();
+        }
         caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
         return caseData;
     }
@@ -3039,6 +3055,15 @@ public class ManageOrderService {
                 isDraftOrder,
                 additionalRequirementsForHearingReqList,
                 standardDirectionOrder.getSdoSettlementHearingDetails()
+            );
+        }
+        if (ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails())
+            && ObjectUtils.isNotEmpty(standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
+                                          .getHearingDateConfirmOptionEnum())) {
+            populateAdditionalRequirementsForHearingReqList(
+                isDraftOrder,
+                additionalRequirementsForHearingReqList,
+                standardDirectionOrder.getSdoDirectionsForFactFindingHearingDetails()
             );
         }
     }

@@ -535,6 +535,38 @@ public class PrlAppsConstants {
         + "d) recommendations in respect of arrangements for the ((child or children)) including stepped arrangements with a view "
         + "to a final order if possible";
 
+    public static final String WHO_MADE_ALLEGATIONS_TEXT = "a) The list must be signed and dated. Each incident must be numbered and set "
+        + "out in date order, giving the date each incident happened so far as possible and giving a brief description of what "
+        + "happened and where. If someone else was there at the time of the incident, and/or the incident was reported to the police "
+        + "or medical attention was sought, details should be given.\n"
+        + System.lineSeparator()
+        + "b) If possible, the list of allegations shall be set out in the form of a table with headings. An example table is attached to this order."
+        + System.lineSeparator()
+        + "c)The list must end with a statement that it is true, and be signed and dated."
+        + System.lineSeparator()
+        + "d) A statement must be sent with the list, giving more details of the allegations, referring to each allegation by its number in the list "
+        + "and attaching all evidence relied upon in support."
+        + System.lineSeparator()
+        + "e) If there were other witnesses to the alleged incidents, or there are documents on which a party intends to rely, that should be "
+        + "referred to in the last paragraph of the statement but no additional witnesses or documents should be sent at this stage."
+        + System.lineSeparator()
+        + "f) In addition, the party making the allegations and any witnesses must make written statements of the evidence they will give to "
+        + "the court about the disputed facts, attaching copies of any documents they wish to use to support their evidence. Copies of the "
+        + "statements and any documents must be sent with the lists.";
+
+    public static final String WHO_NEEDS_TO_RESPOND_ALLEGATIONS_TEXT = "a) The written response to each of the allegations should use the same "
+        + "table if possible. It should set out brief details of what the party who made the allegations says happened, or if the incident is "
+        + "denied. The response must end with a statement that it is true, and must be signed and dated."
+        + System.lineSeparator()
+        + "b) A statement giving more details of the responses, referring to each allegation by its number in the list."
+        + System.lineSeparator()
+        + "c) If there were other witnesses to the alleged incidents, or there are documents on which a party intends to rely, that should be "
+        + "referred to in the last paragraph of the statement but no additional witnesses or documents should be sent at this stage."
+        + System.lineSeparator()
+        + "d) In addition, the party who needs to respond to the allegations made and any witnesses must make written statements of the evidence "
+        + "they will give to the court about the disputed facts, attaching any documents they wish to use to support their evidence. Copies of the"
+        + " statements and any documents must be sent with the lists.";
+
 
     public static final String APPLICANT_CASE_NAME = "applicantCaseName";
 
@@ -696,6 +728,8 @@ public class PrlAppsConstants {
     public static final String SDO_FHDRA_HEARING_DETAILS = "sdoFhdraHearingDetails";
     public static final String SDO_DRA_HEARING_DETAILS = "sdoDraHearingDetails";
     public static final String SDO_SETTLEMENT_HEARING_DETAILS = "sdoSettlementHearingDetails";
+
+    public static final String SDO_DIRECTIONS_FOR_FACT_FINDING_HEARING_DETAILS = "sdoDirectionsForFactFindingHearingDetails";
 
     public static final String C100_RESPONDENTS = "respondents";
     public static final String C100_RESPONDENT_TABLE = "respondentTable";
