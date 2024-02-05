@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -18,6 +19,7 @@ import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.allNonEmpty;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ReturnApplicationService {
 
@@ -79,8 +81,11 @@ public class ReturnApplicationService {
 
                         """);
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("rejectReasonList {}", caseData.getRejectReason());
             for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
+                log.info("rejectReason {}", reasonEnum.getReturnMsgText());
                 returnMsgStr.append(reasonEnum.getReturnMsgText());
+                log.info("rejectReason {}", returnMsgStr);
             }
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
