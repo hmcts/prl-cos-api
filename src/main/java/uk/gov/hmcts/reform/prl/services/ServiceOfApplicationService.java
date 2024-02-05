@@ -5,13 +5,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.ListUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.util.ObjectUtils;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
@@ -172,14 +172,11 @@ public class ServiceOfApplicationService {
     @Value("${xui.url}")
     private String manageCaseUrl;
 
-    public static final String RETURNED_TO_ADMIN_HEADER = "# Application returned to admin";
-    public static final String APPLICATION_SERVED_HEADER = "# Application served";
+    public static final String RETURNED_TO_ADMIN_HEADER = "# The application cannot be served";
     public static final String CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX = """
         ### What happens next
-        The application will be served to relevant people in the case""";
-    public static final String CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX = """
-           ### What happens next
-           The application cannot be served. The packs will be sent to the filling team to be redacted.""";
+        A new service pack will need to be created by admin as this version will be deleted.""";
+
     public static final String CONFIDENTIAL_CONFIRMATION_HEADER = "# The application will be reviewed for confidential details";
     public static final String CONFIDENTIAL_CONFIRMATION_BODY_PREFIX = """
         ### What happens next
@@ -240,6 +237,12 @@ public class ServiceOfApplicationService {
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
+    public static final String CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL = "# The application is ready for personally service";
+
+    public static final String CONFIDENTIALITY_CONFIRMATION_BODY_PERSONAL = """
+        ### What happens next
+        The person arranging personal service will be notified
+        """;
 
     private static final String SERVICE_OF_APPLICATION_ENDPOINT = PrlAppsConstants.URL_STRING + "#Service of application";
 
@@ -2601,13 +2604,15 @@ public class ServiceOfApplicationService {
         response = ok(SubmittedCallbackResponse.builder()
                       .confirmationHeader(RETURNED_TO_ADMIN_HEADER)
                       .confirmationBody(
-                          CONFIDENTIAL_CONFIRMATION_YES_BODY_PREFIX).build());
+                          CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX).build());
         return response;
     }
 
     private ResponseEntity<SubmittedCallbackResponse> servePacksWithConfidentialDetails(String authorisation, CaseData caseData,
                                                                                         Map<String, Object> caseDataMap) {
         final ResponseEntity<SubmittedCallbackResponse> response;
+        String confirmationHeader;
+        String confirmationBody;
         caseData = sendNotificationsForUnServedPacks(
             caseData,
             authorisation
@@ -2615,10 +2620,23 @@ public class ServiceOfApplicationService {
 
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, caseData.getFinalServedApplicationDetailsList());
         caseDataMap.put(UNSERVED_RESPONDENT_PACK, caseData.getServiceOfApplication().getUnServedRespondentPack());
+        if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
+            && YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
+            confirmationBody = CONFIRMATION_BODY_PREFIX;
+            confirmationHeader = CONFIRMATION_HEADER_NON_PERSONAL;
+            confirmationBody = String.format(
+                confirmationBody,
+                "/cases/case-details/" + caseData.getId() + "/#Service%20of%20application"
+            );
+        } else {
+            confirmationBody = CONFIDENTIALITY_CONFIRMATION_BODY_PERSONAL;
+            confirmationHeader = CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL;
+        }
+
         response = ok(SubmittedCallbackResponse.builder()
-                          .confirmationHeader(APPLICATION_SERVED_HEADER)
+                          .confirmationHeader(confirmationHeader)
                           .confirmationBody(
-                              CONFIDENTIAL_CONFIRMATION_NO_BODY_PREFIX).build());
+                              confirmationBody).build());
         return response;
     }
 
