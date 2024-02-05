@@ -189,7 +189,6 @@ public class ServiceOfApplicationService {
     private final CaseInviteManager caseInviteManager;
     private final C100CaseInviteService c100CaseInviteService;
 
-    @Autowired
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
     private final ObjectMapper objectMapper;
