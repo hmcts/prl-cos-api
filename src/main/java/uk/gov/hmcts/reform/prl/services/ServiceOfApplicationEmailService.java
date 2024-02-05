@@ -46,8 +46,8 @@ public class ServiceOfApplicationEmailService {
     private final SendgridService sendgridService;
 
     public EmailNotificationDetails sendEmailNotificationToApplicantSolicitor(String authorization, CaseData caseData,
-                                                                              PartyDetails partyDetails, EmailTemplateNames templateName,
-                                                                              List<Document> docs,String servedParty) throws Exception {
+                                                                              PartyDetails partyDetails,
+                                                                              List<Document> docs, String servedParty) throws IOException {
         return sendgridService.sendEmailWithAttachments(authorization,
                                                         EmailUtils.getEmailProps(null, false, partyDetails.getRepresentativeFullName(),
                                                                                  null, caseData.getApplicantCaseName(),
@@ -114,17 +114,6 @@ public class ServiceOfApplicationEmailService {
                                                         partyDetails.getEmail(), docs, servedParty);
     }
 
-    public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
-                                                                          String email,
-                                                                          List<Document> docs,String servedParty) throws IOException {
-        return sendgridService.sendEmailWithAttachments(authorization,
-                                                        EmailUtils.getEmailProps(null,false,
-                                                                                 PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY,null,
-                                                                      caseData.getApplicantCaseName(),
-                                                                      String.valueOf(caseData.getId())),
-                                                        email, docs, servedParty);
-    }
-
     public EmailNotificationDetails sendEmailUsingTemplateWithAttachments(String authorization,
                                                       String email,
                                                       List<Document> docs,
@@ -152,5 +141,18 @@ public class ServiceOfApplicationEmailService {
             log.error("there is a failure in sending email for email {} with exception {}", email,e.getMessage());
         }
         return null;
+    }
+
+    public EmailNotificationDetails sendEmailNotificationToLocalAuthority(String authorization, CaseData caseData,
+                                                                          String email,
+                                                                          List<Document> docs,String servedParty) throws IOException {
+        Map<String, String> combinedMap = new HashMap<>();
+        combinedMap.put("caseName", caseData.getApplicantCaseName());
+        combinedMap.put("caseNumber", String.valueOf(caseData.getId()));
+        combinedMap.put("solicitorName", servedParty);
+        combinedMap.putAll(EmailUtils.getCommonEmailProps());
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                        combinedMap,
+                                                        email, docs, servedParty);
     }
 }
