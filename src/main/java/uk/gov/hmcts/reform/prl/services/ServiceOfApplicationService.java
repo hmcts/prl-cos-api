@@ -1078,11 +1078,11 @@ public class ServiceOfApplicationService {
         if (caseData.getApplicants().get(0).getValue().getSolicitorEmail() != null) {
             try {
                 log.info(
-                    "Sending the email notification to applicant solicitor for FL401 Application for caseId {}",
+                    "Sending the email notification to applicant solicitor for C100 Application for caseId {}",
                     caseData.getId()
                 );
                 //Respondent's pack
-                log.error("#SOA TO DO With notice add RE3 letter, without notice add RE2, gov notification not required so remove it");
+                log.error("#SOA attach RE6 letter");
                 caseData.getRespondents().forEach(respondent ->
                     finalDocs.add(generateAccessCodeLetter(authorization, caseData,respondent, null, PRL_LET_ENG_C100_RE6))
                 );
