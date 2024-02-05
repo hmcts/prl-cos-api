@@ -209,7 +209,7 @@ public class ServiceOfApplicationEmailService {
         Map<String, Object> combinedMap = new HashMap<>();
         combinedMap.put("caseName", caseData.getApplicantCaseName());
         combinedMap.put("caseReference", String.valueOf(caseData.getId()));
-        combinedMap.put("solicitorName", servedParty);
+        combinedMap.put("localAuthorityName", servedParty);
         combinedMap.putAll(EmailUtils.getCommonEmailProps());
 
         try {
