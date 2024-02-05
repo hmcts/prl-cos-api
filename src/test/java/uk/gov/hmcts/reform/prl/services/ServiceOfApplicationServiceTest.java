@@ -2,13 +2,18 @@ package uk.gov.hmcts.reform.prl.services;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
+import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -22,6 +27,8 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -34,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.C100CaseInviteService;
@@ -42,6 +50,8 @@ import uk.gov.hmcts.reform.prl.services.pin.FL401CaseInviteService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -105,6 +115,21 @@ public class ServiceOfApplicationServiceTest {
 
     @Mock
     private FL401CaseInviteService fl401CaseInviteService;
+
+    @Mock
+    private SendAndReplyService sendAndReplyService;
+
+    @Mock
+    private CoreCaseDataApi coreCaseDataApi;
+
+    @Mock
+    private AuthTokenGenerator authTokenGenerator;
+
+    @Before
+    public void setUp() {
+        when(authTokenGenerator.generate()).thenReturn("");
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.any())).thenReturn(DynamicList.builder().build());
+    }
 
     @Test
     public void testListOfOrdersCreated() {
@@ -725,7 +750,6 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
-
     @Test
     public void testSendNotificationForSoaCitizenC100() throws Exception {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -1015,27 +1039,23 @@ public class ServiceOfApplicationServiceTest {
                                                                           .label("otherPeople")
                                                                           .code("otherPeople")
                                                                           .build());
-
         when(dynamicMultiSelectListService.getOtherPeopleMultiSelectList(caseData)).thenReturn(otherPeopleList);
-
         Map<String, Object> caseDatatMap = caseData.toMap(new ObjectMapper());
-
-
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345L)
             .data(caseDatatMap).build();
-
         when(objectMapper.convertValue(caseDatatMap,  CaseData.class)).thenReturn(caseData);
-
-
         when(CaseUtils.getCaseData(
             caseDetails,
             objectMapper
         )).thenReturn(caseData);
-
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("Confidential-").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap("authorization", caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1110,8 +1130,12 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
 
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("Confidential").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap("", caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1173,8 +1197,12 @@ public class ServiceOfApplicationServiceTest {
         String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
 
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap("",caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1239,8 +1267,12 @@ public class ServiceOfApplicationServiceTest {
         String cafcassCymruEmailAddress = "cafcassCymruEmailAddress@email.com";
 
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        List<DynamicListElement> dynamicListElements = new ArrayList<>();
+        dynamicListElements.add(DynamicListElement.builder().label("").build());
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
-        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(caseDetails);
+        final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap("", caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
 
@@ -1499,4 +1531,189 @@ public class ServiceOfApplicationServiceTest {
         assertNull(caseDataUpdated.get("soaCafcassCymruEmail"));
     }
 
+    @Test
+    public void testSendNotificationForLa() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Element applicantElement = element(partyDetails);
+        applicants.add(applicantElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(applicants)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaServeLocalAuthorityYesOrNo(Yes)
+                                      .soaLaEmailAddress("cymruemail@test.com")
+                                      .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
+                                                                               .documentsListForLa(DynamicList.builder().build())
+                                                                               .build())))
+                                      .soaServeC8ToLocalAuthorityYesOrNo(Yes)
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
+                                                                   .forename("first")
+                                                                   .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH
+        );
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+    }
+
+
+    @Test
+    public void testSendNotificationForLaWithException() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Element applicantElement = element(partyDetails);
+        applicants.add(applicantElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(applicants)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaServeLocalAuthorityYesOrNo(No)
+                                      .soaLaEmailAddress("cymruemail@test.com")
+                                      .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
+                                                                                       .documentsListForLa(DynamicList.builder().build())
+                                                                                       .build())))
+                                      .soaServeC8ToLocalAuthorityYesOrNo(Yes)
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
+                                                                   .forename("first")
+                                                                   .surname("test").build());
+        when(serviceOfApplicationEmailService
+                 .sendEmailNotificationToLocalAuthority(Mockito.anyString(),Mockito.any(),Mockito.anyString(),
+                                                        Mockito.any(),Mockito.anyString())).thenThrow(IOException.class);
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH
+        );
+        assertNull(servedApplicationDetails.getModeOfService());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+    }
+
+    @Test
+    public void testgetSelectedDocumentFromDynamicList() {
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+            TEST_AUTH,
+            DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
+        );
+        assertNotNull(fetchedDocument);
+    }
+
+    @Test
+    public void testgetSelectedDocumentUncategorisedDocs() {
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, Collections.emptyList(), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test1");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+            TEST_AUTH,
+            DynamicList.builder().value(DynamicListElement.builder().code("test1").build()).build(), ""
+        );
+        assertNotNull(fetchedDocument);
+    }
+
+    @Test
+    public void testgetSelectedDocumentForSubCategoriesDocs() {
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        Category category1 = new Category("categoryId", "categoryName", 2, Collections.emptyList(), List.of(category));
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category1), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+            TEST_AUTH,
+            DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
+        );
+        assertNotNull(fetchedDocument);
+    }
 }
