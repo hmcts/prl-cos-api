@@ -62,6 +62,7 @@ import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -162,6 +163,7 @@ public class ServiceOfApplicationServiceTest {
     private CaseInvite caseInvite;
     private static final String SOA_FL415_FILENAME = "FL415.pdf";
     private static final String SOA_FL416_FILENAME = "FL416.pdf";
+    public static final String TEST_AUTH = "test auth";
 
     @Before
     public void setup() throws Exception {
@@ -182,6 +184,12 @@ public class ServiceOfApplicationServiceTest {
             .build();
         when(dgsService.generateDocument(Mockito.anyString(),Mockito.anyString(), Mockito.anyString(), Mockito.any()))
             .thenReturn(GeneratedDocumentInfo.builder().build());
+    }
+
+    @Before
+    public void setUp() {
+        when(authTokenGenerator.generate()).thenReturn("");
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(), Mockito.any())).thenReturn(DynamicList.builder().build());
     }
 
     @Test
@@ -508,6 +516,45 @@ public class ServiceOfApplicationServiceTest {
                                       .unServedApplicantPack(SoaPack.builder().build())
                                       .applicationServedYesNo(YesOrNo.No)
                                       .soaOtherParties(dynamicMultiSelectList)
+                                      .rejectionReason("pack contain confidential address")
+                                      .build()).build();
+        Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(CASE_ISSUED.getValue())
+            .data(dataMap)
+            .build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
+
+        assertNotNull(serviceOfApplicationService.generatePacksForConfidentialCheckC100(caseDetails,authorization));
+    }
+
+    @Test
+    public void testgeneratePacksForConfidentialCheckPersonal() {
+        DynamicList documentList = DynamicList.builder().value(DynamicListElement.builder().code(UUID.randomUUID()).build()).build();
+
+        DocumentListForLa documentListForLa = DocumentListForLa.builder().documentsListForLa(documentList).build();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .respondents(parties)
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .othersToNotify(parties)
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .confidentialCheckFailed(wrapElements(ConfidentialCheckFailed
+                                                                                .builder()
+                                                                                .confidentialityCheckRejectReason("pack contain confidential info")
+                                                                                .build()))
+                                      .soaServeToRespondentOptions(YesOrNo.Yes)
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+                                      .soaRecipientsOptions(dynamicMultiSelectList)
+                                      .soaServeLocalAuthorityYesOrNo(Yes)
+                                      .soaLaEmailAddress("")
+                                      .soaDocumentDynamicListForLa(List.of(element(documentListForLa)))
+                                      .unServedApplicantPack(SoaPack.builder().build())
+                                      .applicationServedYesNo(YesOrNo.No)
                                       .rejectionReason("pack contain confidential address")
                                       .build()).build();
         Map<String, Object> dataMap = caseData.toMap(new ObjectMapper());
@@ -1037,7 +1084,6 @@ public class ServiceOfApplicationServiceTest {
 
     }
 
-
     @Test
     public void testSendNotificationForSoaCitizenC100() throws Exception {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -1514,11 +1560,12 @@ public class ServiceOfApplicationServiceTest {
             objectMapper
         )).thenReturn(caseData);
         List<DynamicListElement> dynamicListElements = new ArrayList<>();
-        dynamicListElements.add(DynamicListElement.builder().label("").build());
+        dynamicListElements.add(DynamicListElement.builder().label("Confidential").build());
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
-
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
         assertNotNull(soaCaseFieldsMap);
@@ -1844,6 +1891,8 @@ public class ServiceOfApplicationServiceTest {
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
         final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
@@ -2018,6 +2067,8 @@ public class ServiceOfApplicationServiceTest {
         when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
             .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
         when(welshCourtEmail.populateCafcassCymruEmailInManageOrders(caseData)).thenReturn(cafcassCymruEmailAddress);
+        when(sendAndReplyService.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(DynamicList.builder().listItems(dynamicListElements).build());
 
         final Map<String, Object> soaCaseFieldsMap = serviceOfApplicationService.getSoaCaseFieldsMap(authorization, caseDetails);
 
@@ -2532,7 +2583,7 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .build();
-        for (String i : new ArrayList<>(Arrays.asList("E", "F", "G", "I", "L", "M", "O", "P", "Z"))) {
+        for (String i : new ArrayList<>(Arrays.asList("E", "F", "G", "H", "I", "L", "M", "O", "P", "Z"))) {
             List<Document> documentPack = serviceOfApplicationService.getNotificationPack(caseData,i,List.of(Document.builder()
                                                                                    .documentFileName(SOA_FL415_FILENAME).build(),
                                                                                Document.builder()
@@ -3025,4 +3076,191 @@ public class ServiceOfApplicationServiceTest {
     }
 
 
+    @Test
+    public void testSendNotificationForLa() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Element applicantElement = element(partyDetails);
+        applicants.add(applicantElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(applicants)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaServeLocalAuthorityYesOrNo(Yes)
+                                      .soaLaEmailAddress("cymruemail@test.com")
+                                      .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
+                                                                               .documentsListForLa(DynamicList.builder().build())
+                                                                               .build())))
+                                      .soaServeC8ToLocalAuthorityYesOrNo(Yes)
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
+                                                                   .forename("first")
+                                                                   .surname("test").build());
+
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertEquals("By email", servedApplicationDetails.getModeOfService());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+    }
+
+
+    @Test
+    public void testSendNotificationForLaWithException() throws Exception {
+        PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
+            .representativeLastName("repLastName")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(Yes)
+            .isEmailAddressConfidential(Yes)
+            .isPhoneNumberConfidential(Yes)
+            .partyId(UUID.randomUUID())
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes).firstName("fn").lastName("ln").user(User.builder().build())
+            .address(Address.builder().addressLine1("line1").build())
+            .build();
+
+
+        List<Element<PartyDetails>> applicants = new ArrayList<>();
+        Element applicantElement = element(partyDetails);
+        applicants.add(applicantElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(applicants)
+            .caseCreatedBy(CaseCreatedBy.CITIZEN)
+            .applicantCaseName("Test Case 45678")
+            .orderCollection(List.of(Element.<OrderDetails>builder().build()))
+            .serviceOfApplication(ServiceOfApplication.builder()
+                                      .soaServeToRespondentOptions(No)
+                                      .soaServeLocalAuthorityYesOrNo(No)
+                                      .soaLaEmailAddress("cymruemail@test.com")
+                                      .soaDocumentDynamicListForLa(List.of(element(DocumentListForLa.builder()
+                                                                                       .documentsListForLa(DynamicList.builder().build())
+                                                                                       .build())))
+                                      .soaServeC8ToLocalAuthorityYesOrNo(Yes)
+                                      .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
+                                      .build())
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .build();
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
+                                                                   .forename("first")
+                                                                   .surname("test").build());
+        when(serviceOfApplicationEmailService
+                 .sendEmailNotificationToLocalAuthority(Mockito.anyString(),Mockito.any(),Mockito.anyString(),
+                                                        Mockito.any(),Mockito.anyString())).thenThrow(IOException.class);
+        final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
+            caseData,
+            TEST_AUTH,
+            new HashMap<>()
+        );
+        assertNull(servedApplicationDetails.getModeOfService());
+        assertEquals("Court", servedApplicationDetails.getWhoIsResponsible());
+    }
+
+    @Test
+    public void testgetSelectedDocumentFromDynamicList() {
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+            TEST_AUTH,
+            DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
+        );
+        assertNotNull(fetchedDocument);
+    }
+
+    @Test
+    public void testgetSelectedDocumentUncategorisedDocs() {
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, Collections.emptyList(), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test1");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+            TEST_AUTH,
+            DynamicList.builder().value(DynamicListElement.builder().code("test1").build()).build(), ""
+        );
+        assertNotNull(fetchedDocument);
+    }
+
+    @Test
+    public void testgetSelectedDocumentForSubCategoriesDocs() {
+        uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
+                                                                                                                   "fileName",
+                                                                                                                   "binaryUrl",
+                                                                                                                   "attributePath",
+                                                                                                                   LocalDateTime.now());
+        Category category = new Category("categoryId", "categoryName", 2, List.of(document), null);
+        Category category1 = new Category("categoryId", "categoryName", 2, Collections.emptyList(), List.of(category));
+
+        CategoriesAndDocuments categoriesAndDocuments = new CategoriesAndDocuments(1, List.of(category1), List.of(document));
+        when(sendAndReplyService.fetchDocumentIdFromUrl(Mockito.anyString())).thenReturn("test");
+        when(coreCaseDataApi.getCategoriesAndDocuments(Mockito.anyString(),Mockito.anyString(),Mockito.anyString()))
+            .thenReturn(categoriesAndDocuments);
+        uk.gov.hmcts.reform.ccd.client.model.Document fetchedDocument = serviceOfApplicationService.getSelectedDocumentFromDynamicList(
+            TEST_AUTH,
+            DynamicList.builder().value(DynamicListElement.builder().code("test->test->test").build()).build(), ""
+        );
+        assertNotNull(fetchedDocument);
+    }
 }
