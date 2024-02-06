@@ -692,19 +692,22 @@ public class ServiceOfApplicationService {
         Map<String, Object> soaWaMap = new HashMap<>();
         String isC8CheckNeeded = NO;
         String responsibleForService = null;
-
+        log.info("EEEVENT {}",eventId);
         if (Event.SOA.getId().equals(eventId)) {
             if (null != caseData.getServiceOfApplication().getIsConfidential()
                 && Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
+                log.info("AAAAAAA");
                 isC8CheckNeeded = YES;
             }
             responsibleForService = getResponsibleForService(caseData);
             if (!C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                log.info("DDDDDDD");
                 soaWaMap.put("isOccupationOrderSelected", caseData.getTypeOfApplicationOrders().getOrderType().contains(
                     FL401OrderTypeEnum.occupationOrder) ? YES : NO);
             }
             soaWaMap.put("isC8CheckNeeded", isC8CheckNeeded);
         } else if (Event.CONFIDENTIAL_CHECK.getId().equals(eventId)) {
+            log.info("FFFFFFF");
             soaWaMap.put("isC8CheckApproved", (caseData.getServiceOfApplication().getApplicationServedYesNo() != null
                 && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) ? YES : NO);
             responsibleForService = (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
@@ -718,6 +721,7 @@ public class ServiceOfApplicationService {
     private String getResponsibleForService(CaseData caseData) {
         String responsibleForService = null;
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            log.info("BBBBBBB");
             if (Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
                 if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                     responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA().getDisplayedValue();
@@ -726,6 +730,7 @@ public class ServiceOfApplicationService {
                 }
             }
         } else {
+            log.info("CCCCCCCCCC");
             if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
                 responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA().getDisplayedValue();
             } else {
