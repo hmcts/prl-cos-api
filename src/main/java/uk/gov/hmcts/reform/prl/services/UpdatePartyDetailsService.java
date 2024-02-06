@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSo
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
@@ -36,19 +39,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -113,12 +121,14 @@ public class UpdatePartyDetailsService {
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
                                                   callbackRequest,authorisation,caseData,caseData.getRespondents());
-                log.info("Updated case data {}", updatedCaseData);
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
+            // set applicant and respondent case flag
+            setApplicantFlag(caseData, updatedCaseData);
+            setRespondentFlag(caseData, updatedCaseData);
         }
-
+        cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
     }
 
@@ -145,12 +155,89 @@ public class UpdatePartyDetailsService {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
             PartyDetails applicant1 = applicants.get(0);
             if (Objects.nonNull(applicant1)) {
                 updatedCaseData.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
             }
         }
+    }
+
+    private void cleanUpCaseDataBasedOnYesNoSelection(Map<String, Object> updatedCaseData, CaseData caseData) {
+        if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            if (isNotEmpty(caseData.getRespondentsFL401())) {
+                PartyDetails updatedRespondent = resetRespondent(caseData.getRespondentsFL401());
+                updatedCaseData.put(FL401_RESPONDENTS, updatedRespondent);
+            }
+            if (isNotEmpty(caseData.getApplicantsFL401())) {
+                PartyDetails updatedApplicant = resetApplicant(caseData.getApplicantsFL401());
+                updatedCaseData.put(FL401_APPLICANTS, updatedApplicant);
+            }
+        } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
+            if (CollectionUtils.isNotEmpty(caseData.getRespondents())) {
+                List<Element<PartyDetails>> updatedRespondents = new ArrayList<>();
+                caseData.getRespondents().forEach(eachRespondent ->
+                    updatedRespondents.add(element(
+                        eachRespondent.getId(),
+                        resetRespondent(eachRespondent.getValue())
+                    ))
+                );
+                updatedCaseData.put(RESPONDENTS, updatedRespondents);
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getApplicants())) {
+                List<Element<PartyDetails>> updatedApplicants = new ArrayList<>();
+                caseData.getApplicants().forEach(eachApplicant ->
+                    updatedApplicants.add(element(
+                        eachApplicant.getId(),
+                        resetApplicant(eachApplicant.getValue())
+                    ))
+                );
+                updatedCaseData.put(APPLICANTS, updatedApplicants);
+            }
+            if (CollectionUtils.isNotEmpty(caseData.getChildren())
+                && YesNoDontKnow.no.equals(caseData.getChildrenKnownToLocalAuthority())) {
+                updatedCaseData.put("childrenKnownToLocalAuthorityTextArea", null);
+            }
+        }
+    }
+
+    private PartyDetails resetApplicant(PartyDetails partyDetails) {
+        partyDetails = partyDetails.toBuilder()
+            .addressLivedLessThan5YearsDetails(YesOrNo.Yes.equals(partyDetails.getIsAtAddressLessThan5Years())
+                                                   ? partyDetails.getAddressLivedLessThan5YearsDetails() : null)
+            .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
+            .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
+                                            ? partyDetails.getIsEmailAddressConfidential() : null)
+            .build();
+
+        return partyDetails;
+    }
+
+    private PartyDetails resetRespondent(PartyDetails partyDetails) {
+        boolean isRepresented = YesNoDontKnow.yes.equals(partyDetails.getDoTheyHaveLegalRepresentation());
+        partyDetails = partyDetails.toBuilder()
+            .dateOfBirth(YesOrNo.Yes.equals(partyDetails.getIsDateOfBirthKnown()) ? partyDetails.getDateOfBirth() : null)
+            .placeOfBirth(YesOrNo.Yes.equals(partyDetails.getIsPlaceOfBirthKnown()) ? partyDetails.getPlaceOfBirth() : null)
+            .address(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown()) ? partyDetails.getAddress() : null)
+            .isAddressConfidential(YesOrNo.Yes.equals(partyDetails.getIsCurrentAddressKnown())
+                                       ? partyDetails.getIsAddressConfidential() : null)
+            .addressLivedLessThan5YearsDetails(YesNoDontKnow.yes.equals(partyDetails.getIsAtAddressLessThan5YearsWithDontKnow())
+                                                   ? partyDetails.getAddressLivedLessThan5YearsDetails() : null)
+            .email(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress()) ? partyDetails.getEmail() : null)
+            .isEmailAddressConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvideEmailAddress())
+                                            ? partyDetails.getIsEmailAddressConfidential() : null)
+            .phoneNumber(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber()) ? partyDetails.getPhoneNumber() : null)
+            .isPhoneNumberConfidential(YesOrNo.Yes.equals(partyDetails.getCanYouProvidePhoneNumber())
+                                           ? partyDetails.getIsPhoneNumberConfidential() : null)
+            .representativeFirstName(isRepresented ? partyDetails.getRepresentativeFirstName() : null)
+            .representativeLastName(isRepresented ? partyDetails.getRepresentativeLastName() : null)
+            .solicitorEmail(isRepresented ? partyDetails.getSolicitorEmail() : null)
+            .dxNumber(isRepresented ? partyDetails.getDxNumber() : null)
+            .solicitorAddress(isRepresented ? partyDetails.getSolicitorAddress() : null)
+            .solicitorOrg(isRepresented ? partyDetails.getSolicitorOrg() : null)
+            .build();
+
+        return partyDetails;
     }
 
     private void setApplicantOrganisationPolicyIfOrgEmpty(Map<String, Object> updatedCaseData, PartyDetails partyDetails) {
@@ -162,15 +249,11 @@ public class UpdatePartyDetailsService {
         if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
             applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
             organisationNotExists = true;
-        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isEmpty(
-            applicantOrganisationPolicy.getOrganisation())) {
-            if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
-                roleNotExists = true;
-            }
-            organisationNotExists = true;
-        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && ObjectUtils.isNotEmpty(
+        } else if (ObjectUtils.isNotEmpty(applicantOrganisationPolicy) && (ObjectUtils.isEmpty(
+            applicantOrganisationPolicy.getOrganisation()) || (ObjectUtils.isNotEmpty(
             applicantOrganisationPolicy.getOrganisation()) && StringUtils.isEmpty(
-            applicantOrganisationPolicy.getOrganisation().getOrganisationID())) {
+            applicantOrganisationPolicy.getOrganisation().getOrganisationID())))
+        ) {
             if (StringUtils.isEmpty(applicantOrganisationPolicy.getOrgPolicyCaseAssignedRole())) {
                 roleNotExists = true;
             }
@@ -193,7 +276,7 @@ public class UpdatePartyDetailsService {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
@@ -213,7 +296,7 @@ public class UpdatePartyDetailsService {
             List<PartyDetails> respondents = respondentsWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
@@ -270,31 +353,32 @@ public class UpdatePartyDetailsService {
         if (caseDataBefore.getCaseTypeOfApplication().equals(C100_CASE_TYPE)) {
             respondentList = caseDataBefore.getRespondents().stream()
                     .filter(resp1 -> resp1.getId().equals(respondent.getId())
-                            && (!StringUtils.equals(resp1.getValue().getEmail(),respondent.getValue().getEmail())
-                            || (resp1.getValue().getAddress() != null
-                            && !resp1.getValue().getAddress().equals(respondent.getValue().getAddress()))
-                            || !StringUtils.equalsIgnoreCase(resp1.getValue().getPhoneNumber(),
-                            respondent.getValue().getPhoneNumber())
+                            && (CaseUtils.isEmailAddressChanged(respondent.getValue(), resp1.getValue())
+                            || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), resp1.getValue())
+                            || CaseUtils.isPhoneNumberChanged(respondent.getValue(),resp1.getValue())
                             || !StringUtils.equals(resp1.getValue().getLabelForDynamicList(), respondent.getValue()
                             .getLabelForDynamicList()))).toList();
         } else {
             PartyDetails respondentDetailsFL401 = caseDataBefore.getRespondentsFL401();
-            if ((!StringUtils.equals(respondentDetailsFL401.getEmail(),respondent.getValue().getEmail()))
-                    || (respondentDetailsFL401.getAddress() != null
-                    && !respondentDetailsFL401.getAddress().equals(respondent.getValue().getAddress()))
-                    || (!StringUtils.equalsIgnoreCase(respondentDetailsFL401.getPhoneNumber(),
-                    respondent.getValue().getPhoneNumber()))) {
+            if ((CaseUtils.isEmailAddressChanged(respondent.getValue(), respondentDetailsFL401))
+                    || CaseUtils.checkIfAddressIsChanged(respondent.getValue(), respondentDetailsFL401)
+                    || (CaseUtils.isPhoneNumberChanged(respondent.getValue(),respondentDetailsFL401))
+                || !StringUtils.equals(respondent.getValue().getLabelForDynamicList(), respondentDetailsFL401
+                .getLabelForDynamicList())) {
                 log.info("respondent data changed for fl401");
                 return true;
             }
         }
         if (respondentList != null && !respondentList.isEmpty()) {
-            log.info("respondent data changed");
+            log.info("respondent data changed {}", respondent.getValue().getLabelForDynamicList());
+            log.info("{}", respondent.getValue().getAddress());
             return true;
         }
         log.info("respondent data not changed");
         return  false;
     }
+
+
 
     private  void populateC8Documents(String authorisation, Map<String, Object> updatedCaseData, CaseData caseData,
                                       Map<String, Object> dataMap, Boolean isDetailsChanged, int partyIndex,
@@ -397,7 +481,7 @@ public class UpdatePartyDetailsService {
                 return  c8Documents;
             }
         } else {
-            return c8Documents;
+            return Collections.emptyList();
         }
     }
 

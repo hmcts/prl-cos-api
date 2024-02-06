@@ -746,11 +746,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private YesOrNo hwfRequestedForAdditionalApplications;
 
     private List<Element<RespondentDocs>> respondentDocsList;
-    private ResponseDocuments respondentAc8;
-    private ResponseDocuments respondentBc8;
-    private ResponseDocuments respondentCc8;
-    private ResponseDocuments respondentDc8;
-    private ResponseDocuments respondentEc8;
+
+    @JsonUnwrapped
+    private CitizenResponseDocuments citizenResponseDocuments;
 
     @JsonUnwrapped
     private RespondentC8Document respondentC8Document;

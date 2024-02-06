@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,7 +15,6 @@ import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static uk.gov.hmcts.reform.prl.enums.Event.CHILD_DETAILS_REVISED;
@@ -24,10 +24,10 @@ import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ChildDetailsRevisedChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -38,7 +38,7 @@ public class ChildDetailsRevisedChecker implements EventChecker {
             List<ChildDetailsRevised> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (ChildDetailsRevised c : children) {
                 log.debug("validateMandatoryFieldsCompleted  :{} ",validateMandatoryFieldsCompleted(c));
@@ -67,7 +67,7 @@ public class ChildDetailsRevisedChecker implements EventChecker {
             List<ChildDetailsRevised> children = childrenWrapped.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             for (ChildDetailsRevised c : children) {
                 if (validateAnyFieldStarted(c)) {
