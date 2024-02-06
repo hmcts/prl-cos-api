@@ -550,7 +550,6 @@ public class ReviewDocumentsControllerFunctionalTest {
                      "\"isRestricted\": \"Yes\"");
 
         request1
-                .log().all()
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCourtAdmin())
             .body(requestBodyRevised)
             .when()
@@ -560,7 +559,9 @@ public class ReviewDocumentsControllerFunctionalTest {
             .body("data.restrictedDocuments[0].value.isConfidential", equalTo("Yes"),
                   "data.restrictedDocuments[0].value.isRestricted", equalTo("Yes"),
                   "data.restrictedDocuments[0].value.applicantApplicationDocument.document_filename", equalTo("Confidential_Test.pdf"),
-                  "data.confidentialDocuments", equalTo(null));
+                  "data.confidentialDocuments", equalTo(null))
+                .assertThat().statusCode(200);
+
 
     }
 
