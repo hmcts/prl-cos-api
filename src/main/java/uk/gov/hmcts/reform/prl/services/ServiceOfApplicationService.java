@@ -606,7 +606,7 @@ public class ServiceOfApplicationService {
             packcDocs,
             SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
             dynamicData,
-            PRL_COURT_ADMIN
+            SERVED_PARTY_APPLICANT_SOLICITOR
         );
         if (null != emailNotification) {
             emailNotificationDetails.add(element(emailNotification));
