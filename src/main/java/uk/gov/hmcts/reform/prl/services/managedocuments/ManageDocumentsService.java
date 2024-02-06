@@ -347,7 +347,7 @@ public class ManageDocumentsService {
      * !ifConfidential && isRestricted - RESTRICTED
      * ifConfidential && !isRestricted - CONFIDENTIAL
      */
-    private String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
+    public String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
         if (quarantineLegalDoc.getIsConfidential() != null) {
             if (!(YesOrNo.No.equals(quarantineLegalDoc.getIsConfidential())
                 && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted()))) {
