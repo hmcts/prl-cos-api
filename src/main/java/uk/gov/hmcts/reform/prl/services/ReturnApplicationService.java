@@ -96,32 +96,16 @@ public class ReturnApplicationService {
     }
 
     private void returnMessageC100(CaseData caseData, StringBuilder returnMsgStr) {
-        boolean otherFlag = false;
-
-        for (RejectReasonEnum reasonEnum : caseData.getRejectReason()) {
-            if (reasonEnum.equals(RejectReasonEnum.otherReason)) {
-                otherFlag = true;
-                continue;
-            }
+        List<RejectReasonEnum> sortedRejectReason = caseData.getRejectReason().stream().sorted().toList();
+        for (RejectReasonEnum reasonEnum : sortedRejectReason) {
             returnMsgStr.append(reasonEnum.getReturnMsgText());
-        }
-        if (otherFlag) {
-            returnMsgStr.append(RejectReasonEnum.otherReason.getReturnMsgText());
         }
     }
 
     private void returnMessageFl402(CaseData caseData, StringBuilder returnMsgStr) {
-        boolean otherFlag = false;
-
-        for (FL401RejectReasonEnum reasonEnum : caseData.getFl401RejectReason()) {
-            if (reasonEnum.equals(FL401RejectReasonEnum.otherReason)) {
-                otherFlag = true;
-                continue;
-            }
+        List<FL401RejectReasonEnum> sortedFl401RejectReason = caseData.getFl401RejectReason().stream().sorted().toList();
+        for (FL401RejectReasonEnum reasonEnum : sortedFl401RejectReason) {
             returnMsgStr.append(reasonEnum.getReturnMsgText());
-        }
-        if (otherFlag) {
-            returnMsgStr.append(FL401RejectReasonEnum.otherReason.getReturnMsgText());
         }
     }
 
