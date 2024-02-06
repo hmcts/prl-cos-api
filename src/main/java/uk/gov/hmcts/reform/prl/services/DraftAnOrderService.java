@@ -1987,6 +1987,8 @@ public class DraftAnOrderService {
             }
 
             caseDataUpdated.put(SELECTED_ORDER, manageOrderService.getSelectedOrderInfoForUpload(caseData));
+            //PRL-4854 - Populate hearings dropdown for upload order
+            caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
