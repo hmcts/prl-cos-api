@@ -736,14 +736,14 @@ public class ServiceOfApplicationService {
                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                              Map<String, Object> caseDataMap) {
         List<Document> staticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
-        String whoIsResponsibleForServing = caseData.getApplicantsFL401().getRepresentativeFullName();
+        String whoIsResponsibleForServing = null;
         log.info("Fl401 case journey for caseId {}", caseData.getId());
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.equals(caseData.getServiceOfApplication()
                                                                                        .getSoaServingRespondentsOptionsDA())) {
             List<Document> packADocs = getNotificationPack(caseData, PrlAppsConstants.A, staticDocs);
             List<Document> packBDocs = getNotificationPack(caseData, PrlAppsConstants.B, staticDocs);
             emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(caseData, authorization, packADocs, packBDocs, true));
-
+            whoIsResponsibleForServing = SERVED_PARTY_APPLICANT_SOLICITOR;
         } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
             || SoaSolicitorServingRespondentsEnum.courtAdmin
@@ -753,7 +753,7 @@ public class ServiceOfApplicationService {
             sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(caseData, authorization, emailNotificationDetails,
                                                                      staticDocs, caseDataMap
             );
-            whoIsResponsibleForServing = PRL_COURT_ADMIN;
+            whoIsResponsibleForServing = COURT;
         } else {
             log.error("#SOA TO DO...Generate packs to be served by unrepresented applicant.."
                           + "solicitor created case");
@@ -2387,7 +2387,7 @@ public class ServiceOfApplicationService {
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
         final SoaPack unServedRespondentPack = caseData.getServiceOfApplication().getUnServedRespondentPack();
-
+        String whoIsResponsible = COURT;
         if (unServedApplicantPack != null || unServedRespondentPack != null) {
             if ((unServedApplicantPack != null
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
@@ -2397,6 +2397,7 @@ public class ServiceOfApplicationService {
                 unServedRespondentPack.getPersonalServiceBy()))) {
                 sendNotificationForApplicantLegalRepPersonalService(caseData, authorization, emailNotificationDetails,
                                                                     unServedApplicantPack, unServedRespondentPack);
+                whoIsResponsible = SERVED_PARTY_APPLICANT_SOLICITOR;
             } else {
                 if (unServedApplicantPack != null) {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
@@ -2448,7 +2449,7 @@ public class ServiceOfApplicationService {
                                                           .servedBy(userService.getUserDetails(authorization).getFullName())
                                                           .servedAt(formatter)
                                                           .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
-                                                          .whoIsResponsible(COURT)
+                                                          .whoIsResponsible(whoIsResponsible)
                                                           .bulkPrintDetails(bulkPrintDetails).build()));
         caseData.setFinalServedApplicationDetailsList(finalServedApplicationDetailsList);
         return caseData;

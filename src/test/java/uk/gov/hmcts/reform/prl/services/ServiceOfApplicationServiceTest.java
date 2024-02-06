@@ -83,6 +83,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -1123,7 +1124,7 @@ public class ServiceOfApplicationServiceTest {
         );
 
         assertNotNull(servedApplicationDetails);
-        assertEquals("repFirstName repLastName", servedApplicationDetails.getWhoIsResponsible());
+        assertEquals(SERVED_PARTY_APPLICANT_SOLICITOR, servedApplicationDetails.getWhoIsResponsible());
 
     }
 
