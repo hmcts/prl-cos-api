@@ -765,7 +765,7 @@ public class PrlAppsConstants {
 
     public static final String D_MMMM_UUUU = "d MMMM uuuu";
 
-    public static final String ENG_STATIC_DOCS_PATH = "/staticdocs/";
+    public static final String ENG_STATIC_DOCS_PATH = "staticdocs/";
 
     public static final String PRIVACY_DOCUMENT_FILENAME = "Privacy_Notice.pdf";
     public static final String C9_DOCUMENT_FILENAME = "C9_personal_service.pdf";
@@ -838,6 +838,8 @@ public class PrlAppsConstants {
     public static final String DISPOSITION = "disposition";
     public static final String MANDATORY_JUDGE =
             "Full name of Justices' Legal Adviser is mandatory, when the Judge's title is selected as Justices' Legal Adviser";
+    public static final String DUMMY = "Dummy";
+
 
     public static final String DATE_TIME_PATTERN = "dd MMM yyyy, hh:mm:ss a";
     public static final String AM_LOWER_CASE = "am";
@@ -845,6 +847,7 @@ public class PrlAppsConstants {
     public static final String PM_LOWER_CASE = "pm";
     public static final String PM_UPPER_CASE = "PM";
 
+    public static final String CAFCASS_PARTY = "CAFCASS";
     public static final String MANDATORY_MAGISTRATE = "Full name of a Magistrate is mandatory, when the Judge's title is selected as"
             + " Magistrates";
     public static final String HEARING_SCREEN_ERRORS = "hearingScreenErrors";
@@ -855,13 +858,6 @@ public class PrlAppsConstants {
 
     public static final String ORDER_COLLECTION = "orderCollection";
 
-    public static final String[] VALID_ORDER_IDS_FOR_C100 = {"blankOrderOrDirections", "childArrangementsSpecificProhibitedOrder",
-        "parentalResponsibility", "specialGuardianShip", "noticeOfProceedingsParties", "noticeOfProceedingsNonParties",
-        "appointmentOfGuardian", "directionOnIssue", "standardDirectionsOrder"};
-
-    public static final String[] VALID_ORDER_IDS_FOR_FL401 = {"nonMolestation", "occupation", "amendDischargedVaried",
-        "blank", "powerOfArrest", "generalForm", "noticeOfProceedings"};
-
     public static final String WA_PERFORMING_USER = "performingUser";
     public static final String WA_PERFORMING_ACTION = "performingAction";
     public static final String WA_JUDGE_LA_REVIEW_REQUIRED = "judgeLaReviewRequired";
@@ -870,5 +866,8 @@ public class PrlAppsConstants {
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
+    public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
 
+    public static final String BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS = "buffChildAndOtherPeopleRelations";
+    public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
 }

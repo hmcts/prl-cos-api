@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
@@ -15,6 +16,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -479,5 +481,34 @@ public class CaseUtils {
             );
         }
         return null;
+    }
+
+    public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        Address currentAddress = currentParty.getAddress();
+        Address previousAddress = updatedParty.getAddress();
+        log.info("Current address {} ", currentAddress);
+        log.info("Previous address {} ", previousAddress);
+        return currentAddress != null
+            && (!StringUtils.equals(currentAddress.getAddressLine1(), previousAddress.getAddressLine1())
+            || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
+            || !StringUtils.equals(currentAddress.getAddressLine3(),previousAddress.getAddressLine3())
+            || !StringUtils.equals(currentAddress.getCountry(),previousAddress.getCountry())
+            || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
+            || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
+            || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
+            || (currentParty.getIsAddressConfidential() != null
+            && !currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+    }
+
+    public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return !StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
+            || (currentParty.getIsEmailAddressConfidential() != null
+            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+    }
+
+    public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
+            || (currentParty.getIsEmailAddressConfidential() != null
+            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
     }
 }

@@ -2,14 +2,12 @@ package uk.gov.hmcts.reform.prl.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -33,7 +31,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseInitiationControllerTest {
 
@@ -68,7 +65,6 @@ public class CaseInitiationControllerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -161,14 +157,15 @@ public class CaseInitiationControllerTest {
                 .taskListVersion(TASK_LIST_VERSION_V2)
                 .build();
 
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-                .caseDetails(caseDetails)
-                .build();
+
 
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         doNothing().when(assignCaseAccessService).assignCaseAccess(String.valueOf(caseData.getId()), authToken);
-
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
         caseInitiationController.handleSubmitted(authToken, s2sToken, callbackRequest);
         CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
         eventService.publishEvent(caseDataChanged);
