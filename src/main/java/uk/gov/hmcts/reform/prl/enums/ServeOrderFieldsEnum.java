@@ -4,7 +4,6 @@ public enum ServeOrderFieldsEnum {
 
     serveOrderAdditionalDocuments("serveOrderAdditionalDocuments"),
     isCafcass("isCafcass"),
-    otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
     isOnlyC47aOrderSelectedToServe("isOnlyC47aOrderSelectedToServe"),
     serveOrderDynamicList("serveOrderDynamicList"),
     serveToRespondentOptions("serveToRespondentOptions"),
@@ -19,6 +18,7 @@ public enum ServeOrderFieldsEnum {
     deliveryByOptionsCA("deliveryByOptionsCA"),
     postalInformationCA("postalInformationCA"),
     emailInformationCA("emailInformationCA"),
+    otherPeoplePresentInCaseFlag("otherPeoplePresentInCaseFlag"),
     servingRespondentsOptionsDA("servingRespondentsOptionsDA"),
     serveOtherPartiesDA("serveOtherPartiesDA"),
     deliveryByOptionsDA("deliveryByOptionsDA"),

@@ -19,18 +19,21 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
+import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.Map;
 
@@ -38,11 +41,12 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_REASONS_SELECTED;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTED_FOR_LIST_ON_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SELECTED_AND_ADDITIONAL_REASONS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBJECT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHOUT_NOTICE_REJECTION;
 
 @Slf4j
 @RestController
@@ -59,6 +63,7 @@ public class ListOnNoticeController {
     private final UserService userService;
     private final AuthorisationService authorisationService;
     private final RoleAssignmentService roleAssignmentService;
+    private final CoreCaseDataService coreCaseDataService;
 
     @PostMapping(path = "/listOnNotice/reasonUpdation/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = " mid-event for updating the reason")
@@ -120,16 +125,15 @@ public class ListOnNoticeController {
                 CaseData.class
             );
             if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
-                caseDataUpdated.put(CASE_NOTE, selectedAndAdditionalReasons);
-                caseDataUpdated.put(SUBJECT, REASONS_SELECTED_FOR_LIST_ON_NOTICE);
+                CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+                    WITHOUT_NOTICE_REJECTION,
+                    selectedAndAdditionalReasons,
+                    userService.getUserDetails(authorisation)
+                );
                 caseDataUpdated.put(
                     CASE_NOTES,
-                    addCaseNoteService.addCaseNoteDetails(
-                        caseData,
-                        userService.getUserDetails(authorisation)
-                    )
+                    addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
                 );
-                addCaseNoteService.clearFields(caseDataUpdated);
             }
             AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
                 caseDataUpdated,
@@ -146,6 +150,40 @@ public class ListOnNoticeController {
                 ALLOCATE_JUDGE_ROLE
             );
 
+            CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/send-listOnNotice-notification", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "List On Notice submission flow")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "List ON notice submission is success"),
+        @ApiResponse(responseCode = "400", description = "Bad Request")})
+    public AboutToStartOrSubmitCallbackResponse sendListOnNoticeNotification(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            String selectedAndAdditionalReasons = (String) caseDataUpdated.get(SELECTED_AND_ADDITIONAL_REASONS);
+            if (!StringUtils.isEmpty(selectedAndAdditionalReasons)) {
+                CaseData caseData = objectMapper.convertValue(
+                    callbackRequest.getCaseDetails().getData(),
+                    CaseData.class
+                );
+                listOnNoticeService.sendNotification(caseData, selectedAndAdditionalReasons);
+                listOnNoticeService.cleanUpListOnNoticeFields(caseDataUpdated);
+                coreCaseDataService.triggerEvent(
+                    JURISDICTION,
+                    CASE_TYPE,
+                    caseData.getId(),
+                    "internal-update-all-tabs",
+                    caseDataUpdated
+                );
+            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

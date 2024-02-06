@@ -72,6 +72,7 @@ public class PrlAppsConstants {
     public  static final String SERVED_PARTY_CAFCASS = "cafcass";
     public  static final String SERVED_PARTY_APPLICANT_SOLICITOR = "Applicant solicitor";
     public  static final String SERVED_PARTY_CAFCASS_CYMRU = "Cafcass cymru";
+    public  static final String SERVED_PARTY_LOCAL_AUTHORITY = "Local Authority";
     public  static final String SERVED_PARTY_OTHER_ORGANISATION = "Other organisation";
     public static final String DOCUMENT_FIELD_C7 = "c7Document";
     public static final String C7_HINT = "C7";
@@ -583,6 +584,9 @@ public class PrlAppsConstants {
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR = "isJudgeOrLegalAdviser";
 
     public static final String JUDGE_NAME_EMAIL = "judgeNameAndEmail";
+
+    public static final String IS_SPECIFIC_JUDGE_OR_LA_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
+
     public static final String IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING =  "isJudgeOrLegalAdviserGatekeeping";
     public static final String JUDGE_NAME = "judgeName";
 
@@ -870,5 +874,23 @@ public class PrlAppsConstants {
     public static final String GATEKEEPING_JUDGE_ROLE = "gatekeeping-judge";
     public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
 
+    // PRL-5025
+    public static final String WA_IS_ORDER_APPROVED = "isOrderApproved";
+    public static final String WA_WHO_APPROVED_THE_ORDER = "whoApprovedTheOrder";
+    public static final String WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED = "judgeLaManagerReviewRequired";
+    public static final String WA_IS_MULTIPLE_HEARING_SELECTED = "isMultipleHearingSelected";
+    public static final String WA_HEARING_OPTION_SELECTED = "hearingOptionSelected";
+    public static final String WA_IS_HEARING_TASK_NEEDED = "isHearingTaskNeeded";
+    public static final String WA_MULTIPLE_OPTIONS_SELECTED_VALUE = "multipleOptionSelected";
+
+    public static final String WITHOUT_NOTICE_REJECTION = "Without notice rejection";
+    public static final String OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR = "You can only serve other people in the case if there is a C6A."
+        + " Go back to the previous page to select it. If the C6A is not there, you will need to create it in manage orders.";
+
+    public static final String BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS = "buffChildAndOtherPeopleRelations";
     public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
+    public static final String MISSING_ADDRESS_WARNING_TEXT = "missingAddressWarningText";
+
+    public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
+        + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
 }
