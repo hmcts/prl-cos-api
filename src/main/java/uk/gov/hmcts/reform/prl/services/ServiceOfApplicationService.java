@@ -237,7 +237,7 @@ public class ServiceOfApplicationService {
         You can view the service packs in the <a href="%s">service of application</a> tab.
         """;
 
-    public static final String CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL = "# The application is ready for personally service";
+    public static final String CONFIDENTIALITY_CONFIRMATION_HEADER_PERSONAL = "# The application is ready for personal service";
 
     public static final String CONFIDENTIALITY_CONFIRMATION_BODY_PERSONAL = """
         ### What happens next
