@@ -2375,8 +2375,10 @@ public class ManageOrderService {
 
         return DynamicList.builder()
             .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
-            .listItems(hearingDropdowns.isEmpty() ? Collections.singletonList(DynamicListElement.defaultListItem(
-                "No hearings available")) : hearingDropdowns)
+            .listItems(hearingDropdowns.isEmpty() ? existingHearingsType.getListItems() : hearingDropdowns)
+            //Temp commented out
+            /*.listItems(hearingDropdowns.isEmpty() ? Collections.singletonList(DynamicListElement.defaultListItem(
+                "No hearings available")) : hearingDropdowns)*/
             .build();
     }
 
