@@ -8,7 +8,7 @@ import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
-
+import org.springframework.scheduling.annotation.EnableAsync;
 
 
 @EnableFeignClients(basePackages = {"uk.gov.hmcts.reform.prl.*", "uk.gov.hmcts.reform.prl.services", "uk.gov.hmcts.reform.idam.client",
@@ -25,6 +25,7 @@ import org.springframework.context.annotation.ComponentScan;
       }
     )
  */
+@EnableAsync
 @SpringBootConfiguration
 @EnableAutoConfiguration
 @ComponentScan(basePackages = {  "uk.gov.hmcts.reform.prl", "uk.gov.hmcts.reform.prl.services",
