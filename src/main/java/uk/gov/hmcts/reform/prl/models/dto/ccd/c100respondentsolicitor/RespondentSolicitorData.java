@@ -61,7 +61,7 @@ public class RespondentSolicitorData {
     private final RespondentChildAbduction respondentChildAbduction;
     private final RespondentOtherConcerns respondentOtherConcerns;
 
-    /** Confirm or Edit your contact details. **/
+    /** Confirm or Edit contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
     /**
