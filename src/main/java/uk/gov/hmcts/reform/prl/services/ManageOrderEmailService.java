@@ -364,9 +364,9 @@ public class ManageOrderEmailService {
                 );
             }
             //Send email notification to Cafcass or Cafcass cymru based on selection
-            String cafcassOrCymruEmail = getCafcassEmail(manageOrders);
-            if (cafcassOrCymruEmail != null) {
-                otherOrganisationEmailList.add(EmailInformation.builder().emailAddress(cafcassOrCymruEmail).build());
+            String cafcassCymruEmailId = getCafcassCymruEmail(manageOrders);
+            if (cafcassCymruEmailId != null) {
+                sendEmailToCafcassCymru(caseData,cafcassCymruEmailId,authorisation, orderDocuments);
             }
             //get email and postal information for other organisations.
             if (manageOrders.getServeOtherPartiesCA() != null && manageOrders.getServeOtherPartiesCA()
@@ -474,6 +474,28 @@ public class ManageOrderEmailService {
             log.error(THERE_IS_A_FAILURE_IN_SENDING_EMAIL_TO_SOLICITOR_ON_WITH_EXCEPTION,
                       emailAddress, e.getMessage());
         }
+    }
+
+    private void sendEmailToCafcassCymru(CaseData caseData, String cafcassCymruEmailId,
+                                         String authorisation, List<Document> orderDocuments) {
+
+        Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+        dynamicData.put("dashBoardLink", manageCaseUrl + "/" + caseData.getId() + ORDERS);
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                SendgridEmailTemplateNames.SERVE_ORDER_CAFCASS_CYMRU,
+                authorisation,
+                SendgridEmailConfig.builder().toEmailAddress(
+                    cafcassCymruEmailId).dynamicTemplateData(
+                    dynamicData).listOfAttachments(
+                    orderDocuments).languagePreference(LanguagePreference.english).build()
+            );
+        } catch (IOException e) {
+            log.error("there is a failure in sending email for email {} with exception {}",
+                      cafcassCymruEmailId, e.getMessage()
+            );
+        }
+
     }
 
     private void handleNonPersonalServiceNotifications(String authorisation, CaseData caseData, ManageOrders manageOrders,
@@ -668,15 +690,12 @@ public class ManageOrderEmailService {
                 .build();
     }
 
-    private String getCafcassEmail(ManageOrders manageOrders) {
-        String cafcassEmail = null;
+    private String getCafcassCymruEmail(ManageOrders manageOrders) {
+        String cafcassCymruEmail = null;
         if (YesOrNo.Yes.equals(manageOrders.getCafcassCymruServedOptions())) {
-            cafcassEmail = manageOrders.getCafcassCymruEmail();
+            cafcassCymruEmail = manageOrders.getCafcassCymruEmail();
         }
-        if (YesOrNo.Yes.equals(manageOrders.getCafcassServedOptions())) {
-            cafcassEmail = manageOrders.getCafcassEmailId();
-        }
-        return cafcassEmail;
+        return cafcassCymruEmail;
     }
 
     private PartyDetails getOtherPerson(String id, CaseData caseData) {

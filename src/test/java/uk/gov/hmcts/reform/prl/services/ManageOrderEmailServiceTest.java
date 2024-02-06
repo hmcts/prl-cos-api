@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +28,6 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRes
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
@@ -75,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Slf4j
 public class ManageOrderEmailServiceTest {
     private static final String manageCaseUrl = null;
     public static final String authToken = "Bearer TestAuthToken";
@@ -2279,6 +2280,56 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
+
+
+    @Test
+    public void sendEmailWhenOrderIsServedToCafcassCymru() throws IOException {
+
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code(uuid.toString())
+            .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(serveOrderDynamicMultiselectListElement))
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .label("John (Child 1)")
+                               .code("00000000-0000-0000-0000-000000000000")
+                               .build())).build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveToRespondentOptions(YesOrNo.Yes)
+            .cafcassCymruServedOptions(YesOrNo.Yes)
+            .otherParties(dynamicMultiSelectList)
+            .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+            .cafcassCymruEmail("test@cafcasscymru.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+
 
     @Test
     public void sendServeOrderEmailWhenCourtBailiffOptionSelectedForC100Case() throws IOException {
