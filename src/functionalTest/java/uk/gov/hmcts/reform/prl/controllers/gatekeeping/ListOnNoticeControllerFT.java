@@ -51,6 +51,8 @@ public class ListOnNoticeControllerFT {
 
     private final String listOnNoticePrepopulateEndpoint = "/pre-populate-list-on-notice";
 
+    private final String listOnNoticeSendNotificationEndpoint = "/send-listOnNotice-notification";
+
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -156,5 +158,22 @@ public class ListOnNoticeControllerFT {
         AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
         Assert.assertNotNull(res);
         Assert.assertTrue(res.getData().containsKey("legalAdviserList"));
+    }
+
+    @Test
+    public void testSendListOnNoticeNotification() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_REQUEST_BODY_WITHOUT_ANY_REASONS_SELECTED);
+        Response response = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(listOnNoticeSendNotificationEndpoint);
+        response.then().assertThat().statusCode(200);
+        AboutToStartOrSubmitCallbackResponse res = objectMapper.readValue(response.getBody().asString(), AboutToStartOrSubmitCallbackResponse.class);
+        Assert.assertNotNull(res);
+        Assert.assertNull(res.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
     }
 }
