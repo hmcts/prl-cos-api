@@ -124,7 +124,7 @@ public class RestrictedCaseAccessController {
         log.info("Case details before:: " + objectMapper.writeValueAsString(callbackRequest));
         String sysAuthorisation = systemUserService.getSysUserToken();
         String systemUpdateUserId = systemUserService.getUserId(sysAuthorisation);
-        CaseEvent caseEvent = CaseEvent.UPDATE_ALL_TABS;
+        CaseEvent caseEvent = CaseEvent.MARK_CASE_AS_RESTRICTED;
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
         log.info("** markAsRestrictedAsSysUpdate2 event starting systemUpdateUserId{} eventRequestData {}",
                  systemUpdateUserId, eventRequestData);
