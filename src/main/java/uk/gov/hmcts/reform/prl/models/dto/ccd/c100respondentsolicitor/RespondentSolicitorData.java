@@ -55,7 +55,7 @@ public class RespondentSolicitorData {
 
     private final ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
 
-    /** Confirm or Edit your contact details. **/
+    /** Confirm or Edit contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
     /**
