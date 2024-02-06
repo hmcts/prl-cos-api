@@ -683,6 +683,11 @@ public class ServiceOfApplicationService {
                 .build();
             getCoverLetterForDaApplicantSolicitor(caseData, authorization, reLetters, respondent);
         }
+        removeDuplicatesAndGetConsolidatedDocs(packA, packB, reLetters);
+        return reLetters;
+    }
+
+    private void removeDuplicatesAndGetConsolidatedDocs(List<Document> packA, List<Document> packB, List<Document> docs) {
         if (CollectionUtils.isNotEmpty(packA) && CollectionUtils.isNotEmpty(packB)) {
             for (Document packBDocument : packB) {
                 boolean isPresentInPackA = false;
@@ -694,11 +699,11 @@ public class ServiceOfApplicationService {
                     }
                 }
                 if (!isPresentInPackA) {
-                    reLetters.add(packBDocument);
+                    docs.add(packBDocument);
                 }
             }
+            docs.addAll(packA);
         }
-        return reLetters;
     }
 
     private void getCoverLetterForDaApplicantSolicitor(CaseData caseData, String authorization,
@@ -1210,7 +1215,6 @@ public class ServiceOfApplicationService {
     private List<Element<EmailNotificationDetails>> sendEmailCaPersonalApplicantLegalRep(CaseData caseData, String authorization,
                                                                                          List<Document> packHiDocs) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
-        List<Document> finalDocs = new ArrayList<>();
         if (caseData.getApplicants().get(0).getValue().getSolicitorEmail() != null) {
             try {
                 log.info(
@@ -1218,10 +1222,7 @@ public class ServiceOfApplicationService {
                     caseData.getId()
                 );
                 //Respondent's pack
-                log.error("#SOA attach RE6 letter");
-                finalDocs.addAll(packHiDocs);
                 log.info("applicant docs {}", packHiDocs);
-                log.info("final docs {}", finalDocs);
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
                 dynamicData.put("c100", true);
@@ -1229,7 +1230,7 @@ public class ServiceOfApplicationService {
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
                     caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
-                    finalDocs,
+                    packHiDocs,
                     SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
                     dynamicData,
                     SERVED_PARTY_APPLICANT_SOLICITOR
@@ -1247,7 +1248,6 @@ public class ServiceOfApplicationService {
                                                                                          boolean attachLetters) {
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         PartyDetails applicant = caseData.getApplicantsFL401();
-        List<Document> finalDocumentList = new ArrayList<>();
         if (applicant.getSolicitorEmail() != null) {
             try {
                 log.info(
@@ -1255,9 +1255,10 @@ public class ServiceOfApplicationService {
                     caseData.getId()
                 );
                 //Respondent's pack
-                finalDocumentList.addAll(getCoverLettersAndRespondentPacksForDaApplicantSolicitor(caseData, authorization,
-                                                                                                  packA, packB, attachLetters));
-                finalDocumentList.addAll(packA);
+                List<Document> finalDocumentList = new ArrayList<>(
+                    getCoverLettersAndRespondentPacksForDaApplicantSolicitor(caseData, authorization,
+                                                                             packA, packB, attachLetters
+                    ));
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
@@ -2174,7 +2175,7 @@ public class ServiceOfApplicationService {
                 .build();
             caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
             final SoaPack unServedApplicantPack = SoaPack.builder()
-                .packDocument(wrapElements(packHDocs))
+                .packDocument(wrapElements(getNotificationPack(caseData, HI, c100StaticDocs)))
                 .partyIds(wrapElements(caseData.getApplicants().get(0).getId().toString()))
                 .servedBy(SERVED_PARTY_APPLICANT_SOLICITOR)
                 .personalServiceBy(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString())
