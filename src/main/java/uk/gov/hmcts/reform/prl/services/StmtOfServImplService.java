@@ -74,7 +74,7 @@ public class StmtOfServImplService {
         return caseDataUpdated;
     }
 
-    public Map<String, Object> retrieveAllRespondentNames(CaseDetails caseDetails, String authorisation) {
+    public CaseData retrieveAllRespondentNames(CaseDetails caseDetails, String authorisation) {
         CaseData caseData = objectMapper.convertValue(
             caseDetails.getData(),
             CaseData.class
@@ -141,7 +141,7 @@ public class StmtOfServImplService {
             .stmtOfServiceAddRecipient(elementList)
             .build();
 
-        return objectMapper.convertValue(caseData, Map.class);
+        return caseData;
     }
 
     private CaseData cleanupRespondentPacksCaOrBailiffPersonalService(CaseData caseData, String authorisation) {

@@ -213,15 +213,14 @@ public class StmtOfServImplServiceTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class))).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails(Mockito.any())).thenReturn(UserDetails.builder().build());
         CaseDetails caseDetails = CaseDetails.builder()
             .id(12345678L)
             .data(stringObjectMap)
             .build();
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(stringObjectMap);
 
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
@@ -280,8 +279,8 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(stringObjectMap);
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+
+        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
@@ -338,8 +337,8 @@ public class StmtOfServImplServiceTest {
             .id(12345678L)
             .data(stringObjectMap)
             .build();
-        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(stringObjectMap);
-        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+
+        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
