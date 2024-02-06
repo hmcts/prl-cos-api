@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -51,6 +52,8 @@ public class RespondentSolicitorData {
 
     @JsonUnwrapped
     private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
+
+    private final ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
 
     /** Confirm or Edit your contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;

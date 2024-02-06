@@ -27,10 +27,11 @@ public enum RespondentSolicitorEvents {
     CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Current or past proceedings",
                                     "currentOrPastProceedingsForChildren,respondentExistingProceedings"
     ),
-    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", "respondentAohYesNo,"
+    ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Make allegations of harm", "respondentAohYesNo,"
         + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour,respondentChildAbuseBehaviour,"
         + "respondentChildAbduction,respondentOtherConcerns"),
     INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild"),
+    RESPOND_ALLEGATION_OF_HARM("responseToAllegationsOfHarm","Respond to allegations of harm",""),
     ABILITY_TO_PARTICIPATE(
         "c100ResSolLitigationCapacity",
         "Litigation capacity",
