@@ -64,14 +64,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
@@ -1596,48 +1589,58 @@ public class ServiceOfApplicationService {
     private List<Document> generatePackA(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
+        docs.addAll(getWitnessStatement(caseData));
         docs.addAll(staticDocs);
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
+    }
+
+    private List<Document> getWitnessStatement(CaseData caseData) {
+        return !CollectionUtils.isEmpty(caseData.getFl401UploadWitnessDocuments()) ? ElementUtils.unwrapElements(
+            caseData.getFl401UploadWitnessDocuments()) : new ArrayList<>();
     }
 
     private List<Document> generatePackB(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getWitnessStatement(caseData));
+        docs.addAll(docs.addAll(staticDocs.stream()
+                                    .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList()););
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
-        docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
     }
 
     private List<Document> generatePackC(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getWitnessStatement(caseData));
+        docs.addAll(docs.addAll(staticDocs.stream()
+                                    .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList()););
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
-        docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
     }
 
     private List<Document> generatePackD(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        docs.addAll(getWitnessStatement(caseData));
+        docs.addAll(docs.addAll(staticDocs.stream()
+                                    .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList()););
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
-        docs.addAll(staticDocs.stream()
-                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
     }
 
     private List<Document> generatePackE(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
+        docs.addAll(getWitnessStatement(caseData));
         docs.addAll(staticDocs);
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         return docs;
     }
 
