@@ -109,5 +109,48 @@ public class RestrictedCaseAccessController {
         );
         log.info("** markAsRestrictedAsSysUpdate submitUpdate done");
     }
+
+
+    @PostMapping(path = "/mark-as-restricted-sys-update-2", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Mark case as restricted")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Callback processed.",
+            content = @Content(mediaType = "application/json", schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
+    @SecurityRequirement(name = "Bearer Authentication")
+    public void markAsRestrictedAsSysUpdate2(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        log.info("Case details before:: " + objectMapper.writeValueAsString(callbackRequest));
+        String sysAuthorisation = systemUserService.getSysUserToken();
+        String systemUpdateUserId = systemUserService.getUserId(sysAuthorisation);
+        CaseEvent caseEvent = CaseEvent.UPDATE_ALL_TABS;
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
+        log.info("** markAsRestrictedAsSysUpdate2 event starting systemUpdateUserId{} eventRequestData {}",
+                 systemUpdateUserId, eventRequestData);
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                sysAuthorisation,
+                eventRequestData,
+                String.valueOf(callbackRequest.getCaseDetails().getId()),
+                true
+            );
+        log.info("** markAsRestrictedAsSysUpdate2 event started");
+        CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContentOnlyWithSecurityClassification2(
+            startEventResponse
+        );
+        log.info("** markAsRestrictedAsSysUpdate2 caseDataContent got Data {} SC {} Reference {}",
+                 caseDataContent.getData(), caseDataContent.getSecurityClassification(),
+                 caseDataContent.getCaseReference());
+        log.info("Response after:: " + objectMapper.writeValueAsString(caseDataContent));
+        coreCaseDataService.submitUpdate(
+            sysAuthorisation,
+            eventRequestData,
+            caseDataContent,
+            String.valueOf(callbackRequest.getCaseDetails().getId()),
+            true
+        );
+        log.info("** markAsRestrictedAsSysUpdate2 submitUpdate done");
+    }
 }
 
