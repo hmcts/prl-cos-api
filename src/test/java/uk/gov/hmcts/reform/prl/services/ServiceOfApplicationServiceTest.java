@@ -375,7 +375,7 @@ public class ServiceOfApplicationServiceTest {
                                                                                     "pack contain confidential info")
                                                                                 .build()))
                                       .unServedApplicantPack(SoaPack.builder().build())
-                                      .unServedRespondentPack(SoaPack.builder().build())
+                                      .unServedRespondentPack(SoaPack.builder().personalServiceBy("courtAdmin").build())
                                       .applicationServedYesNo(YesOrNo.Yes)
                                       .build()).build();
         Map<String, Object> caseDetails = caseData.toMap(new ObjectMapper());
