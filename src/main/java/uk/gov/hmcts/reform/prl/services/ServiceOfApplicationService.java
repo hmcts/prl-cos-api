@@ -2571,6 +2571,7 @@ public class ServiceOfApplicationService {
             log.info("**** Case status :  {}", caseDataMap.get("caseStatus"));
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
+            caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
         }
         caseDataMap.put(APPLICATION_SERVED_YES_NO, null);
         caseDataMap.put(REJECTION_REASON, null);
