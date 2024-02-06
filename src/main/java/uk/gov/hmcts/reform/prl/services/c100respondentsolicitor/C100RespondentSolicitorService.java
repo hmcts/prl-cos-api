@@ -203,10 +203,20 @@ public class C100RespondentSolicitorService {
                     );
                     break;
                 case ALLEGATION_OF_HARM:
-                    RespondentAllegationsOfHarmData respondentAllegationsOfHarmData = solicitorRepresentedRespondent.getValue()
+                    Map<String, Object> unmodifiedCaseData = callbackRequest.getCaseDetails().getData();
+                    CaseData caseData = objectMapper.convertValue(
+                            unmodifiedCaseData,
+                            CaseData.class
+                    );
+
+                    RespondentAllegationsOfHarmData solicitorRepresentedRespondentAllegationsOfHarmData = solicitorRepresentedRespondent.getValue()
                             .getResponse().getRespondentAllegationsOfHarmData();
-                    Map<String, Object> data = objectMapper.convertValue(respondentAllegationsOfHarmData,new TypeReference<Map<String, Object>>() {});
+                    Map<String, Object> data = objectMapper
+                            .convertValue(solicitorRepresentedRespondentAllegationsOfHarmData,new TypeReference<Map<String, Object>>() {});
                     caseDataUpdated.putAll(data);
+                    respondentAllegationOfHarmService.prePopulatedChildData(caseData,
+                            caseDataUpdated,solicitorRepresentedRespondentAllegationsOfHarmData);
+
                     break;
                 case INTERNATIONAL_ELEMENT:
                     String[] internationalElementFields = event.getCaseFieldName().split(",");

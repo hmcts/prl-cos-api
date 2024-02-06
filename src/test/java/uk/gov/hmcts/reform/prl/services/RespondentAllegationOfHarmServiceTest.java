@@ -110,7 +110,7 @@ public class RespondentAllegationOfHarmServiceTest {
                 .prePopulatedChildData(CaseData.builder()
                         .respondentSolicitorData(RespondentSolicitorData.builder()
                                 .respondentAllegationsOfHarmData(allegationOfHarmRevised).build())
-                        .newChildDetails(List.of(childDetailsRevisedElement)).build(),data);
+                        .newChildDetails(List.of(childDetailsRevisedElement)).build(),data,allegationOfHarmRevised);
         Assert.assertFalse(data.isEmpty());
 
     }
@@ -136,7 +136,7 @@ public class RespondentAllegationOfHarmServiceTest {
                 .prePopulatedChildData(CaseData.builder()
                         .respondentSolicitorData(RespondentSolicitorData.builder()
                                 .respondentAllegationsOfHarmData(allegationOfHarmRevised).build())
-                        .newChildDetails(List.of(childDetailsRevisedElement)).build(),data);
+                        .newChildDetails(List.of(childDetailsRevisedElement)).build(),data,allegationOfHarmRevised);
         Assert.assertFalse(data.isEmpty());
 
     }

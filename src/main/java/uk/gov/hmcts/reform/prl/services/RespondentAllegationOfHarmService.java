@@ -186,7 +186,8 @@ public class RespondentAllegationOfHarmService {
         return dynamicMultiSelectList;
     }
 
-    public void prePopulatedChildData(CaseData caseData,Map<String, Object> caseDataMap) {
+    public void prePopulatedChildData(CaseData caseData,Map<String, Object> caseDataMap,
+                                      RespondentAllegationsOfHarmData solicitorRepresentedRespondentAllegationsOfHarmData) {
         List<DynamicMultiselectListElement> listItems = new ArrayList<>();
         caseData.getNewChildDetails().forEach(eachChild ->
                                                   listItems.add(DynamicMultiselectListElement.builder()
@@ -196,12 +197,12 @@ public class RespondentAllegationOfHarmService {
         );
 
         //Retrieve child list for Physical Abuse
-        if (null != caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData()
-            &&  null != caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData()
+        if (null != solicitorRepresentedRespondentAllegationsOfHarmData
+            &&  null != solicitorRepresentedRespondentAllegationsOfHarmData
                 .getRespWhichChildrenAreRiskPhysicalAbuse()) {
             List<DynamicMultiselectListElement> physicalAbuseChildList = new ArrayList<>();
 
-            caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData()
+            solicitorRepresentedRespondentAllegationsOfHarmData
                     .getRespWhichChildrenAreRiskPhysicalAbuse().getValue()
                 .forEach(eachChild ->
                              physicalAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
@@ -217,10 +218,10 @@ public class RespondentAllegationOfHarmService {
         }
 
         //Retrieve child list for Psychological Abuse
-        if (null != caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData()
-            && caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespWhichChildrenAreRiskPsychologicalAbuse() != null) {
+        if (null != solicitorRepresentedRespondentAllegationsOfHarmData
+            && solicitorRepresentedRespondentAllegationsOfHarmData.getRespWhichChildrenAreRiskPsychologicalAbuse() != null) {
             List<DynamicMultiselectListElement> psychologicalAbuseChildList = new ArrayList<>();
-            caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespWhichChildrenAreRiskPsychologicalAbuse().getValue()
+            solicitorRepresentedRespondentAllegationsOfHarmData.getRespWhichChildrenAreRiskPsychologicalAbuse().getValue()
                 .forEach(eachChild ->
                              psychologicalAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                                  .label(eachChild.getLabel()).build()));
@@ -235,10 +236,10 @@ public class RespondentAllegationOfHarmService {
         }
 
         //Retrieve child list for Sexual Abuse
-        if (null != caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData()
-            && caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespWhichChildrenAreRiskSexualAbuse() != null) {
+        if (null != solicitorRepresentedRespondentAllegationsOfHarmData
+            && solicitorRepresentedRespondentAllegationsOfHarmData.getRespWhichChildrenAreRiskSexualAbuse() != null) {
             List<DynamicMultiselectListElement> sexualAbuseChildList = new ArrayList<>();
-            caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespWhichChildrenAreRiskSexualAbuse().getValue()
+            solicitorRepresentedRespondentAllegationsOfHarmData.getRespWhichChildrenAreRiskSexualAbuse().getValue()
                 .forEach(eachChild ->
                              sexualAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                           .label(eachChild.getLabel()).build()));
@@ -253,10 +254,10 @@ public class RespondentAllegationOfHarmService {
         }
 
         //Retrieve child list for Emotional Abuse
-        if (null != caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData()
-            && caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespWhichChildrenAreRiskEmotionalAbuse() != null) {
+        if (null != solicitorRepresentedRespondentAllegationsOfHarmData
+            && solicitorRepresentedRespondentAllegationsOfHarmData.getRespWhichChildrenAreRiskEmotionalAbuse() != null) {
             List<DynamicMultiselectListElement> emotionalAbuseChildList = new ArrayList<>();
-            caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespWhichChildrenAreRiskEmotionalAbuse().getValue()
+            solicitorRepresentedRespondentAllegationsOfHarmData.getRespWhichChildrenAreRiskEmotionalAbuse().getValue()
                 .forEach(eachChild ->
                              emotionalAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                              .label(eachChild.getLabel()).build()));
@@ -271,10 +272,10 @@ public class RespondentAllegationOfHarmService {
         }
 
         //Retrieve child list for Financial Abuse
-        if (null != caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData()
-            && caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespWhichChildrenAreRiskFinancialAbuse() != null) {
+        if (null != solicitorRepresentedRespondentAllegationsOfHarmData
+            && solicitorRepresentedRespondentAllegationsOfHarmData.getRespWhichChildrenAreRiskFinancialAbuse() != null) {
             List<DynamicMultiselectListElement> financialAbuseChildList = new ArrayList<>();
-            caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespWhichChildrenAreRiskFinancialAbuse().getValue()
+            solicitorRepresentedRespondentAllegationsOfHarmData.getRespWhichChildrenAreRiskFinancialAbuse().getValue()
                 .forEach(eachChild ->
                              financialAbuseChildList.add(DynamicMultiselectListElement.builder().code(eachChild.getCode())
                                                              .label(eachChild.getLabel()).build()));
