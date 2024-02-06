@@ -50,6 +50,7 @@ public class RoleAssignmentService {
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
     private final ObjectMapper objectMapper;
+    private final SystemUserService systemUserService;
 
     public void createRoleAssignment(String authorization,
                                      CaseDetails caseDetails,
@@ -97,7 +98,7 @@ public class RoleAssignmentService {
                 .build();
             log.info("assignmentRequest----{}", assignmentRequest);
             roleAssignmentApi.updateRoleAssignment(
-                authorization,
+                systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),
                 null,
                 assignmentRequest
