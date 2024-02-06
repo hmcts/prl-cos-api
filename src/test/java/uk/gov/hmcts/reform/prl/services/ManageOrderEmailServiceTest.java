@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import javassist.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,8 +26,10 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherDraftOrderDetails;
 import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -72,6 +75,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Slf4j
 public class ManageOrderEmailServiceTest {
     private static final String manageCaseUrl = null;
     public static final String authToken = "Bearer TestAuthToken";
@@ -85,6 +89,9 @@ public class ManageOrderEmailServiceTest {
 
     @Mock
     private UserService userService;
+
+    @Mock
+    private DraftAnOrderService draftAnOrderService;
 
     @Mock
     private CourtFinderService courtFinderService;
@@ -1863,6 +1870,34 @@ public class ManageOrderEmailServiceTest {
     }
 
     @Test
+    public void testsendEmailToLegalRepresentativeOnRejection() {
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .manageOrders(ManageOrders.builder().instructionsToLegalRepresentative("test").build())
+            .applicantSolicitorEmailAddress("test@test.com")
+            .issueDate(LocalDate.now())
+            .orderCollection(List.of(element(OrderDetails.builder().build())))
+            .build();
+
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
+        EmailTemplateVars email = ManageOrderEmail.builder()
+            .caseReference(String.valueOf(caseData.getId()))
+            .build();
+        manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(caseDetails, DraftOrder.builder().otherDetails(
+            OtherDraftOrderDetails.builder().orderCreatedBy("Solicitor name").build()).build());
+        verify(emailService, times(1)).getCaseData(caseDetails);
+    }
+
+    @Test
     public void sendEmailWhenOrderIsServedOnly47a() {
         applicant = PartyDetails.builder()
                 .firstName("TestFirst")
@@ -2053,4 +2088,54 @@ public class ManageOrderEmailServiceTest {
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
+
+
+    @Test
+    public void sendEmailWhenOrderIsServedToCafcassCymru() throws IOException {
+
+        DynamicMultiselectListElement serveOrderDynamicMultiselectListElement = DynamicMultiselectListElement
+            .builder()
+            .code(uuid.toString())
+            .build();
+        DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(serveOrderDynamicMultiselectListElement))
+            .build();
+
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder()
+                               .label("John (Child 1)")
+                               .code("00000000-0000-0000-0000-000000000000")
+                               .build())).build();
+        ManageOrders manageOrders = ManageOrders.builder()
+            .serveToRespondentOptions(YesOrNo.Yes)
+            .cafcassCymruServedOptions(YesOrNo.Yes)
+            .otherParties(dynamicMultiSelectList)
+            .serveOrderDynamicList(serveOrderDynamicMultiSelectList)
+            .cafcassCymruEmail("test@cafcasscymru.com")
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .caseTypeOfApplication("C100")
+            .applicantSolicitorEmailAddress("test@test.com")
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID),OrderDetails.builder().build())))
+            .courtName("testcourt")
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("applicantSolicitorEmailAddress", "test@test.com");
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(caseData.getId())
+            .data(dataMap)
+            .build();
+        String applicantNames = "TestFirst TestLast";
+
+        when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+        manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
+        verify(sendgridService, times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
+    }
+
+
 }

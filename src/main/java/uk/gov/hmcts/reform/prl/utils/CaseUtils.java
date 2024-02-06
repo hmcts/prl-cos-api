@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 
@@ -36,7 +37,6 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -351,6 +351,13 @@ public class CaseUtils {
         }
     }
 
+    public static Document convertDocType(uk.gov.hmcts.reform.ccd.client.model.Document document) {
+        return Document.builder().documentUrl(document.getDocumentURL())
+            .documentBinaryUrl(document.getDocumentBinaryURL())
+            .documentFileName(document.getDocumentFilename())
+            .build();
+    }
+
     public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {
         if (localDateTime == null) {
             return "";
@@ -470,8 +477,13 @@ public class CaseUtils {
 
     private static Optional<PartyDetailsMeta> getFL401PartyDetailsMeta(String partyId, CaseData caseData) {
         Optional<PartyDetailsMeta> partyDetailsMeta = Optional.empty();
-        if (isNotEmpty(Collections.singleton(caseData.getApplicantsFL401()))
-            && caseData.getApplicantsFL401().getPartyId().toString().equals(partyId)) {
+        log.info("Inside getFL401PartyDetailsMeta caseData {}", caseData);
+        log.info("Inside getFL401PartyDetailsMeta partyId {}", partyId);
+        log.info("Inside getFL401PartyDetailsMeta getApplicantsFL401 {}", caseData.getApplicantsFL401());
+        if (ObjectUtils.isNotEmpty(caseData.getApplicantsFL401())
+            && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser())
+            && ObjectUtils.isNotEmpty(caseData.getApplicantsFL401().getUser().getIdamId())
+            && caseData.getApplicantsFL401().getUser().getIdamId().equals(partyId)) {
             partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
                                                        .builder()
                                                        .partyType(PartyEnum.applicant)
@@ -481,8 +493,10 @@ public class CaseUtils {
             return partyDetailsMeta;
         }
 
-        if (isNotEmpty(Collections.singleton(caseData.getRespondentsFL401()))
-            && caseData.getRespondentsFL401().getPartyId().toString().equals(partyId)) {
+        if (ObjectUtils.isNotEmpty(caseData.getRespondentsFL401())
+            && ObjectUtils.isNotEmpty(caseData.getRespondentsFL401().getUser())
+            && ObjectUtils.isNotEmpty(caseData.getRespondentsFL401().getUser().getIdamId())
+            && caseData.getRespondentsFL401().getUser().getIdamId().equals(partyId)) {
             partyDetailsMeta = Optional.ofNullable(PartyDetailsMeta
                                                        .builder()
                                                        .partyType(PartyEnum.respondent)
@@ -533,8 +547,10 @@ public class CaseUtils {
         if (null != party
             && isNotBlank(party.getRepresentativeFirstName())
             && isNotBlank(party.getRepresentativeLastName())) {
-            return concat(party.getRepresentativeFirstName(),
-                          concat(" ", party.getRepresentativeLastName()));
+            return concat(
+                party.getRepresentativeFirstName(),
+                concat(" ", party.getRepresentativeLastName())
+            );
         }
         return null;
     }
