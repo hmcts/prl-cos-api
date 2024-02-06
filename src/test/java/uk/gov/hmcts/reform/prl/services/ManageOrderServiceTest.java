@@ -11,16 +11,21 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForCourtAdminOrderEnum;
+import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSolicitorOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.AmendOrderCheckEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.C21OrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ChildArrangementOrdersEnum;
@@ -40,6 +45,7 @@ import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
@@ -97,19 +103,26 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_WHO_APPROVED_THE_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -162,6 +175,9 @@ public class ManageOrderServiceTest {
 
     @Mock
     private RefDataUserService refDataUserService;
+
+    @Mock
+    private DraftAnOrderService draftAnOrderService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -2245,11 +2261,22 @@ public class ManageOrderServiceTest {
     public void testOrderStatusReviewByJudge() {
         String status = manageOrderService.getOrderStatus(
             "createAnOrder",
-            "COURT_ADMIN",
+            "JUDGE",
             "editAndApproveAnOrder",
             "Created by Admin"
         );
         assertEquals(OrderStatusEnum.reviewedByJudge.getDisplayedValue(), status);
+    }
+
+    @Test
+    public void testOrderStatusReviewByManager() {
+        String status = manageOrderService.getOrderStatus(
+            "createAnOrder",
+            "COURT_ADMIN",
+            "editAndApproveAnOrder",
+            "Created by Admin"
+        );
+        assertEquals(OrderStatusEnum.reviewedByManager.getDisplayedValue(), status);
     }
 
     @Test
@@ -3378,7 +3405,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId");
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
@@ -3401,7 +3428,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId");
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_ADMIN_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_ADMIN_CREATED));
@@ -3425,7 +3452,7 @@ public class ManageOrderServiceTest {
             .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
             .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
             .build();
-        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData);
+        Map<String, Object> response = manageOrderService.setFieldsForWaTask("test token", caseData, "eventId");
         assertNotNull(response);
         assertTrue(response.containsKey(WA_ORDER_NAME_JUDGE_CREATED));
         assertNotNull(response.get(WA_ORDER_NAME_JUDGE_CREATED));
@@ -3787,7 +3814,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void testPopulateServeOrderDetailsr() {
+    public void testPopulateServeOrderDetails() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -3803,5 +3830,858 @@ public class ManageOrderServiceTest {
         assertNotNull(responseMap);
         assertNotNull(responseMap.get(CASE_TYPE_OF_APPLICATION));
         assertEquals(FL401_CASE_TYPE, responseMap.get(CASE_TYPE_OF_APPLICATION));
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServicePrefPostShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .contactPreferences(ContactPreferences.post)
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                    .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .othersToNotify(otherParties)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(1,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServiceContactPrefNotPresentShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                    .email("test@test.com")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(1,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServiceEmailAddressNotPresentShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .contactPreferences(ContactPreferences.post)
+                    .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(1,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenRespondenNonPersonalServiceIfRepresentedShouldNotGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder()
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .id(123L).respondents(respondents)
+            .otherPartyInTheCaseRevised(otherParties).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().get("id"));
+        assertEquals("123", response.getData().get("id").toString());
+
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServiceShouldNotGiveErrorIfAddressIsPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                    .email("test@test.com")
+                    .address(Address.builder().addressLine1("test address").build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder()
+            .id(123L).respondents(respondents)
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .otherParties(null)
+                              .serveToRespondentOptions(YesOrNo.Yes).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().get("id"));
+        assertEquals("123", response.getData().get("id").toString());
+    }
+
+    @Test
+    public void givenRespondentLipPersonalServiceShouldNotGiveError() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder()
+            .id(123L).respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .otherParties(null)
+                              .serveToRespondentOptions(YesOrNo.Yes).build()).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().get("id"));
+        assertEquals("123", response.getData().get("id").toString());
+    }
+
+    @Test
+    public void givenOtherPartyNonPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(2,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+    }
+
+    @Test
+    public void givenOtherPartyPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties)
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .serveToRespondentOptions(YesOrNo.Yes).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(1,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+    }
+
+    @Test
+    public void givenOtherPartyShouldNotGiveErrorIfAddressIsPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                    .address(Address.builder()
+                                 .addressLine1("test address").build())
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                    .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder()
+            .id(123L).respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().get("id"));
+        assertEquals("123", response.getData().get("id").toString());
+    }
+
+    private CaseData getCaseData() {
+        List<DynamicMultiselectListElement> elementList = new ArrayList<>();
+        elementList.add(DynamicMultiselectListElement.builder()
+                            .code("0016cff5-17f0-42af-bea4-0b04ca74c9ec")
+                            .label("Jeremy Anderson (Applicant 2)")
+                            .build());
+        elementList.add(DynamicMultiselectListElement.builder()
+                            .code("7e9028ba-534c-42bb-bb04-e67b6551b4bd")
+                            .label("Martina Graham (Applicant 3)")
+                            .build());
+        elementList.add(DynamicMultiselectListElement.builder()
+                            .code("e406bcc3-3c91-45db-9dcc-3a5c14930851")
+                            .label("Mary Richards (Respondent 1)")
+                            .build());
+
+        List<DynamicMultiselectListElement> otherPartiesList = new ArrayList<>();
+        otherPartiesList.add(DynamicMultiselectListElement.builder()
+                            .code("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1")
+                            .label("Sam Nolan")
+                            .build());
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(DynamicMultiSelectList.builder()
+                                                     .value(elementList)
+                                                     .listItems(elementList)
+                                                     .build())
+                              .otherParties(DynamicMultiSelectList.builder()
+                                                .value(otherPartiesList)
+                                                .listItems(otherPartiesList)
+                                                .build())
+                              .build())
+            .build();
+        return caseData;
+    }
+    
+    @Test
+    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.Yes)
+            .manageOrders(manageOrders).build();
+        //when(manageOrderService.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), false)).thenReturn(true);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated, Event.EDIT_AND_APPROVE_ORDER.getId(),"JUDGE");
+        assertEquals(HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+        assertEquals("Yes",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+
+    @Test
+    public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNo() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.sendToAdminToServe);
+
+        DraftOrder draftOrder = DraftOrder.builder().manageOrderHearingDetails(hearingDataList).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+
+        Element<DraftOrder> draftOrderElement = element(uuid,draftOrder);
+        draftOrderCollection.add(draftOrderElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.No)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(manageOrders).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        //when(manageOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
+        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.EDIT_AND_APPROVE_ORDER.getId(),"JUDGE");
+        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+        assertEquals("Yes",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+    @Test
+    public void testWaSetHearingOptionDetailsForTask_whenManagerOrdersJourney() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.sendToAdminToServe);
+
+        DraftOrder draftOrder = DraftOrder.builder().manageOrderHearingDetails(hearingDataList).build();
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+
+        Element<DraftOrder> draftOrderElement = element(uuid,draftOrder);
+        draftOrderCollection.add(draftOrderElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.No)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(manageOrders).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        //when(manageOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
+        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.MANAGE_ORDERS.getId(),"JUDGE");
+        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
+        assertNull(caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertNull(caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+    @Test
+    public void testWaIsHearingTaskNeeded_whenRejected_thenHearingTaskNeeded_shuldbe_No() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+
+        String isOrderApproved = "No";
+        String eventId = Event.EDIT_AND_APPROVE_ORDER.getId();
+        AmendOrderCheckEnum amendOrderCheck = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck;
+
+        manageOrderService.setIsHearingTaskNeeded(manageOrders.getOrdersHearingDetails(),
+                                                  caseDataUpdated,
+                                                  isOrderApproved,
+                                                  amendOrderCheck,
+                                                  eventId);
+        assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
+    }
+
+    @Test
+    public void testWaIsHearingTaskNeeded_whenJudgeLaReviewRequired_thenHearingTaskNeeded_shuldbe_No() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+
+        String isOrderApproved = "Yes";
+        String eventId = Event.MANAGE_ORDERS.getId();
+        AmendOrderCheckEnum amendOrderCheck = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck;
+
+        manageOrderService.setIsHearingTaskNeeded(manageOrders.getOrdersHearingDetails(),
+                                                  caseDataUpdated,
+                                                  isOrderApproved,
+                                                  amendOrderCheck,
+                                                  eventId);
+        assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
+    }
+
+    @Test
+    public void testWaIsHearingTaskNeeded_whenManagerReviewRequired_thenHearingTaskNeeded_shuldbe_No() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+
+        String isOrderApproved = "Yes";
+        String eventId = Event.MANAGE_ORDERS.getId();
+        AmendOrderCheckEnum amendOrderCheck = AmendOrderCheckEnum.managerCheck;
+
+        manageOrderService.setIsHearingTaskNeeded(manageOrders.getOrdersHearingDetails(),
+                                                  caseDataUpdated,
+                                                  isOrderApproved,
+                                                  amendOrderCheck,
+                                                  eventId);
+        assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
+    }
+
+    @Test
+    public void  testUpdateOrderFieldsForDocmosis() {
+
+        DraftOrder draftOrder = DraftOrder.builder().judgeOrMagistratesLastName("testJudge").build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.No)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+
+        CaseData response = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
+        assertEquals("testJudge", response.getJudgeOrMagistratesLastName());
+
+    }
+
+    @Test
+    public void  testHandleFetchOrderDetails() {
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isSdoSelected(YesOrNo.Yes)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        Map<String, Object> caseDataUpdated = manageOrderService.handleFetchOrderDetails("testAuth", callbackRequest);
+        assertEquals(YesOrNo.Yes, caseDataUpdated.get("isSdoSelected"));
+
+    }
+
+
+
+    @Test
+    public void  testGetHearingDataFromExistingHearingData() {
+
+        List<Element<HearingData>> hearingDataList  = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(List.of(Element.<HearingData>builder().build()));
+
+        List<Element<HearingData>> hearingDataListResp
+            = manageOrderService.getHearingDataFromExistingHearingData("testAuth", hearingDataList,caseData);
+
+        assertNotNull(hearingDataListResp);
+    }
+
+    @Test
+    public void testPopulateFinalOrderFromCaseDataForUploadAnOrder() throws Exception {
+
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().forename("test")
+                                                                     .roles(List.of(Roles.COURT_ADMIN.getValue())).build());
+
+
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        List<OrderRecipientsEnum> recipientList = new ArrayList<>();
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        recipientList.add(OrderRecipientsEnum.applicantOrApplicantSolicitor);
+        recipientList.add(OrderRecipientsEnum.respondentOrRespondentSolicitor);
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+
+        ReflectionTestUtils.setField(manageOrderService, "c21Template", "c21-template");
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .standardDirectionOrder(StandardDirectionOrder.builder().build())
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            //.dateOrderMade(LocalDate.now())
+            .approvalDate(LocalDate.now())
+            .orderRecipients(recipientList)
+            .applicants(partyDetails)
+            .respondents(partyDetails)
+            .selectTypeOfOrder(SelectTypeOfOrderEnum.finl)
+            .serveOrderData(ServeOrderData.builder().doYouWantToServeOrder(YesOrNo.Yes).build())
+            .doesOrderClosesCase(YesOrNo.Yes)
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.uploadAnOrder)
+            .manageOrders(manageOrders.toBuilder()
+                              .amendOrderSelectCheckOptions(AmendOrderCheckEnum.noCheck)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+        Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData);
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>)response.get("orderCollection");
+
+        assertEquals("Financial compensation order following C79 enforcement application (C82)",orderCollection.get(0).getValue().getOrderTypeId());
+        assertNotNull(response);
+
+    }
+
+    @Test
+    public void testGenerateOrderDocumentFromDocmosis() throws Exception {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+
+        manageOrders = ManageOrders.builder()
+            .withdrawnOrRefusedOrder(WithDrawTypeOfOrderEnum.withdrawnApplication)
+            .isCaseWithdrawn(YesOrNo.No)
+            .ordersHearingDetails(hearingDataList)
+            .childOption(
+                dynamicMultiSelectList
+            )
+            .build();
+
+        StandardDirectionOrder cafcass = StandardDirectionOrder.builder().sdoNewPartnerPartiesCafcass(
+                dynamicMultiSelectList)
+            .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
+
+        StandardDirectionOrder cymru = StandardDirectionOrder.builder().sdoNewPartnerPartiesCafcassCymru(
+                dynamicMultiSelectList)
+            .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
+        StandardDirectionOrder[] sdoNewPartnerParties = {cafcass, cymru};
+
+        for (StandardDirectionOrder sdo : sdoNewPartnerParties) {
+
+            CaseData caseData = CaseData.builder()
+                .id(12345L)
+                .doYouWantToEditTheOrder(YesOrNo.No)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .manageOrders(manageOrders)
+                .standardDirectionOrder(sdo)
+                .build();
+
+            doCallRealMethod().when(dynamicMultiSelectListService).getStringFromDynamicMultiSelectList(any());
+            when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+                .thenReturn(generatedDocumentInfo);
+            Map<String, Object> caseDataUpdated = manageOrderService.generateOrderDocumentFromDocmosis(
+                "testauth",
+                caseData,
+                CreateSelectOrderOptionsEnum.standardDirectionsOrder
+            );
+
+            assertEquals("Yes",caseDataUpdated.get("isEngDocGen"));
+            assertNotNull(caseDataUpdated.get("ordersHearingDetails"));
+        }
+    }
+
+    @Test
+    public void testIsOrderApprovedSolicitorCreated() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderSolicitor(OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .doYouWantToEditTheOrder(YesOrNo.Yes)
+            .manageOrders(manageOrders).build();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.isOrderApproved(caseData, caseDataUpdated,"JUDGE");
+        assertEquals("Yes",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+    }
+
+    @Test
+    public void setHearingSelectedInfoForTaskWithMultipleHearings() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata1));
+        hearingDataList.add(element(hearingdata2));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertEquals("multipleOptionSelected",caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("Yes",caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
+    @Test
+    public void setHearingSelectedInfoForTaskWitNoHearings() {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertNull(caseDataUpdated.get("hearingOptionSelected"));
+        assertNull(caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
+    @Test
+    public void setHearingSelectedInfoForTaskWitHearingsButNoHearingDateConfirmOptionEnum() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(null)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata1));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertNull(caseDataUpdated.get("hearingOptionSelected"));
+        assertNull(caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
+    @Test
+    public void setHearingSelectedInfoForTaskWitMultipleHearingsButOnlyOneHearingDateConfirmOptionEnum() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(null)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata3 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(null)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata1));
+        hearingDataList.add(element(hearingdata2));
+        hearingDataList.add(element(hearingdata3));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertEquals(HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
+    @Test
+    public void setHearingSelectedInfoForTaskWitMultipleHearingsButMoreThnOneHearingDateConfirmOptionEnum() {
+
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
+        HearingData hearingdata1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateToBeFixed)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        HearingData hearingdata3 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(null)
+            .hearingTypes(DynamicList.builder()
+                              .value(null).build())
+            .hearingChannelsEnum(null).build();
+        hearingDataList.add(element(hearingdata1));
+        hearingDataList.add(element(hearingdata2));
+        hearingDataList.add(element(hearingdata3));
+        manageOrders.setOrdersHearingDetails(hearingDataList);
+        manageOrders.setWhatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe);
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
+
+        assertEquals("multipleOptionSelected",
+                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isMultipleHearingSelected"));
     }
 }
