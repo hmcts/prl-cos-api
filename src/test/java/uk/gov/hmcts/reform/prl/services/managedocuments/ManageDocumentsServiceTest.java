@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.runner.RunWith;
@@ -366,7 +365,6 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    @Ignore
     public void testCopyDocumentIfRestrictedWithCafcassRole() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -412,11 +410,10 @@ public class ManageDocumentsServiceTest {
 
         cafcassQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("cafcassQuarantineDocsList");
         assertNotNull(cafcassQuarantineDocsList);
-        assertEquals(1,cafcassQuarantineDocsList.size());
+        assertEquals(2,cafcassQuarantineDocsList.size());
         assertNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
-    @Ignore
     @Test
     public void testCopyDocumentIfRestrictedWithJudgeRole() {
 
@@ -561,7 +558,6 @@ public class ManageDocumentsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        //when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
@@ -679,22 +675,27 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test// laterrrrr
-    @Ignore//revisitt
     public void testCopyDocumentIfRestricted() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
-            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentParty(DocumentPartyEnum.RESPONDENT)
             .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
             .isRestricted(YesOrNo.Yes)
             .isConfidential(YesOrNo.Yes)
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
             .build();
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", manageDocuments.getDocument());
 
         Map<String, Object> caseDataMapInitial = new HashMap<>();
         caseDataMapInitial.put("manageDocuments",manageDocuments);
 
-        List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsListInitial = new ArrayList<>();
-        caseDataMapInitial.put("courtStaffQuarantineDocsList",courtStaffQuarantineDocsListInitial);
+        List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsListInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfQuarantineDocsList",legalProfQuarantineDocsListInitial);
+
+        List<Element<QuarantineLegalDoc>> legalProfUploadDocListDocTabInitial = new ArrayList<>();
+        caseDataMapInitial.put("legalProfUploadDocListDocTab",legalProfUploadDocListDocTabInitial);
+
         manageDocumentsElement = element(manageDocuments);
 
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -702,14 +703,10 @@ public class ManageDocumentsServiceTest {
             .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
                 .documentFileName("test")
                 .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
-            .isRestricted(YesOrNo.No).categoryId("test").build();
-        HashMap hashMap = new HashMap();
-        hashMap.put("testDocument", quarantineLegalDoc.getDocument());
+            .isRestricted(YesOrNo.Yes).categoryId("test").build();
+
         quarantineLegalDocElement = element(quarantineLegalDoc);
-        List<Element<QuarantineLegalDoc>> courtStaffUploadDocListDocTabInitial = new ArrayList<>();
-        courtStaffUploadDocListDocTabInitial.add(quarantineLegalDocElement);
-        caseDataMapInitial.put("courtStaffUploadDocListDocTab",courtStaffUploadDocListDocTabInitial);
-        ReviewDocuments reviewDocuments = ReviewDocuments.builder().courtStaffUploadDocListDocTab(courtStaffUploadDocListDocTabInitial).build();
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
 
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
@@ -720,24 +717,20 @@ public class ManageDocumentsServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
-        when(systemUserService.getSysUserToken()).thenReturn("test");
-        when(authTokenGenerator.generate()).thenReturn("test");
-        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
-        HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        when(caseDocumentClient
-            .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(expectedResponse);
-        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(expectedResponse);
         when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
 
-        manageDocumentsService
-            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsSolicitorRole, caseData, caseDataMapInitial, "Legal adviser");
-        assertNotNull(quarantineLegalDoc);
+        Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
+        legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");
+
+        legalProfUploadDocListDocTab = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfUploadDocListDocTab");
+
+        assertNotNull(legalProfQuarantineDocsList);
+        assertEquals(1,legalProfQuarantineDocsList.size());
+        assertEquals(0,legalProfUploadDocListDocTab.size());
+        assertNull(caseDataMapUpdated.get("manageDocuments"));
     }
 
     @Test
