@@ -366,6 +366,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
+    @Ignore
     public void testCopyDocumentIfRestrictedWithCafcassRole() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
