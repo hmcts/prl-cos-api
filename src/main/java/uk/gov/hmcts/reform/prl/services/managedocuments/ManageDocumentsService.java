@@ -328,8 +328,8 @@ public class ManageDocumentsService {
         }
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
-            || CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
-            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())) {
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
+            || caseData.getScannedDocuments().size() == 1) {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
