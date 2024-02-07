@@ -1836,7 +1836,7 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
-        Map<String, Object> caseDataUpdated = new HashMap<>();
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
             caseData);
