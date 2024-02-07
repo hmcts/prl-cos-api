@@ -108,6 +108,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARDIN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_SAFEGUARING_CAFCASS_CYMRU;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_UPDATE_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_NOT_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JOINING_INSTRUCTIONS;
@@ -850,7 +851,7 @@ public class DraftAnOrderService {
             .build();
         //PRL-3319 - Fetch hearings dropdown
         DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorization, caseData);
-        caseDataMap.put("hearingsType", hearingsDynamicList);
+        caseDataMap.put(HEARINGS_TYPE, hearingsDynamicList);
         return caseDataMap;
     }
 
@@ -1996,7 +1997,7 @@ public class DraftAnOrderService {
 
             caseDataUpdated.put(SELECTED_ORDER, manageOrderService.getSelectedOrderInfoForUpload(caseData));
             //PRL-4854 - Populate hearings dropdown for upload order
-            caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
+            caseDataUpdated.put(HEARINGS_TYPE, manageOrderService.populateHearingsDropdown(authorisation, caseData));
 
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(caseDataUpdated)
@@ -2016,7 +2017,7 @@ public class DraftAnOrderService {
             return AboutToStartOrSubmitCallbackResponse.builder().errors(errorList).build();
         } else {
             //PRL-3254 - Populate hearing details dropdown for create order
-            caseDataUpdated.put("hearingsType", manageOrderService.populateHearingsDropdown(authorisation, caseData));
+            caseDataUpdated.put(HEARINGS_TYPE, manageOrderService.populateHearingsDropdown(authorisation, caseData));
 
             if (null != caseData.getManageOrders()
                 && null != caseData.getManageOrders().getC21OrderOptions()) {

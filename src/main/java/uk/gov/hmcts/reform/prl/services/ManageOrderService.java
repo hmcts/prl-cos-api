@@ -121,6 +121,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -2375,10 +2376,8 @@ public class ManageOrderService {
 
         return DynamicList.builder()
             .value(null != existingHearingsType ? existingHearingsType.getValue() : DynamicListElement.EMPTY)
-            .listItems(hearingDropdowns.isEmpty() ? existingHearingsType.getListItems() : hearingDropdowns)
-            //Temp commented out
-            /*.listItems(hearingDropdowns.isEmpty() ? Collections.singletonList(DynamicListElement.defaultListItem(
-                "No hearings available")) : hearingDropdowns)*/
+            .listItems(hearingDropdowns.isEmpty() ? Collections.singletonList(DynamicListElement.defaultListItem(
+                "No hearings available")) : hearingDropdowns)
             .build();
     }
 
@@ -2879,7 +2878,7 @@ public class ManageOrderService {
         caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
 
         //PRL-3254 - Populate hearing details dropdown for create order
-        caseDataUpdated.put("hearingsType", populateHearingsDropdown(authorisation, caseData));
+        caseDataUpdated.put(HEARINGS_TYPE, populateHearingsDropdown(authorisation, caseData));
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
             ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));

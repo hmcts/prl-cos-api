@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -176,9 +175,6 @@ public class ManageOrderServiceTest {
 
     @Mock
     private RefDataUserService refDataUserService;
-
-    @Mock
-    private DraftAnOrderService draftAnOrderService;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -2785,7 +2781,7 @@ public class ManageOrderServiceTest {
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
-        //assertNotNull(dynamicList1.getListItems()); TEMP
+        assertNotNull(dynamicList1.getListItems());
     }
 
     @Test
@@ -2813,7 +2809,7 @@ public class ManageOrderServiceTest {
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
-        //assertNotNull(dynamicList1.getListItems());TEMP
+        assertNotNull(dynamicList1.getListItems());
     }
 
     @Test
@@ -2842,7 +2838,7 @@ public class ManageOrderServiceTest {
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
-        //assertNotNull(dynamicList1.getListItems());TEMP
+        assertNotNull(dynamicList1.getListItems());
     }
 
     @Test
@@ -2926,7 +2922,7 @@ public class ManageOrderServiceTest {
 
         //asserts
         assertNotNull(caseData.getManageOrders().getHearingsType());
-        //assertNotNull(dynamicList1.getListItems());TEMP
+        assertNotNull(dynamicList1.getListItems());
     }
 
 
@@ -4375,7 +4371,6 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    @Ignore
     public void  testHandleFetchOrderDetails() {
 
         CaseData caseData = CaseData.builder()

@@ -891,4 +891,6 @@ public class PrlAppsConstants {
 
     public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
         + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
+
+    public static final String HEARINGS_TYPE = "hearingsType";
 }
