@@ -992,7 +992,7 @@ public class DraftAnOrderService {
     }
 
     private DraftOrder getUpdatedDraftOrder(DraftOrder draftOrder, CaseData caseData, String loggedInUserType, String eventId) {
-        log.info("Hearings type dropdown {}", caseData.getManageOrders().getHearingsType());
+        log.info("Manage orders fields {}", caseData.getManageOrders());
         Document orderDocumentEng;
         Document orderDocumentWelsh = null;
         if (YesOrNo.Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder())) {
