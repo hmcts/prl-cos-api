@@ -633,6 +633,7 @@ public class DraftAnOrderService {
         //PRL-4854 - upload order
         updateHearingsType(caseData, caseDataMap, selectedOrder, authorization);
         caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
+        caseDataMap.put("wasTheOrderApprovedAtHearing", selectedOrder.getWasTheOrderApprovedAtHearing());
 
         return caseDataMap;
     }
