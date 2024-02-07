@@ -46,6 +46,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.UNDERSCORE;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RoleAssignmentService {
 
+    public static final String NAME_OF_JUDGE_TO_REVIEW_ORDER = "nameOfJudgeToReviewOrder";
+    public static final String NAME_OF_LA_TO_REVIEW_ORDER = "nameOfLaToReviewOrder";
     private final UserService userService;
     private final RoleAssignmentApi roleAssignmentApi;
     private final AuthTokenGenerator authTokenGenerator;
@@ -115,14 +117,14 @@ public class RoleAssignmentService {
             IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING)) {
             return fetchActorIdIfJudgeIsGatekeeping(authorization, caseDataUpdated);
         } else {
-            if (null != caseDataUpdated.get("nameOfJudgeToReviewOrder")
-                && caseDataUpdated.get("nameOfJudgeToReviewOrder").toString().length() > 3) {
-                return (getIdamId(caseDataUpdated.get("nameOfJudgeToReviewOrder"))[0]) + UNDERSCORE + JUDICIARY;
-            } else if (null != caseDataUpdated.get("nameOfLaToReviewOrder")
-                && caseDataUpdated.get("nameOfLaToReviewOrder").toString().length() > 3) {
+            if (null != caseDataUpdated.get(NAME_OF_JUDGE_TO_REVIEW_ORDER)
+                && caseDataUpdated.get(NAME_OF_JUDGE_TO_REVIEW_ORDER).toString().length() > 3) {
+                return (getIdamId(caseDataUpdated.get(NAME_OF_JUDGE_TO_REVIEW_ORDER))[0]) + UNDERSCORE + JUDICIARY;
+            } else if (null != caseDataUpdated.get(NAME_OF_LA_TO_REVIEW_ORDER)
+                && caseDataUpdated.get(NAME_OF_LA_TO_REVIEW_ORDER).toString().length() > 3) {
                 return fetchActorIdFromSelectedLegalAdviser(
                     authorization,
-                    caseDataUpdated.get("nameOfLaToReviewOrder")
+                    caseDataUpdated.get(NAME_OF_LA_TO_REVIEW_ORDER)
                 );
             }
         }
