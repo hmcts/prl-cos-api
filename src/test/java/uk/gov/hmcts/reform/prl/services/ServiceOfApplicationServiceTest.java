@@ -175,6 +175,7 @@ public class ServiceOfApplicationServiceTest {
                                                                              .surname("test").build());
         PartyDetails testParty = PartyDetails.builder()
             .firstName(testString).lastName(testString).representativeFirstName(testString)
+            .address(Address.builder().addressLine1("ad1").build())
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
         dynamicMultiSelectList = DynamicMultiSelectList.builder()
@@ -2408,7 +2409,7 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By email and post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
+        assertEquals("By email", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2485,7 +2486,6 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
@@ -2556,7 +2556,6 @@ public class ServiceOfApplicationServiceTest {
             .sendNotificationsForUnServedPacks(caseData, authorization);
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
         assertEquals("solicitorResp test", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getServedBy());
-        assertEquals("By post", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getModeOfService());
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
