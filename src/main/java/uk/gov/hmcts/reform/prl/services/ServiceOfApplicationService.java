@@ -803,10 +803,11 @@ public class ServiceOfApplicationService {
                         dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                         dynamicData.put("respondent", true);
+                        List<Document> finalDocs = removeCoverLettersFromThePacks(packSdocs);
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                             authorization,
                             party.get().getValue().getSolicitorEmail(),
-                            packSdocs,
+                            finalDocs,
                             SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
                             dynamicData,
                             PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
@@ -822,8 +823,8 @@ public class ServiceOfApplicationService {
                         "Sending the notification in post to respondent for C100 Application for caseId {}",
                         caseData.getId()
                     );
-
-                    sendPostWithAccessCodeLetterToParty(caseData, authorization, packRdocs, bulkPrintDetails, party.get(),
+                    List<Document> finalDocs = removeCoverLettersFromThePacks(packRdocs);
+                    sendPostWithAccessCodeLetterToParty(caseData, authorization, finalDocs, bulkPrintDetails, party.get(),
                                                         PRL_LET_ENG_RE5, SERVED_PARTY_RESPONDENT);
                 } else {
                     log.info("Unable to send any notification to respondent for C100 Application for caseId {} "
@@ -831,6 +832,12 @@ public class ServiceOfApplicationService {
                 }
             }
         });
+    }
+
+    private List<Document> removeCoverLettersFromThePacks(List<Document> documents) {
+        return documents.stream().filter(document -> !document.getDocumentFileName()
+            .contains("cover_letter_access_code"))
+            .toList();
     }
 
     private void handleNonPersonalServiceForCitizenC100(CaseData caseData, String authorization,
@@ -2199,7 +2206,7 @@ public class ServiceOfApplicationService {
         );
         // Applicants pack
         if (CollectionUtils.isNotEmpty(selectedApplicants)) {
-            buildUnservedApplicantPack(
+            buildUnservedApplicantPackC100NonPersonal(
                 authorization,
                 caseDataUpdated,
                 caseData,
@@ -2214,7 +2221,7 @@ public class ServiceOfApplicationService {
             caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
         );
         if (CollectionUtils.isNotEmpty(selectedRespondents)) {
-            buildUnservedRespondentPack(
+            buildUnservedRespondentPackC100NonPersonal(
                 authorization,
                 caseDataUpdated,
                 caseData,
@@ -2346,23 +2353,31 @@ public class ServiceOfApplicationService {
         caseDataUpdated.put(UNSERVED_OTHERS_PACK, unServedOthersPack);
     }
 
-    private void buildUnservedRespondentPack(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData, String dateCreated,
-                                             List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedRespondents) {
+    private void buildUnservedRespondentPackC100NonPersonal(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData,
+                                                            String dateCreated,
+                                                            List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedRespondents) {
         final List<String> selectedPartyIds = selectedRespondents.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
         log.info("selected respondents ========= {}", selectedRespondents.size());
         log.info("selected Respondent PartyIds ========= {}", selectedPartyIds);
-        List<Element<Document>> packRDocs = wrapElements(getNotificationPack(caseData, PrlAppsConstants.R, c100StaticDocs));
-        final SoaPack unServedRespondentPack = SoaPack.builder().packDocument(packRDocs).partyIds(
-            wrapElements(selectedPartyIds))
+        List<Document> finalDocs = new ArrayList<>();
+        caseData.getRespondents().stream()
+            .filter(partyDetails -> !CaseUtils.hasLegalRepresentation(partyDetails.getValue()))
+            .forEach(partyDetails -> finalDocs.add(generateAccessCodeLetter(authorization, caseData, partyDetails,
+                                                                            null, PRL_LET_ENG_RE5)));
+        finalDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.R, c100StaticDocs));
+        final SoaPack unServedRespondentPack = SoaPack.builder()
+            .packDocument(wrapElements(finalDocs))
+            .partyIds(wrapElements(selectedPartyIds))
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .packCreatedDate(dateCreated)
             .build();
         caseDataUpdated.put(UNSERVED_RESPONDENT_PACK, unServedRespondentPack);
     }
 
-    private void buildUnservedApplicantPack(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData, String dateCreated,
-                                            List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedApplicants) {
+    private void buildUnservedApplicantPackC100NonPersonal(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData,
+                                                           String dateCreated,
+                                                           List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedApplicants) {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
         log.info("selected Applicant ========= {}", selectedApplicants.size());

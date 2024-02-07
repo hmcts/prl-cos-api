@@ -726,7 +726,7 @@ public class ServiceOfApplicationServiceTest {
             .build();
 
         List<Element<PartyDetails>> otherParities = new ArrayList<>();
-        Element partyDetailsElement = element(partyDetails);
+        Element<PartyDetails> partyDetailsElement = element(partyDetails);
         otherParities.add(partyDetailsElement);
         DynamicMultiselectListElement dynamicListElement = DynamicMultiselectListElement.builder()
             .code(partyDetailsElement.getId().toString())
@@ -756,6 +756,7 @@ public class ServiceOfApplicationServiceTest {
             .respondents(partyList)
             .applicantCaseName("Test Case 45678")
             .caseInvites(caseInvites)
+            .finalDocument(Document.builder().documentFileName("").build())
             .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
                                                                                .orderTypeId("Blank order or directions (C21)")
                                                                                .build())
@@ -773,7 +774,6 @@ public class ServiceOfApplicationServiceTest {
             .othersToNotify(otherParities)
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
             .serviceOfApplicationScreen1(dynamicMultiSelectList)
-            .finalDocument(Document.builder().build())
             .c1ADocument(Document.builder().documentFileName("Blank_C7.pdf").build())
             .build();
         Map<String,Object> casedata = new HashMap<>();
