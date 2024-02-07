@@ -471,6 +471,11 @@ public class DraftAnOrderService {
             if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
                 caseData = manageOrderService.populateJudgeNames(caseData);
                 caseData = manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData);
+                if (isNotEmpty(caseData.getStandardDirectionOrder())
+                    && CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())
+                    && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(factFindingHearing)) {
+                    caseData = manageOrderService.populateDirectionOfFactFindingHearingFieldsForDocmosis(caseData);
+                }
             }
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()

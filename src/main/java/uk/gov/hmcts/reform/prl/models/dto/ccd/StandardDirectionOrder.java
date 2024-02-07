@@ -146,6 +146,8 @@ public class StandardDirectionOrder implements MappableObject {
     private final List<FactFindingOtherDirectionEnum> sdoFactFindingOtherCheck;
     @JsonProperty("sdoFactFindingOtherDetails")
     private final List<Element<SdoDioProvideOtherDetails>> sdoFactFindingOtherDetails;
+    private final String sdoWhoNeedsToRespondAllegationsListText;
+    private final String sdoWhoMadeAllegationsListText;
     @JsonProperty("sdoDocsEvidenceWitnessEvidence")
     private final int sdoDocsEvidenceWitnessEvidence;
     private final List<Element<SdoLanguageDialect>> sdoInterpreterDialectRequired;
