@@ -326,10 +326,12 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_RESTRICTED_FLAG);
         }
+        log.info("caseData.getScannedDocuments() -- {}", caseData.getScannedDocuments());
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
-            || caseData.getScannedDocuments().size() == 1) {
+            || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
+            && caseData.getScannedDocuments().size() > 1)) {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
         } else {
             updateCaseDataUpdatedByRole(caseDataUpdated, userRole);
