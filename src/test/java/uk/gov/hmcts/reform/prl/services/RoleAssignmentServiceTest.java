@@ -37,6 +37,9 @@ public class RoleAssignmentServiceTest {
     UserService userService;
 
     @Mock
+    SystemUserService systemUserService;
+
+    @Mock
     AuthTokenGenerator authTokenGenerator;
 
     @Mock
