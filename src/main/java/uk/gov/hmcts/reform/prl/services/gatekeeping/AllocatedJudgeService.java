@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.gatekeeping;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -22,6 +23,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CIRCUIT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DISTRICT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HIGHCOURT_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_SPECIFIC_JUDGE_OR_LA_NEEDED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
@@ -30,6 +32,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIA
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class AllocatedJudgeService {
+
 
     public AllocatedJudge getAllocatedJudgeDetails(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                                    RefDataUserService refDataUserService) {
@@ -40,13 +43,15 @@ public class AllocatedJudgeService {
     private AllocatedJudge mapAllocatedJudge(Map<String, Object> caseDataUpdated, DynamicList legalAdviserList,
                                              RefDataUserService refDataUserService) {
         AllocatedJudge.AllocatedJudgeBuilder allocatedJudgeBuilder = AllocatedJudge.builder();
-        if (null != caseDataUpdated.get(TIER_OF_JUDICIARY)) {
+        if (YesOrNo.No.getDisplayedValue().equals(caseDataUpdated.get(IS_SPECIFIC_JUDGE_OR_LA_NEEDED))
+            && null != caseDataUpdated.get(TIER_OF_JUDICIARY)) {
             allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No);
             allocatedJudgeBuilder.tierOfJudiciary(getTierOfJudiciary(String.valueOf(caseDataUpdated.get(TIER_OF_JUDICIARY))));
         } else {
             if (null != caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)) {
                 if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR)))
                     && null != caseDataUpdated.get(JUDGE_NAME_EMAIL)) {
+                    allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.judge));
                     String[] judgePersonalCode = getPersonalCode(caseDataUpdated.get(JUDGE_NAME_EMAIL));
                     List<JudicialUsersApiResponse> judgeDetails =
                         refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
@@ -57,12 +62,15 @@ public class AllocatedJudgeService {
                         allocatedJudgeBuilder.judgeName(judgeDetails.get(0).getSurname());
                         allocatedJudgeBuilder.judgeEmail(judgeDetails.get(0).getEmailId());
                         allocatedJudgeBuilder.judgePersonalCode(judgePersonalCode[0]);
+                        allocatedJudgeBuilder.tierOfJudge(CollectionUtils.isNotEmpty(judgeDetails.get(0).getAppointments())
+                                                              ? judgeDetails.get(0).getAppointments().get(0).getAppointment()
+                                                              : null);
                     }
                 } else if (null != legalAdviserList && null != legalAdviserList.getValue()) {
-                    allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
                     allocatedJudgeBuilder.isJudgeOrLegalAdviser((AllocatedJudgeTypeEnum.legalAdviser));
                     allocatedJudgeBuilder.legalAdviserList(legalAdviserList);
                 }
+                allocatedJudgeBuilder.isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.Yes);
             }
         }
         return allocatedJudgeBuilder.build();
