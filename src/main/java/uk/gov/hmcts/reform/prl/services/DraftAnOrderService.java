@@ -596,7 +596,7 @@ public class DraftAnOrderService {
         }
     }
 
-    public Map<String, Object> populateDraftOrderDocument(CaseData caseData) {
+    public Map<String, Object> populateDraftOrderDocument(CaseData caseData, String authorization) {
         Map<String, Object> caseDataMap = new HashMap<>();
         DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
         caseDataMap.put(ORDER_NAME, ManageOrdersUtils.getOrderName(selectedOrder));
@@ -629,6 +629,11 @@ public class DraftAnOrderService {
             isHearingPageNeeded(selectedOrder.getOrderType(), selectedOrder.getC21OrderOptions()) ? Yes : No
         );
         caseDataMap.put(CASE_TYPE_OF_APPLICATION, caseData.getCaseTypeOfApplication());
+
+        //PRL-4854 - upload order
+        updateHearingsType(caseData, caseDataMap, selectedOrder, authorization);
+        caseDataMap.put("orderUploadedAsDraftFlag", selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
+
         return caseDataMap;
     }
 
@@ -842,6 +847,15 @@ public class DraftAnOrderService {
                 caseDataMap.put("whatToDoWithOrderCourtAdmin", caseData.getManageOrders().getWhatToDoWithOrderCourtAdmin());
             }
         }
+        //refactored to a private method
+        updateHearingsType(caseData, caseDataMap, selectedOrder, authorization);
+        return caseDataMap;
+    }
+
+    private void updateHearingsType(CaseData caseData,
+                                    Map<String, Object> caseDataMap,
+                                    DraftOrder selectedOrder,
+                                    String authorization) {
         //Set existing hearingsType from draft order
         ManageOrders manageOrders = null != caseData.getManageOrders()
             ? caseData.getManageOrders().toBuilder().hearingsType(selectedOrder.getHearingsType()).build()
@@ -852,7 +866,6 @@ public class DraftAnOrderService {
         //PRL-3319 - Fetch hearings dropdown
         DynamicList hearingsDynamicList = manageOrderService.populateHearingsDropdown(authorization, caseData);
         caseDataMap.put(HEARINGS_TYPE, hearingsDynamicList);
-        return caseDataMap;
     }
 
     public void populateOrderHearingDetails(String authorization, CaseData caseData, Map<String, Object> caseDataMap,

@@ -110,7 +110,7 @@ public class EditAndApproveDraftOrderController {
             );
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderDocument(
-                    caseData)).build();
+                    caseData, authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
