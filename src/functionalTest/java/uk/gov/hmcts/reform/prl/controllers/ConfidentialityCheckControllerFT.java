@@ -35,8 +35,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
 
-import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.APPLICATION_SERVED_HEADER;
-
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -105,7 +103,7 @@ public class ConfidentialityCheckControllerFT {
 
         String json = res.getResponse().getContentAsString();
         assertTrue(json.contains("confirmation_header"));
-        assertTrue(json.contains(APPLICATION_SERVED_HEADER));
+        assertTrue(json.contains(RETURNED_TO_ADMIN_HEADER));
     }
 
     @Test
