@@ -46,6 +46,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class StmtOfServImplService {
+    public static final String RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST = "Respondent has been served personally by Court,"
+        + " hence no bulk print id is generated";
+    public static final String RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL = "Respondent has been served personally by Court through email";
     private final ObjectMapper objectMapper;
     private final UserService userService;
 
@@ -196,10 +199,10 @@ public class StmtOfServImplService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                            List<Element<BulkPrintDetails>> bulkPrintDetails,
                            SoaPack unServedRespondentPack,
-                           String authorization, String solicitorEmail) {
+                           String authorization, String email) {
         if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             emailNotificationDetails.add(element(EmailNotificationDetails.builder()
-                                                     .emailAddress(solicitorEmail)
+                                                     .emailAddress(RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL)
                                                      .servedParty(PRL_COURT_ADMIN)
                                                      .docs(unServedRespondentPack.getPackDocument())
                                                      .attachedDocs(String.join(",", unServedRespondentPack
@@ -213,6 +216,7 @@ public class StmtOfServImplService {
             .equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             bulkPrintDetails.add(element(BulkPrintDetails.builder()
                                              .servedParty(PRL_COURT_ADMIN)
+                                             .bulkPrintId(RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_POST)
                                              .printedDocs(String.join(",", unServedRespondentPack
                                                  .getPackDocument().stream()
                                                  .map(Element::getValue)
