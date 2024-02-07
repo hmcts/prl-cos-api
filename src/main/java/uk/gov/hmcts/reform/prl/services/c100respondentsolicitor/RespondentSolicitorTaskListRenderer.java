@@ -93,7 +93,8 @@ public class RespondentSolicitorTaskListRenderer {
             .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS));
 
         final RespondentTaskSection safetyConcerns = newSection("4. Safety Concerns")
-            .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
+            .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM))
+            .withTask(tasks.get(RespondentSolicitorEvents.RESPOND_ALLEGATION_OF_HARM));
 
         final RespondentTaskSection additionalInformation = newSection("5. Additional information")
             .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
