@@ -11,10 +11,12 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
+import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.OrderStatusEnum;
@@ -108,6 +110,7 @@ import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_ORDER_APPROVED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_ADMIN_CREATED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_CREATED;
@@ -118,6 +121,8 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -1699,10 +1704,11 @@ public class ManageOrderServiceTest {
     @Test
     public void testpopulateCustomOrderFieldsGeneralForm() {
         PartyDetails partyDetails = PartyDetails.builder()
-            .firstName("")
-            .lastName("")
+            .firstName("fn")
+            .lastName("ln")
             .dateOfBirth(LocalDate.now())
             .address(Address.builder().build())
+            .solicitorReference("solRef")
             .build();
         CaseData caseData = CaseData.builder()
             .applicantsFL401(partyDetails)
@@ -1710,7 +1716,10 @@ public class ManageOrderServiceTest {
             .manageOrders(ManageOrders.builder().isTheOrderByConsent(YesOrNo.Yes).build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.generalForm));
+        CaseData caseDataUpdated = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.generalForm);
+        assertNotNull(caseDataUpdated);
+        assertNotNull(caseDataUpdated.getManageOrders().getManageOrdersApplicantReference());
+        assertNotNull(caseDataUpdated.getManageOrders().getManageOrdersRespondentReference());
     }
 
     @Test
@@ -3828,6 +3837,348 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    public void givenRespondentLipNonPersonalServicePrefPostShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .contactPreferences(ContactPreferences.post)
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                    .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .othersToNotify(otherParties)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(1,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServiceContactPrefNotPresentShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                    .email("test@test.com")
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(1,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServiceEmailAddressNotPresentShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .contactPreferences(ContactPreferences.post)
+                    .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(1,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenRespondenNonPersonalServiceIfRepresentedShouldNotGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder()
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .id(123L).respondents(respondents)
+            .otherPartyInTheCaseRevised(otherParties).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().get("id"));
+        assertEquals("123", response.getData().get("id").toString());
+
+    }
+
+    @Test
+    public void givenRespondentLipNonPersonalServiceShouldNotGiveErrorIfAddressIsPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                    .email("test@test.com")
+                    .address(Address.builder().addressLine1("test address").build())
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                    .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder()
+            .id(123L).respondents(respondents)
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .otherParties(null)
+                              .serveToRespondentOptions(YesOrNo.Yes).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().get("id"));
+        assertEquals("123", response.getData().get("id").toString());
+    }
+
+    @Test
+    public void givenRespondentLipPersonalServiceShouldNotGiveError() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder()
+            .id(123L).respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .otherParties(null)
+                              .serveToRespondentOptions(YesOrNo.Yes).build()).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().get("id"));
+        assertEquals("123", response.getData().get("id").toString());
+    }
+
+    @Test
+    public void givenOtherPartyNonPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(2,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_RESPONDENT));
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+    }
+
+    @Test
+    public void givenOtherPartyPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder().respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties)
+            .manageOrders(caseData.getManageOrders().toBuilder()
+                              .serveToRespondentOptions(YesOrNo.Yes).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertEquals(1,response.getErrors().size());
+        assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+    }
+
+    @Test
+    public void givenOtherPartyShouldNotGiveErrorIfAddressIsPresent() {
+        List<Element<PartyDetails>> respondents =
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+                .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
+                .contactPreferences(ContactPreferences.post)
+                    .address(Address.builder()
+                                 .addressLine1("test address").build())
+                .build()));
+        List<Element<PartyDetails>> otherParties =
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+                    .address(Address.builder().addressLine1("test address").build())
+                .build()));
+        CaseData caseData = getCaseData();
+        caseData = caseData.toBuilder()
+            .id(123L).respondents(respondents)
+            .taskListVersion(TASK_LIST_VERSION_V2)
+            .otherPartyInTheCaseRevised(otherParties)
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        AboutToStartOrSubmitCallbackResponse response
+            = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+        assertNotNull(response.getData());
+        assertNotNull(response.getData().get("id"));
+        assertEquals("123", response.getData().get("id").toString());
+    }
+
+    private CaseData getCaseData() {
+        List<DynamicMultiselectListElement> elementList = new ArrayList<>();
+        elementList.add(DynamicMultiselectListElement.builder()
+                            .code("0016cff5-17f0-42af-bea4-0b04ca74c9ec")
+                            .label("Jeremy Anderson (Applicant 2)")
+                            .build());
+        elementList.add(DynamicMultiselectListElement.builder()
+                            .code("7e9028ba-534c-42bb-bb04-e67b6551b4bd")
+                            .label("Martina Graham (Applicant 3)")
+                            .build());
+        elementList.add(DynamicMultiselectListElement.builder()
+                            .code("e406bcc3-3c91-45db-9dcc-3a5c14930851")
+                            .label("Mary Richards (Respondent 1)")
+                            .build());
+
+        List<DynamicMultiselectListElement> otherPartiesList = new ArrayList<>();
+        otherPartiesList.add(DynamicMultiselectListElement.builder()
+                            .code("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1")
+                            .label("Sam Nolan")
+                            .build());
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesOrNo.No)
+                              .recipientsOptions(DynamicMultiSelectList.builder()
+                                                     .value(elementList)
+                                                     .listItems(elementList)
+                                                     .build())
+                              .otherParties(DynamicMultiSelectList.builder()
+                                                .value(otherPartiesList)
+                                                .listItems(otherPartiesList)
+                                                .build())
+                              .build())
+            .build();
+        return caseData;
+    }
+    
+    @Test
     public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
@@ -4337,5 +4688,4 @@ public class ManageOrderServiceTest {
                      caseDataUpdated.get("hearingOptionSelected"));
         assertEquals("Yes", caseDataUpdated.get("isMultipleHearingSelected"));
     }
-
 }

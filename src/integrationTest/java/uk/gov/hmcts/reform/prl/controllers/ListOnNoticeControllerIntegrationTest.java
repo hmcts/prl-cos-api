@@ -8,35 +8,37 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
-import uk.gov.hmcts.reform.prl.util.IdamTokenGenerator;
 
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringIntegrationSerenityRunner.class)
-@SpringBootTest(classes = {Application.class, ServiceOfApplicationControllerIntegrationTest.class})
-public class ServiceOfApplicationControllerIntegrationTest {
+@SpringBootTest(classes = {Application.class, ListOnNoticeControllerIntegrationTest.class})
+public class ListOnNoticeControllerIntegrationTest {
 
     @Value("${case.orchestration.service.base.uri}")
     protected String serviceUrl;
 
-    private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
+    private final String listOnNoticeMidEventEndpoint = "/listOnNotice/reasonUpdation/mid-event";
 
-    @Autowired
-    IdamTokenGenerator idamTokenGenerator;
+    private final String listOnNoticePrepopulateEndpoint = "/pre-populate-list-on-notice";
+
+    private final String listOnNoticeSendNotificationEndpoint = "/send-listOnNotice-notification";
+
+    private static final String LIST_ON_NOTICE_VALID_REQUEST_BODY = "requests/ListOnNoticeRequest.json";
+
 
     @Test
-    public void testServiceOfApplicationEndpoint() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/about-to-start");
+    public void testListOnNoticeMidEventEndpoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + listOnNoticeMidEventEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
         httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
@@ -45,11 +47,11 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testServiceOfApplicationAboutTosubmitEndpoint() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/about-to-submit");
+    public void testListOnNoticePrepopulateEndpoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + listOnNoticePrepopulateEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
         httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
@@ -58,15 +60,16 @@ public class ServiceOfApplicationControllerIntegrationTest {
     }
 
     @Test
-    public void testServiceOfApplicationSubmittedEndpoint() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
-        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/submitted");
+    public void testListOnNoticeSendNotificationEndpoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson(LIST_ON_NOTICE_VALID_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + listOnNoticeSendNotificationEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
-        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
         httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
     }
+
 }
