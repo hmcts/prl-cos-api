@@ -1704,10 +1704,11 @@ public class ManageOrderServiceTest {
     @Test
     public void testpopulateCustomOrderFieldsGeneralForm() {
         PartyDetails partyDetails = PartyDetails.builder()
-            .firstName("")
-            .lastName("")
+            .firstName("fn")
+            .lastName("ln")
             .dateOfBirth(LocalDate.now())
             .address(Address.builder().build())
+            .solicitorReference("solRef")
             .build();
         CaseData caseData = CaseData.builder()
             .applicantsFL401(partyDetails)
@@ -1715,7 +1716,10 @@ public class ManageOrderServiceTest {
             .manageOrders(ManageOrders.builder().isTheOrderByConsent(YesOrNo.Yes).build())
             .manageOrdersOptions(ManageOrdersOptionsEnum.createAnOrder)
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.generalForm).build();
-        assertNotNull(manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.generalForm));
+        CaseData caseDataUpdated = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.generalForm);
+        assertNotNull(caseDataUpdated);
+        assertNotNull(caseDataUpdated.getManageOrders().getManageOrdersApplicantReference());
+        assertNotNull(caseDataUpdated.getManageOrders().getManageOrdersRespondentReference());
     }
 
     @Test
