@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.citizen;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToA
 import java.util.List;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
 @AllArgsConstructor
 public class Response {
