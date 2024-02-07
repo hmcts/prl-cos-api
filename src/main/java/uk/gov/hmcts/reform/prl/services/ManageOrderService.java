@@ -1951,11 +1951,11 @@ public class ManageOrderService {
                 caseData.getRespondentsFL401().getFirstName(),
                 caseData.getRespondentsFL401().getLastName()
             ))
-            .manageOrdersApplicantReference(String.format(
-                PrlAppsConstants.FORMAT,
-                caseData.getApplicantsFL401().getRepresentativeFirstName(),
-                caseData.getApplicantsFL401().getRepresentativeLastName()
-            ))
+            .manageOrdersApplicantReference(caseData.getApplicantsFL401().getSolicitorReference() != null
+                                                ? caseData.getApplicantsFL401().getSolicitorReference() : "")
+            //PRL-5137
+            .manageOrdersRespondentReference(caseData.getRespondentsFL401().getSolicitorReference() != null
+                                                 ? caseData.getRespondentsFL401().getSolicitorReference() : "")
             .build();
 
         if (ofNullable(caseData.getRespondentsFL401().getAddress()).isPresent()) {
