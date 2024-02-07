@@ -56,6 +56,7 @@ public class CaseController {
     private final AuthTokenGenerator authTokenGenerator;
     private final ReasonableAdjustmentsMapper reasonableAdjustmentsMapper;
     private static final String INVALID_CLIENT = "Invalid Client";
+    private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
@@ -201,11 +202,21 @@ public class CaseController {
 
     @PostMapping(value = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
-    public void linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                  @RequestHeader("caseId") String caseId,
-                                  @RequestHeader("accessCode") String accessCode) {
-        caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
+    public CaseData linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                      @RequestHeader("caseId") String caseId,
+                                      @RequestHeader("accessCode") String accessCode) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
+            if (caseDetails != null) {
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                return caseData.toBuilder().id(caseDetails.getId()).build();
+            } else {
+                throw (new RuntimeException(CASE_LINKING_FAILED));
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)

@@ -235,7 +235,8 @@ public class CaseService {
         return result;
     }
 
-    public void linkCitizenToCase(String authorisation, String s2sToken, String caseId, String accessCode) {
+    public CaseDetails linkCitizenToCase(String authorisation, String s2sToken, String caseId, String accessCode) {
+        CaseDetails caseDetails = null;
         String anonymousUserToken = systemUserService.getSysUserToken();
         CaseData currentCaseData = objectMapper.convertValue(
             coreCaseDataApi.getCase(anonymousUserToken, s2sToken, caseId).getData(),
@@ -279,7 +280,7 @@ public class CaseService {
             caseDataUpdated.put(CASE_INVITES, caseData.getCaseInvites());
 
             processUserDetailsForCase(userId, emailId, caseData, partyId, isApplicant, caseDataUpdated);
-            caseRepository.linkDefendant(
+            caseDetails = caseRepository.linkDefendant(
                 authorisation,
                 anonymousUserToken,
                 caseId,
@@ -288,6 +289,7 @@ public class CaseService {
                 caseDataUpdated
             );
         }
+        return null;
     }
 
     private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId,
