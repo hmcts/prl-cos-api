@@ -214,6 +214,7 @@ public class TaskListService {
             RespondentSolicitorEvents.MIAM,
             CURRENT_OR_PREVIOUS_PROCEEDINGS,
             RespondentSolicitorEvents.ALLEGATION_OF_HARM,
+            RespondentSolicitorEvents.RESPOND_ALLEGATION_OF_HARM,
             RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
             ABILITY_TO_PARTICIPATE,
             VIEW_DRAFT_RESPONSE,
