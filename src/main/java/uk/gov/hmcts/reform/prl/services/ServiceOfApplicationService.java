@@ -1336,25 +1336,28 @@ public class ServiceOfApplicationService {
                                                      List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                      Element<PartyDetails> party, String template,
                                                      String servedParty) {
-        List<Document> docs = new ArrayList<>();
-        CaseInvite caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
-        try {
-            docs.add(getCoverSheet(authorization, caseData,
-                                   party.getValue().getAddress(),
-                                   party.getValue().getLabelForDynamicList()
-            ));
-            docs.add(generateAccessCodeLetter(authorization, caseData, party, caseInvite, template));
-            docs.addAll(packDocs);
-            bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
-                caseData,
-                authorization,
-                party.getValue(),
-                docs,
-                servedParty
-            )));
-        } catch (Exception e) {
-            log.info("error while generating coversheet {}", e.getMessage());
-            throw new RuntimeException(e);
+        if (null != party.getValue().getAddress()
+            && null != party.getValue().getAddress().getAddressLine1()) {
+            List<Document> docs = new ArrayList<>();
+            CaseInvite caseInvite = getCaseInvite(party.getId(), caseData.getCaseInvites());
+            try {
+                docs.add(getCoverSheet(authorization, caseData,
+                                       party.getValue().getAddress(),
+                                       party.getValue().getLabelForDynamicList()
+                ));
+                docs.add(generateAccessCodeLetter(authorization, caseData, party, caseInvite, template));
+                docs.addAll(packDocs);
+                bulkPrintDetails.add(element(serviceOfApplicationPostService.sendPostNotificationToParty(
+                    caseData,
+                    authorization,
+                    party.getValue(),
+                    docs,
+                    servedParty
+                )));
+            } catch (Exception e) {
+                log.info("error while generating coversheet {}", e.getMessage());
+                throw new RuntimeException(e);
+            }
         }
     }
 
@@ -1962,23 +1965,26 @@ public class ServiceOfApplicationService {
 
     public Document generateAccessCodeLetter(String authorisation, CaseData caseData,Element<PartyDetails> party,
                                       CaseInvite caseInvite, String template) {
-        Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
-        log.info("Access code map {} for {}",dataMap, template);
-        try {
-            log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
-            GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
-                authorisation,
-                String.valueOf(dataMap.get("id")),
-                template,
-                dataMap
-            );
-            return Document.builder().documentUrl(accessCodeLetter.getUrl())
-                .documentFileName(accessCodeLetter.getDocName()).documentBinaryUrl(accessCodeLetter.getBinaryUrl())
-                .documentCreatedOn(new Date())
-                .build();
-        } catch (Exception e) {
-            log.error("*** Access code letter failed for {} :: because of {}", template, e.getMessage());
-            log.error("*** Access code letter failed for {} :: because of {}", template, e.getStackTrace());
+        if (null != party.getValue().getAddress()
+            && null != party.getValue().getAddress().getAddressLine1()) {
+            Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
+            log.info("Access code map {} for {}",dataMap, template);
+            try {
+                log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
+                GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
+                    authorisation,
+                    String.valueOf(dataMap.get("id")),
+                    template,
+                    dataMap
+                );
+                return Document.builder().documentUrl(accessCodeLetter.getUrl())
+                    .documentFileName(accessCodeLetter.getDocName()).documentBinaryUrl(accessCodeLetter.getBinaryUrl())
+                    .documentCreatedOn(new Date())
+                    .build();
+            } catch (Exception e) {
+                log.error("*** Access code letter failed for {} :: because of {}", template, e.getMessage());
+                log.error("*** Access code letter failed for {} :: because of {}", template, e.getStackTrace());
+            }
         }
         return null;
     }
