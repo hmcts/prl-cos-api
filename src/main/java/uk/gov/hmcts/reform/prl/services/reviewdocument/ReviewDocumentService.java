@@ -501,12 +501,13 @@ public class ReviewDocumentService {
             .uploaderRole(BULK_SCAN);
     }
 
-    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(CaseData caseData) {
+    public ResponseEntity<SubmittedCallbackResponse> getReviewResult(String authorisation, CaseData caseData) {
         if (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList())
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())) {
-            coreCaseDataService.triggerEvent(
+            coreCaseDataService.triggerEventWithAuthorisation(
+                authorisation,
                 JURISDICTION,
                 CASE_TYPE,
                 caseData.getId(),
