@@ -122,7 +122,7 @@ public class ServiceOfApplicationPostService {
                         DOCUMENT_COVER_SHEET_HINT, Boolean.FALSE
                     ), dataMap
                 );
-                coverLetterDocs.add(DocumentUtils.toCoverLetterDocument(generatedDocumentInfo));
+                coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
             }
             if (documentLanguage.isGenWelsh()) {
                 generatedDocumentInfo = dgsService.generateDocument(
@@ -132,7 +132,7 @@ public class ServiceOfApplicationPostService {
                         DOCUMENT_COVER_SHEET_HINT, Boolean.TRUE
                     ), dataMap
                 );
-                coverLetterDocs.add(DocumentUtils.toCoverLetterDocument(generatedDocumentInfo));
+                coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
             }
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");

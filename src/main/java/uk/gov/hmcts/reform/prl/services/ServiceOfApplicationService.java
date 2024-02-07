@@ -835,9 +835,7 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> removeCoverLettersFromThePacks(List<Document> documents) {
-        return documents.stream().filter(document -> !document.getDocumentFileName()
-            .contains("cover_letter_access_code"))
-            .toList();
+        return documents.stream().filter(document -> !document.getDocumentFileName().contains("cover_letter")).toList();
     }
 
     private void handleNonPersonalServiceForCitizenC100(CaseData caseData, String authorization,
@@ -1372,7 +1370,7 @@ public class ServiceOfApplicationService {
     public Document getCoverSheet(String authorization, CaseData caseData, Address address, String name) {
 
         try {
-            return DocumentUtils.toCoverLetterDocument(serviceOfApplicationPostService
+            return DocumentUtils.toCoverSheetDocument(serviceOfApplicationPostService
                                                            .getCoverLetterGeneratedDocInfo(caseData, authorization,
                                                                                            address,
                                                                                            name
@@ -1386,71 +1384,29 @@ public class ServiceOfApplicationService {
     public List<Document> getNotificationPack(CaseData caseData, String requiredPack, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         switch (requiredPack) {
-            case PrlAppsConstants.A:
-                docs.addAll(generatePackA(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.B:
-                docs.addAll(generatePackB(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.C:
-                docs.addAll(generatePackC(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.D:
-                docs.addAll(generatePackD(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.E:
-                docs.addAll(generatePackE(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.F:
-                docs.addAll(generatePackF(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.G:
-                docs.addAll(generatePackG(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.H:
-                docs.addAll(generatePackH(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.I:
-                docs.addAll(generatePackI(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.J:
-                docs.addAll(generatePackJ(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.K:
-                docs.addAll(generatePackK(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.L:
-                docs.addAll(generatePackL(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.M:
-                docs.addAll(generatePackM(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.N:
-                docs.addAll(generatePackN(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.O:
-                docs.addAll(generatePackO(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.P:
-                docs.addAll(generatePackP(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.Q:
-                docs.addAll(generatePackQ(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.R:
-                docs.addAll(generatePackR(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.S:
-                docs.addAll(generatePackS(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.HI:
-                docs.addAll(generatePackHI(caseData, staticDocs));
-                break;
-            case PrlAppsConstants.Z: //not present in miro, added this by comparing to DA other org pack,confirm with PO's
+            case PrlAppsConstants.A -> docs.addAll(generatePackA(caseData, staticDocs));
+            case PrlAppsConstants.B -> docs.addAll(generatePackB(caseData, staticDocs));
+            case PrlAppsConstants.C -> docs.addAll(generatePackC(caseData, staticDocs));
+            case PrlAppsConstants.D -> docs.addAll(generatePackD(caseData, staticDocs));
+            case PrlAppsConstants.E -> docs.addAll(generatePackE(caseData, staticDocs));
+            case PrlAppsConstants.F -> docs.addAll(generatePackF(caseData, staticDocs));
+            case PrlAppsConstants.G -> docs.addAll(generatePackG(caseData, staticDocs));
+            case PrlAppsConstants.H -> docs.addAll(generatePackH(caseData, staticDocs));
+            case PrlAppsConstants.I -> docs.addAll(generatePackI(caseData, staticDocs));
+            case PrlAppsConstants.J -> docs.addAll(generatePackJ(caseData, staticDocs));
+            case PrlAppsConstants.K -> docs.addAll(generatePackK(caseData, staticDocs));
+            case PrlAppsConstants.L -> docs.addAll(generatePackL(caseData, staticDocs));
+            case PrlAppsConstants.M -> docs.addAll(generatePackM(caseData, staticDocs));
+            case PrlAppsConstants.N -> docs.addAll(generatePackN(caseData, staticDocs));
+            case PrlAppsConstants.O -> docs.addAll(generatePackO(caseData, staticDocs));
+            case PrlAppsConstants.P -> docs.addAll(generatePackP(caseData, staticDocs));
+            case PrlAppsConstants.Q -> docs.addAll(generatePackQ(caseData, staticDocs));
+            case PrlAppsConstants.R -> docs.addAll(generatePackR(caseData, staticDocs));
+            case PrlAppsConstants.S -> docs.addAll(generatePackS(caseData, staticDocs));
+            case PrlAppsConstants.HI -> docs.addAll(generatePackHI(caseData, staticDocs));
+            case PrlAppsConstants.Z -> //not present in miro, added this by comparing to DA other org pack,confirm with PO's
                 docs.addAll(generatePackZ(caseData, staticDocs));
-                break;
-            default:
-                break;
+            default -> log.info("No Letter selected");
         }
         return docs;
 
@@ -1525,8 +1481,7 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> generatePackN(CaseData caseData, List<Document> staticDocs) {
-        List<Document> docs = new ArrayList<>();
-        docs.addAll(getC6aIfPresent(getSoaSelectedOrders(caseData)));
+        List<Document> docs = new ArrayList<>(getC6aIfPresent(getSoaSelectedOrders(caseData)));
         log.info("{}",staticDocs);
         return docs;
     }
