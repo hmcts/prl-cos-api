@@ -88,6 +88,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.State.CASE_ISSUED;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -848,7 +851,7 @@ public class ServiceOfApplicationServiceTest {
             .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
         List<Element<CaseInvite>> caseInvites = new ArrayList<>();
-        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(PrlAppsConstants.TEST_UUID)).build()));
+        caseInvites.add(element(CaseInvite.builder().partyId(UUID.fromString(TEST_UUID)).build()));
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(partyList)
