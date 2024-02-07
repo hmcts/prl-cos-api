@@ -12,6 +12,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -59,11 +60,14 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.Respondent
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +78,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
@@ -125,6 +130,10 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     ApplicationsTabService applicationsTabService;
+    @Mock
+    ManageDocumentsService manageDocumentsService;
+    @Mock
+    UserService userService;
 
     @Mock
     OrganisationService organisationService;
@@ -1136,6 +1145,10 @@ public class C100RespondentSolicitorServiceTest {
             Mockito.anyBoolean(),
             Mockito.any(HashMap.class)
         )).thenReturn(document2);
+        UserDetails userDetails = UserDetails.builder().forename("test")
+                .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
 
@@ -1212,6 +1225,10 @@ public class C100RespondentSolicitorServiceTest {
             String event = eventsAndResp.split(HYPHEN_SEPARATOR)[0];
             String respondent = eventsAndResp.split(HYPHEN_SEPARATOR)[1];
             callbackRequest.setEventId(event);
+            UserDetails userDetails = UserDetails.builder().forename("test")
+                    .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+
+            when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
             Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
                 authToken, callbackRequest
             );
@@ -1247,6 +1264,10 @@ public class C100RespondentSolicitorServiceTest {
         )).thenReturn(document);
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        UserDetails userDetails = UserDetails.builder().forename("test")
+                .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
         List<String> errorList = new ArrayList<>();
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(

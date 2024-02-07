@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
@@ -45,11 +47,16 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,6 +72,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
@@ -97,6 +105,8 @@ public class C100RespondentSolicitorService {
     private final SystemUserService systemUserService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final OrganisationService organisationService;
+    private final ManageDocumentsService manageDocumentsService;
+    private final UserService userService;
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
@@ -829,7 +839,8 @@ public class C100RespondentSolicitorService {
             false,
             dataMap
         );
-        updatedCaseData.put("finalC7ResponseDoc", c7FinalDocument);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        uploadC7DocumentToQuarantineTab(caseData,updatedCaseData, userDetails,c7FinalDocument,party);
 
         RespondentDocs respondentDocs = RespondentDocs.builder().build();
         if (null != c7FinalDocument) {
@@ -855,7 +866,7 @@ public class C100RespondentSolicitorService {
                 false,
                 dataMap
             );
-            updatedCaseData.put("finalC1AResponseDoc", c1aFinalDocument);
+            uploadC1ADocumentToQuarantineTab(caseData,updatedCaseData, userDetails,c1aFinalDocument,party);
         }
 
         if (null != c1aFinalDocument) {
@@ -1352,5 +1363,48 @@ public class C100RespondentSolicitorService {
                 RESPONSE_SUBMITTED_LABEL).confirmationBody(CONTACT_LOCAL_COURT_LABEL.concat(null != caseData.getCourtName()
                                                                                                 ? caseData.getCourtName() : ""))
             .build();
+    }
+
+
+    private void uploadC7DocumentToQuarantineTab(CaseData caseData,
+                                                 Map<String, Object> caseDataUpdated,
+                                                 UserDetails userDetails, Document c7doc, String party) {
+        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
+        String userRole = CaseUtils.getUserRole(userDetails);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                .categoryId("respondentApplication")
+                .categoryName("Respondent Application")
+                .isRestricted(Yes)
+                .fileName(party + "_" + c7doc.getDocumentFileName())
+                .restrictedDetails("test")
+                .uploadedBy(userDetails.getFullName())
+                .uploadedByIdamId(userDetails.getId())
+                .uploaderRole(loggedInUserType)
+                .respondentApplicationDocument(c7doc)
+                .build();
+        manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
+        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
+    }
+
+    private void uploadC1ADocumentToQuarantineTab(CaseData caseData,
+                                                  Map<String, Object> caseDataUpdated,
+                                                  UserDetails userDetails, Document c1Adoc, String party) {
+        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
+        String userRole = CaseUtils.getUserRole(userDetails);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                .categoryId("respondentC1AApplication")
+                .categoryName("Respondent C1A Application")
+                .isRestricted(Yes)
+                .fileName(party + "_" + c1Adoc.getDocumentFileName())
+                .restrictedDetails("test")
+                .uploadedBy(userDetails.getFullName())
+                .uploadedByIdamId(userDetails.getId())
+                .uploaderRole(loggedInUserType)
+                .respondentC1AResponseDocument(c1Adoc)
+                .build();
+        manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
+        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
     }
 }

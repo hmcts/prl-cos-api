@@ -319,7 +319,7 @@ public class ManageDocumentsService {
         return setQuarantineDocumentForUploader(manageDocument, loggedInUserType, quarantineLegalDoc);
     }
 
-    private void setFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
+    public void setFlagsForWaTask(CaseData caseData, Map<String, Object> caseDataUpdated, String userRole, QuarantineLegalDoc quarantineLegalDoc) {
         //Setting this flag for WA task
         if (quarantineLegalDoc.getIsConfidential() != null || quarantineLegalDoc.getIsRestricted() != null) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_RESTRICTED_FLAG, "True");
