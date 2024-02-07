@@ -65,5 +65,6 @@ public class ServiceOfApplication {
     private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
     @JsonProperty("soaDocumentDynamicListForLa")
     private List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
+    @JsonProperty("isConfidential")
     private final YesOrNo isConfidential;
 }

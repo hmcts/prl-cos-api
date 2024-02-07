@@ -906,6 +906,7 @@ public class ServiceOfApplicationService {
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
+        log.info("** is confidential about to submit ** {}", caseDataMap.get(SOA_CONFIDENTIAL_DETAILS_PRESENT));
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
@@ -913,6 +914,7 @@ public class ServiceOfApplicationService {
         }
 
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
+        log.info("** is confidential from casedata ** {}", caseData.getServiceOfApplication().getIsConfidential());
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
         return caseDataMap;
     }
@@ -941,6 +943,7 @@ public class ServiceOfApplicationService {
                 ? caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy() : null;
         }
         soaWaMap.put("responsibleForService", responsibleForService);
+        log.info("** soaWaMap ** {}", soaWaMap);
         return soaWaMap;
     }
 
@@ -1872,7 +1875,7 @@ public class ServiceOfApplicationService {
             log.info("** dynamic list 1 ** {}", caseDataUpdated.get(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA));
         }
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
-        log.info("** case created by ** {}", caseDataUpdated.get(CASE_CREATED_BY));
+        log.info("** is confidential ** {}", caseDataUpdated.get(SOA_CONFIDENTIAL_DETAILS_PRESENT));
         caseDataUpdated.put(
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
