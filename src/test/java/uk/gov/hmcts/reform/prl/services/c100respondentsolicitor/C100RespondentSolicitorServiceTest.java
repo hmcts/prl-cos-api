@@ -69,6 +69,7 @@ import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -1136,6 +1137,7 @@ public class C100RespondentSolicitorServiceTest {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName("solicitorC1AFinalTemplate")
+                .documentCreatedOn(new Date())
             .build();
 
         when(documentGenService.generateSingleDocument(
@@ -1173,6 +1175,7 @@ public class C100RespondentSolicitorServiceTest {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName("c100RespC8Template")
+                .documentCreatedOn(new Date())
             .build();
 
         when(documentGenService.generateSingleDocument(
@@ -1245,11 +1248,12 @@ public class C100RespondentSolicitorServiceTest {
             .build();
 
         Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("c100RespC8Template")
-            .build();
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentHash(generatedDocumentInfo.getHashToken())
+                .documentFileName("c100RespC8Template")
+                .documentCreatedOn(new Date())
+                .build();
 
         caseData = caseData.toBuilder()
             .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())

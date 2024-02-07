@@ -770,6 +770,8 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> submitC7ResponseForActiveRespondent(String authorisation, CallbackRequest callbackRequest) throws Exception {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        List<QuarantineLegalDoc> quarantineLegalDocList = new ArrayList<>();
+        UserDetails userDetails = userService.getUserDetails(authorisation);
         CaseData caseData = objectMapper.convertValue(
             updatedCaseData,
             CaseData.class
@@ -800,11 +802,11 @@ public class C100RespondentSolicitorService {
             Map<String, Object> dataMap = generateRespondentDocsAndUpdateCaseData(
                 authorisation,
                 callbackRequest,
-                updatedCaseData,
                 caseData,
                 representedRespondent,
                 party,
-                createdBy
+                createdBy,
+                    quarantineLegalDocList
             );
 
             generateC8AndUpdateCaseData(
@@ -817,22 +819,21 @@ public class C100RespondentSolicitorService {
                 dataMap
             );
         }
-
+        moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
         return updatedCaseData;
     }
 
     private Map<String, Object> generateRespondentDocsAndUpdateCaseData(
         String authorisation,
         CallbackRequest callbackRequest,
-        Map<String, Object> updatedCaseData,
         CaseData caseData,
         Element<PartyDetails> representedRespondent,
         String party,
-        String createdBy
+        String createdBy,
+        List<QuarantineLegalDoc> quarantineLegalDocList
     ) throws Exception {
-        Document c7FinalDocument = null;
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
-        c7FinalDocument = documentGenService.generateSingleDocument(
+        Document c7FinalDocument  = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             SOLICITOR_C7_FINAL_DOCUMENT,
@@ -840,55 +841,18 @@ public class C100RespondentSolicitorService {
             dataMap
         );
         UserDetails userDetails = userService.getUserDetails(authorisation);
-        uploadC7DocumentToQuarantineTab(caseData,updatedCaseData, userDetails,c7FinalDocument,party);
+        quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
 
-        RespondentDocs respondentDocs = RespondentDocs.builder().build();
-        if (null != c7FinalDocument) {
-            respondentDocs = respondentDocs
-                .toBuilder()
-                .c7Document(ResponseDocuments
-                                .builder()
-                                .partyName(party)
-                                .createdBy(createdBy)
-                                .dateCreated(LocalDate.now())
-                                .citizenDocument(c7FinalDocument)
-                                .build()
-                )
-                .build();
-        }
-
-        Document c1aFinalDocument = null;
         if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
-            c1aFinalDocument = documentGenService.generateSingleDocument(
+            Document c1aFinalDocument = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 SOLICITOR_C1A_FINAL_DOCUMENT,
                 false,
                 dataMap
             );
-            uploadC1ADocumentToQuarantineTab(caseData,updatedCaseData, userDetails,c1aFinalDocument,party);
+            quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails,c1aFinalDocument));
         }
-
-        if (null != c1aFinalDocument) {
-            respondentDocs = respondentDocs
-                .toBuilder()
-                .c1aDocument(ResponseDocuments
-                                 .builder()
-                                 .partyName(party)
-                                 .createdBy(createdBy)
-                                 .dateCreated(LocalDate.now())
-                                 .citizenDocument(c1aFinalDocument)
-                                 .build()
-                )
-                .build();
-        }
-
-        if (null != caseData.getRespondentDocsList()) {
-            caseData.getRespondentDocsList().add(element(respondentDocs));
-        } else {
-            caseData.setRespondentDocsList(List.of(element(respondentDocs)));
-        }
-        updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         return dataMap;
     }
 
@@ -1366,45 +1330,45 @@ public class C100RespondentSolicitorService {
     }
 
 
-    private void uploadC7DocumentToQuarantineTab(CaseData caseData,
-                                                 Map<String, Object> caseDataUpdated,
-                                                 UserDetails userDetails, Document c7doc, String party) {
-        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
+    private void moveRespondentDocumentsToQuarantineTab(Map<String, Object> caseDataUpdated,
+                                                        UserDetails userDetails, List<QuarantineLegalDoc> quarantineLegalDocList) {
+        CaseData parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         String userRole = CaseUtils.getUserRole(userDetails);
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+        for (QuarantineLegalDoc eachDoc : quarantineLegalDocList) {
+            manageDocumentsService.setFlagsForWaTask(parsedCaseData, caseDataUpdated, userRole, eachDoc);
+            manageDocumentsService.moveDocumentsToQuarantineTab(eachDoc, parsedCaseData, caseDataUpdated, userRole);
+            parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        }
+    }
+
+    private QuarantineLegalDoc getC7QuarantineLegalDoc(UserDetails userDetails, Document c7doc) {
+        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
+        return QuarantineLegalDoc.builder()
                 .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                 .categoryId("respondentApplication")
                 .categoryName("Respondent Application")
-                .isRestricted(Yes)
-                .fileName(party + "_" + c7doc.getDocumentFileName())
-                .restrictedDetails("test")
+                .fileName(c7doc.getDocumentFileName())
+                .isConfidential(Yes)
                 .uploadedBy(userDetails.getFullName())
-                .uploadedByIdamId(userDetails.getId())
                 .uploaderRole(loggedInUserType)
-                .respondentApplicationDocument(c7doc)
+                .document(c7doc)
                 .build();
-        manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
-        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
+
     }
 
-    private void uploadC1ADocumentToQuarantineTab(CaseData caseData,
-                                                  Map<String, Object> caseDataUpdated,
-                                                  UserDetails userDetails, Document c1Adoc, String party) {
+    private QuarantineLegalDoc getC1AQuarantineLegalDoc(UserDetails userDetails, Document c1aDoc) {
         String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
-        String userRole = CaseUtils.getUserRole(userDetails);
-        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+        return QuarantineLegalDoc.builder()
                 .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                 .categoryId("respondentC1AApplication")
                 .categoryName("Respondent C1A Application")
-                .isRestricted(Yes)
-                .fileName(party + "_" + c1Adoc.getDocumentFileName())
-                .restrictedDetails("test")
+                .isConfidential(Yes)
+                .fileName(c1aDoc.getDocumentFileName())
                 .uploadedBy(userDetails.getFullName())
-                .uploadedByIdamId(userDetails.getId())
                 .uploaderRole(loggedInUserType)
-                .respondentC1AResponseDocument(c1Adoc)
+                .document(c1aDoc)
                 .build();
-        manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, userRole, quarantineLegalDoc);
-        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, userRole);
     }
+
+
 }
