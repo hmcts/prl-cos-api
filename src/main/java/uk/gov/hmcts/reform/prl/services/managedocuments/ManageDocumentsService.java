@@ -176,6 +176,7 @@ public class ManageDocumentsService {
 
         String userRole = CaseUtils.getUserRole(userDetails);
         List<Element<ManageDocuments>> manageDocuments = caseData.getDocumentManagementDetails().getManageDocuments();
+        boolean isWaTaskSetForFirstDocumentIteration = false;
         for (Element<ManageDocuments> element : manageDocuments) {
             CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
             ManageDocuments manageDocument = element.getValue();
@@ -192,7 +193,10 @@ public class ManageDocumentsService {
                     userRole
                 );
             } else {
-                setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                if (!isWaTaskSetForFirstDocumentIteration) {
+                    isWaTaskSetForFirstDocumentIteration = true;
+                    setFlagsForWaTask(updatedCaseData, caseDataUpdated, userRole, quarantineLegalDoc);
+                }
                 moveDocumentsToQuarantineTab(quarantineLegalDoc, updatedCaseData, caseDataUpdated, userRole);
             }
         }
