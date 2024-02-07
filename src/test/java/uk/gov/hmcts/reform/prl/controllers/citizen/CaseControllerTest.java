@@ -364,10 +364,10 @@ public class CaseControllerTest {
             1234567891234567L).data(stringObjectMap).build();
 
         String caseId = "1234567891234567";
-        String accessCode = "e3ceb507";
+        String accessCode = "e3c507";
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        doNothing().when(caseService).linkCitizenToCase(authToken, servAuthToken, accessCode, caseId);
+        when(caseService.linkCitizenToCase(any(), any(), any(), any())).thenReturn(caseDetails);
         caseController.linkCitizenToCase(authToken, caseId, servAuthToken, accessCode);
         assertNotNull(caseData);
 
