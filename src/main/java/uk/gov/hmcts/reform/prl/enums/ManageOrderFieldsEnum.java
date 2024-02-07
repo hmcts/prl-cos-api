@@ -301,9 +301,7 @@ public enum ManageOrderFieldsEnum {
     draftOrderOptions("draftOrderOptions"),
     legalRepInstructionsPlaceHolder("legalRepInstructionsPlaceHolder"),
     editOrderTextInstructions("editOrderTextInstructions"),
-    orderNameForWA("orderNameForWA"),
-    tempHearingCaseId("tempHearingCaseId"),
-    tempHearingCaseIdUpload("tempHearingCaseIdUpload");
+    orderNameForWA("orderNameForWA");
 
     private final String value;
 
