@@ -359,10 +359,13 @@ public class ManageOrdersUtils {
         }
     }
 
-    public static boolean isOrderEdited(CaseData caseData, String eventId, boolean isOrderEdited) {
+    public static boolean isOrderEdited(CaseData caseData, String eventId) {
+        boolean isOrderEdited = false;
         if (Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId()
             .equalsIgnoreCase(eventId)) {
-            if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())) {
+            if (YesOrNo.Yes.equals(caseData.getDoYouWantToEditTheOrder())
+                || (caseData.getManageOrders() != null
+                && Yes.equals(caseData.getManageOrders().getMakeChangesToUploadedOrder()))) {
                 isOrderEdited = true;
             }
         } else if (Event.EDIT_AND_APPROVE_ORDER.getId()

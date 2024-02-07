@@ -2709,8 +2709,7 @@ public class ManageOrderService {
             caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
-            boolean isOrderEdited = false;
-            if (ManageOrdersUtils.isOrderEdited(caseData, eventId, isOrderEdited)) {
+            if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
                 setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
                 setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),
