@@ -3734,6 +3734,7 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(serviceOfApplication)
             .applicants(partyDetailsList)
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .c8Document(Document.builder().build())
             .build();
         Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
             caseData,
@@ -3762,6 +3763,7 @@ public class ServiceOfApplicationServiceTest {
             .serviceOfApplication(serviceOfApplication)
             .applicants(partyDetailsList)
             .caseTypeOfApplication(C100_CASE_TYPE)
+            .c8Document(Document.builder().build())
             .build();
         Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
             caseData,
@@ -3790,6 +3792,7 @@ public class ServiceOfApplicationServiceTest {
                 FL401OrderTypeEnum.occupationOrder)).build())
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetails)
+            .c8Document(Document.builder().build())
             .serviceOfApplication(serviceOfApplication)
             .build();
         Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(

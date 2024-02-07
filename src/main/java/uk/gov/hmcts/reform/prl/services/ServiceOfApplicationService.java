@@ -925,8 +925,7 @@ public class ServiceOfApplicationService {
         String isC8CheckNeeded = NO;
         String responsibleForService = null;
         if (Event.SOA.getId().equals(eventId)) {
-            if (null != caseData.getServiceOfApplication().getIsConfidential()
-                && Yes.equals(caseData.getServiceOfApplication().getIsConfidential())) {
+            if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
                 isC8CheckNeeded = YES;
             }
             responsibleForService = getResponsibleForService(caseData);
@@ -1836,7 +1835,7 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
             caseData);
