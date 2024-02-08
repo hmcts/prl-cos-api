@@ -193,6 +193,23 @@ public class ManageDocumentsControllerTest {
     }
 
     @Test
+    public void testCopyManageDocsMidIfErrorsExist() {
+
+        UserDetails userDetailsSolicitorRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(SOLICITOR_ROLE))
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+        when(manageDocumentsService.validateCourtUser(any(), any())).thenReturn(List.of("errors"));
+
+        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
+        verify(manageDocumentsService).validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
+
+    }
+
+    @Test
     public void testCopyManageDocsMid_notSolicitor() {
 
         UserDetails userDetailsCafcassRole = UserDetails.builder()
@@ -206,6 +223,4 @@ public class ManageDocumentsControllerTest {
         manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
         verify(manageDocumentsService, times(1)).validateRestrictedReason(any(),any());
     }
-
-
 }
