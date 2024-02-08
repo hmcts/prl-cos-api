@@ -220,6 +220,8 @@ public class C100RespondentSolicitorService {
 
                     break;
                 case RESPOND_ALLEGATION_OF_HARM:
+                    log.info("AboutToStart BEFORE : {}",
+                             solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm().toString());
                     caseDataUpdated.put(
                         event.getCaseFieldName(),
                         solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
@@ -355,6 +357,13 @@ public class C100RespondentSolicitorService {
     }
 
     private Response buildRespondAllegationOfHarm(CaseData caseData, Response buildResponseForRespondent) {
+        log.info("AboutToSubmit buildRespondAllegationOfHarm : {}",
+                 buildResponseForRespondent.toString());
+        log.info("AboutToSubmit caseData.getRespondentSolicitorData()\n"
+                   +  "                     .getResponseToAllegationsOfHarm() : {}",
+                 caseData.getRespondentSolicitorData()
+                     .getResponseToAllegationsOfHarm());
+
         ResponseToAllegationsOfHarm responseToAllegationsOfHarm = optimiseResponseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
                                                                                                           .getResponseToAllegationsOfHarm());
 
