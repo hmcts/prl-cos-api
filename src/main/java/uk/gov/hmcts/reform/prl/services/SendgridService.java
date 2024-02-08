@@ -262,23 +262,21 @@ public class SendgridService {
     private void attachFiles(String authorization, Mail mail, Map<String,
         String> emailProps, List<Document> documents) {
         String s2sToken = authTokenGenerator.generate();
-
-        for (Document d : documents) {
+        documents.parallelStream().forEach( document -> {
             Attachments attachments = new Attachments();
             String documentAsString = "";
             documentAsString = Base64.getEncoder().encodeToString(documentGenService
                                                                       .getDocumentBytes(
-                                                                          d.getDocumentUrl(),
+                                                                          document.getDocumentUrl(),
                                                                           authorization,
                                                                           s2sToken
                                                                       ));
-            attachments.setFilename(d.getDocumentFileName());
+            attachments.setFilename(document.getDocumentFileName());
             attachments.setType(emailProps.get("attachmentType"));
             attachments.setDisposition(emailProps.get("disposition"));
             attachments.setContent(documentAsString);
             mail.addAttachments(attachments);
-
-        }
+        });
     }
 
 }
