@@ -136,6 +136,14 @@ public class CommonUtils {
             if (caseData.getRespondentsFL401().getPartyId() == null) {
                 caseData.getRespondentsFL401().setPartyId(generateUuid());
             }
+            if (caseData.getRespondentsFL401().getSolicitorPartyId() == null
+                && (caseData.getRespondentsFL401().getRepresentativeFirstName() != null
+                || caseData.getRespondentsFL401().getRepresentativeLastName() != null)) {
+                caseData.getRespondentsFL401().setSolicitorPartyId(generateUuid());
+            }
+            if (caseData.getRespondentsFL401().getSolicitorOrgUuid() == null) {
+                caseData.getRespondentsFL401().setSolicitorOrgUuid(generateUuid());
+            }
         }
     }
 
@@ -166,7 +174,7 @@ public class CommonUtils {
             .listItems(listItems).build();
     }
 
-    public static String[] getPersonalCode(JudicialUser judgeDetails) {
+    public static String[] getPersonalCode(Object judgeDetails) {
         String[] personalCodes = new String[3];
         try {
             personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
@@ -175,6 +183,20 @@ public class CommonUtils {
             log.error(e.getMessage());
         }
         return personalCodes;
+    }
+
+    public static String[] getIdamId(Object judgeDetails) {
+        String[] idamIds = new String[3];
+        try {
+            idamIds[0] = new ObjectMapper().readValue(
+                new ObjectMapper()
+                    .writeValueAsString(judgeDetails),
+                JudicialUser.class
+            ).getIdamId();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return idamIds;
     }
 
     public static LocalDate formattedLocalDate(String date, String pattern) {
