@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -67,9 +68,9 @@ public class UpdatePartyDetailsService {
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
-        final Flags caseFlags = Flags.builder().build();
+        // final Flags caseFlags = Flags.builder().build();
 
-        updatedCaseData.put("caseFlags", caseFlags);
+        // updatedCaseData.put("caseFlags", caseFlags);
 
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
@@ -87,11 +88,89 @@ public class UpdatePartyDetailsService {
             if (Objects.nonNull(fl401Applicant)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
                 updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
+                String daApplicantExternalFlags = String.format(PartyRole.Representing.DAAPPLICANT.getCaseDataExternalField(), 1);
+                String daApplicantInternalFlags = String.format(PartyRole.Representing.DAAPPLICANT.getCaseDataInternalField(), 1);
+                if (updatedCaseData.containsKey(daApplicantExternalFlags)) {
+                    Flags externalFlags = objectMapper.convertValue(
+                        updatedCaseData.get(daApplicantExternalFlags),
+                        Flags.class
+                    );
+
+                    externalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
+                    updatedCaseData.put(daApplicantExternalFlags, externalFlags);
+                }
+                if (updatedCaseData.containsKey(daApplicantInternalFlags)) {
+                    Flags internalFlags = objectMapper.convertValue(
+                        updatedCaseData.get(daApplicantInternalFlags),
+                        Flags.class
+                    );
+                    internalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
+                    updatedCaseData.put(daApplicantInternalFlags, internalFlags);
+                }
+
+                String daApplicantSolicitorExternalFlags = String.format(PartyRole.Representing.DAAPPLICANTSOLICITOR.getCaseDataExternalField(), 1);
+                String daApplicantSolicitorInternalFlags = String.format(PartyRole.Representing.DAAPPLICANTSOLICITOR.getCaseDataInternalField(), 1);
+                if (updatedCaseData.containsKey(daApplicantSolicitorExternalFlags)) {
+                    Flags solicitorExternalFlags = objectMapper.convertValue(
+                        updatedCaseData.get(daApplicantSolicitorExternalFlags),
+                        Flags.class
+                    );
+                    solicitorExternalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
+                    updatedCaseData.put(daApplicantSolicitorExternalFlags, solicitorExternalFlags);
+                }
+
+                if (updatedCaseData.containsKey(daApplicantInternalFlags)) {
+                    Flags solicitorInternalFlags = objectMapper.convertValue(
+                        updatedCaseData.get(daApplicantInternalFlags),
+                        Flags.class
+                    );
+                    solicitorInternalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
+                    updatedCaseData.put(daApplicantInternalFlags, solicitorInternalFlags);
+                }
             }
 
             if (Objects.nonNull(fl401respondent)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
                 updatedCaseData.put("respondentName", fl401respondent.getLabelForDynamicList());
+                String daRespondentExternalFlags = String.format(PartyRole.Representing.DARESPONDENT.getCaseDataExternalField(), 1);
+                String daRespondentInternalFlags = String.format(PartyRole.Representing.DARESPONDENT.getCaseDataInternalField(), 1);
+                if (updatedCaseData.containsKey(daRespondentExternalFlags)) {
+                    Flags externalFlags = objectMapper.convertValue(
+                        updatedCaseData.get(daRespondentExternalFlags),
+                        Flags.class
+                    );
+
+                    externalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
+                    updatedCaseData.put(daRespondentExternalFlags, externalFlags);
+                }
+                if (updatedCaseData.containsKey(daRespondentInternalFlags)) {
+                    Flags internalFlags = objectMapper.convertValue(
+                        updatedCaseData.get(daRespondentInternalFlags),
+                        Flags.class
+                    );
+                    internalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
+                    updatedCaseData.put(daRespondentInternalFlags, internalFlags);
+                }
+
+                String daRespondentSolicitorExternalFlags = String.format(PartyRole.Representing.DARESPONDENTSOLICITOR.getCaseDataExternalField(), 1);
+                String daApplicantSolicitorInternalFlags = String.format(PartyRole.Representing.DARESPONDENTSOLICITOR.getCaseDataInternalField(), 1);
+                if (updatedCaseData.containsKey(daRespondentSolicitorExternalFlags)) {
+                    Flags solicitorExternalFlags = objectMapper.convertValue(
+                        updatedCaseData.get(daRespondentSolicitorExternalFlags),
+                        Flags.class
+                    );
+                    solicitorExternalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
+                    updatedCaseData.put(daRespondentSolicitorExternalFlags, solicitorExternalFlags);
+                }
+
+                if (updatedCaseData.containsKey(daRespondentInternalFlags)) {
+                    Flags solicitorInternalFlags = objectMapper.convertValue(
+                        updatedCaseData.get(daRespondentInternalFlags),
+                        Flags.class
+                    );
+                    solicitorInternalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
+                    updatedCaseData.put(daRespondentInternalFlags, solicitorInternalFlags);
+                }
             }
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
