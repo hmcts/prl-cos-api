@@ -2506,7 +2506,7 @@ public class ManageOrderService {
             && (caseData.getRespondents().size() > 1 || caseData.getApplicants().size() > 1)) {
             caseDataUpdated.put("sdoFactFindingFlag", "<div class=\"govuk-inset-text\"> "
                 + "If you need to include directions for a fact-finding hearing, you need to upload the"
-                + " order in manage orders instead..</div>");
+                + " order in manage orders instead.</div>");
         }
     }
 
