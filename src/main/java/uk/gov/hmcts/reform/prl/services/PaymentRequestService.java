@@ -101,12 +101,8 @@ public class PaymentRequestService {
             caseId
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseData = buildApplicantAndRespondentForCaseName(caseData);
-        log.info("caseName after being set is {}", caseData.getApplicantCaseName());
-
         createPaymentRequest = createPaymentRequest.toBuilder()
-            .applicantCaseName(caseData.getApplicantCaseName()).build();
-        log.info("paymentrequest is {}", createPaymentRequest);
+            .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData)).build();
         log.info("caseName in paymentrequest is {}", createPaymentRequest.getApplicantCaseName());
 
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
@@ -166,8 +162,7 @@ public class PaymentRequestService {
         }
     }
 
-    private CaseData buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
-        CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
+    private String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
         ObjectMapper mapper = new ObjectMapper();
         C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
@@ -183,12 +178,11 @@ public class PaymentRequestService {
                     .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
             }
         }
-        return buildCaseName(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
+        return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
     }
 
-    private CaseData buildCaseName(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
-                                                        C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
-                                                        C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
+    private String buildCaseName(C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
+                                 C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
         String caseName = null;
         if (null != c100RebuildApplicantDetailsElements
             && null != c100RebuildRespondentDetailsElements.getRespondentDetails()) {
@@ -197,7 +191,7 @@ public class PaymentRequestService {
         }
 
         log.info("caseName is {}", caseName);
-        return caseDataBuilder.applicantCaseName(caseName).build();
+        return caseName;
     }
 
     private PaymentResponse getPaymentResponse(String authorization, CreatePaymentRequest createPaymentRequest,
