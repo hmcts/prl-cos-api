@@ -139,20 +139,4 @@ public class ManageDocumentsController extends AbstractCallbackController {
                       .confirmationBody(CONFIRMATION_BODY)
                       .build());
     }
-
-    //TO BE DELETED
-    @PostMapping("/validate-court-user")
-    public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        if (manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)
-            && !manageDocumentsService.checkIfUserIsCourtStaff(null)) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
-                .build();
-        }
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(updatedCaseData).build();
-    }
 }

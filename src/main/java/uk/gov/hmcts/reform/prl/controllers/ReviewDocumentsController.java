@@ -105,7 +105,6 @@ public class ReviewDocumentsController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         log.info(
             "/copy-manage-docs/about-to-submit::CallbackRequest -> {}",
