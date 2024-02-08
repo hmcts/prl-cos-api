@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -354,15 +353,13 @@ public class ManageDocumentsService {
      */
     public String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
         if (quarantineLegalDoc.getIsConfidential() != null && (!(YesOrNo.No.equals(quarantineLegalDoc.getIsConfidential())
-                && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())))) {
-                if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
-                    && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
-                    return CONFIDENTIAL_DOCUMENTS;
-                } else {
-                    return RESTRICTED_DOCUMENTS;
-                }
-
-
+            && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())))) {
+            if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
+                && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
+                return CONFIDENTIAL_DOCUMENTS;
+            } else {
+                return RESTRICTED_DOCUMENTS;
+            }
         }
         return null;
     }
