@@ -869,7 +869,9 @@ public class PrlAppsConstants {
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
-
+    public static final String ALLOCATE_JUDGE_ROLE = "allocated-judge";
+    public static final String HEARING_JUDGE_ROLE = "hearing-judge";
+    public static final String GATEKEEPING_JUDGE_ROLE = "gatekeeping-judge";
     public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
 
     // PRL-5025
