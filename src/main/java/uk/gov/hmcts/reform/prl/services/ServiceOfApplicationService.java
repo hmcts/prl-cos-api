@@ -568,7 +568,7 @@ public class ServiceOfApplicationService {
                                                                          List<Document> c100StaticDocs,
                                                                          Map<String, Object> caseDataMap) {
         List<Document> packjDocs = getDocumentsForCaOrBailiffToServeApplicantSolcitor(caseData, authorization, c100StaticDocs,
-                                                                                      true);
+                                                                                      false);
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
@@ -1391,7 +1391,6 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.D -> docs.addAll(generatePackD(caseData, staticDocs));
             case PrlAppsConstants.E -> docs.addAll(generatePackE(caseData, staticDocs));
             case PrlAppsConstants.F -> docs.addAll(generatePackF(caseData, staticDocs));
-            case PrlAppsConstants.G -> docs.addAll(generatePackG(caseData, staticDocs));
             case PrlAppsConstants.H -> docs.addAll(generatePackH(caseData, staticDocs));
             case PrlAppsConstants.I -> docs.addAll(generatePackI(caseData, staticDocs));
             case PrlAppsConstants.J -> docs.addAll(generatePackJ(caseData, staticDocs));
@@ -1466,8 +1465,8 @@ public class ServiceOfApplicationService {
     private List<Document> generatePackZ(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         log.info("{}",staticDocs);
         return docs;
     }
@@ -1475,9 +1474,10 @@ public class ServiceOfApplicationService {
     private List<Document> generatePackHI(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(staticDocs);
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
+        // TO DO Remove notice of safety
         return docs;
     }
 
@@ -1500,8 +1500,8 @@ public class ServiceOfApplicationService {
     private List<Document> generatePackH(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
+        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         log.info("{}",staticDocs);
         return docs;
     }
@@ -1616,19 +1616,10 @@ public class ServiceOfApplicationService {
     private List<Document> generatePackF(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(staticDocs.stream()
                         .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_FL415_FILENAME)).toList());
-        return docs;
-    }
-
-    private List<Document> generatePackG(CaseData caseData, List<Document> staticDocs) {
-        List<Document> docs = new ArrayList<>();
-        docs.addAll(getCaseDocs(caseData));
+        docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        docs.addAll(getSoaSelectedOrders(caseData));
-        log.info("{}",staticDocs);
         return docs;
     }
 
@@ -2105,7 +2096,7 @@ public class ServiceOfApplicationService {
                 caseData,
                 authorization,
                 c100StaticDocs,
-                true
+                false
             );
             List<Document> packkDocs = getDocumentsForCaorBailiffToServeRespondents(
                 caseData,
@@ -2452,7 +2443,7 @@ public class ServiceOfApplicationService {
             emailNotificationDetails.addAll(sendEmailCaPersonalApplicantLegalRep(
                 caseData,
                 authorization,
-                unwrapElements(unServedApplicantPack.getPackDocument())
+                unwrapElements(unServedRespondentPack.getPackDocument())
             ));
         }
     }
