@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.gatekeeping;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
@@ -34,6 +36,7 @@ import java.util.Map;
 import javax.ws.rs.NotFoundException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
@@ -47,18 +50,22 @@ public class AllocateJudgeController extends AbstractCallbackController {
     private final AllocatedJudgeService allocatedJudgeService;
     private final AuthorisationService authorisationService;
 
+    private final RoleAssignmentService roleAssignmentService;
+
     @Autowired
     protected AllocateJudgeController(ObjectMapper objectMapper,
                                       EventService eventPublisher,
                                       CaseSummaryTabService caseSummaryTabService,
                                       RefDataUserService refDataUserService,
                                       AllocatedJudgeService allocatedJudgeService,
-                                      AuthorisationService authorisationService) {
+                                      AuthorisationService authorisationService,
+                                      RoleAssignmentService roleAssignmentService) {
         super(objectMapper, eventPublisher);
         this.caseSummaryTabService = caseSummaryTabService;
         this.refDataUserService = refDataUserService;
         this.allocatedJudgeService = allocatedJudgeService;
         this.authorisationService = authorisationService;
+        this.roleAssignmentService = roleAssignmentService;
     }
 
     @PostMapping(path = "/pre-populate-legalAdvisor-details", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -92,16 +99,24 @@ public class AllocateJudgeController extends AbstractCallbackController {
     public AboutToStartOrSubmitCallbackResponse allocateJudge(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
-                                                                                           caseData.getLegalAdviserList(),
-                                                                                           refDataUserService
+            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
+                caseDataUpdated,
+                caseData.getLegalAdviserList(),
+                refDataUserService
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+
+            roleAssignmentService.createRoleAssignment(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                false,
+                ALLOCATE_JUDGE_ROLE
+            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

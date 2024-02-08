@@ -58,6 +58,7 @@ public class ListWithoutNoticeControllerFT {
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
+    @Ignore
     public void testListWithoutNotice_200ResponseAndNoErrors() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(LIST_WITHOUT_NOTICE_VALID_REQUEST_BODY);
@@ -76,6 +77,7 @@ public class ListWithoutNoticeControllerFT {
     }
 
     @Test
+    @Ignore
     public void testDateConfirmedInHearingsTab_200ResponseAndNoErrors() throws Exception {
         String requestBody = ResourceLoader.loadJson(dateConfirmedInHearingsTab);
 

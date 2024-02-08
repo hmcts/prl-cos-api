@@ -93,6 +93,7 @@ import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getApplicantSolicitorNameL
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getFL401SolicitorName;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyNameList;
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getRespondentSolicitorNameList;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -489,7 +490,7 @@ public class HearingDataService {
 
     private List<JudicialUsersApiResponse> getJudgeDetails(JudicialUser hearingJudgeNameAndEmail) {
 
-        String[] judgePersonalCode = allocatedJudgeService.getPersonalCode(hearingJudgeNameAndEmail);
+        String[] judgePersonalCode = getPersonalCode(hearingJudgeNameAndEmail);
         return refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder()
                                                                 .personalCode(judgePersonalCode).build());
     }

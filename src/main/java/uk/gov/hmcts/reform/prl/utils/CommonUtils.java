@@ -164,7 +164,7 @@ public class CommonUtils {
             .listItems(listItems).build();
     }
 
-    public static String[] getPersonalCode(JudicialUser judgeDetails) {
+    public static String[] getPersonalCode(Object judgeDetails) {
         String[] personalCodes = new String[3];
         try {
             personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
@@ -173,6 +173,20 @@ public class CommonUtils {
             log.error(e.getMessage());
         }
         return personalCodes;
+    }
+
+    public static String[] getIdamId(Object judgeDetails) {
+        String[] idamIds = new String[3];
+        try {
+            idamIds[0] = new ObjectMapper().readValue(
+                new ObjectMapper()
+                    .writeValueAsString(judgeDetails),
+                JudicialUser.class
+            ).getIdamId();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return idamIds;
     }
 
     public static LocalDate formattedLocalDate(String date, String pattern) {
