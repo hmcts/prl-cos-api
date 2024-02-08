@@ -196,6 +196,7 @@ public class ManageOrderService {
 
     public static final String EMAIL = "email";
     public static final String POST = "post";
+    public static final String SDO_FACT_FINDING_FLAG = "sdoFactFindingFlag";
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
@@ -2504,9 +2505,11 @@ public class ManageOrderService {
                                                                        Map<String, Object> caseDataUpdated) {
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && (caseData.getRespondents().size() > 1 || caseData.getApplicants().size() > 1)) {
-            caseDataUpdated.put("sdoFactFindingFlag", "<div class=\"govuk-inset-text\"> "
+            caseDataUpdated.put(SDO_FACT_FINDING_FLAG, "<div class=\"govuk-inset-text\"> "
                 + "If you need to include directions for a fact-finding hearing, you need to upload the"
                 + " order in manage orders instead.</div>");
+        } else {
+            caseDataUpdated.put(SDO_FACT_FINDING_FLAG, null);
         }
     }
 
