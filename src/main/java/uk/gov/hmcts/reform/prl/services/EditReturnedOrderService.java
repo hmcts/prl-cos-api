@@ -171,7 +171,6 @@ public class EditReturnedOrderService {
             .otherDetails(draftOrder.getOtherDetails().toBuilder()
                               .status(manageOrderService.getOrderStatus(null, null,
                                                                         Event.EDIT_RETURNED_ORDER.getId(), null))
-                              .isJudgeApprovalNeeded(Yes)
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())

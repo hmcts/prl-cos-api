@@ -375,6 +375,8 @@ public class ManageOrdersUtils {
             || OrderApprovalDecisionsForSolicitorOrderEnum.editTheOrderAndServe
             .equals(caseData.getManageOrders().getWhatToDoWithOrderSolicitor())))) {
             isOrderEdited = true;
+        } else if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
+            isOrderEdited = true;//default true for edit returned order
         }
         return isOrderEdited;
     }

@@ -929,20 +929,17 @@ public class DraftAnOrderService {
         List<Element<DraftOrder>> draftOrderCollection = caseData.getDraftOrderCollection();
         String loggedInUserType = manageOrderService.getLoggedInUserType(authorisation);
         UUID selectedOrderId;
-        boolean isOrderEdited;
         if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)) {
             selectedOrderId = elementUtils.getDynamicListSelectedValue(
                 caseData.getManageOrders().getRejectedOrdersDynamicList(), objectMapper);
-            isOrderEdited = true;//default true for edit returned order
         } else {
             selectedOrderId = elementUtils.getDynamicListSelectedValue(
                 caseData.getDraftOrdersDynamicList(), objectMapper);
-            isOrderEdited = ManageOrdersUtils.isOrderEdited(caseData, eventId);
         }
         for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
             if (e.getId().equals(selectedOrderId)) {
                 DraftOrder draftOrder = e.getValue();
-                if (isOrderEdited) {
+                if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
                     Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
                     if (isHearingPageNeeded(draftOrder.getOrderType(), draftOrder.getC21OrderOptions())) {
                         caseData.getManageOrders().setOrdersHearingDetails(hearingDataService
