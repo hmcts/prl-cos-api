@@ -850,6 +850,7 @@ public class DraftAnOrderService {
         }
         //refactored to a private method
         updateHearingsType(caseData, caseDataMap, selectedOrder, authorization);
+        caseDataMap.put(ORDER_UPLOADED_AS_DRAFT_FLAG, selectedOrder.getIsOrderUploadedByJudgeOrAdmin());
         return caseDataMap;
     }
 
