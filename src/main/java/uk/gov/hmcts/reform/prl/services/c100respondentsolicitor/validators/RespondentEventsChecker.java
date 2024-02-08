@@ -13,7 +13,6 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
@@ -31,7 +30,6 @@ public class RespondentEventsChecker {
     private final KeepDetailsPrivateChecker keepDetailsPrivateChecker;
     private final RespondentMiamChecker respondentMiamChecker;
     private final AbilityToParticipateChecker abilityToParticipateChecker;
-    private final AttendToCourtChecker attendToCourtChecker;
     private final CurrentOrPastProceedingsChecker currentOrPastProceedingsChecker;
     private final InternationalElementsChecker internationalElementsChecker;
     private final RespondentContactDetailsChecker respondentContactDetailsChecker;
@@ -46,7 +44,6 @@ public class RespondentEventsChecker {
         eventStatus.put(CONSENT, consentToApplicationChecker);
         eventStatus.put(KEEP_DETAILS_PRIVATE, keepDetailsPrivateChecker);
         eventStatus.put(ABILITY_TO_PARTICIPATE, abilityToParticipateChecker);
-        eventStatus.put(ATTENDING_THE_COURT, attendToCourtChecker);
         eventStatus.put(MIAM, respondentMiamChecker);
         eventStatus.put(CURRENT_OR_PREVIOUS_PROCEEDINGS, currentOrPastProceedingsChecker);
         eventStatus.put(ALLEGATION_OF_HARM, respondentAllegationsOfHarmChecker);

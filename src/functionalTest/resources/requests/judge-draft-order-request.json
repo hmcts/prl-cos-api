@@ -52,22 +52,6 @@
                 "isAllDocumentsViewed": null,
                 "isAllegationOfHarmViewed": null
               },
-              "attendToCourt": {
-                "disabilityNeeds": null,
-                "haveAnyDisability": null,
-                "respondentWelshNeeds": null,
-                "respondentWelshNeedsList": [
-
-                ],
-                "respondentInterpreterNeeds": [
-
-                ],
-                "respondentIntermediaryNeeds": null,
-                "isRespondentNeededInterpreter": null,
-                "respondentSpecialArrangements": null,
-                "respondentIntermediaryNeedDetails": null,
-                "respondentSpecialArrangementDetails": null
-              },
               "citizenDetails": {
                 "address": {
                   "County": null,
@@ -3160,22 +3144,6 @@
                 "isAllDocumentsViewed": null,
                 "isAllegationOfHarmViewed": null
               },
-              "attendToCourt": {
-                "disabilityNeeds": null,
-                "haveAnyDisability": null,
-                "respondentWelshNeeds": null,
-                "respondentWelshNeedsList": [
-
-                ],
-                "respondentInterpreterNeeds": [
-
-                ],
-                "respondentIntermediaryNeeds": null,
-                "isRespondentNeededInterpreter": null,
-                "respondentSpecialArrangements": null,
-                "respondentIntermediaryNeedDetails": null,
-                "respondentSpecialArrangementDetails": null
-              },
               "citizenDetails": {
                 "address": {
                   "County": null,
@@ -3653,22 +3621,6 @@
                 "isAllDocumentsViewed": null,
                 "isAllegationOfHarmViewed": null
               },
-              "attendToCourt": {
-                "disabilityNeeds": null,
-                "haveAnyDisability": null,
-                "respondentWelshNeeds": null,
-                "respondentWelshNeedsList": [
-
-                ],
-                "respondentInterpreterNeeds": [
-
-                ],
-                "respondentIntermediaryNeeds": null,
-                "isRespondentNeededInterpreter": null,
-                "respondentSpecialArrangements": null,
-                "respondentIntermediaryNeedDetails": null,
-                "respondentSpecialArrangementDetails": null
-              },
               "citizenDetails": {
                 "address": {
                   "County": null,
@@ -4145,22 +4097,6 @@
                 "isResponseInitiated": null,
                 "isAllDocumentsViewed": null,
                 "isAllegationOfHarmViewed": null
-              },
-              "attendToCourt": {
-                "disabilityNeeds": null,
-                "haveAnyDisability": null,
-                "respondentWelshNeeds": null,
-                "respondentWelshNeedsList": [
-
-                ],
-                "respondentInterpreterNeeds": [
-
-                ],
-                "respondentIntermediaryNeeds": null,
-                "isRespondentNeededInterpreter": null,
-                "respondentSpecialArrangements": null,
-                "respondentIntermediaryNeedDetails": null,
-                "respondentSpecialArrangementDetails": null
               },
               "citizenDetails": {
                 "address": {
@@ -4702,22 +4638,6 @@
                 "isAllDocumentsViewed": null,
                 "isAllegationOfHarmViewed": null
               },
-              "attendToCourt": {
-                "disabilityNeeds": null,
-                "haveAnyDisability": null,
-                "respondentWelshNeeds": null,
-                "respondentWelshNeedsList": [
-
-                ],
-                "respondentInterpreterNeeds": [
-
-                ],
-                "respondentIntermediaryNeeds": null,
-                "isRespondentNeededInterpreter": null,
-                "respondentSpecialArrangements": null,
-                "respondentIntermediaryNeedDetails": null,
-                "respondentSpecialArrangementDetails": null
-              },
               "citizenDetails": {
                 "address": {
                   "County": null,
@@ -5194,22 +5114,6 @@
                 "isAllDocumentsViewed": null,
                 "isAllegationOfHarmViewed": null
               },
-              "attendToCourt": {
-                "disabilityNeeds": null,
-                "haveAnyDisability": null,
-                "respondentWelshNeeds": null,
-                "respondentWelshNeedsList": [
-
-                ],
-                "respondentInterpreterNeeds": [
-
-                ],
-                "respondentIntermediaryNeeds": null,
-                "isRespondentNeededInterpreter": null,
-                "respondentSpecialArrangements": null,
-                "respondentIntermediaryNeedDetails": null,
-                "respondentSpecialArrangementDetails": null
-              },
               "citizenDetails": {
                 "address": {
                   "County": null,
@@ -5685,22 +5589,6 @@
                 "isResponseInitiated": null,
                 "isAllDocumentsViewed": null,
                 "isAllegationOfHarmViewed": null
-              },
-              "attendToCourt": {
-                "disabilityNeeds": null,
-                "haveAnyDisability": null,
-                "respondentWelshNeeds": null,
-                "respondentWelshNeedsList": [
-
-                ],
-                "respondentInterpreterNeeds": [
-
-                ],
-                "respondentIntermediaryNeeds": null,
-                "isRespondentNeededInterpreter": null,
-                "respondentSpecialArrangements": null,
-                "respondentIntermediaryNeedDetails": null,
-                "respondentSpecialArrangementDetails": null
               },
               "citizenDetails": {
                 "address": {

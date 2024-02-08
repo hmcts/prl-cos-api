@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidential
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
@@ -44,7 +43,6 @@ public class RespondentSolicitorData {
     private KeepDetailsPrivate keepContactDetailsPrivateOther;
     private String confidentialListDetails;
 
-    private final AttendToCourt respondentAttendingTheCourt;
 
     /**
      * Respondent solicitor's international element.

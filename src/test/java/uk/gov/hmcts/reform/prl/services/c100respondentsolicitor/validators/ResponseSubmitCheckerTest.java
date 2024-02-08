@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytopar
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -46,9 +45,6 @@ public class ResponseSubmitCheckerTest {
     RespondentMiamChecker respondentMiamChecker;
 
     @Mock
-    AttendToCourtChecker attendToCourtChecker;
-
-    @Mock
     CurrentOrPastProceedingsChecker currentOrPastProceedingsChecker;
 
     @Mock
@@ -79,9 +75,6 @@ public class ResponseSubmitCheckerTest {
                           .abilityToParticipate(AbilityToParticipate
                                                     .builder()
                                                     .build())
-                          .attendToCourt(AttendToCourt
-                                             .builder()
-                                             .build())
                           .currentOrPreviousProceedings(CurrentOrPreviousProceedings
                                                             .builder()
                                                             .build())
@@ -110,7 +103,6 @@ public class ResponseSubmitCheckerTest {
         when(respondentEventsChecker.getConsentToApplicationChecker()).thenReturn(consentToApplicationChecker);
         when(respondentEventsChecker.getKeepDetailsPrivateChecker()).thenReturn(keepDetailsPrivateChecker);
         when(respondentEventsChecker.getAbilityToParticipateChecker()).thenReturn(abilityToParticipateChecker);
-        when(respondentEventsChecker.getAttendToCourtChecker()).thenReturn(attendToCourtChecker);
         when(respondentEventsChecker.getCurrentOrPastProceedingsChecker()).thenReturn(currentOrPastProceedingsChecker);
         when(respondentEventsChecker.getRespondentAllegationsOfHarmChecker()).thenReturn(respondentAllegationsOfHarmChecker);
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
@@ -135,9 +127,6 @@ public class ResponseSubmitCheckerTest {
 
         when(respondentEventsChecker.getAbilityToParticipateChecker()).thenReturn(abilityToParticipateChecker);
         when(abilityToParticipateChecker.isFinished(respondent)).thenReturn(true);
-
-        when(respondentEventsChecker.getAttendToCourtChecker()).thenReturn(attendToCourtChecker);
-        when(attendToCourtChecker.isFinished(respondent)).thenReturn(true);
 
         when(respondentEventsChecker.getCurrentOrPastProceedingsChecker()).thenReturn(currentOrPastProceedingsChecker);
         when(currentOrPastProceedingsChecker.isFinished(respondent)).thenReturn(true);

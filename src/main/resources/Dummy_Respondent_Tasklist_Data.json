@@ -17,35 +17,6 @@
     "isAllDocumentsViewed": null,
     "isAllegationOfHarmViewed": null
   },
-  "attendToCourt": {
-    "disabilityNeeds": "A wheelchair user",
-    "haveAnyDisability": "Yes",
-    "respondentWelshNeeds": "Yes",
-    "respondentWelshNeedsList": [
-      "speakWelsh",
-      "readAndWriteWelsh"
-    ],
-    "respondentInterpreterNeeds": [
-      {
-        "id": "8a93f587-f5e4-4ac5-b2be-23d18dc773ba",
-        "value": {
-          "party": [
-            "respondent",
-            "applicant",
-            "other"
-          ],
-          "relationName": "godfather",
-          "requiredLanguage": "German",
-          "respondentOtherAssistance": "sign language"
-        }
-      }
-    ],
-    "respondentIntermediaryNeeds": "Yes",
-    "isRespondentNeededInterpreter": "Yes",
-    "respondentSpecialArrangements": "Yes",
-    "respondentIntermediaryNeedDetails": "yes we do",
-    "respondentSpecialArrangementDetails": "A screen to separate us"
-  },
   "citizenDetails": {
     "address": {
       "County": "",
