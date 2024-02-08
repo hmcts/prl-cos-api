@@ -951,16 +951,16 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             if (Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
                 if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-                    responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA().getDisplayedValue();
+                    responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA().getId();
                 } else {
-                    responsibleForService = caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().getDisplayedValue();
+                    responsibleForService = caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA().getId();
                 }
             }
         } else {
             if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-                responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA().getDisplayedValue();
+                responsibleForService = caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsDA().getId();
             } else {
-                responsibleForService = caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().getDisplayedValue();
+                responsibleForService = caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA().getId();
             }
         }
         return responsibleForService;

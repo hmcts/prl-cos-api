@@ -3771,7 +3771,7 @@ public class ServiceOfApplicationServiceTest {
         );
         assertEquals("Yes", resultMap.get("isC8CheckNeeded"));
         assertEquals(
-            SoaSolicitorServingRespondentsEnum.courtAdmin.getDisplayedValue(),
+            SoaSolicitorServingRespondentsEnum.courtAdmin.getId(),
             resultMap.get("responsibleForService")
         );
     }
@@ -3801,7 +3801,7 @@ public class ServiceOfApplicationServiceTest {
         );
         assertEquals(YES, resultMap.get("isC8CheckNeeded"));
         assertEquals(
-            SoaSolicitorServingRespondentsEnum.courtAdmin.getDisplayedValue(),
+            SoaSolicitorServingRespondentsEnum.courtAdmin.getId(),
             resultMap.get("responsibleForService")
         );
         assertEquals(YES, resultMap.get("isOccupationOrderSelected"));
