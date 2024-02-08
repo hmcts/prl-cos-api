@@ -88,6 +88,7 @@ import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -247,6 +248,9 @@ public class CallbackControllerTest {
 
     @Mock
     private AssignCaseAccessClient assignCaseAccessClient;
+
+    @Mock
+    private RoleAssignmentService roleAssignmentService;
 
     @Mock
     private LocationRefDataService locationRefDataService;
@@ -2303,7 +2307,8 @@ public class CallbackControllerTest {
                            .personalCode("testCode")
                            .build())
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null, refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
+            refDataUserService)).thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
@@ -2649,4 +2654,20 @@ public class CallbackControllerTest {
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
     }
 
+    @Test
+    public void fetchRoleAssignmentUserDoesntHaveRightRoles() {
+        when(roleAssignmentService.validateIfUserHasRightRoles(authToken, CallbackRequest.builder().build())).thenReturn(false);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
+        assertEquals("The selected user does not have right roles to assign this case",
+            aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void fetchRoleAssignmentUserHasRightRoles() {
+        when(roleAssignmentService.validateIfUserHasRightRoles(authToken, CallbackRequest.builder().build())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
 }
