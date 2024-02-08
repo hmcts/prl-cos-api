@@ -354,8 +354,8 @@ public class ManageOrderEmailService {
                 );
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA personal service email notifications ***");
-                handleSolicitorPersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
-                                                            manageOrders.getServingRespondentsOptionsCA());
+                handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
+                                                   manageOrders.getServingRespondentsOptionsCA());
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties())) {
@@ -381,8 +381,8 @@ public class ManageOrderEmailService {
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
             log.info("*** Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
-            handleSolicitorPersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
-                                                        manageOrders.getServingRespondentsOptionsDA());
+            handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
+                                               manageOrders.getServingRespondentsOptionsDA());
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)) {
                 manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
@@ -408,15 +408,15 @@ public class ManageOrderEmailService {
         caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
     }
 
-    private void handleSolicitorPersonalServiceNotifications(String authorisation, CaseData caseData,
-                                                             List<Document> orderDocuments,
-                                                             Map<String, Object> dynamicDataForEmail,
-                                                             SoaSolicitorServingRespondentsEnum respondentOption) {
+    private void handlePersonalServiceNotifications(String authorisation, CaseData caseData,
+                                                    List<Document> orderDocuments,
+                                                    Map<String, Object> dynamicDataForEmail,
+                                                    SoaSolicitorServingRespondentsEnum respondentOption) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
-                sendApplicantSolicitorOrderNotifications(
+                sendPersonalServiceNotifications(
                     party.getValue().getSolicitorEmail(),
                     respondentOption,
                     authorisation,
@@ -427,7 +427,7 @@ public class ManageOrderEmailService {
         } else {
             String solicitorEmail = caseData.getApplicantsFL401().getSolicitorEmail();
             dynamicDataForEmail.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
-            sendApplicantSolicitorOrderNotifications(
+            sendPersonalServiceNotifications(
                 solicitorEmail,
                 respondentOption,
                 authorisation,
@@ -437,9 +437,9 @@ public class ManageOrderEmailService {
         }
     }
 
-    private void sendApplicantSolicitorOrderNotifications(String solicitorEmail,
-                                                          SoaSolicitorServingRespondentsEnum respondentOption,
-                                                          String authorisation, List<Document> orderDocuments, Map<String,
+    private void sendPersonalServiceNotifications(String solicitorEmail,
+                                                  SoaSolicitorServingRespondentsEnum respondentOption,
+                                                  String authorisation, List<Document> orderDocuments, Map<String,
         Object> dynamicDataForEmail) {
         if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(respondentOption)) {
