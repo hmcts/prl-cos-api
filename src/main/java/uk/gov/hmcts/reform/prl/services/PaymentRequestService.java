@@ -96,9 +96,6 @@ public class PaymentRequestService {
             caseId
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
-        String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
-
         String caseName = null;
 
         if (null != caseData.getApplicants() && null != caseData.getApplicants().get(0).getValue()
@@ -109,6 +106,8 @@ public class PaymentRequestService {
 
         log.info("caseName is {}", caseName);
         caseData.toBuilder().applicantCaseName(caseName).build();
+        String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
+        String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
