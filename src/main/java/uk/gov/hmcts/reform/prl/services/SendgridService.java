@@ -263,7 +263,7 @@ public class SendgridService {
     private void attachFiles(String authorization, Mail mail, Map<String,
         String> emailProps, List<Document> documents) {
         String s2sToken = authTokenGenerator.generate();
-        documents.parallelStream().forEach( document -> {
+        documents.parallelStream().forEach(document -> {
             Attachments attachments = new Attachments();
             String documentAsString = "";
             documentAsString = Base64.getEncoder().encodeToString(documentGenService
