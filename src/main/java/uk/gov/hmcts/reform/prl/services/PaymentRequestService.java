@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,10 @@ import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
 import uk.gov.hmcts.reform.prl.clients.PaymentApi;
 import uk.gov.hmcts.reform.prl.models.FeeResponse;
 import uk.gov.hmcts.reform.prl.models.FeeType;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
@@ -28,7 +33,11 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
+import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
 
 @Slf4j
 @Service
@@ -96,17 +105,9 @@ public class PaymentRequestService {
             caseId
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        caseData = buildApplicantAndRespondentForCaseName(caseData);
         log.info("caseData is {}", caseData);
 
-        String caseName = null;
-        if (null != caseData.getApplicants() && null != caseData.getApplicants().get(0).getValue()
-            && null != caseData.getRespondents() && null != caseData.getRespondents().get(0).getValue()) {
-            caseName = caseData.getApplicants().get(0).getValue().getLastName() + " V "
-                + caseData.getRespondents().get(0).getValue().getLastName();
-        }
-
-        log.info("caseName is {}", caseName);
-        caseData.toBuilder().applicantCaseName(caseName).build();
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
@@ -162,6 +163,46 @@ public class PaymentRequestService {
                 paymentReferenceNumber
             );
         }
+    }
+
+    private CaseData buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
+        C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
+        CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
+        C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+        log.info("c100RebuildData is {}", c100RebuildData);
+        ObjectMapper mapper = new ObjectMapper();
+        if (null != c100RebuildData) {
+            if (isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
+                c100RebuildChildDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildChildDetails(), C100RebuildChildDetailsElements.class);
+                updateChildDetailsElementsForCaseData(caseDataBuilder, c100RebuildChildDetailsElements);
+            }
+            if (isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
+                C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
+                updateApplicantElementsForCaseData(caseDataBuilder, c100RebuildApplicantDetailsElements, c100RebuildChildDetailsElements);
+            }
+
+            if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+                C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+                updateRespondentDetailsElementsForCaseData(caseDataBuilder, c100RebuildRespondentDetailsElements, c100RebuildChildDetailsElements);
+            }
+        }
+        return buildCaseName(caseDataBuilder, caseData).build();
+    }
+
+    private CaseData.CaseDataBuilder<?,?> buildCaseName(CaseData.CaseDataBuilder<?,?> caseDataBuilder, CaseData caseData) {
+        String caseName = null;
+        if (null != caseData.getApplicants() && null != caseData.getApplicants().get(0).getValue()
+            && null != caseData.getRespondents() && null != caseData.getRespondents().get(0).getValue()) {
+            caseName = caseData.getApplicants().get(0).getValue().getLastName() + " V "
+                + caseData.getRespondents().get(0).getValue().getLastName();
+        }
+
+        log.info("caseName is {}", caseName);
+        caseData.toBuilder().applicantCaseName(caseName).build();
+        return caseDataBuilder;
     }
 
     private PaymentResponse getPaymentResponse(String authorization, CreatePaymentRequest createPaymentRequest,
