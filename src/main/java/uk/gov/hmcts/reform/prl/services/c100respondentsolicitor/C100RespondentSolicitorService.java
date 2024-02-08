@@ -219,6 +219,12 @@ public class C100RespondentSolicitorService {
                             caseDataUpdated,solicitorRepresentedRespondentAllegationsOfHarmData);
 
                     break;
+                case RESPOND_ALLEGATION_OF_HARM:
+                    caseDataUpdated.put(
+                        event.getCaseFieldName(),
+                        solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                    );
+                    break;
                 case INTERNATIONAL_ELEMENT:
                     String[] internationalElementFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
@@ -351,24 +357,27 @@ public class C100RespondentSolicitorService {
     private Response buildRespondAllegationOfHarm(CaseData caseData, Response buildResponseForRespondent) {
         ResponseToAllegationsOfHarm responseToAllegationsOfHarm = optimiseResponseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
                                                                                                           .getResponseToAllegationsOfHarm());
-        /*log.info("getResponseToAllegationsOfHarmYesOrNoResponse BEFORE : {}",
-                 caseData.getRespondentSolicitorData().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
-        caseData.getRespondentSolicitorData().getResponseToAllegationsOfHarm().setResponseToAllegationsOfHarmYesOrNoResponse(
-            Yes);
-        log.info("getResponseToAllegationsOfHarmYesOrNoResponse AFTER : {}"
-        , responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse());*/
+
+        /*
+         * log.info("getResponseToAllegationsOfHarmYesOrNoResponse BEFORE : {}",
+         * caseData.getRespondentSolicitorData().getResponseToAllegationsOfHarm().
+         * getResponseToAllegationsOfHarmYesOrNoResponse());
+         * caseData.getRespondentSolicitorData().setConfidentialListDetails(EMAIL);
+         * log.info("getResponseToAllegationsOfHarmYesOrNoResponse AFTER : {}",
+         * responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse());
+         */
         return buildResponseForRespondent.toBuilder()
-            .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
+            .responseToAllegationsOfHarm(caseData.getRespondentSolicitorData().getResponseToAllegationsOfHarm())
             .build();
     }
 
     private ResponseToAllegationsOfHarm optimiseResponseToAllegationsOfHarm(ResponseToAllegationsOfHarm responseToAllegationsOfHarm) {
+
         return responseToAllegationsOfHarm.toBuilder()
             .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
             .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
             .build();
     }
-
 
     private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
         List<Element<RespondentProceedingDetails>> respondentExistingProceedings

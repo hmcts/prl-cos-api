@@ -31,7 +31,7 @@ public enum RespondentSolicitorEvents {
         + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour,respondentChildAbuseBehaviour,"
         + "respondentChildAbduction,respondentOtherConcerns"),
     INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild"),
-    RESPOND_ALLEGATION_OF_HARM("c100ResSolResponseToAllegationsOfHarm","Respond to allegations of harm",""),
+    RESPOND_ALLEGATION_OF_HARM("c100ResSolResponseToAllegationsOfHarm","Respond to allegations of harm","responseToAllegationsOfHarm"),
     ABILITY_TO_PARTICIPATE(
         "c100ResSolLitigationCapacity",
         "Litigation capacity",
@@ -63,6 +63,7 @@ public enum RespondentSolicitorEvents {
             MIAM,
             CURRENT_OR_PREVIOUS_PROCEEDINGS,
             ALLEGATION_OF_HARM,
+            RESPOND_ALLEGATION_OF_HARM,
             INTERNATIONAL_ELEMENT,
             ABILITY_TO_PARTICIPATE
         );
