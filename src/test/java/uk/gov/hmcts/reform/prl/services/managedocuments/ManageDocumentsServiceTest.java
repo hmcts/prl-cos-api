@@ -716,7 +716,16 @@ public class ManageDocumentsServiceTest {
             .build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(authTokenGenerator.generate()).thenReturn("test");
+        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(caseDocumentClient
+                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(expectedResponse);
+        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(expectedResponse);
         when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
@@ -942,7 +951,7 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void testCopyDocumentMidEventIfRestrictedWithSoliRole() {
+    public void testCopyDocumentMidEventIfRestrictedWithSoliRoleWhenTriedWithReason() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
@@ -1070,7 +1079,7 @@ public class ManageDocumentsServiceTest {
         Assert.assertTrue(list.isEmpty());
     }
 
-    @Test//aaa
+    @Test
     public void moveToConfidentialOrRestricted() {
         List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -1109,11 +1118,20 @@ public class ManageDocumentsServiceTest {
     }
 
     @Test
-    public void appendConfidentialDocumentNameForCourtAdminNotCourtAdmin() {
+    public void appendConfidentialDocumentNameForNonCourtAdmin() {
         UserDetails userDetails = UserDetails.builder().roles(List.of(SOLICITOR_ROLE)).build();
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
+            .documentCategories(dynamicList)
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
         Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
         CaseData caseData = CaseData.builder().build();
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
@@ -1124,9 +1142,11 @@ public class ManageDocumentsServiceTest {
         Map<String,Object> caseDataUpdated = manageDocumentsService
             .appendConfidentialDocumentNameForCourtAdmin(callbackRequest, auth);
         assertNotNull(caseDataUpdated);
+        assertNull(caseDataUpdated.get("manageDocuments"));
+
     }
 
-    @Test //333
+    @Test
     public void appendConfidentialDocumentNameForCourtAdmin() {
         UserDetails userDetails = UserDetails.builder().roles(List.of(COURT_ADMIN_ROLE)).build();
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
@@ -1142,9 +1162,10 @@ public class ManageDocumentsServiceTest {
         Map<String,Object> caseDataUpdated = manageDocumentsService
             .appendConfidentialDocumentNameForCourtAdmin(callbackRequest, auth);
         assertNotNull(caseDataUpdated);
+        assertNull(caseDataUpdated.get("manageDocuments"));
     }
 
-    @Test //222
+    @Test
     public void appendConfidentialDocumentNameForCourtAdminEvrythingFilled() {
         UserDetails userDetails = UserDetails.builder().roles(List.of(COURT_ADMIN_ROLE)).build();
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
@@ -1166,36 +1187,50 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(map.get("miamCertificateDocument"), uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(quarantineLegalDoc.getDocument());
 
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        CaseData caseData = CaseData.builder().reviewDocuments(ReviewDocuments.builder()
-            .confidentialDocuments(quarantineList).build()).build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentUrl("00000000-0000-0000-0000-000000000000")
+            .documentFileName("test").build();
 
+        Map<String, Object> tempQuarantineObjectMap = new HashMap<>();
+        tempQuarantineObjectMap.put("miamCertificateDocument", doc);
+        tempQuarantineObjectMap.put("hasTheConfidentialDocumentBeenRenamed", YesOrNo.Yes);
+
+        QuarantineLegalDoc updatedQuarantineLegalDocumentObject = QuarantineLegalDoc.builder().miamCertificateDocument(doc)
+            .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes).build();
+        when(objectMapper.convertValue(tempQuarantineObjectMap, QuarantineLegalDoc.class)).thenReturn(updatedQuarantineLegalDocumentObject);
+        CaseData caseData = CaseData.builder().reviewDocuments(ReviewDocuments.builder()
+                                                                   .confidentialDocuments(quarantineList).build()).build();
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
 
         Map<String,Object> caseDataUpdated = manageDocumentsService
             .appendConfidentialDocumentNameForCourtAdmin(callbackRequest, auth);
+
         assertNotNull(caseDataUpdated);
+        assertNotNull(caseDataUpdated.get("confidentialDocuments"));
+        List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>)caseDataUpdated.get("confidentialDocuments");
+        assertEquals(YesOrNo.Yes,confidentialDocuments.get(0).getValue().getHasTheConfidentialDocumentBeenRenamed());
+
     }
 
-    @Test //111
+    @Test
     public void appendConfidentialDocumentNameForCourtAdminRestrictedDocuments() {
-
-        uk.gov.hmcts.reform.prl.models.documents.Document document = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
-            .documentUrl("00000000-0000-0000-0000-000000000000")
-            .documentFileName("test").build();
+        UserDetails userDetails = UserDetails.builder().roles(List.of(COURT_ADMIN_ROLE)).build();
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
         List<Element<QuarantineLegalDoc>> quarantineList = new ArrayList<>();
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
             .categoryId("MIAMCertificate")
-            .document(document)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentUrl("00000000-0000-0000-0000-000000000000")
+                          .documentFileName("test").build())
             .uploaderRole("Staff").build();
         quarantineLegalDocElement = element(quarantineLegalDoc);
         quarantineList.add(quarantineLegalDocElement);
-
         Map<String, Object> map = new HashMap<>();
         map.put("miamCertificateDocument", quarantineLegalDoc);
 
@@ -1203,50 +1238,32 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(map.get("miamCertificateDocument"), uk.gov.hmcts.reform.prl.models.documents.Document.class))
             .thenReturn(quarantineLegalDoc.getDocument());
 
-        UserDetails userDetails = UserDetails.builder().roles(List.of(COURT_ADMIN_ROLE)).build();
-        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentUrl("00000000-0000-0000-0000-000000000000")
+            .documentFileName("test").build();
 
-        Map<String, Object> caseDataMapInitial = new HashMap<>();
-        CaseData caseData = CaseData.builder().reviewDocuments(ReviewDocuments.builder()
-            .restrictedDocuments(quarantineList).build()).build();
-        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-
-        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
-        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        when(systemUserService.getSysUserToken()).thenReturn("test");
-        when(authTokenGenerator.generate()).thenReturn("test");
-
-
-
-
-        //objectMapper.convertValue(doc1,Map.class);
         Map<String, Object> tempQuarantineObjectMap = new HashMap<>();
-        tempQuarantineObjectMap.put("miamCertificateDocument", document);
+        tempQuarantineObjectMap.put("miamCertificateDocument", doc);
         tempQuarantineObjectMap.put("hasTheConfidentialDocumentBeenRenamed", YesOrNo.Yes);
 
-        when(objectMapper.convertValue(QuarantineLegalDoc.class, Map.class))
-            .thenReturn(tempQuarantineObjectMap);
-
-        when(objectMapper.convertValue(tempQuarantineObjectMap, uk.gov.hmcts.reform.prl.models.documents.Document.class))
-            .thenReturn(document);
-        QuarantineLegalDoc doc1 = QuarantineLegalDoc.builder()
-            .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes)
-            .categoryId("MIAMCertificate")
-            .document(document)
-            .uploaderRole("Staff").build();
-        QuarantineLegalDoc updatedQuarantineLegalDocumentObject = QuarantineLegalDoc.builder()
-            .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes)
-            .categoryId("MIAMCertificate")
-            .document(document)
-            .uploaderRole("Staff").build();
-        when(objectMapper.convertValue(objectMapper.convertValue(doc1,Map.class), QuarantineLegalDoc.class))
-            .thenReturn(updatedQuarantineLegalDocumentObject);
+        QuarantineLegalDoc updatedQuarantineLegalDocumentObject = QuarantineLegalDoc.builder().miamCertificateDocument(doc)
+            .hasTheConfidentialDocumentBeenRenamed(YesOrNo.Yes).build();
+        when(objectMapper.convertValue(tempQuarantineObjectMap, QuarantineLegalDoc.class)).thenReturn(updatedQuarantineLegalDocumentObject);
+        CaseData caseData = CaseData.builder().reviewDocuments(ReviewDocuments.builder()
+                                                                   .restrictedDocuments(quarantineList).build()).build();
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
 
         Map<String,Object> caseDataUpdated = manageDocumentsService
             .appendConfidentialDocumentNameForCourtAdmin(callbackRequest, auth);
 
         assertNotNull(caseDataUpdated);
+        assertNotNull(caseDataUpdated.get("restrictedDocuments"));
+        List<Element<QuarantineLegalDoc>> restrictedDocuments = (List<Element<QuarantineLegalDoc>>)caseDataUpdated.get("restrictedDocuments");
+        assertEquals(YesOrNo.Yes,restrictedDocuments.get(0).getValue().getHasTheConfidentialDocumentBeenRenamed());
     }
 
     @Test
