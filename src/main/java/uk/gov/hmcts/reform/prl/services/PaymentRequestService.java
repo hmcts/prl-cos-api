@@ -99,6 +99,16 @@ public class PaymentRequestService {
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
+        String caseName = null;
+
+        if (null != caseData.getApplicants() && null != caseData.getApplicants().get(0).getValue()
+            && null != caseData.getRespondents() && null != caseData.getRespondents().get(0).getValue()) {
+            caseName = caseData.getApplicants().get(0).getValue().getLastName() + " V "
+                + caseData.getRespondents().get(0).getValue().getLastName();
+        }
+
+        log.info("caseName is {}", caseName);
+
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
             CallbackRequest request = buildCallBackRequest(createPaymentRequest);
