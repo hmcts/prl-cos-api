@@ -96,8 +96,9 @@ public class PaymentRequestService {
             caseId
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        String caseName = null;
+        log.info("caseData is {}", caseData);
 
+        String caseName = null;
         if (null != caseData.getApplicants() && null != caseData.getApplicants().get(0).getValue()
             && null != caseData.getRespondents() && null != caseData.getRespondents().get(0).getValue()) {
             caseName = caseData.getApplicants().get(0).getValue().getLastName() + " V "
