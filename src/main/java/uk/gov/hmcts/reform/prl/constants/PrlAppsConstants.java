@@ -542,7 +542,7 @@ public class PrlAppsConstants {
         + System.lineSeparator()
         + "b) If possible, the list of allegations shall be set out in the form of a table with headings. An example table is attached to this order."
         + System.lineSeparator()
-        + "c)The list must end with a statement that it is true, and be signed and dated."
+        + "c) The list must end with a statement that it is true, and be signed and dated."
         + System.lineSeparator()
         + "d) A statement must be sent with the list, giving more details of the allegations, referring to each allegation by its number in the list "
         + "and attaching all evidence relied upon in support."

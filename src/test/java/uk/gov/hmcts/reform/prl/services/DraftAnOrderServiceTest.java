@@ -1650,7 +1650,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertFalse(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertFalse(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
     }
 
     @Test
@@ -1681,7 +1681,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
     }
 
     @Test
@@ -1712,7 +1712,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
     }
 
     @Test
@@ -1743,7 +1743,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
     }
 
     @Test
@@ -1771,7 +1771,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
     }
 
     @Test
@@ -1796,7 +1796,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
     }
 
     @Test
@@ -1821,7 +1821,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
     }
 
     @Test
@@ -1846,7 +1846,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
     }
 
 
@@ -1867,7 +1867,7 @@ public class DraftAnOrderServiceTest {
             .standardDirectionOrder(standardDirectionOrder)
             .build();
 
-        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData));
+        assertTrue(DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, new ArrayList<>()));
     }
 
     @Test

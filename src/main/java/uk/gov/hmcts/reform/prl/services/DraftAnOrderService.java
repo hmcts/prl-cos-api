@@ -1188,8 +1188,8 @@ public class DraftAnOrderService {
         return fl404CustomFields;
     }
 
-    public static boolean checkStandingOrderOptionsSelected(CaseData caseData) {
-        return !(caseData.getStandardDirectionOrder() != null
+    public static boolean checkStandingOrderOptionsSelected(CaseData caseData, List<String> errorList) {
+        if (caseData.getStandardDirectionOrder() != null
             && caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().isEmpty()
@@ -1197,7 +1197,27 @@ public class DraftAnOrderService {
             && caseData.getStandardDirectionOrder().getSdoCourtList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
-            && caseData.getStandardDirectionOrder().getSdoFurtherList().isEmpty());
+            && caseData.getStandardDirectionOrder().getSdoFurtherList().isEmpty()) {
+            errorList.add(
+                "Please select at least one options from below");
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public static boolean validationIfDirectionForFactFindingSelected(CaseData caseData, List<String> errorList) {
+        if (caseData.getStandardDirectionOrder() != null
+            && CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())
+            && caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().contains(factFindingHearing)
+            && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && (caseData.getApplicants().size() > 1 || caseData.getRespondents().size() > 1)) {
+            errorList.add(
+                "You cannot add directions for a fact-finding hearing. Upload the order in manage orders");
+            return false;
+        } else {
+            return true;
+        }
     }
 
     public void populateStandardDirectionOrderDefaultFields(String authorisation, CaseData caseData, Map<String, Object> caseDataUpdated) {
@@ -1393,6 +1413,9 @@ public class DraftAnOrderService {
         }
         if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoDisClosureProceedingDetails())) {
             caseDataUpdated.put("sdoDisClosureProceedingDetails", sdoDioProvideOtherDetailList);
+        }
+        if (CollectionUtils.isEmpty(caseData.getStandardDirectionOrder().getSdoFactFindingOtherDetails())) {
+            caseDataUpdated.put("sdoFactFindingOtherDetails", sdoDioProvideOtherDetailList);
         }
     }
 
