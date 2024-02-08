@@ -27,7 +27,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
         "rd_professional.api.url=localhost:8894",
         "payments.api.url=",
         "pba.validation.service.api.baseurl=",
-        "staffDetails.api.url="
+        "staffDetails.api.url=",
+        "amRoleAssignment.api.url="
     }
 )
 public class ReferenceDataOrganisationalInternalUsersConsumerTest extends ReferenceDataConsumerTestBase {
