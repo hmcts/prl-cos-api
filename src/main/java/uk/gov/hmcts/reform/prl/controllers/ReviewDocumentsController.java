@@ -107,7 +107,6 @@ public class ReviewDocumentsController {
     ) throws Exception {
         ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
         log.info(
             "/copy-manage-docs/about-to-submit::CallbackRequest -> {}",
             objectMapper.writeValueAsString(callbackRequest)

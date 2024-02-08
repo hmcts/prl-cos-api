@@ -191,7 +191,7 @@ public class ReviewDocumentService {
                                                    element.getValue().getDateCreated()
                                                ))
                                                .build()).toList());
-            // TODO Handle Citizen Document management later
+            //Handle Citizen Document management later
         }
         if (isNotEmpty(caseData.getScannedDocuments())) {
             dynamicListElements.addAll(caseData.getScannedDocuments().stream()
@@ -347,7 +347,6 @@ public class ReviewDocumentService {
             if (!isDocumentFound && isNotEmpty(caseData.getScannedDocuments())) {
                 quarantineLegalDocElementOptional = getQuarantineBulkScanDocElement(caseData, uuid);
                 if (quarantineLegalDocElementOptional.isPresent()) {
-                    isDocumentFound = true;
                     processDocumentsAfterReviewNew(
                         caseData,
                         caseDataUpdated,

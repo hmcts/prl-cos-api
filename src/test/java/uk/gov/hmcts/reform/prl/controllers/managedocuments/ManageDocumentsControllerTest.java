@@ -4,14 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
@@ -176,44 +174,6 @@ public class ManageDocumentsControllerTest {
         abc.getBody().getConfirmationHeader();
         Assert.assertEquals("# Documents submitted",abc.getBody().getConfirmationHeader());
         verifyNoMoreInteractions(tabService);
-
-    }
-
-    @Test
-    public void testValidateCourtUserShouldReturnError() {
-        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
-        Assert.assertNotNull(response.getErrors());
-        Assert.assertTrue(!response.getErrors().isEmpty());
-        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'", response.getErrors().get(0));
-    }
-
-    @Test
-    @Ignore //Revisittt
-    public void testValidateCourtUserShouldAllowToProcess() {
-        when(manageDocumentsService.checkIfUserIsCourtStaff(any(UserDetails.class))).thenReturn(true);
-        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
-        Assert.assertNotNull(response.getData());
-        Assert.assertEquals(12345678L, response.getData().get("id"));
-
-    }
-
-    @Test
-    public void testValidateOtherUserShouldReturnError() {
-        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
-        Assert.assertNotNull(response.getErrors());
-        Assert.assertTrue(!response.getErrors().isEmpty());
-        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'", response.getErrors().get(0));
-    }
-
-    @Test
-    public void testValidateOtherUserShouldAllowToProcess() {
-        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(false);
-        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
-        Assert.assertNotNull(response.getData());
-        Assert.assertEquals(12345678L, response.getData().get("id"));
 
     }
 

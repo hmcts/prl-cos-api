@@ -100,7 +100,6 @@ public class ReviewDocumentsControllerTest {
 
     @Test
     public void testHandleMidEvent() {
-
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         reviewDocumentsController.handleMidEvent(auth, callbackRequest);
         verify(reviewDocumentService).getReviewedDocumentDetailsNew(caseData,stringObjectMap);
@@ -109,7 +108,6 @@ public class ReviewDocumentsControllerTest {
 
     @Test
     public void testHandleAboutToSubmit() throws Exception {
-
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         reviewDocumentsController.handleAboutToSubmit(auth, callbackRequest);
         verify(reviewDocumentService).processReviewDocument(stringObjectMap,caseData,uuid);
