@@ -125,7 +125,7 @@ public class CaseServiceTest {
     public void setup() {
         partyDetails = PartyDetails.builder()
             .firstName("")
-            .lastName("")
+            .lastName("test")
             .email("")
             .user(User.builder().email("").idamId("").build())
             .build();
