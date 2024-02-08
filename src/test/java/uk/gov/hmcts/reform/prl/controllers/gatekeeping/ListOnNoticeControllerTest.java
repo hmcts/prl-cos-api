@@ -18,8 +18,10 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.ListOnNoticeReasonsEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
@@ -27,6 +29,7 @@ import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
@@ -84,6 +87,9 @@ public class ListOnNoticeControllerTest {
 
     @Mock
     AllocatedJudgeService allocatedJudgeService;
+
+    @Mock
+    RoleAssignmentService roleAssignmentService;
 
     @Mock
     CoreCaseDataService coreCaseDataService;
@@ -148,6 +154,16 @@ public class ListOnNoticeControllerTest {
         reasonsSelected.add("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder");
         reasonsSelected.add("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice");
 
+        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
+            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .legalAdviserList(legalAdviserList)
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
+            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .build();
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService))
+            .thenReturn(allocatedJudge);
         caseDataUpdated.put(LIST_ON_NOTICE_REASONS_SELECTED,reasonsSelected);
         String reasonsSelectedString = ListOnNoticeReasonsEnum.getDisplayedValue("childrenResideWithApplicantAndBothProtectedByNonMolestationOrder")
             + "\n" + ListOnNoticeReasonsEnum.getDisplayedValue("noEvidenceOnRespondentSeekToFrustrateTheProcessIfTheyWereGivenNotice") + "\n";
@@ -178,14 +194,20 @@ public class ListOnNoticeControllerTest {
         when(userService.getUserDetails(authToken)).thenReturn(UserDetails.builder().forename("PRL").surname("Judge").build());
         when(addCaseNoteService.addCaseNoteDetails(caseData,UserDetails.builder().forename("PRL").surname("Judge").build()))
             .thenReturn(null);
+        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
+            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .legalAdviserList(legalAdviserList)
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.legalAdviser)
             .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
             .build();
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
             "field5", "value5"
         );
+        when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService))
+            .thenReturn(allocatedJudge);
         AboutToStartOrSubmitCallbackResponse response = listOnNoticeController.listOnNoticeSubmission(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
         assertNull(response.getData().get(SELECTED_AND_ADDITIONAL_REASONS));
