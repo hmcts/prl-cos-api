@@ -741,7 +741,7 @@ public class ManageDocumentsServiceTest {
         assertNotNull(quarantineLegalDoc);
     }
 
-    @Test// laterrrrr
+    @Test
     public void testCopyDocumentIfRestricted() {
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
