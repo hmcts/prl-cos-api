@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentEventErrorsEnum;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,12 +24,12 @@ public class RespondentTaskErrorService {
     Map<RespondentEventErrorsEnum, RespondentEventValidationErrors> eventErrors = new EnumMap<>(
         RespondentEventErrorsEnum.class);
 
-    public List<RespondentEventValidationErrors> getEventErrors() {
+    public List<RespondentEventValidationErrors> getEventErrors(CaseData caseData) {
         List<RespondentEventValidationErrors> eventErrorList = new ArrayList<>();
         for (Map.Entry<RespondentEventErrorsEnum, RespondentEventValidationErrors> entry : eventErrors.entrySet()) {
             eventErrorList.add(entry.getValue());
         }
-        eventErrorList.sort(Comparator.comparingInt(x -> RespondentSolicitorEvents.getEventOrder()
+        eventErrorList.sort(Comparator.comparingInt(x -> RespondentSolicitorEvents.getEventOrder(caseData)
             .indexOf(x.getEvent())));
         return eventErrorList;
     }

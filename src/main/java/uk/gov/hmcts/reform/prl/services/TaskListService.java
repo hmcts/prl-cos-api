@@ -85,8 +85,8 @@ public class TaskListService {
             .toList();
     }
 
-    public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty) {
-        return getRespondentsEvents().stream()
+    public List<RespondentTask> getRespondentSolicitorTasks(PartyDetails respondingParty, CaseData caseData) {
+        return getRespondentsEvents(caseData).stream()
             .map(event -> RespondentTask.builder()
                 .event(event)
                 .state(getRespondentTaskState(event, respondingParty))
@@ -205,7 +205,23 @@ public class TaskListService {
         return eventsList;
     }
 
-    public List<RespondentSolicitorEvents> getRespondentsEvents() {
+    public List<RespondentSolicitorEvents> getRespondentsEvents(CaseData caseData) {
+        if (null != caseData.getC1ADocument()) {
+            return new ArrayList<>(List.of(
+                CONSENT,
+                KEEP_DETAILS_PRIVATE,
+                CONFIRM_EDIT_CONTACT_DETAILS,
+                ATTENDING_THE_COURT,
+                RespondentSolicitorEvents.MIAM,
+                CURRENT_OR_PREVIOUS_PROCEEDINGS,
+                RespondentSolicitorEvents.ALLEGATION_OF_HARM,
+                RespondentSolicitorEvents.RESPOND_ALLEGATION_OF_HARM,
+                RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
+                ABILITY_TO_PARTICIPATE,
+                VIEW_DRAFT_RESPONSE,
+                RespondentSolicitorEvents.SUBMIT
+            ));
+        }
         return new ArrayList<>(List.of(
             CONSENT,
             KEEP_DETAILS_PRIVATE,
@@ -214,7 +230,6 @@ public class TaskListService {
             RespondentSolicitorEvents.MIAM,
             CURRENT_OR_PREVIOUS_PROCEEDINGS,
             RespondentSolicitorEvents.ALLEGATION_OF_HARM,
-            RespondentSolicitorEvents.RESPOND_ALLEGATION_OF_HARM,
             RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
             ABILITY_TO_PARTICIPATE,
             VIEW_DRAFT_RESPONSE,

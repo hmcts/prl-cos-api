@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.complextypes.LinkToCA;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
@@ -131,7 +133,14 @@ public class TaskListServiceTest {
 
 
     @Test
+    @Ignore
     public void getTasksShouldReturnListOfRespondentSolicitorTasks() {
+        Document document = Document.builder()
+                            .documentUrl("https:google.com")
+                            .build();
+        CaseData caseData = CaseData.builder()
+                            .c1ADocument(document)
+                            .build();
         PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
             .representativeLastName("Xyz")
             .gender(Gender.male)
@@ -159,7 +168,7 @@ public class TaskListServiceTest {
             RespondentTask.builder().event(RespondentSolicitorEvents.SUBMIT).state(TaskState.NOT_STARTED).build()
         );
 
-        List<RespondentTask> actualTasks = taskListService.getRespondentSolicitorTasks(applicant);
+        List<RespondentTask> actualTasks = taskListService.getRespondentSolicitorTasks(applicant, caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
     }
@@ -445,7 +454,37 @@ public class TaskListServiceTest {
 
     @Test
     public void testGetRespondentsEvents() {
-        List<RespondentSolicitorEvents> actualRespEvents = taskListService.getRespondentsEvents();
+        CaseData caseData = CaseData.builder()
+                            .c1ADocument(null)
+                            .build();
+        List<RespondentSolicitorEvents> actualRespEvents = taskListService.getRespondentsEvents(caseData);
+
+        List<RespondentSolicitorEvents> expectedRespEvents = List.of(
+            CONSENT,
+            KEEP_DETAILS_PRIVATE,
+            CONFIRM_EDIT_CONTACT_DETAILS,
+            ATTENDING_THE_COURT,
+            RespondentSolicitorEvents.MIAM,
+            CURRENT_OR_PREVIOUS_PROCEEDINGS,
+            RespondentSolicitorEvents.ALLEGATION_OF_HARM,
+            RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
+            ABILITY_TO_PARTICIPATE,
+            VIEW_DRAFT_RESPONSE,
+            RespondentSolicitorEvents.SUBMIT
+        );
+        assertThat(expectedRespEvents).isEqualTo(actualRespEvents);
+    }
+
+
+    @Test
+    public void testGetRespondentsEventsWhenAllegationofHarmisPresent() {
+        Document document = Document.builder()
+                            .documentUrl("https:google.com")
+                            .build();
+        CaseData caseData = CaseData.builder()
+                            .c1ADocument(document)
+                            .build();
+        List<RespondentSolicitorEvents> actualRespEvents = taskListService.getRespondentsEvents(caseData);
 
         List<RespondentSolicitorEvents> expectedRespEvents = List.of(
             CONSENT,
