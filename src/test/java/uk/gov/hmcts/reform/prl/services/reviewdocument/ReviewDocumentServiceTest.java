@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -336,7 +335,8 @@ public class ReviewDocumentServiceTest {
     public void testReviewDocumentListIsNotEmptyWhenDocumentsAreNotPresent() {
         HashMap<String, Object> caseDataUpdated = new HashMap<>();
         Assert.assertTrue(reviewDocumentService.fetchDocumentDynamicListElements(CaseData.builder()
-                                                                                     .documentManagementDetails(DocumentManagementDetails.builder().build()).build(), caseDataUpdated).isEmpty());
+                                                                    .documentManagementDetails(DocumentManagementDetails.builder().build()).build(),
+                                                                                 caseDataUpdated).isEmpty());
     }
 
     @Test
