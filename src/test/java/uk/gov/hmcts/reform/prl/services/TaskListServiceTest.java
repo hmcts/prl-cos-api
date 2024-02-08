@@ -159,7 +159,6 @@ public class TaskListServiceTest {
 
 
     @Test
-    @Ignore
     public void getTasksShouldReturnListOfRespondentSolicitorTasks() {
         Document document = Document.builder()
                             .documentUrl("https:google.com")
