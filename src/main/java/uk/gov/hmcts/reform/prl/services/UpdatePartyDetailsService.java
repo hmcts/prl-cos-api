@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -78,7 +79,11 @@ public class UpdatePartyDetailsService {
                 .getApplicantsFL401();
             PartyDetails fl401respondent = caseData
                 .getRespondentsFL401();
-
+            try {
+                log.info("updatedCaseData is:: " + objectMapper.writeValueAsString(updatedCaseData));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             if (Objects.nonNull(fl401Applicant)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
                 updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
