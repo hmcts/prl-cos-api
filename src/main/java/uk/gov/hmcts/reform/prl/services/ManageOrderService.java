@@ -2493,8 +2493,21 @@ public class ManageOrderService {
                 callbackRequest,
                 caseData
             ));
+            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                populateWarningMessageIfRequiredForFactFindingHearing(caseData, caseDataUpdated);
+            }
         }
         return caseDataUpdated;
+    }
+
+    public void populateWarningMessageIfRequiredForFactFindingHearing(CaseData caseData,
+                                                                       Map<String, Object> caseDataUpdated) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && (caseData.getRespondents().size() > 1 || caseData.getApplicants().size() > 1)) {
+            caseDataUpdated.put("sdoFactFindingFlag", "<div class=\"govuk-inset-text\"> "
+                + "If you need to include directions for a fact-finding hearing, you need to upload the"
+                + " order in manage orders instead..</div>");
+        }
     }
 
     public CaseData setHearingDataForSdo(CaseData caseData, Hearings hearings, String authorisation) {

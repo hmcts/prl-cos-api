@@ -703,6 +703,7 @@ public class DraftAnOrderService {
             );
         } else {
             caseDataMap.putAll(objectMapper.convertValue(selectedOrder.getSdoDetails(), Map.class));
+            manageOrderService.populateWarningMessageIfRequiredForFactFindingHearing(caseData, caseDataMap);
         }
 
         return caseDataMap;
