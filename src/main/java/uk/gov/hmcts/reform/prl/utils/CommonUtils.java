@@ -137,6 +137,14 @@ public class CommonUtils {
             if (caseData.getRespondentsFL401().getPartyId() == null) {
                 caseData.getRespondentsFL401().setPartyId(generateUuid());
             }
+            if (caseData.getRespondentsFL401().getSolicitorPartyId() == null
+                && (caseData.getRespondentsFL401().getRepresentativeFirstName() != null
+                || caseData.getRespondentsFL401().getRepresentativeLastName() != null)) {
+                caseData.getRespondentsFL401().setSolicitorPartyId(generateUuid());
+            }
+            if (caseData.getRespondentsFL401().getSolicitorOrgUuid() == null) {
+                caseData.getRespondentsFL401().setSolicitorOrgUuid(generateUuid());
+            }
         }
     }
 
