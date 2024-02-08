@@ -1189,6 +1189,7 @@ public class DraftAnOrderService {
     }
 
     public static boolean checkStandingOrderOptionsSelected(CaseData caseData, List<String> errorList) {
+        log.info("inside checkStandingOrderOptionsSelected");
         if (caseData.getStandardDirectionOrder() != null
             && caseData.getStandardDirectionOrder().getSdoPreamblesList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().isEmpty()
@@ -1198,24 +1199,29 @@ public class DraftAnOrderService {
             && caseData.getStandardDirectionOrder().getSdoDocumentationAndEvidenceList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoOtherList().isEmpty()
             && caseData.getStandardDirectionOrder().getSdoFurtherList().isEmpty()) {
+            log.info("checkStandingOrderOptionsSelected failed");
             errorList.add(
                 "Please select at least one options from below");
             return false;
         } else {
+            log.info("checkStandingOrderOptionsSelected success");
             return true;
         }
     }
 
     public static boolean validationIfDirectionForFactFindingSelected(CaseData caseData, List<String> errorList) {
+        log.info("inside validationIfDirectionForFactFindingSelected ");
         if (caseData.getStandardDirectionOrder() != null
             && CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())
-            && caseData.getStandardDirectionOrder().getSdoCafcassOrCymruList().contains(factFindingHearing)
+            && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(factFindingHearing)
             && C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
             && (caseData.getApplicants().size() > 1 || caseData.getRespondents().size() > 1)) {
+            log.info("validationIfDirectionForFactFindingSelected failed");
             errorList.add(
                 "You cannot add directions for a fact-finding hearing. Upload the order in manage orders");
             return false;
         } else {
+            log.info("validationIfDirectionForFactFindingSelected success");
             return true;
         }
     }
