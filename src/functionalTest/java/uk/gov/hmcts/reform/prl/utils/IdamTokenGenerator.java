@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import jakarta.annotation.PostConstruct;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 
 @TestPropertySource("classpath:application.yaml")
 @Service
+@Slf4j
 public class IdamTokenGenerator {
 
     @Value("${idam.solicitor.username}")
@@ -56,16 +59,28 @@ public class IdamTokenGenerator {
     @Value("${idam.admin.password}")
     private String courtAdminPassword;
 
+    private String solicitorIdamToken;
+
+    private String systemIdamToken;
+
+    private String judgeIdamToken;
+
+    private String cafcassIdamToken;
+
+    private String citizenIdamToken;
+
+    private String courtAdminIdamToken;
+
     public String generateIdamTokenForSolicitor() {
-        return idamClient.getAccessToken(solicitorUsername, solicitorPassword);
+        return solicitorIdamToken;
     }
 
     public String generateIdamTokenForSystem() {
-        return idamClient.getAccessToken(systemUpdateUsername, systemUpdatePassword);
+        return systemIdamToken;
     }
 
     public String generateIdamTokenForJudge() {
-        return idamClient.getAccessToken(judgeUserName, judgePassword);
+        return judgeIdamToken;
     }
 
     public String generateIdamTokenForCourtNav() {
@@ -77,7 +92,7 @@ public class IdamTokenGenerator {
     }
 
     public String generateIdamTokenForCafcass() {
-        return idamClient.getAccessToken(cafcassUserName, cafcassPassword);
+        return cafcassIdamToken;
     }
 
     public UserDetails getUserDetailsFor(final String token) {
@@ -85,11 +100,21 @@ public class IdamTokenGenerator {
     }
 
     public String generateIdamTokenForCitizen() {
-        return idamClient.getAccessToken(citizenUsername, citizenPassword);
+        return citizenIdamToken;
     }
 
     public String generateIdamTokenForCourtAdmin() {
-        return idamClient.getAccessToken(courtAdminUsername, courtAdminPassword);
+        return courtAdminIdamToken;
     }
 
+    @PostConstruct
+    public void beforeTestClass() {
+        log.info(":::: Generating Bearer Token From Idam");
+        solicitorIdamToken = idamClient.getAccessToken(solicitorUsername, solicitorPassword);
+        systemIdamToken = idamClient.getAccessToken(systemUpdateUsername, systemUpdatePassword);
+        judgeIdamToken = idamClient.getAccessToken(judgeUserName, judgePassword);
+        cafcassIdamToken = idamClient.getAccessToken(cafcassUserName, cafcassPassword);
+        citizenIdamToken = idamClient.getAccessToken(citizenUsername, citizenPassword);
+        courtAdminIdamToken = idamClient.getAccessToken(courtAdminUsername, courtAdminPassword);
+    }
 }
