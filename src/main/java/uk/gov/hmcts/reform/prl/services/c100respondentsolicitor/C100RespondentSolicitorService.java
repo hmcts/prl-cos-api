@@ -322,6 +322,9 @@ public class C100RespondentSolicitorService {
             case ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildAoHResponse(caseData, buildResponseForRespondent, solicitor);
                 break;
+            case RESPOND_ALLEGATION_OF_HARM:
+                buildResponseForRespondent = buildRespondAllegationOfHarm(caseData, buildResponseForRespondent);
+                break;
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildInternationalElementResponse(caseData, buildResponseForRespondent);
                 break;
@@ -342,6 +345,13 @@ public class C100RespondentSolicitorService {
                 respondents.set(index, element(party.getId(), amended));
             }
         }
+    }
+
+    private Response buildRespondAllegationOfHarm(CaseData caseData, Response buildResponseForRespondent) {
+        return buildResponseForRespondent.toBuilder()
+            .responseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
+                                             .getResponseToAllegationsOfHarm())
+            .build();
     }
 
     private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
