@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotif
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.utils.ElementUtils;
 
 import java.io.IOException;
 import java.time.ZoneId;
@@ -220,8 +221,8 @@ public class SendgridService {
         return EmailNotificationDetails.builder()
             .emailAddress(toEmailAddress)
             .servedParty(servedParty)
-            .docs(listOfAttachments.stream().map(s -> element(s)).toList())
-            .attachedDocs(String.join(",", listOfAttachments.stream().map(a -> a.getDocumentFileName()).toList()))
+            .docs(listOfAttachments.stream().map(ElementUtils::element).toList())
+            .attachedDocs(String.join(",", listOfAttachments.stream().map(Document::getDocumentFileName).toList()))
             .timeStamp(currentDate).build();
     }
 
