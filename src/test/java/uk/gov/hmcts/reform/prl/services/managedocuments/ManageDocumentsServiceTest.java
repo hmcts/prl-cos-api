@@ -1370,6 +1370,7 @@ public class ManageDocumentsServiceTest {
         assertNull(document1);
     }
 
+
     private static uk.gov.hmcts.reform.ccd.document.am.model.Document testDocument() {
         uk.gov.hmcts.reform.ccd.document.am.model.Document.Link binaryLink = new uk.gov.hmcts.reform.ccd.document.am.model.Document.Link();
         binaryLink.href = "http://test.link";
