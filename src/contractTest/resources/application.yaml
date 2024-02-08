@@ -512,6 +512,10 @@ commonData:
   api:
     url: ${COMMON_DATA_API:http://rd-commondata-api-aat.service.core-compute-aat.internal}
 
+amRoleAssignment:
+  api:
+    url: ${AM_ROLE_ASSIGNMENT_API_URL:http://am-role-assignment-service-aat.service.core-compute-aat.internal}
+
 welsh:
   court:
     email-mapping: ${WELSH_COURT_MAPPING:}
