@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
@@ -348,11 +349,26 @@ public class C100RespondentSolicitorService {
     }
 
     private Response buildRespondAllegationOfHarm(CaseData caseData, Response buildResponseForRespondent) {
+        ResponseToAllegationsOfHarm responseToAllegationsOfHarm = optimiseResponseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
+                                                                                                          .getResponseToAllegationsOfHarm());
+        /*log.info("getResponseToAllegationsOfHarmYesOrNoResponse BEFORE : {}",
+                 caseData.getRespondentSolicitorData().getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
+        caseData.getRespondentSolicitorData().getResponseToAllegationsOfHarm().setResponseToAllegationsOfHarmYesOrNoResponse(
+            Yes);
+        log.info("getResponseToAllegationsOfHarmYesOrNoResponse AFTER : {}"
+        , responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse());*/
         return buildResponseForRespondent.toBuilder()
-            .responseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
-                                             .getResponseToAllegationsOfHarm())
+            .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
             .build();
     }
+
+    private ResponseToAllegationsOfHarm optimiseResponseToAllegationsOfHarm(ResponseToAllegationsOfHarm responseToAllegationsOfHarm) {
+        return responseToAllegationsOfHarm.toBuilder()
+            .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
+            .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
+            .build();
+    }
+
 
     private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
         List<Element<RespondentProceedingDetails>> respondentExistingProceedings
