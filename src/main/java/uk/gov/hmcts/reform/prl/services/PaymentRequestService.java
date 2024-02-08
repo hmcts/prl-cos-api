@@ -108,6 +108,7 @@ public class PaymentRequestService {
         }
 
         log.info("caseName is {}", caseName);
+        caseData.toBuilder().applicantCaseName(caseName).build();
 
         if (null == paymentServiceReferenceNumber
             && null == paymentReferenceNumber) {
