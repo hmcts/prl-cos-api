@@ -131,7 +131,6 @@ public class ManageDocumentsControllerTest {
             .listItems(dynamicListElementList).build();
     }
 
-
     @Test
     public void testHandleAboutToStart() {
         ManageDocuments manageDocuments = ManageDocuments.builder()
