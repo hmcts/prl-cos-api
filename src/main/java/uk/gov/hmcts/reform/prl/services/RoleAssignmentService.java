@@ -66,7 +66,6 @@ public class RoleAssignmentService {
                 roleCategory = RoleCategory.LEGAL_OPERATIONS.name();
             }
 
-            log.info("actor id is {}", actorId);
             UserDetails userDetails = userService.getUserDetails(authorization);
 
             RoleRequest roleRequest = RoleRequest.roleRequest()
@@ -98,7 +97,7 @@ public class RoleAssignmentService {
                 .roleRequest(roleRequest)
                 .requestedRoles(requestedRoles)
                 .build();
-            log.info("assignmentRequest----{}", assignmentRequest);
+
             roleAssignmentApi.updateRoleAssignment(
                 systemUserService.getSysUserToken(),
                 authTokenGenerator.generate(),
@@ -132,8 +131,6 @@ public class RoleAssignmentService {
     }
 
     private String fetchActorIdIfJudge(String authorization, HashMap<String, Object> caseDataUpdated) {
-        log.info("caseDataUpdated.get(JUDGE_NAME)--- {}", caseDataUpdated.get(JUDGE_NAME));
-        log.info("caseDataUpdated.get(JUDGE_NAME_EMAIL)--- {}", caseDataUpdated.get(JUDGE_NAME_EMAIL));
         if (AllocatedJudgeTypeEnum.judge.getId().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR)))) {
             return ((null != caseDataUpdated.get(JUDGE_NAME)

@@ -99,7 +99,6 @@ public class AllocateJudgeController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            log.info("/allocatedJudgeDetails::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
