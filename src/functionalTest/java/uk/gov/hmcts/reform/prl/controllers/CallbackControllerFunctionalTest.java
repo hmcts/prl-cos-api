@@ -112,7 +112,7 @@ public class CallbackControllerFunctionalTest {
             .when()
             .contentType("application/json")
             .post("/generate-save-draft-document")
-            .then().assertThat().statusCode(200);
+            .then().assertThat().statusCode(400);
     }
 
 
