@@ -88,8 +88,6 @@ public class CaseService {
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
                                   String caseId, String eventId, String accessCode) throws JsonProcessingException {
-        log.info("update case created first");
-        log.info("eventId is {}", eventId);
         if (LINK_CASE.equalsIgnoreCase(eventId) && null != accessCode) {
             linkCitizenToCase(authToken, s2sToken, caseId, accessCode);
             return caseRepository.getCase(authToken, caseId);
