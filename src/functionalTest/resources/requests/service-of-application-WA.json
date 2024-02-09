@@ -152,66 +152,6 @@
           }
         }
       ],
-      "respondentsFL401": {
-        "email": "soli@gmail.com",
-        "gender": null,
-        "address": {
-          "County": null,
-          "Country": null,
-          "PostCode": null,
-          "PostTown": null,
-          "AddressLine1": null,
-          "AddressLine2": null,
-          "AddressLine3": null
-        },
-        "dxNumber": null,
-        "landline": null,
-        "lastName": "Doe",
-        "firstName": "John",
-        "dateOfBirth": null,
-        "otherGender": null,
-        "phoneNumber": "01234567891",
-        "placeOfBirth": null,
-        "previousName": null,
-        "solicitorOrg": {
-          "OrganisationID": null,
-          "OrganisationName": null
-        },
-        "sendSignUpLink": null,
-        "solicitorEmail": null,
-        "isAddressUnknown": null,
-        "solicitorAddress": {
-          "County": null,
-          "Country": null,
-          "PostCode": null,
-          "PostTown": null,
-          "AddressLine1": null,
-          "AddressLine2": null,
-          "AddressLine3": null
-        },
-        "isDateOfBirthKnown": "No",
-        "solicitorReference": null,
-        "solicitorTelephone": null,
-        "isPlaceOfBirthKnown": null,
-        "isDateOfBirthUnknown": null,
-        "isAddressConfidential": "Yes",
-        "isCurrentAddressKnown": "No",
-        "relationshipToChildren": null,
-        "representativeLastName": null,
-        "representativeFirstName": null,
-        "canYouProvidePhoneNumber": "Yes",
-        "canYouProvideEmailAddress": "Yes",
-        "isAtAddressLessThan5Years": null,
-        "isPhoneNumberConfidential": null,
-        "isEmailAddressConfidential": null,
-        "respondentLivedWithApplicant": "No",
-        "doTheyHaveLegalRepresentation": null,
-        "addressLivedLessThan5YearsDetails": "*Provide details of all previous addresses for the last 5 years below(if known, including the dates and starting with most recent) (Optional)",
-        "otherPersonRelationshipToChildren": [
-
-        ],
-        "isAtAddressLessThan5YearsWithDontKnow": "yes"
-      },
       "respondents": [
         {
           "id": "29959b30-f49e-483b-a963-d53a88a93209",
@@ -269,13 +209,6 @@
           }
         }
       ],
-      "c8Document": {
-        "category_id": null,
-        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/04d2b51b-9bed-403f-ae9f-7b371a9ca248",
-        "document_filename": "C8Document.pdf",
-        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/04d2b51b-9bed-403f-ae9f-7b371a9ca248/binary",
-        "document_creation_date": null
-      },
       "createSelectOrderOptions": "blankOrderOrDirections",
       "isConfidential": "Yes",
       "soaServeToRespondentOptions": "Yes",
