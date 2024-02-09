@@ -885,7 +885,9 @@ public class PrlAppsConstants {
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
-
+    public static final String ALLOCATE_JUDGE_ROLE = "allocated-judge";
+    public static final String HEARING_JUDGE_ROLE = "hearing-judge";
+    public static final String GATEKEEPING_JUDGE_ROLE = "gatekeeping-judge";
     public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
 
     // PRL-5025
@@ -897,9 +899,9 @@ public class PrlAppsConstants {
     public static final String WA_IS_HEARING_TASK_NEEDED = "isHearingTaskNeeded";
     public static final String WA_MULTIPLE_OPTIONS_SELECTED_VALUE = "multipleOptionSelected";
 
+    public static final String WITHOUT_NOTICE_REJECTION = "Without notice rejection";
     public static final String OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR = "You can only serve other people in the case if there is a C6A."
         + " Go back to the previous page to select it. If the C6A is not there, you will need to create it in manage orders.";
-
 
     public static final String BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS = "buffChildAndOtherPeopleRelations";
     public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";

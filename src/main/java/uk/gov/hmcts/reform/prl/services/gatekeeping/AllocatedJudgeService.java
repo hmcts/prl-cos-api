@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.gatekeeping;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -10,7 +9,6 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiResponse;
@@ -27,6 +25,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_SPECIFIC_JUD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MAGISTRATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TIER_OF_JUDICIARY;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 
 @Slf4j
 @Service
@@ -74,17 +73,6 @@ public class AllocatedJudgeService {
             }
         }
         return allocatedJudgeBuilder.build();
-    }
-
-    public String[] getPersonalCode(Object judgeDetails) {
-        String[] personalCodes = new String[3];
-        try {
-            personalCodes[0] = new ObjectMapper().readValue(new ObjectMapper()
-                .writeValueAsString(judgeDetails), JudicialUser.class).getPersonalCode();
-        } catch (Exception e) {
-            log.error(e.getMessage());
-        }
-        return personalCodes;
     }
 
     private TierOfJudiciaryEnum getTierOfJudiciary(String tierOfJudiciary) {

@@ -290,7 +290,7 @@ public class C100RespondentSolicitorService {
                                             Element<PartyDetails> party,
                                             RespondentSolicitorEvents event) {
         Response buildResponseForRespondent = party.getValue().getResponse();
-        String solicitor = party.getValue().getRepresentativeFullName();
+        String solicitor = party.getValue().getRepresentativeFullNameForCaseFlags();
         switch (event) {
             case CONSENT:
                 Consent respondentConsentToApplication = caseData.getRespondentSolicitorData().getRespondentConsentToApplication();
@@ -560,7 +560,7 @@ public class C100RespondentSolicitorService {
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
         boolean attendedMiam = Yes.equals(caseData.getRespondentSolicitorData()
                                               .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam());
-        boolean willingToAttendMiam = attendedMiam && Yes.equals(caseData.getRespondentSolicitorData()
+        boolean willingToAttendMiam = !attendedMiam && No.equals(caseData.getRespondentSolicitorData()
                                                                      .getRespondentSolicitorHaveYouAttendedMiam()
                                                                      .getWillingToAttendMiam());
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
@@ -570,9 +570,9 @@ public class C100RespondentSolicitorService {
                       .willingToAttendMiam(attendedMiam ? null : caseData.getRespondentSolicitorData()
                           .getRespondentSolicitorHaveYouAttendedMiam().getWillingToAttendMiam())
                       .reasonNotAttendingMiam(
-                          willingToAttendMiam ? null : caseData
+                          willingToAttendMiam ? caseData
                               .getRespondentSolicitorData().getRespondentSolicitorHaveYouAttendedMiam()
-                              .getReasonNotAttendingMiam()).build()).build();
+                              .getReasonNotAttendingMiam() : null).build()).build();
         return buildResponseForRespondent;
     }
 
@@ -726,6 +726,7 @@ public class C100RespondentSolicitorService {
             .getConfidentialityList().contains(ConfidentialityListEnum.email)) {
             keepDetailsPrivateList.put("isEmailAddressConfidential", YesOrNo.Yes);
         }
+        keepDetailsPrivateList.put(RESPONDENT_NAME_FOR_RESPONSE, caseData.getRespondentSolicitorData().getRespondentNameForResponse());
         return keepDetailsPrivateList;
     }
 
@@ -777,8 +778,8 @@ public class C100RespondentSolicitorService {
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
             String party = representedRespondent.getValue().getLabelForDynamicList();
-            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullName())
-                ? party : representedRespondent.getValue().getRepresentativeFullName() + SOLICITOR;
+            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
+                ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
 
             caseData.getRespondents().set(
                 caseData.getRespondents().indexOf(representedRespondent),
