@@ -162,7 +162,7 @@ public class PaymentRequestService {
         }
     }
 
-    private String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
+    public String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
         ObjectMapper mapper = new ObjectMapper();
         C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
