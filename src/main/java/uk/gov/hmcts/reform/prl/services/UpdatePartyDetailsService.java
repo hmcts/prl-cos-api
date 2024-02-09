@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
@@ -53,6 +54,7 @@ public class UpdatePartyDetailsService {
     public static final String RESPONDENT_CONFIDENTIAL_DETAILS = "respondentConfidentialDetails";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
 
     @Qualifier("caseSummaryTab")
@@ -60,8 +62,10 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
+        CaseData oldCaseData = objectMapper.convertValue(oldCaseDataMap, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
@@ -88,89 +92,15 @@ public class UpdatePartyDetailsService {
             if (Objects.nonNull(fl401Applicant)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
                 updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
-                String daApplicantExternalFlags = String.format(PartyRole.Representing.DAAPPLICANT.getCaseDataExternalField(), 1);
-                String daApplicantInternalFlags = String.format(PartyRole.Representing.DAAPPLICANT.getCaseDataInternalField(), 1);
-                if (updatedCaseData.containsKey(daApplicantExternalFlags)) {
-                    Flags externalFlags = objectMapper.convertValue(
-                        updatedCaseData.get(daApplicantExternalFlags),
-                        Flags.class
-                    );
-
-                    externalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
-                    updatedCaseData.put(daApplicantExternalFlags, externalFlags);
-                }
-                if (updatedCaseData.containsKey(daApplicantInternalFlags)) {
-                    Flags internalFlags = objectMapper.convertValue(
-                        updatedCaseData.get(daApplicantInternalFlags),
-                        Flags.class
-                    );
-                    internalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
-                    updatedCaseData.put(daApplicantInternalFlags, internalFlags);
-                }
-
-                String daApplicantSolicitorExternalFlags = String.format(PartyRole.Representing.DAAPPLICANTSOLICITOR.getCaseDataExternalField(), 1);
-                String daApplicantSolicitorInternalFlags = String.format(PartyRole.Representing.DAAPPLICANTSOLICITOR.getCaseDataInternalField(), 1);
-                if (updatedCaseData.containsKey(daApplicantSolicitorExternalFlags)) {
-                    Flags solicitorExternalFlags = objectMapper.convertValue(
-                        updatedCaseData.get(daApplicantSolicitorExternalFlags),
-                        Flags.class
-                    );
-                    solicitorExternalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
-                    updatedCaseData.put(daApplicantSolicitorExternalFlags, solicitorExternalFlags);
-                }
-
-                if (updatedCaseData.containsKey(daApplicantInternalFlags)) {
-                    Flags solicitorInternalFlags = objectMapper.convertValue(
-                        updatedCaseData.get(daApplicantInternalFlags),
-                        Flags.class
-                    );
-                    solicitorInternalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
-                    updatedCaseData.put(daApplicantInternalFlags, solicitorInternalFlags);
-                }
+                partyLevelCaseFlagsService.amendFl401PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.DAAPPLICANT);
+                partyLevelCaseFlagsService.amendFl401PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.DAAPPLICANTSOLICITOR);
             }
 
             if (Objects.nonNull(fl401respondent)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
                 updatedCaseData.put("respondentName", fl401respondent.getLabelForDynamicList());
-                String daRespondentExternalFlags = String.format(PartyRole.Representing.DARESPONDENT.getCaseDataExternalField(), 1);
-                String daRespondentInternalFlags = String.format(PartyRole.Representing.DARESPONDENT.getCaseDataInternalField(), 1);
-                if (updatedCaseData.containsKey(daRespondentExternalFlags)) {
-                    Flags externalFlags = objectMapper.convertValue(
-                        updatedCaseData.get(daRespondentExternalFlags),
-                        Flags.class
-                    );
-
-                    externalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
-                    updatedCaseData.put(daRespondentExternalFlags, externalFlags);
-                }
-                if (updatedCaseData.containsKey(daRespondentInternalFlags)) {
-                    Flags internalFlags = objectMapper.convertValue(
-                        updatedCaseData.get(daRespondentInternalFlags),
-                        Flags.class
-                    );
-                    internalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
-                    updatedCaseData.put(daRespondentInternalFlags, internalFlags);
-                }
-
-                String daRespondentSolicitorExternalFlags = String.format(PartyRole.Representing.DARESPONDENTSOLICITOR.getCaseDataExternalField(), 1);
-                String daApplicantSolicitorInternalFlags = String.format(PartyRole.Representing.DARESPONDENTSOLICITOR.getCaseDataInternalField(), 1);
-                if (updatedCaseData.containsKey(daRespondentSolicitorExternalFlags)) {
-                    Flags solicitorExternalFlags = objectMapper.convertValue(
-                        updatedCaseData.get(daRespondentSolicitorExternalFlags),
-                        Flags.class
-                    );
-                    solicitorExternalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
-                    updatedCaseData.put(daRespondentSolicitorExternalFlags, solicitorExternalFlags);
-                }
-
-                if (updatedCaseData.containsKey(daRespondentInternalFlags)) {
-                    Flags solicitorInternalFlags = objectMapper.convertValue(
-                        updatedCaseData.get(daRespondentInternalFlags),
-                        Flags.class
-                    );
-                    solicitorInternalFlags.setPartyName(fl401Applicant.getLabelForDynamicList());
-                    updatedCaseData.put(daRespondentInternalFlags, solicitorInternalFlags);
-                }
+                partyLevelCaseFlagsService.amendFl401PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.DARESPONDENT);
+                partyLevelCaseFlagsService.amendFl401PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.DARESPONDENTSOLICITOR);
             }
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
         } else if (C100_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
@@ -194,6 +124,11 @@ public class UpdatePartyDetailsService {
             if (applicantList.isPresent()) {
                 setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
             }
+            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CAAPPLICANT);
+            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CAAPPLICANTSOLICITOR);
+            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CARESPONDENT);
+            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CARESPONDENTSOLICITOR);
+            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CAOTHERPARTY);
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;

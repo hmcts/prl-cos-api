@@ -15,16 +15,14 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -436,5 +434,219 @@ public class PartyLevelCaseFlagsService {
             }
         }
         return caseData;
+    }
+
+    private Map<String, Object> amendPartyFlagsForName(Map<String, Object> oldCaseDataMap, Map<String, Object> updatedCaseDataMap) {
+        CaseData updatedCaseData = objectMapper.convertValue(updatedCaseDataMap, CaseData.class);
+        CaseData oldCaseData = objectMapper.convertValue(oldCaseDataMap, CaseData.class);
+        if (FL401_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())) {
+            amendFl401PartyCaseFlags(
+                oldCaseData,
+                updatedCaseData,
+                updatedCaseDataMap,
+                PartyRole.Representing.DAAPPLICANT
+            );
+            amendFl401PartyCaseFlags(
+                oldCaseData,
+                updatedCaseData,
+                updatedCaseDataMap,
+                PartyRole.Representing.DAAPPLICANTSOLICITOR
+            );
+            amendFl401PartyCaseFlags(
+                oldCaseData,
+                updatedCaseData,
+                updatedCaseDataMap,
+                PartyRole.Representing.DARESPONDENT
+            );
+            amendFl401PartyCaseFlags(
+                oldCaseData,
+                updatedCaseData,
+                updatedCaseDataMap,
+                PartyRole.Representing.DARESPONDENTSOLICITOR
+            );
+        } else if (C100_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())) {
+            amendC100PartyCaseFlags(
+                oldCaseData,
+                updatedCaseData,
+                updatedCaseDataMap,
+                PartyRole.Representing.CAAPPLICANT
+            );
+            amendC100PartyCaseFlags(
+                oldCaseData,
+                updatedCaseData,
+                updatedCaseDataMap,
+                PartyRole.Representing.CAAPPLICANTSOLICITOR
+            );
+            amendC100PartyCaseFlags(
+                oldCaseData,
+                updatedCaseData,
+                updatedCaseDataMap,
+                PartyRole.Representing.CARESPONDENT
+            );
+            amendC100PartyCaseFlags(
+                oldCaseData,
+                updatedCaseData,
+                updatedCaseDataMap,
+                PartyRole.Representing.CARESPONDENTSOLICITOR
+            );
+            amendC100PartyCaseFlags(
+                oldCaseData,
+                updatedCaseData,
+                updatedCaseDataMap,
+                PartyRole.Representing.CAOTHERPARTY
+            );
+        }
+
+        return updatedCaseDataMap;
+    }
+
+    public Map<String, Object> amendC100PartyCaseFlags(CaseData oldCaseData, CaseData updatedCaseData, Map<String, Object> updatedCaseDataMap, PartyRole.Representing representing) {
+        List<Element<PartyDetails>> oldPartyDetailsList = representing.getCaTarget().apply(oldCaseData);
+        List<Element<PartyDetails>> updatedPartyDetailsList = representing.getCaTarget().apply(updatedCaseData);
+
+        int numElements = null != updatedPartyDetailsList ? updatedPartyDetailsList.size() : 0;
+        List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
+        for (int i = 0; i < partyRoles.size(); i++) {
+            PartyRole partyRole = partyRoles.get(i);
+            if (null != updatedPartyDetailsList) {
+                PartyDetails updatedPartyDetails = i < numElements ? updatedPartyDetailsList.get(i).getValue() : null;
+                PartyDetails oldPartyDetails = i < numElements ? oldPartyDetailsList.get(i).getValue() : null;
+
+                amendPartyCaseFlags(updatedCaseDataMap, representing, updatedPartyDetails, oldPartyDetails);
+            }
+        }
+
+        return updatedCaseDataMap;
+    }
+
+    public Map<String, Object> amendFl401PartyCaseFlags(CaseData oldCaseData, CaseData updatedCaseData, Map<String, Object> updatedCaseDataMap, PartyRole.Representing representing) {
+        PartyDetails oldPartyDetails = representing.getDaTarget().apply(oldCaseData);
+        PartyDetails updatedPartyDetails = representing.getDaTarget().apply(updatedCaseData);
+
+        return amendPartyCaseFlags(updatedCaseDataMap, representing, updatedPartyDetails, oldPartyDetails);
+    }
+
+    private Map<String, Object> amendPartyCaseFlags(Map<String, Object> updatedCaseDataMap, PartyRole.Representing representing, PartyDetails updatedPartyDetails, PartyDetails oldPartyDetails) {
+        List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
+        for (int i = 0; i < partyRoles.size(); i++) {
+            PartyRole partyRole = partyRoles.get(i);
+            if (null != updatedPartyDetails) {
+                String caseDataExternalField = String.format(representing.getCaseDataExternalField(), i + 1);
+                String caseDataInternalField = String.format(representing.getCaseDataInternalField(), i + 1);
+                String groupId = String.format(representing.getGroupId(), i + 1);
+                switch (representing) {
+                    case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY, DAAPPLICANT, DARESPONDENT: {
+                        if (!StringUtils.isEmpty(updatedPartyDetails.getLabelForDynamicList())) {
+                            if (oldPartyDetails != null
+                                && updatedPartyDetails.getLabelForDynamicList().equalsIgnoreCase(oldPartyDetails.getLabelForDynamicList())) {
+                                amendNameForTheFlags(
+                                    updatedCaseDataMap,
+                                    caseDataExternalField,
+                                    updatedPartyDetails.getLabelForDynamicList()
+                                );
+
+                                amendNameForTheFlags(
+                                    updatedCaseDataMap,
+                                    caseDataInternalField,
+                                    updatedPartyDetails.getLabelForDynamicList()
+                                );
+                            } else {
+                                amendAndRegeneratedFlags(
+                                    updatedCaseDataMap,
+                                    caseDataExternalField,
+                                    updatedPartyDetails.getLabelForDynamicList(),
+                                    partyRole,
+                                    false,
+                                    groupId
+                                );
+                                amendAndRegeneratedFlags(
+                                    updatedCaseDataMap,
+                                    caseDataInternalField,
+                                    updatedPartyDetails.getLabelForDynamicList(),
+                                    partyRole,
+                                    true,
+                                    groupId
+                                );
+                            }
+                        }
+                        break;
+                    }
+                    case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR, DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
+                        if (!StringUtils.isEmpty(updatedPartyDetails.getRepresentativeFullNameForCaseFlags())) {
+                            if (oldPartyDetails != null
+                                && updatedPartyDetails.getRepresentativeFullName().equalsIgnoreCase(oldPartyDetails.getRepresentativeFullName())) {
+                                amendNameForTheFlags(
+                                    updatedCaseDataMap,
+                                    caseDataExternalField,
+                                    updatedPartyDetails.getRepresentativeFullName()
+                                );
+
+                                amendNameForTheFlags(
+                                    updatedCaseDataMap,
+                                    caseDataInternalField,
+                                    updatedPartyDetails.getRepresentativeFullName()
+                                );
+                            } else {
+                                amendAndRegeneratedFlags(
+                                    updatedCaseDataMap,
+                                    caseDataExternalField,
+                                    updatedPartyDetails.getRepresentativeFullName(),
+                                    partyRole,
+                                    false,
+                                    groupId
+                                );
+                                amendAndRegeneratedFlags(
+                                    updatedCaseDataMap,
+                                    caseDataInternalField,
+                                    updatedPartyDetails.getRepresentativeFullName(),
+                                    partyRole,
+                                    true,
+                                    groupId
+                                );
+                            }
+                        }
+                        break;
+                    }
+                    default: {
+                        break;
+                    }
+                }
+            }
+        }
+        return updatedCaseDataMap;
+    }
+
+    private void amendNameForTheFlags(Map<String, Object> updatedCaseDataMap,
+                                      String flagField,
+                                      String partyName) {
+        if (updatedCaseDataMap.containsKey(flagField)) {
+            Flags flags = objectMapper.convertValue(
+                updatedCaseDataMap.get(flagField),
+                Flags.class
+            );
+            flags.setPartyName(partyName);
+            updatedCaseDataMap.put(flagField, flags);
+        }
+    }
+
+    private void amendAndRegeneratedFlags(Map<String, Object> updatedCaseDataMap,
+                                          String flagField,
+                                          String partyName,
+                                          PartyRole partyRole,
+                                          boolean internalFlag,
+                                          String groupId) {
+        if (internalFlag) {
+            updatedCaseDataMap.put(flagField, partyLevelCaseFlagsGenerator.generateInternalPartyFlags(
+                partyName,
+                partyRole.getCaseRoleLabel(),
+                groupId
+            ));
+        } else {
+            updatedCaseDataMap.put(flagField, partyLevelCaseFlagsGenerator.generateExternalPartyFlags(
+                partyName,
+                partyRole.getCaseRoleLabel(),
+                groupId
+            ));
+        }
     }
 }
