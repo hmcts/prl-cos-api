@@ -63,7 +63,7 @@
             "representativeFirstName": "repFirstName",
             "representativeLastName": "repLastName",
             "isAtAddressLessThan5YearsWithDontKnow": null,
-            "doTheyHaveLegalRepresentation": null,
+            "doTheyHaveLegalRepresentation": "yes",
             "sendSignUpLink": null,
             "solicitorEmail": null
           }
@@ -174,7 +174,7 @@
               "PostCode": "N14 5AL"
             },
             "isAddressUnknown": null,
-            "isAddressConfidential": null,
+            "isAddressConfidential": "Yes",
             "isAtAddressLessThan5Years": null,
             "addressLivedLessThan5YearsDetails": null,
             "canYouProvideEmailAddress": "No",
@@ -210,8 +210,19 @@
         }
       ],
       "createSelectOrderOptions": "blankOrderOrDirections",
+      "isConfidential": "Yes",
+      "soaServeToRespondentOptions": "Yes",
+      "soaServingRespondentsOptionsCA": "applicantLegalRepresentative",
+      "soaCitizenServingRespondentsOptionsDA": "courtBailiff",
+      "typeOfApplicationOrders": {
+        "orderType": [
+          "nonMolestationOrder",
+          "occupationOrder"
+        ]
+      },
       "manageOrdersOptions": "uploadAnOrder",
       "childArrangementOrders": "standardDirectionsOrder",
+      "applicationServedYesNo": "Yes",
       "unServedApplicantPack": {
         "packDocument": [
           {
@@ -229,7 +240,27 @@
         ],
         "servedBy": "",
         "packCreatedDate": ""
-      }
+      },
+      "unServedRespondentPack": {
+        "packDocument": [
+          {
+            "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+            "value": {
+              "documentUrl": ""
+            }
+          }
+        ],
+        "partyIds": [
+          {
+            "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+            "value": "97e25c77-f915-4b4e-8436-89a0d1678813"
+          }
+        ],
+        "servedBy": "",
+        "personalServiceBy": "Court admin",
+        "packCreatedDate": ""
+      },
+      "caseCreatedBy": "SOLICITOR"
     }
   },
   "event_id": "litigationCapacity"

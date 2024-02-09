@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -31,6 +32,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -42,11 +44,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENG_STATIC_DOCS
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PRIVACY_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL416_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Service
 @Slf4j
@@ -119,7 +122,7 @@ public class ServiceOfApplicationPostService {
                         DOCUMENT_COVER_SHEET_HINT, Boolean.FALSE
                     ), dataMap
                 );
-                coverLetterDocs.add(DocumentUtils.toCoverLetterDocument(generatedDocumentInfo));
+                coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
             }
             if (documentLanguage.isGenWelsh()) {
                 generatedDocumentInfo = dgsService.generateDocument(
@@ -129,7 +132,7 @@ public class ServiceOfApplicationPostService {
                         DOCUMENT_COVER_SHEET_HINT, Boolean.TRUE
                     ), dataMap
                 );
-                coverLetterDocs.add(DocumentUtils.toCoverLetterDocument(generatedDocumentInfo));
+                coverLetterDocs.add(DocumentUtils.toCoverSheetDocument(generatedDocumentInfo));
             }
         } else {
             log.error("ADDRESS NOT PRESENT, CAN NOT GENERATE COVER LETTER");
@@ -201,12 +204,6 @@ public class ServiceOfApplicationPostService {
                     ),
                     new InMemoryMultipartFile(
                         SOA_MULTIPART_FILE,
-                        SOA_FL416_FILENAME,
-                        APPLICATION_PDF_VALUE,
-                        DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL416_FILENAME)
-                    ),
-                    new InMemoryMultipartFile(
-                        SOA_MULTIPART_FILE,
                         SOA_FL415_FILENAME,
                         APPLICATION_PDF_VALUE,
                         DocumentUtils.readBytes(URL_STRING + ENG_STATIC_DOCS_PATH + SOA_FL415_FILENAME)
@@ -223,11 +220,55 @@ public class ServiceOfApplicationPostService {
         return Collections.emptyList();
     }
 
+    public CaseData getRespondentCaseData(PartyDetails partyDetails, CaseData caseData) {
+        return CaseData
+            .builder()
+            .id(caseData.getId())
+            .respondents(List.of(element(partyDetails)))
+            .build();
+    }
+
+    public List<GeneratedDocumentInfo> getUploadedDocumentsServiceOfApplication(CaseData caseData) {
+        List<GeneratedDocumentInfo> docs = new ArrayList<>();
+        Optional<Document> pd36qLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs().getPd36qLetter());
+        Optional<Document> specialArrangementLetter = Optional.ofNullable(caseData.getServiceOfApplicationUploadDocs()
+                                                                              .getSpecialArrangementsLetter());
+        pd36qLetter.ifPresent(document -> docs.add(toGeneratedDocumentInfo(document)));
+        specialArrangementLetter.ifPresent(document -> docs.add(toGeneratedDocumentInfo(document)));
+        return docs;
+    }
+
+    public Document getFinalDocument(CaseData caseData) {
+        if (!welshCase(caseData)) {
+            return caseData.getFinalDocument();
+        }
+        return caseData.getFinalWelshDocument();
+    }
+
+    public Optional<Document> getC1aDocument(CaseData caseData) {
+        if (hasAllegationsOfHarm(caseData)) {
+            if (!welshCase(caseData)) {
+                return Optional.of(caseData.getC1ADocument());
+            }
+            return Optional.of(caseData.getC1AWelshDocument());
+        }
+        return Optional.empty();
+    }
+
+    private boolean welshCase(CaseData caseData) {
+        return caseData.getFinalWelshDocument() != null;
+    }
+
+    private boolean hasAllegationsOfHarm(CaseData caseData) {
+        return YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
+    }
+
     private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
                                            List<Document> docs, Address address, String name, String servedParty) {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         String bulkPrintedId = "";
+        log.info("Docs sending {}", docs);
         try {
             log.info("*** Initiating request to Bulk print service ***");
             log.info("*** number of files in the pack *** {}", null != docs ? docs.size() : "empty");

@@ -58,7 +58,7 @@ public class UpdatePartyDetailsService {
 
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-
+        log.info("*** UpdatedCasedata applicants *** {}", updatedCaseData.get("applicants"));
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);

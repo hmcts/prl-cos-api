@@ -23,7 +23,11 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -113,9 +117,13 @@ public class CaseService {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         PartyDetails partyDetails = updateCaseData.getPartyDetails();
         PartyEnum partyType = updateCaseData.getPartyType();
+        if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
+            eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
+            handleCitizenStatementOfService(caseData, partyDetails, partyType);
+        }
         if (null != partyDetails.getUser()) {
             if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
-                updatingPartyDetailsCa(caseData, partyDetails, partyType);
+                caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
@@ -124,6 +132,59 @@ public class CaseService {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    private CaseData handleCitizenStatementOfService(CaseData caseData,PartyDetails partyDetails, PartyEnum partyType) {
+        CitizenSos citizenSos = partyDetails.getCitizenSosObject();
+        StmtOfServiceAddRecipient sosObject = StmtOfServiceAddRecipient.builder()
+            .citizenPartiesServedList(getPartyNames(citizenSos.getPartiesServed(), caseData, partyType))
+            .citizenPartiesServedDate(citizenSos.getPartiesServedDate())
+            .citizenSosDocs(getSosDocs(citizenSos.getCitizenSosDocs(), caseData.getCitizenUploadQuarantineDocsList()))
+            .build();
+        if (caseData.getStmtOfServiceAddRecipient() != null) {
+            List<Element<StmtOfServiceAddRecipient>> sosList = caseData.getStmtOfServiceAddRecipient();
+            List<Element<StmtOfServiceAddRecipient>> mutableList = new ArrayList<>(sosList);
+            mutableList.add(element(sosObject));
+            caseData.setStmtOfServiceAddRecipient(mutableList);
+        } else {
+            caseData.setStmtOfServiceAddRecipient(List.of(element(sosObject)));
+        }
+        return caseData;
+    }
+
+    private String getPartyNames(String parties, CaseData caseData, PartyEnum partyType) {
+        List<String> servedParties = new ArrayList<>();
+        if (parties != null) {
+            for (String partyId : parties.split(",")) {
+                if (PartyEnum.applicant.equals(partyType)) {
+                    servedParties.add(getPartyNameById(partyId, caseData.getApplicants()));
+                } else if (PartyEnum.respondent.equals(partyType)) {
+                    servedParties.add(getPartyNameById(partyId, caseData.getRespondents()));
+                }
+            }
+        }
+        return servedParties.toString();
+    }
+
+    private String getPartyNameById(String partyId, List<Element<PartyDetails>> parties) {
+        for (Element<PartyDetails> party : parties) {
+            if (party.getId().toString().equalsIgnoreCase(partyId)) {
+                return party.getValue().getLabelForDynamicList();
+            }
+        }
+        return "";
+    }
+
+    private List<Document> getSosDocs(List<String> docIdList, List<Element<UploadedDocuments>> citizenDocs) {
+        List<Document> docs = new ArrayList<>();
+        if (citizenDocs != null) {
+            citizenDocs.forEach(doc -> {
+                if (docIdList.contains(doc.getId().toString())) {
+                    docs.add(doc.getValue().getCitizenDocument());
+                }
+            });
+        }
+        return docs;
     }
 
     private CaseData generateAnswersForNoc(CaseData caseData) {
@@ -154,9 +215,10 @@ public class CaseService {
         return caseData;
     }
 
-    private static void updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+    private static CaseData updatingPartyDetailsCa(CaseData caseData, PartyDetails partyDetails, PartyEnum partyType) {
+        log.info("** PartyDetails ** {}", partyDetails);
         if (PartyEnum.applicant.equals(partyType)) {
-            List<Element<PartyDetails>> applicants = caseData.getApplicants();
+            List<Element<PartyDetails>> applicants = new ArrayList<>(caseData.getApplicants());
             applicants.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -166,8 +228,9 @@ public class CaseService {
                 .ifPresent(party ->
                                applicants.set(applicants.indexOf(party), element(party.getId(), partyDetails))
                 );
+            caseData = caseData.toBuilder().applicants(applicants).build();
         } else if (PartyEnum.respondent.equals(partyType)) {
-            List<Element<PartyDetails>> respondents = caseData.getRespondents();
+            List<Element<PartyDetails>> respondents = new ArrayList<>(caseData.getRespondents());
             respondents.stream()
                 .filter(party -> Objects.equals(
                     party.getValue().getUser().getIdamId(),
@@ -177,7 +240,9 @@ public class CaseService {
                 .ifPresent(party ->
                                respondents.set(respondents.indexOf(party), element(party.getId(), partyDetails))
                 );
+            caseData = caseData.toBuilder().respondents(respondents).build();
         }
+        return caseData;
     }
 
 

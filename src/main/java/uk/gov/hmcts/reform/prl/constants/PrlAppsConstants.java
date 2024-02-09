@@ -733,25 +733,34 @@ public class PrlAppsConstants {
 
     public static final String ADDITIONAL_APPLICATIONS_HELP_WITH_FEES = "additionalApplicationsHelpWithFees";
 
-    public static final String Q = "Q";
-
-    public static final String S = "S";
-
-    public static final String R = "R";
-
     public static final String A = "A";
 
     public static final String B = "B";
 
-    public static final String G = "G";
+    public static final String C = "C";
 
-    public static final String O = "O";
+    public static final String D = "D";
+
+    public static final String E = "E";
+
+    public static final String F = "F";
+
+    public static final String G = "G";
     public static final String H = "H";
     public static final String I = "I";
+    public static final String J = "J";
+    public static final String K = "K";
+    public static final String L = "L"; //CA other org pack
+    public static final String M = "M";
     public static final String N = "N";
+    public static final String O = "O";
+    public static final String P = "P";
+    public static final String Q = "Q";
+    public static final String R = "R";
+    public static final String S = "S";
+
     public static final String HI = "HI";
     public static final String Z = "Z"; //CA other org pack
-    public static final String L = "L"; //CA other org pack
     public static final String SWANSEA_COURT_NAME = "Swansea Civil And Family Justice Centre";
     public static final String CAFCASS_CAN_VIEW_ONLINE = "Cafcass/Cafcass CYMRU can login to system to view documents, "
         + "hence not sending any documents ";
@@ -783,6 +792,8 @@ public class PrlAppsConstants {
     public static final String SOA_FL416_FILENAME = "FL416.pdf";
 
     public static final String SOA_MULTIPART_FILE = "files";
+    public static final String SOA_CITIZEN = "CITIZEN";
+    public static final String SOA_SOLICITOR = "SOLICITOR";
 
 
     public static final String COURT_ADMIN = "Court admin";
@@ -822,6 +833,11 @@ public class PrlAppsConstants {
     public static final String  SEXUAL_ABUSE = "sexualAbuse";
     public static final String  EMOTIONAL_ABUSE = "emotionalAbuse";
     public static final String  FINANCIAL_ABUSE = "financialAbuse";
+    //Soa letter types
+    public static final String SOA_RES_LET_RE5 = "RE5";
+
+    public static final String EUROPE_LONDON_TIME_ZONE = "Europe/London";
+    public static final String DD_MMM_YYYY_HH_MM_SS = "dd MMM yyyy HH:mm:ss";
     public static final String OTHER_PERSON = "otherPerson";
     public static final String UNDERSCORE = "_";
     public static final String AWP_STATUS_SUBMITTED = "Submitted";
@@ -893,4 +909,11 @@ public class PrlAppsConstants {
 
     public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
         + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
+
+    public static final String WA_SOA_C8_CHECK_NEEDED = "isC8CheckNeeded";
+    public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
+    public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
+    public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
+
+
 }

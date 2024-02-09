@@ -1,9 +1,9 @@
 {
   "case_details": {
     "state": "JUDICIAL_REVIEW",
-    "id": "1702638919767299",
+    "id": "1687443551969082",
     "case_data": {
-      "id": 1701277056588266,
+      "id": 1687443551969082,
       "applicantCaseName": "John Smith",
       "caseTypeOfApplication": "C100",
       "caseManagementLocation": {
@@ -81,7 +81,15 @@
             "gender": "male",
             "otherGender": null,
             "placeOfBirth": "London",
-            "address": null,
+            "address": {
+              "AddressLine1": "Ministry Of Justice",
+              "AddressLine2": "Seventh Floor 102 Petty France",
+              "AddressLine3": "",
+              "PostTown": "",
+              "County": "",
+              "Country": "",
+              "PostCode": "RH117RQ"
+            },
             "isAddressUnknown": null,
             "isAddressConfidential": "No",
             "isAtAddressLessThan5Years": "No",
@@ -229,7 +237,9 @@
         ],
         "servedBy": "",
         "packCreatedDate": ""
-      }
+      },
+      "applicationServedYesNo": "Yes",
+      "soaServeToRespondentOptions" : "No"
     }
   },
   "event_id": "litigationCapacity"

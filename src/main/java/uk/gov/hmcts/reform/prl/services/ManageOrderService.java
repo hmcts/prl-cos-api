@@ -682,12 +682,11 @@ public class ManageOrderService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
 
         caseDataUpdated.put(CASE_TYPE_OF_APPLICATION, CaseUtils.getCaseTypeOfApplication(caseData));
-        caseDataUpdated.put("childrenList", dynamicMultiSelectListService
+        String childList = dynamicMultiSelectListService
             .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                     .getChildOption()));
-        caseDataUpdated.put("childListForSpecialGuardianship", dynamicMultiSelectListService
-            .getStringFromDynamicMultiSelectList(caseData.getManageOrders()
-                                                     .getChildOption()));
+                                                     .getChildOption());
+        caseDataUpdated.put("childrenList", childList);
+        caseDataUpdated.put("childListForSpecialGuardianship", childList);
         caseDataUpdated.put("selectedOrder", getSelectedOrderInfo(caseData) != null
             ? BOLD_BEGIN + getSelectedOrderInfo(caseData) + BOLD_END : "");
         return caseDataUpdated;
