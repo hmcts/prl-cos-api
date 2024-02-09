@@ -447,36 +447,7 @@ public class DraftAnOrderService {
                 .orderDocument(draftOrder.getOrderDocument())
                 .build();
         } else {
-            manageOrderService.populateChildrenListForDocmosis(caseData);
-            if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
-                && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
-                caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
-            }
-            if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
-                && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
-                caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
-                                                                 .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
-                                                                 .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
-                                                                     caseData))
-                                                                 .manageOrdersRespondent(CaseUtils.getRespondent(caseData))
-                                                                 .manageOrdersRespondentReference(
-                                                                     caseData.getRespondentsFL401().getSolicitorReference() != null
-                                                                         ? caseData.getRespondentsFL401().getSolicitorReference() : "")
-                                                                 .manageOrdersRespondentDob(
-                                                                     null != caseData.getRespondentsFL401().getDateOfBirth()
-                                                                         ? caseData.getRespondentsFL401().getDateOfBirth() : null)
-                                                                 .build())
-                    .build();
-            }
-            if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
-                caseData = manageOrderService.populateJudgeNames(caseData);
-                caseData = manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData);
-                if (isNotEmpty(caseData.getStandardDirectionOrder())
-                    && CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())
-                    && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(factFindingHearing)) {
-                    caseData = manageOrderService.populateDirectionOfFactFindingHearingFieldsForDocmosis(caseData);
-                }
-            }
+            caseData = updateCaseDataForDocmosis(caseData, draftOrder);
             caseData = caseData.toBuilder().manageOrders(
                 caseData.getManageOrders().toBuilder()
                     .ordersHearingDetails(draftOrder.getManageOrderHearingDetails())
@@ -524,6 +495,40 @@ public class DraftAnOrderService {
             }
         }
         return orderDetails;
+    }
+
+    private CaseData updateCaseDataForDocmosis(CaseData caseData, DraftOrder draftOrder) {
+        manageOrderService.populateChildrenListForDocmosis(caseData);
+        if ((C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData)))
+            && CreateSelectOrderOptionsEnum.appointmentOfGuardian.equals(draftOrder.getOrderType())) {
+            caseData = manageOrderService.updateOrderFieldsForDocmosis(draftOrder, caseData);
+        }
+        if (FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && CreateSelectOrderOptionsEnum.generalForm.equals(draftOrder.getOrderType())) {
+            caseData = caseData.toBuilder().manageOrders(caseData.getManageOrders().toBuilder()
+                                                             .manageOrdersApplicant(CaseUtils.getApplicant(caseData))
+                                                             .manageOrdersApplicantReference(CaseUtils.getApplicantReference(
+                                                                 caseData))
+                                                             .manageOrdersRespondent(CaseUtils.getRespondent(caseData))
+                                                             .manageOrdersRespondentReference(
+                                                                 caseData.getRespondentsFL401().getSolicitorReference() != null
+                                                                     ? caseData.getRespondentsFL401().getSolicitorReference() : "")
+                                                             .manageOrdersRespondentDob(
+                                                                 null != caseData.getRespondentsFL401().getDateOfBirth()
+                                                                     ? caseData.getRespondentsFL401().getDateOfBirth() : null)
+                                                             .build())
+                .build();
+        }
+        if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
+            caseData = manageOrderService.populateJudgeNames(caseData);
+            caseData = manageOrderService.populatePartyDetailsOfNewParterForDocmosis(caseData);
+            if (isNotEmpty(caseData.getStandardDirectionOrder())
+                && CollectionUtils.isNotEmpty(caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList())
+                && caseData.getStandardDirectionOrder().getSdoHearingsAndNextStepsList().contains(factFindingHearing)) {
+                caseData = manageOrderService.populateDirectionOfFactFindingHearingFieldsForDocmosis(caseData);
+            }
+        }
+        return caseData;
     }
 
     private OrderDetails getOrderDetails(CaseData caseData, DraftOrder draftOrder, String eventId, String loggedInUserType) {
