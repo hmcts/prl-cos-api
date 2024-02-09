@@ -43,7 +43,9 @@ public class ConfidentialityCheckControllerFT {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
 
-    private static final String VALID_REQUEST_BODY_WA = "requests/service-of-application-WA.json";
+    private static final String VALID_REQUEST_BODY_WA1 = "requests/service-of-application-WA1.json";
+
+    private static final String VALID_REQUEST_BODY_WA2 = "requests/service-of-application-WA2.json";
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -110,7 +112,7 @@ public class ConfidentialityCheckControllerFT {
 
     @Test
     public void givenRequestBody_whenConfidentialCheckWhenAppplicationServedAndUnServedRespondentPackAvailable() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA1);
 
         String requestBodyRevised = requestBody
             .replace("\"event_id\": \"litigationCapacity\"",
@@ -135,7 +137,7 @@ public class ConfidentialityCheckControllerFT {
 
     @Test
     public void givenRequestBody_whenConfidentialCheckWhenApplicationServedAndUnServedRespondentPackNotAvailable() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA1);
 
         String requestBodyRevised = requestBody
             .replace("\"event_id\": \"litigationCapacity\"",
@@ -164,7 +166,7 @@ public class ConfidentialityCheckControllerFT {
 
     @Test
     public void givenRequestBody_whenSoaEventC100WhenBothIsConfidentialAndSoaServeToRespondentOptionsYes() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA1);
 
         String requestBodyRevised = requestBody
             .replace("\"event_id\": \"litigationCapacity\"",
@@ -189,13 +191,13 @@ public class ConfidentialityCheckControllerFT {
 
     @Test
     public void givenRequestBody_whenSoaEventC100WhenBothIsC8DocPresentAndSoaServeToRespondentOptionsYes() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA1);
 
         String requestBodyRevised = requestBody
             .replace("\"event_id\": \"litigationCapacity\"",
                      "\"event_id\": \"serviceOfApplication\"")
             .replace("\"isAddressConfidential\": \"Yes\"",
-                 "\"isAddressConfidential\": \"No\"");
+                     "\"isAddressConfidential\": \"No\"");
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -216,13 +218,13 @@ public class ConfidentialityCheckControllerFT {
 
     @Test
     public void givenRequestBody_whenSoaEventC100WhenIsConfidentialC8DocAndSoaServeToRespondentOptionsNo() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA2);
 
         String requestBodyRevised = requestBody
             .replace("\"event_id\": \"litigationCapacity\"",
                      "\"event_id\": \"serviceOfApplication\"")
             .replace("\"soaServeToRespondentOptions\": \"Yes\"",
-                 "\"soaServeToRespondentOptions\": \"No\"")
+                     "\"soaServeToRespondentOptions\": \"No\"")
             .replace("\"isConfidential\": \"Yes\"",
                      "\"isConfidential\": \"No\"")
             .replace("\"isAddressConfidential\": \"Yes\"",
@@ -266,13 +268,13 @@ public class ConfidentialityCheckControllerFT {
 
     @Test
     public void givenRequestBody_whenSoaEventFl401WhenBothIsConfidentialAndSoaServingRespondentsOptionsDaYes() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA1);
 
         String requestBodyRevised = requestBody
             .replace("\"event_id\": \"litigationCapacity\"",
                      "\"event_id\": \"serviceOfApplication\"")
             .replace("\"caseTypeOfApplication\": \"C100\"",
-                 "\"caseTypeOfApplication\": \"FL401\"")
+                     "\"caseTypeOfApplication\": \"FL401\"")
             .replace("\"caseCreatedBy\": \"SOLICITOR\"",
                      "\"caseCreatedBy\": \"CITIZEN\"");
 
@@ -295,7 +297,7 @@ public class ConfidentialityCheckControllerFT {
 
     @Test
     public void givenRequestBody_whenSoaEventFL401WhenIsConfidentialNoAndC8DocNotPresent() throws Exception {
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA);
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA2);
 
         String requestBodyRevised = requestBody
             .replace("\"event_id\": \"litigationCapacity\"",
