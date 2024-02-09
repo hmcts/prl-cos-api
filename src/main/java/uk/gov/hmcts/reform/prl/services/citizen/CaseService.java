@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -19,6 +20,9 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -40,6 +44,7 @@ import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
@@ -50,6 +55,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDEN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -107,6 +113,13 @@ public class CaseService {
             log.info("case is being updated");
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
+        if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)) {
+            CaseData updatedCaseData = caseDataMapper
+                .buildUpdatedCaseData(caseData.toBuilder()
+                    .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
+                    .build());
+            return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+        }
 
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
@@ -129,6 +142,42 @@ public class CaseService {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    public String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
+        if (!isEmpty(caseData.getApplicantCaseName())) {
+            return caseData.getApplicantCaseName();
+        } else {
+            C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+            ObjectMapper mapper = new ObjectMapper();
+            C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
+            C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
+            if (null != c100RebuildData) {
+                if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
+                    c100RebuildApplicantDetailsElements = mapper
+                        .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
+                }
+
+                if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+                    c100RebuildRespondentDetailsElements = mapper
+                        .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+                }
+            }
+            return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
+        }
+    }
+
+    private String buildCaseName(C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
+                                 C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
+        String caseName = null;
+        if (null != c100RebuildApplicantDetailsElements
+            && null != c100RebuildRespondentDetailsElements.getRespondentDetails()) {
+            caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
+                + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
+        }
+
+        log.info("caseName is {}", caseName);
+        return caseName;
     }
 
     private CaseData generateAnswersForNoc(CaseData caseData) {
