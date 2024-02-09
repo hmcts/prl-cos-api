@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection;
 import uk.gov.hmcts.reform.prl.services.TaskListRenderElements;
@@ -45,7 +46,7 @@ public class RespondentSolicitorTaskListRenderer {
 
 
     public String render(List<RespondentTask> allTasks, List<RespondentEventValidationErrors> tasksErrors,
-                         String respondent, String representedRespondentName, boolean hasSubmitted, long caseId) {
+                         String respondent, String representedRespondentName, boolean hasSubmitted, CaseData caseData) {
         final List<String> lines = new LinkedList<>();
         if (!hasSubmitted) {
             lines.add(
@@ -58,13 +59,13 @@ public class RespondentSolicitorTaskListRenderer {
 
             lines.add(DIV_CLASS_WIDTH_50);
 
-            (groupInSections(allTasks))
+            (groupInSections(allTasks, caseData))
                 .forEach(section -> lines.addAll(renderSection(section, respondent)));
 
             lines.add(DIV);
             lines.addAll(renderResSolTasksErrors(tasksErrors, respondent));
         } else {
-            String caseDocumentsUrl =  "/cases/case-details/" + caseId + "/#Case%20documents";
+            String caseDocumentsUrl =  "/cases/case-details/" + caseData.getId() + "/#Case%20documents";
             lines.add(
                 DIV_CLASS_WIDTH_50
                     + "<h3>Response for " + representedRespondentName + " has been successfully submitted.</h3>"
@@ -76,14 +77,14 @@ public class RespondentSolicitorTaskListRenderer {
         return String.join("\n\n", lines);
     }
 
-    private List<RespondentTaskSection> groupInSections(List<RespondentTask> allTasks) {
+    private List<RespondentTaskSection> groupInSections(List<RespondentTask> allTasks, CaseData caseData) {
         final Map<RespondentSolicitorEvents, RespondentTask> tasks
             = allTasks.stream().collect(toMap(RespondentTask::getEvent, identity()));
 
         final RespondentTaskSection consent = newSection("1. Consent to the Application")
             .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
 
-        final RespondentTaskSection yourDetails = newSection("2. Your details")
+        final RespondentTaskSection yourDetails = newSection("2. Respondent's details")
             .withTask(tasks.get(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE))
             .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS))
             .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));
@@ -92,8 +93,17 @@ public class RespondentSolicitorTaskListRenderer {
             .withTask(tasks.get(RespondentSolicitorEvents.MIAM))
             .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS));
 
-        final RespondentTaskSection safetyConcerns = newSection("4. Safety Concerns")
-            .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
+        final RespondentTaskSection safetyConcerns;
+
+        if (null != caseData.getC1ADocument()) {
+            safetyConcerns = newSection("4. Safety Concerns")
+                .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM))
+                .withTask(tasks.get(RespondentSolicitorEvents.RESPOND_ALLEGATION_OF_HARM));
+
+        } else {
+            safetyConcerns = newSection("4. Safety Concerns")
+                .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
+        }
 
         final RespondentTaskSection additionalInformation = newSection("5. Additional information")
             .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
@@ -113,8 +123,7 @@ public class RespondentSolicitorTaskListRenderer {
             additionalInformation,
             viewResponse,
             submit
-        )
-            .filter(RespondentTaskSection::hasAnyTask)
+        ).filter(RespondentTaskSection::hasAnyTask)
             .toList();
     }
 

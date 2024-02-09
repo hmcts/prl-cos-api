@@ -126,13 +126,13 @@ public class CaseEventHandlerTest {
             respondentTask,
             resErrors,
             "A",
-            "test test", false, 123456L
+            "test test", false, caseData
         )).thenReturn(respondentTaskListA);
         when(respondentSolicitorTaskListRenderer.render(
             respondentTask,
             resErrors,
             "B",
-            "test test", false, 123456L
+            "test test", false, caseData
         )).thenReturn(respondentTaskListB);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
@@ -314,19 +314,19 @@ public class CaseEventHandlerTest {
         );
 
         when(taskListService.getTasksForOpenCase(caseData)).thenReturn(c100Tasks);
-        when(taskListService.getRespondentsEvents()).thenReturn(respondentEvents);
+        when(taskListService.getRespondentsEvents(caseData)).thenReturn(respondentEvents);
         when(taskListRenderer.render(c100Tasks, errors, true, caseData)).thenReturn(c100renderedTaskList);
         when(respondentSolicitorTaskListRenderer.render(
             respondentTask,
             resErrors,
             "A",
-            "test test", false, 123456L
+            "test test", false, caseData
         )).thenReturn(respondentTaskListA);
         when(respondentSolicitorTaskListRenderer.render(
             respondentTask,
             resErrors,
             "B",
-            "test test", false, 123456L
+            "test test", false, caseData
         )).thenReturn(respondentTaskListB);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
@@ -418,13 +418,13 @@ public class CaseEventHandlerTest {
             respondentTask,
             resErrors,
             "A",
-            "test test", false, 123456L
+            "test test", false, caseData
         )).thenReturn(respondentTaskListA);
 
         caseEventHandler.getRespondentTaskList(caseData, "A");
 
         verify(respondentSolicitorTaskListRenderer).render(Mockito.anyList(), Mockito.anyList(), Mockito.anyString(),
-                                                           Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong()
+                                                           Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()
         );
 
     }
@@ -484,13 +484,13 @@ public class CaseEventHandlerTest {
             respondentTask,
             resErrors,
             "A",
-            "test test", false, 123456L
+            "test test", false, caseData
         )).thenReturn(respondentTaskListA);
 
         caseEventHandler.getRespondentTaskList(caseData, "A");
 
         verify(respondentSolicitorTaskListRenderer).render(Mockito.any(), Mockito.any(), Mockito.anyString(),
-                                                           Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyLong()
+                                                           Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()
         );
 
     }
@@ -543,13 +543,13 @@ public class CaseEventHandlerTest {
             respondentTask,
             resErrors,
             "A",
-            "test test", false, 123456L
+            "test test", false, caseData
         )).thenReturn(respondentTaskListA);
         when(respondentSolicitorTaskListRenderer.render(
             respondentTask,
             resErrors,
             "B",
-            "test test", false, 123456L
+            "test test", false, caseData
         )).thenReturn(respondentTaskListB);
 
         caseEventHandler.handleCaseDataChange(caseDataChanged);
