@@ -378,7 +378,7 @@ public class C100RespondentSolicitorService {
          * responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse());
          */
         return buildResponseForRespondent.toBuilder()
-            .responseToAllegationsOfHarm(caseData.getRespondentSolicitorData().getResponseToAllegationsOfHarm())
+            .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
             .build();
     }
 
