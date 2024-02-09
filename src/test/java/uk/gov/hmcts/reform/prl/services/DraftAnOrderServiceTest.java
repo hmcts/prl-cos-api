@@ -5142,8 +5142,10 @@ public class DraftAnOrderServiceTest {
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
                               .isJudgeApprovalNeeded(Yes)
+                              .status("Drafted by CA")
                               .build())
             .isOrderUploadedByJudgeOrAdmin(Yes)
+            .adminNotes("test")
             .build();
         Element<DraftOrder> draftOrderElement = element(draftOrder);
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -5162,7 +5164,6 @@ public class DraftAnOrderServiceTest {
                               .editedUploadOrderDoc(Document.builder().documentFileName("abc.pdf").build())
                               .hearingsType(dynamicList)
                               .build())
-            .judgeDirectionsToAdmin("test")
             .wasTheOrderApprovedAtHearing(Yes)
             .build();
         List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
@@ -5195,6 +5196,7 @@ public class DraftAnOrderServiceTest {
                               .dateCreated(LocalDateTime.now())
                               .createdBy("test")
                               .isJudgeApprovalNeeded(Yes)
+                              .status("Reviewed by Judge")
                               .build())
             .isOrderUploadedByJudgeOrAdmin(Yes)
             .build();
