@@ -490,11 +490,11 @@ public class ManageOrderEmailService {
                                               String authorisation, List<Document> orderDocuments, Map<String, Object> dynamicData) {
 
         emailInformation.forEach(value ->
-                                     sendEmailViaSendGrid(authorisation,
-                                                          orderDocuments,
-                                                          dynamicData,
-                                                          value.getEmailAddress(),
-                                                          SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION)
+             sendEmailViaSendGrid(authorisation,
+                                  orderDocuments,
+                                  dynamicData,
+                                  value.getEmailAddress(),
+                                  SendgridEmailTemplateNames.SERVE_ORDER_ANOTHER_ORGANISATION)
         );
     }
 
@@ -831,6 +831,9 @@ public class ManageOrderEmailService {
                                   List<Document> orderDocuments, String serveParty) {
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
         dynamicData.put("name",serveParty);
+        log.info("ALLLLLLLL--> {}", dynamicData);
+        log.info("DOCSSSS--> {}", orderDocuments);
+        log.info("SIZEEE--> {}", orderDocuments.size());
 
         try {
             sendgridService.sendEmailUsingTemplateWithAttachments(
