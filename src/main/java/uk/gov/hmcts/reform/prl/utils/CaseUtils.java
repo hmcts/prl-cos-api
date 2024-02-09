@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.CaseManagementLocation;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.CourtVenue;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 
@@ -217,7 +218,7 @@ public class CaseUtils {
                 ));
         } else if (null != caseData.getRespondentsFL401() && !hasLegalRepresentation(caseData.getRespondentsFL401())
             && Yes.equals(caseData.getRespondentsFL401().getCanYouProvideEmailAddress())
-            && !excludeId.equals(caseData.getRespondentsFL401().getPartyId())) {
+            && !caseData.getRespondentsFL401().getPartyId().equals(excludeId)) {
             respondentMap.put(
                 caseData.getRespondentsFL401().getEmail(),
                 caseData.getRespondentsFL401().getFirstName() + EMPTY_SPACE_STRING
@@ -343,6 +344,13 @@ public class CaseUtils {
         for (String field : fields) {
             caseDataMap.remove(field);
         }
+    }
+
+    public static Document convertDocType(uk.gov.hmcts.reform.ccd.client.model.Document document) {
+        return Document.builder().documentUrl(document.getDocumentURL())
+            .documentBinaryUrl(document.getDocumentBinaryURL())
+            .documentFileName(document.getDocumentFilename())
+            .build();
     }
 
     public static String convertLocalDateTimeToAmOrPmTime(LocalDateTime localDateTime) {

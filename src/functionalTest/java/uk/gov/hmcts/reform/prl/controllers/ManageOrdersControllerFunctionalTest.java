@@ -4,29 +4,45 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.FixMethodOrder;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.runners.MethodSorters;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
 import static org.hamcrest.Matchers.equalTo;
-
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
+@FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ManageOrdersControllerFunctionalTest {
 
+    public static final String MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT
+        = "/manage-orders/recipients-validations";
     private final String userToken = "Bearer testToken";
 
     private static final String VALID_MANAGE_ORDER_REQUEST_BODY = "requests/manage-order-fetch-children-request.json";
@@ -40,6 +56,12 @@ public class ManageOrdersControllerFunctionalTest {
     @MockBean
     private ManageOrderService manageOrderService;
 
+    @MockBean
+    private RoleAssignmentApi roleAssignmentApi;
+
+    @MockBean
+    private HearingService hearingService;
+
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
     private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER = "CallBckReqForFinaliseServeOrder.json";
@@ -48,11 +70,25 @@ public class ManageOrdersControllerFunctionalTest {
 
     private static final String VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER = "CallBckReqForCreateOrUpdOrder.json";
 
+    private static final String VALID_REQUEST_RESPONDENT_LIP_WITH_NO_ADDRESS
+        = "requests/manage-orders/serve-order-request-respondent-lip-noaddress-present.json";
+
+    private static final String VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS
+        = "requests/manage-orders/serve-order-request-respondent-lip-address-present.json";
+
+    private static final String VALID_REQUEST_OTHER_PARTY_WITH_ADDRESS
+        = "requests/manage-orders/serve-order-request-otherParty-address-present.json";
+
+    private static final String VALID_REQUEST_OTHER_PARTY_WITHOUT_ADDRESS
+        = "requests/manage-orders/serve-order-request-otherParty-noaddress-present.json";
+
     private final String targetInstance =
         StringUtils.defaultIfBlank(
             System.getenv("TEST_URL"),
             "http://localhost:4044"
         );
+
+    private static CaseDetails caseDetails;
 
     private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
@@ -70,7 +106,14 @@ public class ManageOrdersControllerFunctionalTest {
 
     private static final String JUDGE_DRAFT_ORDER_BODY = "requests/judge-draft-order-request.json";
 
+    private static final String VALID_CAFCASS_REQUEST_JSON
+        = "requests/cafcass-cymru-send-email-request.json";
 
+    private static final String APPLICANT_CASE_NAME_REQUEST = "requests/call-back-controller-applicant-case-name.json";
+
+    @Before
+    public void setup(){
+    }
 
     @Test
     public void givenRequestBody_whenPostRequestToPopulatePreviewOrder_then200Response() throws Exception {
@@ -159,6 +202,9 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenBody_whenAboutToSubmitForCreateUpldOrder() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER);
+        when(roleAssignmentApi.updateRoleAssignment(any(), any(), any(), any(RoleAssignmentRequest.class)))
+            .thenReturn(RoleAssignmentResponse.builder().build());
+        when(hearingService.getHearings(any(), any())).thenReturn(Hearings.hearingsWith().build());
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -224,9 +270,22 @@ public class ManageOrdersControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
         System.out.println("Respppp " + resp.getData());
-
     }
 
+    @Test
+    public void givenBodyWhenAddressPresentForOtherPartyShouldNotGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_OTHER_PARTY_WITH_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
+            .then()
+            .body("data.applicantCaseName",Matchers.equalTo("John Smith"))
+            .body("data.caseTypeOfApplication",Matchers.equalTo("C100"));
+    }
 
     /**
      * Court Admin manageOrders journey - creates the order with many hearings with approval required.
@@ -310,5 +369,101 @@ public class ManageOrdersControllerFunctionalTest {
 
         System.out.println("Respppp " + resp.getData().get("isHearingTaskNeeded"));
 
+    }
+
+    @Test
+    public void givenBodyWhenAddressNotPresentForRespondentLipShouldGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_RESPONDENT_LIP_WITH_NO_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
+            .then()
+            .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT));
+    }
+
+    @Test
+    public void givenBodyWhenAddressPresentForRespondentLipShouldNotGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_RESPONDENT_LIP_WITH_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
+            .then()
+            .body("data.applicantCaseName",Matchers.equalTo("John Smith"))
+            .body("data.caseTypeOfApplication",Matchers.equalTo("C100"));
+    }
+
+    @Test
+    public void givenBodyWhenAddressNotPresentOtherPartyShouldGetErrorMessage() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_OTHER_PARTY_WITHOUT_ADDRESS);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post(MANAGE_ORDERS_VALIDATE_RESPONDENT_AND_OTHER_PERSON_ENDPOINT)
+            .then()
+            .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
+    }
+
+    @Ignore
+    @Test
+    public void createCcdTestCase() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        caseDetails =  request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-ccd-case-data")
+            .then()
+            .assertThat().statusCode(200)
+            .extract()
+            .as(CaseDetails.class);
+
+        Assert.assertNotNull(caseDetails);
+        Assert.assertNotNull(caseDetails.getId());
+    }
+
+    @Ignore
+    @Test
+    public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() {
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails).build();
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(callbackRequest)
+            .when()
+            .contentType("application/json")
+            .post("/case-order-email-notification")
+            .then()
+            .body("data.postalInformationCaOnlyC47a", equalTo(null))
+            .body("data.postalInformationCA", equalTo(null))
+            .body("data.otherParties", equalTo(null))
+            .body("data.recipientsOptions", equalTo(null))
+            .body("data.cafcassCymruEmail", equalTo(null))
+            .body("data.serveOrderDynamicList", equalTo(null))
+            .body("data.serveOtherPartiesCA", equalTo(null))
+            .body("data.cafcassCymruServedOptions", equalTo(null))
+            .body("data.emailInformationCaOnlyC47a", equalTo(null))
+            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruServed",
+                  equalTo("Yes"))
+            .body("data.orderCollection[0].value.serveOrderDetails.cafcassCymruEmail",
+                  equalTo(caseDetails.getData().get("cafcassCymruEmail")))
+            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruServed",
+                  equalTo("Yes"))
+            .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail",
+                  equalTo(caseDetails.getData().get("cafcassCymruEmail")));
     }
 }

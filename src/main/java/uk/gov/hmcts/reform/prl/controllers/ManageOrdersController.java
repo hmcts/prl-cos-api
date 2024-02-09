@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -49,8 +50,10 @@ import javax.ws.rs.core.HttpHeaders;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
@@ -96,11 +99,19 @@ public class ManageOrdersController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private RoleAssignmentService roleAssignmentService;
 
-    private final HearingService hearingService;
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Autowired
+    private HearingService hearingService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
+
+    @Autowired
+    ManageOrdersController(RoleAssignmentService roleAssignmentService) {
+        this.roleAssignmentService = roleAssignmentService;
+    }
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -301,7 +312,10 @@ public class ManageOrdersController {
                     caseData
                 ));
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-                caseDataUpdated.put(ORDER_COLLECTION, manageOrderService.serveOrder(caseData, caseData.getOrderCollection()));
+                caseDataUpdated.put(
+                    ORDER_COLLECTION,
+                    manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
+                );
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
@@ -311,9 +325,24 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
+            checkNameOfJudgeToReviewOrder(caseData, authorisation, callbackRequest);
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    private void checkNameOfJudgeToReviewOrder(CaseData caseData, String authorisation, CallbackRequest callbackRequest) {
+        if (null != caseData.getManageOrders().getNameOfJudgeToReviewOrder()
+            || null != caseData.getManageOrders().getNameOfLaToReviewOrder()) {
+            roleAssignmentService.createRoleAssignment(
+                authorisation,
+                callbackRequest.getCaseDetails(),
+                false,
+                HEARING_JUDGE_ROLE
+            );
         }
     }
 
@@ -517,6 +546,25 @@ public class ManageOrdersController {
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(manageOrderService.handlePreviewOrder(callbackRequest, authorisation))
                 .build();
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @PostMapping(path = "/manage-orders/recipients-validations",
+        consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Callback to validate respondent Lip and other person address")
+    @SecurityRequirement(name = "Bearer Authentication")
+    public AboutToStartOrSubmitCallbackResponse validateRespondentAndOtherPersonAddress(
+        @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+        @RequestBody CallbackRequest callbackRequest) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            if (C100_CASE_TYPE.equals(callbackRequest.getCaseDetails().getData().get(CASE_TYPE_OF_APPLICATION))) {
+                return manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
+            }
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .data(callbackRequest.getCaseDetails().getData()).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
