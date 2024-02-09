@@ -119,6 +119,7 @@ public class PaymentRequestService {
                 PaymentServiceResponse paymentServiceResponse = createServiceRequest(request, authorization);
                 paymentResponse = PaymentResponse.builder()
                     .serviceRequestReference(paymentServiceResponse.getServiceRequestReference())
+                    .applicantCaseName(createPaymentRequest.getApplicantCaseName())
                     .build();
             } else {
                 // if CR and PR doesn't exist
@@ -132,6 +133,7 @@ public class PaymentRequestService {
                 );
                 //set service request ref
                 paymentResponse.setServiceRequestReference(paymentServiceResponse.getServiceRequestReference());
+                paymentResponse.setApplicantCaseName(createPaymentRequest.getApplicantCaseName());
             }
             return paymentResponse;
         } else if (null != paymentServiceReferenceNumber
