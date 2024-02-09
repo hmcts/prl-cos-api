@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -70,6 +71,8 @@ public class CaseService {
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
     private final CoreCaseDataApi coreCaseDataApi;
+
+    private final PaymentRequestService paymentRequestService;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
@@ -100,10 +103,12 @@ public class CaseService {
 
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder()
+                    .applicantCaseName(paymentRequestService.buildApplicantAndRespondentForCaseName(caseData))
                     .userInfo(wrapElements(userInfo))
                     .courtName(C100_DEFAULT_COURT_NAME)
                     .build());
             log.info("case is being updated");
+            log.info("updatedCaseData case name is {}", updatedCaseData.getApplicantCaseName());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
 
