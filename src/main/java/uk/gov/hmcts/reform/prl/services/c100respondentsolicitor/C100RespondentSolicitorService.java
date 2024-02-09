@@ -818,6 +818,12 @@ public class C100RespondentSolicitorService {
 
         if (representedRespondent != null && representedRespondent.getValue() != null && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(
             caseData.getCaseTypeOfApplication())) {
+            if (representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm() != null
+                    && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                    .getResponseToAllegationsOfHarmDocument() != null) {
+                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(userDetails,representedRespondent.getValue().getResponse()
+                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()));
+            }
             PartyDetails amended = representedRespondent.getValue().toBuilder()
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
@@ -837,8 +843,6 @@ public class C100RespondentSolicitorService {
                 callbackRequest,
                 caseData,
                 representedRespondent,
-                party,
-                createdBy,
                     quarantineLegalDocList
             );
 
@@ -861,8 +865,6 @@ public class C100RespondentSolicitorService {
         CallbackRequest callbackRequest,
         CaseData caseData,
         Element<PartyDetails> representedRespondent,
-        String party,
-        String createdBy,
         List<QuarantineLegalDoc> quarantineLegalDocList
     ) throws Exception {
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
@@ -1321,6 +1323,20 @@ public class C100RespondentSolicitorService {
                 .uploadedBy(userDetails.getFullName())
                 .uploaderRole(loggedInUserType)
                 .document(c1aDoc)
+                .build();
+    }
+
+    private QuarantineLegalDoc getUploadedResponseToApplicantAoh(UserDetails userDetails, Document document) {
+        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
+        return QuarantineLegalDoc.builder()
+                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                .categoryId("respondentC1AResponse")
+                .categoryName("Respondent C1A response")
+                .isConfidential(Yes)
+                .fileName(document.getDocumentFileName())
+                .uploadedBy(userDetails.getFullName())
+                .uploaderRole(loggedInUserType)
+                .document(document)
                 .build();
     }
 
