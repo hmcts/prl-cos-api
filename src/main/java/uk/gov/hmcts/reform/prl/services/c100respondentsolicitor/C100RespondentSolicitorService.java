@@ -987,10 +987,12 @@ public class C100RespondentSolicitorService {
                     .getCaseDetails().getData().get(
                     "newChildDetails");
             dataMap.put(CHILDREN, listOfChildren);
+
         } else {
             List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(
                     CHILDREN);
             dataMap.put(CHILDREN, listOfChildren);
+
         }
 
         if (solicitorRepresentedRespondent == null) {
@@ -1040,6 +1042,7 @@ public class C100RespondentSolicitorService {
             populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response);
         }
         dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
+
         try {
             log.info("dataMap  : {}",objectMapper.writeValueAsString(dataMap));
         } catch (JsonProcessingException e) {
@@ -1093,6 +1096,9 @@ public class C100RespondentSolicitorService {
         );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
+        if(null != response.getResponseToAllegationsOfHarm()){
+            dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
+        }
     }
 
     private void populatePartyDetails(Element<PartyDetails> solicitorRepresentedRespondent, Response response, Map<String, Object> dataMap) {
