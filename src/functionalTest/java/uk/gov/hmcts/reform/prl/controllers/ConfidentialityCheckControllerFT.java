@@ -1,6 +1,9 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,11 +16,13 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -30,7 +35,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_NON_PERSONAL;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETURNED_TO_ADMIN_HEADER;
 
-
 @Slf4j
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -38,6 +42,8 @@ import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.RETUR
 public class ConfidentialityCheckControllerFT {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
+
+    private static final String VALID_REQUEST_BODY_WA = "requests/service-of-application-WA.json";
 
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
@@ -54,6 +60,15 @@ public class ConfidentialityCheckControllerFT {
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
+
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
+
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
+
 
     @MockBean
     private CoreCaseDataService coreCaseDataService;
@@ -94,6 +109,143 @@ public class ConfidentialityCheckControllerFT {
     }
 
     @Test
+    public void givenRequestBody_whenConfidentialCheckWhenAppplicationServedAndUnServedRespondentPackAvailable() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace("\"event_id\": \"litigationCapacity\"",
+                     "\"event_id\": \"confidentialityCheck\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/confidentiality-check/about-to-submit")
+            .then()
+            .body("data.isC8CheckApproved", equalTo("Yes"),
+                  "data.responsibleForService", equalTo("Court admin"),
+                  "data.isC8CheckNeeded", equalTo(null),
+                  "data.isOccupationOrderSelected", equalTo(null))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    @Test
+    public void givenRequestBody_whenConfidentialCheckWhenApplicationServedAndUnServedRespondentPackNotAvailable() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace("\"event_id\": \"litigationCapacity\"",
+                     "\"event_id\": \"confidentialityCheck\"")
+            .replace("\"personalServiceBy\": \"Court admin\"",
+                     "\"removepersonalServiceBy\":  \"\"")
+            .replace("\"applicationServedYesNo\": \"Yes\"",
+                     "\"applicationServedYesNo\": \"No\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/confidentiality-check/about-to-submit")
+            .then()
+            .body("data.isC8CheckApproved", equalTo("No"),
+                  "data.responsibleForService", equalTo(null),
+                  "data.isC8CheckNeeded", equalTo(null),
+                  "data.isOccupationOrderSelected", equalTo(null))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    @Test
+    public void givenRequestBody_whenSoaEventC100WhenBothIsConfidentialAndSoaServeToRespondentOptionsYes() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace("\"event_id\": \"litigationCapacity\"",
+                     "\"event_id\": \"serviceOfApplication\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/confidentiality-check/about-to-submit")
+            .then()
+            .body("data.isC8CheckApproved", equalTo(null),
+                  "data.responsibleForService", equalTo("applicantLegalRepresentative"),
+                  "data.isC8CheckNeeded", equalTo("Yes"),
+                  "data.isOccupationOrderSelected", equalTo(null))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    @Test
+    public void givenRequestBody_whenSoaEventC100WhenBothIsC8DocPresentAndSoaServeToRespondentOptionsYes() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace("\"event_id\": \"litigationCapacity\"",
+                     "\"event_id\": \"serviceOfApplication\"")
+            .replace("\"isAddressConfidential\": \"Yes\"",
+                 "\"isAddressConfidential\": \"No\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/confidentiality-check/about-to-submit")
+            .then()
+            .body("data.isC8CheckApproved", equalTo(null),
+                  "data.responsibleForService", equalTo("applicantLegalRepresentative"),
+                  "data.isC8CheckNeeded", equalTo("Yes"),
+                  "data.isOccupationOrderSelected", equalTo(null))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    @Test
+    public void givenRequestBody_whenSoaEventC100WhenIsConfidentialC8DocAndSoaServeToRespondentOptionsNo() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA);
+
+        String requestBodyRevised = requestBody
+            .replace("\"event_id\": \"litigationCapacity\"",
+                     "\"event_id\": \"serviceOfApplication\"")
+            .replace("\"soaServeToRespondentOptions\": \"Yes\"",
+                 "\"soaServeToRespondentOptions\": \"No\"")
+            .replace("\"isConfidential\": \"Yes\"",
+                     "\"isConfidential\": \"No\"")
+            .replace("\"isAddressConfidential\": \"Yes\"",
+                     "\"isAddressConfidential\": \"No\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/confidentiality-check/about-to-submit")
+            .then()
+            .body("data.isC8CheckApproved", equalTo(null),
+                  "data.responsibleForService", equalTo(null),
+                  "data.isC8CheckNeeded", equalTo("No"),
+                  "data.isOccupationOrderSelected", equalTo(null))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    @Test
     public void givenRequestWithCaseData_ResponseContainsYes() throws Exception {
 
         String requestBody = ResourceLoader.loadJson("requests/service-of-application-ready-to-serve.json");
@@ -111,4 +263,65 @@ public class ConfidentialityCheckControllerFT {
         assertTrue(json.contains("confirmation_header"));
         assertTrue(json.contains(CONFIRMATION_HEADER_NON_PERSONAL));
     }
+
+    @Test
+    public void givenRequestBody_whenSoaEventFl401WhenBothIsConfidentialAndSoaServingRespondentsOptionsDaYes() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
+        String requestBodyRevised = requestBody
+            .replace("\"event_id\": \"litigationCapacity\"",
+                     "\"event_id\": \"serviceOfApplication\"")
+            .replace("\"caseTypeOfApplication\": \"C100\"",
+                 "\"caseTypeOfApplication\": \"FL401\"")
+            .replace("\"caseCreatedBy\": \"SOLICITOR\"",
+                     "\"caseCreatedBy\": \"CITIZEN\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/confidentiality-check/about-to-submit")
+            .then()
+            .body("data.isC8CheckApproved", equalTo(null),
+                  "data.responsibleForService", equalTo("courtBailiff"),
+                  "data.isC8CheckNeeded", equalTo("Yes"),
+                  "data.isOccupationOrderSelected", equalTo("Yes"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    @Test
+    public void givenRequestBody_whenSoaEventFL401WhenIsConfidentialNoAndC8DocNotPresent() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WA);
+
+        String requestBodyRevised = requestBody
+            .replace("\"event_id\": \"litigationCapacity\"",
+                     "\"event_id\": \"serviceOfApplication\"")
+            .replace("\"caseTypeOfApplication\": \"C100\"",
+                     "\"caseTypeOfApplication\": \"FL401\"")
+            .replace("\"caseCreatedBy\": \"SOLICITOR\"",
+                     "\"caseCreatedBy\": \"CITIZEN\"")
+            .replace("\"isAddressConfidential\": \"Yes\"",
+                     "\"isAddressConfidential\": \"No\"");
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBodyRevised)
+            .when()
+            .contentType("application/json")
+            .post("/confidentiality-check/about-to-submit")
+            .then()
+            .body("data.isC8CheckApproved", equalTo(null),
+                  "data.responsibleForService", equalTo("courtBailiff"),
+                  "data.isC8CheckNeeded", equalTo("No"),
+                  "data.isOccupationOrderSelected", equalTo("Yes"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
 }

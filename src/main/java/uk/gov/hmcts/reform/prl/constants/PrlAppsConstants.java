@@ -909,4 +909,11 @@ public class PrlAppsConstants {
 
     public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
         + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
+
+    public static final String WA_SOA_C8_CHECK_NEEDED = "isC8CheckNeeded";
+    public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
+    public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
+    public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
+
+
 }
