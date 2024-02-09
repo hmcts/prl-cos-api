@@ -13,11 +13,11 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 public class ResponseToAllegationsOfHarmChecker implements RespondentEventChecker {
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
-        return false;
+        return true;
     }
 }
