@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
-import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -51,7 +50,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDEN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -73,7 +71,6 @@ public class CaseService {
     public static final String CASE_INVITES = "caseInvites";
     private final CoreCaseDataApi coreCaseDataApi;
 
-    private final PaymentRequestService paymentRequestService;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
@@ -108,24 +105,6 @@ public class CaseService {
                     .courtName(C100_DEFAULT_COURT_NAME)
                     .build());
             log.info("case is being updated");
-            return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
-        }
-        if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)) {
-            UserDetails userDetails = idamClient.getUserDetails(authToken);
-            UserInfo userInfo = UserInfo
-                .builder()
-                .idamId(userDetails.getId())
-                .firstName(userDetails.getForename())
-                .lastName(userDetails.getSurname().orElse(null))
-                .emailAddress(userDetails.getEmail())
-                .build();
-
-            CaseData updatedCaseData = caseDataMapper
-                .buildUpdatedCaseData(caseData.toBuilder()
-                    .userInfo(wrapElements(userInfo))
-                    .applicantCaseName(paymentRequestService.buildApplicantAndRespondentForCaseName(caseData))
-                    .build());
-            log.info("updatedCaseData case name is {}", updatedCaseData.getApplicantCaseName());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
 
