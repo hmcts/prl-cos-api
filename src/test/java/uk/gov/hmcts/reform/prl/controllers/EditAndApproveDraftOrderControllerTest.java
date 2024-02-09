@@ -1635,8 +1635,6 @@ public class EditAndApproveDraftOrderControllerTest {
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        Map<String, Object> caseDataMap = new HashMap<>();
-
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
             .eventId(Event.EDIT_AND_APPROVE_ORDER.getId())
@@ -1657,6 +1655,36 @@ public class EditAndApproveDraftOrderControllerTest {
         Map<String, Object> updatedCaseDataMap = response.getData();
         Assert.assertNotNull(updatedCaseDataMap.get("draftOrderCollection"));
         Assert.assertEquals("C100", updatedCaseDataMap.get("caseTypeOfApplication"));
+    }
+
+    @Test
+    public void testSkipUploadConditionWhenDraftOrderIsNull() throws Exception {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .draftOrderCollection(Collections.singletonList(element(draftOrder)))
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(null);
+
+        AboutToStartOrSubmitCallbackResponse response = editAndApproveDraftOrderController
+            .populateJudgeOrAdminDraftOrderCustomFields(authToken,s2sToken,callbackRequest);
+
+        Assert.assertNotNull(response);
     }
 
     @Test
