@@ -94,7 +94,6 @@ public class PaymentRequestService {
                                          @RequestBody CreatePaymentRequest createPaymentRequest)
         throws Exception {
         //Get case using caseId
-        log.info("payment created first");
         String caseId = createPaymentRequest.getCaseId();
         uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = coreCaseDataApi.getCase(
             authorization,
