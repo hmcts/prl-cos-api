@@ -290,6 +290,7 @@ public enum ManageOrderFieldsEnum {
     sdoWhoNeedsToRespondAllegationsText("sdoWhoNeedsToRespondAllegationsText"),
     sdoWhoNeedsToRespondAllegationsListText("sdoWhoNeedsToRespondAllegationsListText"),
     sdoWhoMadeAllegationsListText("sdoWhoMadeAllegationsListText"),
+    sdoFactFindingFlag("sdoFactFindingFlag"),
 
     dioPreamblesList("dioPreamblesList"),
     dioHearingsAndNextStepsList("dioHearingsAndNextStepsList"),
