@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -55,6 +56,8 @@ public class RefDataUserService {
 
     private List<DynamicListElement> listOfCategoryValues;
     private CommonDataResponse commonDataResponse;
+
+    private CaseFlag caseFlag;
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
@@ -141,6 +144,22 @@ public class RefDataUserService {
             log.error("Category Values look up failed {} ", e.getMessage());
         }
         return commonDataResponse;
+    }
+
+
+    public CaseFlag retrieveCaseFlags(String authorization, String flagType) {
+        log.info("retrieve case flags for flag type{} ", flagType);
+        try {
+            caseFlag = commonDataRefApi.retrieveCaseFlagsByServiceId(
+                authorization,
+                authTokenGenerator.generate(),
+                SERVICE_ID,
+                flagType
+            );
+        } catch (Exception e) {
+            log.error("Case flags Values look up failed {} ", e.getMessage());
+        }
+        return caseFlag;
     }
 
     public List<DynamicListElement> filterCategoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {

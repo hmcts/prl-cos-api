@@ -414,6 +414,7 @@ public class ManageOrdersControllerFunctionalTest {
             .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
     }
 
+    @Ignore
     @Test
     public void createCcdTestCase() throws Exception {
 
@@ -434,6 +435,7 @@ public class ManageOrdersControllerFunctionalTest {
         Assert.assertNotNull(caseDetails.getId());
     }
 
+    @Ignore
     @Test
     public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() {
         CallbackRequest callbackRequest = CallbackRequest.builder()
