@@ -284,7 +284,7 @@ public class C100RespondentSolicitorService {
                                             Element<PartyDetails> party,
                                             RespondentSolicitorEvents event) {
         Response buildResponseForRespondent = party.getValue().getResponse();
-        String solicitor = party.getValue().getRepresentativeFullName();
+        String solicitor = party.getValue().getRepresentativeFullNameForCaseFlags();
         switch (event) {
             case CONSENT:
                 Consent respondentConsentToApplication = caseData.getRespondentSolicitorData().getRespondentConsentToApplication();
@@ -712,6 +712,7 @@ public class C100RespondentSolicitorService {
             .getConfidentialityList().contains(ConfidentialityListEnum.email)) {
             keepDetailsPrivateList.put("isEmailAddressConfidential", YesOrNo.Yes);
         }
+        keepDetailsPrivateList.put(RESPONDENT_NAME_FOR_RESPONSE, caseData.getRespondentSolicitorData().getRespondentNameForResponse());
         return keepDetailsPrivateList;
     }
 
@@ -763,8 +764,8 @@ public class C100RespondentSolicitorService {
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
             String party = representedRespondent.getValue().getLabelForDynamicList();
-            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullName())
-                ? party : representedRespondent.getValue().getRepresentativeFullName() + SOLICITOR;
+            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
+                ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
 
             caseData.getRespondents().set(
                 caseData.getRespondents().indexOf(representedRespondent),

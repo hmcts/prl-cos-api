@@ -52,7 +52,7 @@ public class RespondentSolicitorData {
     @JsonUnwrapped
     private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
 
-    /** Confirm or Edit your contact details. **/
+    /** Confirm or Edit contact details. **/
     private final CitizenDetails resSolConfirmEditContactDetails;
 
     /**
