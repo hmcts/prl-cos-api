@@ -213,9 +213,7 @@ public class DraftAnOrderService {
         //By default all the hearing will be option 1 (dateReservedWithListAssit) as per ticket PRL-4766
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
             && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())) {
-            orderDetails.getValue().getManageOrderHearingDetails()
-                .forEach(hearingDataElement -> hearingDataElement.getValue()
-                    .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
+            defaultHearingOptionToDateReservedWithListAssist(orderDetails.getValue());
         }
         if (caseData.getDraftOrderCollection() != null) {
             draftOrderList.addAll(caseData.getDraftOrderCollection());
@@ -229,6 +227,13 @@ public class DraftAnOrderService {
         ));
         return Map.of(DRAFT_ORDER_COLLECTION, draftOrderList
         );
+    }
+
+    private static void defaultHearingOptionToDateReservedWithListAssist(DraftOrder draftOrder) {
+        draftOrder.getManageOrderHearingDetails()
+            .stream().filter(hearingDataElement -> null == hearingDataElement.getValue().getHearingDateConfirmOptionEnum())
+            .forEach(hearingDataElement -> hearingDataElement.getValue()
+                .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
     }
 
     public DraftOrder getCurrentOrderDetails(CaseData caseData, String loggedInUserType,String authorisation) {
@@ -954,6 +959,11 @@ public class DraftAnOrderService {
                         log.info("Updated sdo order hearing details for docmosis");
                     }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
+                    //Default hearing option to 1 for edit returned
+                    if (Event.EDIT_RETURNED_ORDER.getId().equalsIgnoreCase(eventId)
+                        && Yes.equals(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())) {
+                        defaultHearingOptionToDateReservedWithListAssist(draftOrder);
+                    }
                 } else {
                     draftOrder = getDraftOrderWithUpdatedStatus(caseData, eventId, loggedInUserType, draftOrder);
                 }
