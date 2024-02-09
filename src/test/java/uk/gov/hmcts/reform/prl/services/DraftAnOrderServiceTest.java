@@ -5132,4 +5132,111 @@ public class DraftAnOrderServiceTest {
             assertEquals("This order is not available to be drafted", response.getErrors().get(0));
         }
     }
+
+    @Test
+    public void testAdminUpdateUploadDraftOrderCollection() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderTypeId("Blank order or directions")
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .isJudgeApprovalNeeded(Yes)
+                              .build())
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .children(children)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(ManageOrders.builder()
+                              .makeChangesToUploadedOrder(Yes)
+                              .editedUploadOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+                              .hearingsType(dynamicList)
+                              .build())
+            .judgeDirectionsToAdmin("test")
+            .wasTheOrderApprovedAtHearing(Yes)
+            .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+
+        Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
+            caseData,
+            "test-auth",
+            ADMIN_EDIT_AND_APPROVE_ORDER.getId()
+        );
+
+        assertNotNull(caseDataMap);
+        assertNotNull(caseDataMap.get("draftOrderCollection"));
+        List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        assertNotNull(updatedDraftOrder.getHearingsType());
+        assertEquals("Yes", String.valueOf(updatedDraftOrder.getWasTheOrderApprovedAtHearing()));
+        assertEquals("Yes", String.valueOf(updatedDraftOrder.getOtherDetails().getIsJudgeApprovalNeeded()));
+    }
+
+    @Test
+    public void testJudgeUpdateUploadDraftOrderCollectionAndApprove() {
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderDocument(Document.builder().documentFileName("abc.pdf").build())
+            .orderTypeId("Blank order or directions")
+            .otherDetails(OtherDraftOrderDetails.builder()
+                              .dateCreated(LocalDateTime.now())
+                              .createdBy("test")
+                              .isJudgeApprovalNeeded(Yes)
+                              .build())
+            .isOrderUploadedByJudgeOrAdmin(Yes)
+            .build();
+        Element<DraftOrder> draftOrderElement = element(draftOrder);
+        List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
+        draftOrderCollection.add(draftOrderElement);
+        List<Element<Child>> children = List.of(Element.<Child>builder().id(UUID.fromString(TEST_UUID))
+                                                    .value(Child.builder().build()).build());
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication("C100")
+            .children(children)
+            .draftOrderCollection(draftOrderCollection)
+            .manageOrders(ManageOrders.builder()
+
+                              .editedUploadOrderDoc(Document.builder().documentFileName("abc.pdf").build())
+                              .hearingsType(dynamicList)
+                              .whatToDoWithOrderCourtAdmin(OrderApprovalDecisionsForCourtAdminOrderEnum.editTheOrderAndServe)
+                              .build())
+            .judgeDirectionsToAdmin("test")
+            .wasTheOrderApprovedAtHearing(Yes)
+            .build();
+        List<DynamicMultiselectListElement> listItems = dynamicMultiSelectListService
+            .getChildrenMultiSelectList(caseData);
+        when(elementUtils.getDynamicListSelectedValue(
+            caseData.getDraftOrdersDynamicList(), objectMapper)).thenReturn(draftOrderElement.getId());
+        when(dynamicMultiSelectListService.getChildrenMultiSelectList(caseData)).thenReturn(listItems);
+
+        Map<String, Object> caseDataMap = draftAnOrderService.updateDraftOrderCollection(
+            caseData,
+            "test-auth",
+            EDIT_AND_APPROVE_ORDER.getId()
+        );
+
+        assertNotNull(caseDataMap);
+        assertNotNull(caseDataMap.get("draftOrderCollection"));
+        List<Element<DraftOrder>> updatedDraftOrderCollection =  (List<Element<DraftOrder>>) caseDataMap.get("draftOrderCollection");
+        DraftOrder updatedDraftOrder = updatedDraftOrderCollection.get(0).getValue();
+        assertNotNull(updatedDraftOrder.getHearingsType());
+        assertEquals("Yes", String.valueOf(updatedDraftOrder.getWasTheOrderApprovedAtHearing()));
+        assertEquals("No", String.valueOf(updatedDraftOrder.getOtherDetails().getIsJudgeApprovalNeeded()));
+    }
 }

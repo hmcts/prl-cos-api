@@ -2941,8 +2941,7 @@ public class ManageOrderService {
         log.info("**ManageOrdersOptions" + caseData.getManageOrdersOptions());
         log.info("**CreateSelectOrderOptions" + caseData.getCreateSelectOrderOptions());
         if (null != caseData.getManageOrdersOptions()
-            && (caseData.getManageOrdersOptions().equals(createAnOrder)
-            || caseData.getManageOrdersOptions().equals(uploadAnOrder))
+            && caseData.getManageOrdersOptions().equals(createAnOrder)
             && null != caseData.getCreateSelectOrderOptions()) {
             if ((standardDirectionsOrder).equals(caseData.getCreateSelectOrderOptions())
                 || (other).equals(caseData.getCreateSelectOrderOptions())) {
