@@ -1931,7 +1931,8 @@ public class ManageOrderService {
                                         .sdoWhoNeedsToRespondAllegationsListText(sdoWhoNeedsToRespondAllegationsListText)
                                         .sdoWhoMadeAllegationsListText(sdoWhoMadeAllegationsListText)
                                         .build())
-            .isCafcass(CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()))
+            .isCafcass(caseData.getCaseManagementLocation() != null
+                           ? CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()) : null)
             .build();
         log.info("exit populateDirectionOfFactFindingHearingFieldsForDocmosis ==> " + caseData);
         return caseData;

@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.ServeOtherPartiesOptions;
 import uk.gov.hmcts.reform.prl.enums.manageorders.WithDrawTypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoFurtherInstructionsEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingsAndNextStepsEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoLocalAuthorityEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -121,6 +122,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.CHILD_OPTION;
+import static uk.gov.hmcts.reform.prl.services.ManageOrderService.SDO_FACT_FINDING_FLAG;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY;
 import static uk.gov.hmcts.reform.prl.services.ManageOrderService.VALIDATION_ADDRESS_ERROR_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -981,6 +983,9 @@ public class ManageOrderServiceTest {
             .caseTypeOfApplication("C100")
             .applicantCaseName("Test Case 45678")
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+                                        .build())
             .fl401FamilymanCaseNumber("familyman12345")
             .dateOrderMade(LocalDate.now())
             .orderRecipients(recipientList)
@@ -1464,6 +1469,7 @@ public class ManageOrderServiceTest {
             .applicantCaseName("Test Case 45678")
             .manageOrders(manageOrders)
             .standardDirectionOrder(StandardDirectionOrder.builder()
+                                        .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
                                         .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build())
             .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
             .build();
@@ -4177,7 +4183,7 @@ public class ManageOrderServiceTest {
             .build();
         return caseData;
     }
-    
+
     @Test
     public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
 
@@ -4517,7 +4523,17 @@ public class ManageOrderServiceTest {
         StandardDirectionOrder cymru = StandardDirectionOrder.builder().sdoNewPartnerPartiesCafcassCymru(
                 dynamicMultiSelectList)
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
-        StandardDirectionOrder[] sdoNewPartnerParties = {cafcass, cymru};
+
+        StandardDirectionOrder factFindingHearing = StandardDirectionOrder.builder().sdoHearingsAndNextStepsList(List.of(
+                SdoHearingsAndNextStepsEnum.factFindingHearing))
+            .sdoWhoMadeAllegationsList(DynamicMultiSelectList.builder()
+                                                     .value(List.of(DynamicMultiselectListElement.builder().label("aa")
+                                                                        .build())).build())
+            .sdoWhoNeedsToRespondAllegationsList(DynamicMultiSelectList.builder()
+                                                     .value(List.of(DynamicMultiselectListElement.builder().label("bb")
+                                                                                                    .build())).build())
+            .build();
+        StandardDirectionOrder[] sdoNewPartnerParties = {cafcass, cymru, factFindingHearing};
 
         for (StandardDirectionOrder sdo : sdoNewPartnerParties) {
 
@@ -4527,6 +4543,7 @@ public class ManageOrderServiceTest {
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .manageOrders(manageOrders)
                 .standardDirectionOrder(sdo)
+                .caseManagementLocation(CaseManagementLocation.builder().regionId("7").build())
                 .build();
 
             doCallRealMethod().when(dynamicMultiSelectListService).getStringFromDynamicMultiSelectList(any());
@@ -4687,5 +4704,93 @@ public class ManageOrderServiceTest {
         assertEquals("multipleOptionSelected",
                      caseDataUpdated.get("hearingOptionSelected"));
         assertEquals("Yes", caseDataUpdated.get("isMultipleHearingSelected"));
+    }
+
+    @Test
+    public void  testHandlePreviewOrderScenario1() throws Exception {
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isSdoSelected(YesOrNo.Yes)
+            .applicantCaseName("Test Case 45678")
+            .respondents(partyDetails)
+            .applicants(partyDetails)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId("createOrders")
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        assertNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
+
+    }
+
+    @Test
+    public void  testHandlePreviewOrderScenario2() throws Exception {
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+        PartyDetails details1 = PartyDetails.builder()
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement1 = element(details1);
+        partyDetails.add(partyDetailsElement1);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isSdoSelected(YesOrNo.Yes)
+            .applicantCaseName("Test Case 45678")
+            .respondents(partyDetails)
+            .applicants(partyDetails)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .applicants(List.of(element(PartyDetails.builder().doTheyHaveLegalRepresentation(YesNoDontKnow.no).build())))
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
+        uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+            .id(12345678L)
+            .state(State.AWAITING_SUBMISSION_TO_HMCTS.getValue())
+            .data(caseDataMap)
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .eventId("createOrders")
+            .build();
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+
+        Map<String, Object> caseDataUpdated = manageOrderService.handlePreviewOrder(callbackRequest, "testAuth");
+        assertNotNull(caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
+        assertEquals("<div class=\"govuk-inset-text\"> "
+                         + "If you need to include directions for a fact-finding hearing, you need to upload the"
+                         + " order in manage orders instead.</div>", caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
+
     }
 }
