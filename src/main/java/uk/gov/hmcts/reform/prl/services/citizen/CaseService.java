@@ -111,8 +111,18 @@ public class CaseService {
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)) {
+            UserDetails userDetails = idamClient.getUserDetails(authToken);
+            UserInfo userInfo = UserInfo
+                .builder()
+                .idamId(userDetails.getId())
+                .firstName(userDetails.getForename())
+                .lastName(userDetails.getSurname().orElse(null))
+                .emailAddress(userDetails.getEmail())
+                .build();
+
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder()
+                    .userInfo(wrapElements(userInfo))
                     .applicantCaseName(paymentRequestService.buildApplicantAndRespondentForCaseName(caseData))
                     .build());
             log.info("updatedCaseData case name is {}", updatedCaseData.getApplicantCaseName());
