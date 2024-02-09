@@ -96,7 +96,6 @@ public class PaymentRequestService {
             caseId
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
