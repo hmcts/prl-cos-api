@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
 
@@ -165,22 +166,26 @@ public class PaymentRequestService {
     }
 
     public String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
-        C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-        ObjectMapper mapper = new ObjectMapper();
-        C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
-        C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
-        if (null != c100RebuildData) {
-            if (isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
-                c100RebuildApplicantDetailsElements = mapper
-                    .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
-            }
+        if (!isEmpty(caseData.getApplicantCaseName())) {
+            return caseData.getApplicantCaseName();
+        } else {
+            C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+            ObjectMapper mapper = new ObjectMapper();
+            C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
+            C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
+            if (null != c100RebuildData) {
+                if (isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
+                    c100RebuildApplicantDetailsElements = mapper
+                        .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
+                }
 
-            if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
-                c100RebuildRespondentDetailsElements = mapper
-                    .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+                if (isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+                    c100RebuildRespondentDetailsElements = mapper
+                        .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+                }
             }
+            return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
         }
-        return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
     }
 
     private String buildCaseName(C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
