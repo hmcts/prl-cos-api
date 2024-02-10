@@ -67,111 +67,116 @@ public class ReasonableAdjustmentsMapper {
 
             if (CollectionUtils.isNotEmpty(applicantDetails.getApplicants()) && CollectionUtils.isNotEmpty(
                 applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags())) {
-                log.info(
-                    "Inside mapRAforC100MainApplicant RAFlags {}",
-                    applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags()
-                );
-                UserDetails userDetails = idamClient.getUserDetails(authToken);
-                CaseEvent caseEvent = CaseEvent.fromValue(C100_REQUEST_SUPPORT.getValue());
-                EventRequestData eventRequestData = coreCaseDataService.eventRequest(
-                    caseEvent,
-                    userDetails.getId()
-                );
-
-                StartEventResponse startEventResponse =
-                    coreCaseDataService.startUpdate(
-                        authToken,
-                        eventRequestData,
-                        caseId,
-                        false
-                    );
-
-                Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
-                Optional<String> partyExternalCaseFlagField = caseService.getPartyExternalCaseFlagField(
-                    caseData.getCaseTypeOfApplication(),
-                    PartyEnum.applicant,
-                    0
-                );
-
-                if (partyExternalCaseFlagField.isPresent()) {
-                    log.info("Inside mapRAforC100MainApplicant partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(
-                        partyExternalCaseFlagField.get()));
-
-                    Flags flags = objectMapper.convertValue(
-                        updatedCaseData.get(partyExternalCaseFlagField.get()),
-                        Flags.class
-                    );
-                    log.info("Inside mapRAforC100MainApplicant Existing external Party flags  ===>" + objectMapper.writeValueAsString(
-                        flags));
-
-                    List<Element<FlagDetail>> flagDetails = new ArrayList<>();
-                    DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
-                        "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
-                        Locale.ENGLISH
-                    );
-                    for (C100FlagDetailRequest flag : applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags()) {
-                        List<Element<String>> path = new ArrayList<>();
-                        for (String pathDetail : flag.getPath()) {
-                            path.add(element(pathDetail));
-                        }
-
-                        FlagDetail flagDetail = FlagDetail.builder().name(flag.getName()).name_cy(flag.getName_cy())
-                            .subTypeValue(flag.getSubTypeValue())
-                            .subTypeValue_cy(flag.getSubTypeValue_cy())
-                            .subTypeKey(flag.getSubTypeKey())
-                            .otherDescription(flag.getOtherDescription())
-                            .otherDescription_cy(flag.getOtherDescription_cy())
-                            .flagComment(flag.getFlagComment())
-                            .flagComment_cy(flag.getFlagComment_cy())
-                            .flagUpdateComment(flag.getFlagUpdateComment())
-                            .dateTimeCreated(LocalDateTime.parse(flag.getDateTimeCreated(), dateTimeFormatter))
-                            .dateTimeModified(null != flag.getDateTimeModified() ? LocalDateTime.parse(
-                                flag.getDateTimeModified(),
-                                dateTimeFormatter
-                            ) : null)
-                            .path(path)
-                            .hearingRelevant(flag.getHearingRelevant())
-                            .flagCode(flag.getFlagCode())
-                            .status(flag.getStatus())
-                            .availableExternally(flag.getAvailableExternally())
-                            .build();
-                        flagDetails.add(element(flagDetail));
-                    }
-
-                    flags = flags.toBuilder()
-                        .details(flagDetails)
-                        .build();
-                    log.info("Inside mapRAforC100MainApplicant Updated external Party flags  ===>" + objectMapper.writeValueAsString(
-                        flags));
-
-                    Map<String, Object> externalCaseFlagMap = new HashMap<>();
-                    externalCaseFlagMap.put(partyExternalCaseFlagField.get(), flags);
-
-                    CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
-                        startEventResponse,
-                        externalCaseFlagMap
-                    );
-
-                    log.info("Inside mapRAforC100MainApplicant Case data content is  ===>" + objectMapper.writeValueAsString(
-                        caseDataContent));
-
-                    CaseDetails updatedCaseDetails = coreCaseDataService.submitUpdate(
-                        authToken,
-                        eventRequestData,
-                        caseDataContent,
-                        caseId,
-                        false
-                    );
-
-                    log.info("Inside mapRAforC100MainApplicant updatedCaseDetails is  ===>" + objectMapper.writeValueAsString(
-                        updatedCaseDetails));
-
-                    return CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
-                }
-                return caseData;
+                return findAndMapRA(caseData, authToken, applicantDetails, caseId);
             }
         }
 
+        return caseData;
+    }
+
+    private CaseData findAndMapRA(CaseData caseData, String authToken, C100RebuildApplicantDetailsElements applicantDetails, String caseId)
+        throws JsonProcessingException {
+        log.info(
+            "Inside mapRAforC100MainApplicant RAFlags {}",
+            applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags()
+        );
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        CaseEvent caseEvent = CaseEvent.fromValue(C100_REQUEST_SUPPORT.getValue());
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(
+            caseEvent,
+            userDetails.getId()
+        );
+
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+
+        Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
+        Optional<String> partyExternalCaseFlagField = caseService.getPartyExternalCaseFlagField(
+            caseData.getCaseTypeOfApplication(),
+            PartyEnum.applicant,
+            0
+        );
+
+        if (partyExternalCaseFlagField.isPresent()) {
+            log.info("Inside mapRAforC100MainApplicant partyExternalCaseFlagField ===>" + objectMapper.writeValueAsString(
+                partyExternalCaseFlagField.get()));
+
+            Flags flags = objectMapper.convertValue(
+                updatedCaseData.get(partyExternalCaseFlagField.get()),
+                Flags.class
+            );
+            log.info("Inside mapRAforC100MainApplicant Existing external Party flags  ===>" + objectMapper.writeValueAsString(
+                flags));
+
+            List<Element<FlagDetail>> flagDetails = new ArrayList<>();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern(
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                Locale.ENGLISH
+            );
+            for (C100FlagDetailRequest flag : applicantDetails.getApplicants().get(0).getReasonableAdjustmentsFlags()) {
+                List<Element<String>> path = new ArrayList<>();
+                for (String pathDetail : flag.getPath()) {
+                    path.add(element(pathDetail));
+                }
+
+                FlagDetail flagDetail = FlagDetail.builder().name(flag.getName()).name_cy(flag.getName_cy())
+                    .subTypeValue(flag.getSubTypeValue())
+                    .subTypeValue_cy(flag.getSubTypeValue_cy())
+                    .subTypeKey(flag.getSubTypeKey())
+                    .otherDescription(flag.getOtherDescription())
+                    .otherDescription_cy(flag.getOtherDescription_cy())
+                    .flagComment(flag.getFlagComment())
+                    .flagComment_cy(flag.getFlagComment_cy())
+                    .flagUpdateComment(flag.getFlagUpdateComment())
+                    .dateTimeCreated(LocalDateTime.parse(flag.getDateTimeCreated(), dateTimeFormatter))
+                    .dateTimeModified(null != flag.getDateTimeModified() ? LocalDateTime.parse(
+                        flag.getDateTimeModified(),
+                        dateTimeFormatter
+                    ) : null)
+                    .path(path)
+                    .hearingRelevant(flag.getHearingRelevant())
+                    .flagCode(flag.getFlagCode())
+                    .status(flag.getStatus())
+                    .availableExternally(flag.getAvailableExternally())
+                    .build();
+                flagDetails.add(element(flagDetail));
+            }
+
+            flags = flags.toBuilder()
+                .details(flagDetails)
+                .build();
+            log.info("Inside mapRAforC100MainApplicant Updated external Party flags  ===>" + objectMapper.writeValueAsString(
+                flags));
+
+            Map<String, Object> externalCaseFlagMap = new HashMap<>();
+            externalCaseFlagMap.put(partyExternalCaseFlagField.get(), flags);
+
+            CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+                startEventResponse,
+                externalCaseFlagMap
+            );
+
+            log.info("Inside mapRAforC100MainApplicant Case data content is  ===>" + objectMapper.writeValueAsString(
+                caseDataContent));
+
+            CaseDetails updatedCaseDetails = coreCaseDataService.submitUpdate(
+                authToken,
+                eventRequestData,
+                caseDataContent,
+                caseId,
+                false
+            );
+
+            log.info("Inside mapRAforC100MainApplicant updatedCaseDetails is  ===>" + objectMapper.writeValueAsString(
+                updatedCaseDetails));
+
+            return CaseUtils.getCaseData(updatedCaseDetails, objectMapper);
+        }
         return caseData;
     }
 }

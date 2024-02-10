@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.BeforeEach;
@@ -29,6 +28,7 @@ import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDe
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
@@ -128,13 +128,13 @@ public class CaseControllerTest {
 
     }
 
-    @Ignore
     @Test
     public void testCitizenUpdateCase() throws JsonProcessingException, NotFoundException {
 
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .applicantCaseName("test")
+            .c100RebuildData(C100RebuildData.builder().c100RebuildApplicantDetails("").build())
             .build();
 
         when(authorisationService.authoriseService(any())).thenReturn(true);
@@ -171,7 +171,7 @@ public class CaseControllerTest {
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(confidentialDetailsMapper.mapConfidentialData(caseData, true)).thenReturn(updatedCasedata);
-        when(reasonableAdjustmentsMapper.mapRAforC100MainApplicant("", caseData, eventId, authToken)).thenReturn(
+        when(reasonableAdjustmentsMapper.mapRAforC100MainApplicant("", updatedCasedata, eventId, authToken)).thenReturn(
             updatedCasedata);
         when(authTokenGenerator.generate()).thenReturn("TestToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
