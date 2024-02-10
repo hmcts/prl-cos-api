@@ -338,7 +338,7 @@ public class StatementOfServiceControllerTest {
                                   .lastName("lastFl401")
                                   .build())
             .statementOfService(StatementOfService.builder()
-                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.applicationPack)
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
                                     .stmtOfServiceAddRecipient(listOfSos)
                                     .build())
             .build();
@@ -397,7 +397,7 @@ public class StatementOfServiceControllerTest {
                                   .lastName("lastFl401")
                                   .build())
             .statementOfService(StatementOfService.builder()
-                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.order)
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
                                     .stmtOfServiceAddRecipient(listOfSos)
                                     .build())
             .build();

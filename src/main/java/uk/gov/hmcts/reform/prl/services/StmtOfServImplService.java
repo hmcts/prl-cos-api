@@ -144,10 +144,10 @@ public class StmtOfServImplService {
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceAddRecipient(caseData.getStatementOfService()
                                                                    .getStmtOfServiceWhatWasServed().equals(
-                                            StatementOfServiceWhatWasServed.applicationPack) ? elementList : null)
+                                            StatementOfServiceWhatWasServed.statementOfServiceApplicationPack) ? elementList : null)
                                     .stmtOfServiceForOrder(caseData.getStatementOfService()
                                                                .getStmtOfServiceWhatWasServed().equals(
-                                            StatementOfServiceWhatWasServed.order) ? elementList : null)
+                                            StatementOfServiceWhatWasServed.statementOfServiceOrder) ? elementList : null)
                                     .build())
 
             .build();
