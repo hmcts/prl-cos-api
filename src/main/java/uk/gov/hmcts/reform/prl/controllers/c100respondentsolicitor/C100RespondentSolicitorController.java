@@ -86,7 +86,6 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         log.info("handleAboutToSubmit: Callback for about-to-submit");
-        log.info("CallbackRequest: {}", objectMapper.writeValueAsString(callbackRequest));
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             List<String> errorList = new ArrayList<>();
             return AboutToStartOrSubmitCallbackResponse

@@ -53,6 +53,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCou
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentInterpreterNeeds;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -138,6 +139,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     OrganisationService organisationService;
+
+    @Mock
+    ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
 
     boolean mandatoryFinished = false;
 
@@ -247,6 +251,11 @@ public class C100RespondentSolicitorServiceTest {
                 .value(proceedingDetails).build();
         List<Element<RespondentProceedingDetails>> proceedingsList = Collections.singletonList(proceedingDetailsElement);
 
+        responseToAllegationsOfHarm = ResponseToAllegationsOfHarm.builder()
+            .responseToAllegationsOfHarmYesOrNoResponse(Yes)
+            .responseToAllegationsOfHarmDocument(Document.builder().build())
+            .build();
+
         User user = User.builder().email("respondent@example.net")
                 .idamId("1234-5678").solicitorRepresented(Yes).build();
 
@@ -293,6 +302,7 @@ public class C100RespondentSolicitorServiceTest {
                                 .build())
                         .supportYouNeed(ReasonableAdjustmentsSupport.builder()
                                 .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                        .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
                         .build())
                 .canYouProvideEmailAddress(Yes)
                 .isEmailAddressConfidential(No)
@@ -354,6 +364,7 @@ public class C100RespondentSolicitorServiceTest {
                                 .build())
                         .supportYouNeed(ReasonableAdjustmentsSupport.builder()
                                 .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                        .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
                         .build())
                 .canYouProvideEmailAddress(Yes)
                 .isEmailAddressConfidential(Yes)
@@ -477,6 +488,7 @@ public class C100RespondentSolicitorServiceTest {
                                                                                      .willingToAttendMiam(Yes)
                                 .reasonNotAttendingMiam("test")
                                 .build())
+                        .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
                         .build())
                 .build();
 
@@ -559,6 +571,7 @@ public class C100RespondentSolicitorServiceTest {
                                 .build())
                         .supportYouNeed(ReasonableAdjustmentsSupport.builder()
                                 .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                        .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
                         .build())
                 .canYouProvideEmailAddress(Yes)
                 .isEmailAddressConfidential(No)
@@ -624,6 +637,7 @@ public class C100RespondentSolicitorServiceTest {
                                 .build())
                         .supportYouNeed(ReasonableAdjustmentsSupport.builder()
                                 .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
+                        .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
                         .build())
                 .canYouProvideEmailAddress(Yes)
                 .isEmailAddressConfidential(No)
@@ -747,6 +761,7 @@ public class C100RespondentSolicitorServiceTest {
                                 .willingToAttendMiam(No)
                                 .reasonNotAttendingMiam("test")
                                 .build())
+                        .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
                         .build())
                 .build();
 
@@ -786,7 +801,7 @@ public class C100RespondentSolicitorServiceTest {
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivateA",
             "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA",
             "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA", "c100ResSolLitigationCapacityA",
-            "c100ResSolViewResponseDraftDocumentA"};
+            "c100ResSolViewResponseDraftDocumentA", "c100ResSolResponseToAllegationsOfHarmA"};
         for (String event : events) {
             callbackRequest.setEventId(event);
             Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -1078,7 +1093,7 @@ public class C100RespondentSolicitorServiceTest {
 
         String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
             "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
-            "c100ResSolLitigationCapacityA", "c100ResSolConsentingToApplicationA"};
+            "c100ResSolLitigationCapacityA", "c100ResSolConsentingToApplicationA", "c100ResSolResponseToAllegationsOfHarmA"};
         for (String event : events) {
             callbackRequest.setEventId(event);
             Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -1547,7 +1562,7 @@ public class C100RespondentSolicitorServiceTest {
 
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
             "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
-            "c100ResSolInternationalElement", "c100ResSolLitigationCapacity", Optional.empty().toString()};
+            "c100ResSolInternationalElement", "c100ResSolLitigationCapacity", "c100ResSolResponseToAllegationsOfHarm", Optional.empty().toString()};
         for (String event : events) {
             CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                     .CallbackRequest.builder()
@@ -1902,6 +1917,27 @@ public class C100RespondentSolicitorServiceTest {
                     callbackRequest,SolicitorRole.C100APPLICANTSOLICITOR1
             );
         }, RespondentSolicitorException.class, RESPONSE_ALREADY_SUBMITTED_ERROR);
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataSolResponseToAllegationOfHarmTest() {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        List<String> errorList = new ArrayList<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("c100ResSolResponseToAllegationsOfHarmA")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest);
+
+        assertTrue(response.containsKey("respondents"));
     }
 
     protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,

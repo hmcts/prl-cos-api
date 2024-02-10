@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Cons
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Collections;
@@ -57,6 +58,9 @@ public class ResponseSubmitCheckerTest {
     @Mock
     RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
 
+    @Mock
+    ResponseToAllegationsOfHarmChecker responseToAllegationsOfHarmChecker;
+
     CaseData emptyCaseData;
 
     PartyDetails respondent;
@@ -88,6 +92,9 @@ public class ResponseSubmitCheckerTest {
                           .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
                                                                .builder()
                                                                .build())
+                          .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm
+                                                           .builder()
+                                                           .build())
                           .build())
             .build();
 
@@ -114,6 +121,7 @@ public class ResponseSubmitCheckerTest {
         when(respondentEventsChecker.getCurrentOrPastProceedingsChecker()).thenReturn(currentOrPastProceedingsChecker);
         when(respondentEventsChecker.getRespondentAllegationsOfHarmChecker()).thenReturn(respondentAllegationsOfHarmChecker);
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
+        when(respondentEventsChecker.getResponseToAllegationsOfHarmChecker()).thenReturn(responseToAllegationsOfHarmChecker);
 
 
         Boolean bool = responseSubmitChecker.isFinished(emptyRespondent);
@@ -147,6 +155,9 @@ public class ResponseSubmitCheckerTest {
 
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
         when(respondentContactDetailsChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getResponseToAllegationsOfHarmChecker()).thenReturn(responseToAllegationsOfHarmChecker);
+        when(responseToAllegationsOfHarmChecker.isFinished(respondent)).thenReturn(true);
 
         Boolean bool = responseSubmitChecker.isFinished(respondent);
 
