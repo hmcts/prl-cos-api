@@ -234,10 +234,6 @@ public class C100RespondentSolicitorService {
                         event.getCaseFieldName(),
                         solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
                     );
-                    log.info("AboutToStart event name : {}",
-                             event.getCaseFieldName());
-                    log.info("AboutToStart BEFORE : {}",
-                             caseDataUpdated.get(event.getCaseFieldName()));
                     break;
                 case INTERNATIONAL_ELEMENT:
                     String[] internationalElementFields = event.getCaseFieldName().split(",");
@@ -369,31 +365,14 @@ public class C100RespondentSolicitorService {
     }
 
     private Response buildRespondAllegationOfHarm(CaseData caseData, Response buildResponseForRespondent) {
-        log.info("AboutToSubmit buildRespondAllegationOfHarm : {}",
-                 buildResponseForRespondent);
-        log.info("AboutToSubmit caseData.getRespondentSolicitorData()\n"
-                   +  "                     .getResponseToAllegationsOfHarm() : {}",
-                 caseData.getRespondentSolicitorData()
-                     .getResponseToAllegationsOfHarm());
-
         ResponseToAllegationsOfHarm responseToAllegationsOfHarm = optimiseResponseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
                                                                                                           .getResponseToAllegationsOfHarm());
-
-        /*
-         * log.info("getResponseToAllegationsOfHarmYesOrNoResponse BEFORE : {}",
-         * caseData.getRespondentSolicitorData().getResponseToAllegationsOfHarm().
-         * getResponseToAllegationsOfHarmYesOrNoResponse());
-         * caseData.getRespondentSolicitorData().setConfidentialListDetails(EMAIL);
-         * log.info("getResponseToAllegationsOfHarmYesOrNoResponse AFTER : {}",
-         * responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse());
-         */
         return buildResponseForRespondent.toBuilder()
             .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
             .build();
     }
 
     private ResponseToAllegationsOfHarm optimiseResponseToAllegationsOfHarm(ResponseToAllegationsOfHarm responseToAllegationsOfHarm) {
-
         return responseToAllegationsOfHarm.toBuilder()
             .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
             .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
