@@ -7,7 +7,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -813,8 +812,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    @Ignore
-    public void testUpdateCitizenRaflags() {
+    public void testUpdateCitizenRaFlags() {
         User user1 = User.builder().idamId("applicant-1").build();
         User user2 = User.builder().idamId("respondent-1").build();
         User user3 = User.builder().idamId("respondent-2").build();
@@ -926,11 +924,18 @@ public class CaseServiceTest {
         StartEventResponse startEventResponse = StartEventResponse.builder().eventId("c100RequestSupport")
             .caseDetails(caseDetails)
             .token(eventToken).build();
+        // when(coreCaseDataService.startUpdate(
+        //    authToken,
+        //    EventRequestData.builder().build(),
+        //    caseId,
+        //    false
+        //)).thenReturn(
+        //    startEventResponse);
         when(coreCaseDataService.startUpdate(
-            authToken,
-            EventRequestData.builder().build(),
-            caseId,
-            false
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
         )).thenReturn(
             startEventResponse);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class))).thenReturn(caseData);

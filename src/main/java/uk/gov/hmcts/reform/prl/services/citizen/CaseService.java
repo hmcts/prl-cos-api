@@ -289,7 +289,7 @@ public class CaseService {
                 caseDataUpdated
             );
         }
-        return null;
+        return caseDetails;
     }
 
     private void processUserDetailsForCase(String userId, String emailId, CaseData caseData, UUID partyId,
