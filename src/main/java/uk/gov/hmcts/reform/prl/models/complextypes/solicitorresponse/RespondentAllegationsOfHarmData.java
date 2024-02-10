@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -112,23 +111,18 @@ public class RespondentAllegationsOfHarmData {
     private final List<ChildAbuseEnum> respChildAbuses;
 
     @JsonProperty("respChildPhysicalAbuse")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final RespChildAbuse respChildPhysicalAbuse;
 
     @JsonProperty("respChildPsychologicalAbuse")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final RespChildAbuse respChildPsychologicalAbuse;
 
     @JsonProperty("respChildFinancialAbuse")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final RespChildAbuse respChildFinancialAbuse;
 
     @JsonProperty("respChildSexualAbuse")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final RespChildAbuse respChildSexualAbuse;
 
     @JsonProperty("respChildEmotionalAbuse")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private final RespChildAbuse respChildEmotionalAbuse;
 
     @JsonIgnore
