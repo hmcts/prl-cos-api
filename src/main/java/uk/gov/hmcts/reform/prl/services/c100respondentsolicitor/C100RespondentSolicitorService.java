@@ -290,9 +290,13 @@ public class C100RespondentSolicitorService {
             CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         }
+
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
+        Map<String, Object> data = objectMapper
+                .convertValue(RespondentAllegationsOfHarmData.builder().build(),new TypeReference<Map<String, Object>>() {});
+        updatedCaseData.putAll(data);
         return updatedCaseData;
     }
 

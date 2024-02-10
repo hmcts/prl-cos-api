@@ -828,6 +828,8 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
+                Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
         List<String> errorList = new ArrayList<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()
@@ -1109,6 +1111,8 @@ public class C100RespondentSolicitorServiceTest {
     public void populateAboutToSubmitCaseDataForC100ResSolKeepDetailsPrivateATest() throws Exception {
 
         when(responseSubmitChecker.isFinished(respondent3)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
+                Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
         caseData = caseData.toBuilder()
                 .respondentSolicitorData(RespondentSolicitorData.builder().respondentAllegationsOfHarmData(allegationsOfHarmData)
@@ -1132,6 +1136,8 @@ public class C100RespondentSolicitorServiceTest {
     public void populateAboutToSubmitCaseDataForC100ResSolCurrentOrPreviousProceedingsAWhileExistingProceedingNoTest() throws Exception {
 
         when(responseSubmitChecker.isFinished(respondent3)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
+                Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
         String[] events = {"c100ResSolCurrentOrPreviousProceedingsA"};
         for (String event : events) {
@@ -1413,6 +1419,8 @@ public class C100RespondentSolicitorServiceTest {
         when(systemUserService.getSysUserToken()).thenReturn("");
 
         when(responseSubmitChecker.isFinished(respondent)).thenReturn(mandatoryFinished);
+        when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
+                Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
         String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
             "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
@@ -1485,6 +1493,8 @@ public class C100RespondentSolicitorServiceTest {
             when(applicationsTabService.getRespondentsTable(caseData1)).thenReturn(List.of(Element.<Respondent>builder().build()));
             when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
                     Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
+            when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
+                    Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
             when(systemUserService.getSysUserToken()).thenReturn("");
 
@@ -1565,6 +1575,8 @@ public class C100RespondentSolicitorServiceTest {
         when(organisationService.getOrganisationDetails(Mockito.anyString(), Mockito.anyString())).thenReturn(
                 Organisations.builder().contactInformation(List.of(ContactInformation.builder().build())).build());
         when(systemUserService.getSysUserToken()).thenReturn("");
+        when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
+                Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
 
 
         String[] events = {"c100ResSolKeepDetailsPrivateA"};
@@ -1950,6 +1962,8 @@ public class C100RespondentSolicitorServiceTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
+                Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
         List<String> errorList = new ArrayList<>();
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
