@@ -56,6 +56,9 @@ public class Response {
     @JsonUnwrapped
     @Builder.Default
     private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
+
+    @JsonUnwrapped
+    @Builder.Default
     private final ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
 
     private final YesOrNo c7ResponseSubmitted;
