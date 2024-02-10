@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -38,6 +40,7 @@ public class StatementOfServiceController {
 
     private final AuthorisationService authorisationService;
     private final StmtOfServImplService stmtOfServImplService;
+    private final ObjectMapper objectMapper;
 
     @PostMapping(path = "/Statement-of-service-about-to-start", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to Statement of service about to start.")
@@ -74,8 +77,19 @@ public class StatementOfServiceController {
     ) {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
+            try {
+                log.info(
+                    "/Statement-of-service-about-to-submit/about-to-submit::CallbackRequest -> {}",
+                    objectMapper.writeValueAsString(callbackRequest)
+                );
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             return CallbackResponse.builder()
-                .data(stmtOfServImplService.retrieveAllRespondentNames(callbackRequest.getCaseDetails(), authorisation)).build();
+                .data(stmtOfServImplService.retrieveAllRespondentNames(
+                    callbackRequest.getCaseDetails(),
+                    authorisation
+                )).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
