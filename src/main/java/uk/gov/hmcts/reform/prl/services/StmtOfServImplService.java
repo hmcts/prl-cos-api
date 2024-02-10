@@ -162,6 +162,7 @@ public class StmtOfServImplService {
     private List<Element<StmtOfServiceAddRecipient>> appendStatementOfServiceToSoaTab(
         CaseData caseData,
         List<Element<StmtOfServiceAddRecipient>> statementOfServiceListFromCurrentEvent) {
+
         if (caseData.getStatementOfService()
             .getStmtOfServiceWhatWasServed().equals(
                 StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)) {
@@ -169,6 +170,10 @@ public class StmtOfServImplService {
                 statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceForApplication());
             }
             return statementOfServiceListFromCurrentEvent;
+        } else {
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
+                return caseData.getStatementOfService().getStmtOfServiceForApplication();
+            }
         }
         return null;
     }
@@ -184,7 +189,12 @@ public class StmtOfServImplService {
                 statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
             }
             return statementOfServiceListFromCurrentEvent;
+        } else {
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
+                return caseData.getStatementOfService().getStmtOfServiceForOrder();
+            }
         }
+
         return null;
     }
 
