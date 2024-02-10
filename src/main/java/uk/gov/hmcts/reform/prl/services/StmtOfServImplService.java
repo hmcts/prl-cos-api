@@ -142,17 +142,48 @@ public class StmtOfServImplService {
 
         caseData = caseData.toBuilder()
             .statementOfService(StatementOfService.builder()
-                                    .stmtOfServiceAddRecipient(caseData.getStatementOfService()
-                                                                   .getStmtOfServiceWhatWasServed().equals(
-                                            StatementOfServiceWhatWasServed.statementOfServiceApplicationPack) ? elementList : null)
-                                    .stmtOfServiceForOrder(caseData.getStatementOfService()
-                                                               .getStmtOfServiceWhatWasServed().equals(
-                                            StatementOfServiceWhatWasServed.statementOfServiceOrder) ? elementList : null)
+                                    .stmtOfServiceAddRecipient(appendStatementOfServiceToSoaTab(
+                                        caseData,
+                                        elementList
+                                    ))
+                                    .stmtOfServiceForOrder(appendStatementOfServiceToOrdersTab(
+                                        caseData,
+                                        elementList
+                                    ))
                                     .build())
 
             .build();
 
         return caseData;
+    }
+
+    private List<Element<StmtOfServiceAddRecipient>> appendStatementOfServiceToSoaTab(
+        CaseData caseData,
+        List<Element<StmtOfServiceAddRecipient>> statementOfServiceListFromCurrentEvent) {
+        if (caseData.getStatementOfService()
+            .getStmtOfServiceWhatWasServed().equals(
+                StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)) {
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
+                statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceAddRecipient());
+            }
+            return statementOfServiceListFromCurrentEvent;
+        }
+        return null;
+    }
+
+    private List<Element<StmtOfServiceAddRecipient>> appendStatementOfServiceToOrdersTab(
+        CaseData caseData,
+        List<Element<StmtOfServiceAddRecipient>> statementOfServiceListFromCurrentEvent) {
+
+        if (caseData.getStatementOfService()
+            .getStmtOfServiceWhatWasServed().equals(
+                StatementOfServiceWhatWasServed.statementOfServiceOrder)) {
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
+                statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
+            }
+            return statementOfServiceListFromCurrentEvent;
+        }
+        return null;
     }
 
     private CaseData cleanupRespondentPacksCaOrBailiffPersonalService(CaseData caseData, String authorisation) {
