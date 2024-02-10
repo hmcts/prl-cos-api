@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
@@ -448,10 +447,11 @@ public class ReviewDocumentService {
             .url(scannedDocument.getUrl())
             .scannedDate(scannedDocument.getScannedDate())
             .deliveryDate(scannedDocument.getDeliveryDate())
+            .documentParty(BULK_SCAN)
             .uploadedBy(BULK_SCAN)
             .documentUploadedDate(scannedDocument.getScannedDate())
-            .isConfidential(YesOrNo.Yes) //bulk scan docs always go to confidential if decision is Yes
-            .isRestricted(YesOrNo.No) //fix to getRestrictedOrConfidentialKey=confidential
+            .isConfidential(null) //bulk scan docs always go to confidential if decision is Yes
+            .isRestricted(null) //fix to getRestrictedOrConfidentialKey=confidential
             .uploaderRole(BULK_SCAN);
     }
 
