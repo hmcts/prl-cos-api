@@ -53,6 +53,7 @@ public class RespondentSolicitorData {
     @JsonUnwrapped
     private final RespondentAllegationsOfHarmData respondentAllegationsOfHarmData;
 
+    @JsonUnwrapped
     private final ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
 
     /** Confirm or Edit contact details. **/

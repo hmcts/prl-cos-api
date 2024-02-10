@@ -230,10 +230,19 @@ public class C100RespondentSolicitorService {
 
                     break;
                 case RESPOND_ALLEGATION_OF_HARM:
-                    caseDataUpdated.put(
-                        event.getCaseFieldName(),
-                        solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
-                    );
+                    if (null != solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()) {
+                        String[] respondToAllegationOfHarmFields = event.getCaseFieldName().split(",");
+                        caseDataUpdated.put(
+                            respondToAllegationOfHarmFields[0],
+                            solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                                .getResponseToAllegationsOfHarmYesOrNoResponse()
+                        );
+                        caseDataUpdated.put(
+                            respondToAllegationOfHarmFields[1],
+                            solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                                .getResponseToAllegationsOfHarmDocument()
+                        );
+                    }
                     break;
                 case INTERNATIONAL_ELEMENT:
                     String[] internationalElementFields = event.getCaseFieldName().split(",");
