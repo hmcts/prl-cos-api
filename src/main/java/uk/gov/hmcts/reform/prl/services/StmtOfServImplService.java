@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -19,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
@@ -80,7 +82,7 @@ public class StmtOfServImplService {
             CaseData.class
         );
 
-        List<Element<StmtOfServiceAddRecipient>> addRecipientElementList = caseData.getStmtOfServiceAddRecipient();
+        List<Element<StmtOfServiceAddRecipient>> addRecipientElementList = caseData.getStatementOfService().getStmtOfServiceAddRecipient();
         List<Element<StmtOfServiceAddRecipient>> elementList = new ArrayList<>();
         List<StmtOfServiceAddRecipient> recipients = addRecipientElementList
             .stream()
@@ -137,8 +139,17 @@ public class StmtOfServImplService {
             }
             elementList.add(element(recipient));
         }
+
         caseData = caseData.toBuilder()
-            .stmtOfServiceAddRecipient(elementList)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceAddRecipient(caseData.getStatementOfService()
+                                                                   .getStmtOfServiceWhatWasServed().equals(
+                                            StatementOfServiceWhatWasServed.applicationPack) ? elementList : null)
+                                    .stmtOfServiceForOrder(caseData.getStatementOfService()
+                                                               .getStmtOfServiceWhatWasServed().equals(
+                                            StatementOfServiceWhatWasServed.order) ? elementList : null)
+                                    .build())
+
             .build();
 
         return caseData;
