@@ -78,6 +78,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ServeOrderData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.hearingmanagement.HearingDataFromTabToDocmosis;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.CaseHearing;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -3639,6 +3640,7 @@ public class ManageOrderServiceTest {
             .sdoSettlementHearingDetails(hearingData)
             .sdoPermissionHearingDetails(hearingData)
             .sdoSecondHearingDetails(hearingData)
+            .sdoDirectionsForFactFindingHearingDetails(hearingData)
             .build();
 
 
@@ -4792,5 +4794,62 @@ public class ManageOrderServiceTest {
                          + "If you need to include directions for a fact-finding hearing, you need to upload the"
                          + " order in manage orders instead.</div>", caseDataUpdated.get(SDO_FACT_FINDING_FLAG));
 
+    }
+
+    @Test
+    public void testSetHearingDataForSdo() {
+
+        UUID uuid = UUID.randomUUID();
+        HearingDataFromTabToDocmosis hearingDataFromTabToDocmosis = HearingDataFromTabToDocmosis.builder().hearingType("ABA5-FHR").build();
+
+        List<Element<HearingDataFromTabToDocmosis>> elementList = new ArrayList<>();
+        elementList.add(element(uuid,hearingDataFromTabToDocmosis));
+
+        DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
+                                                                  .build()).build();
+        HearingData hearingDataInitial = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .build();
+
+        HearingData hearingDataRevised = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .hearingdataFromHearingTab(elementList).build();
+
+        StandardDirectionOrder standardDirectionOrder = StandardDirectionOrder.builder()
+            .sdoUrgentHearingDetails(hearingDataInitial)
+            .sdoPermissionHearingDetails(hearingDataInitial)
+            .sdoSecondHearingDetails(hearingDataInitial)
+            .sdoFhdraHearingDetails(hearingDataInitial)
+            .sdoDraHearingDetails(hearingDataInitial)
+            .sdoSettlementHearingDetails(hearingDataInitial)
+            .sdoDirectionsForFactFindingHearingDetails(hearingDataInitial)
+            .sdoHearingsAndNextStepsList(List.of(SdoHearingsAndNextStepsEnum.factFindingHearing))
+            .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
+
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Test")
+            .manageOrders(ManageOrders.builder().hearingsType(dynamicList).build())
+            .standardDirectionOrder(standardDirectionOrder)
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.standardDirectionsOrder)
+            .build();
+        CaseHearing caseHearing = CaseHearing.caseHearingWith().hmcStatus("CANCELLED").hearingID(123456L).build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseRef("123")
+            .hmctsServiceCode("ABA5")
+            .caseHearings(Collections.singletonList(caseHearing))
+            .build();
+        when(hearingDataService.getHearingDataForSdo(Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(HearingData.builder().build());
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+            .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
+        when(hearingDataService.getHearingDataForSelectedHearingForSdo(Mockito.any(),Mockito.any(),Mockito.any()))
+            .thenReturn(hearingDataRevised);
+
+        CaseData caseDataResp = manageOrderService.setHearingDataForSdo(caseData, hearings, "auth");
+        Assert.assertNull(caseData.getStandardDirectionOrder().getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab());
+        Assert.assertEquals(uuid,caseDataResp.getStandardDirectionOrder()
+            .getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab().get(0).getId());
     }
 }
