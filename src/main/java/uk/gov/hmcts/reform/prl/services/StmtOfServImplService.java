@@ -113,6 +113,7 @@ public class StmtOfServImplService {
                 } else {
                     recipient = recipient.toBuilder()
                         .respondentDynamicList(DynamicList.builder()
+                                                   .listItems(recipient.getRespondentDynamicList().getListItems())
                                                    .value(DynamicListElement.builder()
                                                               .code(recipient.getRespondentDynamicList().getValue().getCode())
                                                               .label(recipient.getRespondentDynamicList().getValue().getLabel())
@@ -125,6 +126,7 @@ public class StmtOfServImplService {
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 recipient = recipient.toBuilder()
                     .respondentDynamicList(DynamicList.builder()
+                                               .listItems(recipient.getRespondentDynamicList().getListItems())
                                                .value(DynamicListElement.builder()
                                                           .label(caseData.getRespondentsFL401().getFirstName()
                                                                      + " " + caseData.getRespondentsFL401().getLastName())
@@ -142,7 +144,7 @@ public class StmtOfServImplService {
 
         caseData = caseData.toBuilder()
             .statementOfService(StatementOfService.builder()
-                                    .stmtOfServiceAddRecipient(appendStatementOfServiceToSoaTab(
+                                    .stmtOfServiceForApplication(appendStatementOfServiceToSoaTab(
                                         caseData,
                                         elementList
                                     ))
@@ -150,8 +152,8 @@ public class StmtOfServImplService {
                                         caseData,
                                         elementList
                                     ))
+                                    .stmtOfServiceAddRecipient(null)
                                     .build())
-
             .build();
 
         return caseData;
@@ -163,8 +165,8 @@ public class StmtOfServImplService {
         if (caseData.getStatementOfService()
             .getStmtOfServiceWhatWasServed().equals(
                 StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)) {
-            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceAddRecipient())) {
-                statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceAddRecipient());
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
+                statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceForApplication());
             }
             return statementOfServiceListFromCurrentEvent;
         }
