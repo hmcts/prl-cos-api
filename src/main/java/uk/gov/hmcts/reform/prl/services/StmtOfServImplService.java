@@ -103,6 +103,7 @@ public class StmtOfServImplService {
                     String allRespondentNames = String.join(", ", respondentNamesList);
                     recipient = recipient.toBuilder()
                         .respondentDynamicList(DynamicList.builder()
+                                                   .listItems(recipient.getRespondentDynamicList().getListItems())
                                                    .value(DynamicListElement.builder()
                                                               .code(UUID.randomUUID())
                                                               .label(allRespondentNames)
