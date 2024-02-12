@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
@@ -248,7 +249,8 @@ public class TaskListService {
         List<String> roles = userDetails.getRoles();
         boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
         String state = callbackRequest.getCaseDetails().getState();
-        if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))) {
+        if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
+            || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)) {
             try {
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
