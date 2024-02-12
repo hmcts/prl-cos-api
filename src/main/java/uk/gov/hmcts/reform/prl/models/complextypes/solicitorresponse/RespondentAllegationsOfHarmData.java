@@ -36,6 +36,7 @@ public class RespondentAllegationsOfHarmData {
     private final YesOrNo respAbductionPassportOfficeNotified;
     private final YesOrNo respAbductionChildHasPassport;
 
+
     @JsonProperty("respChildPassportDetails")
     private RespChildPassportDetails respChildPassportDetails;
 
