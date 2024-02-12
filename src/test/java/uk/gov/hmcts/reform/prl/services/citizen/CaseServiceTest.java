@@ -660,19 +660,8 @@ public class CaseServiceTest {
     public void shouldUpdateCaseWithCaseName() throws IOException, NotFoundException {
 
         C100RebuildData c100RebuildData = C100RebuildData.builder()
-            .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
-            .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
-            .c100RebuildTypeOfOrder(TestUtil.readFileFrom("classpath:c100-rebuild/too.json"))
-            .c100RebuildOtherProceedings(TestUtil.readFileFrom("classpath:c100-rebuild/op.json"))
-            .c100RebuildMaim(TestUtil.readFileFrom("classpath:c100-rebuild/miam.json"))
-            .c100RebuildHearingUrgency(TestUtil.readFileFrom("classpath:c100-rebuild/hu.json"))
-            .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
             .c100RebuildApplicantDetails(TestUtil.readFileFrom("classpath:c100-rebuild/appl.json"))
-            .c100RebuildOtherChildrenDetails(TestUtil.readFileFrom("classpath:c100-rebuild/ocd.json"))
-            .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra.json"))
-            .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs.json"))
             .c100RebuildRespondentDetails(TestUtil.readFileFrom("classpath:c100-rebuild/resp.json"))
-            .c100RebuildConsentOrderDetails(TestUtil.readFileFrom("classpath:c100-rebuild/co.json"))
             .build();
 
         CaseData caseData = CaseData.builder()
@@ -690,6 +679,100 @@ public class CaseServiceTest {
             .id(1234567891234567L)
             .c100RebuildData(c100RebuildData)
             .applicantCaseName("applicantLN1 V respLN1")
+            .build();
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+
+        //When
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+
+        //Then
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
+    }
+
+    @Test
+    public void shouldUpdateCaseWithCaseNameButNoApplicantOrRespondentDetails() throws IOException, NotFoundException {
+
+        C100RebuildData c100RebuildData = C100RebuildData.builder()
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .c100RebuildData(c100RebuildData)
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .id(1234567891234567L)
+            .c100RebuildData(c100RebuildData)
+            .build();
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+
+        //When
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+
+        //Then
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
+    }
+
+    @Test
+    public void shouldUpdateCaseWithCaseNameButNoC100RebuildData() throws IOException, NotFoundException {
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .id(1234567891234567L)
+            .build();
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
+        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
+
+        //When
+        CaseDetails actualCaseDetails =  caseService.updateCase(caseData, authToken, s2sToken, caseId,
+            CITIZEN_CASE_UPDATE.getValue(), accessCode);
+
+        //Then
+        assertThat(actualCaseDetails).isEqualTo(caseDetails);
+    }
+
+    @Test
+    public void shouldUpdateCaseWithCaseNameButCaseNameExists() throws IOException, NotFoundException {
+
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .build();
+        UserDetails userDetails = UserDetails
+            .builder()
+            .email("test@gmail.com")
+            .build();
+
+        CaseDetails caseDetails = mock(CaseDetails.class);
+
+        CaseData updatedCaseData = caseData.toBuilder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
             .build();
 
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
