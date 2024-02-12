@@ -531,6 +531,8 @@ public class DraftAnOrderServiceTest {
                               .childArrangementsOrdersToIssue(orderType)
                               .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
                               .loggedInUserType("Solicitor")
+                              .hasJudgeProvidedHearingDetails(Yes)
+                              .ordersHearingDetails(List.of(element(HearingData.builder().build())))
                               .build())
             .judgeOrMagistratesLastName("judge last")
             .justiceLegalAdviserFullName("Judge full")
