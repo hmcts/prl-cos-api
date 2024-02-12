@@ -127,6 +127,7 @@ public class ReviewDocumentServiceTest {
                        .isRestricted(YesOrNo.No)
                        .restrictedDetails("test")
                        .uploaderRole("Legal professional")
+                       .uploadedBy("Legal professional")
                        .documentUploadedDate(LocalDateTime.now())
                        .document(Document.builder().build())
                        .build()).build();
@@ -677,7 +678,7 @@ public class ReviewDocumentServiceTest {
             UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),
             ScannedDocument.builder()
                 .scannedDate(LocalDateTime.now())
-                .url(Document.builder().build())
+                .url(document)
                 .controlNumber("123")
                 .deliveryDate(LocalDateTime.now())
                 .exceptionRecordReference("EXREF")
@@ -703,18 +704,14 @@ public class ReviewDocumentServiceTest {
             .thenReturn(bulkScanQuarantineDoc);
         reviewDocumentService.processReviewDocument(caseDataMap, caseData, UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"));
 
-        //Assert.assertNotNull(caseDataMap.get("bulkScannedDocListDocTab"));
         Assert.assertTrue(caseData.getScannedDocuments().isEmpty());
-
-        List<Element<QuarantineLegalDoc>>  bulkScannedDocListDocTab =
-            (List<Element<QuarantineLegalDoc>>)caseDataMap.get("bulkScannedDocListDocTab");
-
-        Assert.assertNotNull(caseDataMap.get("bulkScannedDocListDocTab"));
-        Assert.assertEquals(1, bulkScannedDocListDocTab.size());
-        Assert.assertNotNull(bulkScannedDocListDocTab.get(0).getValue().getUrl());
-        Assert.assertNull(bulkScannedDocListDocTab.get(0).getValue().getCategoryId());
-        Assert.assertEquals("123", bulkScannedDocListDocTab.get(0).getValue().getControlNumber());
-        Assert.assertEquals("EXREF", bulkScannedDocListDocTab.get(0).getValue().getExceptionRecordReference());
+        Assert.assertNotNull(caseDataMap.get(CONFIDENTIAL_DOCUMENTS));
+        List<Element<QuarantineLegalDoc>>  confidentialDocs =
+            (List<Element<QuarantineLegalDoc>>)caseDataMap.get(CONFIDENTIAL_DOCUMENTS);
+        Assert.assertNotNull(confidentialDocs.get(0).getValue().getUrl());
+        Assert.assertNull(confidentialDocs.get(0).getValue().getCategoryId());
+        Assert.assertEquals("123", confidentialDocs.get(0).getValue().getControlNumber());
+        Assert.assertEquals("EXREF", confidentialDocs.get(0).getValue().getExceptionRecordReference());
     }
 
     @Test
@@ -1044,6 +1041,7 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testReviewProcessForCafcassWhenDecisionNo() {
+        //.uploaderRole(CAFCASS)
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
         documentList.add(element);
