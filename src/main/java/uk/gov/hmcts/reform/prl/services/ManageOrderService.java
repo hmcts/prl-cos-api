@@ -109,6 +109,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_CASEREVIEW_HEARING_DETAILS;
@@ -197,6 +198,7 @@ public class ManageOrderService {
     public static final String EMAIL = "email";
     public static final String POST = "post";
     public static final String SDO_FACT_FINDING_FLAG = "sdoFactFindingFlag";
+    public static final String AND = " and";
 
     @Value("${document.templates.common.prl_sdo_draft_template}")
     protected String sdoDraftTemplate;
@@ -1915,16 +1917,17 @@ public class ManageOrderService {
     public CaseData populateDirectionOfFactFindingHearingFieldsForDocmosis(CaseData caseData) {
         String sdoWhoNeedsToRespondAllegationsListText = null;
         String sdoWhoMadeAllegationsListText = null;
-        log.info("inside populateDirectionOfFactFindingHearingFieldsForDocmosis");
         if (isNotEmpty(caseData.getStandardDirectionOrder().getSdoWhoMadeAllegationsList()) && CollectionUtils.isNotEmpty(
             caseData.getStandardDirectionOrder().getSdoWhoMadeAllegationsList().getValue())) {
             sdoWhoMadeAllegationsListText = dynamicMultiSelectListService
                 .getStringFromDynamicMultiSelectList(caseData.getStandardDirectionOrder().getSdoWhoMadeAllegationsList());
+            sdoWhoMadeAllegationsListText = sdoWhoMadeAllegationsListText.replace(COMMA, AND);
         }
         if (isNotEmpty(caseData.getStandardDirectionOrder().getSdoWhoNeedsToRespondAllegationsList()) && CollectionUtils.isNotEmpty(
             caseData.getStandardDirectionOrder().getSdoWhoNeedsToRespondAllegationsList().getValue())) {
             sdoWhoNeedsToRespondAllegationsListText = dynamicMultiSelectListService
                 .getStringFromDynamicMultiSelectList(caseData.getStandardDirectionOrder().getSdoWhoNeedsToRespondAllegationsList());
+            sdoWhoNeedsToRespondAllegationsListText = sdoWhoNeedsToRespondAllegationsListText.replace(",", AND);
         }
         caseData = caseData.toBuilder()
             .standardDirectionOrder(caseData.getStandardDirectionOrder().toBuilder()
@@ -1934,7 +1937,6 @@ public class ManageOrderService {
             .isCafcass(caseData.getCaseManagementLocation() != null
                            ? CaseUtils.cafcassFlag(caseData.getCaseManagementLocation().getRegion()) : null)
             .build();
-        log.info("exit populateDirectionOfFactFindingHearingFieldsForDocmosis ==> " + caseData);
         return caseData;
     }
 

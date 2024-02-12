@@ -4526,11 +4526,19 @@ public class ManageOrderServiceTest {
                 dynamicMultiSelectList)
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
 
+        DynamicMultiselectListElement dynamicMultiselectListElement1 = DynamicMultiselectListElement.builder().label("aa")
+            .build();
+        DynamicMultiselectListElement dynamicMultiselectListElement2 = DynamicMultiselectListElement.builder().label("bb")
+            .build();
+
+        List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
+        dynamicMultiselectListElementList.add(dynamicMultiselectListElement1);
+        dynamicMultiselectListElementList.add(dynamicMultiselectListElement2);
+
         StandardDirectionOrder factFindingHearing = StandardDirectionOrder.builder().sdoHearingsAndNextStepsList(List.of(
                 SdoHearingsAndNextStepsEnum.factFindingHearing))
             .sdoWhoMadeAllegationsList(DynamicMultiSelectList.builder()
-                                                     .value(List.of(DynamicMultiselectListElement.builder().label("aa")
-                                                                        .build())).build())
+                                                     .value(dynamicMultiselectListElementList).build())
             .sdoWhoNeedsToRespondAllegationsList(DynamicMultiSelectList.builder()
                                                      .value(List.of(DynamicMultiselectListElement.builder().label("bb")
                                                                                                     .build())).build())
