@@ -913,6 +913,7 @@ public class DocumentGenService {
                                            CaseData caseData,
                                            String hint,
                                            boolean isWelsh, Map<String, Object> respondentDetails) throws Exception {
+        log.info("caseData name inside generatedocument {}", caseData.getApplicantCaseName());
         return getDocument(authorisation, caseData, hint, isWelsh, respondentDetails);
     }
 
