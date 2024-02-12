@@ -128,7 +128,11 @@ public class StmtOfServImplService {
                     .build();
             }
             if (isNotEmpty(caseData.getServiceOfApplication())
-                && isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack())) {
+                && isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack())
+                && StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
+                .equals(caseData.getStatementOfService()
+                            .getStmtOfServiceWhatWasServed())
+            ) {
                 caseData = cleanupRespondentPacksCaOrBailiffPersonalService(caseData, authorisation);
                 caseDataUpdateMap.put(
                     "finalServedApplicationDetailsList",
@@ -146,10 +150,13 @@ public class StmtOfServImplService {
                 elementList
             )
         );
-        caseDataUpdateMap.put("stmtOfServiceForOrder", appendStatementOfServiceToOrdersTab(
-            caseData,
-            elementList
-        ));
+        caseDataUpdateMap.put(
+            "stmtOfServiceForOrder",
+            appendStatementOfServiceToOrdersTab(
+                caseData,
+                elementList
+            )
+        );
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
         caseDataUpdateMap.put("stmtOfServiceWhatWasServed", null);
         return caseDataUpdateMap;
