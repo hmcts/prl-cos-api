@@ -179,9 +179,6 @@ public class ManageOrderServiceTest {
     @Mock
     private RefDataUserService refDataUserService;
 
-    @Mock
-    private DraftAnOrderService draftAnOrderService;
-
     public static final String authToken = "Bearer TestAuthToken";
 
     @Before
@@ -228,6 +225,7 @@ public class ManageOrderServiceTest {
                                                                                                    .forename("")
                                                                                                    .surname("")
                                                                                                    .build());
+        ReflectionTestUtils.setField(manageOrderService, "hearingStatusesToFilter", "COMPLETED, AWAITING_ACTUALS");
     }
 
     @Test
