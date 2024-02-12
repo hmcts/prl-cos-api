@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentC8;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
@@ -261,8 +260,8 @@ public class CaseApplicationResponseController {
                 .dateCreated(LocalDate.now())
                 .citizenDocument(c8FinalDocument)
                 .build();
-            if (caseData.getRespondentC8() == null) {
-                caseData.setRespondentC8(RespondentC8.builder().build());
+            if (caseData.getCitizenResponseDocuments() == null) {
+                caseData.setCitizenResponseDocuments(CitizenResponseDocuments.builder().build());
             }
             switch (partyIndex) {
                 case 0:

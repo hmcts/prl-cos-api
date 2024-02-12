@@ -2253,7 +2253,7 @@ public class C100RespondentSolicitorServiceTest {
                         .c7ResponseSubmitted(No)
                         .keepDetailsPrivate(KeepDetailsPrivate
                                 .builder()
-                                .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                 .confidentiality(Yes)
                                 .build())
                         .miam(Miam.builder().attendedMiam(No)

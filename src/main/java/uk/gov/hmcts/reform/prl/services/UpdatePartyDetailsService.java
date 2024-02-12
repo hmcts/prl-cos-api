@@ -102,8 +102,11 @@ public class UpdatePartyDetailsService {
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
             try {
-                generateC8DocumentsForRespondents(updatedCaseData,callbackRequest,authorisation,caseData, List.of(ElementUtils
-                                                                                             .element(fl401respondent)));
+                generateC8DocumentsForRespondents(updatedCaseData,
+                                                  callbackRequest,
+                                                  authorisation,
+                                                  caseData,
+                                                  List.of(ElementUtils.element(fl401respondent)));
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for Fl401 case {}",e.getMessage());
             }
@@ -117,11 +120,15 @@ public class UpdatePartyDetailsService {
             setRespondentSolicitorUuid(caseData, updatedCaseData);
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             if (applicantList.isPresent()) {
-                setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
+                setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData,
+                                                         ElementUtils.unwrapElements(applicantList.get()).get(0));
             }
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,
-                                                  callbackRequest,authorisation,caseData,caseData.getRespondents());
+                                                  callbackRequest,
+                                                  authorisation,
+                                                  caseData,
+                                                  caseData.getRespondents());
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
