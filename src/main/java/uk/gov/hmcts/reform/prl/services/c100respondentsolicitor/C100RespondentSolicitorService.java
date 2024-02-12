@@ -1347,7 +1347,6 @@ public class C100RespondentSolicitorService {
             } else if (null != respondingParty.getValue().getSendSignUpLink()) {
                 orgName = respondingParty.getValue().getSendSignUpLink();
             }
-            log.info("organisation details {}",orgDetails);
         } catch (Exception e) {
             log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }

@@ -943,7 +943,6 @@ public class DocumentGenService {
                                            CaseData caseData,
                                            String hint,
                                            boolean isWelsh, Map<String, Object> respondentDetails) throws Exception {
-        log.info("hint is: {}", hint);
         return getDocument(authorisation, caseData, hint, isWelsh, respondentDetails);
     }
 
