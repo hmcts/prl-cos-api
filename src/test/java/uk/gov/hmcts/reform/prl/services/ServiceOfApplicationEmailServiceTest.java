@@ -206,10 +206,8 @@ public class ServiceOfApplicationEmailServiceTest {
                                                                               List.of(Document.builder().build()),
                                                                                "Local authority");
 
-        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(),
-                                               Mockito.any(),
-                                               Mockito.anyString(), Mockito.any(), Mockito.anyString()
-        );
+        verify(sendgridService, times(1))
+            .sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
 
     @Test

@@ -388,7 +388,9 @@ public class CaseUtils {
             || (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
             && caseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument() != null)
             || (caseData.getServiceOfApplication().getUnServedOthersPack() != null
-            && caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument() != null))) {
+            && caseData.getServiceOfApplication().getUnServedOthersPack().getPackDocument() != null)
+            || (caseData.getServiceOfApplication().getUnServedLaPack() != null
+            && caseData.getServiceOfApplication().getUnServedLaPack().getPackDocument() != null))) {
             return true;
         }
         return false;
