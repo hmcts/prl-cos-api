@@ -2,17 +2,20 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import uk.gov.hmcts.reform.ccd.document.am.model.Document;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.utils.DocumentsHelper;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_PARTY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PARTY_NAME;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 public class CafcassServiceUtil {
@@ -33,7 +36,22 @@ public class CafcassServiceUtil {
                                                  CaseData caseData, Document document) {
         String partyName = caseData.getApplicantCaseName() != null
             ? caseData.getApplicantCaseName() : CAFCASS_PARTY;
-        List<Element<UploadedDocuments>> uploadedDocumentsList;
+        List<Element<QuarantineLegalDoc>> uploadedDocumentsList;
+
+
+        Element<QuarantineLegalDoc> quarantineLegalDoc =
+            element(QuarantineLegalDoc.builder()
+                        .documentUploadedDate(LocalDateTime.now())
+                        .documentType(typeOfDocument)
+                        .documentParty(PARTY_NAME)
+                        .documentName(fileName)
+                        .categoryName("Safe_guarding_Letter")
+                        .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                                      .documentUrl(document.links.self.href)
+                                      .documentBinaryUrl(document.links.binary.href)
+                                      .documentHash(document.hashToken)
+                                      .documentFileName(fileName).build()).build());
+
         Element<UploadedDocuments> uploadedDocsElement =
             element(UploadedDocuments.builder().dateCreated(LocalDate.now())
                         .documentType(typeOfDocument)
@@ -48,13 +66,13 @@ public class CafcassServiceUtil {
                                              .documentHash(document.hashToken)
                                              .documentFileName(fileName).build()).build());
         if (caseData.getCafcassUploadedDocs() != null) {
-            uploadedDocumentsList = caseData.getCafcassUploadedDocs();
-            uploadedDocumentsList.add(uploadedDocsElement);
+            uploadedDocumentsList = caseData.getCafcassQuarantineDocsList();
+            uploadedDocumentsList.add(quarantineLegalDoc);
         } else {
             uploadedDocumentsList = new ArrayList<>();
-            uploadedDocumentsList.add(uploadedDocsElement);
+            uploadedDocumentsList.add(quarantineLegalDoc);
         }
-        return CaseData.builder().id(Long.parseLong(caseId)).cafcassUploadedDocs(uploadedDocumentsList).build();
+        return CaseData.builder().id(Long.parseLong(caseId)).cafcassQuarantineDocsList(uploadedDocumentsList).build();
     }
 
     private CafcassServiceUtil() {
