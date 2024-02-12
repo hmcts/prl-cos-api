@@ -458,7 +458,8 @@ public class ReviewDocumentService {
         if (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
             && (CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList()))
             && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList())
-            && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())) {
+            && CollectionUtils.isEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
+            && CollectionUtils.isEmpty(caseData.getScannedDocuments())) {
             coreCaseDataService.triggerEventWithAuthorisation(
                 authorisation,
                 JURISDICTION,
