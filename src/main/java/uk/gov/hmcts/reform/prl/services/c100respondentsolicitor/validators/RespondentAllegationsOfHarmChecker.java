@@ -390,13 +390,18 @@ public class RespondentAllegationsOfHarmChecker implements RespondentEventChecke
                             childAbuseEnum,respondentAllegationsOfHarmData).getValue());
             fields.add(whichChildrenAreRisk);
         }
-        fields.add(respAbuseNatureDescription);
+        if (respAbuseNatureDescription.isPresent()) {
+            fields.add(respAbuseNatureDescription);
+        }
         Optional<String> respBehavioursStartDateAndLength = ofNullable(respChildAbuse.getRespBehavioursStartDateAndLength());
-        fields.add(respBehavioursStartDateAndLength);
+        if (respBehavioursStartDateAndLength.isPresent()) {
+            fields.add(respBehavioursStartDateAndLength);
+        }
         Optional<YesOrNo> respBehavioursApplicantSoughtHelp = ofNullable(respChildAbuse.getRespBehavioursApplicantSoughtHelp());
-        fields.add(respBehavioursApplicantSoughtHelp);
+
         if (respBehavioursApplicantSoughtHelp.isPresent()
                 && respBehavioursApplicantSoughtHelp.get().equals(Yes)) {
+            fields.add(respBehavioursApplicantSoughtHelp);
             fields.add(respBehavioursApplicantHelpSoughtWho);
         }
         return fields.stream().noneMatch(Optional::isEmpty)
