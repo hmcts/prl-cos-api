@@ -61,10 +61,4 @@ public class BaseCaseData {
     //FPET-567 - Added for hiding fields for SDO
     @JsonProperty("isSdoSelected")
     private YesOrNo isSdoSelected;
-
-    @JsonProperty("tempHearingCaseId")
-    private String tempHearingCaseId;
-
-    @JsonProperty("tempHearingCaseIdUpload")
-    private String tempHearingCaseIdUpload;
 }
