@@ -44,7 +44,6 @@ public class ReturnApplicationServiceTest {
         + "\n"
         + "Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n"
         + "\n"
-        + "\n"
         + "Consent order not provided\n"
         + "\n"
         + "Your application is being returned because the document uploaded is not a draft consent order and/or is not signed by both parties.\n"
@@ -68,7 +67,6 @@ public class ReturnApplicationServiceTest {
         + "Dear John Smith,\n"
         + "\n"
         + "Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n"
-        + "\n"
         + "\n"
         + "Application incomplete\n"
         + "\n"
@@ -258,7 +256,7 @@ public class ReturnApplicationServiceTest {
             .append("Case name: TestCase\n")
             .append("Reference code: 123\n\n")
             .append("Dear " + returnApplicationService.getLegalFullName(casedata) + ",\n\n")
-            .append("Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n\n\n");
+            .append("Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n\n");
 
         for (RejectReasonEnum reasonEnum : casedata.getRejectReason()) {
             returnMsgStr.append(reasonEnum.getReturnMsgText());
@@ -281,7 +279,7 @@ public class ReturnApplicationServiceTest {
             .append("Reference code: 123\n\n")
             .append("Dear " + returnApplicationService.getLegalFullName(caseDataFl401) + ",\n\n")
             .append("Thank you for your application."
-                        + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n\n");
+                        + " Your application has been reviewed and is being returned for the following reasons:" + "\n\n");
 
         for (FL401RejectReasonEnum reasonEnum : caseDataFl401.getFl401RejectReason()) {
             returnMsgStr.append(reasonEnum.getReturnMsgText());

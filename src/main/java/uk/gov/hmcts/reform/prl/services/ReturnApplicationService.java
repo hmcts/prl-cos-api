@@ -76,12 +76,12 @@ public class ReturnApplicationService {
             .append("Case name: " + caseData.getApplicantCaseName() + "\n")
             .append("Reference code: " + caseData.getId() + "\n\n")
             .append("Dear " + getLegalFullName(caseData) + ",\n\n")
-            .append("Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n\n\n");
+            .append("Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n\n");
 
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             returnMessageC100(caseData, returnMsgStr);
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            returnMessageFl402(caseData, returnMsgStr);
+            returnMessageFl401(caseData, returnMsgStr);
         }
 
         returnMsgStr.append("Please resolve these issues and resubmit your application.\n\n")
@@ -99,7 +99,7 @@ public class ReturnApplicationService {
         }
     }
 
-    private void returnMessageFl402(CaseData caseData, StringBuilder returnMsgStr) {
+    private void returnMessageFl401(CaseData caseData, StringBuilder returnMsgStr) {
         List<FL401RejectReasonEnum> sortedFl401RejectReason = caseData.getFl401RejectReason().stream().sorted().toList();
         for (FL401RejectReasonEnum reasonEnum : sortedFl401RejectReason) {
             returnMsgStr.append(reasonEnum.getReturnMsgText());
