@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.document.am.model.Classification;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.GrantType;
 import uk.gov.hmcts.reform.prl.enums.RoleCategory;
 import uk.gov.hmcts.reform.prl.enums.RoleType;
@@ -57,8 +58,8 @@ public class RoleAssignmentService {
     public void createRoleAssignment(String authorization,
                                      CaseDetails caseDetails,
                                      boolean replaceExisting,
-                                     String roleName) {
-        String actorId = populateActorId(authorization, (HashMap<String, Object>) caseDetails.getData());
+                                     String roleName, Event eventId) {
+        String actorId = populateActorId(authorization, (HashMap<String, Object>) caseDetails.getData(), eventId);
         String roleCategory = RoleCategory.JUDICIAL.name();
         if (null != actorId) {
             if (actorId.split(UNDERSCORE)[1].equals(LEGAL_ADVISER)) {
@@ -107,7 +108,18 @@ public class RoleAssignmentService {
         }
     }
 
-    private String populateActorId(String authorization, HashMap<String, Object> caseDataUpdated) {
+    private String populateActorId(String authorization, HashMap<String, Object> caseDataUpdated, Event eventId) {
+
+        switch (eventId) {
+            case ALLOCATED_JUDGE ->
+                break;
+
+            case SEND_TO_GATEKEEPER ->
+                break;
+
+            case MANAGE_ORDERS ->
+                break;
+        }
 
         if (null != caseDataUpdated.get(
             IS_JUDGE_OR_LEGAL_ADVISOR)) {

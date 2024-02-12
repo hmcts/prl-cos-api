@@ -38,6 +38,7 @@ import javax.ws.rs.NotFoundException;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLOCATED_JUDGE;
 
 @Slf4j
 @RestController
@@ -113,7 +114,8 @@ public class AllocateJudgeController extends AbstractCallbackController {
                 authorisation,
                 callbackRequest.getCaseDetails(),
                 false,
-                ALLOCATE_JUDGE_ROLE
+                ALLOCATE_JUDGE_ROLE,
+                ALLOCATED_JUDGE
             );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {

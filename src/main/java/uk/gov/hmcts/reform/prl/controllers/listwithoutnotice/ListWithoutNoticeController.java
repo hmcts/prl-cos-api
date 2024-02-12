@@ -48,7 +48,6 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.ResponseEntity.ok;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LISTWITHOUTNOTICE_HEARINGDETAILS;
 
@@ -62,7 +61,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
     private final AllocatedJudgeService allocatedJudgeService;
     private final AuthorisationService authorisationService;
     private final HearingService hearingService;
-    private final RoleAssignmentService roleAssignmentService;
     @Qualifier("caseSummaryTab")
     private final CaseSummaryTabService caseSummaryTabService;
     public static final String CONFIRMATION_HEADER = "# Listing directions sent";
@@ -89,7 +87,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
         this.allocatedJudgeService = allocatedJudgeService;
         this.authorisationService = authorisationService;
         this.hearingService = hearingService;
-        this.roleAssignmentService = roleAssignmentService;
         this.caseSummaryTabService = caseSummaryTabService;
     }
 
@@ -165,12 +162,6 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
             caseDataUpdated.put(LISTWITHOUTNOTICE_HEARINGDETAILS, hearingDataService
                 .getHearingDataForOtherOrders(caseData.getListWithoutNoticeHearingDetails(), null, caseData));
 
-            roleAssignmentService.createRoleAssignment(
-                authorisation,
-                callbackRequest.getCaseDetails(),
-                false,
-                ALLOCATE_JUDGE_ROLE
-            );
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
