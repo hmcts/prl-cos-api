@@ -64,4 +64,4 @@ java:
     STAFF_DETAILS_API: http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal
     COMMON_DATA_API: http://rd-commondata-api-aat.service.core-compute-aat.internal
     SEND_LETTER_URL: http://rpe-send-letter-service-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    AM_ROLE_ASSIGNMENT_API_URL: http://prl-ccd-definitions-pr-1468-am-role-assignment-service
+    AM_ROLE_ASSIGNMENT_API_URL: http://prl-ccd-definitions-pr-1818-am-role-assignment-service

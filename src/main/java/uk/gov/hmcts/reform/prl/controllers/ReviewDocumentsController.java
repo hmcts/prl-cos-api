@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
@@ -53,11 +52,6 @@ public class ReviewDocumentsController {
     public AboutToStartOrSubmitCallbackResponse handleAboutToStart(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        try {
-            log.info("/review documents/about-to-start::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
@@ -83,11 +77,7 @@ public class ReviewDocumentsController {
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        try {
-            log.info("/review docs/mid event::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);
@@ -105,9 +95,7 @@ public class ReviewDocumentsController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
-        ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
         log.info(
             "/copy-manage-docs/about-to-submit::CallbackRequest -> {}",
             objectMapper.writeValueAsString(callbackRequest)

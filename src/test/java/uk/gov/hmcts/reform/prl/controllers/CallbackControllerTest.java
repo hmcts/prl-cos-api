@@ -51,6 +51,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
@@ -66,6 +68,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
@@ -98,6 +101,7 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
@@ -123,6 +127,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -138,8 +143,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -148,6 +155,8 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -202,6 +211,9 @@ public class CallbackControllerTest {
 
     @Mock
     AllTabServiceImpl allTabsService;
+
+    @Mock
+    ManageDocumentsService manageDocumentsService;
 
     @Mock
     UpdatePartyDetailsService updatePartyDetailsService;
@@ -2700,4 +2712,94 @@ public class CallbackControllerTest {
             .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
         assertNotNull(aboutToStartOrSubmitCallbackResponse);
     }
+
+    @Test
+    public void testAttachScanDocsWaChangeWithQuarantineDocsAndScannedDocs() {
+
+        Element<QuarantineLegalDoc> courtStaffQuanElement = element(QuarantineLegalDoc.builder().build());
+        Element<QuarantineLegalDoc> cafcassQuanElement = element(QuarantineLegalDoc.builder().build());
+        Element<QuarantineLegalDoc> legalProfDocQuanElement = element(QuarantineLegalDoc.builder().build());
+
+        List<Element<QuarantineLegalDoc>> courtStaffQuanList = Collections.singletonList(courtStaffQuanElement);
+        List<Element<QuarantineLegalDoc>> cafcassQuanList = Collections.singletonList(cafcassQuanElement);
+        List<Element<QuarantineLegalDoc>> legalProfDocQuanList = Collections.singletonList(legalProfDocQuanElement);
+
+        Element<ScannedDocument> scannedDocElement = element(ScannedDocument.builder().build());
+        List<Element<ScannedDocument>> scannedDocList = Collections.singletonList(scannedDocElement);
+
+        CaseData caseData = CaseData.builder()
+            .issueDate(LocalDate.now())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .courtStaffQuarantineDocsList(courtStaffQuanList)
+                                           .cafcassQuarantineDocsList(cafcassQuanList)
+                                           .legalProfQuarantineDocsList(legalProfDocQuanList)
+                                           .build())
+            .scannedDocuments(scannedDocList)
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+
+        doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
+
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
+        assertNotNull(response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals(TRUE, response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNull(response.getData().get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testAttachScanDocsWaChangeWithoutQuarantineDocsAndScannedDocs() {
+
+        CaseData caseData = CaseData.builder()
+            .issueDate(LocalDate.now())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+
+        doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
+
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
+        assertNotNull(response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNotNull(response.getData().get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        assertEquals(TRUE, response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals(STAFF, response.getData().get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testAttachScanDocsWaChangeInvalidClientException() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+
+        doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
+
+        assertExpectedException(() -> {
+            callbackController.attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+    }
+
 }

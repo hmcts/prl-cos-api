@@ -4,14 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.ResponseEntity;
-import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CategoriesAndDocuments;
@@ -42,8 +40,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
@@ -51,7 +49,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 
-@Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class ManageDocumentsControllerTest {
 
@@ -134,7 +131,6 @@ public class ManageDocumentsControllerTest {
             .listItems(dynamicListElementList).build();
     }
 
-
     @Test
     public void testHandleAboutToStart() {
         ManageDocuments manageDocuments = ManageDocuments.builder()
@@ -175,48 +171,8 @@ public class ManageDocumentsControllerTest {
 
         ResponseEntity<SubmittedCallbackResponse> abc = manageDocumentsController.handleSubmitted(callbackRequest, auth);
         abc.getBody().getConfirmationHeader();
-        verify(tabService).updateAllTabsIncludingConfTab(caseData);
         Assert.assertEquals("# Documents submitted",abc.getBody().getConfirmationHeader());
         verifyNoMoreInteractions(tabService);
-
-    }
-
-    @Test
-    public void testValidateCourtUserShouldReturnError() {
-        when(manageDocumentsService.checkIfUserIsCourtStaff(any(UserDetails.class))).thenReturn(false);
-        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
-        Assert.assertNotNull(response.getErrors());
-        Assert.assertTrue(!response.getErrors().isEmpty());
-        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'", response.getErrors().get(0));
-    }
-
-    @Test
-    public void testValidateCourtUserShouldAllowToProcess() {
-        when(manageDocumentsService.checkIfUserIsCourtStaff(any(UserDetails.class))).thenReturn(true);
-        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
-        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
-        Assert.assertNotNull(response.getData());
-        Assert.assertEquals(12345678L, response.getData().get("id"));
-
-    }
-
-    @Test
-    public void testValidateOtherUserShouldReturnError() {
-        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(true);
-        when(manageDocumentsService.checkIfUserIsCourtStaff(any(UserDetails.class))).thenReturn(false);
-        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
-        Assert.assertNotNull(response.getErrors());
-        Assert.assertTrue(!response.getErrors().isEmpty());
-        Assert.assertEquals("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'", response.getErrors().get(0));
-    }
-
-    @Test
-    public void testValidateOtherUserShouldAllowToProcess() {
-        when(manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)).thenReturn(false);
-        AboutToStartOrSubmitCallbackResponse response = manageDocumentsController.validateUserIfCourtSelected(auth, callbackRequest);
-        Assert.assertNotNull(response.getData());
-        Assert.assertEquals(12345678L, response.getData().get("id"));
 
     }
 
@@ -233,7 +189,23 @@ public class ManageDocumentsControllerTest {
 
         manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
         verify(manageDocumentsService).validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
-        verifyNoMoreInteractions(manageDocumentsService);
+
+    }
+
+    @Test
+    public void testCopyManageDocsMidIfErrorsExist() {
+
+        UserDetails userDetailsSolicitorRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(SOLICITOR_ROLE))
+            .build();
+
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+        when(manageDocumentsService.validateCourtUser(any(), any())).thenReturn(List.of("errors"));
+
+        manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
+        verify(manageDocumentsService).validateRestrictedReason(callbackRequest, userDetailsSolicitorRole);
 
     }
 
@@ -249,8 +221,6 @@ public class ManageDocumentsControllerTest {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCafcassRole);
 
         manageDocumentsController.validateManageDocumentsData(auth, callbackRequest);
-        verifyNoInteractions(manageDocumentsService);
+        verify(manageDocumentsService, times(1)).validateRestrictedReason(any(),any());
     }
-
-
 }

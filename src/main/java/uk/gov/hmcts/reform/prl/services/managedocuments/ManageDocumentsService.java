@@ -50,7 +50,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static org.springframework.util.CollectionUtils.isEmpty;
@@ -211,9 +210,7 @@ public class ManageDocumentsService {
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
                 Document document = getQuarantineDocumentForUploader(loggedInUserType, quarantineLegalDoc);
-                Document updatedConfidentialDocument = downloadAndDeleteDocument(
-                    quarantineLegalDoc, document
-                );
+                Document updatedConfidentialDocument = downloadAndDeleteDocument(document);
                 quarantineLegalDoc = setQuarantineDocumentForUploader(
                     ManageDocuments.builder()
                         .document(updatedConfidentialDocument)
@@ -354,18 +351,15 @@ public class ManageDocumentsService {
      * !ifConfidential && isRestricted - RESTRICTED
      * ifConfidential && !isRestricted - CONFIDENTIAL
      */
-    private String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
-        if (quarantineLegalDoc.getIsConfidential() != null) {
-            if (!(YesOrNo.No.equals(quarantineLegalDoc.getIsConfidential())
-                && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted()))) {
-                if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
-                    && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
-                    return CONFIDENTIAL_DOCUMENTS;
-                } else {
-                    return RESTRICTED_DOCUMENTS;
-                }
+    public String getRestrictedOrConfidentialKey(QuarantineLegalDoc quarantineLegalDoc) {
+        if (quarantineLegalDoc.getIsConfidential() != null && (!(YesOrNo.No.equals(quarantineLegalDoc.getIsConfidential())
+            && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())))) {
+            if (YesOrNo.Yes.equals(quarantineLegalDoc.getIsConfidential())
+                && YesOrNo.No.equals(quarantineLegalDoc.getIsRestricted())) {
+                return CONFIDENTIAL_DOCUMENTS;
+            } else {
+                return RESTRICTED_DOCUMENTS;
             }
-
         }
         return null;
     }
@@ -387,8 +381,7 @@ public class ManageDocumentsService {
     }
 
 
-    private Document downloadAndDeleteDocument(
-        QuarantineLegalDoc quarantineLegalDoc, Document document) {
+    private Document downloadAndDeleteDocument(Document document) {
         try {
             if (!document.getDocumentFileName().startsWith(CONFIDENTIAL)) {
                 UUID documentId = UUID.fromString(DocumentUtils.getDocumentId(document.getDocumentUrl()));
@@ -663,9 +656,7 @@ public class ManageDocumentsService {
                     );
                     QuarantineLegalDoc updatedQuarantineLegalDocumentObject = quarantineLegalDoc[0];
 
-                    Document renamedDocument = downloadAndDeleteDocument(
-                        quarantineLegalDoc[0], existingDocument
-                    );
+                    Document renamedDocument = downloadAndDeleteDocument(existingDocument);
                     Map tempQuarantineObjectMap =
                         objectMapper.convertValue(quarantineLegalDoc[0], Map.class);
                     tempQuarantineObjectMap.put(
@@ -689,7 +680,7 @@ public class ManageDocumentsService {
         return confidentialTabDocuments.stream().sorted(Comparator.comparing(
             m -> m.getValue().getDocumentUploadedDate(),
             Comparator.reverseOrder()
-        )).collect(Collectors.toList());
+        )).toList();
     }
 
     public void updateCaseData(CallbackRequest callbackRequest, Map<String, Object> caseDataUpdated) {

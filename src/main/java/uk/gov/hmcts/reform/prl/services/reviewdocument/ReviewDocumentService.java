@@ -191,7 +191,7 @@ public class ReviewDocumentService {
                                                    element.getValue().getDateCreated()
                                                ))
                                                .build()).toList());
-            // TODO Handle Citizen Document management later
+            //Handle Citizen Document management later
         }
         if (isNotEmpty(caseData.getScannedDocuments())) {
             dynamicListElements.addAll(caseData.getScannedDocuments().stream()

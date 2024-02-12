@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -114,11 +113,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestBody CallbackRequest callbackRequest
     ) throws JsonProcessingException {
         log.info("/copy-manage-docs/about-to-submit::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-        log.info("=======STARttt====");
-        ObjectMapper om = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        log.info("CCCCCCC--->{}", result);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
     }
@@ -127,12 +121,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation) {
-        try {
-            log.info("/handleSubmitted::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
         Map<String, Object> caseDataUpdated = manageDocumentsService.appendConfidentialDocumentNameForCourtAdmin(
             callbackRequest,
             authorisation
@@ -144,21 +132,5 @@ public class ManageDocumentsController extends AbstractCallbackController {
                       .confirmationHeader(CONFIRMATION_HEADER)
                       .confirmationBody(CONFIRMATION_BODY)
                       .build());
-    }
-
-    //TO BE DELETED
-    @PostMapping("/validate-court-user")
-    public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestBody CallbackRequest callbackRequest) {
-        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        if (manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)
-            && !manageDocumentsService.checkIfUserIsCourtStaff(null)) {
-            return AboutToStartOrSubmitCallbackResponse.builder()
-                .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
-                .build();
-        }
-        return AboutToStartOrSubmitCallbackResponse.builder()
-            .data(updatedCaseData).build();
     }
 }
