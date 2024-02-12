@@ -108,6 +108,7 @@ public class CaseService {
                     .userInfo(wrapElements(userInfo))
                     .courtName(C100_DEFAULT_COURT_NAME)
                     .build());
+            log.info("caseName is {}", updatedCaseData.getApplicantCaseName());
             log.info("case is being updated");
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
