@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
@@ -22,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 
 @RunWith(MockitoJUnitRunner.class)
@@ -107,7 +110,7 @@ public class RespondentAllegationOfHarmServiceTest {
 
         Map<String, Object> data = new HashMap<>();
         respondentAllegationOfHarmService
-                .prePopulatedChildData(CaseData.builder()
+                .prePopulatedChildData(CaseData.builder().taskListVersion(TASK_LIST_VERSION_V2)
                         .respondentSolicitorData(RespondentSolicitorData.builder()
                                 .respondentAllegationsOfHarmData(allegationOfHarmRevised).build())
                         .newChildDetails(List.of(childDetailsRevisedElement)).build(),data,allegationOfHarmRevised);
@@ -130,13 +133,17 @@ public class RespondentAllegationOfHarmServiceTest {
         ChildDetailsRevised childDetailsRevised = ChildDetailsRevised.builder().firstName("child 1").lastName("last").build();
         Element<ChildDetailsRevised> childDetailsRevisedElement = Element.<ChildDetailsRevised>builder()
                 .value(childDetailsRevised).id(UUID.randomUUID()).build();
+        Child child = Child.builder().firstName("child 1").lastName("last").build();
+        Element<Child> childElement = Element.<Child>builder()
+                .value(child).id(UUID.randomUUID()).build();
 
         Map<String, Object> data = new HashMap<>();
         respondentAllegationOfHarmService
                 .prePopulatedChildData(CaseData.builder()
                         .respondentSolicitorData(RespondentSolicitorData.builder()
                                 .respondentAllegationsOfHarmData(allegationOfHarmRevised).build())
-                        .newChildDetails(List.of(childDetailsRevisedElement)).build(),data,allegationOfHarmRevised);
+                        .newChildDetails(List.of(childDetailsRevisedElement)).children(List.of(childElement))
+                        .build(),data,allegationOfHarmRevised);
         Assert.assertFalse(data.isEmpty());
 
     }

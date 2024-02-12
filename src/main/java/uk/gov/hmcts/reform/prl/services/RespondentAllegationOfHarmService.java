@@ -25,6 +25,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINANCIAL_ABUSE
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PHYSICAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PSYCHOLOGICAL_ABUSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SEXUAL_ABUSE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 
 @Slf4j
 @Service
@@ -186,15 +187,9 @@ public class RespondentAllegationOfHarmService {
         return dynamicMultiSelectList;
     }
 
-    public void prePopulatedChildData(CaseData caseData,Map<String, Object> caseDataMap,
+    public void prePopulatedChildData(CaseData caseData, Map<String, Object> caseDataMap,
                                       RespondentAllegationsOfHarmData solicitorRepresentedRespondentAllegationsOfHarmData) {
-        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
-        caseData.getNewChildDetails().forEach(eachChild ->
-                                                  listItems.add(DynamicMultiselectListElement.builder()
-                                                                    .code(eachChild.getId().toString())
-                                                                    .label(eachChild.getValue().getFirstName() + " "
-                                                                               + eachChild.getValue().getLastName()).build())
-        );
+        List<DynamicMultiselectListElement> listItems = getChildrenDynamicList(caseData);
 
         //Retrieve child list for Physical Abuse
         if (null != solicitorRepresentedRespondentAllegationsOfHarmData
@@ -289,5 +284,25 @@ public class RespondentAllegationOfHarmService {
                 .build());
         }
 
+    }
+
+    private static List<DynamicMultiselectListElement> getChildrenDynamicList(CaseData caseData) {
+        List<DynamicMultiselectListElement> listItems = new ArrayList<>();
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())) {
+            caseData.getNewChildDetails().forEach(eachChild ->
+                    listItems.add(DynamicMultiselectListElement.builder()
+                            .code(eachChild.getId().toString())
+                            .label(eachChild.getValue().getFirstName() + " "
+                                    + eachChild.getValue().getLastName()).build())
+            );
+        } else {
+            caseData.getChildren().forEach(eachChild ->
+                    listItems.add(DynamicMultiselectListElement.builder()
+                            .code(eachChild.getId().toString())
+                            .label(eachChild.getValue().getFirstName() + " "
+                                    + eachChild.getValue().getLastName()).build())
+            );
+        }
+        return listItems;
     }
 }
