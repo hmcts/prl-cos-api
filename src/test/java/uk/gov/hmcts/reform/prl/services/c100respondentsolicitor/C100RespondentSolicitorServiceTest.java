@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
@@ -186,7 +187,7 @@ public class C100RespondentSolicitorServiceTest {
                                        .build())
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
@@ -309,11 +310,11 @@ public class C100RespondentSolicitorServiceTest {
                           .c7ResponseSubmitted(No)
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
-                          .miam(Miam.builder().attendedMiam(No)
+                          .miam(Miam.builder().attendedMiam(Yes)
                                     .willingToAttendMiam(No)
                                     .reasonNotAttendingMiam("test").build())
                           .respondentExistingProceedings(proceedingsList)
@@ -454,7 +455,7 @@ public class C100RespondentSolicitorServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondentSolicitorData(RespondentSolicitorData.builder()
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
-                                                                        .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                                        .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                                         .confidentiality(Yes)
                                                                         .confidentialityList(confidentialityListEnums)
                                                                         .build())
@@ -482,7 +483,7 @@ public class C100RespondentSolicitorServiceTest {
                                          .respondentExistingProceedings(proceedingsList)
                                          .abilityToParticipateInProceedings(AbilityToParticipate.builder()
                                                                                 .factorsAffectingAbilityToParticipate(
-                                                                                    YesNoDontKnow.yes)
+                                                                                    Yes)
                                                                                 .build())
                                          .internationalElementChild(CitizenInternationalElements.builder()
                                                                         .childrenLiveOutsideOfEnWl(Yes)
@@ -533,7 +534,7 @@ public class C100RespondentSolicitorServiceTest {
                                                                               .build())
                                          .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
                                                                                      .attendedMiam(No)
-                                                                                     .willingToAttendMiam(No)
+                                                                                     .willingToAttendMiam(Yes)
                                                                                      .reasonNotAttendingMiam("test")
                                                                                      .build())
                                          .build())
@@ -597,12 +598,12 @@ public class C100RespondentSolicitorServiceTest {
                                        .build())
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums2)
                                                   .build())
-                          .miam(Miam.builder().attendedMiam(No)
-                                    .willingToAttendMiam(No)
+                          .miam(Miam.builder().attendedMiam(Yes)
+                                    .willingToAttendMiam(Yes)
                                     .reasonNotAttendingMiam("test").build())
                           .respondentExistingProceedings(proceedingsList2)
                           .citizenInternationalElements(CitizenInternationalElements
@@ -723,7 +724,7 @@ public class C100RespondentSolicitorServiceTest {
                           .c7ResponseSubmitted(No)
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums2)
                                                   .build())
@@ -866,7 +867,7 @@ public class C100RespondentSolicitorServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondentSolicitorData(RespondentSolicitorData.builder()
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
-                                                                        .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                                        .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                                         .confidentiality(Yes)
                                                                         .confidentialityList(confidentialityListEnums2)
                                                                         .build())
@@ -893,8 +894,11 @@ public class C100RespondentSolicitorServiceTest {
                                          .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
                                          .respondentExistingProceedings(proceedingsList2)
                                          .abilityToParticipateInProceedings(AbilityToParticipate.builder()
+                                                                                .provideDetailsForFactorsAffectingAbilityToParticipate("Test")
+                                                                                .detailsOfReferralOrAssessment("Test")
+                                                                                .giveDetailsAffectingLitigationCapacity("Test")
                                                                                 .factorsAffectingAbilityToParticipate(
-                                                                                    YesNoDontKnow.yes)
+                                                                                    Yes)
                                                                                 .build())
                                          .internationalElementChild(CitizenInternationalElements.builder()
                                                                         .childrenLiveOutsideOfEnWl(Yes)
@@ -977,7 +981,7 @@ public class C100RespondentSolicitorServiceTest {
     public void populateAboutToStartCaseDataResSolConsentingToApplicationTest() {
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivateA",
             "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA",
-            "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA", "c100ResSolAbilityToParticipateA",
+            "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA", "c100ResSolLitigationCapacityA",
             "c100ResSolViewResponseDraftDocumentA"};
         for (String event : events) {
             callbackRequest.setEventId(event);
@@ -1261,7 +1265,7 @@ public class C100RespondentSolicitorServiceTest {
 
         String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
             "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
-            "c100ResSolAbilityToParticipateA", "c100ResSolConsentingToApplicationA"};
+            "c100ResSolLitigationCapacityA", "c100ResSolConsentingToApplicationA"};
         for (String event : events) {
             callbackRequest.setEventId(event);
             Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -1325,7 +1329,7 @@ public class C100RespondentSolicitorServiceTest {
                                        .build())
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
@@ -1447,7 +1451,7 @@ public class C100RespondentSolicitorServiceTest {
                           .c7ResponseSubmitted(No)
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
@@ -1592,7 +1596,7 @@ public class C100RespondentSolicitorServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondentSolicitorData(RespondentSolicitorData.builder()
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
-                                                                        .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                                        .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                                         .confidentiality(Yes)
                                                                         .confidentialityList(confidentialityListEnums)
                                                                         .build())
@@ -1620,7 +1624,7 @@ public class C100RespondentSolicitorServiceTest {
                                          .respondentExistingProceedings(proceedingsList)
                                          .abilityToParticipateInProceedings(AbilityToParticipate.builder()
                                                                                 .factorsAffectingAbilityToParticipate(
-                                                                                    YesNoDontKnow.yes)
+                                                                                    No)
                                                                                 .build())
                                          .internationalElementChild(CitizenInternationalElements.builder()
                                                                         .childrenLiveOutsideOfEnWl(Yes)
@@ -1695,7 +1699,7 @@ public class C100RespondentSolicitorServiceTest {
 
         String[] events = {"c100ResSolKeepDetailsPrivateA", "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA",
             "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedingsA", "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA",
-            "c100ResSolAbilityToParticipateA", "c100ResSolConsentingToApplicationA"};
+            "c100ResSolLitigationCapacityA", "c100ResSolConsentingToApplicationA"};
         for (String event : events) {
             callbackRequest.setEventId(event);
             Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(
@@ -1790,7 +1794,7 @@ public class C100RespondentSolicitorServiceTest {
             .response(Response.builder()
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .build())
                           .build())
@@ -1808,7 +1812,7 @@ public class C100RespondentSolicitorServiceTest {
             .caseTypeOfApplication(C100_CASE_TYPE)
             .respondentSolicitorData(RespondentSolicitorData.builder()
                                          .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
-                                                                        .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                                        .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                                         .confidentiality(No)
                                                                         .build())
                                          .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
@@ -1862,7 +1866,7 @@ public class C100RespondentSolicitorServiceTest {
 
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
             "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
-            "c100ResSolInternationalElement", "c100ResSolAbilityToParticipate", Optional.empty().toString()};
+            "c100ResSolInternationalElement", "c100ResSolLitigationCapacity", Optional.empty().toString()};
         for (String event : events) {
             CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
                 .CallbackRequest.builder()

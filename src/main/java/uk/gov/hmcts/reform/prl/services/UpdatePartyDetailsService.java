@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
@@ -98,7 +97,15 @@ public class UpdatePartyDetailsService {
             PartyDetails fl401respondent = caseData
                 .getRespondentsFL401();
 
-            setFl401ApplicantAndRespondent(updatedCaseData, caseData, fl401Applicant, fl401respondent);
+            if (Objects.nonNull(fl401Applicant)) {
+                CommonUtils.generatePartyUuidForFL401(caseData);
+                updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
+            }
+
+            if (Objects.nonNull(fl401respondent)) {
+                CommonUtils.generatePartyUuidForFL401(caseData);
+                updatedCaseData.put("respondentName", fl401respondent.getLabelForDynamicList());
+            }
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,callbackRequest,authorisation,caseData, List.of(ElementUtils
@@ -112,8 +119,8 @@ public class UpdatePartyDetailsService {
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
             setApplicantName(updatedCaseData, applicantsWrapped);
             // set applicant and respondent case flag
-            setApplicantFlag(caseData, updatedCaseData);
-            setRespondentFlag(caseData, updatedCaseData);
+            setApplicantSolicitorUuid(caseData, updatedCaseData);
+            setRespondentSolicitorUuid(caseData, updatedCaseData);
             Optional<List<Element<PartyDetails>>> applicantList = ofNullable(caseData.getApplicants());
             if (applicantList.isPresent()) {
                 setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, ElementUtils.unwrapElements(applicantList.get()).get(0));
@@ -245,7 +252,6 @@ public class UpdatePartyDetailsService {
         OrganisationPolicy applicantOrganisationPolicy = caseDataUpdated.getApplicantOrganisationPolicy();
         boolean organisationNotExists = false;
         boolean roleNotExists = false;
-        log.info("Organisation policy before  override : {}", applicantOrganisationPolicy);
         if (ObjectUtils.isEmpty(applicantOrganisationPolicy)) {
             applicantOrganisationPolicy = OrganisationPolicy.builder().orgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]").build();
             organisationNotExists = true;
@@ -265,12 +271,10 @@ public class UpdatePartyDetailsService {
         if (roleNotExists) {
             applicantOrganisationPolicy.setOrgPolicyCaseAssignedRole("[APPLICANTSOLICITOR]");
         }
-        log.info("Organisation policy after  override : {}", applicantOrganisationPolicy);
         updatedCaseData.put("applicantOrganisationPolicy", applicantOrganisationPolicy);
     }
 
-    private void setApplicantFlag(CaseData caseData, Map<String, Object> caseDetails) {
-
+    private void setApplicantSolicitorUuid(CaseData caseData, Map<String, Object> caseDetails) {
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
         if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
             List<PartyDetails> applicants = applicantsWrapped.get()
@@ -280,17 +284,12 @@ public class UpdatePartyDetailsService {
 
             for (PartyDetails applicant : applicants) {
                 CommonUtils.generatePartyUuidForC100(applicant);
-                final String partyName = applicant.getFirstName() + " " + applicant.getLastName();
-                final Flags applicantFlag = Flags.builder().partyName(partyName)
-                    .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
-                applicant.setPartyLevelFlag(applicantFlag);
             }
-
             caseDetails.put("applicants", applicantsWrapped);
         }
     }
 
-    private void setRespondentFlag(CaseData caseData, Map<String, Object> caseDetails) {
+    private void setRespondentSolicitorUuid(CaseData caseData, Map<String, Object> caseDetails) {
         Optional<List<Element<PartyDetails>>> respondentsWrapped = ofNullable(caseData.getRespondents());
         if (respondentsWrapped.isPresent() && !respondentsWrapped.get().isEmpty()) {
             List<PartyDetails> respondents = respondentsWrapped.get()
@@ -300,31 +299,9 @@ public class UpdatePartyDetailsService {
 
             for (PartyDetails respondent : respondents) {
                 CommonUtils.generatePartyUuidForC100(respondent);
-                final String partyName = respondent.getFirstName() + " " + respondent.getLastName();
-                final Flags respondentFlag = Flags.builder().partyName(partyName)
-                    .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
-                respondent.setPartyLevelFlag(respondentFlag);
             }
             caseDetails.put("respondents", respondentsWrapped);
         }
-    }
-
-    private void setFL401ApplicantFlag(Map<String, Object> caseDetails, PartyDetails fl401Applicant) {
-        String partyName = fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName();
-        final Flags applicantFlag = Flags.builder().partyName(partyName)
-            .roleOnCase(PartyEnum.applicant.getDisplayedValue()).details(Collections.emptyList()).build();
-        fl401Applicant.setPartyLevelFlag(applicantFlag);
-
-        caseDetails.put("applicantsFL401", fl401Applicant);
-    }
-
-    private void setFL401RespondentFlag(Map<String, Object> caseDetails, PartyDetails fl401respondent) {
-        String partyName = fl401respondent.getFirstName() + " " + fl401respondent.getLastName();
-        final Flags respondentFlag = Flags.builder().partyName(partyName)
-            .roleOnCase(PartyEnum.respondent.getDisplayedValue()).details(Collections.emptyList()).build();
-        fl401respondent.setPartyLevelFlag(respondentFlag);
-
-        caseDetails.put("respondentsFL401", fl401respondent);
     }
 
     private void generateC8DocumentsForRespondents(Map<String, Object> updatedCaseData, CallbackRequest callbackRequest, String authorisation,
