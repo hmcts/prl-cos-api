@@ -76,10 +76,7 @@ public class ReturnApplicationService {
             .append("Case name: " + caseData.getApplicantCaseName() + "\n")
             .append("Reference code: " + caseData.getId() + "\n\n")
             .append("Dear " + getLegalFullName(caseData) + ",\n\n")
-            .append("""
-                        Thank you for your application. Your application has been reviewed and is being returned for the following reasons:
-
-                        """);
+            .append("Thank you for your application. Your application has been reviewed and is being returned for the following reasons:\n\n\n");
 
         if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             returnMessageC100(caseData, returnMsgStr);
