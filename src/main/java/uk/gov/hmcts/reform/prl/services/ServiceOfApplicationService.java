@@ -173,6 +173,7 @@ public class ServiceOfApplicationService {
     public static final String PRL_COURT_ADMIN = "PRL Court admin";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
     public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
+    public static final String UNSERVED_CAFCASS_CYMRU_PACK = "unServedCafcassCymruPack";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
@@ -1776,15 +1777,14 @@ public class ServiceOfApplicationService {
             "soaIsOrderListEmpty",
             "noticeOfSafetySupportLetter",
             "additionalDocumentsList",
+            "soaCafcassCymruEmail",
+            "soaCafcassCymruServedOptions",
+            "soaCafcassEmailId",
+            "soaCafcassServedOptions",
             PROCEED_TO_SERVING,
             MISSING_ADDRESS_WARNING_TEXT,
             SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA
         ));
-
-        if (removeCafcassFields) {
-            soaFields.addAll(List.of("soaCafcassCymruEmail", "soaCafcassCymruServedOptions", "soaCafcassEmailId", "soaCafcassServedOptions"));
-
-        }
 
         for (String field : soaFields) {
             if (caseDataUpdated.containsKey(field)) {
@@ -2121,6 +2121,14 @@ public class ServiceOfApplicationService {
             buildUnservedOthersPack(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
         } else {
             caseDataUpdated.put(UNSERVED_OTHERS_PACK, null);
+        }
+
+        //generate packs for Cafcass cymru
+        if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
+            && StringUtils.isNotEmpty(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())) {
+            caseDataUpdated.put(UNSERVED_CAFCASS_CYMRU_PACK, SoaPack.builder()
+                    .partyIds(List.of(element(caseData.getServiceOfApplication().getSoaCafcassCymruEmail())))
+                .build());
         }
 
         //serving Local authority in the case
@@ -2463,12 +2471,19 @@ public class ServiceOfApplicationService {
         if (unServedOthersPack != null) {
             sendNotificationForOthersPack(caseData, authorization, bulkPrintDetails, unServedOthersPack);
         }
+
+        // send notification for CafcassCymru
+        final SoaPack unservedCymruPack = caseData.getServiceOfApplication().getUnServedCafcassCymruPack();
+
+        if (ObjectUtils.isNotEmpty(unservedCymruPack) && CollectionUtils.isNotEmpty(unservedCymruPack.getPartyIds())) {
+            log.info("Cafcass Cymru option {}", unservedCymruPack);
+            emailNotificationDetails.addAll(sendEmailToCafcassInCase(
+                caseData,
+                unservedCymruPack.getPartyIds().get(0).getValue(),
+                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
+        }
         //serving Local authority
         checkAndServeLocalAuthorityEmail(caseData, authorization, emailNotificationDetails);
-        log.info("Cafcass Cymru option {}", caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions());
-        log.info("Cafcass Cymru email {}", caseData.getServiceOfApplication().getSoaCafcassCymruEmail());
-        //serving cafcass cymru
-        checkAndSendCafcassCymruEmails(caseData, emailNotificationDetails);
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
@@ -2617,6 +2632,7 @@ public class ServiceOfApplicationService {
         }
         caseDataMap.put(UNSERVED_OTHERS_PACK, null);
         caseDataMap.put(UNSERVED_LA_PACK, null);
+        caseDataMap.put(UNSERVED_CAFCASS_CYMRU_PACK, null);
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,

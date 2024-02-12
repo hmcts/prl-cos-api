@@ -54,6 +54,7 @@ public class ServiceOfApplication {
     private final SoaPack unServedRespondentPack;
     private final SoaPack unServedOthersPack;
     private final SoaPack unServedLaPack;
+    private final SoaPack unServedCafcassCymruPack;
 
     private final YesOrNo applicationServedYesNo;
     private final String rejectionReason;
