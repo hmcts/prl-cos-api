@@ -2318,10 +2318,13 @@ public class ServiceOfApplicationService {
         log.info("selected respondents ========= {}", selectedRespondents.size());
         log.info("selected Respondent PartyIds ========= {}", selectedPartyIds);
         List<Document> finalDocs = new ArrayList<>();
-        caseData.getRespondents().stream()
-            .filter(partyDetails -> !CaseUtils.hasLegalRepresentation(partyDetails.getValue()))
-            .forEach(partyDetails -> finalDocs.add(generateAccessCodeLetter(authorization, caseData, partyDetails,
-                                                                            null, PRL_LET_ENG_RE5)));
+        selectedPartyIds.forEach(partyId -> {
+            Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getRespondents());
+            if (party.isPresent() && !CaseUtils.hasLegalRepresentation(party.get().getValue())) {
+                finalDocs.add(generateAccessCodeLetter(authorization, caseData, party.get(),
+                                                       null, PRL_LET_ENG_RE5));
+            }
+        });
         finalDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.R, c100StaticDocs));
         final SoaPack unServedRespondentPack = SoaPack.builder()
             .packDocument(wrapElements(finalDocs))
