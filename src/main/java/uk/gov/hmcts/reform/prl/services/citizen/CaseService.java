@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDoc
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
@@ -141,13 +142,18 @@ public class CaseService {
             .citizenPartiesServedDate(citizenSos.getPartiesServedDate())
             .citizenSosDocs(getSosDocs(citizenSos.getCitizenSosDocs(), caseData.getCitizenUploadQuarantineDocsList()))
             .build();
-        if (caseData.getStmtOfServiceAddRecipient() != null) {
-            List<Element<StmtOfServiceAddRecipient>> sosList = caseData.getStmtOfServiceAddRecipient();
+        if (caseData.getStatementOfService().getStmtOfServiceAddRecipient() != null) {
+            List<Element<StmtOfServiceAddRecipient>> sosList = caseData.getStatementOfService().getStmtOfServiceAddRecipient();
             List<Element<StmtOfServiceAddRecipient>> mutableList = new ArrayList<>(sosList);
             mutableList.add(element(sosObject));
-            caseData.setStmtOfServiceAddRecipient(mutableList);
+            caseData.setStatementOfService(StatementOfService.builder()
+                                               .stmtOfServiceAddRecipient(mutableList)
+                                               .build());
         } else {
-            caseData.setStmtOfServiceAddRecipient(List.of(element(sosObject)));
+            caseData
+                .setStatementOfService(StatementOfService.builder()
+                                           .stmtOfServiceAddRecipient(List.of(element(sosObject)))
+                                           .build());
         }
         return caseData;
     }

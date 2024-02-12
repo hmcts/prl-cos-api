@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -74,13 +75,14 @@ public class StmtOfServImplService {
         return caseDataUpdated;
     }
 
-    public CaseData retrieveAllRespondentNames(CaseDetails caseDetails, String authorisation) {
+    public Map<String, Object> retrieveAllRespondentNames(CaseDetails caseDetails, String authorisation) {
+        Map<String, Object> caseDataUpdateMap = caseDetails.getData();
         CaseData caseData = objectMapper.convertValue(
             caseDetails.getData(),
             CaseData.class
         );
 
-        List<Element<StmtOfServiceAddRecipient>> addRecipientElementList = caseData.getStmtOfServiceAddRecipient();
+        List<Element<StmtOfServiceAddRecipient>> addRecipientElementList = caseData.getStatementOfService().getStmtOfServiceAddRecipient();
         List<Element<StmtOfServiceAddRecipient>> elementList = new ArrayList<>();
         List<StmtOfServiceAddRecipient> recipients = addRecipientElementList
             .stream()
@@ -98,23 +100,19 @@ public class StmtOfServImplService {
                     List<String> respondentNamesList = respondents.stream()
                         .map(element -> element.getFirstName() + " " + element.getLastName())
                         .toList();
-                    String allRespondentNames = String.join(", ", respondentNamesList);
+                    String allRespondentNames = String.join(", ", respondentNamesList).concat(" (All respondents)");
                     recipient = recipient.toBuilder()
-                        .respondentDynamicList(DynamicList.builder()
-                                                   .value(DynamicListElement.builder()
-                                                              .code(UUID.randomUUID())
-                                                              .label(allRespondentNames)
-                                                              .build()).build())
+                        .respondentDynamicList(null)
+                        .selectedPartyId("00000000-0000-0000-0000-000000000000")
+                        .selectedPartyName(allRespondentNames)
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
                         .servedDateTimeOption(recipient.getServedDateTimeOption())
                         .build();
                 } else {
                     recipient = recipient.toBuilder()
-                        .respondentDynamicList(DynamicList.builder()
-                                                   .value(DynamicListElement.builder()
-                                                              .code(recipient.getRespondentDynamicList().getValue().getCode())
-                                                              .label(recipient.getRespondentDynamicList().getValue().getLabel())
-                                                              .build()).build())
+                        .respondentDynamicList(null)
+                        .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
+                        .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
                         .servedDateTimeOption(recipient.getServedDateTimeOption())
                         .build();
@@ -122,26 +120,85 @@ public class StmtOfServImplService {
 
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 recipient = recipient.toBuilder()
-                    .respondentDynamicList(DynamicList.builder()
-                                               .value(DynamicListElement.builder()
-                                                          .label(caseData.getRespondentsFL401().getFirstName()
-                                                                     + " " + caseData.getRespondentsFL401().getLastName())
-                                                          .build()).build())
+                    .respondentDynamicList(null)
+                    .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
+                    .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                     .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
                     .servedDateTimeOption(recipient.getServedDateTimeOption())
                     .build();
             }
             if (isNotEmpty(caseData.getServiceOfApplication())
-                && isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack())) {
+                && isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack())
+                && StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
+                .equals(caseData.getStatementOfService()
+                            .getStmtOfServiceWhatWasServed())
+            ) {
                 caseData = cleanupRespondentPacksCaOrBailiffPersonalService(caseData, authorisation);
+                caseDataUpdateMap.put(
+                    "finalServedApplicationDetailsList",
+                    caseData.getFinalServedApplicationDetailsList()
+                );
+                caseDataUpdateMap.put("unServedRespondentPack", null);
             }
             elementList.add(element(recipient));
         }
-        caseData = caseData.toBuilder()
-            .stmtOfServiceAddRecipient(elementList)
-            .build();
 
-        return caseData;
+        caseDataUpdateMap.put(
+            "stmtOfServiceForApplication",
+            appendStatementOfServiceToSoaTab(
+                caseData,
+                elementList
+            )
+        );
+        caseDataUpdateMap.put(
+            "stmtOfServiceForOrder",
+            appendStatementOfServiceToOrdersTab(
+                caseData,
+                elementList
+            )
+        );
+        caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
+        caseDataUpdateMap.put("stmtOfServiceWhatWasServed", null);
+        return caseDataUpdateMap;
+    }
+
+    private List<Element<StmtOfServiceAddRecipient>> appendStatementOfServiceToSoaTab(
+        CaseData caseData,
+        List<Element<StmtOfServiceAddRecipient>> statementOfServiceListFromCurrentEvent) {
+
+        if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
+            .equals(caseData.getStatementOfService()
+                        .getStmtOfServiceWhatWasServed())) {
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
+                statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceForApplication());
+            }
+            return statementOfServiceListFromCurrentEvent;
+        } else {
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
+                return caseData.getStatementOfService().getStmtOfServiceForApplication();
+            }
+        }
+        return null;
+    }
+
+    private List<Element<StmtOfServiceAddRecipient>> appendStatementOfServiceToOrdersTab(
+        CaseData caseData,
+        List<Element<StmtOfServiceAddRecipient>> statementOfServiceListFromCurrentEvent) {
+
+        if (StatementOfServiceWhatWasServed.statementOfServiceOrder
+            .equals(caseData.getStatementOfService()
+                        .getStmtOfServiceWhatWasServed())) {
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
+                statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
+            }
+            return statementOfServiceListFromCurrentEvent;
+        } else {
+            if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
+                return caseData.getStatementOfService().getStmtOfServiceForOrder();
+            }
+        }
+
+        return null;
     }
 
     private CaseData cleanupRespondentPacksCaOrBailiffPersonalService(CaseData caseData, String authorisation) {
