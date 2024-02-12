@@ -26,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceRequest;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentServiceResponse;
 import uk.gov.hmcts.reform.prl.models.dto.payment.PaymentStatusResponse;
-import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PAYMENT_ACTION;
@@ -42,8 +41,6 @@ public class PaymentRequestService {
     private final FeeService feeService;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ObjectMapper objectMapper;
-
-    private final CaseService caseService;
     public static final String GBP_CURRENCY = "GBP";
     public static final String ENG_LANGUAGE = "English";
     private static final String SERVICE_AUTH = "ServiceAuthorization";
@@ -99,8 +96,6 @@ public class PaymentRequestService {
             caseId
         );
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        createPaymentRequest = createPaymentRequest.toBuilder()
-            .applicantCaseName(caseService.buildApplicantAndRespondentForCaseName(caseData)).build();
         String paymentServiceReferenceNumber = caseData.getPaymentServiceRequestReferenceNumber();
         String paymentReferenceNumber = caseData.getPaymentReferenceNumber();
 
