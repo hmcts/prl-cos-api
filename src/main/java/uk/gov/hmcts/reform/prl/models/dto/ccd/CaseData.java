@@ -70,7 +70,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDetailsOfWithoutNoticeOr
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.ReasonForWithoutNoticeOrder;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBailConditionDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespondentBehaviour;
@@ -87,7 +86,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ChildConfidentialityDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -341,6 +339,11 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private final Document c1ADocument;
     @JsonProperty("c1AWelshDocument")
     private final Document c1AWelshDocument;
+
+    @JsonProperty("c8DraftDocument")
+    private final Document c8DraftDocument;
+    @JsonProperty("c8WelshDraftDocument")
+    private final Document c8WelshDraftDocument;
 
     @JsonProperty("isEngDocGen")
     private final String isEngDocGen;
@@ -655,6 +658,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonProperty("citizenResponseC7DocumentList")
     private final List<Element<ResponseDocuments>> citizenResponseC7DocumentList;
 
+    @JsonProperty("scannedDocuments")
+    private List<Element<ScannedDocument>> scannedDocuments;
+
     /**
      * Courtnav.
      */
@@ -754,23 +760,8 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private SendOrReplyMessage sendOrReplyMessage;
 
-    //PRL-3562 - manage document enhancements
-    @JsonProperty("manageDocuments")
-    private List<Element<ManageDocuments>> manageDocuments;
-    private String manageDocumentsTriggeredBy;
-    private String manageDocumentsRestrictedFlag;
-
-    @JsonProperty("legalProfQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
-    @JsonProperty("cafcassQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
-    //PRL-4328 - To be deleted
-    @JsonProperty("courtStaffQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
-    @JsonProperty("citizenUploadQuarantineDocsList")
-    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
-    @JsonProperty("scannedDocuments")
-    private List<Element<ScannedDocument>> scannedDocuments;
+    @JsonUnwrapped
+    private DocumentManagementDetails documentManagementDetails;
 
     /**
      * Review documents.

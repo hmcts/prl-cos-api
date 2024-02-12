@@ -300,6 +300,15 @@ public class CaseUtils {
         return false;
     }
 
+    public static boolean isC8PresentCheckDraftAndFinal(CaseData caseData) {
+        log.info("Confidential check is happening");
+        if (caseData.getC8DraftDocument() != null || caseData.getC8WelshDraftDocument() != null
+            || caseData.getC8Document() != null || caseData.getC8WelshDocument() != null) {
+            return true;
+        }
+        return false;
+    }
+
     public static void createCategorySubCategoryDynamicList(List<Category> categoryList,
                                                             List<DynamicListElement> dynamicListElementList,
                                                             List<String> categoriesToExclude) {
