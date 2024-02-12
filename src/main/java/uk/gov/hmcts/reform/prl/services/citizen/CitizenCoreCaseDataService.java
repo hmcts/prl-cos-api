@@ -97,20 +97,16 @@ public class CitizenCoreCaseDataService {
     ) {
         try {
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            log.info("user details generated");
             EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
-            log.info("eventRequestData Passed");
             StartEventResponse startEventResponse = ccdCoreCaseDataService.startUpdate(
                 authorisation,
                 eventRequestData,
                 caseId.toString(),
                 !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
-            log.info("startEventResponse Passed");
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
             Iterables.removeIf(caseDataMap.values(), Objects::isNull);
             CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseDataMap);
-            log.info("ccase data content generated");
             return ccdCoreCaseDataService.submitUpdate(
                 authorisation,
                 eventRequestData,
