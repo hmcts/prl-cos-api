@@ -116,10 +116,8 @@ public class CaseService {
             caseData = caseData.toBuilder()
                 .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
                 .build();
-            log.info("caseName inside if statement is {}", caseData.getApplicantCaseName());
         }
 
-        log.info("caseName outside if statement is {}", caseData.getApplicantCaseName());
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
@@ -172,7 +170,6 @@ public class CaseService {
                 + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
         }
 
-        log.info("caseName is {}", caseName);
         return caseName;
     }
 
