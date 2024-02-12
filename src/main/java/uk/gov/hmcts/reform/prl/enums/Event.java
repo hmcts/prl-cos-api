@@ -57,7 +57,9 @@ public enum Event {
     EDIT_AND_APPROVE_ORDER("editAndApproveAnOrder", "Edit and approve a draft order"),
     UPLOAD_ADDITIONAL_APPLICATIONS("uploadAdditionalApplications", "Upload additional applications"),
     TRANSFER_TO_ANOTHER_COURT("transferToAnotherCourt", "Transfer to another court"),
-    EDIT_RETURNED_ORDER("editReturnedOrder", "Edit a returned order");
+    EDIT_RETURNED_ORDER("editReturnedOrder", "Edit a returned order"),
+    SOA("serviceOfApplication", "Service of application"),
+    CONFIDENTIAL_CHECK("confidentialityCheck", "Confidentiality check");
 
     private final String id;
     private final String name;

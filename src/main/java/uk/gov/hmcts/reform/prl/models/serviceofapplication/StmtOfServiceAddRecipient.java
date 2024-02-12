@@ -24,4 +24,6 @@ public class StmtOfServiceAddRecipient {
     private final String citizenPartiesServedList;
     private final String citizenPartiesServedDate;
     private final List<Document> citizenSosDocs;
+    private final String selectedPartyId;
+    private final String selectedPartyName;
 }

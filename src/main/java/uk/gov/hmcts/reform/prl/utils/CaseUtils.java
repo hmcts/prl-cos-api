@@ -2,8 +2,9 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
+import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
@@ -202,7 +204,7 @@ public class CaseUtils {
     }
 
     public static boolean hasLegalRepresentation(PartyDetails partyDetails) {
-        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || StringUtils.hasLength(partyDetails.getSolicitorEmail());
+        return yes.equals(partyDetails.getDoTheyHaveLegalRepresentation()) || StringUtils.isNotEmpty(partyDetails.getSolicitorEmail());
     }
 
     public static Map<String, String> getApplicantsToNotify(CaseData caseData, UUID excludeId) {
@@ -559,5 +561,43 @@ public class CaseUtils {
             }
         }
         return temp;
+    }
+
+    public static List<Element<PartyDetails>> getOthersToNotifyInCase(CaseData caseData) {
+        return TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
+    }
+
+    public static boolean isApplyOrderWithoutGivingNoticeToRespondent(CaseData caseData) {
+        boolean applyOrderWithoutGivingNoticeToRespondent = ObjectUtils.isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
+            && YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
+        return applyOrderWithoutGivingNoticeToRespondent;
+    }
+
+    public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        Address currentAddress = currentParty.getAddress();
+        Address previousAddress = updatedParty.getAddress();
+        return currentAddress != null
+            && (!StringUtils.equals(currentAddress.getAddressLine1(), previousAddress.getAddressLine1())
+            || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
+            || !StringUtils.equals(currentAddress.getAddressLine3(),previousAddress.getAddressLine3())
+            || !StringUtils.equals(currentAddress.getCountry(),previousAddress.getCountry())
+            || !StringUtils.equals(currentAddress.getCounty(),previousAddress.getCounty())
+            || !StringUtils.equals(currentAddress.getPostCode(),previousAddress.getPostCode())
+            || !StringUtils.equals(currentAddress.getPostTown(),previousAddress.getPostTown())
+            || (currentParty.getIsAddressConfidential() != null
+            && !currentParty.getIsAddressConfidential().equals(updatedParty.getIsAddressConfidential())));
+    }
+
+    public static boolean isEmailAddressChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return !StringUtils.equals(currentParty.getEmail(),updatedParty.getEmail())
+            || (currentParty.getIsEmailAddressConfidential() != null
+            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
+    }
+
+    public static boolean isPhoneNumberChanged(PartyDetails currentParty, PartyDetails updatedParty) {
+        return !StringUtils.equals(currentParty.getPhoneNumber(),updatedParty.getPhoneNumber())
+            || (currentParty.getIsEmailAddressConfidential() != null
+            && !currentParty.getIsEmailAddressConfidential().equals(updatedParty.getIsEmailAddressConfidential()));
     }
 }

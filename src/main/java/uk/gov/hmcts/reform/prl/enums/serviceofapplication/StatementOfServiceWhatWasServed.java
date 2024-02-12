@@ -1,29 +1,26 @@
 package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
+
+@Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum SoaCitizenServingRespondentsEnum {
-    @JsonProperty("courtBailiff")
-    courtBailiff("courtBailiff", "Court bailiff"),
-    @JsonProperty("unrepresentedApplicant")
-    unrepresentedApplicant("unrepresentedApplicant", "Unrepresented applicant who is arranging service"),
-    @JsonProperty("courtAdmin")
-    courtAdmin("courtAdmin", "Court admin");
+public enum StatementOfServiceWhatWasServed {
+
+    @JsonProperty("statementOfServiceApplicationPack")
+    statementOfServiceApplicationPack("statementOfServiceApplicationPack", "Application pack"),
+    @JsonProperty("statementOfServiceOrder")
+    statementOfServiceOrder("statementOfServiceOrder", "Order");
 
     private final String id;
     private final String displayedValue;
-
-    public String getId() {
-        return id;
-    }
 
     @JsonValue
     public String getDisplayedValue() {
@@ -31,7 +28,8 @@ public enum SoaCitizenServingRespondentsEnum {
     }
 
     @JsonCreator
-    public static SoaCitizenServingRespondentsEnum getValue(String key) {
-        return SoaCitizenServingRespondentsEnum.valueOf(key);
+    public static StatementOfServiceWhatWasServed getValue(String key) {
+        return StatementOfServiceWhatWasServed.valueOf(key);
     }
+
 }

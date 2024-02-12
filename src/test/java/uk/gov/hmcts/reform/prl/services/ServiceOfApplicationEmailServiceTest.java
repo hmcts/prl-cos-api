@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
-import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
@@ -30,6 +29,7 @@ import java.util.List;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -119,17 +119,12 @@ public class ServiceOfApplicationEmailServiceTest {
                                                       Mockito.any(), Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
         serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
-                                                                                EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                                List.of(Document.builder().build()),
+                List.of(Document.builder().build()),
                                                                                         "Applicant");
 
         verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
                                                                    Mockito.anyString(),
                                                                    Mockito.any(), Mockito.anyString()
-        );
-        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
         );
     }
 
@@ -148,13 +143,9 @@ public class ServiceOfApplicationEmailServiceTest {
             .build();
         when(emailService.getCaseData(Mockito.any(CaseDetails.class))).thenReturn(caseData);
         serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
-                                                                                    EmailTemplateNames.RESPONDENT_SOLICITOR,
-                                                                                    List.of(Document.builder().build()),
+                List.of(Document.builder().build()),
                                                                                     "Respondent");
-        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
-                                            Mockito.any(),
-                                            Mockito.any(), Mockito.any()
-        );
+        verifyNoMoreInteractions(emailService);
     }
 
     @Test
@@ -182,9 +173,10 @@ public class ServiceOfApplicationEmailServiceTest {
                                                                                    docs,
                                                                                    PrlAppsConstants.APPLICANT_SOLICITOR
         );
-        verify(emailService,times(0)).sendSoa(Mockito.anyString(),
-                                           Mockito.any(),
-                                           Mockito.any(),Mockito.any());
+        verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(),
+                                                                   Mockito.any(),
+                                                                   Mockito.anyString(), Mockito.any(), Mockito.anyString()
+        );
     }
 
     @Test
@@ -235,17 +227,12 @@ public class ServiceOfApplicationEmailServiceTest {
                                                       Mockito.any(), Mockito.anyString()))
             .thenReturn(EmailNotificationDetails.builder().build());
         serviceOfApplicationEmailService.sendEmailNotificationToSolicitor("test", caseData, party,
-                                                                          EmailTemplateNames.APPLICANT_SOLICITOR_CA,
-                                                                          List.of(Document.builder().build()),
+                List.of(Document.builder().build()),
                                                                           PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR);
 
         verify(sendgridService, times(1)).sendEmailWithAttachments(Mockito.anyString(), Mockito.any(),
                                                                    Mockito.anyString(),
                                                                    Mockito.any(), Mockito.anyString()
-        );
-        verify(emailService, times(1)).sendSoa(Mockito.anyString(),
-                                               Mockito.any(),
-                                               Mockito.any(), Mockito.any()
         );
     }
 

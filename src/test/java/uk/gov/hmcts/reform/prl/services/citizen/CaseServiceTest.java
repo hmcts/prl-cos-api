@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
@@ -693,7 +694,9 @@ public class CaseServiceTest {
             .build();
         caseData = caseData.toBuilder()
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build())))
-            .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
+                                    .build())
             .respondents(List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build()))
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
@@ -752,7 +755,9 @@ public class CaseServiceTest {
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build())))
             .citizenUploadQuarantineDocsList(List.of(Element.<UploadedDocuments>builder().id(UUID.fromString(TEST_UUID))
                                                          .value(UploadedDocuments.builder().build()).build()))
-            .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
+                                    .build())
             .applicants(List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build()))
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
