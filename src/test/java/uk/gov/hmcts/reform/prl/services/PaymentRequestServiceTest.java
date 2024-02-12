@@ -807,6 +807,9 @@ public class PaymentRequestServiceTest {
             .nextUrl("https://www.payments.service.gov.uk/secure/7a85745f-9485-47e4-ae12-e7d659a40299")
             .paymentStatus("Initiated")
             .build();
+        when(paymentRequestService.createPayment(authToken,
+                serviceAuthToken,
+                createPaymentRequest.toBuilder().hwfRefNumber("TEST_HWF_REF").build())).thenReturn(paymentResponse);
 
         assertNotNull(paymentResponse);
         assertEquals(PAYMENTSRREFERENCENUMBER, paymentResponse.getServiceRequestReference());
@@ -849,6 +852,10 @@ public class PaymentRequestServiceTest {
             .nextUrl("https://www.payments.service.gov.uk/secure/7a85745f-9485-47e4-ae12-e7d659a40299")
             .paymentStatus("Success")
             .build();
+        when(paymentRequestService.createPayment(
+            authToken,
+            serviceAuthToken,
+            createPaymentRequest.toBuilder().hwfRefNumber("TEST_HWF_REF").build())).thenReturn(paymentResponse);
 
         assertNotNull(paymentResponse);
         assertEquals(PAYMENTSRREFERENCENUMBER, paymentResponse.getServiceRequestReference());
