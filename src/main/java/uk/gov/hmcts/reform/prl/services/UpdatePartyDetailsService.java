@@ -84,6 +84,8 @@ public class UpdatePartyDetailsService {
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
 
+        updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
+
         final Flags caseFlags = Flags.builder().build();
 
         updatedCaseData.put("caseFlags", caseFlags);
