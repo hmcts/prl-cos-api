@@ -100,8 +100,9 @@ public class StmtOfServImplService {
                     List<String> respondentNamesList = respondents.stream()
                         .map(element -> element.getFirstName() + " " + element.getLastName())
                         .toList();
-                    String allRespondentNames = String.join(", ", respondentNamesList);
+                    String allRespondentNames = String.join(", ", respondentNamesList).concat(" (All respondents)");
                     recipient = recipient.toBuilder()
+                        .respondentDynamicList(null)
                         .selectedPartyId("00000000-0000-0000-0000-000000000000")
                         .selectedPartyName(allRespondentNames)
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
@@ -109,6 +110,7 @@ public class StmtOfServImplService {
                         .build();
                 } else {
                     recipient = recipient.toBuilder()
+                        .respondentDynamicList(null)
                         .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
                         .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                         .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
@@ -118,6 +120,7 @@ public class StmtOfServImplService {
 
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 recipient = recipient.toBuilder()
+                    .respondentDynamicList(null)
                     .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
                     .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                     .stmtOfServiceDocument(recipient.getStmtOfServiceDocument())
