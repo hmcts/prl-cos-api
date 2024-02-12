@@ -1041,7 +1041,6 @@ public class ReviewDocumentServiceTest {
 
     @Test
     public void testReviewProcessForCafcassWhenDecisionNo() {
-        //.uploaderRole(CAFCASS)
 
         List<Element<QuarantineLegalDoc>> documentList = new ArrayList<>();
         documentList.add(element);
