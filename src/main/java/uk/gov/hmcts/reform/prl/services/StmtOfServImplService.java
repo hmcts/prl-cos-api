@@ -166,6 +166,7 @@ public class StmtOfServImplService {
             elementList
         ));
         caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
+        caseDataUpdateMap.put("stmtOfServiceWhatWasServed", null);
         return caseDataUpdateMap;
     }
 
