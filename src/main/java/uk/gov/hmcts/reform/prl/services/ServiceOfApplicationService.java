@@ -2380,27 +2380,40 @@ public class ServiceOfApplicationService {
                 && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative.toString().equalsIgnoreCase(
                 unServedRespondentPack.getPersonalServiceBy()))) {
                 sendNotificationForApplicantLegalRepPersonalService(caseData, authorization, emailNotificationDetails,
-                                                                    unServedApplicantPack, unServedRespondentPack);
+                                                                    unServedApplicantPack, unServedRespondentPack
+                );
                 whoIsResponsible = SERVED_PARTY_APPLICANT_SOLICITOR;
             } else {
                 if (unServedApplicantPack != null) {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
-                                                             unServedApplicantPack, bulkPrintDetails);
+                                                             unServedApplicantPack, bulkPrintDetails
+                    );
                 }
                 if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
-                        final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
-                        final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
-                            partyIds);
+                    final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
+                    final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
+                        partyIds);
 
-                        final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
-                        if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-                            sendNotificationsToCitizenRespondentsC100(authorization, respondentList, caseData, bulkPrintDetails,
-                                                                      respondentDocs, false);
-                        } else {
-                            // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
-                            sendNotificationToRespondentOrSolicitorNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails,
-                                                                    respondentList, respondentDocs, respondentDocs);
-                        }
+                    final List<Document> respondentDocs = unwrapElements(unServedRespondentPack.getPackDocument());
+                    if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
+                        sendNotificationsToCitizenRespondentsC100(authorization,
+                                                                  respondentList,
+                                                                  caseData,
+                                                                  bulkPrintDetails,
+                                                                  respondentDocs,
+                                                                  false
+                        );
+                    } else {
+                        // Pack R and S only differ in acess code letter, Pack R - email, Pack S - Post
+                        sendNotificationToRespondentOrSolicitorNonPersonal(caseData,
+                                                                           authorization,
+                                                                           emailNotificationDetails,
+                                                                           bulkPrintDetails,
+                                                                           respondentList,
+                                                                           respondentDocs,
+                                                                           respondentDocs
+                        );
+                    }
 
                 }
 
@@ -2420,7 +2433,8 @@ public class ServiceOfApplicationService {
             emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                 caseData,
                 unservedCymruPack.getPartyIds().get(0).getValue(),
-                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU));
+                PrlAppsConstants.SERVED_PARTY_CAFCASS_CYMRU
+            ));
         }
         //serving Local authority
         checkAndServeLocalAuthorityEmail(caseData, authorization, emailNotificationDetails);
@@ -2432,10 +2446,14 @@ public class ServiceOfApplicationService {
         } else {
             finalServedApplicationDetailsList = new ArrayList<>();
         }
-        finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
+        finalServedApplicationDetailsList.add(element(ServedApplicationDetails.builder().emailNotificationDetails(
+            emailNotificationDetails)
                                                           .servedBy(userService.getUserDetails(authorization).getFullName())
                                                           .servedAt(formatter)
-                                                          .modeOfService(CaseUtils.getModeOfService(emailNotificationDetails, bulkPrintDetails))
+                                                          .modeOfService(CaseUtils.getModeOfService(
+                                                              emailNotificationDetails,
+                                                              bulkPrintDetails
+                                                          ))
                                                           .whoIsResponsible(whoIsResponsible)
                                                           .bulkPrintDetails(bulkPrintDetails).build()));
         caseData.setFinalServedApplicationDetailsList(finalServedApplicationDetailsList);
