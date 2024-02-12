@@ -116,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPLE_PRESENT_IN_CASE;
@@ -1528,10 +1529,11 @@ public class ServiceOfApplicationService {
     private List<Document> generatePackHI(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
-        docs.addAll(staticDocs);
+        docs.addAll(staticDocs.stream()
+                        .filter(d -> !d.getDocumentFileName().equalsIgnoreCase(SOA_NOTICE_SAFETY))
+                        .toList());
         docs.addAll(getNonC6aOrders(getSoaSelectedOrders(caseData)));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        // TO DO Remove notice of safety
         return docs;
     }
 
@@ -2372,10 +2374,13 @@ public class ServiceOfApplicationService {
         log.info("selected respondents ========= {}", selectedRespondents.size());
         log.info("selected Respondent PartyIds ========= {}", selectedPartyIds);
         List<Document> finalDocs = new ArrayList<>();
-        caseData.getRespondents().stream()
-            .filter(partyDetails -> !CaseUtils.hasLegalRepresentation(partyDetails.getValue()))
-            .forEach(partyDetails -> finalDocs.add(generateAccessCodeLetter(authorization, caseData, partyDetails,
-                                                                            null, PRL_LET_ENG_RE5)));
+        selectedPartyIds.forEach(partyId -> {
+            Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getRespondents());
+            if (party.isPresent() && !CaseUtils.hasLegalRepresentation(party.get().getValue())) {
+                finalDocs.add(generateAccessCodeLetter(authorization, caseData, party.get(),
+                                                       null, PRL_LET_ENG_RE5));
+            }
+        });
         finalDocs.addAll(getNotificationPack(caseData, PrlAppsConstants.R, c100StaticDocs));
         final SoaPack unServedRespondentPack = SoaPack.builder()
             .packDocument(wrapElements(finalDocs))
