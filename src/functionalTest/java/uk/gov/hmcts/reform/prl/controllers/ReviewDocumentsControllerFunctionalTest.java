@@ -192,8 +192,6 @@ public class ReviewDocumentsControllerFunctionalTest {
         final MultipartFile file = new InMemoryMultipartFile(filePath, filePath, MediaType.APPLICATION_PDF_VALUE,
                                                              resourceAsBytes(filePath));
 
-        //MultipartFile file = new InMemoryMultipartFile("files", fileName, contentType, pdf);
-
         UploadResponse response = caseDocumentClient.uploadDocuments(token, serviceAuthenticationGenerator.generate(),
                                                                      CASE_TYPE, JURISDICTION, newArrayList(file)
         );

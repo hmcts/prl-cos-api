@@ -77,7 +77,6 @@ public class ReviewDocumentsController {
     public AboutToStartOrSubmitCallbackResponse handleMidEvent(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         reviewDocumentService.getReviewedDocumentDetailsNew(caseData, caseDataUpdated);
@@ -96,20 +95,13 @@ public class ReviewDocumentsController {
         @RequestBody CallbackRequest callbackRequest
     ) throws Exception {
         objectMapper.registerModule(new JavaTimeModule());
-        log.info(
-            "/copy-manage-docs/about-to-submit::CallbackRequest -> {}",
-            objectMapper.writeValueAsString(callbackRequest)
-        );
 
         CaseDetails caseDetails = callbackRequest.getCaseDetails();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         log.info("*************************** BEFORE REVIEW ***************************");
         Map<String, Object> caseDataUpdated = caseDetails.getData();
         UUID uuid = UUID.fromString(caseData.getReviewDocuments().getReviewDocsDynamicList().getValue().getCode());
-
         reviewDocumentService.processReviewDocument(caseDataUpdated, caseData, uuid);
-
-
         log.info("*************************** AFTER REVIEW ***************************");
 
         //clear fields

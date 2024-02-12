@@ -989,7 +989,6 @@ public class DocumentGenService {
     }
 
     public DocumentResponse uploadDocument(String authorization, MultipartFile file) throws IOException {
-        log.info("1111111");
         try {
             uk.gov.hmcts.reform.ccd.document.am.model.Document stampedDocument
                 = uploadService.uploadDocument(
@@ -998,7 +997,6 @@ public class DocumentGenService {
                 file.getContentType(),
                 authorization
             );
-            log.info("222222");
             log.info("Stored Doc Detail: " + stampedDocument.toString());
             return DocumentResponse.builder().status("Success").document(Document.builder()
                                                                              .documentBinaryUrl(stampedDocument.links.binary.href)

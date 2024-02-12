@@ -241,7 +241,6 @@ public class ReviewDocumentService {
         Document documentTobeReviewed = manageDocumentsService.getQuarantineDocumentForUploader(
             submittedBy, quarantineLegalDoc);
         caseDataUpdated.put(REVIEW_DOC, documentTobeReviewed);
-        log.info(REVIEW_DOC + " {}", documentTobeReviewed);
     }
 
     public void processReviewDocument(Map<String, Object> caseDataUpdated, CaseData caseData, UUID uuid) {

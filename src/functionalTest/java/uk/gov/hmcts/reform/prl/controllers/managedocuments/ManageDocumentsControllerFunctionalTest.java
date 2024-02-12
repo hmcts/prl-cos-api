@@ -77,8 +77,6 @@ public class ManageDocumentsControllerFunctionalTest {
 
     private static final String MANAGE_DOCUMENT_COURT_REQUEST =
         "requests/manage-documents-request-with-court-as-party.json";
-    //private static final String MANAGE_DOCUMENT_RESPONSE = "response/MangeDocument.json";
-
     private static final String MANAGE_DOCUMENT_REQUEST_RESTRICTED = "requests/manage-documents-restricted.json";
 
     private static final String MANAGE_DOCUMENT_REQUEST_NOT_RESTRICTED = "requests/manage-documents-not-restricted.json";
