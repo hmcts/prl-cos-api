@@ -113,15 +113,13 @@ public class CaseService {
         }
         if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
             && isEmpty(caseData.getApplicantCaseName())) {
-            String caseName = buildApplicantAndRespondentForCaseName(caseData);
-            log.info("caseName returned is {}", caseName);
-            caseData.toBuilder()
-                .applicantCaseName(caseName)
+            caseData = caseData.toBuilder()
+                .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
                 .build();
             log.info("caseName inside if statement is {}", caseData.getApplicantCaseName());
         }
 
-        log.info("caseName outside if statement is is {}", caseData.getApplicantCaseName());
+        log.info("caseName outside if statement is {}", caseData.getApplicantCaseName());
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
@@ -161,9 +159,7 @@ public class CaseService {
                     .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
             }
         }
-        String caseName = buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
-        log.info("caseName inside buildapplicantandrespondentforcasename is {}", caseName);
-        return caseName;
+        return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
     }
 
 
