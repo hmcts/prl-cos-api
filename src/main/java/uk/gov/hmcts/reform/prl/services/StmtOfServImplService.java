@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -30,14 +29,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.COURT;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.PRL_COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -151,22 +151,12 @@ public class StmtOfServImplService {
         if (CollectionUtils.isNotEmpty(caseData.getFinalServedApplicationDetailsList())) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
         }
-        String email;
-        if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            email = caseData.getRespondents().stream().map(Element::getValue)
-                .map(PartyDetails::getEmail)
-                .filter(StringUtils::isNotEmpty)
-                .collect(Collectors.joining(","));
-
-        } else {
-            email = caseData.getRespondentsFL401().getEmail();
-        }
         finalServedApplicationDetailsList.add(element(checkAndServeRespondentPacksCaOrBailiffPersonalService(
             emailNotificationDetails,
             bulkPrintDetails,
             caseData.getServiceOfApplication().getUnServedRespondentPack(),
             authorisation,
-            email
+            CaseUtils.getCaseTypeOfApplication(caseData)
         )));
         return caseData.toBuilder()
             .finalServedApplicationDetailsList(finalServedApplicationDetailsList)
@@ -199,7 +189,22 @@ public class StmtOfServImplService {
         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                            List<Element<BulkPrintDetails>> bulkPrintDetails,
                            SoaPack unServedRespondentPack,
-                           String authorization, String email) {
+                           String authorization, String casTypeOfApplication) {
+        if (FL401_CASE_TYPE.equalsIgnoreCase(casTypeOfApplication)) {
+            unServedRespondentPack = unServedRespondentPack.toBuilder()
+                .packDocument(unServedRespondentPack.getPackDocument()
+                                  .stream()
+                                  .filter(d -> !d.getValue().getDocumentFileName().equalsIgnoreCase(
+                                      SOA_FL415_FILENAME)).toList())
+                .build();
+        } else {
+            unServedRespondentPack = unServedRespondentPack.toBuilder()
+                .packDocument(unServedRespondentPack.getPackDocument()
+                                  .stream()
+                                  .filter(d -> !d.getValue().getDocumentFileName().equalsIgnoreCase(
+                                      C9_DOCUMENT_FILENAME)).toList())
+                .build();
+        }
         if (SoaSolicitorServingRespondentsEnum.courtAdmin.toString().equalsIgnoreCase(unServedRespondentPack.getPersonalServiceBy())) {
             emailNotificationDetails.add(element(EmailNotificationDetails.builder()
                                                      .emailAddress(RESPONDENT_WILL_BE_SERVED_PERSONALLY_BY_EMAIL)

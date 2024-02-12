@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,9 @@ import java.util.UUID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALL_RESPONDENTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C9_DOCUMENT_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class StmtOfServImplServiceTest {
@@ -196,6 +200,15 @@ public class StmtOfServImplServiceTest {
             .id(UUID.fromString(TEST_UUID))
             .value(stmtOfServiceAddRecipient).build();
         List<Element<StmtOfServiceAddRecipient>> listOfSos = Collections.singletonList(wrappedSos);
+        Document c9Doc = Document.builder()
+            .documentFileName(C9_DOCUMENT_FILENAME)
+            .build();
+        Document finalDocument = Document.builder()
+            .documentFileName("C100.pdf")
+            .build();
+        List<Element<Document>> documentList = new ArrayList<>();
+        documentList.add(element(c9Doc));
+        documentList.add(element(finalDocument));
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
@@ -204,9 +217,7 @@ public class StmtOfServImplServiceTest {
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtAdmin.toString())
-                                                                  .packDocument(List.of(Element.<Document>builder()
-                                                                                            .value(Document.builder().build())
-                                                                                            .build()))
+                                                                  .packDocument(documentList)
                                                                   .build()).build())
             .stmtOfServiceAddRecipient(listOfSos)
             .build();
@@ -254,6 +265,15 @@ public class StmtOfServImplServiceTest {
             .id(UUID.fromString(TEST_UUID))
             .value(stmtOfServiceAddRecipient).build();
         List<Element<StmtOfServiceAddRecipient>> listOfSos = Collections.singletonList(wrappedSos);
+        Document fl415 = Document.builder()
+            .documentFileName(SOA_FL415_FILENAME)
+            .build();
+        Document finalDocument = Document.builder()
+            .documentFileName("FL401.pdf")
+            .build();
+        List<Element<Document>> documentList = new ArrayList<>();
+        documentList.add(element(fl415));
+        documentList.add(element(finalDocument));
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("FL401")
             .respondentsFL401(PartyDetails.builder()
@@ -264,9 +284,7 @@ public class StmtOfServImplServiceTest {
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtBailiff.toString())
-                                                                  .packDocument(List.of(Element.<Document>builder()
-                                                                                            .value(Document.builder().build())
-                                                                                            .build()))
+                                                                  .packDocument(documentList)
                                                                   .build()).build())
             .stmtOfServiceAddRecipient(listOfSos)
             .build();
@@ -314,6 +332,15 @@ public class StmtOfServImplServiceTest {
             .id(UUID.fromString(TEST_UUID))
             .value(stmtOfServiceAddRecipient).build();
         List<Element<StmtOfServiceAddRecipient>> listOfSos = Collections.singletonList(wrappedSos);
+        Document c9Doc = Document.builder()
+            .documentFileName(C9_DOCUMENT_FILENAME)
+            .build();
+        Document finalDocument = Document.builder()
+            .documentFileName("C100.pdf")
+            .build();
+        List<Element<Document>> documentList = new ArrayList<>();
+        documentList.add(element(c9Doc));
+        documentList.add(element(finalDocument));
 
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
@@ -322,9 +349,7 @@ public class StmtOfServImplServiceTest {
                                       .unServedRespondentPack(SoaPack.builder()
                                                                   .personalServiceBy(SoaSolicitorServingRespondentsEnum
                                                                                          .courtAdmin.toString())
-                                                                  .packDocument(List.of(Element.<Document>builder()
-                                                                                            .value(Document.builder().build())
-                                                                                            .build()))
+                                                                  .packDocument(documentList)
                                                                   .build()).build())
             .stmtOfServiceAddRecipient(listOfSos)
             .build();
