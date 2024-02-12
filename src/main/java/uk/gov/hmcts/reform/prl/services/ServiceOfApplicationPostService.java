@@ -10,7 +10,6 @@ import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -37,6 +36,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C1A_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_BLANK_DOCUMENT_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
@@ -47,7 +47,9 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILEN
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MEDIATION_VOUCHER_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.toGeneratedDocumentInfo;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -70,9 +72,7 @@ public class ServiceOfApplicationPostService {
                                                         PartyDetails partyDetails,
                                                         List<Document> docs, String servedParty) {
         // Sends post
-        return sendBulkPrint(caseData, authorisation, docs, partyDetails.getAddress(),
-                             partyDetails.getLabelForDynamicList(), servedParty
-        );
+        return sendBulkPrint(caseData, authorisation, docs, partyDetails, servedParty);
     }
 
     public GeneratedDocumentInfo getCoverLetterGeneratedDocInfo(CaseData caseData, String auth, Address address, String name) throws Exception {
@@ -143,7 +143,7 @@ public class ServiceOfApplicationPostService {
     public List<Document> getStaticDocs(String auth, String caseType) {
         List<Document> generatedDocList = new ArrayList<>();
         UploadResponse uploadResponse = null;
-        if (PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseType)) {
             uploadResponse = caseDocumentClient.uploadDocuments(
                 auth,
                 authTokenGenerator.generate(),
@@ -260,11 +260,11 @@ public class ServiceOfApplicationPostService {
     }
 
     private boolean hasAllegationsOfHarm(CaseData caseData) {
-        return YesOrNo.Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
+        return Yes.equals(caseData.getAllegationOfHarm().getAllegationsOfHarmYesNo());
     }
 
     private BulkPrintDetails sendBulkPrint(CaseData caseData, String authorisation,
-                                           List<Document> docs, Address address, String name, String servedParty) {
+                                           List<Document> docs, PartyDetails partyDetails, String servedParty) {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
         String currentDate = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm:ss").format(zonedDateTime);
         String bulkPrintedId = "";
@@ -279,7 +279,7 @@ public class ServiceOfApplicationPostService {
                     authorisation,
                     LETTER_TYPE,
                     docs,
-                    name
+                    partyDetails.getLabelForDynamicList()
                 );
                 log.info("ID in the queue from bulk print service : {}", bulkPrintId);
                 bulkPrintedId = String.valueOf(bulkPrintId);
@@ -287,11 +287,15 @@ public class ServiceOfApplicationPostService {
         } catch (Exception e) {
             log.error("The bulk print service has failed", e);
         }
+        Address address = Yes.equals(partyDetails.getIsAddressConfidential())
+            ? Address.builder().addressLine1(THIS_INFORMATION_IS_CONFIDENTIAL).build()
+            : partyDetails.getAddress();
+
         return BulkPrintDetails.builder()
             .bulkPrintId(bulkPrintedId)
             .servedParty(servedParty)
             .printedDocs(String.join(",", docs.stream().map(Document::getDocumentFileName).toList()))
-            .recipientsName(name)
+            .recipientsName(partyDetails.getLabelForDynamicList())
             .printDocs(docs.stream().map(ElementUtils::element).toList())
             .postalAddress(address)
             .timeStamp(currentDate).build();
