@@ -447,6 +447,7 @@ public class ReviewDocumentService {
             .url(scannedDocument.getUrl())
             .scannedDate(scannedDocument.getScannedDate())
             .deliveryDate(scannedDocument.getDeliveryDate())
+            .documentParty(BULK_SCAN)
             .uploadedBy(BULK_SCAN)
             .documentUploadedDate(scannedDocument.getScannedDate())
             .isConfidential(YesOrNo.Yes) //bulk scan docs always go to confidential if decision is Yes
