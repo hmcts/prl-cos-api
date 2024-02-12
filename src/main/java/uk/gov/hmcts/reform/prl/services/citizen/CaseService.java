@@ -113,11 +113,9 @@ public class CaseService {
         }
         if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
             && isEmpty(caseData.getApplicantCaseName())) {
-            CaseData updatedCaseData = caseDataMapper
-                .buildUpdatedCaseData(caseData.toBuilder()
-                    .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
-                    .build());
-            return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+            caseData.toBuilder()
+                .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
+                .build();
         }
 
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
