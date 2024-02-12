@@ -1042,7 +1042,7 @@ public class ServiceOfApplicationService {
         }
         finalServedApplicationDetailsList.add(element(sendNotificationForServiceOfApplication(caseData, authorisation, caseDataMap)));
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
-        cleanUpSoaSelections(caseDataMap, true);
+        cleanUpSoaSelections(caseDataMap);
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
@@ -1063,7 +1063,7 @@ public class ServiceOfApplicationService {
                             ? generatePacksForConfidentialCheckC100(callbackRequest.getCaseDetails(), authorisation)
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
 
-        cleanUpSoaSelections(caseDataMap, false);
+        cleanUpSoaSelections(caseDataMap);
 
         log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
 
@@ -1743,7 +1743,7 @@ public class ServiceOfApplicationService {
 
     }
 
-    public void cleanUpSoaSelections(Map<String, Object> caseDataUpdated, boolean removeCafcassFields) {
+    public void cleanUpSoaSelections(Map<String, Object> caseDataUpdated) {
         List<String> soaFields = new ArrayList<>(List.of(
             "pd36qLetter",
             "specialArrangementsLetter",
@@ -2443,8 +2443,7 @@ public class ServiceOfApplicationService {
                     sendNotificationForUnservedApplicantPack(caseData, authorization, emailNotificationDetails,
                                                              unServedApplicantPack, bulkPrintDetails);
                 }
-                if (unServedRespondentPack != null) {
-                    if (null == unServedRespondentPack.getPersonalServiceBy()) {
+                if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
                         final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
                         log.info("Sending notification for Respondents ==> {}", partyIds);
 
@@ -2460,7 +2459,7 @@ public class ServiceOfApplicationService {
                             sendNotificationToRespondentOrSolicitorNonPersonal(caseData, authorization,emailNotificationDetails, bulkPrintDetails,
                                                                     respondentList, respondentDocs, respondentDocs);
                         }
-                    }
+
                 }
 
             }
