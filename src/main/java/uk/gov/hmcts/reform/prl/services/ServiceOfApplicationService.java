@@ -417,7 +417,6 @@ public class ServiceOfApplicationService {
 
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String formatter = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
-        log.info("*** Email notification details {}", emailNotificationDetails);
         return ServedApplicationDetails.builder().emailNotificationDetails(emailNotificationDetails)
             .servedBy(userService.getUserDetails(authorization).getFullName())
             .servedAt(formatter)
@@ -440,8 +439,6 @@ public class ServiceOfApplicationService {
                 handleNonPersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
                                                    bulkPrintDetails, c100StaticDocs);
             } else {
-                log.info(" update who is responsible flag here");
-                log.error("#SOA TO DO ... citizen created case personal service");
                 handlePersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
                                                    bulkPrintDetails, c100StaticDocs);
             }
@@ -470,7 +467,6 @@ public class ServiceOfApplicationService {
                 getNotificationPack(caseData, PrlAppsConstants.C, c100StaticDocs);
                 getNotificationPack(caseData, PrlAppsConstants.D, c100StaticDocs);
             }
-            log.info("#SOA TO DO ... FL401 citizen created case");
         }
         return whoIsResponsibleForServing;
     }
@@ -529,7 +525,6 @@ public class ServiceOfApplicationService {
                 caseData.getApplicants(),
                 caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
             );
-            log.info("selected Applicants " + selectedApplicants.size());
             if (!selectedApplicants.isEmpty()) {
                 List<Document> packQDocs = getNotificationPack(caseData, PrlAppsConstants.Q, c100StaticDocs);
                 emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
@@ -544,7 +539,6 @@ public class ServiceOfApplicationService {
                 caseData.getRespondents(),
                 caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
             );
-            log.info("selected respondents " + selectedRespondents.size());
             if (!selectedRespondents.isEmpty()) {
                 //unrepresented
                 List<Document> packRDocs = getNotificationPack(caseData, PrlAppsConstants.R, c100StaticDocs);
@@ -759,8 +753,6 @@ public class ServiceOfApplicationService {
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())
             || SoaSolicitorServingRespondentsEnum.courtAdmin
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())) {
-            log.info("#SOA...Generate C, D packs to be served by admin/bailiff.."
-                          + "solicitor created case");
             sendNotificationsAndCreatePacksForDaCourtAdminAndBailiff(caseData, authorization, emailNotificationDetails,
                                                                      staticDocs, caseDataMap
             );
@@ -797,7 +789,6 @@ public class ServiceOfApplicationService {
                                                                     List<Document> packSdocs, List<Document> packRdocs) {
         selectedRespondents.forEach(respondentc100 -> {
             Optional<Element<PartyDetails>> party = getParty(respondentc100.getCode(), caseData.getRespondents());
-            log.info("Party details {}", party);
             if (party.isPresent() && YesNoDontKnow.yes.equals(party.get().getValue().getDoTheyHaveLegalRepresentation())) {
                 if (party.get().getValue().getSolicitorEmail() != null) {
                     try {
@@ -856,8 +847,6 @@ public class ServiceOfApplicationService {
             caseData.getRespondents(),
             caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue()
         );
-        log.info("*** Selected respondents *** {}", selectedRespondents);
-        log.info("*** Selected applicants *** {}", selectedApplicants);
         if (CollectionUtils.isNotEmpty(selectedApplicants)) {
             emailNotificationDetails
                 .addAll(sendNotificationsToCitizenApplicantsC100(
@@ -867,8 +856,6 @@ public class ServiceOfApplicationService {
                     c100StaticDocs
                 ));
         }
-        log.info(" ** emailnotification {}", emailNotificationDetails);
-        log.info(" ** bulk print details {}", bulkPrintDetails);
 
         if (CollectionUtils.isNotEmpty(selectedRespondents)) {
             emailNotificationDetails
@@ -902,13 +889,11 @@ public class ServiceOfApplicationService {
             getNotificationPack(caseData, PrlAppsConstants.J, c100StaticDocs);
             getNotificationPack(caseData, PrlAppsConstants.K, c100StaticDocs);
         }
-        log.info(" {}", emailNotificationDetails);
     }
 
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        log.info("** is confidential about to submit ** {}", caseDataMap.get(SOA_CONFIDENTIAL_DETAILS_PRESENT));
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
@@ -916,7 +901,6 @@ public class ServiceOfApplicationService {
         }
 
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
-        log.info("** is confidential from casedata ** {}", caseData.getServiceOfApplication().getIsConfidential());
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
         return caseDataMap;
     }
@@ -944,7 +928,6 @@ public class ServiceOfApplicationService {
                 ? caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy() : null;
         }
         soaWaMap.put("responsibleForService", responsibleForService);
-        log.info("** soaWaMap ** {}", soaWaMap);
         return soaWaMap;
     }
 
@@ -984,9 +967,6 @@ public class ServiceOfApplicationService {
         List<Element<ServedApplicationDetails>> finalServedApplicationDetailsList;
         String confirmationBody = "";
         String confirmationHeader;
-        log.info("Respondent options {}", caseData.getServiceOfApplication().getSoaServeToRespondentOptions());
-        log.info("serving respondent options da {}", caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA());
-        log.info("citien serving respondent options ca {}", caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA());
         if (caseData.getServiceOfApplication().getSoaServeToRespondentOptions() != null
             && YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
             confirmationBody = CONFIRMATION_BODY_PREFIX;
@@ -1031,8 +1011,6 @@ public class ServiceOfApplicationService {
         }
         confirmationBody = String.format(confirmationBody, manageCaseUrl + PrlAppsConstants.URL_STRING
             + caseData.getId() + SERVICE_OF_APPLICATION_ENDPOINT);
-        log.info("Body {}", confirmationBody);
-        log.info("Header {}", confirmationHeader);
 
         if (caseData.getFinalServedApplicationDetailsList() != null) {
             finalServedApplicationDetailsList = caseData.getFinalServedApplicationDetailsList();
@@ -1065,8 +1043,6 @@ public class ServiceOfApplicationService {
 
         cleanUpSoaSelections(caseDataMap);
 
-        log.info("============= updated case data for confidentialy pack ================> {}", caseDataMap);
-
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -1089,7 +1065,6 @@ public class ServiceOfApplicationService {
             List<Document> docs = new ArrayList<>();
             if (null != caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
                 for (Element<DocumentListForLa> laDocument: caseData.getServiceOfApplication().getSoaDocumentDynamicListForLa()) {
-                    log.info("fetching doc for {}", laDocument);
                     uk.gov.hmcts.reform.ccd.client.model.Document document = getSelectedDocumentFromDynamicList(
                         authorisation,
                         laDocument.getValue().getDocumentsListForLa(),
@@ -1260,7 +1235,6 @@ public class ServiceOfApplicationService {
     private void sendEmailToCitizen(String authorization,
                                     CaseData caseData, Element<PartyDetails> applicant,
                                     List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
-        log.info("** Docs being sent *** {}", docs);
         try {
             notificationList.add(element(serviceOfApplicationEmailService
                                              .sendEmailNotificationToApplicant(
@@ -1283,7 +1257,6 @@ public class ServiceOfApplicationService {
                     caseData.getId()
                 );
                 //Respondent's pack
-                log.info("applicant docs {}", packHiDocs);
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
                 dynamicData.put("c100", true);
@@ -1340,9 +1313,6 @@ public class ServiceOfApplicationService {
 
     private List<DynamicMultiselectListElement> getSelectedApplicantsOrRespondents(List<Element<PartyDetails>> applicantsOrRespondents,
                                                                                    List<DynamicMultiselectListElement> value) {
-
-        log.info("applicantsOrRespondents {}", applicantsOrRespondents);
-        log.info("value {}", value);
         return value.stream().filter(element -> applicantsOrRespondents.stream().anyMatch(party -> party.getId().toString().equals(
             element.getCode()))).collect(
             Collectors.toList());
@@ -1523,7 +1493,6 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        log.info("{}",staticDocs);
         return docs;
     }
 
@@ -1540,7 +1509,6 @@ public class ServiceOfApplicationService {
 
     private List<Document> generatePackN(CaseData caseData, List<Document> staticDocs) {
         List<Document> docs = new ArrayList<>(getC6aIfPresent(getSoaSelectedOrders(caseData)));
-        log.info("{}",staticDocs);
         return docs;
     }
 
@@ -1559,7 +1527,6 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
-        log.info("{}",staticDocs);
         return docs;
     }
 
@@ -1568,7 +1535,6 @@ public class ServiceOfApplicationService {
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
-        log.info("{}",staticDocs);
         return docs;
     }
 
@@ -1686,7 +1652,6 @@ public class ServiceOfApplicationService {
         docs.add(caseData.getC8Document());
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
-        log.info("{}",staticDocs);
         return docs;
     }
 
@@ -1864,15 +1829,12 @@ public class ServiceOfApplicationService {
         if (C100_CASE_TYPE.equalsIgnoreCase(String.valueOf(caseDataUpdated.get(CASE_TYPE_OF_APPLICATION)))) {
             caseDataUpdated.put(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA, getDocumentsDynamicListForLa(authorisation,
                                                                                                String.valueOf(caseData.getId())));
-            log.info("** dynamic list 1 ** {}", caseDataUpdated.get(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA));
         }
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
-        log.info("** is confidential ** {}", caseDataUpdated.get(SOA_CONFIDENTIAL_DETAILS_PRESENT));
         caseDataUpdated.put(
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
-        log.info("** dynamic list 2 ** {}", caseDataUpdated.get(SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA));
         return caseDataUpdated;
     }
 
@@ -1916,9 +1878,6 @@ public class ServiceOfApplicationService {
         } else if (!isOtherPeopleAddressPresent) {
             warningText = ADDRESS_MISSED_FOR_OTHER_PARTIES;
         }
-        log.info("isRespondentAddressPresent ==> " + isRespondentAddressPresent);
-        log.info("isOtherPeopleAddressPresent ==> " + isOtherPeopleAddressPresent);
-        log.info("warningText ==> " + warningText);
         return warningText;
     }
 
@@ -2012,7 +1971,6 @@ public class ServiceOfApplicationService {
                                       CaseInvite caseInvite, String template) {
 
         Map<String, Object> dataMap = populateAccessCodeMap(caseData, party, caseInvite);
-        log.info("Access code map {} for {}",dataMap, template);
         try {
             log.info("generating letter : {} for case : {}", template, dataMap.get("id"));
             GeneratedDocumentInfo accessCodeLetter = dgsService.generateDocument(
@@ -2027,13 +1985,11 @@ public class ServiceOfApplicationService {
                 .build();
         } catch (Exception e) {
             log.error("*** Access code letter failed for {} :: because of {}", template, e.getMessage());
-            log.error("*** Access code letter failed for {} :: because of {}", template, e.getStackTrace());
         }
         return null;
     }
 
     public Map<String, Object> populateAccessCodeMap(CaseData caseData, Element<PartyDetails> party, CaseInvite caseInvite) {
-        log.info("*** case invite {}", caseInvite);
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("id", caseData.getId());
         dataMap.put("serviceUrl", citizenUrl);
@@ -2045,7 +2001,6 @@ public class ServiceOfApplicationService {
         if (FL401_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             dataMap.put(DA_APPLICANT_NAME, caseData.getApplicantsFL401().getLabelForDynamicList());
         }
-        log.info("data map tto letters {}", dataMap);
         return dataMap;
     }
 
@@ -2106,13 +2061,11 @@ public class ServiceOfApplicationService {
         ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE));
         String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
-        log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
         if (YesOrNo.No.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())
             && (caseData.getServiceOfApplication().getSoaRecipientsOptions() != null)
             && (!caseData.getServiceOfApplication().getSoaRecipientsOptions().getValue().isEmpty())) {
             c100StaticDocs = buildPacksConfidentialCheckC100NonPersonal(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
         } else if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaServeToRespondentOptions())) {
-            log.error("#SOA TO DO .. Personal Service to be added - for 4 options");
             buildPacksConfidentialCheckC100Personal(authorization, caseDataUpdated, caseData, dateCreated, c100StaticDocs);
         }
         //serving other people in the case
@@ -2261,7 +2214,6 @@ public class ServiceOfApplicationService {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         String dateCreated = DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(zonedDateTime);
         List<Document> fl401StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
-        log.info("caseData.getServiceOfApplication() {}", caseData.getServiceOfApplication());
         if (SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsDA())) {
             caseDataUpdated.putAll(getPacksForConfidentialCheckDaApplicantSolicitor(authorization, caseData, dateCreated,
@@ -2349,8 +2301,6 @@ public class ServiceOfApplicationService {
 
     private void buildUnservedOthersPack(String authorization, Map<String, Object> caseDataUpdated, CaseData caseData, String dateCreated,
                                          List<Document> c100StaticDocs) {
-        log.info("serving other people in case");
-        log.info("Before caseData.getOthersToNotify {}", caseData.getOthersToNotify());
         List<Element<PartyDetails>> otherPartiesToNotify = CaseUtils.getOthersToNotifyInCase(caseData);
         final List<DynamicMultiselectListElement> otherParties = getSelectedApplicantsOrRespondents(
             otherPartiesToNotify,
@@ -2379,8 +2329,6 @@ public class ServiceOfApplicationService {
                                                             List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedRespondents) {
         final List<String> selectedPartyIds = selectedRespondents.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
-        log.info("selected respondents ========= {}", selectedRespondents.size());
-        log.info("selected Respondent PartyIds ========= {}", selectedPartyIds);
         List<Document> finalDocs = new ArrayList<>();
         selectedPartyIds.forEach(partyId -> {
             Optional<Element<PartyDetails>> party = getParty(partyId, caseData.getRespondents());
@@ -2404,8 +2352,6 @@ public class ServiceOfApplicationService {
                                                            List<Document> c100StaticDocs, List<DynamicMultiselectListElement> selectedApplicants) {
         final List<String> selectedPartyIds = selectedApplicants.stream().map(DynamicMultiselectListElement::getCode).collect(
             Collectors.toList());
-        log.info("selected Applicant ========= {}", selectedApplicants.size());
-        log.info("selected Applicant PartyIds ========= {}", selectedPartyIds);
         List<Element<Document>> packDocs = new ArrayList<>();
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             packDocs.addAll(wrapElements(getNotificationPack(caseData, PrlAppsConstants.P, c100StaticDocs)));
@@ -2421,8 +2367,6 @@ public class ServiceOfApplicationService {
     }
 
     public CaseData sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
-
-        log.info("Inside sendNotificationsForUnServedPacks method");
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
@@ -2445,8 +2389,6 @@ public class ServiceOfApplicationService {
                 }
                 if (unServedRespondentPack != null && null == unServedRespondentPack.getPersonalServiceBy()) {
                         final List<Element<String>> partyIds = unServedRespondentPack.getPartyIds();
-                        log.info("Sending notification for Respondents ==> {}", partyIds);
-
                         final List<DynamicMultiselectListElement> respondentList = createPartyDynamicMultiSelectListElement(
                             partyIds);
 
@@ -2475,7 +2417,6 @@ public class ServiceOfApplicationService {
         final SoaPack unservedCymruPack = caseData.getServiceOfApplication().getUnServedCafcassCymruPack();
 
         if (ObjectUtils.isNotEmpty(unservedCymruPack) && CollectionUtils.isNotEmpty(unservedCymruPack.getPartyIds())) {
-            log.info("Cafcass Cymru option {}", unservedCymruPack);
             emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                 caseData,
                 unservedCymruPack.getPartyIds().get(0).getValue(),
@@ -2525,7 +2466,6 @@ public class ServiceOfApplicationService {
                                                   List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
         if (!ObjectUtils.isEmpty(unServedLaPack) && CollectionUtils.isNotEmpty(unServedLaPack.getPartyIds())) {
-            log.info("*** La pack present *** {}", unServedLaPack);
             try {
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                     .sendEmailNotificationToLocalAuthority(
@@ -2543,7 +2483,6 @@ public class ServiceOfApplicationService {
     private void checkAndSendCafcassCymruEmails(CaseData caseData, List<Element<EmailNotificationDetails>> emailNotificationDetails) {
         if (YesOrNo.Yes.equals(caseData.getServiceOfApplication().getSoaCafcassCymruServedOptions())
             && null != caseData.getServiceOfApplication().getSoaCafcassCymruEmail()) {
-            log.info("Sending notifiction for Cafcass Cymru");
             emailNotificationDetails.addAll(sendEmailToCafcassInCase(
                 caseData,
                 caseData.getServiceOfApplication().getSoaCafcassCymruEmail(),
@@ -2557,7 +2496,6 @@ public class ServiceOfApplicationService {
         final List<DynamicMultiselectListElement> otherPartyList = createPartyDynamicMultiSelectListElement(
             otherPartyIds);
 
-        log.info("Sending notification for others ==> {}", otherPartyIds);
         bulkPrintDetails.addAll(sendPostToOtherPeopleInCase(
             caseData,
             authorization, otherPartyList,
@@ -2573,8 +2511,6 @@ public class ServiceOfApplicationService {
         final List<Element<String>> partyIds = unServedApplicantPack.getPartyIds();
         final List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
             partyIds);
-        log.info("Sending notification for Applicants ====> {}", unServedApplicantPack);
-        log.info("Case created by {}", CaseUtils.isCaseCreatedByCitizen(caseData));
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             //#SOA TO DO... Add a new method to handle after check emails
@@ -2615,7 +2551,6 @@ public class ServiceOfApplicationService {
             && Yes.equals(caseData.getServiceOfApplication().getApplicationServedYesNo())) {
             response = servePacksWithConfidentialDetails(authorisation, caseData, caseDataMap);
             CaseUtils.setCaseState(callbackRequest, caseDataMap);
-            log.info("**** Case status :  {}", caseDataMap.get("caseStatus"));
         } else {
             response = rejectPacksWithConfidentialDetails(caseData, caseDataMap);
             caseDataMap.put(UNSERVED_RESPONDENT_PACK, null);
@@ -2664,8 +2599,6 @@ public class ServiceOfApplicationService {
             .build();
 
         confidentialCheckFailedList.add(ElementUtils.element(confidentialCheckFailed));
-
-        log.info("Confidential check Reject Reason ======> {}", confidentialCheckFailedList);
 
         caseDataMap.put(CONFIDENTIAL_CHECK_FAILED, confidentialCheckFailedList);
 
