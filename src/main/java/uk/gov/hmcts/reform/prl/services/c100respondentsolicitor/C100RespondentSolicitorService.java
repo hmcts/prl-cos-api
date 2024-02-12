@@ -396,10 +396,18 @@ public class C100RespondentSolicitorService {
     }
 
     private ResponseToAllegationsOfHarm optimiseResponseToAllegationsOfHarm(ResponseToAllegationsOfHarm responseToAllegationsOfHarm) {
-        return responseToAllegationsOfHarm.toBuilder()
-            .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
-            .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
-            .build();
+        if (null != responseToAllegationsOfHarm
+            && responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse().equals(Yes)) {
+            return responseToAllegationsOfHarm.toBuilder()
+                .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
+                .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
+                .build();
+        } else {
+            return responseToAllegationsOfHarm.toBuilder()
+                .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
+                .responseToAllegationsOfHarmDocument(null)
+                .build();
+        }
     }
 
     private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
