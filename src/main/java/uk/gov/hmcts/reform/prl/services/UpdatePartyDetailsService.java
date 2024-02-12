@@ -97,15 +97,7 @@ public class UpdatePartyDetailsService {
             PartyDetails fl401respondent = caseData
                 .getRespondentsFL401();
 
-            if (Objects.nonNull(fl401Applicant)) {
-                CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
-            }
-
-            if (Objects.nonNull(fl401respondent)) {
-                CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("respondentName", fl401respondent.getLabelForDynamicList());
-            }
+            setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
             try {
                 generateC8DocumentsForRespondents(updatedCaseData,callbackRequest,authorisation,caseData, List.of(ElementUtils
@@ -117,7 +109,7 @@ public class UpdatePartyDetailsService {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, CAAPPLICANT));
             Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
-            setApplicantName(updatedCaseData, applicantsWrapped);
+            setC100ApplicantPartyName(applicantsWrapped, updatedCaseData);
             // set applicant and respondent case flag
             setApplicantSolicitorUuid(caseData, updatedCaseData);
             setRespondentSolicitorUuid(caseData, updatedCaseData);
@@ -131,33 +123,12 @@ public class UpdatePartyDetailsService {
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
-            // set applicant and respondent case flag
-            setApplicantFlag(caseData, updatedCaseData);
-            setRespondentFlag(caseData, updatedCaseData);
         }
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
     }
 
-    private void setFl401ApplicantAndRespondent(Map<String, Object> updatedCaseData,
-                                                CaseData caseData, PartyDetails fl401Applicant,
-                                                PartyDetails fl401respondent) {
-        if (Objects.nonNull(fl401Applicant)) {
-            CommonUtils.generatePartyUuidForFL401(caseData);
-            updatedCaseData.put("applicantName", fl401Applicant.getFirstName() + " " + fl401Applicant.getLastName());
-            setFL401ApplicantFlag(updatedCaseData, fl401Applicant);
-
-        }
-
-        if (Objects.nonNull(fl401respondent)) {
-            CommonUtils.generatePartyUuidForFL401(caseData);
-            updatedCaseData.put("respondentName", fl401respondent.getFirstName() + " " + fl401respondent.getLastName());
-            setFL401RespondentFlag(updatedCaseData, fl401respondent);
-        }
-    }
-
-    private void setApplicantName(Map<String, Object> updatedCaseData,
-                                  Optional<List<Element<PartyDetails>>> applicantsWrapped) {
+    private static void setC100ApplicantPartyName(Optional<List<Element<PartyDetails>>> applicantsWrapped, Map<String, Object> updatedCaseData) {
         if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
@@ -167,6 +138,18 @@ public class UpdatePartyDetailsService {
             if (Objects.nonNull(applicant1)) {
                 updatedCaseData.put("applicantName", applicant1.getFirstName() + " " + applicant1.getLastName());
             }
+        }
+    }
+
+    private static void setFl401PartyNames(PartyDetails fl401Applicant, CaseData caseData, Map<String, Object> updatedCaseData, PartyDetails fl401respondent) {
+        if (Objects.nonNull(fl401Applicant)) {
+            CommonUtils.generatePartyUuidForFL401(caseData);
+            updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
+        }
+
+        if (Objects.nonNull(fl401respondent)) {
+            CommonUtils.generatePartyUuidForFL401(caseData);
+            updatedCaseData.put("respondentName", fl401respondent.getLabelForDynamicList());
         }
     }
 
