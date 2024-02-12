@@ -169,9 +169,10 @@ public class ListWithoutNoticeController extends AbstractCallbackController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
-                                                                                           caseData.getLegalAdviserList(),
-                                                                                           refDataUserService
+            AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
+                caseDataUpdated,
+                caseData.getLegalAdviserList(),
+                refDataUserService
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));

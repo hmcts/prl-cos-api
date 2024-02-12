@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
+import uk.gov.hmcts.reform.prl.enums.gatekeeping.AllocatedJudgeTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
@@ -267,6 +268,7 @@ public class ListWithoutNoticeControllerTest {
         AllocatedJudge allocatedJudge = AllocatedJudge.builder()
             .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
             .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .isJudgeOrLegalAdviser(AllocatedJudgeTypeEnum.judge)
             .build();
         Map<String, Object> summaryTabFields = Map.of(
             "field4", "value4",
