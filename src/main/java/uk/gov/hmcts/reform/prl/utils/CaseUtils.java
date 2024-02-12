@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.utils;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
@@ -557,5 +558,16 @@ public class CaseUtils {
             }
         }
         return temp;
+    }
+
+    public static List<Element<PartyDetails>> getOthersToNotifyInCase(CaseData caseData) {
+        return TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
+            ? caseData.getOtherPartyInTheCaseRevised() : caseData.getOthersToNotify();
+    }
+
+    public static boolean isApplyOrderWithoutGivingNoticeToRespondent(CaseData caseData) {
+        boolean applyOrderWithoutGivingNoticeToRespondent = ObjectUtils.isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
+            && YesOrNo.Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent().getOrderWithoutGivingNotice());
+        return applyOrderWithoutGivingNoticeToRespondent;
     }
 }
