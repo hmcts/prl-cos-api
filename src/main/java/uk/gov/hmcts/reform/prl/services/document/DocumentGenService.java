@@ -635,6 +635,7 @@ public class DocumentGenService {
             );
         } else {
             log.info("Generating document for {} ", template);
+            log.info("casename is {}", caseData.getApplicantCaseName());
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
@@ -913,7 +914,6 @@ public class DocumentGenService {
                                            CaseData caseData,
                                            String hint,
                                            boolean isWelsh, Map<String, Object> respondentDetails) throws Exception {
-        log.info("caseData name inside generatedocument {}", caseData.getApplicantCaseName());
         return getDocument(authorisation, caseData, hint, isWelsh, respondentDetails);
     }
 
