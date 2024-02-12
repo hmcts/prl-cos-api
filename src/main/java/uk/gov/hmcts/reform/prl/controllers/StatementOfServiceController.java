@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
 
@@ -70,7 +69,7 @@ public class StatementOfServiceController {
             content = @Content(mediaType = "application/json",
                 schema = @Schema(implementation = uk.gov.hmcts.reform.ccd.client.model.CallbackResponse.class))),
         @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content)})
-    public CallbackResponse sosAboutToSubmit(
+    public AboutToStartOrSubmitCallbackResponse sosAboutToSubmit(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
@@ -85,7 +84,7 @@ public class StatementOfServiceController {
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-            return CallbackResponse.builder()
+            return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(stmtOfServImplService.retrieveAllRespondentNames(
                     callbackRequest.getCaseDetails(),
                     authorisation

@@ -20,7 +20,6 @@ import uk.gov.hmcts.reform.prl.models.dto.bulkprint.BulkPrintDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.IncrementalInteger;
@@ -76,7 +75,8 @@ public class StmtOfServImplService {
         return caseDataUpdated;
     }
 
-    public CaseData retrieveAllRespondentNames(CaseDetails caseDetails, String authorisation) {
+    public Map<String, Object> retrieveAllRespondentNames(CaseDetails caseDetails, String authorisation) {
+        Map<String, Object> caseDataUpdateMap = caseDetails.getData();
         CaseData caseData = objectMapper.convertValue(
             caseDetails.getData(),
             CaseData.class
@@ -139,34 +139,36 @@ public class StmtOfServImplService {
             if (isNotEmpty(caseData.getServiceOfApplication())
                 && isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack())) {
                 caseData = cleanupRespondentPacksCaOrBailiffPersonalService(caseData, authorisation);
+                caseDataUpdateMap.put(
+                    "finalServedApplicationDetailsList",
+                    caseData.getFinalServedApplicationDetailsList()
+                );
+                caseDataUpdateMap.put("unServedRespondentPack", null);
             }
             elementList.add(element(recipient));
         }
 
-        caseData = caseData.toBuilder()
-            .statementOfService(StatementOfService.builder()
-                                    .stmtOfServiceForApplication(appendStatementOfServiceToSoaTab(
-                                        caseData,
-                                        elementList
-                                    ))
-                                    .stmtOfServiceForOrder(appendStatementOfServiceToOrdersTab(
-                                        caseData,
-                                        elementList
-                                    ))
-                                    .stmtOfServiceAddRecipient(null)
-                                    .build())
-            .build();
-
-        return caseData;
+        caseDataUpdateMap.put(
+            "stmtOfServiceForApplication",
+            appendStatementOfServiceToSoaTab(
+                caseData,
+                elementList
+            )
+        );
+        caseDataUpdateMap.put("stmtOfServiceForOrder", appendStatementOfServiceToOrdersTab(
+            caseData,
+            elementList
+        ));
+        return caseDataUpdateMap;
     }
 
     private List<Element<StmtOfServiceAddRecipient>> appendStatementOfServiceToSoaTab(
         CaseData caseData,
         List<Element<StmtOfServiceAddRecipient>> statementOfServiceListFromCurrentEvent) {
 
-        if (caseData.getStatementOfService()
-            .getStmtOfServiceWhatWasServed().equals(
-                StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)) {
+        if (StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
+            .equals(caseData.getStatementOfService()
+                        .getStmtOfServiceWhatWasServed())) {
             if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForApplication())) {
                 statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceForApplication());
             }
@@ -183,9 +185,9 @@ public class StmtOfServImplService {
         CaseData caseData,
         List<Element<StmtOfServiceAddRecipient>> statementOfServiceListFromCurrentEvent) {
 
-        if (caseData.getStatementOfService()
-            .getStmtOfServiceWhatWasServed().equals(
-                StatementOfServiceWhatWasServed.statementOfServiceOrder)) {
+        if (StatementOfServiceWhatWasServed.statementOfServiceOrder
+            .equals(caseData.getStatementOfService()
+                        .getStmtOfServiceWhatWasServed())) {
             if (CollectionUtils.isNotEmpty(caseData.getStatementOfService().getStmtOfServiceForOrder())) {
                 statementOfServiceListFromCurrentEvent.addAll(caseData.getStatementOfService().getStmtOfServiceForOrder());
             }

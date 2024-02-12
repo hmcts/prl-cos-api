@@ -229,7 +229,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
@@ -290,7 +290,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
@@ -353,7 +353,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
@@ -416,7 +416,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
@@ -477,7 +477,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
@@ -538,7 +538,7 @@ public class StmtOfServImplServiceTest {
             .data(stringObjectMap)
             .build();
 
-        CaseData updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
+        Map<String, Object> updatedCaseData = stmtOfServImplService.retrieveAllRespondentNames(caseDetails, authToken);
 
         assertNotNull(updatedCaseData);
 
