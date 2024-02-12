@@ -102,6 +102,8 @@ public class StmtOfServImplService {
                         .toList();
                     String allRespondentNames = String.join(", ", respondentNamesList);
                     recipient = recipient.toBuilder()
+                        .selectedPartyId("00000000-0000-0000-0000-000000000000")
+                        .selectedPartyName(allRespondentNames)
                         .respondentDynamicList(DynamicList.builder()
                                                    .listItems(recipient.getRespondentDynamicList().getListItems())
                                                    .value(DynamicListElement.builder()
@@ -113,6 +115,8 @@ public class StmtOfServImplService {
                         .build();
                 } else {
                     recipient = recipient.toBuilder()
+                        .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
+                        .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                         .respondentDynamicList(DynamicList.builder()
                                                    .listItems(recipient.getRespondentDynamicList().getListItems())
                                                    .value(DynamicListElement.builder()
@@ -126,6 +130,8 @@ public class StmtOfServImplService {
 
             } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
                 recipient = recipient.toBuilder()
+                    .selectedPartyId(recipient.getRespondentDynamicList().getValue().getCode())
+                    .selectedPartyName(recipient.getRespondentDynamicList().getValue().getLabel())
                     .respondentDynamicList(DynamicList.builder()
                                                .listItems(recipient.getRespondentDynamicList().getListItems())
                                                .value(DynamicListElement.builder()
@@ -159,6 +165,7 @@ public class StmtOfServImplService {
             caseData,
             elementList
         ));
+        caseDataUpdateMap.put("stmtOfServiceAddRecipient", null);
         return caseDataUpdateMap;
     }
 
