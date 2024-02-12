@@ -276,6 +276,14 @@ public class C100RespondentSolicitorService {
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
+        Map<String, Object> data = objectMapper
+                .convertValue(RespondentAllegationsOfHarmData.builder().build(),new TypeReference<Map<String, Object>>() {});
+        try {
+            log.info("caseData flusing aoh {}",objectMapper.writeValueAsString(data));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        updatedCaseData.putAll(data);
         return updatedCaseData;
     }
 
