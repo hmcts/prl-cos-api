@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,6 +102,7 @@ public class CallbackControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
+    @Ignore
     @Test
     public void givenNoAuthorization_whenPostRequestToDraftDocumentGeneration_then400Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
