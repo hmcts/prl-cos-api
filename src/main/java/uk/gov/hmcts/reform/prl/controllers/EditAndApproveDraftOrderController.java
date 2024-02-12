@@ -302,13 +302,12 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
+            List<String> errorList = new ArrayList<>();
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData, true)).build();
             } else {
-                List<String> errorList = new ArrayList<>();
-                errorList.add(
-                    "Please select at least one options from below");
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();
