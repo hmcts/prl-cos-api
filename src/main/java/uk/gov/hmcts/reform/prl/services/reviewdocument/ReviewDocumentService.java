@@ -347,7 +347,6 @@ public class ReviewDocumentService {
             if (!isDocumentFound && isNotEmpty(caseData.getScannedDocuments())) {
                 quarantineLegalDocElementOptional = getQuarantineBulkScanDocElement(caseData, uuid);
                 if (quarantineLegalDocElementOptional.isPresent()) {
-                    isDocumentFound = true;
                     processDocumentsAfterReviewNew(
                         caseData,
                         caseDataUpdated,
@@ -501,7 +500,7 @@ public class ReviewDocumentService {
         StringBuilder reviewDetailsBuilder = new StringBuilder();
         reviewDetailsBuilder.append(format(SUBMITTED_BY_LABEL, submittedBy));
         //append quarantine document details for solicitor, cafcass & court staff
-        appendQuarantineDocumentDetails(reviewDetailsBuilder, quarantineDoc);
+        appendQuarantineDocumentDetails(reviewDetailsBuilder, quarantineDoc, submittedBy);
 
         //PRL-5006 bulk scan fields
         if (BULK_SCAN.equals(submittedBy)) {
@@ -512,7 +511,8 @@ public class ReviewDocumentService {
     }
 
     private void appendQuarantineDocumentDetails(StringBuilder reviewDetailsBuilder,
-                                                 QuarantineLegalDoc quarantineDoc) {
+                                                 QuarantineLegalDoc quarantineDoc,
+                                                 String submittedBy) {
         if (CommonUtils.isNotEmpty(quarantineDoc.getCategoryName())) {
             reviewDetailsBuilder.append(format(DOCUMENT_CATEGORY_LABEL,
                                                quarantineDoc.getCategoryName()));
@@ -521,11 +521,11 @@ public class ReviewDocumentService {
             reviewDetailsBuilder.append(format(DOCUMENT_COMMENTS_LABEL,
                                                quarantineDoc.getNotes()));
         }
-        if (null != quarantineDoc.getIsConfidential()) {
+        if (null != quarantineDoc.getIsConfidential() && !BULK_SCAN.equals(submittedBy)) {
             reviewDetailsBuilder.append(format(CONFIDENTIAL_INFO_LABEL,
                                                quarantineDoc.getIsConfidential().getDisplayedValue()));
         }
-        if (null != quarantineDoc.getIsRestricted()) {
+        if (null != quarantineDoc.getIsRestricted() && !BULK_SCAN.equals(submittedBy)) {
             reviewDetailsBuilder.append(format(RESTRICTED_INFO_LABEL,
                                                quarantineDoc.getIsRestricted().getDisplayedValue()));
         }
