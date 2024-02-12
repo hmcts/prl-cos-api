@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
@@ -446,11 +447,10 @@ public class ReviewDocumentService {
             .url(scannedDocument.getUrl())
             .scannedDate(scannedDocument.getScannedDate())
             .deliveryDate(scannedDocument.getDeliveryDate())
-            .documentParty(BULK_SCAN)
             .uploadedBy(BULK_SCAN)
             .documentUploadedDate(scannedDocument.getScannedDate())
-            .isConfidential(null) //bulk scan docs always go to confidential if decision is Yes
-            .isRestricted(null) //fix to getRestrictedOrConfidentialKey=confidential
+            .isConfidential(YesOrNo.Yes) //bulk scan docs always go to confidential if decision is Yes
+            .isRestricted(YesOrNo.No) //fix to getRestrictedOrConfidentialKey=confidential
             .uploaderRole(BULK_SCAN);
     }
 
@@ -500,7 +500,7 @@ public class ReviewDocumentService {
         StringBuilder reviewDetailsBuilder = new StringBuilder();
         reviewDetailsBuilder.append(format(SUBMITTED_BY_LABEL, submittedBy));
         //append quarantine document details for solicitor, cafcass & court staff
-        appendQuarantineDocumentDetails(reviewDetailsBuilder, quarantineDoc);
+        appendQuarantineDocumentDetails(reviewDetailsBuilder, quarantineDoc, submittedBy);
 
         //PRL-5006 bulk scan fields
         if (BULK_SCAN.equals(submittedBy)) {
@@ -511,7 +511,8 @@ public class ReviewDocumentService {
     }
 
     private void appendQuarantineDocumentDetails(StringBuilder reviewDetailsBuilder,
-                                                 QuarantineLegalDoc quarantineDoc) {
+                                                 QuarantineLegalDoc quarantineDoc,
+                                                 String submittedBy) {
         if (CommonUtils.isNotEmpty(quarantineDoc.getCategoryName())) {
             reviewDetailsBuilder.append(format(DOCUMENT_CATEGORY_LABEL,
                                                quarantineDoc.getCategoryName()));
@@ -520,11 +521,11 @@ public class ReviewDocumentService {
             reviewDetailsBuilder.append(format(DOCUMENT_COMMENTS_LABEL,
                                                quarantineDoc.getNotes()));
         }
-        if (null != quarantineDoc.getIsConfidential()) {
+        if (null != quarantineDoc.getIsConfidential() && !BULK_SCAN.equals(submittedBy)) {
             reviewDetailsBuilder.append(format(CONFIDENTIAL_INFO_LABEL,
                                                quarantineDoc.getIsConfidential().getDisplayedValue()));
         }
-        if (null != quarantineDoc.getIsRestricted()) {
+        if (null != quarantineDoc.getIsRestricted() && !BULK_SCAN.equals(submittedBy)) {
             reviewDetailsBuilder.append(format(RESTRICTED_INFO_LABEL,
                                                quarantineDoc.getIsRestricted().getDisplayedValue()));
         }

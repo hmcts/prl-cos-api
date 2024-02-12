@@ -361,9 +361,6 @@ public class ManageDocumentsService {
                 return RESTRICTED_DOCUMENTS;
             }
         }
-        if (quarantineLegalDoc.getUploadedBy().equals(BULK_SCAN)) {
-            return CONFIDENTIAL_DOCUMENTS;
-        }
         return null;
     }
 
