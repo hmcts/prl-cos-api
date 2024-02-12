@@ -95,7 +95,6 @@ public class CaseService {
         if (CITIZEN_CASE_SUBMIT.getValue().equalsIgnoreCase(eventId)
             || CITIZEN_CASE_SUBMIT_WITH_HWF.getValue().equalsIgnoreCase(eventId)) {
             UserDetails userDetails = idamClient.getUserDetails(authToken);
-            log.info("caseName is {}", caseData.getApplicantCaseName());
             UserInfo userInfo = UserInfo
                 .builder()
                 .idamId(userDetails.getId())
@@ -109,7 +108,6 @@ public class CaseService {
                     .userInfo(wrapElements(userInfo))
                     .courtName(C100_DEFAULT_COURT_NAME)
                     .build());
-            log.info("caseName is {}", updatedCaseData.getApplicantCaseName());
             log.info("case is being updated");
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
