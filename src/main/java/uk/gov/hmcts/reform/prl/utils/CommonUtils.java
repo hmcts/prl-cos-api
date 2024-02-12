@@ -214,7 +214,7 @@ public class CommonUtils {
                     .replace(AM_LOWER_CASE, AM_UPPER_CASE).replace(PM_LOWER_CASE, PM_UPPER_CASE);
             }
         } catch (Exception e) {
-            log.error("Error while formatting the date time", e);
+            log.error(ERROR_STRING + "in formatDateTime Method" + e.getMessage());
         }
         return "";
     }
