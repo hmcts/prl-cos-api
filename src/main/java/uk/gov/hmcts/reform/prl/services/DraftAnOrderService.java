@@ -231,7 +231,6 @@ public class DraftAnOrderService {
 
     private static void defaultHearingOptionToDateReservedWithListAssist(DraftOrder draftOrder) {
         draftOrder.getManageOrderHearingDetails()
-            .stream().filter(hearingDataElement -> null == hearingDataElement.getValue().getHearingDateConfirmOptionEnum())
             .forEach(hearingDataElement -> hearingDataElement.getValue()
                 .setHearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit));
     }
