@@ -150,7 +150,10 @@ public class UpdatePartyDetailsService {
         }
     }
 
-    private static void setFl401PartyNames(PartyDetails fl401Applicant, CaseData caseData, Map<String, Object> updatedCaseData, PartyDetails fl401respondent) {
+    private static void setFl401PartyNames(PartyDetails fl401Applicant,
+                                           CaseData caseData,
+                                           Map<String, Object> updatedCaseData,
+                                           PartyDetails fl401respondent) {
         if (Objects.nonNull(fl401Applicant)) {
             CommonUtils.generatePartyUuidForFL401(caseData);
             updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
