@@ -111,7 +111,8 @@ public class CaseService {
             log.info("case is being updated");
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
-        if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)) {
+        if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
+            && isEmpty(caseData.getApplicantCaseName())) {
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder()
                     .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
@@ -143,27 +144,24 @@ public class CaseService {
     }
 
     public String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
-        if (!isEmpty(caseData.getApplicantCaseName())) {
-            return caseData.getApplicantCaseName();
-        } else {
-            C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-            ObjectMapper mapper = new ObjectMapper();
-            C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
-            C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
-            if (null != c100RebuildData) {
-                if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
-                    c100RebuildApplicantDetailsElements = mapper
-                        .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
-                }
-
-                if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
-                    c100RebuildRespondentDetailsElements = mapper
-                        .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
-                }
+        C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+        ObjectMapper mapper = new ObjectMapper();
+        C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
+        C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
+        if (null != c100RebuildData) {
+            if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
+                c100RebuildApplicantDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
             }
-            return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
+
+            if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+                c100RebuildRespondentDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+            }
         }
+        return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
     }
+
 
     private String buildCaseName(C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
                                  C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
