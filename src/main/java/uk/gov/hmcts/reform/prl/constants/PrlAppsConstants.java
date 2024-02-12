@@ -111,6 +111,7 @@ public class PrlAppsConstants {
     public static final String C8_DRAFT_HINT = "C8_DRAFT";
     public static final String C8_RESP_DRAFT_HINT = "C8_RESPONDENT_DRAFT";
     public static final String C8_RESP_FINAL_HINT = "C8_RESPONDENT_FINAL";
+    public static final String C8_RESP_FL401_FINAL_HINT = "C8_RESPONDENT_FL401_FINAL";
     public static final String C1A_DRAFT_HINT = "C1A_DRAFT";
     public static final String FINAL_HINT = "FINAL";
     public static final String DRAFT_HINT = "DRAFT";
@@ -885,7 +886,9 @@ public class PrlAppsConstants {
     public static final String WA_ORDER_NAME_JUDGE_CREATED = "orderNameForJudgeCreatedOrder";
     public static final String WA_ORDER_NAME_SOLICITOR_CREATED = "orderNameForSolicitorCreatedOrder";
     public static final String WA_ORDER_NAME_ADMIN_CREATED = "orderNameForAdminCreatedOrder";
-
+    public static final String ALLOCATE_JUDGE_ROLE = "allocated-judge";
+    public static final String HEARING_JUDGE_ROLE = "hearing-judge";
+    public static final String GATEKEEPING_JUDGE_ROLE = "gatekeeping-judge";
     public static final String IS_SPECIFIC_JUDGE_OR_LEGAL_ADVISOR_NEEDED = "isSpecificJudgeOrLegalAdviserNeeded";
 
     // PRL-5025
@@ -907,4 +910,11 @@ public class PrlAppsConstants {
 
     public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
         + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
+
+    public static final String WA_SOA_C8_CHECK_NEEDED = "isC8CheckNeeded";
+    public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
+    public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
+    public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
+
+
 }

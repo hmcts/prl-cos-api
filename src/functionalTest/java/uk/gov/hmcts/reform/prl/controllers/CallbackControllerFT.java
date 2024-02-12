@@ -15,6 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.Application;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
@@ -29,6 +30,8 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
@@ -51,6 +54,7 @@ import java.util.Optional;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -75,6 +79,9 @@ public class CallbackControllerFT {
 
     @MockBean
     private CaseEventService caseEventService;
+
+    @MockBean
+    private RoleAssignmentApi roleAssignmentApi;
 
     @MockBean
     private SolicitorEmailService solicitorEmailService;
@@ -269,6 +276,10 @@ public class CallbackControllerFT {
     public void givenC100Case_whenSendToGateKeeperEndpoint_then200Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(C100_SEND_TO_GATEKEEPER);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(userService.getUserByEmailId(anyString(), anyString())).thenReturn(List.of(UserDetails.builder().build()));
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
+        when(roleAssignmentApi.updateRoleAssignment(any(), any(), any(), any(RoleAssignmentRequest.class)))
+            .thenReturn(RoleAssignmentResponse.builder().build());
         mockMvc.perform(post("/send-to-gatekeeper")
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
@@ -363,6 +374,8 @@ public class CallbackControllerFT {
             RefDataUserService.class))).thenReturn(
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.legalAdviser).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(userService.getUserByEmailId(anyString(), anyString())).thenReturn(List.of(UserDetails.builder().build()));
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
         mockMvc.perform(post("/send-to-gatekeeper")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -379,6 +392,8 @@ public class CallbackControllerFT {
             RefDataUserService.class))).thenReturn(
             GatekeepingDetails.builder().isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge).build());
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        when(userService.getUserByEmailId(anyString(), anyString())).thenReturn(List.of(UserDetails.builder().build()));
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
         mockMvc.perform(post("/send-to-gatekeeper")
                             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
                             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
