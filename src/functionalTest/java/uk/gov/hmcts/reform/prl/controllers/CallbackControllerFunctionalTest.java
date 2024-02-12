@@ -102,7 +102,6 @@ public class CallbackControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
-    @Ignore
     @Test
     public void givenNoAuthorization_whenPostRequestToDraftDocumentGeneration_then400Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
