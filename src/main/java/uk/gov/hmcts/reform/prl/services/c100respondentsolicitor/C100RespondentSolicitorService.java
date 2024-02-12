@@ -227,6 +227,11 @@ public class C100RespondentSolicitorService {
                     caseDataUpdated.putAll(data);
                     respondentAllegationOfHarmService.prePopulatedChildData(caseData,
                             caseDataUpdated,solicitorRepresentedRespondentAllegationsOfHarmData);
+                    try {
+                        log.info("caseData prepoulation aoh {}",objectMapper.writeValueAsString(caseDataUpdated));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
 
                     break;
                 case RESPOND_ALLEGATION_OF_HARM:
@@ -305,6 +310,11 @@ public class C100RespondentSolicitorService {
         updatedCaseData.put(RESPONDENTS, respondents);
         Map<String, Object> data = objectMapper
                 .convertValue(RespondentAllegationsOfHarmData.builder().build(),new TypeReference<Map<String, Object>>() {});
+        try {
+            log.info("caseData flusing aoh {}",objectMapper.writeValueAsString(data));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         updatedCaseData.putAll(data);
         return updatedCaseData;
     }
