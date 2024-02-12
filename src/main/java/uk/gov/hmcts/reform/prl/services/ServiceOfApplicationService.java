@@ -173,7 +173,7 @@ public class ServiceOfApplicationService {
     public static final String PRL_COURT_ADMIN = "PRL Court admin";
     public static final String DASH_BOARD_LINK = "dashBoardLink";
     public static final String SOA_DOCUMENT_DYNAMIC_LIST_FOR_LA = "soaDocumentDynamicListForLa";
-    public static final String UNSERVED_CAFCASS_CYMRU_PACK = "unservedCafcassCymruPack";
+    public static final String UNSERVED_CAFCASS_CYMRU_PACK = "unServedCafcassCymruPack";
 
     @Value("${xui.url}")
     private String manageCaseUrl;
