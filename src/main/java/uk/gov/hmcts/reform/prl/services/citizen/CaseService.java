@@ -116,10 +116,10 @@ public class CaseService {
             caseData.toBuilder()
                 .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
                 .build();
-            log.info("caseName is ()", caseData.getApplicantCaseName());
+            log.info("caseName is {}", caseData.getApplicantCaseName());
         }
 
-        log.info("caseName is ()", caseData.getApplicantCaseName());
+        log.info("caseName is {}", caseData.getApplicantCaseName());
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
 
