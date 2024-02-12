@@ -121,7 +121,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DIO_WITHOUT_NOT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_TEMPLATE_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HMC_STATUS_COMPLETED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARINGS_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_HEARING_DETAILS;
@@ -567,6 +567,9 @@ public class ManageOrderService {
     @Value("${document.templates.common.prl_fl404b_blank_welsh_final_filename}")
     protected String fl404bBlankWelshFile;
 
+    @Value("${hearing_component.hearingStatusesToFilter}")
+    private String hearingStatusesToFilter;
+
     private final DocumentLanguageService documentLanguageService;
 
     public static final String FAMILY_MAN_ID = "Family Man ID: ";
@@ -602,6 +605,8 @@ public class ManageOrderService {
                 populateServeOrderDetails(caseData, headerMap);
             }
         }
+        //PRL-4854 - Set isSdoSelected=No default
+        headerMap.put("isSdoSelected", No);
         return headerMap;
     }
 
@@ -1355,6 +1360,7 @@ public class ManageOrderService {
                                   caseData.getManageOrders().getAmendOrderSelectCheckOptions())
                                                          || UserRoles.JUDGE.name().equalsIgnoreCase(loggedInUserType)
                                                          ? No : Yes)
+                              .reviewRequiredBy(caseData.getManageOrders().getAmendOrderSelectCheckOptions()) //PRL-4854
                               .build())
             .dateOrderMade(caseData.getDateOrderMade())
             .approvalDate(caseData.getApprovalDate())
@@ -1365,6 +1371,10 @@ public class ManageOrderService {
             .manageOrderHearingDetails(caseData.getManageOrders().getOrdersHearingDetails())
             .hasJudgeProvidedHearingDetails(caseData.getManageOrders().getHasJudgeProvidedHearingDetails())
             .isOrderCreatedBySolicitor(UserRoles.SOLICITOR.name().equals(loggedInUserType) ? Yes : No)
+            //PRL-4854 - persist hearingsType dynamicList
+            .hearingsType(caseData.getManageOrders().getHearingsType())
+            .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
+            .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
             .build();
     }
 
@@ -2375,12 +2385,14 @@ public class ManageOrderService {
             String.valueOf(caseData.getId())
         ));
         List<CaseHearing> caseHearings = hearings.map(Hearings::getCaseHearings).orElseGet(ArrayList::new);
-        List<CaseHearing> completedHearings = caseHearings.stream()
-            .filter(caseHearing -> HMC_STATUS_COMPLETED.equalsIgnoreCase(caseHearing.getHmcStatus()))
+        List<String> hearingStatusFilterList = Arrays.stream(hearingStatusesToFilter.trim().split(COMMA)).map(String::trim).toList();
+        log.info("Hearing statuses to filter {}", hearingStatusFilterList);
+        List<CaseHearing> filteredHearings = caseHearings.stream()
+            .filter(caseHearing -> hearingStatusFilterList.contains(caseHearing.getHmcStatus()))
             .toList();
-
+        log.info("Filtered hearing {}", filteredHearings);
         //get hearings dropdown
-        List<DynamicListElement> hearingDropdowns = completedHearings.stream()
+        List<DynamicListElement> hearingDropdowns = filteredHearings.stream()
             .map(caseHearing -> {
                 //get hearingType
                 String hearingType = String.valueOf(caseHearing.getHearingTypeValue());
@@ -2768,8 +2780,7 @@ public class ManageOrderService {
             caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
-            boolean isOrderEdited = false;
-            if (ManageOrdersUtils.isOrderEdited(caseData, eventId, isOrderEdited)) {
+            if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
                 setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
                 setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),
@@ -2937,7 +2948,7 @@ public class ManageOrderService {
         caseDataUpdated.put("loggedInUserType", getLoggedInUserType(authorisation));
 
         //PRL-3254 - Populate hearing details dropdown for create order
-        caseDataUpdated.put("hearingsType", populateHearingsDropdown(authorisation, caseData));
+        caseDataUpdated.put(HEARINGS_TYPE, populateHearingsDropdown(authorisation, caseData));
         caseDataUpdated.put("dateOrderMade", LocalDate.now());
         caseDataUpdated.put("magistrateLastName", isNotEmpty(caseData.getMagistrateLastName())
             ? caseData.getMagistrateLastName() : Arrays.asList(element(MagistrateLastName.builder().build())));
