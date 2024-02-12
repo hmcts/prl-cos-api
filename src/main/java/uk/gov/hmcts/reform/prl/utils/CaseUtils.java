@@ -494,8 +494,6 @@ public class CaseUtils {
     public static boolean checkIfAddressIsChanged(PartyDetails currentParty, PartyDetails updatedParty) {
         Address currentAddress = currentParty.getAddress();
         Address previousAddress = updatedParty.getAddress();
-        log.info("Current address {} ", currentAddress);
-        log.info("Previous address {} ", previousAddress);
         return currentAddress != null
             && (!StringUtils.equals(currentAddress.getAddressLine1(), previousAddress.getAddressLine1())
             || !StringUtils.equals(currentAddress.getAddressLine2(),previousAddress.getAddressLine2())
