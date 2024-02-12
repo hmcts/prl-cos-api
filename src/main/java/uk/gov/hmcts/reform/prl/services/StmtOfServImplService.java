@@ -27,6 +27,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -178,7 +179,7 @@ public class StmtOfServImplService {
                 return caseData.getStatementOfService().getStmtOfServiceForApplication();
             }
         }
-        return null;
+        return Collections.emptyList();
     }
 
     private List<Element<StmtOfServiceAddRecipient>> appendStatementOfServiceToOrdersTab(
@@ -198,7 +199,7 @@ public class StmtOfServImplService {
             }
         }
 
-        return null;
+        return Collections.emptyList();
     }
 
     private CaseData cleanupRespondentPacksCaOrBailiffPersonalService(CaseData caseData, String authorisation) {

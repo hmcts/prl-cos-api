@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -76,14 +75,6 @@ public class StatementOfServiceController {
     ) {
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
             && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken))) {
-            try {
-                log.info(
-                    "/Statement-of-service-about-to-submit/about-to-submit::CallbackRequest -> {}",
-                    objectMapper.writeValueAsString(callbackRequest)
-                );
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(stmtOfServImplService.retrieveAllRespondentNames(
                     callbackRequest.getCaseDetails(),

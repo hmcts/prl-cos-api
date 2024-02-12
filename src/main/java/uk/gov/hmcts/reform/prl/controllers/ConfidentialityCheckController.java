@@ -88,7 +88,7 @@ public class ConfidentialityCheckController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map caseDataMap = callbackRequest.getCaseDetails().getData();
+            Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             caseDataMap.putAll(serviceOfApplicationService.setSoaOrConfidentialWaFields(
                 caseData,

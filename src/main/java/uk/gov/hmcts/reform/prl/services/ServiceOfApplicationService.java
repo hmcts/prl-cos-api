@@ -135,7 +135,7 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@SuppressWarnings({"java:S3776","java:S6204","java:S112","java:S4144", "java:S5665"})
+@SuppressWarnings({"java:S3776","java:S6204","java:S112","java:S4144", "java:S5665","java:S1172","java:S6541"})
 public class ServiceOfApplicationService {
     public static final String UNSERVED_APPLICANT_PACK = "unServedApplicantPack";
     public static final String UNSERVED_RESPONDENT_PACK = "unServedRespondentPack";
@@ -865,9 +865,11 @@ public class ServiceOfApplicationService {
     }
 
     private void handlePersonalServiceForCitizenC100(CaseData caseData, String authorization,
+
                                                         List<Element<EmailNotificationDetails>> emailNotificationDetails,
                                                         List<Element<BulkPrintDetails>> bulkPrintDetails,
                                                         List<Document> c100StaticDocs) {
+        //Suppressed java:S1172 as emailNotificationDetails not used, but will be used when citizen journey comes into the picture.
         if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
@@ -1418,20 +1420,20 @@ public class ServiceOfApplicationService {
             case PrlAppsConstants.E -> docs.addAll(generatePackE(caseData, staticDocs));
             case PrlAppsConstants.F -> docs.addAll(generatePackF(caseData, staticDocs));
             case PrlAppsConstants.H -> docs.addAll(generatePackH(caseData, staticDocs));
-            case PrlAppsConstants.I -> docs.addAll(generatePackI(caseData, staticDocs));
+            case PrlAppsConstants.I -> docs.addAll(generatePackI(caseData));
             case PrlAppsConstants.J -> docs.addAll(generatePackJ(caseData, staticDocs));
             case PrlAppsConstants.K -> docs.addAll(generatePackK(caseData, staticDocs));
             case PrlAppsConstants.L -> docs.addAll(generatePackL(caseData, staticDocs));
             case PrlAppsConstants.M -> docs.addAll(generatePackM(caseData, staticDocs));
-            case PrlAppsConstants.N -> docs.addAll(generatePackN(caseData, staticDocs));
-            case PrlAppsConstants.O -> docs.addAll(generatePackO(caseData, staticDocs));
+            case PrlAppsConstants.N -> docs.addAll(generatePackN(caseData));
+            case PrlAppsConstants.O -> docs.addAll(generatePackO(caseData));
             case PrlAppsConstants.P -> docs.addAll(generatePackP(caseData, staticDocs));
             case PrlAppsConstants.Q -> docs.addAll(generatePackQ(caseData, staticDocs));
             case PrlAppsConstants.R -> docs.addAll(generatePackR(caseData, staticDocs));
             case PrlAppsConstants.S -> docs.addAll(generatePackS(caseData, staticDocs));
             case PrlAppsConstants.HI -> docs.addAll(generatePackHI(caseData, staticDocs));
             case PrlAppsConstants.Z -> //not present in miro, added this by comparing to DA other org pack,confirm with PO's
-                docs.addAll(generatePackZ(caseData, staticDocs));
+                docs.addAll(generatePackZ(caseData));
             default -> log.info("No Letter selected");
         }
         return docs;
@@ -1488,7 +1490,7 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackZ(CaseData caseData, List<Document> staticDocs) {
+    private List<Document> generatePackZ(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
@@ -1507,9 +1509,8 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackN(CaseData caseData, List<Document> staticDocs) {
-        List<Document> docs = new ArrayList<>(getC6aIfPresent(getSoaSelectedOrders(caseData)));
-        return docs;
+    private List<Document> generatePackN(CaseData caseData) {
+        return new ArrayList<>(getC6aIfPresent(getSoaSelectedOrders(caseData)));
     }
 
     public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
@@ -1530,7 +1531,7 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackI(CaseData caseData, List<Document> staticDocs) {
+    private List<Document> generatePackI(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
@@ -1646,7 +1647,7 @@ public class ServiceOfApplicationService {
         return docs;
     }
 
-    private List<Document> generatePackO(CaseData caseData, List<Document> staticDocs) {
+    private List<Document> generatePackO(CaseData caseData) {
         List<Document> docs = new ArrayList<>();
         docs.addAll(getCaseDocs(caseData));
         docs.add(caseData.getC8Document());
@@ -2367,6 +2368,7 @@ public class ServiceOfApplicationService {
     }
 
     public CaseData sendNotificationsForUnServedPacks(CaseData caseData, String authorization) {
+        //Suppressed java:S6541 , suppression will be removed after refactoring in the IP sprint.
         List<Element<EmailNotificationDetails>> emailNotificationDetails = new ArrayList<>();
         List<Element<BulkPrintDetails>> bulkPrintDetails = new ArrayList<>();
         final SoaPack unServedApplicantPack = caseData.getServiceOfApplication().getUnServedApplicantPack();
@@ -2467,7 +2469,7 @@ public class ServiceOfApplicationService {
             emailNotificationDetails.addAll(sendEmailDaPersonalApplicantLegalRep(
                 caseData,
                 authorization,
-                unwrapElements(unServedApplicantPack.getPackDocument()),
+                unwrapElements(null != unServedApplicantPack ? unServedApplicantPack.getPackDocument() : null),
                 unwrapElements(unServedRespondentPack.getPackDocument()),
                 false
             ));
