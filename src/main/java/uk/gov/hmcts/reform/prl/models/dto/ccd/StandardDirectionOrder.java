@@ -114,20 +114,40 @@ public class StandardDirectionOrder implements MappableObject {
     private final List<Element<MiamAttendingPersonName>> sdoMiamAttendingPerson;
     @JsonProperty("sdoJoiningInstructionsForRH")
     private final String sdoJoiningInstructionsForRH;
+    //Not required - start
     @JsonProperty("sdoHearingAllegationsMadeBy")
     private final List<SdoApplicantRespondentEnum> sdoHearingAllegationsMadeBy;
     @JsonProperty("sdoHearingCourtHasRequested")
     private final List<SdoCourtRequestedEnum> sdoHearingCourtHasRequested;
+    //Not required - end
+    @JsonProperty("sdoDirectionsForFactFindingHearingDetails")
+    private final HearingData sdoDirectionsForFactFindingHearingDetails;
+    @JsonProperty("sdoHearingCourtRequests")
+    private final SdoCourtRequestedEnum sdoHearingCourtRequests;
+    @JsonProperty("sdoWhoMadeAllegationsList")
+    private final DynamicMultiSelectList sdoWhoMadeAllegationsList;
+    @JsonProperty("sdoWhoNeedsToRespondAllegationsList")
+    private final DynamicMultiSelectList sdoWhoNeedsToRespondAllegationsList;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoAllegationsDeadlineDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private final LocalDate sdoWrittenResponseDeadlineDate;
     @JsonProperty("sdoHearingReportsAlsoSentTo")
     private final List<SdoReportsAlsoSentToEnum> sdoHearingReportsAlsoSentTo;
+    @JsonProperty("sdoWhoMadeAllegationsText")
+    private final String sdoWhoMadeAllegationsText;
+    @JsonProperty("sdoWhoNeedsToRespondAllegationsText")
+    private final String sdoWhoNeedsToRespondAllegationsText;
     @JsonProperty("sdoHearingMaximumPages")
     private final String sdoHearingMaximumPages;
     @JsonProperty("sdoHearingHowManyWitnessEvidence")
     private final int sdoHearingHowManyWitnessEvidence;
+    @JsonProperty("sdoFactFindingOtherCheck")
+    private final List<FactFindingOtherDirectionEnum> sdoFactFindingOtherCheck;
+    @JsonProperty("sdoFactFindingOtherDetails")
+    private final List<Element<SdoDioProvideOtherDetails>> sdoFactFindingOtherDetails;
+    private final String sdoWhoNeedsToRespondAllegationsListText;
+    private final String sdoWhoMadeAllegationsListText;
     @JsonProperty("sdoDocsEvidenceWitnessEvidence")
     private final int sdoDocsEvidenceWitnessEvidence;
     private final List<Element<SdoLanguageDialect>> sdoInterpreterDialectRequired;
@@ -238,10 +258,6 @@ public class StandardDirectionOrder implements MappableObject {
     private final HearingData sdoDraHearingDetails;
     @JsonProperty("sdoSettlementHearingDetails")
     private final HearingData sdoSettlementHearingDetails;
-    @JsonProperty("sdoFactFindingOtherCheck")
-    private final List<FactFindingOtherDirectionEnum> sdoFactFindingOtherCheck;
-    @JsonProperty("sdoFactFindingOtherDetails")
-    private final List<Element<SdoDioProvideOtherDetails>> sdoFactFindingOtherDetails;
     @JsonProperty("sdoInterpreterOtherDetailsCheck")
     private final List<DioOtherDirectionEnum> sdoInterpreterOtherDetailsCheck;
     @JsonProperty("sdoInterpreterOtherDetails")

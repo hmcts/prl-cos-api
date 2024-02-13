@@ -202,5 +202,4 @@ public class CallbackControllerFunctionalTest {
             .body("data.caseNameHmctsInternal", equalTo("Test Name"))
             .assertThat().statusCode(200);
     }
-
 }
