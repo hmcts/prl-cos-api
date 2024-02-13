@@ -532,10 +532,13 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_ForPersonalServiceWhenCourtAdminSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
 
+        String requestBodyRevised = requestBody
+            .replace("1706997775517206", caseDetails.getId().toString());
+
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
@@ -551,10 +554,13 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_ForPersonalServiceWhenBailiffSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
 
+        String requestBodyRevised = requestBody
+            .replace("1706997775517206", caseDetails.getId().toString());
+
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
