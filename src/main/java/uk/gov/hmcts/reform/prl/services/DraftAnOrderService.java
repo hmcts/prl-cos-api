@@ -65,6 +65,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.StandardDirectionOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
@@ -90,6 +91,7 @@ import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AFTER_SECOND_GATEKEEPING;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_NEXT_STEPS_CONTENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -141,6 +143,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_S
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WHO_MADE_ALLEGATIONS_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WHO_NEEDS_TO_RESPOND_ALLEGATIONS_TEXT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
+import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum.partyToProvideDetailsCmyru;
@@ -201,6 +204,7 @@ public class DraftAnOrderService {
     private final HearingDataService hearingDataService;
     private final HearingService hearingService;
     private final CoreCaseDataService coreCaseDataService;
+    private final RoleAssignmentService roleAssignmentService;
 
     private static final String DRAFT_ORDER_COLLECTION = "draftOrderCollection";
     private static final String ORDER_NAME = "orderName";
@@ -1096,8 +1100,10 @@ public class DraftAnOrderService {
                                       true,
                                       caseData.getStandardDirectionOrder(),
                                       draftOrder.getOrderType(),
-                                      draftOrder.getC21OrderOptions()))
-                                  .instructionsToLegalRepresentative(null)
+                                      draftOrder.getC21OrderOptions()
+                                  ))
+                                  .instructionsToLegalRepresentative(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(
+                                      eventId) ? null : draftOrder.getOtherDetails().getInstructionsToLegalRepresentative())
                                   .build())
                 .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
                 .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
@@ -2002,6 +2008,40 @@ public class DraftAnOrderService {
                                                                                 hearings,
                                                                                 authorisation
                                                                             ));
+            if (caseData.getAllocatedJudge() != null
+                && caseData.getAllocatedJudge().getIsSpecificJudgeOrLegalAdviserNeeded().equals(Yes)) {
+                RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                    .judgeEmail(caseData.getAllocatedJudge().getJudgeEmail())
+                    .legalAdviserList(caseData.getAllocatedJudge().getLegalAdviserList())
+                    .build();
+                roleAssignmentService.createRoleAssignment(
+                    authorisation,
+                    callbackRequest.getCaseDetails(),
+                    roleAssignmentDto,
+                    DRAFT_AN_ORDER.getName(),
+                    false,
+                    ALLOCATE_JUDGE_ROLE
+                );
+            } else {
+                RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                    .judicialUser(caseData.getManageOrders()
+                                      .getSolicitorOrdersHearingDetails()
+                                      .stream()
+                                      .findFirst()
+                                      .get()
+                                      .getValue()
+                                      .getHearingJudgeNameAndEmail())
+                    .build();
+                roleAssignmentService.createRoleAssignment(
+                    authorisation,
+                    callbackRequest.getCaseDetails(),
+                    roleAssignmentDto,
+                    DRAFT_AN_ORDER.getName(),
+                    false,
+                    ALLOCATE_JUDGE_ROLE
+                );
+
+            }
         }
         caseDataUpdated.putAll(generateDraftOrderCollection(caseData, authorisation));
         CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
@@ -2245,7 +2285,7 @@ public class DraftAnOrderService {
         );
 
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
-            && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
+            && DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
             errorList = validateDraftOrderDetails(caseData);
             if (!errorList.isEmpty()) {
                 return Map.of("errorList", errorList);
@@ -2301,7 +2341,7 @@ public class DraftAnOrderService {
         boolean isSolicitorOrdersHearings = false;
         List<String> occupationErrorList = new ArrayList<>();
         if (DraftOrderOptionsEnum.draftAnOrder.equals(caseData.getDraftOrderOptions())
-            && Event.DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
+            && DRAFT_AN_ORDER.getId().equals(callbackRequest.getEventId())) {
             if (isHearingPageNeeded(
                 caseData.getCreateSelectOrderOptions(),
                 caseData.getManageOrders().getC21OrderOptions()
