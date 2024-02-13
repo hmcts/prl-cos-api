@@ -102,15 +102,12 @@ public class CaseService {
                 .lastName(userDetails.getSurname().orElse(null))
                 .emailAddress(userDetails.getEmail())
                 .build();
-            uk.gov.hmcts.reform.ccd.client.model.CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
-            caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
             CaseData updatedCaseData = caseDataMapper
                 .buildUpdatedCaseData(caseData.toBuilder()
                     .userInfo(wrapElements(userInfo))
                     .courtName(C100_DEFAULT_COURT_NAME)
                     .build());
-            log.info("updatedCaseData case name {}", updatedCaseData.getApplicantCaseName());
             log.info("case is being updated");
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }

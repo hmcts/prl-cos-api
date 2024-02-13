@@ -635,7 +635,6 @@ public class DocumentGenService {
             );
         } else {
             log.info("Generating document for {} ", template);
-            log.info("casename is {}", caseData.getApplicantCaseName());
             generatedDocumentInfo = dgsService.generateDocument(
                 authorisation,
                 uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails.builder().caseData(caseData).build(),
