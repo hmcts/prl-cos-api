@@ -49,12 +49,12 @@ public class DocumentUtils {
             .build();
     }
 
-    public static Document toCoverLetterDocument(GeneratedDocumentInfo generatedDocumentInfo) {
+    public static Document toCoverSheetDocument(GeneratedDocumentInfo generatedDocumentInfo) {
         if (null != generatedDocumentInfo) {
             return Document.builder().documentUrl(generatedDocumentInfo.getUrl())
                 .documentHash(generatedDocumentInfo.getHashToken())
                 .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                .documentFileName("coverletter.pdf")
+                .documentFileName("coversheet.pdf")
                 .build();
         }
         return null;

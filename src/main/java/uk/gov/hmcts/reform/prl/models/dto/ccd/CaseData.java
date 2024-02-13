@@ -102,7 +102,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -728,7 +728,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private GatekeepingDetails gatekeepingDetails;
 
     @JsonUnwrapped
-    private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
+    private final ListWithoutNoticeDetails listWithoutNoticeDetails;
     @JsonUnwrapped
     private final Fl401ListOnNotice fl401ListOnNotice;
 
@@ -776,7 +776,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
 
-    private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+    @JsonUnwrapped
+    private StatementOfService statementOfService;
+
     @JsonUnwrapped
     private final AllPartyFlags allPartyFlags;
     /**
