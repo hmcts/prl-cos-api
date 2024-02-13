@@ -83,6 +83,15 @@ public class ManageOrdersControllerFunctionalTest {
     private static final String VALID_REQUEST_OTHER_PARTY_WITHOUT_ADDRESS
         = "requests/manage-orders/serve-order-request-otherParty-noaddress-present.json";
 
+    private static final String VALID_CAFCASS_REQUEST_JSON
+        = "requests/cafcass-cymru-send-email-request.json";
+
+
+    private static final String VALID_SERVER_ORDER_REQUEST_JSON
+        = "requests/serve-order-send-email-to-app-and-resp-request.json";
+
+    private static final String APPLICANT_CASE_NAME_REQUEST = "requests/call-back-controller-applicant-case-name.json";
+
     private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN =
         "CallBckReqForFinaliseServeOrder_courtadmin.json";
 
@@ -112,11 +121,6 @@ public class ManageOrdersControllerFunctionalTest {
         = "requests/court-admin-manage-order-manager-approval-required-request.json";
 
     private static final String JUDGE_DRAFT_ORDER_BODY = "requests/judge-draft-order-request.json";
-
-    private static final String VALID_CAFCASS_REQUEST_JSON
-        = "requests/cafcass-cymru-send-email-request.json";
-
-    private static final String APPLICANT_CASE_NAME_REQUEST = "requests/call-back-controller-applicant-case-name.json";
 
     @Before
     public void setup(){
@@ -222,6 +226,25 @@ public class ManageOrdersControllerFunctionalTest {
             .then()
             .assertThat().statusCode(200);
 
+    }
+
+
+    @Test
+    @Ignore
+    public void givenRequestBody_WhenServeOrderTestSendEmailToApplicantOrRespLip() throws Exception {
+
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails).build();
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(callbackRequest)
+            .when()
+            .contentType("application/json")
+            .post("/case-order-email-notification")
+            .then()
+            .body("data.id", equalTo(caseDetails.getData().get("id")))
+            .assertThat().statusCode(200);
     }
 
     /**
