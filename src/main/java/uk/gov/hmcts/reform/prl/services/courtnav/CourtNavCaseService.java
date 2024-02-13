@@ -154,7 +154,7 @@ public class CourtNavCaseService {
         try {
             return coreCaseDataService.startUpdate(authorisation, eventRequestData, caseId, true);
         } catch (Exception ex) {
-            log.error("Error while getting the case {} {}", caseId, ex.getMessage());
+            log.error("Error while getting the case {} {}", caseId, ex.getMessage(), ex);
         }
         return null;
     }

@@ -83,7 +83,7 @@ public class HearingService {
         try {
             caseLinkedData = hearingApiClient.getCaseLinkedData(userToken, authTokenGenerator.generate(), caseLinkedRequest);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error in getCaseLinkedData ", e);
         }
         return caseLinkedData;
     }
@@ -94,7 +94,7 @@ public class HearingService {
         try {
             return hearingApiClient.getNextHearingDate(userToken, authTokenGenerator.generate(), caseReferenceNumber);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error in getNextHearingDate", e);
         }
         return null;
     }

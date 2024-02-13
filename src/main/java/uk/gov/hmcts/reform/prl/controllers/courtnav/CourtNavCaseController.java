@@ -95,7 +95,6 @@ public class CourtNavCaseController {
         @RequestParam MultipartFile file,
         @RequestParam String typeOfDocument
     ) {
-        log.info("Document name {} and Type of document {}", file.getOriginalFilename(), typeOfDocument);
         if (Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation)) && Boolean.TRUE.equals(
             authorisationService.authoriseService(serviceAuthorization))) {
 

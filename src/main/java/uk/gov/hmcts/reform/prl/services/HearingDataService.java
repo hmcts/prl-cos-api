@@ -138,7 +138,7 @@ public class HearingDataService {
             );
             return refDataUserService.filterCategoryValuesByCategoryId(commonDataResponse, HEARINGTYPE);
         } catch (Exception e) {
-            log.error("Category Values look up failed - " + e.getMessage(), e);
+            log.error("Category Values look up failed - ", e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -564,7 +564,7 @@ public class HearingDataService {
                     .toList();
             }
         } catch (Exception e) {
-            log.error("Exception occured in getLinkedCasesDynamicList {}", e.getMessage());
+            log.error("Exception occured in getLinkedCasesDynamicList {}", e);
         }
         return dynamicListElements;
     }

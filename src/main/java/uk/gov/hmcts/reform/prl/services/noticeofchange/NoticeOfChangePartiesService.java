@@ -741,7 +741,6 @@ public class NoticeOfChangePartiesService {
             Element<PartyDetails> newPartyDetailsElement = entry.getValue();
             if (removeSolicitorRole.isPresent() && null != newPartyDetailsElement.getValue().getSolicitorOrg()) {
                 List<CaseEventDetail> eventsForCase = caseEventService.findEventsForCase(String.valueOf(caseId));
-                log.info("CaseEventDetail ===> " + eventsForCase);
                 for (CaseEventDetail eventDetail : eventsForCase) {
                     if (State.PREPARE_FOR_HEARING_CONDUCT_HEARING.getValue().equalsIgnoreCase(eventDetail.getStateId())) {
                         log.info("Case in hearing state, hence updating access code");

@@ -66,13 +66,11 @@ public class RefDataUserService {
                 Optional<String> totalRecordsStr = Optional.ofNullable(response.getHeaders().getFirst(
                     RD_STAFF_TOTAL_RECORDS_HEADER));
                 int totalRecords = totalRecordsStr.map(Integer::parseInt).orElse(0);
-                log.info("Total no. of records: {} ", totalRecords);
                 if (totalRecords > 0 && totalRecords < RD_STAFF_PAGE_SIZE) {
                     return onlyLegalAdvisor(response.getBody());
                 } else {
                     List<DynamicListElement> listOfLegalAdvisors = onlyLegalAdvisor(response.getBody());
                     int noOfPages = (int) Math.ceil(totalRecords / (double) RD_STAFF_PAGE_SIZE);
-                    log.info("No. of pages: {} ", noOfPages);
                     for (int pageNumber = RD_STAFF_SECOND_PAGE; pageNumber < noOfPages; pageNumber++) {
                         listOfLegalAdvisors.addAll(onlyLegalAdvisor(getStaffResponse(pageNumber).getBody()));
                     }
@@ -141,7 +139,7 @@ public class RefDataUserService {
             );
 
         } catch (Exception e) {
-            log.error("Category Values look up failed {} ", e.getMessage());
+            log.error("Category Values look up failed {} ", e);
         }
         return commonDataResponse;
     }
@@ -157,7 +155,7 @@ public class RefDataUserService {
                 flagType
             );
         } catch (Exception e) {
-            log.error("Case flags Values look up failed {} ", e.getMessage());
+            log.error("Case flags Values look up failed {} ", e);
         }
         return caseFlag;
     }

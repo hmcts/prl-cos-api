@@ -80,8 +80,6 @@ public class HearingManagementService {
             fields.put(NEXT_HEARING_DETAILS, hearingRequest.getNextHearingDateRequest().getNextHearingDetails());
         }
 
-        log.info("fields object -- > {}",fields);
-
         switch (caseState) {
             case PREPARE_FOR_HEARING_CONDUCT_HEARING:
                 customFields.put(EVENT_ID, CaseEvent.HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING);

@@ -179,7 +179,7 @@ public class RequestUpdateCallbackService {
                 caseData.setCourtCodeFromFact(String.valueOf(closestChildArrangementsCourt.getCountyLocationCode()));
             }
         } catch (Exception e) {
-            log.error("Error while populating case date in payment request call {}", caseData.getId());
+            log.error("Error while populating case date in payment request call {}", caseData.getId(), e);
         }
         return caseData;
     }

@@ -50,7 +50,7 @@ public class BundlingService {
         try {
             bundleCreateResponse = bundleApiClient.createBundleServiceRequest(authorization, serviceAuthorization, bundleCreateRequest);
         } catch (Exception e) {
-            log.error(e.getMessage());
+            log.error("Error in creating bundle service request",e);
         }
         return bundleCreateResponse;
     }

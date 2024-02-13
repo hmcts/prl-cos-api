@@ -59,7 +59,7 @@ public class CourtFinderService {
                             : getCorrectPartyPostcode(caseData));
             }
         } catch (Exception e) {
-            log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e.getMessage());
+            log.info("CourtFinderService.getNearestFamilyCourt() method is throwing exception : {}",e);
         }
         if (serviceArea != null
             && !serviceArea.getCourts().isEmpty()) {

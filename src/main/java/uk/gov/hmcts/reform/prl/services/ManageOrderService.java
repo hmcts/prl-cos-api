@@ -1830,7 +1830,7 @@ public class ManageOrderService {
             Map<String, String> fieldsMap = getOrderTemplateAndFile(selectOrderOption);
             updateDocmosisAttributes(authorisation, caseData, caseDataUpdated, fieldsMap);
         } catch (Exception ex) {
-            log.info("Error occured while generating Draft document ==> " + ex.getMessage());
+            log.error("Error occured while generating Draft document ==> ", ex);
         }
         return caseDataUpdated;
     }
@@ -1919,7 +1919,7 @@ public class ManageOrderService {
                     .documentFileName(fieldsMap.get(PrlAppsConstants.DRAFT_WELSH_FILE_NAME)).build());
             }
         } catch (Exception ex) {
-            log.info("Error occured while generating Draft document ==> " + ex.getMessage());
+            log.error("Error occured while generating Draft document ==> ", ex);
         }
         return caseDataUpdated;
     }
@@ -2413,7 +2413,6 @@ public class ManageOrderService {
     }
 
     private void populateLegalRepFlag(String email, Map<String, Object> caseDataUpdated) {
-        log.info("---- Legal rep present ----{}", email);
         if (org.apache.commons.lang3.StringUtils.isNotEmpty(email)) {
             log.info("---- Legal rep present ----");
             caseDataUpdated.put(DISPLAY_LEGAL_REP_OPTION, "Yes");
@@ -2524,7 +2523,7 @@ public class ManageOrderService {
                     judgeFullName = judicialUsersApiResponses.get(0).getFullName();
                 }
             } catch (Exception e) {
-                log.error("User details not found for personal code {}", personalCodes);
+                log.error("User details not found for personal code {}", personalCodes, e);
             }
         }
         return judgeFullName;
