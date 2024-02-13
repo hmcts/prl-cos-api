@@ -1100,8 +1100,7 @@ public class DraftAnOrderService {
                                       true,
                                       caseData.getStandardDirectionOrder(),
                                       draftOrder.getOrderType(),
-                                      draftOrder.getC21OrderOptions()
-                                  ))
+                                      draftOrder.getC21OrderOptions()))
                                   .instructionsToLegalRepresentative(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(
                                       eventId) ? null : draftOrder.getOtherDetails().getInstructionsToLegalRepresentative())
                                   .build())
