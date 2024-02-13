@@ -2,31 +2,250 @@
   "case_details": {
     "callback_response_status": "string",
     "case_data": {
-      "id": "1704361978232810",
-      "manageDocuments": [{
-        "id": "559c3c44-a2fc-475d-9822-42747c29469c",
-        "value": {
-          "documentParty": "CAFCASS_CYMRU",
-          "document": {
-            "documentCreatedOn": null
-          },
-          "documentCategories": {
-            "value": {
-              "code": "string",
-              "label": "string"
+      "id": "1705348332562551",
+      "manageDocuments": [
+        {
+          "value": {
+            "documentParty": "APPLICANT",
+            "documentCategories": {
+              "value": {
+                "code": "applicantApplication",
+                "label": "Applicant application"
+              },
+              "list_items": [
+                {
+                  "code": "applicantApplication",
+                  "label": "Applicant application"
+                },
+                {
+                  "code": "applicantC1AApplication",
+                  "label": "Applicant C1A application"
+                },
+                {
+                  "code": "applicantC1AResponse",
+                  "label": "Applicant C1A response"
+                },
+                {
+                  "code": "MIAMCertificate",
+                  "label": "MIAM certificate"
+                },
+                {
+                  "code": "previousOrdersSubmittedWithApplication",
+                  "label": "Orders from other proceedings"
+                },
+                {
+                  "code": "respondentApplication",
+                  "label": "Respondent application"
+                },
+                {
+                  "code": "respondentC1AApplication",
+                  "label": "Respondent C1A application"
+                },
+                {
+                  "code": "respondentC1AResponse",
+                  "label": "Respondent C1A response"
+                },
+                {
+                  "code": "ordersFromOtherProceedings",
+                  "label": "Orders from other proceedings"
+                },
+                {
+                  "code": "noticeOfHearing",
+                  "label": "Notice of hearing"
+                },
+                {
+                  "code": "courtBundle",
+                  "label": "Court bundle"
+                },
+                {
+                  "code": "caseSummary",
+                  "label": "Case summary"
+                },
+                {
+                  "code": "safeguardingLetter",
+                  "label": "Safeguarding letter"
+                },
+                {
+                  "code": "section7Report",
+                  "label": "Section 7 report"
+                },
+                {
+                  "code": "section37Report",
+                  "label": "Section 37 report"
+                },
+                {
+                  "code": "16aRiskAssessment",
+                  "label": "16a risk assessment"
+                },
+                {
+                  "code": "guardianReport",
+                  "label": "Guardian report"
+                },
+                {
+                  "code": "specialGuardianshipReport",
+                  "label": "Special guardianship report"
+                },
+                {
+                  "code": "otherDocs",
+                  "label": "Other documents"
+                },
+                {
+                  "code": "emailsToCourtToRequestHearingsAdjourned",
+                  "label": "Emails to request hearings adjourned"
+                },
+                {
+                  "code": "publicFundingCertificates",
+                  "label": "Public funding certificates"
+                },
+                {
+                  "code": "noticesOfActingDischarge",
+                  "label": "Notices of acting/discharge"
+                },
+                {
+                  "code": "requestForFASFormsToBeChanged",
+                  "label": "Request for FAS forms to be changed"
+                },
+                {
+                  "code": "witnessAvailability",
+                  "label": "Witness availability"
+                },
+                {
+                  "code": "lettersOfComplaint",
+                  "label": "Letters of complaint"
+                },
+                {
+                  "code": "SPIPReferralRequests",
+                  "label": "SPIP referral requests"
+                },
+                {
+                  "code": "homeOfficeDWPResponses",
+                  "label": "Home Office/ DWP responses"
+                },
+                {
+                  "code": "internalCorrespondence",
+                  "label": "Internal correspondence"
+                },
+                {
+                  "code": "bulkScanQuarantine",
+                  "label": "Bulk scan uploaded"
+                },
+                {
+                  "code": "medicalReports",
+                  "label": "Medical reports"
+                },
+                {
+                  "code": "DNAReports_expertReport",
+                  "label": "DNA reports"
+                },
+                {
+                  "code": "resultsOfHairStrandBloodTests",
+                  "label": "Results of hair strand/blood tests"
+                },
+                {
+                  "code": "policeDisclosures",
+                  "label": "Police disclosures"
+                },
+                {
+                  "code": "medicalRecords",
+                  "label": "Medical records"
+                },
+                {
+                  "code": "drugAndAlcoholTest(toxicology)",
+                  "label": "Drug and alcohol test (toxicology)"
+                },
+                {
+                  "code": "policeReport",
+                  "label": "Police report"
+                },
+                {
+                  "code": "sec37Report",
+                  "label": "Section 37 report"
+                },
+                {
+                  "code": "localAuthorityOtherDoc",
+                  "label": "Other documents"
+                },
+                {
+                  "code": "ordersSubmittedWithApplication",
+                  "label": "Draft orders"
+                },
+                {
+                  "code": "approvedOrders",
+                  "label": "Approved orders"
+                },
+                {
+                  "code": "standardDirectionsOrder",
+                  "label": "Standard directions order"
+                },
+                {
+                  "code": "transcriptsOfJudgements",
+                  "label": "Transcripts of judgements"
+                },
+                {
+                  "code": "magistratesFactsAndReasons",
+                  "label": "Magistrates facts and reasons"
+                },
+                {
+                  "code": "judgeNotesFromHearing",
+                  "label": "Judge notes from hearing"
+                },
+                {
+                  "code": "importantInfoAboutAddressAndContact",
+                  "label": "Important info about address and contact"
+                },
+                {
+                  "code": "privacyNotice",
+                  "label": "Privacy notice"
+                },
+                {
+                  "code": "specialMeasures",
+                  "label": "Reasonable adjustments and special measures"
+                },
+                {
+                  "code": "anyOtherDoc",
+                  "label": "Any other documents"
+                },
+                {
+                  "code": "pathfinder",
+                  "label": "Pathfinder"
+                },
+                {
+                  "code": "positionStatements",
+                  "label": "Position statements"
+                },
+                {
+                  "code": "applicantStatements",
+                  "label": "Applicant's statements"
+                },
+                {
+                  "code": "respondentStatements",
+                  "label": "Respondent's statements"
+                },
+                {
+                  "code": "otherWitnessStatements",
+                  "label": "Other witness statements"
+                }
+              ]
             },
-            "list_items": [
-              {
-                "code": "string",
-                "label": "string"
-              }
+            "isConfidential": "Yes",
+            "isRestricted": "Yes",
+            "restrictedDetails": null,
+            "documentDetails": null,
+            "documentRelatedToCaseCheckbox": [
+              "RELATED_TO_CASE"
+            ],
+            "document": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a8232731-9d13-4ea8-a2e9-7362b0fe5f87",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a8232731-9d13-4ea8-a2e9-7362b0fe5f87/binary",
+              "document_filename": "Test doc1.pdf"
+            },
+            "documentRestrictCheckbox": [
+
             ]
           },
-          "documentRestrictCheckbox": [
-            "restrictToGroup"
-          ]
+          "id": "0f2b9409-0fe8-434f-9e76-f78661919eec"
         }
-      }],
+      ],
       "applicantAttendedMiam": "No",
       "caseTypeOfApplication": "C100",
       "claimingExemptionMiam": "Yes",
@@ -249,7 +468,7 @@
     },
     "case_type_id": "string",
     "created_date": "2022-03-15T15:02:33.880Z",
-    "id": 1704361978232810,
+    "id": 1705348332562551,
     "jurisdiction": "string",
     "last_modified": "2022-03-15T15:02:33.880Z",
     "locked_by_user_id": 0,

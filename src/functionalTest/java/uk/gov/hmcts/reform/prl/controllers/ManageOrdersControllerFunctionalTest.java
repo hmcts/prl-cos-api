@@ -444,7 +444,6 @@ public class ManageOrdersControllerFunctionalTest {
             .body("errors", Matchers.contains(ManageOrderService.VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
     }
 
-    @Ignore
     @Test
     public void createCcdTestCase() throws Exception {
 

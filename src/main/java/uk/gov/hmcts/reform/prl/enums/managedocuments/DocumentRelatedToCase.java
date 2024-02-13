@@ -7,22 +7,13 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
+
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum DocumentPartyEnum {
+public enum DocumentRelatedToCase {
 
-    @JsonProperty("applicant")
-    APPLICANT("Applicant"),
-    @JsonProperty("respondent")
-    RESPONDENT("Respondent"),
-    @JsonProperty("cafcass")
-    CAFCASS("Cafcass"),
-    @JsonProperty("cafcassCymru")
-    CAFCASS_CYMRU("Cafcass Cymru"),
-    @JsonProperty("localAuthority")
-    LOCAL_AUTHORITY("Local authority"),
-    @JsonProperty("Court")
-    COURT("Court");
+    @JsonProperty("relatedToCase")
+    RELATED_TO_CASE("Yes, the document belongs to the case");
 
     private final String displayedValue;
 
@@ -32,7 +23,8 @@ public enum DocumentPartyEnum {
     }
 
     @JsonCreator
-    public static DocumentPartyEnum getValue(String key) {
-        return DocumentPartyEnum.valueOf(key);
+    public static DocumentRelatedToCase getValue(String key) {
+        return DocumentRelatedToCase.valueOf(key);
     }
+
 }
