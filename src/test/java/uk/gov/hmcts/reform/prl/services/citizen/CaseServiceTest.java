@@ -32,6 +32,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
@@ -753,8 +754,8 @@ public class CaseServiceTest {
             .build();
         caseData = caseData.toBuilder()
             .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build())))
-            .citizenUploadQuarantineDocsList(List.of(Element.<UploadedDocuments>builder().id(UUID.fromString(TEST_UUID))
-                                                         .value(UploadedDocuments.builder().build()).build()))
+            .documentManagementDetails(DocumentManagementDetails.builder().citizenUploadQuarantineDocsList(List.of(Element.<UploadedDocuments>builder().id(UUID.fromString(TEST_UUID))
+                                                         .value(UploadedDocuments.builder().build()).build())).build())
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
                                     .build())

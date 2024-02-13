@@ -142,7 +142,10 @@ public class CaseService {
         StmtOfServiceAddRecipient sosObject = StmtOfServiceAddRecipient.builder()
             .citizenPartiesServedList(getPartyNames(citizenSos.getPartiesServed(), caseData, partyType))
             .citizenPartiesServedDate(citizenSos.getPartiesServedDate())
-            .citizenSosDocs(getSosDocs(citizenSos.getCitizenSosDocs(), caseData.getCitizenUploadQuarantineDocsList()))
+            .citizenSosDocs(getSosDocs(
+                citizenSos.getCitizenSosDocs(),
+                caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList()
+            ))
             .build();
         if (caseData.getStatementOfService().getStmtOfServiceAddRecipient() != null) {
             List<Element<StmtOfServiceAddRecipient>> sosList = caseData.getStatementOfService().getStmtOfServiceAddRecipient();
