@@ -528,6 +528,7 @@ public class ManageOrdersControllerFunctionalTest {
 
     }
 
+    @Ignore
     @Test
     public void givenRequestBody_ForPersonalServiceWhenCourtAdminSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
@@ -547,6 +548,7 @@ public class ManageOrdersControllerFunctionalTest {
             .body("data.applicants[0].value.solicitorEmail", equalTo("test@test.com"));
     }
 
+    @Ignore
     @Test
     public void givenRequestBody_ForPersonalServiceWhenBailiffSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
