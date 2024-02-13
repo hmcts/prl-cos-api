@@ -56,7 +56,7 @@ public class ReasonableAdjustmentsController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         log.info("Inside updateCitizenRAflags controller {}");
-        if (isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return caseService.updateCitizenRAflags(
                 caseId,
                 eventId,
@@ -75,7 +75,7 @@ public class ReasonableAdjustmentsController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        if (isAuthorized(authorisation, s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -87,18 +87,13 @@ public class ReasonableAdjustmentsController {
     public Flags getCaseFlags(
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
-        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
+        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
-        if (isAuthorized(userToken, s2sToken)) {
-            return caseService.getPartyCaseFlags(userToken, caseId, partyId);
+        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            return caseService.getPartyCaseFlags(authorisation, caseId, partyId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
-    }
-
-    private boolean isAuthorized(String authorisation, String s2sToken) {
-        return Boolean.TRUE.equals(authorisationService.authoriseUser(authorisation))
-            && Boolean.TRUE.equals(authorisationService.authoriseService(s2sToken));
     }
 }

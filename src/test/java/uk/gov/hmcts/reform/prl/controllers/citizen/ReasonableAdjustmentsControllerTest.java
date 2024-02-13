@@ -67,8 +67,7 @@ public class ReasonableAdjustmentsControllerTest {
         String caseId = "1234567891234567L";
         String partyId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
 
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(Boolean.TRUE);
         Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
         Mockito.when(caseService.getPartyCaseFlags(authToken, caseId, partyId)).thenReturn(Flags.builder().roleOnCase(
             "Respondent 1").partyName("Respondent").details(
@@ -114,8 +113,7 @@ public class ReasonableAdjustmentsControllerTest {
             .partyIdamId(partyId)
             .partyExternalFlags(FlagsRequest.builder()
                                     .details(flagDetailsRequest).build()).build();
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
-        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(Boolean.TRUE);
         Mockito.when(authTokenGenerator.generate()).thenReturn(servAuthToken);
         Mockito.when(caseService.updateCitizenRAflags(
             caseId,
@@ -154,8 +152,7 @@ public class ReasonableAdjustmentsControllerTest {
             .partyExternalFlags(FlagsRequest.builder()
                                     .details(flagDetailsRequest).build()).build();
 
-        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
-        Mockito.when(authorisationService.authoriseService(servAuthToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(authorisationService.isAuthorized(authToken, servAuthToken)).thenReturn(Boolean.FALSE);
 
         ResponseEntity<Object> updateResponse = reasonableAdjustmentsController.updateCitizenRAflags(
             partyRequestFlags,
