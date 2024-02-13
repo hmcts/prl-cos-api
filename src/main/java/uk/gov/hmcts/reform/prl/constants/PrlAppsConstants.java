@@ -940,11 +940,18 @@ public class PrlAppsConstants {
 
     public static final String BUFF_CHILD_AND_OTHER_PEOPLE_RELATIONS = "buffChildAndOtherPeopleRelations";
     public static final String BUFF_CHILD_AND_RESPONDENT_RELATIONS = "buffChildAndRespondentRelations";
+
+    public static final String INTERNAL_CORRESPONDENCE_LABEL = "Internal correspondence";
+    public static final String INTERNAL_CORRESPONDENCE_CATEGORY_ID = "internalCorrespondence";
+    public static final String RESTRICTED_DOCUMENTS = "restrictedDocuments";
+    public static final String CONFIDENTIAL_DOCUMENTS = "confidentialDocuments";
     public static final String MISSING_ADDRESS_WARNING_TEXT = "missingAddressWarningText";
 
     public static final String WARNING_TEXT_DIV = "<div class='govuk-warning-text'>"
         + "<span class='govuk-warning-text__icon' aria-hidden='true'>!";
 
+    public static final String STAFF = "STAFF";
+    public static final String TRUE = "True";
     public static final String WA_SOA_C8_CHECK_NEEDED = "isC8CheckNeeded";
     public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
     public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
