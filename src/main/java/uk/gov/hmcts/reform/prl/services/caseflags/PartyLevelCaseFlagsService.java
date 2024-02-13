@@ -22,7 +22,10 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.caseflags.PartyLevelCaseFlagsGenerator;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -436,7 +439,7 @@ public class PartyLevelCaseFlagsService {
         return caseData;
     }
 
-    private Map<String, Object> amendPartyFlagsForName(Map<String, Object> oldCaseDataMap, Map<String, Object> updatedCaseDataMap) {
+    public Map<String, Object> amendPartyFlagsForName(Map<String, Object> oldCaseDataMap, Map<String, Object> updatedCaseDataMap) {
         CaseData updatedCaseData = objectMapper.convertValue(updatedCaseDataMap, CaseData.class);
         CaseData oldCaseData = objectMapper.convertValue(oldCaseDataMap, CaseData.class);
         if (FL401_CASE_TYPE.equals(updatedCaseData.getCaseTypeOfApplication())) {
@@ -500,14 +503,16 @@ public class PartyLevelCaseFlagsService {
         return updatedCaseDataMap;
     }
 
-    public Map<String, Object> amendC100PartyCaseFlags(CaseData oldCaseData, CaseData updatedCaseData, Map<String, Object> updatedCaseDataMap, PartyRole.Representing representing) {
+    public Map<String, Object> amendC100PartyCaseFlags(CaseData oldCaseData,
+                                                       CaseData updatedCaseData,
+                                                       Map<String, Object> updatedCaseDataMap,
+                                                       PartyRole.Representing representing) {
         List<Element<PartyDetails>> oldPartyDetailsList = representing.getCaTarget().apply(oldCaseData);
         List<Element<PartyDetails>> updatedPartyDetailsList = representing.getCaTarget().apply(updatedCaseData);
 
         int numElements = null != updatedPartyDetailsList ? updatedPartyDetailsList.size() : 0;
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
-            PartyRole partyRole = partyRoles.get(i);
             if (null != updatedPartyDetailsList) {
                 PartyDetails updatedPartyDetails = i < numElements ? updatedPartyDetailsList.get(i).getValue() : null;
                 PartyDetails oldPartyDetails = i < numElements ? oldPartyDetailsList.get(i).getValue() : null;
@@ -519,14 +524,20 @@ public class PartyLevelCaseFlagsService {
         return updatedCaseDataMap;
     }
 
-    public Map<String, Object> amendFl401PartyCaseFlags(CaseData oldCaseData, CaseData updatedCaseData, Map<String, Object> updatedCaseDataMap, PartyRole.Representing representing) {
+    public Map<String, Object> amendFl401PartyCaseFlags(CaseData oldCaseData,
+                                                        CaseData updatedCaseData,
+                                                        Map<String, Object> updatedCaseDataMap,
+                                                        PartyRole.Representing representing) {
         PartyDetails oldPartyDetails = representing.getDaTarget().apply(oldCaseData);
         PartyDetails updatedPartyDetails = representing.getDaTarget().apply(updatedCaseData);
 
         return amendPartyCaseFlags(updatedCaseDataMap, representing, updatedPartyDetails, oldPartyDetails);
     }
 
-    private Map<String, Object> amendPartyCaseFlags(Map<String, Object> updatedCaseDataMap, PartyRole.Representing representing, PartyDetails updatedPartyDetails, PartyDetails oldPartyDetails) {
+    private Map<String, Object> amendPartyCaseFlags(Map<String, Object> updatedCaseDataMap,
+                                                    PartyRole.Representing representing,
+                                                    PartyDetails updatedPartyDetails,
+                                                    PartyDetails oldPartyDetails) {
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
@@ -619,14 +630,11 @@ public class PartyLevelCaseFlagsService {
     private void amendNameForTheFlags(Map<String, Object> updatedCaseDataMap,
                                       String flagField,
                                       String partyName) {
-        if (updatedCaseDataMap.containsKey(flagField)) {
-            Flags flags = objectMapper.convertValue(
-                updatedCaseDataMap.get(flagField),
-                Flags.class
-            );
+        updatedCaseDataMap.computeIfPresent(flagField, (k, v) -> {
+            Flags flags = objectMapper.convertValue(v, Flags.class);
             flags.setPartyName(partyName);
-            updatedCaseDataMap.put(flagField, flags);
-        }
+            return v;
+        });
     }
 
     private void amendAndRegeneratedFlags(Map<String, Object> updatedCaseDataMap,

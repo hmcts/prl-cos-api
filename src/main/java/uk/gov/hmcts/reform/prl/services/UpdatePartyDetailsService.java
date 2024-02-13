@@ -17,13 +17,12 @@ import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
-import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -92,10 +91,6 @@ public class UpdatePartyDetailsService {
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
-        // final Flags caseFlags = Flags.builder().build();
-
-        // updatedCaseData.put("caseFlags", caseFlags);
-
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
@@ -112,15 +107,11 @@ public class UpdatePartyDetailsService {
             if (Objects.nonNull(fl401Applicant)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
                 updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
-                partyLevelCaseFlagsService.amendFl401PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.DAAPPLICANT);
-                partyLevelCaseFlagsService.amendFl401PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.DAAPPLICANTSOLICITOR);
             }
 
             if (Objects.nonNull(fl401respondent)) {
                 CommonUtils.generatePartyUuidForFL401(caseData);
                 updatedCaseData.put("respondentName", fl401respondent.getLabelForDynamicList());
-                partyLevelCaseFlagsService.amendFl401PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.DARESPONDENT);
-                partyLevelCaseFlagsService.amendFl401PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.DARESPONDENTSOLICITOR);
             }
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
@@ -155,12 +146,10 @@ public class UpdatePartyDetailsService {
             } catch (Exception e) {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
-            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CAAPPLICANT);
-            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CAAPPLICANTSOLICITOR);
-            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CARESPONDENT);
-            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CARESPONDENTSOLICITOR);
-            partyLevelCaseFlagsService.amendC100PartyCaseFlags(oldCaseData, caseData, updatedCaseData, PartyRole.Representing.CAOTHERPARTY);
         }
+
+        partyLevelCaseFlagsService.amendPartyFlagsForName(oldCaseDataMap, updatedCaseData);
+
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
     }
