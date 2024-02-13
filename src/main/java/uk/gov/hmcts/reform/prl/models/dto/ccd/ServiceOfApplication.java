@@ -9,8 +9,13 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.Address;
+import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
+import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 
+import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -26,6 +31,7 @@ public class ServiceOfApplication {
     @JsonProperty("soaOtherPeoplePresentInCaseFlag")
     private final YesOrNo soaOtherPeoplePresentInCaseFlag;
 
+    @JsonProperty("soaServeToRespondentOptions")
     private final YesOrNo soaServeToRespondentOptions;
     private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsCA;
     private final SoaSolicitorServingRespondentsEnum soaServingRespondentsOptionsDA;
@@ -39,5 +45,27 @@ public class ServiceOfApplication {
     private final YesOrNo soaCafcassCymruServedOptions;
     private final String soaCafcassCymruEmail;
 
+    //Not in use anymore as it was added for intermim confidentiality check
     private final YesOrNo proceedToServing;
+
+    // Confidentiality check related fields
+
+    private final SoaPack unServedApplicantPack;
+    private final SoaPack unServedRespondentPack;
+    private final SoaPack unServedOthersPack;
+    private final SoaPack unServedLaPack;
+    private final SoaPack unServedCafcassCymruPack;
+
+    private final YesOrNo applicationServedYesNo;
+    private final String rejectionReason;
+
+    private List<Element<ConfidentialCheckFailed>> confidentialCheckFailed;
+
+    private final YesOrNo soaServeLocalAuthorityYesOrNo;
+    private final String soaLaEmailAddress;
+    private final YesOrNo soaServeC8ToLocalAuthorityYesOrNo;
+    @JsonProperty("soaDocumentDynamicListForLa")
+    private List<Element<DocumentListForLa>> soaDocumentDynamicListForLa;
+    @JsonProperty("isConfidential")
+    private final YesOrNo isConfidential;
 }
