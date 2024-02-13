@@ -40,8 +40,8 @@ java:
     IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     AM_ROLE_ASSIGNMENT_API_URL: http://prl-ccd-definitions-pr-1788-am-role-assignment-service
-    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-1788-ccd-data-store-api
-    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-1788-cdam
+    CORE_CASE_DATA_API_URL: http://prl-ccd-definitions-pr-1901-ccd-data-store-api
+    CCD_CASE_DOCS_AM_API: http://prl-ccd-definitions-pr-1901-cdam
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1788-aac-manage-case-assignment
     BUNDLE_URL: http://prl-ccd-definitions-pr-1788-em-ccdorc
     AUTH_IDAM_CLIENT_BASEURL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
