@@ -795,7 +795,6 @@ public class ManageOrderEmailService {
                                                         List<Document> orderDocuments,
                                                         List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                         Map<String, Object> dynamicDataForEmail) {
-        SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         value.forEach(element -> {
             Optional<Element<PartyDetails>> partyDataOptional = partyDetails.stream()
                 .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
