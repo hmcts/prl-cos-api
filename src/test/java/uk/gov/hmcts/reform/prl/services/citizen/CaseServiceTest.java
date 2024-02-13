@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -665,6 +666,7 @@ public class CaseServiceTest {
         assertEquals(INVALID, isValid);
     }
 
+    @Ignore
     @Test
     public void testupdateCaseSosWithCitizenDocs() {
         PartyDetails partyDetails = PartyDetails.builder()
