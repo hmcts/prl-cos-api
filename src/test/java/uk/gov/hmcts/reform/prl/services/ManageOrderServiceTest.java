@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
@@ -64,6 +65,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenLiveAtAddress;
 import uk.gov.hmcts.reform.prl.models.complextypes.Home;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.EmailInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.PostalInformation;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.serveorders.ServeOrgDetails;
@@ -4079,12 +4081,12 @@ public class ManageOrderServiceTest {
     @Test
     public void givenOtherPartyPersonalServiceShouldGiveErrorIfAddressIsNotPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"), PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .contactPreferences(ContactPreferences.post)
                 .build()));
         List<Element<PartyDetails>> otherParties =
-            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"), PartyDetails.builder()
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder().respondents(respondents)
@@ -4107,22 +4109,22 @@ public class ManageOrderServiceTest {
 
         AboutToStartOrSubmitCallbackResponse response
             = manageOrderService.validateRespondentLipAndOtherPersonAddress(callbackRequest);
-        assertEquals(1,response.getErrors().size());
+        assertEquals(1, response.getErrors().size());
         assertTrue(response.getErrors().contains(VALIDATION_ADDRESS_ERROR_OTHER_PARTY));
     }
 
     @Test
     public void givenOtherPartyShouldNotGiveErrorIfAddressIsPresent() {
         List<Element<PartyDetails>> respondents =
-            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"),PartyDetails.builder()
+            List.of(ElementUtils.element(UUID.fromString("e406bcc3-3c91-45db-9dcc-3a5c14930851"), PartyDetails.builder()
                 .doTheyHaveLegalRepresentation(YesNoDontKnow.no)
                 .contactPreferences(ContactPreferences.post)
-                    .address(Address.builder()
-                                 .addressLine1("test address").build())
+                .address(Address.builder()
+                             .addressLine1("test address").build())
                 .build()));
         List<Element<PartyDetails>> otherParties =
-            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"),PartyDetails.builder()
-                    .address(Address.builder().addressLine1("test address").build())
+            List.of(ElementUtils.element(UUID.fromString("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1"), PartyDetails.builder()
+                .address(Address.builder().addressLine1("test address").build())
                 .build()));
         CaseData caseData = getCaseData();
         caseData = caseData.toBuilder()
@@ -4166,9 +4168,9 @@ public class ManageOrderServiceTest {
 
         List<DynamicMultiselectListElement> otherPartiesList = new ArrayList<>();
         otherPartiesList.add(DynamicMultiselectListElement.builder()
-                            .code("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1")
-                            .label("Sam Nolan")
-                            .build());
+                                 .code("6bb5e9ac-df97-4593-8b22-3969dc0bb4e1")
+                                 .label("Sam Nolan")
+                                 .build());
         CaseData caseData = CaseData.builder()
             .manageOrders(ManageOrders.builder().serveToRespondentOptions(YesOrNo.No)
                               .recipientsOptions(DynamicMultiSelectList.builder()
@@ -4202,13 +4204,20 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders).build();
         //when(manageOrderService.isOrderEdited(caseData, Event.EDIT_AND_APPROVE_ORDER.getId(), false)).thenReturn(true);
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated, Event.EDIT_AND_APPROVE_ORDER.getId(),"JUDGE");
-        assertEquals(HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
-                     caseDataUpdated.get("hearingOptionSelected"));
+        manageOrderService.setHearingOptionDetailsForTask(
+            caseData,
+            caseDataUpdated,
+            Event.EDIT_AND_APPROVE_ORDER.getId(),
+            "JUDGE"
+        );
+        assertEquals(
+            HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
+            caseDataUpdated.get("hearingOptionSelected")
+        );
         assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
         assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
-        assertEquals("Yes",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
-        assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+        assertEquals("Yes", caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE", caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
     }
 
 
@@ -4229,7 +4238,7 @@ public class ManageOrderServiceTest {
         DraftOrder draftOrder = DraftOrder.builder().manageOrderHearingDetails(hearingDataList).build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
 
-        Element<DraftOrder> draftOrderElement = element(uuid,draftOrder);
+        Element<DraftOrder> draftOrderElement = element(uuid, draftOrder);
         draftOrderCollection.add(draftOrderElement);
 
         CaseData caseData = CaseData.builder()
@@ -4239,13 +4248,18 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         //when(manageOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
-        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.EDIT_AND_APPROVE_ORDER.getId(),"JUDGE");
-        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
-                     caseDataUpdated.get("hearingOptionSelected"));
+        manageOrderService.setHearingOptionDetailsForTask(caseData,
+                                                          caseDataUpdated,
+                                                          Event.EDIT_AND_APPROVE_ORDER.getId(),
+                                                          "JUDGE");
+        assertEquals(
+            HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
+            caseDataUpdated.get("hearingOptionSelected")
+        );
         assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
         assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
-        assertEquals("Yes",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
-        assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+        assertEquals("Yes", caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE", caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
     }
 
     @Test
@@ -4265,7 +4279,7 @@ public class ManageOrderServiceTest {
         DraftOrder draftOrder = DraftOrder.builder().manageOrderHearingDetails(hearingDataList).build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
 
-        Element<DraftOrder> draftOrderElement = element(uuid,draftOrder);
+        Element<DraftOrder> draftOrderElement = element(uuid, draftOrder);
         draftOrderCollection.add(draftOrderElement);
 
         CaseData caseData = CaseData.builder()
@@ -4275,9 +4289,14 @@ public class ManageOrderServiceTest {
             .manageOrders(manageOrders).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
         //when(manageOrderService.isOrderEdited(caseData,Event.EDIT_AND_APPROVE_ORDER.getId(),false)).thenReturn(false);
-        manageOrderService.setHearingOptionDetailsForTask(caseData,caseDataUpdated,Event.MANAGE_ORDERS.getId(),"JUDGE");
-        assertEquals(HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
-                     caseDataUpdated.get("hearingOptionSelected"));
+        manageOrderService.setHearingOptionDetailsForTask(caseData,
+                                                          caseDataUpdated,
+                                                          Event.MANAGE_ORDERS.getId(),
+                                                          "JUDGE");
+        assertEquals(
+            HearingDateConfirmOptionEnum.dateReservedWithListAssit.toString(),
+            caseDataUpdated.get("hearingOptionSelected")
+        );
         assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
         assertEquals("Yes", caseDataUpdated.get("isHearingTaskNeeded"));
         assertNull(caseDataUpdated.get(WA_IS_ORDER_APPROVED));
@@ -4302,11 +4321,13 @@ public class ManageOrderServiceTest {
         String eventId = Event.EDIT_AND_APPROVE_ORDER.getId();
         AmendOrderCheckEnum amendOrderCheck = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck;
 
-        manageOrderService.setIsHearingTaskNeeded(manageOrders.getOrdersHearingDetails(),
-                                                  caseDataUpdated,
-                                                  isOrderApproved,
-                                                  amendOrderCheck,
-                                                  eventId);
+        manageOrderService.setIsHearingTaskNeeded(
+            manageOrders.getOrdersHearingDetails(),
+            caseDataUpdated,
+            isOrderApproved,
+            amendOrderCheck,
+            eventId
+        );
         assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
     }
 
@@ -4328,11 +4349,13 @@ public class ManageOrderServiceTest {
         String eventId = Event.MANAGE_ORDERS.getId();
         AmendOrderCheckEnum amendOrderCheck = AmendOrderCheckEnum.judgeOrLegalAdvisorCheck;
 
-        manageOrderService.setIsHearingTaskNeeded(manageOrders.getOrdersHearingDetails(),
-                                                  caseDataUpdated,
-                                                  isOrderApproved,
-                                                  amendOrderCheck,
-                                                  eventId);
+        manageOrderService.setIsHearingTaskNeeded(
+            manageOrders.getOrdersHearingDetails(),
+            caseDataUpdated,
+            isOrderApproved,
+            amendOrderCheck,
+            eventId
+        );
         assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
     }
 
@@ -4354,16 +4377,18 @@ public class ManageOrderServiceTest {
         String eventId = Event.MANAGE_ORDERS.getId();
         AmendOrderCheckEnum amendOrderCheck = AmendOrderCheckEnum.managerCheck;
 
-        manageOrderService.setIsHearingTaskNeeded(manageOrders.getOrdersHearingDetails(),
-                                                  caseDataUpdated,
-                                                  isOrderApproved,
-                                                  amendOrderCheck,
-                                                  eventId);
+        manageOrderService.setIsHearingTaskNeeded(
+            manageOrders.getOrdersHearingDetails(),
+            caseDataUpdated,
+            isOrderApproved,
+            amendOrderCheck,
+            eventId
+        );
         assertEquals("No", caseDataUpdated.get("isHearingTaskNeeded"));
     }
 
     @Test
-    public void  testUpdateOrderFieldsForDocmosis() {
+    public void testUpdateOrderFieldsForDocmosis() {
 
         DraftOrder draftOrder = DraftOrder.builder().judgeOrMagistratesLastName("testJudge").build();
 
@@ -4379,7 +4404,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void  testHandleFetchOrderDetails() {
+    public void testHandleFetchOrderDetails() {
 
         CaseData caseData = CaseData.builder()
             .id(12345L)
@@ -4410,11 +4435,10 @@ public class ManageOrderServiceTest {
     }
 
 
-
     @Test
-    public void  testGetHearingDataFromExistingHearingData() {
+    public void testGetHearingDataFromExistingHearingData() {
 
-        List<Element<HearingData>> hearingDataList  = new ArrayList<>();
+        List<Element<HearingData>> hearingDataList = new ArrayList<>();
         HearingData hearingdata = HearingData.builder()
             .hearingTypes(DynamicList.builder()
                               .value(null).build())
@@ -4428,11 +4452,11 @@ public class ManageOrderServiceTest {
             .build();
         Map<String, Object> caseDataMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
-        when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
 
         List<Element<HearingData>> hearingDataListResp
-            = manageOrderService.getHearingDataFromExistingHearingData("testAuth", hearingDataList,caseData);
+            = manageOrderService.getHearingDataFromExistingHearingData("testAuth", hearingDataList, caseData);
 
         assertNotNull(hearingDataListResp);
     }
@@ -4489,10 +4513,14 @@ public class ManageOrderServiceTest {
                               .serveOrderDynamicList(dynamicMultiSelectList)
                               .build())
             .build();
-        Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList("test token", caseData);
-        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>)response.get("orderCollection");
+        Map<String, Object> response = manageOrderService.addOrderDetailsAndReturnReverseSortedList(
+            "test token",
+            caseData
+        );
+        List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) response.get("orderCollection");
 
-        assertEquals("Financial compensation order following C79 enforcement application (C82)",orderCollection.get(0).getValue().getOrderTypeId());
+        assertEquals("Financial compensation order following C79 enforcement application (C82)",
+                     orderCollection.get(0).getValue().getOrderTypeId());
         assertNotNull(response);
 
     }
@@ -4517,16 +4545,18 @@ public class ManageOrderServiceTest {
             .build();
 
         StandardDirectionOrder cafcass = StandardDirectionOrder.builder().sdoNewPartnerPartiesCafcass(
-                dynamicMultiSelectList)
+            dynamicMultiSelectList)
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
 
         StandardDirectionOrder cymru = StandardDirectionOrder.builder().sdoNewPartnerPartiesCafcassCymru(
-                dynamicMultiSelectList)
+            dynamicMultiSelectList)
             .sdoAllocateOrReserveJudgeName(JudicialUser.builder().idamId("").build()).build();
 
-        DynamicMultiselectListElement dynamicMultiselectListElement1 = DynamicMultiselectListElement.builder().label("aa")
+        DynamicMultiselectListElement dynamicMultiselectListElement1 = DynamicMultiselectListElement.builder().label(
+            "aa")
             .build();
-        DynamicMultiselectListElement dynamicMultiselectListElement2 = DynamicMultiselectListElement.builder().label("bb")
+        DynamicMultiselectListElement dynamicMultiselectListElement2 = DynamicMultiselectListElement.builder().label(
+            "bb")
             .build();
 
         List<DynamicMultiselectListElement> dynamicMultiselectListElementList = new ArrayList<>();
@@ -4534,12 +4564,12 @@ public class ManageOrderServiceTest {
         dynamicMultiselectListElementList.add(dynamicMultiselectListElement2);
 
         StandardDirectionOrder factFindingHearing = StandardDirectionOrder.builder().sdoHearingsAndNextStepsList(List.of(
-                SdoHearingsAndNextStepsEnum.factFindingHearing))
+            SdoHearingsAndNextStepsEnum.factFindingHearing))
             .sdoWhoMadeAllegationsList(DynamicMultiSelectList.builder()
-                                                     .value(dynamicMultiselectListElementList).build())
+                                           .value(dynamicMultiselectListElementList).build())
             .sdoWhoNeedsToRespondAllegationsList(DynamicMultiSelectList.builder()
                                                      .value(List.of(DynamicMultiselectListElement.builder().label("bb")
-                                                                                                    .build())).build())
+                                                                        .build())).build())
             .build();
         StandardDirectionOrder[] sdoNewPartnerParties = {cafcass, cymru, factFindingHearing};
 
@@ -4563,7 +4593,7 @@ public class ManageOrderServiceTest {
                 CreateSelectOrderOptionsEnum.standardDirectionsOrder
             );
 
-            assertEquals("Yes",caseDataUpdated.get("isEngDocGen"));
+            assertEquals("Yes", caseDataUpdated.get("isEngDocGen"));
             assertNotNull(caseDataUpdated.get("ordersHearingDetails"));
         }
     }
@@ -4586,9 +4616,9 @@ public class ManageOrderServiceTest {
             .doYouWantToEditTheOrder(YesOrNo.Yes)
             .manageOrders(manageOrders).build();
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        manageOrderService.isOrderApproved(caseData, caseDataUpdated,"JUDGE");
-        assertEquals("Yes",caseDataUpdated.get(WA_IS_ORDER_APPROVED));
-        assertEquals("JUDGE",caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
+        manageOrderService.isOrderApproved(caseData, caseDataUpdated, "JUDGE");
+        assertEquals("Yes", caseDataUpdated.get(WA_IS_ORDER_APPROVED));
+        assertEquals("JUDGE", caseDataUpdated.get(WA_WHO_APPROVED_THE_ORDER));
     }
 
     @Test
@@ -4612,8 +4642,8 @@ public class ManageOrderServiceTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
 
-        assertEquals("multipleOptionSelected",caseDataUpdated.get("hearingOptionSelected"));
-        assertEquals("Yes",caseDataUpdated.get("isMultipleHearingSelected"));
+        assertEquals("multipleOptionSelected", caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals("Yes", caseDataUpdated.get("isMultipleHearingSelected"));
     }
 
     @Test
@@ -4677,8 +4707,10 @@ public class ManageOrderServiceTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
 
-        assertEquals(HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
-                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals(
+            HearingDateConfirmOptionEnum.dateToBeFixed.toString(),
+            caseDataUpdated.get("hearingOptionSelected")
+        );
         assertEquals("No", caseDataUpdated.get("isMultipleHearingSelected"));
     }
 
@@ -4709,13 +4741,15 @@ public class ManageOrderServiceTest {
         Map<String, Object> caseDataUpdated = new HashMap<>();
         manageOrderService.setHearingSelectedInfoForTask(hearingDataList, caseDataUpdated);
 
-        assertEquals("multipleOptionSelected",
-                     caseDataUpdated.get("hearingOptionSelected"));
+        assertEquals(
+            "multipleOptionSelected",
+            caseDataUpdated.get("hearingOptionSelected")
+        );
         assertEquals("Yes", caseDataUpdated.get("isMultipleHearingSelected"));
     }
 
     @Test
-    public void  testHandlePreviewOrderScenario1() throws Exception {
+    public void testHandlePreviewOrderScenario1() throws Exception {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -4755,7 +4789,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    public void  testHandlePreviewOrderScenario2() throws Exception {
+    public void testHandlePreviewOrderScenario2() throws Exception {
         List<Element<PartyDetails>> partyDetails = new ArrayList<>();
         PartyDetails details = PartyDetails.builder()
             .solicitorOrg(Organisation.builder().organisationName("test Org").build())
@@ -4806,10 +4840,11 @@ public class ManageOrderServiceTest {
     public void testSetHearingDataForSdo() {
 
         UUID uuid = UUID.randomUUID();
-        HearingDataFromTabToDocmosis hearingDataFromTabToDocmosis = HearingDataFromTabToDocmosis.builder().hearingType("ABA5-FHR").build();
+        HearingDataFromTabToDocmosis hearingDataFromTabToDocmosis = HearingDataFromTabToDocmosis.builder().hearingType(
+            "ABA5-FHR").build();
 
         List<Element<HearingDataFromTabToDocmosis>> elementList = new ArrayList<>();
-        elementList.add(element(uuid,hearingDataFromTabToDocmosis));
+        elementList.add(element(uuid, hearingDataFromTabToDocmosis));
 
         DynamicList dynamicList = DynamicList.builder().value(DynamicListElement.builder().code("12345:").label("test")
                                                                   .build()).build();
@@ -4846,16 +4881,128 @@ public class ManageOrderServiceTest {
             .hmctsServiceCode("ABA5")
             .caseHearings(Collections.singletonList(caseHearing))
             .build();
-        when(hearingDataService.getHearingDataForSdo(Mockito.any(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.getHearingDataForSdo(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(HearingData.builder().build());
-        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),
+                                                            Mockito.anyString(),
+                                                            Mockito.any(),
+                                                            Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
-        when(hearingDataService.getHearingDataForSelectedHearingForSdo(Mockito.any(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.getHearingDataForSelectedHearingForSdo(Mockito.any(), Mockito.any(), Mockito.any()))
             .thenReturn(hearingDataRevised);
 
         CaseData caseDataResp = manageOrderService.setHearingDataForSdo(caseData, hearings, "auth");
         Assert.assertNull(caseData.getStandardDirectionOrder().getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab());
-        Assert.assertEquals(uuid,caseDataResp.getStandardDirectionOrder()
+        Assert.assertEquals(uuid, caseDataResp.getStandardDirectionOrder()
             .getSdoDirectionsForFactFindingHearingDetails().getHearingdataFromHearingTab().get(0).getId());
+    }
+
+    @Test
+    public void testServeOrderC100WithAmendedParties() throws Exception {
+        generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+
+        List<DynamicMultiselectListElement> elements = new ArrayList<>();
+        DynamicMultiselectListElement element = DynamicMultiselectListElement.builder()
+            .code(uuid.toString())
+            .label("test label").build();
+        elements.add(element);
+
+        List<Element<ServedParties>> servedParties = new ArrayList<>();
+        Element<ServedParties> servedPartiesElement = ElementUtils.element(uuid, ServedParties.builder()
+            .partyName("test")
+            .partyId(uuid.toString())
+            .build());
+        servedParties.add(servedPartiesElement);
+        Element<OrderDetails> orders = Element.<OrderDetails>builder().id(uuid).value(OrderDetails
+                                                                                          .builder()
+                                                                                          .orderDocument(Document
+                                                                                                             .builder()
+                                                                                                             .build())
+                                                                                          .dateCreated(now)
+                                                                                          .orderTypeId(TEST_UUID)
+                                                                                          .otherDetails(
+                                                                                              OtherOrderDetails.builder().build())
+                                                                                          .serveOrderDetails(
+                                                                                              ServeOrderDetails.builder()
+                                                                                                  .servedParties(
+                                                                                                      servedParties)
+                                                                                                  .build())
+                                                                                          .build()).build();
+        List<Element<OrderDetails>> orderList = new ArrayList<>();
+        orderList.add(orders);
+
+        List<Element<PartyDetails>> partyDetails = new ArrayList<>();
+        PartyDetails details = PartyDetails.builder().firstName("first").lastName("lastname")
+            .solicitorOrg(Organisation.builder().organisationName("test Org").build())
+            .build();
+        Element<PartyDetails> partyDetailsElement = element(details);
+        partyDetails.add(partyDetailsElement);
+
+        ManageOrders manageOrders = ManageOrders.builder()
+            .cafcassCymruServedOptions(YesOrNo.No)
+            .childArrangementsOrdersToIssue(List.of(childArrangementsOrder, prohibitedStepsOrder))
+            .selectChildArrangementsOrder(ChildArrangementOrderTypeEnum.liveWithOrder)
+            .serveOrderDynamicList(dynamicMultiSelectList)
+            .serveOrderAdditionalDocuments(List.of(Element.<Document>builder()
+                                                       .value(Document.builder().documentFileName(
+                                                           "abc.pdf").build())
+                                                       .build()))
+            .recipientsOptions(DynamicMultiSelectList.builder()
+                                   .value(elements)
+                                   .listItems(elements)
+                                   .build())
+            .childOption(DynamicMultiSelectList.builder()
+                             .listItems(elements)
+                             .build())
+            .otherParties(DynamicMultiSelectList.builder()
+                              .listItems(elements)
+                              .build())
+            .serveToRespondentOptions(YesOrNo.Yes)
+            .servingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.courtAdmin)
+            .serveOtherPartiesCA(List.of(OtherOrganisationOptions.anotherOrganisation))
+            .cafcassCymruEmail("test")
+            .deliveryByOptionsCA(DeliveryByEnum.post)
+            .emailInformationCA(List.of(Element.<EmailInformation>builder()
+                                            .value(EmailInformation.builder().emailAddress("test").build()).build()))
+            .postalInformationCA(List.of(Element.<PostalInformation>builder()
+                                             .value(PostalInformation.builder().postalAddress(
+                                                 Address.builder().postCode("NE65LA").build()).build()).build()))
+            .build();
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicants(partyDetails)
+            .caseTypeOfApplication("C100")
+            .applicantCaseName("Test Case 45678")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .fl401FamilymanCaseNumber("familyman12345")
+            .orderCollection(orderList)
+            .dateOrderMade(LocalDate.now())
+            .childArrangementOrders(ChildArrangementOrdersEnum.financialCompensationC82)
+            .manageOrdersOptions(ManageOrdersOptionsEnum.servedSavedOrders)
+            .manageOrders(manageOrders)
+            .build();
+
+
+        when(dgsService.generateDocument(Mockito.anyString(), Mockito.any(CaseDetails.class), Mockito.any()))
+            .thenReturn(generatedDocumentInfo);
+
+        when(dateTime.now()).thenReturn(LocalDateTime.now());
+        List<Element<OrderDetails>> orderDetails = manageOrderService.serveOrder(caseData, orderList);
+        assertNotNull(orderDetails);
+        assertNotNull(orderDetails.get(0));
+        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails());
+        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties());
+        assertNotNull(orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0));
+        assertEquals(
+            orderDetails.get(0).getValue().getServeOrderDetails().getServedParties().get(0).getValue()
+                .getPartyId(),
+            (orders.getValue().getServeOrderDetails().getServedParties().get(0).getValue().getPartyId())
+        );
     }
 }
