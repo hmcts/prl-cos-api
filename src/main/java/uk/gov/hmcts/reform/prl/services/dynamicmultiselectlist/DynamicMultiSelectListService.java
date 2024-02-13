@@ -378,4 +378,11 @@ public class DynamicMultiSelectListService {
                           .label(label.toString())
                           .build());
     }
+
+    public DynamicMultiSelectList getEmptyDynMultiSelectList() {
+        return  DynamicMultiSelectList.builder()
+            .listItems(List.of(DynamicMultiselectListElement.EMPTY))
+            .value(List.of(DynamicMultiselectListElement.EMPTY))
+            .build();
+    }
 }
