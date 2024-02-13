@@ -95,7 +95,7 @@ public class ReasonableAdjustmentsMapper {
                 false
             );
 
-        Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
+        Map<String, Object> caseDataMap = startEventResponse.getCaseDetails().getData();
         Optional<String> partyExternalCaseFlagField = caseService.getPartyExternalCaseFlagField(
             caseData.getCaseTypeOfApplication(),
             PartyEnum.applicant,
@@ -107,7 +107,7 @@ public class ReasonableAdjustmentsMapper {
                 partyExternalCaseFlagField.get()));
 
             Flags flags = objectMapper.convertValue(
-                updatedCaseData.get(partyExternalCaseFlagField.get()),
+                caseDataMap.get(partyExternalCaseFlagField.get()),
                 Flags.class
             );
             log.info("Inside mapRAforC100MainApplicant Existing external Party flags  ===>" + objectMapper.writeValueAsString(
