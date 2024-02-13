@@ -498,6 +498,8 @@ public class ManageDocumentsServiceTest {
 
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
 
+        List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
+        listQuarantine.add(quarantineLegalDocElement);
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
             .documentManagementDetails(DocumentManagementDetails.builder()
@@ -650,6 +652,9 @@ public class ManageDocumentsServiceTest {
 
         ReviewDocuments reviewDocuments = ReviewDocuments.builder().courtStaffUploadDocListDocTab(courtStaffUploadDocListDocTabInitial).build();
 
+        List<Element<QuarantineLegalDoc>> listQuarantine = new ArrayList<>();
+        listQuarantine.add(quarantineLegalDocElement);
+
         CaseData caseData = CaseData.builder()
             .reviewDocuments(reviewDocuments)
             .documentManagementDetails(DocumentManagementDetails.builder()
@@ -673,6 +678,7 @@ public class ManageDocumentsServiceTest {
         assertNull(caseDataMapUpdated.get("manageDocuments"));
 
     }
+
 
     @Test
     public void testMoveDocumentsToRespectiveCategoriesNew() {
@@ -797,6 +803,7 @@ public class ManageDocumentsServiceTest {
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
         when(userService.getUserDetails(auth)).thenReturn(userDetailsSolicitorRole);
+
 
         Map<String, Object>  caseDataMapUpdated = manageDocumentsService.copyDocument(callbackRequest, auth);
         legalProfQuarantineDocsList = (List<Element<QuarantineLegalDoc>>) caseDataMapUpdated.get("legalProfQuarantineDocsList");

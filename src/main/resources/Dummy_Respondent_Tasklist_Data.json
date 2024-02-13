@@ -448,5 +448,13 @@
   ],
   "currentOrPastProceedingsForChildren": "yes",
   "factorsAffectingAbilityToParticipate": "Yes",
-  "provideDetailsForFactorsAffectingAbilityToParticipate": "yes a lot of factors"
+  "provideDetailsForFactorsAffectingAbilityToParticipate": "yes a lot of factors",
+  "responseToAllegationsOfHarmYesOrNoResponse": "Yes",
+  "responseToAllegationsOfHarmDocument": {
+    "category_id": null,
+    "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4cd84f6d-21a9-4179-8bed-8f727a9ba9e3",
+    "document_filename": "Screenshot 2024-02-08 at 10.15.01 am.png",
+    "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/4cd84f6d-21a9-4179-8bed-8f727a9ba9e3/binary",
+    "document_creation_date": null
+  }
 }

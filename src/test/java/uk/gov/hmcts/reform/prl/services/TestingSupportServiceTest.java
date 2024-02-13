@@ -39,10 +39,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Cons
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.supportyouneed.ReasonableAdjustmentsSupport;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentOtherConcerns;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -189,9 +185,9 @@ public class TestingSupportServiceTest {
                                                             .anotherCountryAskedInformation(Yes)
                                                             .anotherCountryAskedInformationDetaails("test")
                                                             .build())
-                          .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
+                          /*      .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
                                                                .builder()
-                                                               .respChildAbductionInfo(RespondentChildAbduction
+                                                          .respChildAbductionInfo(RespondentChildAbduction
                                                                                            .builder()
                                                                                            .previousThreatsForChildAbduction(
                                                                                                Yes)
@@ -251,9 +247,12 @@ public class TestingSupportServiceTest {
                                                                                               .build())
                                                                .respAohYesOrNo(Yes)
                                                                .build())
+                    */
                           .supportYouNeed(ReasonableAdjustmentsSupport.builder()
                                               .reasonableAdjustments(List.of(ReasonableAdjustmentsEnum.nosupport)).build())
-                          .build())
+                          .build()
+
+                          )
             .canYouProvideEmailAddress(Yes)
             .isEmailAddressConfidential(Yes)
             .isPhoneNumberConfidential(Yes)

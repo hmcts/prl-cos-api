@@ -148,14 +148,15 @@ public class CaseEventHandler {
                                 respondent,
                                 representedRespondentName,
                                 hasSubmitted,
-                                caseData.getId()
+                                caseData
                             );
                     } else {
-                        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
+                        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue(),caseData);
+                        log.info("Tasks are as : {} ", tasks);
+                        List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(caseData);
 
-                        List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
-
-                        List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
+                        List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents(caseData);
+                        log.info("Events  are as : {} ", events);
                         eventErrors.removeIf(e -> !events.contains(e.getEvent()));
                         return respondentSolicitorTaskListRenderer
                             .render(
@@ -164,7 +165,7 @@ public class CaseEventHandler {
                                 respondent,
                                 representedRespondentName,
                                 hasSubmitted,
-                                caseData.getId()
+                                caseData
                             );
                     }
                 }

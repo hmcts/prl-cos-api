@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,7 +26,9 @@ import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
+import uk.gov.hmcts.reform.prl.models.complextypes.Child;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenDetails;
@@ -36,19 +41,25 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationa
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
-import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
+import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,11 +74,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_SEAL_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -96,6 +110,9 @@ public class C100RespondentSolicitorService {
     private final SystemUserService systemUserService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final OrganisationService organisationService;
+    private final RespondentAllegationOfHarmService respondentAllegationOfHarmService;
+    private final ManageDocumentsService manageDocumentsService;
+    private final UserService userService;
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
@@ -197,31 +214,40 @@ public class C100RespondentSolicitorService {
                     );
                     break;
                 case ALLEGATION_OF_HARM:
-                    String[] allegationsOfHarmFields = event.getCaseFieldName().split(",");
-                    caseDataUpdated.put(
-                        allegationsOfHarmFields[0],
-                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo()
+                    Map<String, Object> unmodifiedCaseData = callbackRequest.getCaseDetails().getData();
+                    CaseData caseData = objectMapper.convertValue(
+                            unmodifiedCaseData,
+                            CaseData.class
                     );
-                    caseDataUpdated.put(
-                        allegationsOfHarmFields[1],
-                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo()
-                    );
-                    caseDataUpdated.put(
-                        allegationsOfHarmFields[2],
-                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespDomesticAbuseInfo()
-                    );
-                    caseDataUpdated.put(
-                        allegationsOfHarmFields[3],
-                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbuseInfo()
-                    );
-                    caseDataUpdated.put(
-                        allegationsOfHarmFields[4],
-                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
-                    );
-                    caseDataUpdated.put(
-                        allegationsOfHarmFields[5],
-                        solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespOtherConcernsInfo()
-                    );
+
+                    RespondentAllegationsOfHarmData solicitorRepresentedRespondentAllegationsOfHarmData = solicitorRepresentedRespondent.getValue()
+                            .getResponse().getRespondentAllegationsOfHarmData();
+                    Map<String, Object> data = objectMapper
+                            .convertValue(solicitorRepresentedRespondentAllegationsOfHarmData,new TypeReference<Map<String, Object>>() {});
+                    caseDataUpdated.putAll(data);
+                    respondentAllegationOfHarmService.prePopulatedChildData(caseData,
+                            caseDataUpdated,solicitorRepresentedRespondentAllegationsOfHarmData);
+                    try {
+                        log.info("caseData prepoulation aoh {}",objectMapper.writeValueAsString(caseDataUpdated));
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                    break;
+                case RESPOND_ALLEGATION_OF_HARM:
+                    if (null != solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()) {
+                        String[] respondToAllegationOfHarmFields = event.getCaseFieldName().split(",");
+                        caseDataUpdated.put(
+                            respondToAllegationOfHarmFields[0],
+                            solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                                .getResponseToAllegationsOfHarmYesOrNoResponse()
+                        );
+                        caseDataUpdated.put(
+                            respondToAllegationOfHarmFields[1],
+                            solicitorRepresentedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                                .getResponseToAllegationsOfHarmDocument()
+                        );
+                    }
                     break;
                 case INTERNATIONAL_ELEMENT:
                     String[] internationalElementFields = event.getCaseFieldName().split(",");
@@ -278,9 +304,18 @@ public class C100RespondentSolicitorService {
             CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
         }
+
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
+        Map<String, Object> data = objectMapper
+                .convertValue(RespondentAllegationsOfHarmData.builder().build(),new TypeReference<Map<String, Object>>() {});
+        try {
+            log.info("caseData flusing aoh {}",objectMapper.writeValueAsString(data));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+        updatedCaseData.putAll(data);
         return updatedCaseData;
     }
 
@@ -327,6 +362,9 @@ public class C100RespondentSolicitorService {
             case ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildAoHResponse(caseData, buildResponseForRespondent, solicitor);
                 break;
+            case RESPOND_ALLEGATION_OF_HARM:
+                buildResponseForRespondent = buildRespondAllegationOfHarm(caseData, buildResponseForRespondent);
+                break;
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildInternationalElementResponse(caseData, buildResponseForRespondent);
                 break;
@@ -346,6 +384,29 @@ public class C100RespondentSolicitorService {
             if (index != -1) {
                 respondents.set(index, element(party.getId(), amended));
             }
+        }
+    }
+
+    private Response buildRespondAllegationOfHarm(CaseData caseData, Response buildResponseForRespondent) {
+        ResponseToAllegationsOfHarm responseToAllegationsOfHarm = optimiseResponseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
+                                                                                                          .getResponseToAllegationsOfHarm());
+        return buildResponseForRespondent.toBuilder()
+            .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
+            .build();
+    }
+
+    private ResponseToAllegationsOfHarm optimiseResponseToAllegationsOfHarm(ResponseToAllegationsOfHarm responseToAllegationsOfHarm) {
+        if (null != responseToAllegationsOfHarm
+            && responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse().equals(Yes)) {
+            return responseToAllegationsOfHarm.toBuilder()
+                .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
+                .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
+                .build();
+        } else {
+            return responseToAllegationsOfHarm.toBuilder()
+                .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
+                .responseToAllegationsOfHarmDocument(null)
+                .build();
         }
     }
 
@@ -466,72 +527,64 @@ public class C100RespondentSolicitorService {
     }
 
     private Response buildAoHResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
-        RespondentAllegationsOfHarm respondentAllegationsOfHarm
-            = caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarm();
-        if (null != respondentAllegationsOfHarm.getRespondentUndertakingDocument()) {
+        RespondentAllegationsOfHarmData respondentAllegationsOfHarmData
+            = caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData();
+        if (null != respondentAllegationsOfHarmData.getRespOrdersUndertakingInPlaceDocument()) {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
                 solicitor + SOLICITOR,
-                respondentAllegationsOfHarm.getRespondentUndertakingDocument()
+                    respondentAllegationsOfHarmData.getRespOrdersUndertakingInPlaceDocument()
             );
         }
 
-        if (null != respondentAllegationsOfHarm.getRespondentForcedMarriageDocument()) {
+        if (null != respondentAllegationsOfHarmData.getRespOrdersForcedMarriageProtectionDocument()) {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
                 solicitor + SOLICITOR,
-                respondentAllegationsOfHarm.getRespondentForcedMarriageDocument()
+                    respondentAllegationsOfHarmData.getRespOrdersForcedMarriageProtectionDocument()
             );
         }
-        if (null != respondentAllegationsOfHarm.getRespondentNonMolestationOrderDocument()) {
+        if (null != respondentAllegationsOfHarmData.getRespOrdersNonMolestationDocument()) {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
                 solicitor + SOLICITOR,
-                respondentAllegationsOfHarm.getRespondentNonMolestationOrderDocument()
-            );
-        }
-
-        if (null != respondentAllegationsOfHarm.getRespondentOccupationOrderDocument()) {
-            buildRespondentDocs(
-                caseData,
-                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                solicitor + SOLICITOR,
-                respondentAllegationsOfHarm.getRespondentOccupationOrderDocument()
+                    respondentAllegationsOfHarmData.getRespOrdersNonMolestationDocument()
             );
         }
 
-        if (null != respondentAllegationsOfHarm.getRespondentOtherInjunctiveDocument()) {
+        if (null != respondentAllegationsOfHarmData.getRespOrdersOccupationDocument()) {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
                 solicitor + SOLICITOR,
-                respondentAllegationsOfHarm.getRespondentOtherInjunctiveDocument()
+                    respondentAllegationsOfHarmData.getRespOrdersOccupationDocument()
             );
         }
 
-        if (null != respondentAllegationsOfHarm.getRespondentRestrainingDocument()) {
+        if (null != respondentAllegationsOfHarmData.getRespOrdersOtherInjunctiveDocument()) {
             buildRespondentDocs(
                 caseData,
                 caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
                 solicitor + SOLICITOR,
-                respondentAllegationsOfHarm.getRespondentRestrainingDocument()
+                    respondentAllegationsOfHarmData.getRespOrdersOtherInjunctiveDocument()
+            );
+        }
+
+        if (null != respondentAllegationsOfHarmData.getRespOrdersRestrainingDocument()) {
+            buildRespondentDocs(
+                caseData,
+                caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                solicitor + SOLICITOR,
+                    respondentAllegationsOfHarmData.getRespOrdersRestrainingDocument()
             );
         }
 
         buildResponseForRespondent = buildResponseForRespondent.toBuilder()
             .respondentAllegationsOfHarmData(
-                RespondentAllegationsOfHarmData
-                    .builder()
-                    .respAohYesOrNo(caseData.getRespondentSolicitorData().getRespondentAohYesNo())
-                    .respAllegationsOfHarmInfo(caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarm())
-                    .respDomesticAbuseInfo(caseData.getRespondentSolicitorData().getRespondentDomesticAbuseBehaviour())
-                    .respChildAbuseInfo(caseData.getRespondentSolicitorData().getRespondentChildAbuseBehaviour())
-                    .respChildAbductionInfo(caseData.getRespondentSolicitorData().getRespondentChildAbduction())
-                    .respOtherConcernsInfo(caseData.getRespondentSolicitorData().getRespondentOtherConcerns())
-                    .build())
+                respondentAllegationsOfHarmData)
             .build();
         return buildResponseForRespondent;
     }
@@ -760,6 +813,8 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> submitC7ResponseForActiveRespondent(String authorisation, CallbackRequest callbackRequest) throws Exception {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        List<QuarantineLegalDoc> quarantineLegalDocList = new ArrayList<>();
+        UserDetails userDetails = userService.getUserDetails(authorisation);
         CaseData caseData = objectMapper.convertValue(
             updatedCaseData,
             CaseData.class
@@ -773,6 +828,12 @@ public class C100RespondentSolicitorService {
 
         if (representedRespondent != null && representedRespondent.getValue() != null && PrlAppsConstants.C100_CASE_TYPE.equalsIgnoreCase(
             caseData.getCaseTypeOfApplication())) {
+            if (representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm() != null
+                    && representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                    .getResponseToAllegationsOfHarmDocument() != null) {
+                quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(userDetails,representedRespondent.getValue().getResponse()
+                        .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()));
+            }
             PartyDetails amended = representedRespondent.getValue().toBuilder()
                 .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
                 .build();
@@ -790,11 +851,9 @@ public class C100RespondentSolicitorService {
             Map<String, Object> dataMap = generateRespondentDocsAndUpdateCaseData(
                 authorisation,
                 callbackRequest,
-                updatedCaseData,
                 caseData,
                 representedRespondent,
-                party,
-                createdBy
+                    quarantineLegalDocList
             );
 
             generateC8AndUpdateCaseData(
@@ -807,77 +866,39 @@ public class C100RespondentSolicitorService {
                 dataMap
             );
         }
-
+        moveRespondentDocumentsToQuarantineTab(updatedCaseData,userDetails,quarantineLegalDocList);
         return updatedCaseData;
     }
 
     private Map<String, Object> generateRespondentDocsAndUpdateCaseData(
         String authorisation,
         CallbackRequest callbackRequest,
-        Map<String, Object> updatedCaseData,
         CaseData caseData,
         Element<PartyDetails> representedRespondent,
-        String party,
-        String createdBy
+        List<QuarantineLegalDoc> quarantineLegalDocList
     ) throws Exception {
-        Document c7FinalDocument = null;
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
-        c7FinalDocument = documentGenService.generateSingleDocument(
+        Document c7FinalDocument  = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             SOLICITOR_C7_FINAL_DOCUMENT,
             false,
             dataMap
         );
-        updatedCaseData.put("finalC7ResponseDoc", c7FinalDocument);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
 
-        RespondentDocs respondentDocs = RespondentDocs.builder().build();
-        if (null != c7FinalDocument) {
-            respondentDocs = respondentDocs
-                .toBuilder()
-                .c7Document(ResponseDocuments
-                                .builder()
-                                .partyName(party)
-                                .createdBy(createdBy)
-                                .dateCreated(LocalDate.now())
-                                .citizenDocument(c7FinalDocument)
-                                .build()
-                )
-                .build();
-        }
-
-        Document c1aFinalDocument = null;
-        if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
-            c1aFinalDocument = documentGenService.generateSingleDocument(
+        if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null
+                && Yes.equals(caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+            Document c1aFinalDocument = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 SOLICITOR_C1A_FINAL_DOCUMENT,
                 false,
                 dataMap
             );
-            updatedCaseData.put("finalC1AResponseDoc", c1aFinalDocument);
+            quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails,c1aFinalDocument));
         }
-
-        if (null != c1aFinalDocument) {
-            respondentDocs = respondentDocs
-                .toBuilder()
-                .c1aDocument(ResponseDocuments
-                                 .builder()
-                                 .partyName(party)
-                                 .createdBy(createdBy)
-                                 .dateCreated(LocalDate.now())
-                                 .citizenDocument(c1aFinalDocument)
-                                 .build()
-                )
-                .build();
-        }
-
-        if (null != caseData.getRespondentDocsList()) {
-            caseData.getRespondentDocsList().add(element(respondentDocs));
-        } else {
-            caseData.setRespondentDocsList(List.of(element(respondentDocs)));
-        }
-        updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         return dataMap;
     }
 
@@ -946,9 +967,22 @@ public class C100RespondentSolicitorService {
         dataMap.put(COURT_NAME_FIELD, callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put(CASE_DATA_ID, callbackRequest.getCaseDetails().getId());
         dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
-        List<Element<ChildDetailsRevised>> listOfChildren = (List<Element<ChildDetailsRevised>>) callbackRequest.getCaseDetails().getData().get(
-            CHILDREN);
-        dataMap.put(CHILDREN, listOfChildren);
+        dataMap.put(COURT_SEAL_FIELD,callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD) == null ? "[userImage:familycourtseal.png]"
+                : callbackRequest.getCaseDetails().getData().get(COURT_SEAL_FIELD));
+        if (callbackRequest.getCaseDetails().getData().get("taskListVersion") != null
+                && TASK_LIST_VERSION_V2.equalsIgnoreCase(String.valueOf(callbackRequest
+                .getCaseDetails().getData().get("taskListVersion")))) {
+            List<Element<ChildDetailsRevised>> listOfChildren = (List<Element<ChildDetailsRevised>>) callbackRequest
+                    .getCaseDetails().getData().get(
+                    "newChildDetails");
+            dataMap.put(CHILDREN, listOfChildren);
+
+        } else {
+            List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(
+                    CHILDREN);
+            dataMap.put(CHILDREN, listOfChildren);
+
+        }
 
         if (solicitorRepresentedRespondent == null) {
             Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
@@ -999,6 +1033,12 @@ public class C100RespondentSolicitorService {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
         }
+
+        try {
+            log.info("dataMap  : {}",objectMapper.writeValueAsString(dataMap));
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
         return dataMap;
     }
 
@@ -1015,7 +1055,6 @@ public class C100RespondentSolicitorService {
         dataMap.put("willingToAttendMiam", response.getMiam().getWillingToAttendMiam());
         dataMap.put("reasonNotAttendingMiam", response.getMiam().getReasonNotAttendingMiam());
         dataMap.put("currentOrPastProceedingsForChildren", response.getCurrentOrPastProceedingsForChildren());
-        dataMap.put("childAbuseInfo", response.getRespondentAllegationsOfHarmData().getRespChildAbuseInfo());
         dataMap.put("reasonForChild", response.getCitizenInternationalElements().getChildrenLiveOutsideOfEnWl());
         dataMap.put(
             "reasonForChildDetails",
@@ -1048,6 +1087,9 @@ public class C100RespondentSolicitorService {
         );
         dataMap.put("reasonableAdjustments", response.getSupportYouNeed().getReasonableAdjustments());
         dataMap.put("attendingTheCourt", response.getAttendToCourt());
+        if (null != response.getResponseToAllegationsOfHarm()) {
+            dataMap.put("isRespondToAllegationOfHarm", response.getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
+        }
     }
 
     private void populatePartyDetails(Element<PartyDetails> solicitorRepresentedRespondent, Response response, Map<String, Object> dataMap) {
@@ -1160,112 +1202,12 @@ public class C100RespondentSolicitorService {
     }
 
     private void populateAohDataMap(Response response, Map<String, Object> dataMap) {
-        if (response.getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo() != null) {
-            dataMap.put("nonMolestationOrderIssueDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIssueDate());
-            dataMap.put("nonMolestationOrderEndDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderEndDate());
-            dataMap.put("aoh", response.getRespondentAllegationsOfHarmData().getRespAllegationsOfHarmInfo());
-            dataMap.put("nonMolestationOrderIsCurrent", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderIsCurrent());
-            dataMap.put("nonMolestationOrderCourt", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderCourt());
-            dataMap.put("nonMolestationOrderCaseNumber", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentNonMolestationOrderCaseNumber());
-            dataMap.put("occupationOrderIssueDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderIssueDate());
-            dataMap.put("occupationOrderEndDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderEndDate());
-            dataMap.put("occupationOrderIsCurrent", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderIsCurrent());
-            dataMap.put("occupationOrderCourt", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderCourt());
-            dataMap.put("occupationCaseNumber", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOccupationOrderCaseNumber());
-            dataMap.put("forcedMarriageIssueDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageIssueDate());
-            dataMap.put("forcedMarriageEndDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageEndDate());
-            dataMap.put("forcedMarriageIsCurrent", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageIsCurrent());
-            dataMap.put("forcedMarriageCourt", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageCourt());
-            dataMap.put("forcedMarriageNumber", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentForcedMarriageCaseNumber());
-            dataMap.put("restrainingIssueDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentRestrainingIssueDate());
-            dataMap.put("restrainingEndDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentRestrainingEndDate());
-            dataMap.put("restrainingIsCurrent", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentRestrainingIsCurrent());
-            dataMap.put("restrainingCourt", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentRestrainingCourt());
-            dataMap.put("restrainingNumber", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentRestrainingCaseNumber());
-            dataMap.put("otherInjunctiveIssueDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveIssueDate());
-            dataMap.put("otherInjunctiveEndDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveEndDate());
-            dataMap.put("otherInjunctiveIsCurrent", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveIsCurrent());
-            dataMap.put("otherInjunctiveCourt", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveCourt());
-            dataMap.put("otherInjunctiveNumber", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOtherInjunctiveCaseNumber());
-            dataMap.put("undertakingIssueDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentUndertakingIssueDate());
-            dataMap.put("undertakingEndDate", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentUndertakingEndDate());
-            dataMap.put("undertakingIsCurrent", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentUndertakingIsCurrent());
-            dataMap.put("undertakingCourt", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentUndertakingCourt());
-            dataMap.put("undertakingNumber", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentUndertakingCaseNumber());
-            dataMap.put("domesticAbuse", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentDomesticAbuse());
-            dataMap.put("domesticAbuseInfo", response.getRespondentAllegationsOfHarmData().getRespDomesticAbuseInfo());
-            dataMap.put("drugAlcoholAbuse", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentDrugOrAlcoholAbuse());
-            dataMap.put("otherConcerns", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentOtherSafetyConcerns());
-            dataMap.put("ordersRespondentWantsFromCourt", response.getRespondentAllegationsOfHarmData()
-                .getRespOtherConcernsInfo().getOrdersRespondentWantFromCourt());
-            dataMap.put("childSpendingUnsupervisedTime", response.getRespondentAllegationsOfHarmData()
-                .getRespOtherConcernsInfo().getChildSpendingUnsupervisedTime());
-            dataMap.put("childSpendingSupervisedTime", response.getRespondentAllegationsOfHarmData()
-                .getRespOtherConcernsInfo().getChildSpendingSupervisedTime());
-            dataMap.put("childHavingOtherFormOfContact", response.getRespondentAllegationsOfHarmData()
-                .getRespOtherConcernsInfo().getChildHavingOtherFormOfContact());
-            dataMap.put("childAbuse", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getRespondentChildAbuse());
-            dataMap.put("childAbductionInfo", response.getRespondentAllegationsOfHarmData()
-                .getRespAllegationsOfHarmInfo().getIsRespondentChildAbduction());
-            dataMap.put("reasonChildAbductionBelief", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getReasonForChildAbductionBelief());
-            dataMap.put("previousThreatsForChildAbduction", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getPreviousThreatsForChildAbduction());
-            dataMap.put("previousThreatsForChildAbductionDetails", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getPreviousThreatsForChildAbductionDetails());
-            dataMap.put("whereIsChild", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getWhereIsChild());
-            dataMap.put("passportOfficeBeenNotified", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getHasPassportOfficeNotified());
-            dataMap.put("orgInvolvedInPreviousAbductions", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getAnyOrgInvolvedInPreviousAbduction());
-            dataMap.put("orgInvolvedInPreviousAbductionsDetails", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getAnyOrgInvolvedInPreviousAbductionDetails());
-            dataMap.put(
-                "childrenHavePassport",
-                response.getRespondentAllegationsOfHarmData().getRespChildAbductionInfo()
-                    .getChildrenHavePassport()
-            );
-            dataMap.put("childrenHaveMoreThanOnePassport", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getChildrenHaveMoreThanOnePassport());
-            dataMap.put("whoHasChildrenPassport", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getWhoHasChildPassport());
-            dataMap.put("whoHasChildrenPassportOther", response.getRespondentAllegationsOfHarmData()
-                .getRespChildAbductionInfo().getWhoHasChildPassportOther());
+        if (response.getRespondentAllegationsOfHarmData() != null) {
+            RespondentAllegationsOfHarmData allegationsOfHarmData = response.getRespondentAllegationsOfHarmData();
+            dataMap.put("respChildAbuseBehavioursDocmosis",respondentAllegationOfHarmService
+                    .updateChildAbusesForDocmosis(allegationsOfHarmData));
+            dataMap.putAll(objectMapper.convertValue(allegationsOfHarmData,new TypeReference<Map<String, Object>>() {}));
+
         }
     }
 
@@ -1306,13 +1248,14 @@ public class C100RespondentSolicitorService {
         );
         caseDataUpdated.put("draftC7ResponseDoc", document);
 
-        if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
+        if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null
+                && Yes.equals(caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
             Document documentForC1A = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                SOLICITOR_C1A_DRAFT_DOCUMENT,
-                false,
-                dataMap
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_DRAFT_DOCUMENT,
+                    false,
+                    dataMap
             );
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
         }
@@ -1360,4 +1303,61 @@ public class C100RespondentSolicitorService {
                                                                                                 ? caseData.getCourtName() : ""))
             .build();
     }
+
+
+    private void moveRespondentDocumentsToQuarantineTab(Map<String, Object> caseDataUpdated,
+                                                        UserDetails userDetails, List<QuarantineLegalDoc> quarantineLegalDocList) {
+        CaseData parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        String userRole = CaseUtils.getUserRole(userDetails);
+        for (QuarantineLegalDoc eachDoc : quarantineLegalDocList) {
+            manageDocumentsService.setFlagsForWaTask(parsedCaseData, caseDataUpdated, userRole, eachDoc);
+            manageDocumentsService.moveDocumentsToQuarantineTab(eachDoc, parsedCaseData, caseDataUpdated, userRole);
+            parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        }
+    }
+
+    private QuarantineLegalDoc getC7QuarantineLegalDoc(UserDetails userDetails, Document c7doc) {
+        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
+        return QuarantineLegalDoc.builder()
+                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                .categoryId("respondentApplication")
+                .categoryName("Respondent Application")
+                .fileName(c7doc.getDocumentFileName())
+                .isConfidential(Yes)
+                .uploadedBy(userDetails.getFullName())
+                .uploaderRole(loggedInUserType)
+                .document(c7doc)
+                .build();
+
+    }
+
+    private QuarantineLegalDoc getC1AQuarantineLegalDoc(UserDetails userDetails, Document c1aDoc) {
+        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
+        return QuarantineLegalDoc.builder()
+                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                .categoryId("respondentC1AApplication")
+                .categoryName("Respondent C1A Application")
+                .isConfidential(Yes)
+                .fileName(c1aDoc.getDocumentFileName())
+                .uploadedBy(userDetails.getFullName())
+                .uploaderRole(loggedInUserType)
+                .document(c1aDoc)
+                .build();
+    }
+
+    private QuarantineLegalDoc getUploadedResponseToApplicantAoh(UserDetails userDetails, Document document) {
+        String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
+        return QuarantineLegalDoc.builder()
+                .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                .categoryId("respondentC1AResponse")
+                .categoryName("Respondent C1A response")
+                .isConfidential(Yes)
+                .fileName(document.getDocumentFileName())
+                .uploadedBy(userDetails.getFullName())
+                .uploaderRole(loggedInUserType)
+                .document(document)
+                .build();
+    }
+
+
 }

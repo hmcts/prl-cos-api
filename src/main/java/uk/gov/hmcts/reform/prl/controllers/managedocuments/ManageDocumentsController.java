@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.controllers.managedocuments;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -128,5 +129,21 @@ public class ManageDocumentsController extends AbstractCallbackController {
                       .confirmationHeader(CONFIRMATION_HEADER)
                       .confirmationBody(CONFIRMATION_BODY)
                       .build());
+    }
+
+    //TO BE DELETED
+    @PostMapping("/validate-court-user")
+    public AboutToStartOrSubmitCallbackResponse validateUserIfCourtSelected(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestBody CallbackRequest callbackRequest) {
+        Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
+        if (manageDocumentsService.isCourtSelectedInDocumentParty(callbackRequest)
+            && !manageDocumentsService.checkIfUserIsCourtStaff(null)) {
+            return AboutToStartOrSubmitCallbackResponse.builder()
+                .errors(List.of("Only court admin/Judge can select the value 'court' for 'submitting on behalf of'"))
+                .build();
+        }
+        return AboutToStartOrSubmitCallbackResponse.builder()
+            .data(updatedCaseData).build();
     }
 }

@@ -378,7 +378,7 @@ public class ManageDocumentsService {
         } else {
             caseDataUpdated.put(confidentialOrRestrictedKey, List.of(element(uploadDoc)));
         }
-    }
+            }
 
 
     private Document downloadAndDeleteDocument(Document document) {
