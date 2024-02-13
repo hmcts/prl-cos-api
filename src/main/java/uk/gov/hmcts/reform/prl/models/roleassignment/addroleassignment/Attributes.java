@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.ContractType;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(builderMethodName = "attributes")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Attributes {
 
     private String jurisdiction;
