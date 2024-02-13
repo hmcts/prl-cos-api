@@ -60,4 +60,43 @@ public class CoreCaseDataService {
             caseDataContent
         );
     }
+
+
+    public void triggerEventWithAuthorisation(String authorisation, String jurisdiction,
+                                              String caseType,
+                                              Long caseId,
+                                              String eventName,
+                                              Map<String, Object> eventData) {
+
+        String systemUpdateUserId = systemUserService.getUserId(authorisation);
+
+        StartEventResponse startEventResponse = coreCaseDataApi.startEventForCaseWorker(
+            authorisation,
+            authTokenGenerator.generate(),
+            systemUpdateUserId,
+            jurisdiction,
+            caseType,
+            caseId.toString(),
+            eventName
+        );
+
+        CaseDataContent caseDataContent = CaseDataContent.builder()
+            .eventToken(startEventResponse.getToken())
+            .event(Event.builder()
+                       .id(startEventResponse.getEventId())
+                       .build())
+            .data(eventData)
+            .build();
+
+        coreCaseDataApi.submitEventForCaseWorker(
+            authorisation,
+            authTokenGenerator.generate(),
+            systemUpdateUserId,
+            jurisdiction,
+            caseType,
+            caseId.toString(),
+            true,
+            caseDataContent
+        );
+    }
 }
