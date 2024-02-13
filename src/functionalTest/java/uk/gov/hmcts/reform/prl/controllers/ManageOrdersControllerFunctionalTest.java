@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
@@ -91,6 +92,11 @@ public class ManageOrdersControllerFunctionalTest {
 
     private static final String APPLICANT_CASE_NAME_REQUEST = "requests/call-back-controller-applicant-case-name.json";
 
+    private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN =
+        "CallBckReqForFinaliseServeOrder_courtadmin.json";
+
+    private static final String VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF =
+        "CallBckReqForFinaliseServeOrder_courtbailif.json";
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -489,5 +495,75 @@ public class ManageOrdersControllerFunctionalTest {
                   equalTo("Yes"))
             .body("data.orderCollection[1].value.serveOrderDetails.cafcassCymruEmail",
                   equalTo(caseDetails.getData().get("cafcassCymruEmail")));
+    }
+
+    @Test
+    public void givenBody_ServeOrderForPersonalServiceWithCourtBailiffOptionSelected() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .body("data.orderCollection[0].value.serveOrderDetails.courtPersonalService",
+                  equalTo(SoaSolicitorServingRespondentsEnum.courtBailiff.name()));
+
+    }
+
+    @Test
+    public void givenBody_ServeOrderForPersonalServiceWithCourtAdminOptionSelected() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/manage-orders/about-to-submit")
+            .then()
+            .body("data.orderCollection[0].value.serveOrderDetails.courtPersonalService",
+                  equalTo(SoaSolicitorServingRespondentsEnum.courtAdmin.name()));
+
+    }
+
+    @Test
+    public void givenRequestBody_ForPersonalServiceWhenCourtAdminSelected() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case-order-email-notification")
+            .then()
+            .body("data.recipientsOptions", equalTo(null))
+            .body("data.cafcassCymruEmail", equalTo(null))
+            .body("data.serveOrderDynamicList", equalTo(null))
+            .body("data.serveOtherPartiesCA", equalTo(null))
+            .body("data.applicants[0].value.solicitorEmail", equalTo("test@test.com"));
+    }
+
+    @Test
+    public void givenRequestBody_ForPersonalServiceWhenBailiffSelected() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/case-order-email-notification")
+            .then()
+            .body("data.recipientsOptions", equalTo(null))
+            .body("data.cafcassCymruEmail", equalTo(null))
+            .body("data.serveOrderDynamicList", equalTo(null))
+            .body("data.serveOtherPartiesCA", equalTo(null))
+            .body("data.applicants[0].value.solicitorEmail", equalTo("test@test.com"));
     }
 }

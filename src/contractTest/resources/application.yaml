@@ -138,12 +138,17 @@ send-grid:
           SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
           SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: d-26fd4bac10854d3b858dc57ee07f5bc3
           SERVE_ORDER_NON_PERSONAL_SOLLICITOR: d-b5cf52c69837403dbefda498f6dae888
+          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: d-13b61732cb744f89a9489d4b3500123a
+          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-8b6f127addd240b599528c75b3b37974}
+          SOA_CA_LOCAL_AUTHORITY: ${SEND_GRID_SOA_CA_LOCAL_AUTHORITY:d-d121b680310f45e5a4117dd7023482e2}
           SERVE_ORDER_CAFCASS_CYMRU: d-f117f63372a3466aae1eb08120ed1fd0
           SERVE_ORDER_APPLICANT_RESPONDENT: d-0dec5ed3abd84dbeb935dc2319a66fee
         welsh:
           SERVE_ORDER_ANOTHER_ORGANISATION: d-2dbde39ca0ed4297825fe736b26a0bb6
           SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR: d-26fd4bac10854d3b858dc57ee07f5bc3
           SERVE_ORDER_NON_PERSONAL_SOLLICITOR: d-b5cf52c69837403dbefda498f6dae888
+          SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP: d-13b61732cb744f89a9489d4b3500123a
+          SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB: ${SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB:d-8b6f127addd240b599528c75b3b37974}
           SERVE_ORDER_CAFCASS_CYMRU: d-f117f63372a3466aae1eb08120ed1fd0
           SERVE_ORDER_APPLICANT_RESPONDENT: d-0dec5ed3abd84dbeb935dc2319a66fee
   rpa:
@@ -291,6 +296,8 @@ document:
       c100_c1a_welsh_template_v2: FL-PRL-APP-WEL-C1A-Final-V2.docx
       c100_c1a_welsh_template: PRL-C1A-WelshLang.docx
       c100_c1a_welsh_filename: C1A_Document_Welsh.pdf
+      c100_resp_c8_welsh_template: FL-PRL-GOR-WEL-RES-C8-FINAL.docx
+      c100_resp_c8_welsh_filename: C8Document_Welsh.pdf
     fl401:
       fl401_final_template: FL-PRL-APP-ENG-Fl401-Final.docx
       fl401_final_filename: FL401FinalDocument.pdf
@@ -312,6 +319,10 @@ document:
       fl401_fl406_welsh_draft_filename: Welsh_Power_of_arrest_draft.pdf
       fl401_fl406_welsh_template: PRL-GOR-WEL-FL406-Power-Of-Arrest-Final.docx
       fl401_fl406_welsh_filename: Welsh_Power_of_arrest.pdf
+      fl401_resp_c8_template: FL-PRL-GOR-ENG-RES-C8-FL401-FINAL.docx
+      fl401_resp_c8_filename: C8Document.pdf
+      fl401_resp_c8_template_welsh: FL-PRL-GOR-WEL-RES-C8-FL401-FINAL.docx
+      fl401_resp_c8_filename_welsh: C8Document.pdf
     common:
       doc_cover_sheet_template: PRL-DOCUMENT-COVER-SHEET.docx
       doc_cover_sheet_welsh_template: PRL-WEL-DOCUMENT-COVER-SHEET.docx
@@ -526,3 +537,4 @@ sendandreply:
 
 hearing_component:
   futureHearingStatus: HEARING_REQUESTED, AWAITING_LISTING, LISTED, UPDATE_REQUESTED, UPDATE_SUBMITTED, EXCEPTION, CANCELLATION_REQUESTED, CANCELLATION_SUBMITTED, AWAITING_ACTUALS
+  hearingStatusesToFilter: COMPLETED, AWAITING_ACTUALS
