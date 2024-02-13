@@ -64,9 +64,7 @@ public class BulkPrintService {
         log.info("Converted docs --> {}", pdfDocuments);
 
         final List<String> stringifiedDocuments = pdfDocuments.stream()
-            .map(docInfo -> {
-                return getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken);
-            })
+            .map(docInfo -> getDocumentsAsBytes(docInfo.getDocumentBinaryUrl(), userToken, s2sToken))
             .map(getEncoder()::encodeToString)
             .toList();
         log.info("Sending {} for case {}", letterType, caseId);

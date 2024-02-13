@@ -81,15 +81,7 @@
             "gender": "male",
             "otherGender": null,
             "placeOfBirth": "London",
-            "address": {
-              "AddressLine1": "Ministry Of Justice",
-              "AddressLine2": "Seventh Floor 102 Petty France",
-              "AddressLine3": "",
-              "PostTown": "",
-              "County": "",
-              "Country": "",
-              "PostCode": "RH117RQ"
-            },
+            "address": null,
             "isAddressUnknown": null,
             "isAddressConfidential": "No",
             "isAtAddressLessThan5Years": "No",

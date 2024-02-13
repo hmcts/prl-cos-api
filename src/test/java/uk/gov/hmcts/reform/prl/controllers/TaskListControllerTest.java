@@ -62,4 +62,43 @@ public class TaskListControllerTest {
         Assert.assertNotNull(response);
         verify(taskListService, times(1)).updateTaskList(callbackRequest,auth);
     }
+
+    //    @Test
+    //    public void testHandleSubmittedWithoutCourtStaffRoles() throws JsonProcessingException {
+    //        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(List.of("test role")).build());
+    //        taskListController.handleSubmitted(callbackRequest,"testAuth");
+    //        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+    //    }
+    //
+    //    @Test
+    //    public void testHandleSubmittedWithCourtStaffRoles() throws JsonProcessingException {
+    //        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(ROLES).build());
+    //        taskListController.handleSubmitted(callbackRequest,"testAuth");
+    //        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+    //    }
+    //
+    //    @Test
+    //    public void testHandleSubmittedForGateKeepingState() throws Exception {
+    //        Map<String, Object> documentMap = new HashMap<>();
+    //        documentMap.put("c1ADocument", Document.builder().build());
+    //        documentMap.put("c8Document", Document.builder().build());
+    //        documentMap.put("C8WelshDocument", Document.builder().build());
+    //        documentMap.put("finalDocument", Document.builder().build());
+    //        documentMap.put("finalWelshDocument", Document.builder().build());
+    //        documentMap.put("c1AWelshDocument", Document.builder().build());
+    //        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+    //        when(dgsService.generateDocuments("testAuth",caseData)).thenReturn(documentMap);
+    //        when(userService.getUserDetails(Mockito.anyString())).thenReturn(UserDetails.builder().roles(ROLES).build());
+    //        taskListController.handleSubmitted(callbackRequest,"testAuth");
+    //        verify(tabService,times(1)).updateAllTabsIncludingConfTab(Mockito.any(CaseData.class));
+    //    }
+    //
+    //    @Test
+    //    public void testUpdateTaskListWhenSubmitted() {
+    //        ZonedDateTime zonedDateTime = ZonedDateTime.now(ZoneId.of("Europe/London"));
+    //        caseData = caseData.toBuilder().dateSubmitted(DateTimeFormatter.ISO_LOCAL_DATE.format(zonedDateTime)).build();
+    //        CaseDataChanged caseDataChanged = new CaseDataChanged(caseData);
+    //        taskListController.updateTaskListWhenSubmitted(callbackRequest, "testAuth");
+    //        verify(eventPublisher, times(1)).publishEvent(Mockito.any());
+    //    }
 }

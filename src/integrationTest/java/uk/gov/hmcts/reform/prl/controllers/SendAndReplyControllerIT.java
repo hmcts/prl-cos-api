@@ -75,10 +75,6 @@ public class SendAndReplyControllerIT {
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         Map<String, Object> httpResponse = (Map<String, Object>) HttpClientBuilder.create().build().execute(httpPost);
-        //        assertEquals(
-        //            HttpStatus.SC_OK,
-        //            httpResponse.getStatusLine().getStatusCode()
-        //        );
         assertEquals(httpResponse.get("http_status"),"200 OK");
         assertNotNull(httpResponse);
         assertNull(httpResponse);

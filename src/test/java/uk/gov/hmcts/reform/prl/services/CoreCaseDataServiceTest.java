@@ -80,5 +80,17 @@ public class CoreCaseDataServiceTest {
         return StartEventResponse.builder().eventId(eventId).token(eventToken).build();
     }
 
+    @Test
+    public void shouldTriggerEventWithAuthorisation() {
+        Map<String, Object> eventData = Map.of("A", "B");
+        coreCaseDataService.triggerEventWithAuthorisation(userToken, jurisdiction, caseType, caseId, eventName, eventData);
+
+        verify(coreCaseDataApi).startEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                        caseType, Long.toString(caseId), eventName);
+        verify(coreCaseDataApi).submitEventForCaseWorker(userToken, serviceAuthToken, systemUserId, jurisdiction,
+                                                         caseType, Long.toString(caseId), true,
+                                                         buildCaseDataContent(eventName, eventToken, eventData));
+    }
+
 }
 

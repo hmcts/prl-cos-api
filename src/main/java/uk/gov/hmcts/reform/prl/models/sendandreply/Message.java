@@ -69,10 +69,8 @@ public class Message extends MessageMetaData {
         if (sendReplyJudgeName == null
             || StringUtils.isEmpty(sendReplyJudgeName.getIdamId())
             || StringUtils.isEmpty(sendReplyJudgeName.getPersonalCode())) {
-            System.out.println("getSendReplyJudgeName null check");
             return null;
         }
-        System.out.println("outside getSendReplyJudgeName null check");
         return sendReplyJudgeName;
     }
 

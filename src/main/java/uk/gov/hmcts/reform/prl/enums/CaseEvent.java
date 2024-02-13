@@ -34,7 +34,8 @@ public enum CaseEvent {
     HMC_CASE_STATUS_UPDATE_TO_PREP_FOR_HEARING("hmcCaseUpdPrepForHearing"),
     HMC_CASE_STATUS_UPDATE_TO_DECISION_OUTCOME("hmcCaseUpdDecOutcome"),
     CITIZEN_REMOVE_LEGAL_REPRESENTATIVE("citizenRemoveLegalRepresentative"),
-    TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase");
+    TS_ADMIN_APPLICATION_NOC("testingSupportDummyCase"),
+    CITIZEN_STATEMENT_OF_SERVICE("citizenStatementOfService");
 
     private final String value;
 

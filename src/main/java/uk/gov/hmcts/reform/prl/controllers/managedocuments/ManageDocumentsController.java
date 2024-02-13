@@ -44,9 +44,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @SecurityRequirement(name = "Bearer Authentication")
 public class ManageDocumentsController extends AbstractCallbackController {
     private final ManageDocumentsService manageDocumentsService;
-
     private final UserService userService;
-
     public static final String CONFIRMATION_HEADER = "# Documents submitted";
     public static final String CONFIRMATION_BODY = "### What happens next \n\n The court will review the submitted documents.";
 
@@ -66,7 +64,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
         //PRL-3562 - populate document categories
         caseData = manageDocumentsService.populateDocumentCategories(authorisation, caseData);
-        log.info("debolina_aboutToStartResponse {}", caseData);
         return CallbackResponse.builder()
             .data(caseData)
             .build();
@@ -113,12 +110,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest
     ) throws JsonProcessingException {
-        log.info("/copy-manage-docs/about-to-submit::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-        log.info("=======STARttt====");
-        ObjectMapper om = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        log.info("CCCCCCC--->{}", result);
         return AboutToStartOrSubmitCallbackResponse.builder()
             .data(manageDocumentsService.copyDocument(callbackRequest, authorisation)).build();
     }
@@ -127,12 +118,6 @@ public class ManageDocumentsController extends AbstractCallbackController {
     public ResponseEntity<SubmittedCallbackResponse> handleSubmitted(@RequestBody CallbackRequest callbackRequest,
                                                                      @RequestHeader(HttpHeaders.AUTHORIZATION)
                                                                      @Parameter(hidden = true) String authorisation) {
-        try {
-            log.info("/handleSubmitted::CallbackRequest -> {}", objectMapper.writeValueAsString(callbackRequest));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
-
         Map<String, Object> caseDataUpdated = manageDocumentsService.appendConfidentialDocumentNameForCourtAdmin(
             callbackRequest,
             authorisation

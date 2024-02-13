@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -179,6 +180,9 @@ public class DocumentGenServiceTest {
 
     @Mock
     AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+
+    @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
+    protected String fl401RespC8TemplateWelsh;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -377,6 +381,7 @@ public class DocumentGenServiceTest {
             .languageRequirementApplicationNeedWelsh(Yes)
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .applicantsFL401(partyDetailsWithOrganisations)
+            .respondentsFL401(partyDetailsWithOrganisations)
             .isEngDocGen("Yes")
             .isWelshDocGen("Yes")
             .state(State.AWAITING_SUBMISSION_TO_HMCTS)
@@ -786,6 +791,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(homefull)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -903,6 +909,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(homefull)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -1010,6 +1017,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -1103,6 +1111,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -1196,6 +1205,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -1284,6 +1294,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -1511,6 +1522,14 @@ public class DocumentGenServiceTest {
     public void testSingleDocGenerationC1ADraftHint() throws Exception {
         documentGenService.generateSingleDocument("auth", c100CaseData, C1A_DRAFT_HINT, false);
         verify(dgsService, times(1)).generateDocument(Mockito.anyString(), any(CaseDetails.class), Mockito.any());
+    }
+
+    @Test
+    public void testGenerateC8DocumentForRespondent() throws Exception {
+        Map<String, Object> respondentDetails = new HashMap<>();
+        respondentDetails.put("dynamic_fileName","test.pdf");
+        documentGenService.generateSingleDocument("auth", c100CaseData, DOCUMENT_COVER_SHEET_HINT, false, respondentDetails);
+        verify(dgsService, times(1)).generateDocument(Mockito.anyString(), Mockito.anyString(), Mockito.any(), Mockito.any());
     }
 
     @Test
@@ -2719,6 +2738,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(homefull)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -2835,6 +2855,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(homefull)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -2942,6 +2963,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3027,6 +3049,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3101,6 +3124,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3170,6 +3194,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3235,6 +3260,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3306,6 +3332,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();
@@ -3368,6 +3395,7 @@ public class DocumentGenServiceTest {
                                .documentFileName("FL401-Final.docx")
                                .build())
             .applicantsFL401(applicant)
+            .respondentsFL401(applicant)
             .home(null)
             .state(State.AWAITING_FL401_SUBMISSION_TO_HMCTS)
             .build();

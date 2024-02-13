@@ -69,4 +69,17 @@ public class ServiceOfApplicationControllerIntegrationTest {
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
     }
+
+    @Test
+    public void testServiceOfApplicationOtherPeopleC6AOrdersEndpoint() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + "/service-of-application/soa-validation");
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
 }
