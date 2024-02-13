@@ -504,13 +504,14 @@ public class ManageOrderEmailService {
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         if (recipientsOptions != null) {
+
             //applicants
-            sendEmailToApplicantOrRespondentSolicitor(recipientsOptions.getValue(),
+            sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
                                                       caseData.getApplicants(),
                                                       isFinalOrder,
                                                       caseData,
                                                       authorisation,
-                                                      dynamicDataForEmail,
+                                                      dynamicDataForEmail, bulkPrintOrderDetails,
                                                       orderDocuments
             );
             //respondents
@@ -648,6 +649,36 @@ public class ManageOrderEmailService {
         });
     }
 
+    private void serveOrdersToApplicantAddress(CaseData caseData, String authorisation,
+                                               List<Document> orderDocuments,
+                                               List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
+                                               Element<PartyDetails> applicantElement) {
+        if ((isNotEmpty(applicantElement.getValue().getAddress()))
+            && isNotEmpty(applicantElement.getValue().getAddress().getAddressLine1())) {
+            try {
+                UUID bulkPrintId = sendOrderDocumentViaPost(caseData, applicantElement.getValue().getAddress(),
+                                                            applicantElement.getValue().getLabelForDynamicList(),
+                                                            authorisation, orderDocuments
+                );
+                //PRL-4225 save bulk print details
+                bulkPrintOrderDetails.add(element(
+                    buildBulkPrintOrderDetail(
+                        bulkPrintId,
+                        String.valueOf(applicantElement.getId()),
+                        applicantElement.getValue().getLabelForDynamicList()
+                    )));
+            } catch (Exception e) {
+                log.error("Error in sending order docs to applicant address {}", applicantElement.getId());
+                log.error("Exception occurred in sending order docs to applicant address", e);
+            }
+        } else {
+            log.info(
+                "Couldn't send serve order details to applicant address, address is null/empty for {}",
+                applicantElement.getId()
+            );
+        }
+    }
+
     private void serveOrderToOtherPersons(String authorisation,
                                           DynamicMultiSelectList otherParties,
                                           CaseData caseData,
@@ -713,11 +744,13 @@ public class ManageOrderEmailService {
         return null;
     }
 
-    private void sendEmailToApplicantOrRespondentSolicitor(List<DynamicMultiselectListElement> value,
+    private void sendEmailToApplicantOrSolicitor(List<DynamicMultiselectListElement> value,
                                                            List<Element<PartyDetails>> partyDetails,
                                                            SelectTypeOfOrderEnum isFinalOrder,
                                                            CaseData caseData, String authorisation,
-                                                           Map<String, Object> dynamicDataForEmail, List<Document> orderDocuments) {
+                                                           Map<String, Object> dynamicDataForEmail,
+                                                           List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
+                                                           List<Document> orderDocuments) {
         value.forEach(element -> {
             Optional<Element<PartyDetails>> partyDataOptional = partyDetails.stream()
                 .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
@@ -730,13 +763,23 @@ public class ManageOrderEmailService {
                                          dynamicDataForEmail,
                                          partyData.getSolicitorEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
-                } else if (isPartyProvidedWithEmail(partyData)) {
+                } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
+                    && isPartyProvidedWithEmail(partyData)) {
+                    log.info("Contact preference set as email");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
-                                                     buildApplicantRespondentEmail(
-                                                             caseData,
-                                                             partyData.getLabelForDynamicList()
+                                                     buildApplicantRespondentEmail(caseData,
+                                                                                   partyData.getLabelForDynamicList()
                                                      ),
                                                      caseData
+                    );
+                } else {
+                    log.info("inside calling serveOrdersToApplicantAddress start");
+                    serveOrdersToApplicantAddress(
+                        caseData,
+                        authorisation,
+                        orderDocuments,
+                        bulkPrintOrderDetails,
+                        partyDataOptional.get()
                     );
                 }
             }
