@@ -888,9 +888,10 @@ public class C100RespondentSolicitorService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
 
-        if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null
-                && Yes.equals(caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
-            Document c1aFinalDocument = documentGenService.generateSingleDocument(
+        if (representedRespondent.getValue().getResponse() != null
+                && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
+                && Yes.equals(representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+            c1aFinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
                     SOLICITOR_C1A_FINAL_DOCUMENT,
@@ -1236,28 +1237,11 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> dataMap = populateDataMap(callbackRequest, null);
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        Document document = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                SOLICITOR_C7_DRAFT_DOCUMENT,
-                false,
-                dataMap
-        );
-        caseDataUpdated.put("draftC7ResponseDoc", document);
 
-        if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null
-                && Yes.equals(caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
-            Document documentForC1A = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    SOLICITOR_C1A_DRAFT_DOCUMENT,
-                    false,
-                    dataMap
-            );
-            caseDataUpdated.put("draftC1ADoc", documentForC1A);
-        }
+
+
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
         Element<PartyDetails> solicitorRepresentedRespondent = null;
         if (solicitorRole.isPresent()) {
@@ -1269,6 +1253,28 @@ public class C100RespondentSolicitorService {
                 caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
             }
 
+        }
+        Map<String, Object> dataMap = populateDataMap(callbackRequest, solicitorRepresentedRespondent);
+        Document document = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                SOLICITOR_C7_DRAFT_DOCUMENT,
+                false,
+                dataMap
+        );
+        caseDataUpdated.put("draftC7ResponseDoc", document);
+
+        if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue().getResponse() != null
+                && solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
+                && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+            Document documentForC1A = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_DRAFT_DOCUMENT,
+                    false,
+                    dataMap
+            );
+            caseDataUpdated.put("draftC1ADoc", documentForC1A);
         }
         return caseDataUpdated;
     }
