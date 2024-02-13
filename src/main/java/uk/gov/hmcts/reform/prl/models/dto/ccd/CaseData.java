@@ -104,7 +104,7 @@ import uk.gov.hmcts.reform.prl.models.sendandreply.Message;
 import uk.gov.hmcts.reform.prl.models.sendandreply.MessageMetaData;
 import uk.gov.hmcts.reform.prl.models.sendandreply.SendOrReplyMessage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
-import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 
 import java.time.LocalDate;
@@ -722,7 +722,7 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private GatekeepingDetails gatekeepingDetails;
 
     @JsonUnwrapped
-    private final List<Element<HearingData>> listWithoutNoticeHearingDetails;
+    private final ListWithoutNoticeDetails listWithoutNoticeDetails;
     @JsonUnwrapped
     private final Fl401ListOnNotice fl401ListOnNotice;
 
@@ -748,6 +748,13 @@ public class CaseData extends BaseCaseData implements MappableObject {
     private YesOrNo hwfRequestedForAdditionalApplications;
 
     private List<Element<RespondentDocs>> respondentDocsList;
+
+    @JsonUnwrapped
+    private CitizenResponseDocuments citizenResponseDocuments;
+
+    @JsonUnwrapped
+    private RespondentC8Document respondentC8Document;
+
     @JsonUnwrapped
     private RespondentC8 respondentC8;
     //PRL-3454 - send and reply message enhancements
@@ -777,7 +784,9 @@ public class CaseData extends BaseCaseData implements MappableObject {
     @JsonUnwrapped
     private ReviewDocuments reviewDocuments;
 
-    private final List<Element<StmtOfServiceAddRecipient>> stmtOfServiceAddRecipient;
+    @JsonUnwrapped
+    private StatementOfService statementOfService;
+
     @JsonUnwrapped
     private final AllPartyFlags allPartyFlags;
     /**
