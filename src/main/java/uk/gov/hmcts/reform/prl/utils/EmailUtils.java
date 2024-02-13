@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.utils;
 import io.micrometer.common.util.StringUtils;
 import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.manageorders.SelectTypeOfOrderEnum;
-import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.HashMap;
@@ -21,13 +20,13 @@ public class EmailUtils {
     }
 
     public static Map<String, String> getEmailProps(SelectTypeOfOrderEnum isFinalOrder,
-                                                    Boolean isRespondent, PartyDetails partyDetails,
+                                                    Boolean isRespondent, String name,String email,
                                                     String applicantCaseName, String caseId) {
         Map<String, String> combinedMap = new HashMap<>();
         combinedMap.put("caseName", applicantCaseName);
         combinedMap.put("caseNumber", caseId);
-        combinedMap.put("solicitorName", partyDetails.getRepresentativeFullName());
-        if (isRespondent.equals(true) && StringUtils.isNotEmpty(partyDetails.getSolicitorEmail())) {
+        combinedMap.put("solicitorName", name);
+        if (isRespondent.equals(true) && StringUtils.isNotEmpty(email)) {
             combinedMap.put("orderURLLinkNeeded", YES);
             combinedMap.put("orderSubject", "New order issued: ");
         }
@@ -40,7 +39,7 @@ public class EmailUtils {
         return combinedMap;
     }
 
-    private static Map<String, String> getCommonEmailProps() {
+    public static Map<String, String> getCommonEmailProps() {
         Map<String, String> emailProps = new HashMap<>();
         emailProps.put("subject", "Case documents for : ");
         emailProps.put("content", "Case details");
