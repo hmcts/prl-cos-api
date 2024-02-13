@@ -149,7 +149,6 @@ public class CaseService {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
-   }
 
     public String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
