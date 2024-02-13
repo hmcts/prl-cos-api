@@ -25,11 +25,13 @@ import uk.gov.hmcts.reform.prl.enums.editandapprove.OrderApprovalDecisionsForSol
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.DraftAnOrderService;
 import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
@@ -39,9 +41,11 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
+import static uk.gov.hmcts.reform.prl.enums.Event.DRAFT_AN_ORDER;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
@@ -56,6 +60,7 @@ public class EditAndApproveDraftOrderController {
     private final ManageOrderEmailService manageOrderEmailService;
     private final AuthorisationService authorisationService;
     private final EditReturnedOrderService editReturnedOrderService;
+    private final RoleAssignmentService roleAssignmentService;
 
     public static final String CONFIRMATION_HEADER = "# Order approved";
     public static final String CONFIRMATION_BODY_FURTHER_DIRECTIONS = """
@@ -180,6 +185,39 @@ public class EditAndApproveDraftOrderController {
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
+                if (caseData.getAllocatedJudge() != null
+                    && caseData.getAllocatedJudge().getIsSpecificJudgeOrLegalAdviserNeeded().equals(Yes)) {
+                    RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                        .judgeEmail(caseData.getAllocatedJudge().getJudgeEmail())
+                        .legalAdviserList(caseData.getAllocatedJudge().getLegalAdviserList())
+                        .build();
+                    roleAssignmentService.createRoleAssignment(
+                        authorisation,
+                        callbackRequest.getCaseDetails(),
+                        roleAssignmentDto,
+                        DRAFT_AN_ORDER.getName(),
+                        true,
+                        ALLOCATE_JUDGE_ROLE
+                    );
+                } else {
+                    RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                        .judicialUser(caseData.getManageOrders()
+                                          .getSolicitorOrdersHearingDetails()
+                                          .stream()
+                                          .findFirst()
+                                          .get()
+                                          .getValue()
+                                          .getHearingJudgeNameAndEmail())
+                        .build();
+                    roleAssignmentService.createRoleAssignment(
+                        authorisation,
+                        callbackRequest.getCaseDetails(),
+                        roleAssignmentDto,
+                        DRAFT_AN_ORDER.getName(),
+                        false,
+                        ALLOCATE_JUDGE_ROLE
+                    );
+                }
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
