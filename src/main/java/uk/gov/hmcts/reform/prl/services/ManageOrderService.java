@@ -2570,6 +2570,7 @@ public class ManageOrderService {
     }
 
     public CaseData setHearingDataForSdo(CaseData caseData, Hearings hearings, String authorisation) {
+        log.info("inside setHearingDataForSdo");
         StandardDirectionOrder standardDirectionOrder = caseData.getStandardDirectionOrder();
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
             hearingDataService.populateHearingDynamicLists(
@@ -2680,6 +2681,7 @@ public class ManageOrderService {
                 .build();
         }
         caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
+        log.info("exit setHearingDataForSdo ==> " + caseData);
         return caseData;
     }
 
