@@ -48,6 +48,7 @@ public class HearingService {
     public Hearings getHearings(String userToken, String caseReferenceNumber) {
 
         Hearings hearings = null;
+        caseReferenceNumber = "1706198412807825";
         try {
             hearings = hearingApiClient.getHearingDetails(userToken, authTokenGenerator.generate(), caseReferenceNumber);
             if (hearings != null) {
