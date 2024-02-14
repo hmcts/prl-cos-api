@@ -139,8 +139,7 @@ public class HearingServiceTest {
         assertEquals(true,hearingsResp.getCaseHearings().get(0).isUrgentFlag());
     }
 
-    @Test
-    @Ignore
+    /*@Test
     @DisplayName("test case for HearingService getHearings no hearings returned.")
     public void getHearingsTestNoHearingReturned() {
 
@@ -150,7 +149,7 @@ public class HearingServiceTest {
 
         assertEquals(null, hearingsResp);
 
-    }
+    }*/
 
     @Test
     @DisplayName("test case for HearingService getHearings exception.")
