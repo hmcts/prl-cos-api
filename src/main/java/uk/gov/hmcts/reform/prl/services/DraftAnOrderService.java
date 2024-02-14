@@ -809,6 +809,7 @@ public class DraftAnOrderService {
                 standardDirectionOrderMap = objectMapper.convertValue(standardDirectionOrder, Map.class);
                 log.info("caseData.getStandardDirectionOrder()===> " + caseData.getStandardDirectionOrder());
                 populateStandardDirectionOrderDefaultFields(authorisation, caseData, standardDirectionOrderMap);
+                log.info("standardDirectionOrderMap ===> " + standardDirectionOrderMap);
             } catch (JsonProcessingException exception) {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
             }
