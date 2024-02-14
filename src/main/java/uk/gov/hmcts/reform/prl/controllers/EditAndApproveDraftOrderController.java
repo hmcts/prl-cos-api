@@ -110,7 +110,7 @@ public class EditAndApproveDraftOrderController {
             );
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderDocument(
-                    caseData)).build();
+                    caseData, authorisation)).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -231,6 +231,11 @@ public class EditAndApproveDraftOrderController {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
             }
+            //PRL-4854 - skip default call for upload
+            if (null != selectedOrder && Yes.equals(selectedOrder.getIsOrderUploadedByJudgeOrAdmin())) {
+                return AboutToStartOrSubmitCallbackResponse.builder()
+                    .data(caseDataUpdated).build();
+            }
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(draftAnOrderService.populateDraftOrderCustomFields(caseData, selectedOrder)).build();
         } else {
@@ -260,9 +265,8 @@ public class EditAndApproveDraftOrderController {
             }
             DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
             Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder);
-            boolean isOrderEdited = false;
-            isOrderEdited = ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId(), isOrderEdited);
-            if (isOrderEdited) {
+
+            if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
                 response.put("doYouWantToEditTheOrder", Yes);
             }
             return AboutToStartOrSubmitCallbackResponse.builder()
@@ -302,13 +306,12 @@ public class EditAndApproveDraftOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
+            List<String> errorList = new ArrayList<>();
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(draftAnOrderService.populateStandardDirectionOrder(authorisation, caseData, true)).build();
             } else {
-                List<String> errorList = new ArrayList<>();
-                errorList.add(
-                    "Please select at least one options from below");
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();

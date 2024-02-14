@@ -595,6 +595,10 @@ def sonarExclusions = [
   '**/uk/gov/hmcts/reform/prl/services/extendedcasedataservice/ExtendedCaseDataService.java',
   '**/uk/gov/hmcts/reform/prl/controllers/testingsupport/TestingSupportController.java',
   '**/uk/gov/hmcts/reform/prl/repositories/CcdCaseRepository.java',
+  '**uk/gov/hmcts/reform/prl/services/validators/eventschecker/*',
+  '**uk/gov/hmcts/reform/prl/services/c100respondentsolicitor/validators/ResponseSubmitChecker.java',
+  '**uk/gov/hmcts/reform/prl/services/RoleAssignmentServiceForSystemUser.java',
+  '**uk/gov/hmcts/reform/prl/controllers/SystemUserRoleAssingmentController.java'
 ]
 
 sonarqube {
