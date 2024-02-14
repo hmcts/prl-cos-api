@@ -2725,7 +2725,8 @@ public class ServiceOfApplicationService {
 
         List<String> errorList = new ArrayList<>();
 
-        if (null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()
+        if (null != caseData.getServiceOfApplication().getSoaOtherParties()
+            && null != caseData.getServiceOfApplication().getSoaOtherParties().getValue()
             && !caseData.getServiceOfApplication().getSoaOtherParties().getValue().isEmpty()) {
 
             List<String> c6aOrderIds = new ArrayList<>();
