@@ -409,8 +409,7 @@ public class C100RespondentSolicitorService {
                     .build();
             }
         }
-        return responseToAllegationsOfHarm.toBuilder()
-            .build();
+        return null;
     }
 
     private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
