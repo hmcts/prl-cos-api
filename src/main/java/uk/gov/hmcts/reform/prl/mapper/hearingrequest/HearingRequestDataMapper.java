@@ -6,6 +6,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
@@ -332,7 +333,7 @@ public class HearingRequestDataMapper {
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates());
         } else {
             log.info("inside hearingData.getConfirmedHearingDates().getValue() is null");
-            hearingData.setConfirmedHearingDates(DynamicList.builder().build());
+            hearingData.setConfirmedHearingDates(DynamicList.builder().value(DynamicListElement.EMPTY).build());
             mapDynamicListItems(hearingData.getConfirmedHearingDates(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates());
         }
@@ -369,7 +370,7 @@ public class HearingRequestDataMapper {
             mapDynamicListItems(hearingData.getHearingListedLinkedCases(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases());
         } else {
-            hearingData.setHearingListedLinkedCases(DynamicList.builder().build());
+            hearingData.setHearingListedLinkedCases(DynamicList.builder().value(DynamicListElement.EMPTY).build());
             mapDynamicListItems(hearingData.getHearingListedLinkedCases(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases());
         }
