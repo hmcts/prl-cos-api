@@ -24,6 +24,7 @@ public class HearingRequestDataMapper {
 
     public void mapHearingData(HearingData hearingData, HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists, CaseData caseData) {
         boolean isHearingDynamicListItemsNullifyReq = (null != hearingDataPrePopulatedDynamicLists) ? Boolean.FALSE  : Boolean.TRUE;
+        log.info("isHearingDynamicListItemsNullifyReq " + isHearingDynamicListItemsNullifyReq);
         mapHearingTypesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapConfirmedHearingDatesListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
         mapHearingChannelsListItems(hearingData,isHearingDynamicListItemsNullifyReq,hearingDataPrePopulatedDynamicLists);
@@ -303,7 +304,9 @@ public class HearingRequestDataMapper {
     }
 
     private void mapDynamicListItems(DynamicList existingHearingDynamicList, DynamicList requiredHearingDynamicList) {
+        log.info("inside mapDynamicListItems");
         if (null != existingHearingDynamicList) {
+            log.info("requiredHearingDynamicList ===>" + requiredHearingDynamicList);
             existingHearingDynamicList.setListItems(null != requiredHearingDynamicList
                                                         ? requiredHearingDynamicList.getListItems() : null);
         }
@@ -324,9 +327,11 @@ public class HearingRequestDataMapper {
     private void mapConfirmedHearingDatesListItems(HearingData hearingData, boolean isHearingDynamicListItemsNullifyReq,
                                                    HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
         if (null != hearingData.getConfirmedHearingDates() && null != hearingData.getConfirmedHearingDates().getValue()) {
+            log.info("inside hearingData.getConfirmedHearingDates().getValue() not null");
             mapDynamicListItems(hearingData.getConfirmedHearingDates(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates());
         } else {
+            log.info("inside hearingData.getConfirmedHearingDates().getValue() is null");
             hearingData.setConfirmedHearingDates(DynamicList.builder().build());
             mapDynamicListItems(hearingData.getConfirmedHearingDates(),
                                 isHearingDynamicListItemsNullifyReq ? null : hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates());

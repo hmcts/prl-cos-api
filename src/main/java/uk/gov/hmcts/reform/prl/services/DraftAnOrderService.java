@@ -758,6 +758,7 @@ public class DraftAnOrderService {
                         caseData,
                         hearings
                     );
+                log.info("hearingDataPrePopulatedDynamicLists ==>" + hearingDataPrePopulatedDynamicLists);
                 standardDirectionOrder = standardDirectionOrder.toBuilder()
                     .sdoUrgentHearingDetails(isNotEmpty(standardDirectionOrder.getSdoUrgentHearingDetails())
                                                  ? hearingDataService.getHearingDataForSdo(
