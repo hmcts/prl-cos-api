@@ -941,13 +941,13 @@ public class DraftAnOrderService {
                 .listItems(
                     hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates()
                         .getListItems())
-                .build() : DynamicList.builder().listItems(List.of(DynamicListElement.EMPTY)).build())
+                .build() : DynamicList.builder().value(DynamicListElement.EMPTY).listItems(List.of(DynamicListElement.EMPTY)).build())
             .hearingListedLinkedCases(isNotEmpty(hearingData.getHearingListedLinkedCases())
                                           ? hearingData.getHearingListedLinkedCases().toBuilder()
                 .listItems(
                     hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases()
                         .getListItems())
-                .build() : DynamicList.builder().listItems(List.of(DynamicListElement.EMPTY)).build())
+                .build() : DynamicList.builder().value(DynamicListElement.EMPTY).listItems(List.of(DynamicListElement.EMPTY)).build())
             .build();
     }
 
