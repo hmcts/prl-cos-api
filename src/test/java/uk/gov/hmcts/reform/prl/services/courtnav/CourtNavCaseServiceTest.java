@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -77,6 +78,9 @@ public class CourtNavCaseServiceTest {
 
     @Mock
     private AllTabServiceImpl allTabService;
+
+    @Mock
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     private Map<String, Object> caseDataMap = new HashMap<>();
     private CaseData caseData;

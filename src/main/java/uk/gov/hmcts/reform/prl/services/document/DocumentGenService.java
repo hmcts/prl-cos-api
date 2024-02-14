@@ -9,8 +9,10 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
+import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
@@ -23,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDet
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
+import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -38,6 +41,7 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
@@ -79,6 +84,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -108,213 +114,155 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"java:S6204"})
 public class DocumentGenService {
-
     public static final String GENERATED_THE_DOCUMENT_FOR_CASE_ID = "Generated the {} document for case id {} ";
     @Value("${document.templates.c100.c100_final_template}")
     protected String c100FinalTemplate;
-
     @Value("${document.templates.c100.c100_final_filename}")
     protected String c100FinalFilename;
-
     @Value("${document.templates.c100.c100_draft_filename}")
     protected String c100DraftFilename;
-
     @Value("${document.templates.c100.c100_c8_filename}")
     protected String c100C8Filename;
-
     @Value("${document.templates.c100.c100_c8_draft_filename}")
     protected String c100C8DraftFilename;
-
     @Value("${document.templates.c100.c100_resp_c8_template}")
     protected String c100RespC8Template;
 
+    @Value("${document.templates.fl401.fl401_resp_c8_template}")
+    protected String fl401RespC8Template;
+
+    @Value("${document.templates.fl401.fl401_resp_c8_template_welsh}")
+    protected String fl401RespC8TemplateWelsh;
+
     @Value("${document.templates.c100.c100_resp_c8_draft_template}")
     protected String c100RespC8DraftTemplate;
-
     @Value("${document.templates.c100.c100_resp_c8_filename}")
     protected String c100RespC8Filename;
-
     @Value("${document.templates.c100.c100_resp_c8_draft_filename}")
     protected String c100RespC8DraftFilename;
-
     @Value("${document.templates.c100.c100_c1a_template}")
     protected String c100C1aTemplate;
-
     @Value("${document.templates.c100.c100_c1a_draft_template}")
     protected String c100C1aDraftTemplate;
-
     @Value("${document.templates.c100.c100_c1a_filename}")
     protected String c100C1aFilename;
-
     @Value("${document.templates.c100.c100_c1a_draft_filename}")
     protected String c100C1aDraftFilename;
-
     @Value("${document.templates.c100.c100_final_welsh_filename}")
     protected String c100FinalWelshFilename;
-
     @Value("${document.templates.c100.c100_draft_welsh_filename}")
     protected String c100DraftWelshFilename;
-
     @Value("${document.templates.c100.c100_c8_welsh_filename}")
     protected String c100C8WelshFilename;
-
     @Value("${document.templates.c100.c100_c8_draft_welsh_filename}")
     protected String c100C8DraftWelshFilename;
-
     @Value("${document.templates.c100.c100_c1a_welsh_filename}")
     protected String c100C1aWelshFilename;
-
     @Value("${document.templates.c100.c100_c1a_draft_welsh_filename}")
     protected String c100C1aDraftWelshFilename;
-
     @Value("${document.templates.fl401.fl401_draft_filename}")
     protected String fl401DraftFilename;
-
     @Value("${document.templates.fl401.fl401_draft_template}")
     protected String fl401DraftTemplate;
-
     @Value("${document.templates.fl401.fl401_draft_welsh_template}")
     protected String fl401DraftWelshTemplate;
-
     @Value("${document.templates.fl401.fl401_draft_welsh_filename}")
     protected String fl401DraftWelshFileName;
-
     @Value("${document.templates.fl401.fl401_final_template}")
     protected String fl401FinalTemplate;
-
     @Value("${document.templates.fl401.fl401_final_filename}")
     protected String fl401FinalFilename;
-
     @Value("${document.templates.fl401.fl401_final_welsh_template}")
     protected String fl401FinalWelshTemplate;
-
     @Value("${document.templates.fl401.fl401_final_welsh_filename}")
     protected String fl401FinalWelshFilename;
-
     @Value("${document.templates.fl401.fl401_c8_template}")
     protected String fl401C8Template;
-
     @Value("${document.templates.fl401.fl401_c8_filename}")
     protected String fl401C8Filename;
-
     @Value("${document.templates.fl401.fl401_c8_welsh_template}")
     protected String fl401C8WelshTemplate;
-
     @Value("${document.templates.fl401.fl401_c8_welsh_filename}")
     protected String fl401C8WelshFilename;
-
     @Value("${document.templates.common.doc_cover_sheet_template}")
     protected String docCoverSheetTemplate;
-
     @Value("${document.templates.common.doc_cover_sheet_welsh_template}")
     protected String docCoverSheetWelshTemplate;
-
     @Value("${document.templates.common.doc_cover_sheet_filename}")
     protected String docCoverSheetFilename;
-
     @Value("${document.templates.common.doc_cover_sheet_welsh_filename}")
     protected String docCoverSheetWelshFilename;
-
     @Value("${document.templates.common.prl_c7_draft_template}")
     protected String docC7DraftTemplate;
-
     @Value("${document.templates.common.prl_c7_final_template_eng}")
     protected String docC7FinalEngTemplate;
-
     @Value("${document.templates.common.prl_c7_final_template_wel}")
     protected String docC7FinalWelshTemplate;
-
     @Value("${document.templates.common.prl_c7_draft_filename}")
     protected String docC7DraftFilename;
-
     @Value("${document.templates.common.prl_c7_final_filename_eng}")
     protected String docC7FinalEngFilename;
-
     @Value("${document.templates.common.prl_c7_final_filename_wel}")
     protected String docC7FinalWelshFilename;
-
     @Value("${document.templates.common.prl_solicitor_c7_draft_template}")
     protected String solicitorC7DraftTemplate;
-
     @Value("${document.templates.common.prl_solicitor_c7_draft_filename}")
     protected String solicitorC7DraftFilename;
-
     @Value("${document.templates.common.prl_solicitor_c7_final_template}")
     protected String solicitorC7FinalTemplate;
-
     @Value("${document.templates.common.prl_solicitor_c7_final_filename}")
     protected String solicitorC7FinalFilename;
-
     @Value("${document.templates.common.prl_solicitor_c1a_draft_template}")
     protected String solicitorC1ADraftTemplate;
-
     @Value("${document.templates.common.prl_solicitor_c1a_draft_filename}")
     protected String solicitorC1ADraftFilename;
-
     @Value("${document.templates.common.prl_solicitor_c1a_final_template}")
     protected String solicitorC1AFinalTemplate;
-
     @Value("${document.templates.common.prl_solicitor_c1a_final_filename}")
     protected String solicitorC1AFinalFilename;
-
     @Value("${document.templates.common.prl_c1a_blank_template}")
     protected String docC1aBlankTemplate;
-
     @Value("${document.templates.common.prl_c1a_blank_filename}")
     protected String docC1aBlankFilename;
-
     @Value("${document.templates.common.prl_c8_blank_template}")
     protected String docC8BlankTemplate;
-
     @Value("${document.templates.common.prl_c8_blank_filename}")
     protected String docC8BlankFilename;
-
     @Value("${document.templates.common.prl_privacy_notice_template}")
     protected String privacyNoticeTemplate;
-
     @Value("${document.templates.common.prl_privacy_notice_filename}")
     protected String privacyNoticeFilename;
-
     @Value("${document.templates.citizen.prl_citizen_upload_template}")
     protected String prlCitizenUploadTemplate;
-
     @Value("${document.templates.citizen.prl_citizen_upload_filename}")
     protected String prlCitizenUploadFileName;
-
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_template}")
     protected String daListOnNoticeFl404bTemplate;
-
     @Value("${document.templates.fl401listonnotice.prl_fl404b_for_da_list_on_notice_filename}")
     protected String daListOnNoticeFl404bFile;
+    @Value("${document.templates.c100.c100_resp_c8_welsh_template}")
+    protected String respC8TemplateWelsh;
+    @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
+    protected String respC8FilenameWelsh;
 
-
-    @Autowired
-    private DgsService dgsService;
-
-    @Autowired
-    DocumentLanguageService documentLanguageService;
-
-    @Autowired
-    OrganisationService organisationService;
-
-    @Autowired
-    UploadDocumentService uploadService;
-
-    @Autowired
-    CaseDocumentClient caseDocumentClient;
+    private final DgsService dgsService;
+    private final DocumentLanguageService documentLanguageService;
+    private final OrganisationService organisationService;
+    private final UploadDocumentService uploadService;
+    private final CaseDocumentClient caseDocumentClient;
+    private final IdamClient idamClient;
+    private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @Autowired
-    IdamClient idamClient;
+    private DgsApiClient dgsApiClient;
 
-    @Autowired
-    C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
+    private final AuthTokenGenerator authTokenGenerator;
 
-    @Autowired
-    private AllegationOfHarmRevisedService allegationOfHarmRevisedService;
-
+    protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
 
     public CaseData fillOrgDetails(CaseData caseData) {
         log.info("Calling org service to update the org address .. for case id {} ", caseData.getId());
@@ -323,6 +271,7 @@ public class DocumentGenService {
             caseData = organisationService.getRespondentOrganisationDetails(caseData);
         } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = organisationService.getApplicantOrganisationDetailsForFL401(caseData);
+            caseData = organisationService.getRespondentOrganisationDetailsForFL401(caseData);
         }
         log.info("Called org service to update the org address .. for case id {} ", caseData.getId());
         return caseData;
@@ -347,16 +296,13 @@ public class DocumentGenService {
     }
 
     public Map<String, Object> generateDocuments(String authorisation, CaseData caseData) throws Exception {
-
-        Map<String, Object> updatedCaseData = new HashMap<>();
-
         caseData = fillOrgDetails(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             caseData = allegationOfHarmRevisedService.updateChildAbusesForDocmosis(caseData);
         }
 
+        Map<String, Object> updatedCaseData = new HashMap<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-
         documentLanguageIsEng(authorisation, caseData, updatedCaseData, documentLanguage);
         documentLanguageIsWelsh(authorisation, caseData, updatedCaseData, documentLanguage);
         if (documentLanguage.isGenEng() && !documentLanguage.isGenWelsh()) {
@@ -515,8 +461,14 @@ public class DocumentGenService {
 
     private Document getDocument(String authorisation, CaseData caseData, String hint, boolean isWelsh, Map<String, Object> respondentDetails)
         throws Exception {
+        String filename = "";
+        if (respondentDetails.containsKey("dynamic_fileName")) {
+            filename = String.valueOf(respondentDetails.get("dynamic_fileName"));
+        } else {
+            filename = getFileName(caseData, hint, isWelsh);
+        }
         return generateDocumentField(
-            getFileName(caseData, hint, isWelsh),
+            filename,
             generateDocument(authorisation, getTemplate(caseData, hint, isWelsh), caseData, isWelsh, respondentDetails)
         );
     }
@@ -726,7 +678,7 @@ public class DocumentGenService {
                 fileName = c100RespC8DraftFilename;
                 break;
             case C8_RESP_FINAL_HINT:
-                fileName = c100RespC8Filename;
+                fileName = findFinalRespondentC8FileName(isWelsh);
                 break;
             case C1A_HINT:
                 fileName = !isWelsh ? c100C1aFilename : c100C1aWelshFilename;
@@ -832,7 +784,10 @@ public class DocumentGenService {
                 template = c100RespC8DraftTemplate;
                 break;
             case C8_RESP_FINAL_HINT:
-                template = c100RespC8Template;
+                template = findFinalRespondentC8Template(isWelsh);
+                break;
+            case C8_RESP_FL401_FINAL_HINT:
+                template = findFinalDaRespondentC8Template(isWelsh);
                 break;
             case C1A_HINT:
                 template = c100DocumentTemplateFinderService.findC1ATemplate(caseData,isWelsh);
@@ -919,7 +874,19 @@ public class DocumentGenService {
         return template;
     }
 
+    private String findFinalRespondentC8Template(boolean isWelsh) {
+        return !isWelsh ? c100RespC8Template  : respC8TemplateWelsh;
 
+    }
+
+    private String findFinalDaRespondentC8Template(boolean isWelsh) {
+        return !isWelsh ? fl401RespC8Template  : fl401RespC8TemplateWelsh;
+    }
+
+    private String findFinalRespondentC8FileName(boolean isWelsh) {
+        return !isWelsh ? c100RespC8Filename  : respC8FilenameWelsh;
+
+    }
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
@@ -931,8 +898,8 @@ public class DocumentGenService {
 
         boolean isChildrenConfidential = isChildrenDetailsConfidentiality(caseData, typeOfApplicationOrders);
 
-        return isApplicantDetailsConfidential(partyDetails) || isChildrenConfidential;
-
+        return isPartyDetailsConfidential(partyDetails)
+            || isChildrenConfidential;
     }
 
     private boolean isChildrenDetailsConfidentiality(CaseData caseData,
@@ -957,19 +924,19 @@ public class DocumentGenService {
         return childrenConfidentiality;
     }
 
-    private boolean isApplicantDetailsConfidential(PartyDetails applicant) {
+    private boolean isPartyDetailsConfidential(PartyDetails partyDetails) {
 
-        boolean isApplicantInformationConfidential = false;
-        if ((YesOrNo.Yes).equals(applicant.getIsAddressConfidential())) {
-            isApplicantInformationConfidential = true;
+        boolean isPartyInformationConfidential = false;
+        if ((YesOrNo.Yes).equals(partyDetails.getIsAddressConfidential())) {
+            isPartyInformationConfidential = true;
         }
-        if ((YesOrNo.Yes).equals(applicant.getIsEmailAddressConfidential())) {
-            isApplicantInformationConfidential = true;
+        if ((YesOrNo.Yes).equals(partyDetails.getIsEmailAddressConfidential())) {
+            isPartyInformationConfidential = true;
         }
-        if ((YesOrNo.Yes).equals(applicant.getIsPhoneNumberConfidential())) {
-            isApplicantInformationConfidential = true;
+        if ((YesOrNo.Yes).equals(partyDetails.getIsPhoneNumberConfidential())) {
+            isPartyInformationConfidential = true;
         }
-        return isApplicantInformationConfidential;
+        return isPartyInformationConfidential;
     }
 
     public Document generateSingleDocument(String authorisation,
@@ -1227,5 +1194,57 @@ public class DocumentGenService {
                 }
             })
             .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + fileName));
+    }
+
+    private boolean checkFileFormat(String fileName) {
+        log.info("Allowed file types {} ", ALLOWED_FILE_TYPES);
+        String format = "";
+        if (null != fileName) {
+            int i = fileName.lastIndexOf('.');
+            if (i >= 0) {
+                format = fileName.substring(i + 1);
+            }
+            String finalFormat = format;
+            return Arrays.stream(ALLOWED_FILE_TYPES).anyMatch(s -> s.equalsIgnoreCase(finalFormat));
+        } else {
+            return false;
+        }
+    }
+
+    public Document convertToPdf(String authorisation, Document document) {
+        String filename = document.getDocumentFileName();
+        if (checkFileFormat(document.getDocumentFileName())) {
+            ResponseEntity<Resource> responseEntity = caseDocumentClient.getDocumentBinary(
+                authorisation,
+                authTokenGenerator.generate(),
+                document.getDocumentBinaryUrl()
+            );
+            byte[] docInBytes = Optional.ofNullable(responseEntity)
+                .map(ResponseEntity::getBody)
+                .map(resource -> {
+                    try {
+                        return resource.getInputStream().readAllBytes();
+                    } catch (IOException e) {
+                        throw new InvalidResourceException("Doc name " + filename, e);
+                    }
+                })
+                .orElseThrow(() -> new InvalidResourceException("Resource is invalid " + filename));
+
+            Map<String, Object> tempCaseDetails = new HashMap<>();
+            tempCaseDetails.put("fileName", docInBytes);
+            GeneratedDocumentInfo generatedDocumentInfo = dgsApiClient.convertDocToPdf(
+                document.getDocumentFileName(),
+                authorisation, GenerateDocumentRequest
+                    .builder().template(DUMMY).values(tempCaseDetails).build()
+            );
+            return Document.builder()
+                .documentUrl(generatedDocumentInfo.getUrl())
+                .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                .documentFileName(generatedDocumentInfo.getDocName())
+                .build();
+
+
+        }
+        return document;
     }
 }
