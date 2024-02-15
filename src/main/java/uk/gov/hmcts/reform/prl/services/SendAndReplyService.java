@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.AdditionalApplicationsBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.C2DocumentBundle;
 import uk.gov.hmcts.reform.prl.models.complextypes.uploadadditionalapplication.OtherApplicationsBundle;
+import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.HearingDaySchedule;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -886,9 +887,10 @@ public class SendAndReplyService {
         addRowToMessageTable(lines, HEARING, message.getSelectedFutureHearingValue());
         addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
             ? ANCHOR_HREF_START + message.getHearingsLink() + HEARINGS_ANCHOR_END : null);
-        addRowToMessageTable(lines, DOCUMENT, message.getSelectedSubmittedDocumentValue());
         addRowToMessageTable(lines, MESSAGE_SUBJECT, message.getMessageSubject());
         addRowToMessageTable(lines, MESSAGE_DETAILS, message.getMessageContent());
+        log.info("message document {}", message.getSelectedDocument());
+        addRowToMessageTable(lines, DOCUMENT, message.getSelectedSubmittedDocumentValue());
         lines.add(TABLE_END);
         lines.add(DIV_END);
 
@@ -920,15 +922,30 @@ public class SendAndReplyService {
                     addRowToMessageTable(lines, HEARING, history.getSelectedFutureHearingValue());
                     addRowToMessageTable(lines, HEARINGS, isNotBlank(message.getHearingsLink())
                         ? ANCHOR_HREF_START + history.getHearingsLink() + HEARINGS_ANCHOR_END : null);
-                    addRowToMessageTable(lines, DOCUMENT, history.getSelectedSubmittedDocumentValue());
                     addRowToMessageTable(lines, MESSAGE_SUBJECT, history.getMessageSubject());
                     addRowToMessageTable(lines, MESSAGE_DETAILS, history.getMessageContent());
+                    log.info("message document1 {}", message.getSelectedDocument());
+                    addRowToMessageTable(lines, DOCUMENT, history.getSelectedSubmittedDocumentValue());
+                    addRowToMessageTableWithDoc(lines, "TEST-DOC", history.getSelectedDocument());
                     lines.add(TABLE_END);
                     lines.add(DIV_END);
                 });
         }
 
         return String.join("\n\n", lines);
+    }
+
+    private void addRowToMessageTableWithDoc(List<String> lines,
+                                      String label,
+                                      Document value) {
+        if (null != value) {
+            lines.add(TABLE_ROW_BEGIN);
+            lines.add(TABLE_ROW_DATA_BEGIN + TABLE_ROW_LABEL + label + SPAN_END);
+            lines.add(TABLE_ROW_DATA_END);
+            lines.add(TABLE_ROW_DATA_BEGIN + TABLE_ROW_VALUE + value + SPAN_END);
+            lines.add(TABLE_ROW_DATA_END);
+            lines.add(TABLE_ROW_END);
+        }
     }
 
     private void addRowToMessageTable(List<String> lines,
@@ -1015,8 +1032,8 @@ public class SendAndReplyService {
                     replyMessage.setReplyHistory(messageHistoryList);
                     replyMessage.setUpdatedTime(dateTime.now());
                     //retain the original subject & date sent
+                    log.info("date sent {}", replyMessage.getDateSent());
                     replyMessage.setMessageSubject(message.getMessageSubject());
-                    replyMessage.setDateSent(message.getDateSent());
                     replyMessage.setSelectedApplicationCode(StringUtils.stripToNull(message.getSelectedApplicationCode()));
                     replyMessage.setSelectedFutureHearingCode(StringUtils.stripToNull(message.getSelectedFutureHearingCode()));
                     replyMessage.setJudicialOrMagistrateTierCode(StringUtils.stripToNull(message.getJudicialOrMagistrateTierCode()));
