@@ -25,11 +25,9 @@ import uk.gov.hmcts.reform.prl.services.TaskListService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentSolicitorTaskListRenderer;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.RespondentTaskErrorService;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
@@ -75,23 +73,29 @@ public class CaseEventHandler {
         final String respondentTaskListD = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_D);
         final String respondentTaskListE = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_E);
 
-        Map<String, Object> sortedMap = new TreeMap<>(Collections.reverseOrder());
-
-        sortedMap.put(TASK_LIST, taskList);
-        sortedMap.put(C100_RESPONDENT_TASK_LIST, "");
-        sortedMap.put(C100_RESPONDENT_TASK_LIST_A, respondentTaskListA);
-        sortedMap.put(C100_RESPONDENT_TASK_LIST_B, respondentTaskListB);
-        sortedMap.put(C100_RESPONDENT_TASK_LIST_C, respondentTaskListC);
-        sortedMap.put(C100_RESPONDENT_TASK_LIST_D, respondentTaskListD);
-        sortedMap.put(C100_RESPONDENT_TASK_LIST_E, respondentTaskListE);
-        sortedMap.put(ID, String.valueOf(caseData.getId()));
-
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
             caseData.getId(),
             INTERNAL_UPDATE_TASK_LIST,
-            sortedMap
+            Map.of(
+                TASK_LIST,
+                taskList,
+                C100_RESPONDENT_TASK_LIST,
+                "",
+                C100_RESPONDENT_TASK_LIST_A,
+                respondentTaskListA,
+                C100_RESPONDENT_TASK_LIST_B,
+                respondentTaskListB,
+                C100_RESPONDENT_TASK_LIST_C,
+                respondentTaskListC,
+                C100_RESPONDENT_TASK_LIST_D,
+                respondentTaskListD,
+                C100_RESPONDENT_TASK_LIST_E,
+                respondentTaskListE,
+                ID,
+                String.valueOf(caseData.getId())
+            )
         );
     }
 
