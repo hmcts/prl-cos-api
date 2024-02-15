@@ -2300,8 +2300,8 @@ public class ServiceOfApplicationServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
         when(caseSummaryTabService.updateTab(Mockito.any(CaseData.class))).thenReturn(dataMap);
-        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
 
+        when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
         ResponseEntity<SubmittedCallbackResponse> response = serviceOfApplicationService.handleSoaSubmitted(authorization, callBackRequest);
         assertEquals("# The application will be reviewed for confidential details", response.getBody().getConfirmationHeader());
     }

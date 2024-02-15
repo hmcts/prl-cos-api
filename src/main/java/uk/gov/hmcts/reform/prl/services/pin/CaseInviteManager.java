@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -30,16 +32,17 @@ public class CaseInviteManager {
     private final C100CaseInviteService c100CaseInviteService;
     private final FL401CaseInviteService fl401CaseInviteService;
 
-    public CaseData generatePinAndSendNotificationEmail(CaseData caseData) {
+    public Map<String, Object> generatePinAndSendNotificationEmail(CaseData caseData) {
+        Map<String, Object> caseDataMap = new HashMap<>();
         if (launchDarklyClient.isFeatureEnabled("generate-pin")) {
             log.info("Generating and sending PIN to respondents");
             if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-                caseData = c100CaseInviteService.generateAndSendCaseInvite(caseData);
+                caseDataMap = c100CaseInviteService.generateAndSendCaseInvite(caseData);
             } else {
-                caseData = fl401CaseInviteService.generateAndSendCaseInvite(caseData);
+                caseDataMap = fl401CaseInviteService.generateAndSendCaseInvite(caseData);
             }
         }
-        return caseData;
+        return caseDataMap;
     }
 
     public CaseData reGeneratePinAndSendNotificationEmail(CaseData caseData) {

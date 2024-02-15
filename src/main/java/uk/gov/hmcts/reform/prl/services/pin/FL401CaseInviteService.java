@@ -13,7 +13,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -37,7 +39,8 @@ public class FL401CaseInviteService implements CaseInviteService {
     }
 
     @Override
-    public CaseData generateAndSendCaseInvite(CaseData caseData) {
+    public Map<String, Object> generateAndSendCaseInvite(CaseData caseData) {
+        Map<String, Object> caseDataMap = new HashMap<>();
         PartyDetails respondent = caseData.getRespondentsFL401();
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
 
@@ -47,6 +50,7 @@ public class FL401CaseInviteService implements CaseInviteService {
             if (Yes.equals(respondent.getCanYouProvideEmailAddress())) {
                 sendCaseInvite(caseInvite, respondent, caseData);
             }
+            caseDataMap.put("caseInvite", caseInvite);
         }
 
         if (launchDarklyClient.isFeatureEnabled("generate-da-citizen-applicant-pin")) {
@@ -56,8 +60,9 @@ public class FL401CaseInviteService implements CaseInviteService {
             if (Yes.equals(applicant.getCanYouProvideEmailAddress())) {
                 sendCaseInvite(caseInvite, applicant, caseData);
             }
+            caseDataMap.put("caseInvite", caseInvite);
         }
-        return caseData.toBuilder().caseInvites(caseInvites).build();
+        return caseDataMap;
     }
 
     public List<Element<CaseInvite>> generateAndSendCaseInviteForDaRespondent(CaseData caseData, PartyDetails partyDetails) {

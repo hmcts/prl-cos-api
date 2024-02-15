@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
@@ -95,10 +96,12 @@ public class CaseInviteManagerTest {
     @Test
     public void testGeneratePinAndNotificationEmailForC100() throws Exception {
 
-        CaseData actualCaseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
+        Map<String, Object> caseDataMap = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
 
-        assertEquals(2, actualCaseData.getCaseInvites().size());
-        assertEquals("abc1@de.com", actualCaseData.getCaseInvites().get(0).getValue()
+        CaseInvite caseInvite = (CaseInvite) caseDataMap.get("caseInvites");
+
+        assertEquals(2, caseInvite.size());
+        assertEquals("abc1@de.com", caseDataMap.get("caseInvites").getValue()
             .getCaseInviteEmail());
         assertEquals("abc2@de.com", actualCaseData.getCaseInvites().get(1).getValue()
             .getCaseInviteEmail());

@@ -14,7 +14,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -40,16 +42,17 @@ public class C100CaseInviteService implements CaseInviteService {
     }
 
     @Override
-    public CaseData generateAndSendCaseInvite(CaseData caseData) {
+    public Map<String, Object> generateAndSendCaseInvite(CaseData caseData) {
         List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null ? caseData.getCaseInvites() : new ArrayList<>();
 
         log.info("Generating case invites and sending notification to applicants/respondents with email address present");
-
+        Map<String, Object> caseDataMap = new HashMap<>();
         for (Element<PartyDetails> respondent : caseData.getRespondents()) {
             if (!hasLegalRepresentation(respondent.getValue()) && Yes.equals(respondent.getValue().getCanYouProvideEmailAddress())) {
                 CaseInvite caseInvite = generateCaseInvite(respondent, No);
                 caseInvites.add(element(caseInvite));
                 sendCaseInvite(caseInvite, respondent.getValue(), caseData);
+                caseDataMap.put("caseInvite", caseInvite);
             }
         }
         //PRLC100-431 - Generate case invites & send notification to c100 applicants for case created/submitted by citizen
@@ -61,10 +64,11 @@ public class C100CaseInviteService implements CaseInviteService {
                     CaseInvite caseInvite = generateCaseInvite(applicant, Yes);
                     caseInvites.add(element(caseInvite));
                     sendCaseInvite(caseInvite, applicant.getValue(), caseData);
+                    caseDataMap.put("caseInvite", caseInvite);
                 }
             }
         }
-        return caseData.toBuilder().caseInvites(caseInvites).build();
+        return caseDataMap;
     }
 
     public List<Element<CaseInvite>> generateAndSendCaseInviteForCaRespondent(CaseData caseData, Element<PartyDetails> partyDetails) {
