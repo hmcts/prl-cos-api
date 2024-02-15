@@ -801,11 +801,10 @@ public class ServiceOfApplicationServiceTest {
                 .state(CASE_ISSUED.getValue())
                 .data(dataMap)
                 .build();
+            CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
             when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
             when(CaseUtils.getCaseData(caseDetails, objectMapper)).thenReturn(caseData);
-            when(caseInviteManager.generatePinAndSendNotificationEmail(caseData)).thenReturn(caseData);
 
-            CallbackRequest callBackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
             assertNotNull(serviceOfApplicationService.handleAboutToSubmit(callBackRequest));
         }
     }
