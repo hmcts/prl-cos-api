@@ -807,7 +807,6 @@ public class DraftAnOrderService {
                     .build();
                 caseData = caseData.toBuilder().standardDirectionOrder(standardDirectionOrder).build();
                 standardDirectionOrderMap = objectMapper.convertValue(standardDirectionOrder, Map.class);
-                log.info("caseData.getStandardDirectionOrder()===> " + caseData.getStandardDirectionOrder());
                 populateStandardDirectionOrderDefaultFields(authorisation, caseData, standardDirectionOrderMap);
             } catch (JsonProcessingException exception) {
                 throw new ManageOrderRuntimeException(MANAGE_ORDER_SDO_FAILURE, exception);
@@ -933,7 +932,6 @@ public class DraftAnOrderService {
     private static HearingData resetHearingConfirmedDatesAndLinkedCases(
         HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists,
         HearingData hearingData) {
-        log.info("hearingData.getConfirmedHearingDates() ===>" + hearingData.getConfirmedHearingDates());
         return hearingData.toBuilder()
             .confirmedHearingDates(isNotEmpty(hearingData.getConfirmedHearingDates())
                                        ? hearingData.getConfirmedHearingDates().toBuilder()
@@ -1620,7 +1618,6 @@ public class DraftAnOrderService {
     private static void populateHearingData(Map<String, Object> caseDataUpdated, HearingData hearingData,
                                             HearingData existingHearingData, String hearingKey,
                                             HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists) {
-        log.info("hearingKey ===> " + hearingKey);
         if (existingHearingData == null
             || existingHearingData.getHearingDateConfirmOptionEnum() == null) {
             caseDataUpdated.put(hearingKey, hearingData);
