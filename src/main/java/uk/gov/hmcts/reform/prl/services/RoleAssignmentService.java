@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.document.am.model.Classification;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.enums.GrantType;
 import uk.gov.hmcts.reform.prl.enums.RoleCategory;
@@ -66,12 +65,13 @@ public class RoleAssignmentService {
                 roleCategory = RoleCategory.LEGAL_OPERATIONS.name();
             }
 
-            UserDetails userDetails = userService.getUserDetails(authorization);
+            String systemUserToken = systemUserService.getSysUserToken();
+            String systemUserId = systemUserService.getUserId(systemUserToken);
 
             RoleRequest roleRequest = RoleRequest.roleRequest()
-                .assignerId(userDetails.getId())
+                .assignerId(systemUserId)
                 .process("CCD")
-                .reference(createRoleRequestReference(caseDetails, userDetails.getId()))
+                .reference(createRoleRequestReference(caseDetails, systemUserId))
                 .replaceExisting(replaceExisting)
                 .build();
             String actorIdForService = actorId.split(UNDERSCORE)[0];
@@ -99,7 +99,7 @@ public class RoleAssignmentService {
                 .build();
 
             roleAssignmentApi.updateRoleAssignment(
-                systemUserService.getSysUserToken(),
+                systemUserToken,
                 authTokenGenerator.generate(),
                 null,
                 assignmentRequest
