@@ -128,7 +128,6 @@ public class AllocateJudgeController extends AbstractCallbackController {
                     ALLOCATE_JUDGE_ROLE
                 );
             }
-
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
