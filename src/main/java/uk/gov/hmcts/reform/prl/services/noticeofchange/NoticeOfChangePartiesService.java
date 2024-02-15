@@ -693,6 +693,7 @@ public class NoticeOfChangePartiesService {
                 caseDetails.getData()
                     .put("changeOrganisationRequestField", changeOrganisationRequest);
                 String userToken = systemUserService.getSysUserToken();
+                log.info("CASEEE DETAILS.... {}",caseDetails);
                 AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
                     userToken,
                     tokenGenerator.generate(),
