@@ -349,7 +349,7 @@ public class DraftAnOrderService {
                                                                                .getHearingDataForSelectedHearing(caseData,
                                                                                                                  hearings,
                                                                                                                  authorisation));
-                    } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
+                    } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
                         caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                     }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
