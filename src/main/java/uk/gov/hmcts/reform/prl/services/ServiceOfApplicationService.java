@@ -902,10 +902,7 @@ public class ServiceOfApplicationService {
             caseDataMap.put(APPLICANTS, caseData.getApplicants());
         }
 
-        //caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
-        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
-        caseDataMap.put(CASE_INVITES, caseInviteManager.generatePinAndSendNotificationEmail(caseData).getCaseInvites());
-        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+        caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
         return caseDataMap;
     }
@@ -963,6 +960,13 @@ public class ServiceOfApplicationService {
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
+        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+        List<Element<CaseInvite>> caseInvites = caseInviteManager.generatePinAndSendNotificationEmail(caseData).getCaseInvites();
+        if (CollectionUtils.isNotEmpty(caseInvites)) {
+            caseInvites.addAll(caseData.getCaseInvites());
+            caseDataMap.put(CASE_INVITES, caseInvites);
+        }
+        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         return processNonConfidentialSoa(authorisation, caseData, caseDataMap);
     }
 
