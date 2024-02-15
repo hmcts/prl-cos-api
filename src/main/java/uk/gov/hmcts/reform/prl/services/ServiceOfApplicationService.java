@@ -902,7 +902,10 @@ public class ServiceOfApplicationService {
             caseDataMap.put(APPLICANTS, caseData.getApplicants());
         }
 
-        caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
+        //caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
+        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
+        caseDataMap.put(CASE_INVITES, caseInviteManager.generatePinAndSendNotificationEmail(caseData).getCaseInvites());
+        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
         return caseDataMap;
     }
@@ -957,9 +960,6 @@ public class ServiceOfApplicationService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
         caseDataMap.putAll(caseSummaryTabService.updateTab(caseData));
-        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
-        caseData = caseInviteManager.generatePinAndSendNotificationEmail(caseData);
-        //TEMP UNBLOCK - GENERATE AND SEND ACCESS CODE TO APPLICANTS & RESPONDENTS OVER EMAIL
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
