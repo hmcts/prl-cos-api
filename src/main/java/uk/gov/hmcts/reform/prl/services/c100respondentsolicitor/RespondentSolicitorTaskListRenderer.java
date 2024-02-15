@@ -89,13 +89,13 @@ public class RespondentSolicitorTaskListRenderer {
             .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));
 
         final RespondentTaskSection applicationDetails = newSection("3. Application details")
-            .withTask(tasks.get(RespondentSolicitorEvents.MIAM))
-            .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS));
+            .withTask(tasks.get(RespondentSolicitorEvents.MIAM));
 
         final RespondentTaskSection safetyConcerns = newSection("4. Safety Concerns")
             .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
 
         final RespondentTaskSection additionalInformation = newSection("5. Additional information")
+            .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS))
             .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE));
 
