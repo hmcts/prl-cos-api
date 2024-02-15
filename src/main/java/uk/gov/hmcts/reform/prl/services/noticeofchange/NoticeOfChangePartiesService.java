@@ -548,7 +548,13 @@ public class NoticeOfChangePartiesService {
                                                            String solicitorEmailAddress,
                                                            String typeOfEvent,
                                                            String accessCode) {
+        log.info("SSSSSS");
         if (solicitorRole.isPresent()) {
+            log.info("SSSSSS {}",typeOfEvent);
+            log.info("SSSSSS {}",accessCode);
+            log.info("repre {}",solicitorRole.get().getRepresenting());
+            log.info("sol name {}",solicitorName);
+            log.info("sol email {}",solicitorEmailAddress);
             int partyIndex = solicitorRole.get().getIndex();
             return NoticeOfChangeEvent.builder()
                 .caseData(newCaseData)
@@ -702,8 +708,10 @@ public class NoticeOfChangePartiesService {
     }
 
     public void submittedStopRepresenting(CallbackRequest callbackRequest) {
+
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
+        log.info("AAAAAAAA {}",newCaseData);
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
         getSelectedPartyDetailsMap(
             newCaseData,
