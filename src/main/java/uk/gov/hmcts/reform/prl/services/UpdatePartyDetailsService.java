@@ -69,6 +69,7 @@ public class UpdatePartyDetailsService {
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final DocumentGenService documentGenService;
+    private final ConfidentialityTabService confidentialityTabService;
 
     DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy HH:mm");
 
@@ -82,6 +83,7 @@ public class UpdatePartyDetailsService {
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+
         /*log.info("1st Instance ------------------------------");
         log.info("respondentsConfidentialDetails----->>>>   {}", caseDataTemp.getRespondentConfidentialDetails());
         log.info("caseData.getApplicantsConfidentialDetails()----->>>>   {}", caseDataTemp.getApplicantsConfidentialDetails());
@@ -91,6 +93,7 @@ public class UpdatePartyDetailsService {
         log.info("caseData.getC8Document()----->>>>   {}", caseDataTemp.getC8Document());
         log.info("caseData.getC8WelshDocument()----->>>>   {}", caseDataTemp.getC8WelshDocument());*/
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
+        updatedCaseData.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 

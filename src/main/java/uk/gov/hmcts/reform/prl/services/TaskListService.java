@@ -243,9 +243,9 @@ public class TaskListService {
 
     public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("caseData.getApplicantsConfidentialDetails() updateTaskList {}", caseData.getApplicantsConfidentialDetails());
+        //log.info("caseData.getApplicantsConfidentialDetails() updateTaskList {}", caseData.getApplicantsConfidentialDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        log.info("caseData.getChildrenConfidentialDetails() updateTaskList {}", caseData.getChildrenConfidentialDetails());
+        //log.info("caseData.getChildrenConfidentialDetails() updateTaskList {}", caseData.getChildrenConfidentialDetails());
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
@@ -254,12 +254,15 @@ public class TaskListService {
         if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
             || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)) {
             try {
+                log.info("caseDataUpdated.get(applicantsConfidentialDetails) {}", caseDataUpdated.get("applicantsConfidentialDetails"));
+                log.info("caseDataUpdated.get(childrenConfidentialDetails) {}", caseDataUpdated.get("childrenConfidentialDetails"));
+                //caseDataUpdated.putAll(confidentialityTabService.updateConfidentialityDetails(caseData));
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                log.info("caseData.getApplicantsConfidentialDetails() AFTER {}", caseData.getApplicantsConfidentialDetails());
+                /*log.info("caseData.getApplicantsConfidentialDetails() AFTER {}", caseData.getApplicantsConfidentialDetails());
                 log.info("caseData.getChildrenConfidentialDetails() AFTER {}", caseData.getChildrenConfidentialDetails());
                 log.info("updatedCaseData.getC8Document() {}", updatedCaseData.getC8Document());
-                log.info("updatedCaseData.getC8WelshDocument() {}", updatedCaseData.getC8WelshDocument());
+                log.info("updatedCaseData.getC8WelshDocument() {}", updatedCaseData.getC8WelshDocument());*/
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())
                     .c1ADocument(updatedCaseData.getC1ADocument())
@@ -273,22 +276,22 @@ public class TaskListService {
             }
         }
 
-        log.info("Submitted event Instance ------------------------------");
+        /*log.info("Submitted event Instance ------------------------------");
         log.info("respondentsConfidentialDetails----->>>>   {}", caseData.getRespondentConfidentialDetails());
         log.info("caseData.getApplicantsConfidentialDetails()----->>>>   {}", caseData.getApplicantsConfidentialDetails());
         log.info("caseData.getChildrenConfidentialDetails()----->>>>   {}", caseData.getChildrenConfidentialDetails());
         log.info("caseData.getMainAppDocForTabDisplay()----->>>>   {}", caseData.getMainAppDocForTabDisplay());
         log.info("caseData.getCorrespondenceForTabDisplay()----->>>>   {}", caseData.getCorrespondenceForTabDisplay());
         log.info("caseData.getC8Document()----->>>>   {}", caseData.getC8Document());
-        log.info("caseData.getC8WelshDocument()----->>>>   {}", caseData.getC8WelshDocument());
+        log.info("caseData.getC8WelshDocument()----->>>>   {}", caseData.getC8WelshDocument());*/
 
         tabService.updateAllTabsIncludingConfTab(caseData);
 
         if (!isCourtStaff) {
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
         }
-        log.info("caseData.getApplicantsConfidentialDetails() 2nd AFTER {}", caseDataUpdated.get("applicantsConfidentialDetails"));
-        log.info("caseData.getChildrenConfidentialDetails() 2nd AFTER {}", caseDataUpdated.get("childrenConfidentialDetails"));
+        /*log.info("caseData.getApplicantsConfidentialDetails() 2nd AFTER {}", caseDataUpdated.get("applicantsConfidentialDetails"));
+        log.info("caseData.getChildrenConfidentialDetails() 2nd AFTER {}", caseDataUpdated.get("childrenConfidentialDetails"));*/
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
