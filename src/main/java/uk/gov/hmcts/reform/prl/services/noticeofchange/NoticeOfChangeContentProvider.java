@@ -57,7 +57,7 @@ public class NoticeOfChangeContentProvider {
                 .litigantName(litigantName)
                 .citizenSignUpLink(citizenUrl)
                 .accessCode(accessCode)
-                .caseLink(citizenUrl + CITIZEN_DASHBOARD)// As per PRL-4877 commented temporarily
+                .caseLink(citizenUrl + CITIZEN_DASHBOARD)
                 .build();
         }
     }

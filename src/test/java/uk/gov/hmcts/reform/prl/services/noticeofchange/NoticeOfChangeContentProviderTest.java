@@ -51,8 +51,14 @@ public class NoticeOfChangeContentProviderTest {
     }
 
     @Test
-    public void testBuildNoticeOfChangeEmailCitizen() {
+    public void testBuildNoticeOfChangeEmailCitizenForOtherParties() {
         EmailTemplateVars emailTemplateVars = noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, "Solicitor Name", "test", true, "111");
+        assertEquals("123455",emailTemplateVars.getCaseReference());
+    }
+
+    @Test
+    public void testBuildNoticeOfChangeEmailCitizen() {
+        EmailTemplateVars emailTemplateVars = noticeOfChangeContentProvider.buildNocEmailCitizen(caseData, "Solicitor Name", "test", false, "111");
         assertEquals("123455",emailTemplateVars.getCaseReference());
     }
 
