@@ -38,8 +38,11 @@ public class EmailService {
         final String templateId = getTemplateId(templateName, languagePreference);
 
         try {
+            log.info("templateVars-->{}",templateVars);
+            log.info("toMap(templateVars)-->{}",toMap(templateVars));
             SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
                                                                       reference);
+            log.info("completeddd");
             onAfterLog(templateName, templateVars.getCaseReference(), reference, response.getNotificationId());
         } catch (NotificationClientException exception) {
             throw new IllegalArgumentException(exception);
