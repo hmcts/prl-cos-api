@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.NoticeOfChangeEmail;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
@@ -39,14 +40,25 @@ public class NoticeOfChangeContentProvider {
                                                   String litigantName,
                                                   boolean isOtherPerson,
                                                   String accessCode) {
-        return NoticeOfChangeEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .solicitorName(solicitorName)
-            .litigantName(litigantName)
-            .citizenSignUpLink(citizenUrl)
-            .accessCode(accessCode)
-            //.caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))// As per PRL-4877 commented temporarily
-            .build();
+        if (isOtherPerson) {
+            return NoticeOfChangeEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .solicitorName(solicitorName)
+                .litigantName(litigantName)
+                .citizenSignUpLink(citizenUrl)
+                .accessCode(accessCode)
+                .build();
+        } else {
+            return NoticeOfChangeEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .solicitorName(solicitorName)
+                .litigantName(litigantName)
+                .citizenSignUpLink(citizenUrl)
+                .accessCode(accessCode)
+                .caseLink(citizenUrl + CITIZEN_DASHBOARD)// As per PRL-4877 commented temporarily
+                .build();
+        }
     }
 }
