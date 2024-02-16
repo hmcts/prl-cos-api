@@ -46,7 +46,6 @@ public class NoticeOfChangeContentProvider {
             .litigantName(litigantName)
             .citizenSignUpLink(citizenUrl)
             .accessCode(accessCode)
-            //.caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))// As per PRL-4877 commented temporarily
             .build();
     }
 }
