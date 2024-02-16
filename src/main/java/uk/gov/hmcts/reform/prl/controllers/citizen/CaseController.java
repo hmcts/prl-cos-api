@@ -220,8 +220,8 @@ public class CaseController {
     ) {
         CaseDetails caseDetails = null;
         if (isAuthorized(authorisation, s2sToken)) {
-            caseDetails = caseService.withdrawCase(caseData, caseId, authorisation);
-            caseDetails.getData().put("caseStatus", CaseStatus.builder().state("Withdrawn").build());
+            caseData.put("state", WITHDRAWN_STATE);
+            caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
             return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
