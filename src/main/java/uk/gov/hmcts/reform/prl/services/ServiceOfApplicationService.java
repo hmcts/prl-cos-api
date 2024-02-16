@@ -22,11 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
-import uk.gov.hmcts.reform.prl.enums.Event;
-import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
-import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
-import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.*;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaCitizenServingRespondentsEnum;
 import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRespondentsEnum;
@@ -1657,8 +1653,7 @@ public class ServiceOfApplicationService {
     }
 
     private List<Document> generatePackO(CaseData caseData) {
-        List<Document> docs = new ArrayList<>();
-        docs.addAll(getCaseDocs(caseData));
+        List<Document> docs = new ArrayList<>(getCaseDocs(caseData));
         docs.add(caseData.getC8Document());
         docs.addAll(getDocumentsUploadedInServiceOfApplication(caseData));
         docs.addAll(getSoaSelectedOrders(caseData));
@@ -1669,12 +1664,35 @@ public class ServiceOfApplicationService {
         //Welsh pack generation needs to be reviewed
         List<Document> docs = new ArrayList<>();
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            if (null != caseData.getFinalDocument()) {
-                docs.add(caseData.getFinalDocument());
+            if (LanguagePreference.english.getDisplayedValue().equalsIgnoreCase(CaseUtils.getLanguageRequirements(caseData))) {
+                if (null != caseData.getFinalDocument()) {
+                    docs.add(caseData.getFinalDocument());
+                }
+                if (null != caseData.getC1ADocument()) {
+                    docs.add(caseData.getC1ADocument());
+                }
+            } else if (LanguagePreference.welsh.getDisplayedValue().equalsIgnoreCase(CaseUtils.getLanguageRequirements(caseData))) {
+                if (null != caseData.getFinalWelshDocument()) {
+                    docs.add(caseData.getFinalWelshDocument());
+                }
+                if (null != caseData.getC1AWelshDocument()) {
+                    docs.add(caseData.getC1AWelshDocument());
+                }
+            } else {
+                if (null != caseData.getFinalDocument()) {
+                    docs.add(caseData.getFinalDocument());
+                }
+                if (null != caseData.getC1ADocument()) {
+                    docs.add(caseData.getC1ADocument());
+                }
+                if (null != caseData.getFinalWelshDocument()) {
+                    docs.add(caseData.getFinalWelshDocument());
+                }
+                if (null != caseData.getC1AWelshDocument()) {
+                    docs.add(caseData.getC1AWelshDocument());
+                }
             }
-            if (null != caseData.getC1ADocument()) {
-                docs.add(caseData.getC1ADocument());
-            }
+
         } else {
             docs.add(caseData.getFinalDocument());
         }
