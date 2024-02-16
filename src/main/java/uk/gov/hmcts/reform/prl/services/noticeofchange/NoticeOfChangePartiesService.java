@@ -548,13 +548,7 @@ public class NoticeOfChangePartiesService {
                                                            String solicitorEmailAddress,
                                                            String typeOfEvent,
                                                            String accessCode) {
-        log.info("SSSSSS");
         if (solicitorRole.isPresent()) {
-            log.info("SSSSSS {}",typeOfEvent);
-            log.info("SSSSSS {}",accessCode);
-            log.info("repre {}",solicitorRole.get().getRepresenting());
-            log.info("sol name {}",solicitorName);
-            log.info("sol email {}",solicitorEmailAddress);
             int partyIndex = solicitorRole.get().getIndex();
             return NoticeOfChangeEvent.builder()
                 .caseData(newCaseData)
@@ -693,7 +687,6 @@ public class NoticeOfChangePartiesService {
                 caseDetails.getData()
                     .put("changeOrganisationRequestField", changeOrganisationRequest);
                 String userToken = systemUserService.getSysUserToken();
-                log.info("CASEEE DETAILS.... {}",caseDetails);
                 AboutToStartOrSubmitCallbackResponse response = assignCaseAccessClient.applyDecision(
                     userToken,
                     tokenGenerator.generate(),
@@ -709,10 +702,8 @@ public class NoticeOfChangePartiesService {
     }
 
     public void submittedStopRepresenting(CallbackRequest callbackRequest) {
-
         CaseData newCaseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         DynamicMultiSelectList solStopRepChooseParties = newCaseData.getSolStopRepChooseParties();
-        log.info("submittedStopRepresenting.....");
         Map<Optional<SolicitorRole>, Element<PartyDetails>> selectedPartyDetailsMap = new HashMap<>();
         getSelectedPartyDetailsMap(
             newCaseData,
@@ -957,7 +948,6 @@ public class NoticeOfChangePartiesService {
                     || (FL401_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)
                     && partyDetails.getValue().getEmail().equals(caseInviteElement.getValue().getCaseInviteEmail()))) {
                     accessCode = caseInviteElement.getValue().getAccessCode();
-                    log.info("accessCodeee {}",accessCode);
                 }
             }
         }

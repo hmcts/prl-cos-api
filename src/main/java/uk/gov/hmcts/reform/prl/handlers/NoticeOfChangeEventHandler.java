@@ -53,7 +53,6 @@ public class NoticeOfChangeEventHandler {
     }
 
     private void sendEmailToAppRespSolicitors(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateNames) {
-        log.info("sendEmailToAppRespSolicitors.... ");
         Map<String, String> solicitorsToNotify = new HashMap<>();
         solicitorsToNotify.putAll(CaseUtils.getApplicantSolicitorsToNotify(caseData));
         solicitorsToNotify.putAll(CaseUtils.getRespondentSolicitorsToNotify(caseData));
@@ -61,7 +60,6 @@ public class NoticeOfChangeEventHandler {
             solicitorsToNotify.forEach(
                 (key, value) -> {
                     if (!key.equalsIgnoreCase(event.getSolicitorEmailAddress())) {
-                        log.info("sendEmailToAppRespSolicitors.... {}",key);
                         emailService.send(
                             key,
                             emailTemplateNames,
@@ -76,7 +74,6 @@ public class NoticeOfChangeEventHandler {
     private void sendEmailToOtherParties(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateNames) {
         Map<String, String> othersToNotify = CaseUtils.getOthersToNotify(caseData);
         if (!othersToNotify.isEmpty()) {
-            log.info("sendEmailToOtherParties.... {}",othersToNotify);
             othersToNotify.forEach(
                 (key, value) -> emailService.send(
                     key,
@@ -94,7 +91,6 @@ public class NoticeOfChangeEventHandler {
     }
 
     private void sendEmailToApplicantsRespondents(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateNames) {
-        log.info("sendEmailToApplicantsRespondents.....");
         Element<PartyDetails> partyElement = getLitigantParty(caseData, event);
         Map<String, String> applicantsRespondentsToNotify = new HashMap<>();
         applicantsRespondentsToNotify.putAll(CaseUtils.getApplicantsToNotify(
@@ -106,7 +102,6 @@ public class NoticeOfChangeEventHandler {
             null != partyElement ? partyElement.getId() : null
         ));
         if (!applicantsRespondentsToNotify.isEmpty()) {
-            log.info("sendEmailToApplicantsRespondents all... {}",applicantsRespondentsToNotify);
             applicantsRespondentsToNotify.forEach(
                 (key, value) -> emailService.send(
                     key,
@@ -128,7 +123,6 @@ public class NoticeOfChangeEventHandler {
         if (null != partyElement && null != partyElement.getValue()) {
             PartyDetails partyDetails = partyElement.getValue();
             if (null != partyDetails.getEmail()) {
-                log.info("sendEmailToLitigant.....");
                 emailService.send(
                     partyDetails.getEmail(),
                     emailTemplateName,
@@ -150,7 +144,6 @@ public class NoticeOfChangeEventHandler {
 
     private void sendEmailToSolicitor(CaseData caseData, NoticeOfChangeEvent event, EmailTemplateNames emailTemplateName) {
         if (null != event.getSolicitorEmailAddress()) {
-            log.info("sendEmailToSolicitor.....");
             emailService.send(
                 event.getSolicitorEmailAddress(),
                 emailTemplateName,
@@ -196,7 +189,6 @@ public class NoticeOfChangeEventHandler {
     @Async
     @EventListener(condition = "#event.typeOfEvent eq 'Remove Legal Representation'")
     public void notifyWhenLegalRepresentativeRemoved(final NoticeOfChangeEvent event) {
-        log.info("notifyWhenLegalRepresentativeRemoved.....");
         CaseData caseData = event.getCaseData();
         //PRL-3215 - notify old LR
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
@@ -204,7 +196,6 @@ public class NoticeOfChangeEventHandler {
         //Access code will not generate if the case has not reached to Hearing state yet
         if (StringUtils.isNotEmpty(event.getAccessCode())
             && launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")) {
-            log.info("generate-access-code-for-noc true.....");
             //PRL-3215 - notify LiP
             sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC);
             //PRL-3215 - notify applicants/respondents other parties except litigant
