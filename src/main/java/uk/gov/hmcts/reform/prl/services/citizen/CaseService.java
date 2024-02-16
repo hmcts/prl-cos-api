@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
@@ -444,7 +445,7 @@ public class CaseService {
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         CaseDetails caseDetails = getCase(authToken, caseId);
         Map<String, Object> caseDataUpdated =  caseDetails.getData();
-        caseDataUpdated.put("caseStatus", CaseStatus.builder().state("CASE_WITHDRAWN").build());
+        caseDataUpdated.put("caseStatus", CaseStatus.builder().state( State.CASE_WITHDRAWN.getLabel()).build());
         caseDetails.setData(caseDataUpdated);
         CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
