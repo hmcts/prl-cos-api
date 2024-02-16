@@ -254,6 +254,8 @@ public class TaskListService {
             try {
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+                log.info("updatedCaseData.getC8Document() {}", updatedCaseData.getC8Document());
+                log.info("updatedCaseData.getC8WelshDocument() {}", updatedCaseData.getC8WelshDocument());
                 caseData = caseData.toBuilder()
                     .c8Document(updatedCaseData.getC8Document())
                     .c1ADocument(updatedCaseData.getC1ADocument())

@@ -82,14 +82,14 @@ public class UpdatePartyDetailsService {
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-        log.info("1st Instance ------------------------------");
+        /*log.info("1st Instance ------------------------------");
         log.info("respondentsConfidentialDetails----->>>>   {}", caseDataTemp.getRespondentConfidentialDetails());
         log.info("caseData.getApplicantsConfidentialDetails()----->>>>   {}", caseDataTemp.getApplicantsConfidentialDetails());
         log.info("caseData.getChildrenConfidentialDetails()----->>>>   {}", caseDataTemp.getChildrenConfidentialDetails());
         log.info("caseData.getMainAppDocForTabDisplay()----->>>>   {}", caseDataTemp.getMainAppDocForTabDisplay());
         log.info("caseData.getCorrespondenceForTabDisplay()----->>>>   {}", caseDataTemp.getCorrespondenceForTabDisplay());
         log.info("caseData.getC8Document()----->>>>   {}", caseDataTemp.getC8Document());
-        log.info("caseData.getC8WelshDocument()----->>>>   {}", caseDataTemp.getC8WelshDocument());
+        log.info("caseData.getC8WelshDocument()----->>>>   {}", caseDataTemp.getC8WelshDocument());*/
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
@@ -145,14 +145,14 @@ public class UpdatePartyDetailsService {
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
 
         CaseData caseDataTest = objectMapper.convertValue(updatedCaseData, CaseData.class);
-        log.info("2nd Instance ------------------------------");
+        /*log.info("2nd Instance ------------------------------");
         log.info("respondentsConfidentialDetails----->>>>   {}", caseDataTest.getRespondentConfidentialDetails());
         log.info("caseData.getApplicantsConfidentialDetails()----->>>>   {}", caseDataTest.getApplicantsConfidentialDetails());
         log.info("caseData.getChildrenConfidentialDetails()----->>>>   {}", caseDataTest.getChildrenConfidentialDetails());
         log.info("caseData.getMainAppDocForTabDisplay()----->>>>   {}", caseDataTest.getMainAppDocForTabDisplay());
         log.info("caseData.getCorrespondenceForTabDisplay()----->>>>   {}", caseDataTest.getCorrespondenceForTabDisplay());
         log.info("caseData.getC8Document()----->>>>   {}", caseDataTest.getC8Document());
-        log.info("caseData.getC8WelshDocument()----->>>>   {}", caseDataTest.getC8WelshDocument());
+        log.info("caseData.getC8WelshDocument()----->>>>   {}", caseDataTest.getC8WelshDocument());*/
         return updatedCaseData;
     }
 
