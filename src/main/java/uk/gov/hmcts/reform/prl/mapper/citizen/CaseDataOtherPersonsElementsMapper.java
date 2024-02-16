@@ -27,6 +27,7 @@ import java.util.Optional;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -35,17 +36,30 @@ public class CaseDataOtherPersonsElementsMapper {
     private CaseDataOtherPersonsElementsMapper() {
     }
 
-    public static void updateOtherPersonDetailsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
+    public static void updateOtherPersonDetailsElementsForCaseData(String taskListVersion,CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                                    C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements,
                                                                    C100RebuildChildDetailsElements c100RebuildChildDetailsElements) {
-        caseDataBuilder
-            .othersToNotify(buildOtherPeople(c100RebuildOtherPersonDetailsElements))
-            .otherPartyInTheCaseRevised(buildOtherPeople(c100RebuildOtherPersonDetailsElements))
-            .relations(caseDataBuilder.build().getRelations().toBuilder()
-                                      .childAndOtherPeopleRelations(
-                                          buildChildAndOtherPeopleRelation(c100RebuildOtherPersonDetailsElements,
-                                                                           c100RebuildChildDetailsElements))
-                                      .build());
+        if (TASK_LIST_VERSION_V2.equalsIgnoreCase(taskListVersion)) {
+            caseDataBuilder
+                .otherPartyInTheCaseRevised(buildOtherPeople(c100RebuildOtherPersonDetailsElements))
+                .relations(caseDataBuilder.build().getRelations().toBuilder()
+                               .childAndOtherPeopleRelations(
+                                   buildChildAndOtherPeopleRelation(
+                                       c100RebuildOtherPersonDetailsElements,
+                                       c100RebuildChildDetailsElements
+                                   ))
+                               .build());
+        } else {
+            caseDataBuilder
+                .othersToNotify(buildOtherPeople(c100RebuildOtherPersonDetailsElements))
+                .relations(caseDataBuilder.build().getRelations().toBuilder()
+                               .childAndOtherPeopleRelations(
+                                   buildChildAndOtherPeopleRelation(
+                                       c100RebuildOtherPersonDetailsElements,
+                                       c100RebuildChildDetailsElements
+                                   ))
+                               .build());
+        }
     }
 
     private static List<Element<PartyDetails>> buildOtherPeople(C100RebuildOtherPersonDetailsElements
