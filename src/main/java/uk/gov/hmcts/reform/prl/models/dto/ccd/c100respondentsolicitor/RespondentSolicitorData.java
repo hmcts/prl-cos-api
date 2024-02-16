@@ -38,6 +38,10 @@ public class RespondentSolicitorData {
     private final Miam respondentSolicitorHaveYouAttendedMiam;
     private final String whatIsMiamPlaceHolder;
     private final String helpMiamCostsExemptionsPlaceHolder;
+    //PRL-4588 - Miam new case fields
+    private final YesOrNo hasRespondentAttendedMiam;
+    private final YesOrNo respondentWillingToAttendMiam;
+    private final String respondentReasonNotAttendingMiam;
 
     private KeepDetailsPrivate keepContactDetailsPrivate;
     @JsonIgnore

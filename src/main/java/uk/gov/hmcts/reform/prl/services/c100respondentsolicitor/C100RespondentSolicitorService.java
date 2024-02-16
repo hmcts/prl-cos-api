@@ -557,22 +557,17 @@ public class C100RespondentSolicitorService {
     }
 
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
-        boolean attendedMiam = Yes.equals(caseData.getRespondentSolicitorData()
-                                              .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam());
+        boolean attendedMiam = Yes.equals(caseData.getRespondentSolicitorData().getHasRespondentAttendedMiam());
         boolean willingToAttendMiam = !attendedMiam && No.equals(caseData.getRespondentSolicitorData()
-                                                                     .getRespondentSolicitorHaveYouAttendedMiam()
-                                                                     .getWillingToAttendMiam());
-        buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+                                                                     .getRespondentWillingToAttendMiam());
+        return buildResponseForRespondent.toBuilder()
             .miam(Miam.builder()
-                      .attendedMiam(caseData.getRespondentSolicitorData()
-                                        .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam())
-                      .willingToAttendMiam(attendedMiam ? null : caseData.getRespondentSolicitorData()
-                          .getRespondentSolicitorHaveYouAttendedMiam().getWillingToAttendMiam())
-                      .reasonNotAttendingMiam(
-                          willingToAttendMiam ? caseData
-                              .getRespondentSolicitorData().getRespondentSolicitorHaveYouAttendedMiam()
-                              .getReasonNotAttendingMiam() : null).build()).build();
-        return buildResponseForRespondent;
+                      .attendedMiam(caseData.getRespondentSolicitorData().getHasRespondentAttendedMiam())
+                      .willingToAttendMiam(caseData.getRespondentSolicitorData().getRespondentWillingToAttendMiam())
+                      .reasonNotAttendingMiam(willingToAttendMiam
+                                                  ? caseData.getRespondentSolicitorData().getRespondentReasonNotAttendingMiam()
+                                                  : null).build())
+            .build();
     }
 
     private Response buildCitizenDetailsResponse(CaseData caseData, Response buildResponseForRespondent) {
