@@ -445,7 +445,7 @@ public class CaseService {
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         CaseDetails caseDetails = getCase(authToken, caseId);
         Map<String, Object> caseDataUpdated =  caseDetails.getData();
-        caseDataUpdated.put("caseStatus", CaseStatus.builder().state( State.CASE_WITHDRAWN.getLabel()).build());
+        caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.CASE_WITHDRAWN.getLabel()).build());
         caseDetails.setData(caseDataUpdated);
         CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
