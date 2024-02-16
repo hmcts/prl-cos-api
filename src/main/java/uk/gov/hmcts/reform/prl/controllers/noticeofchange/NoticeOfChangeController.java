@@ -132,7 +132,6 @@ public class NoticeOfChangeController extends AbstractCallbackController {
     public void submittedStopRepresentation(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestBody CallbackRequest callbackRequest) {
-        log.info("submittedStopRepresentation.......");
         noticeOfChangePartiesService.submittedStopRepresenting(callbackRequest);
     }
 
