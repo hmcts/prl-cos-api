@@ -193,6 +193,8 @@ public class NoticeOfChangeEventHandler {
         //PRL-3215 - notify old LR
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
+        log.info("event.getAccessCode()---> {}",event.getAccessCode());
+        log.info("nocc---> {}",launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc"));
         //Access code will not generate if the case has not reached to Hearing state yet
         if (StringUtils.isNotEmpty(event.getAccessCode())
             && launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")) {
