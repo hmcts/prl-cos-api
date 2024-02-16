@@ -22,10 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -33,7 +32,10 @@ import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+
 import java.util.List;
+import java.util.Map;
+
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
@@ -220,9 +222,10 @@ public class CaseController {
     ) {
         CaseDetails caseDetails = null;
         if (isAuthorized(authorisation, s2sToken)) {
-            caseData.put("state", WITHDRAWN_STATE);
-            caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
             caseDetails = caseService.withdrawCase(caseData, caseId, authorisation);
+            Map<String, Object> caseDataUpdated =  caseDetails.getData();
+            caseDataUpdated.put("caseStatus", CaseStatus.builder().state("Withdrawn").build());
+            caseDetails.setData(caseDataUpdated);
             return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
