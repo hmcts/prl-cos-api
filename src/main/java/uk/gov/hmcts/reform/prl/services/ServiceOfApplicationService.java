@@ -963,7 +963,6 @@ public class ServiceOfApplicationService {
         if (isRespondentDetailsConfidential(caseData) || CaseUtils.isC8Present(caseData)) {
             return processConfidentialDetailsSoa(authorisation, callbackRequest, caseData);
         }
-
         return processNonConfidentialSoa(authorisation, caseData, caseDataMap);
     }
 
@@ -1027,8 +1026,6 @@ public class ServiceOfApplicationService {
         finalServedApplicationDetailsList.add(element(sendNotificationForServiceOfApplication(caseData, authorisation, caseDataMap)));
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
         cleanUpSoaSelections(caseDataMap);
-        //SAVE TEMP GENERATED ACCESS CODE
-        caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         //SAVE TEMP GENERATED ACCESS CODE
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
@@ -1053,8 +1050,6 @@ public class ServiceOfApplicationService {
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
 
         cleanUpSoaSelections(caseDataMap);
-        //SAVE TEMP GENERATED ACCESS CODE
-        caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         //SAVE TEMP GENERATED ACCESS CODE
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
