@@ -39,8 +39,6 @@ public class ConfidentialDetailsMapper {
                     .toList();
                 respondentsConfidentialDetails = getRespondentConfidentialDetails(respondents);
             }
-
-            log.info("respondentsConfidentialDetails----->>>>   {}", respondentsConfidentialDetails);
             caseData = caseData.toBuilder()
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
