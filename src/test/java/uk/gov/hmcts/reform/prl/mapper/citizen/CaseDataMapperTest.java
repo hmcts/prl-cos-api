@@ -215,6 +215,24 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
         assertNotNull(updatedCaseData);
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/ra1.json", "classpath:c100-rebuild/ra2.json", "classpath:c100-rebuild/ra3.json"})
+    void testCaseDataMapperReasonableAdjustmentsExtraFields2(String resourcePath) throws IOException {
+        CaseData caseData1 = caseData
+            .toBuilder()
+            .taskListVersion("v2")
+            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
+                                 .c100RebuildReasonableAdjustments(TestUtil.readFileFrom(resourcePath))
+                                 .build())
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+    }
+
     @Test
     public void testCaseDataMapperForOtherPersonDetails() throws IOException {
         //Given
@@ -231,26 +249,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
         //Then
         assertNotNull(updatedCaseData);
         assertNotNull(updatedCaseData.getOthersToNotify());
-    }
-
-    @Test
-    public void testCaseDataMapperForOtherPersonDetailsRevised() throws IOException {
-        //Given
-        CaseData caseData1 = caseData
-            .toBuilder()
-            .taskListVersion("v2")
-            .c100RebuildData(caseData
-                                 .getC100RebuildData().toBuilder()
-                                 .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs1.json"))
-                                 .build())
-            .build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
-        //Then
-        assertNotNull(updatedCaseData);
-        assertNotNull(updatedCaseData.getOtherPartyInTheCaseRevised());
     }
 
     @Test
