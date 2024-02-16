@@ -269,20 +269,20 @@ public class TaskListService {
             }
         }
 
+        log.info("Submitted event Instance ------------------------------");
+        log.info("respondentsConfidentialDetails----->>>>   {}", caseData.getRespondentConfidentialDetails());
+        log.info("caseData.getApplicantsConfidentialDetails()----->>>>   {}", caseData.getApplicantsConfidentialDetails());
+        log.info("caseData.getChildrenConfidentialDetails()----->>>>   {}", caseData.getChildrenConfidentialDetails());
+        log.info("caseData.getMainAppDocForTabDisplay()----->>>>   {}", caseData.getMainAppDocForTabDisplay());
+        log.info("caseData.getCorrespondenceForTabDisplay()----->>>>   {}", caseData.getCorrespondenceForTabDisplay());
+        log.info("caseData.getC8Document()----->>>>   {}", caseData.getC8Document());
+        log.info("caseData.getC8WelshDocument()----->>>>   {}", caseData.getC8WelshDocument());
+
         tabService.updateAllTabsIncludingConfTab(caseData);
 
         if (!isCourtStaff) {
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
         }
-        CaseData caseDataTest = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-        log.info("Submitted event Instance ------------------------------");
-        log.info("respondentsConfidentialDetails----->>>>   {}", caseDataTest.getRespondentConfidentialDetails());
-        log.info("caseData.getApplicantsConfidentialDetails()----->>>>   {}", caseDataTest.getApplicantsConfidentialDetails());
-        log.info("caseData.getChildrenConfidentialDetails()----->>>>   {}", caseDataTest.getChildrenConfidentialDetails());
-        log.info("caseData.getMainAppDocForTabDisplay()----->>>>   {}", caseDataTest.getMainAppDocForTabDisplay());
-        log.info("caseData.getCorrespondenceForTabDisplay()----->>>>   {}", caseDataTest.getCorrespondenceForTabDisplay());
-        log.info("caseData.getC8Document()----->>>>   {}", caseDataTest.getC8Document());
-        log.info("caseData.getC8WelshDocument()----->>>>   {}", caseDataTest.getC8WelshDocument());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

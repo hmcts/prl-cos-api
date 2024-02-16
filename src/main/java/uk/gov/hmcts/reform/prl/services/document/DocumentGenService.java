@@ -407,6 +407,7 @@ public class DocumentGenService {
     private void isConfidentialInformationPresentForC100Eng(String authorisation, CaseData caseData,
                                                             Map<String, Object> updatedCaseData) throws Exception {
         if (isConfidentialInformationPresentForC100(caseData)) {
+            log.info("confidential info present <<<<<<<<<<<<<<<>>>>>>>>>>>>>");
             if (State.CASE_ISSUED.equals(caseData.getState()) || State.JUDICIAL_REVIEW.equals(caseData.getState())) {
                 updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
             } else {
@@ -419,12 +420,22 @@ public class DocumentGenService {
             && isApplicantOrChildDetailsConfidential(caseData)) {
             updatedCaseData.put(DOCUMENT_FIELD_C8, getDocument(authorisation, caseData, C8_HINT, false));
         } else {
+            log.info("confidential info NOT present <<<<<<<<<<<<<<<>>>>>>>>>>>>>");
             updatedCaseData.put(DOCUMENT_FIELD_C8, null);
         }
     }
 
 
     private boolean isConfidentialInformationPresentForC100(CaseData caseData) {
+        log.info("caseData.getApplicantsConfidentialDetails() BEFORE {}", caseData.getApplicantsConfidentialDetails());
+        log.info("caseData.getChildrenConfidentialDetails() BEFORE {}", caseData.getChildrenConfidentialDetails());
+        log.info("condition evaluation: {}",
+            C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
+                && ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
+                && !caseData.getApplicantsConfidentialDetails().isEmpty()
+                || ofNullable(caseData.getChildrenConfidentialDetails()).isPresent()
+                && !caseData.getChildrenConfidentialDetails().isEmpty());
+
         return C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())
             && ofNullable(caseData.getApplicantsConfidentialDetails()).isPresent()
             && !caseData.getApplicantsConfidentialDetails().isEmpty()
