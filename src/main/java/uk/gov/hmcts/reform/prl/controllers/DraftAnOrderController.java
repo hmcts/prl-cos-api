@@ -115,13 +115,16 @@ public class DraftAnOrderController {
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
             );
+            List<String> errorList = new ArrayList<>();
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData)) {
-                draftAnOrderService.populateStandardDirectionOrderDefaultFields(authorisation, caseData, caseDataUpdated);
+            if (DraftAnOrderService.checkStandingOrderOptionsSelected(caseData, errorList)
+                && DraftAnOrderService.validationIfDirectionForFactFindingSelected(caseData, errorList)) {
+                draftAnOrderService.populateStandardDirectionOrderDefaultFields(
+                    authorisation,
+                    caseData,
+                    caseDataUpdated
+                );
             } else {
-                List<String> errorList = new ArrayList<>();
-                errorList.add(
-                    "Please select at least one options from below");
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .errors(errorList)
                     .build();

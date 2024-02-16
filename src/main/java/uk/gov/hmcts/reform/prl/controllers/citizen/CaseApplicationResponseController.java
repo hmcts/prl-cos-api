@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
@@ -259,21 +260,29 @@ public class CaseApplicationResponseController {
                 .dateCreated(LocalDate.now())
                 .citizenDocument(c8FinalDocument)
                 .build();
+            if (caseData.getCitizenResponseDocuments() == null) {
+                caseData.setCitizenResponseDocuments(CitizenResponseDocuments.builder().build());
+            }
             switch (partyIndex) {
                 case 0:
-                    caseData.setRespondentAc8(c8ResponseDocuments);
+                    caseData.toBuilder().citizenResponseDocuments(CitizenResponseDocuments.builder()
+                                                                      .respondentAc8(c8ResponseDocuments).build());
                     break;
                 case 1:
-                    caseData.setRespondentBc8(c8ResponseDocuments);
+                    caseData.toBuilder().citizenResponseDocuments(CitizenResponseDocuments.builder()
+                                                                      .respondentBc8(c8ResponseDocuments).build());
                     break;
                 case 2:
-                    caseData.setRespondentCc8(c8ResponseDocuments);
+                    caseData.toBuilder().citizenResponseDocuments(CitizenResponseDocuments.builder()
+                                                                      .respondentCc8(c8ResponseDocuments).build());
                     break;
                 case 3:
-                    caseData.setRespondentDc8(c8ResponseDocuments);
+                    caseData.toBuilder().citizenResponseDocuments(CitizenResponseDocuments.builder()
+                                                                      .respondentDc8(c8ResponseDocuments).build());
                     break;
                 case 4:
-                    caseData.setRespondentEc8(c8ResponseDocuments);
+                    caseData.toBuilder().citizenResponseDocuments(CitizenResponseDocuments.builder()
+                                                                      .respondentEc8(c8ResponseDocuments).build());
                     break;
                 default:
                     break;
