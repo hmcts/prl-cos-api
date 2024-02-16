@@ -243,7 +243,9 @@ public class TaskListService {
 
     public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
         CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        log.info("caseData.getApplicantsConfidentialDetails() updateTaskList {}", caseData.getApplicantsConfidentialDetails());
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        log.info("caseData.getChildrenConfidentialDetails() updateTaskList {}", caseData.getChildrenConfidentialDetails());
         eventPublisher.publishEvent(new CaseDataChanged(caseData));
         UserDetails userDetails = userService.getUserDetails(authorisation);
         List<String> roles = userDetails.getRoles();
@@ -254,6 +256,8 @@ public class TaskListService {
             try {
                 caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
                 CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+                log.info("caseData.getApplicantsConfidentialDetails() AFTER {}", caseData.getApplicantsConfidentialDetails());
+                log.info("caseData.getChildrenConfidentialDetails() AFTER {}", caseData.getChildrenConfidentialDetails());
                 log.info("updatedCaseData.getC8Document() {}", updatedCaseData.getC8Document());
                 log.info("updatedCaseData.getC8WelshDocument() {}", updatedCaseData.getC8WelshDocument());
                 caseData = caseData.toBuilder()
@@ -283,6 +287,8 @@ public class TaskListService {
         if (!isCourtStaff) {
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
         }
+        log.info("caseData.getApplicantsConfidentialDetails() 2nd AFTER {}", caseDataUpdated.get("applicantsConfidentialDetails"));
+        log.info("caseData.getChildrenConfidentialDetails() 2nd AFTER {}", caseDataUpdated.get("childrenConfidentialDetails"));
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
