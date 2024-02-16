@@ -66,7 +66,6 @@ public class C100JsonMapper {
             .add("otherPeopleInTheCase", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion())
                 ? otherPeopleInTheCaseRevisedMapper.map(caseData.getOtherPartyInTheCaseRevised())
                 : otherPeopleInTheCaseMapper.map(caseData.getOthersToNotify()))
-            //TODO : logic to add otherPeopleInTheCaseRevised
             .add("otherChildrenNotPartOfTheApplication", otherChildrenNotInTheCaseMapper.map(caseData.getChildrenNotInTheCase()))
             .add("allegationsOfHarm", TASK_LIST_VERSION_V2.equalsIgnoreCase(caseData.getTaskListVersion()) ? allegationsOfHarmRevisedMapper
                     .map(caseData) : allegationOfHarmMapper.map(caseData))
