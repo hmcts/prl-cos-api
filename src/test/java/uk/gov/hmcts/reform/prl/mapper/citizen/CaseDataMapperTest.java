@@ -234,6 +234,26 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
     }
 
     @Test
+    public void testCaseDataMapperForOtherPersonDetailsRevised() throws IOException {
+        //Given
+        CaseData caseData1 = caseData
+            .toBuilder()
+            .taskListVersion("v2")
+            .c100RebuildData(caseData
+                                 .getC100RebuildData().toBuilder()
+                                 .c100RebuildOtherPersonsDetails(TestUtil.readFileFrom("classpath:c100-rebuild/oprs1.json"))
+                                 .build())
+            .build();
+
+        //When
+        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
+
+        //Then
+        assertNotNull(updatedCaseData);
+        assertNotNull(updatedCaseData.getOtherPartyInTheCaseRevised());
+    }
+
+    @Test
     public void testCaseDataMapperForOtherPersonDetailsUnknownDoB() throws IOException {
         //Given
         CaseData caseData1 = caseData
