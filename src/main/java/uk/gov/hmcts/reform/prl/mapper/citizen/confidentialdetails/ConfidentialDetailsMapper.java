@@ -40,6 +40,7 @@ public class ConfidentialDetailsMapper {
                 respondentsConfidentialDetails = getRespondentConfidentialDetails(respondents);
             }
 
+            log.info("respondentsConfidentialDetails----->>>>   {}", respondentsConfidentialDetails);
             caseData = caseData.toBuilder()
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
@@ -66,6 +67,9 @@ public class ConfidentialDetailsMapper {
             boolean addressSet = false;
             boolean emailSet = false;
             boolean phoneSet = false;
+            log.info("respondent.getIsAddressConfidential() {}", respondent.getIsAddressConfidential());
+            log.info("respondent.getIsEmailAddressConfidential() {}", respondent.getIsEmailAddressConfidential());
+            log.info("respondent.getIsPhoneNumberConfidential() {}", respondent.getIsPhoneNumberConfidential());
             if ((YesOrNo.Yes).equals(respondent.getIsAddressConfidential())) {
                 addressSet = true;
             }
@@ -92,7 +96,9 @@ public class ConfidentialDetailsMapper {
         Address address = addressSet ? respondent.getAddress() : null;
         String phoneNumber = phoneSet ? respondent.getPhoneNumber() : null;
         String email = emailSet ? respondent.getEmail() : null;
-
+        log.info("address {}", address);
+        log.info("phoneNumber {}", phoneNumber);
+        log.info("email {}", email);
 
         ApplicantConfidentialityDetails applicantConfidentialityDetails = getApplicantConfidentialityDetails(
             addressSet,
