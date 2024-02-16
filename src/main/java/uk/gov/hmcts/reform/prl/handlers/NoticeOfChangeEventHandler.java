@@ -205,7 +205,7 @@ public class NoticeOfChangeEventHandler {
         }
 
         //PRL-3215 - notify other persons if any
-        sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
+        sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC_REVISED);
 
         //PRL-3215 - notify applicants/respondents LRs
         sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
