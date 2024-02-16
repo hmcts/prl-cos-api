@@ -56,6 +56,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
         caseData = CaseData.builder()
                 .id(1234567891234567L)
                 .caseTypeOfApplication(CASE_TYPE)
+                .taskListVersion("v2")
                 .c100RebuildData(C100RebuildData.builder()
                 .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
                 .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -203,24 +204,6 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
     void testCaseDataMapperReasonableAdjustmentsExtraFields1(String resourcePath) throws IOException {
         CaseData caseData1 = caseData
             .toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                                 .c100RebuildReasonableAdjustments(TestUtil.readFileFrom(resourcePath))
-                                 .build())
-            .build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
-        //Then
-        assertNotNull(updatedCaseData);
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"classpath:c100-rebuild/ra1.json", "classpath:c100-rebuild/ra2.json", "classpath:c100-rebuild/ra3.json"})
-    void testCaseDataMapperReasonableAdjustmentsExtraFields2(String resourcePath) throws IOException {
-        CaseData caseData1 = caseData
-            .toBuilder()
-            .taskListVersion("v2")
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
                                  .c100RebuildReasonableAdjustments(TestUtil.readFileFrom(resourcePath))
                                  .build())

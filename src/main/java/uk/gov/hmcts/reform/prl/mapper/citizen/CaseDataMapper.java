@@ -110,7 +110,7 @@ public class CaseDataMapper {
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherPersonsDetails())) {
             C100RebuildOtherPersonDetailsElements c100RebuildOtherPersonDetailsElements = mapper
                 .readValue(c100RebuildData.getC100RebuildOtherPersonsDetails(), C100RebuildOtherPersonDetailsElements.class);
-            updateOtherPersonDetailsElementsForCaseData(caseData.getTaskListVersion(),caseDataBuilder,
+            updateOtherPersonDetailsElementsForCaseData(caseDataBuilder,
                                                         c100RebuildOtherPersonDetailsElements, c100RebuildChildDetailsElements);
         }
 
