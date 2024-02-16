@@ -272,7 +272,15 @@ public class TaskListService {
         if (!isCourtStaff) {
             eventPublisher.publishEvent(new CaseDataChanged(caseData));
         }
-
+        CaseData caseDataTest = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        log.info("Submitted event Instance ------------------------------");
+        log.info("respondentsConfidentialDetails----->>>>   {}", caseDataTest.getRespondentConfidentialDetails());
+        log.info("caseData.getApplicantsConfidentialDetails()----->>>>   {}", caseDataTest.getApplicantsConfidentialDetails());
+        log.info("caseData.getChildrenConfidentialDetails()----->>>>   {}", caseDataTest.getChildrenConfidentialDetails());
+        log.info("caseData.getMainAppDocForTabDisplay()----->>>>   {}", caseDataTest.getMainAppDocForTabDisplay());
+        log.info("caseData.getCorrespondenceForTabDisplay()----->>>>   {}", caseDataTest.getCorrespondenceForTabDisplay());
+        log.info("caseData.getC8Document()----->>>>   {}", caseDataTest.getC8Document());
+        log.info("caseData.getC8WelshDocument()----->>>>   {}", caseDataTest.getC8WelshDocument());
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }
