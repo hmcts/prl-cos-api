@@ -2808,7 +2808,8 @@ public class ManageOrderService {
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId, String performingUser) {
-
+        log.info("starttt --> {}",caseData);
+        log.info("orders --> {}",caseData.getManageOrders());
         AmendOrderCheckEnum amendOrderCheckEnum = caseData.getManageOrders().getAmendOrderSelectCheckOptions();
         String judgeLaManagerReviewRequired = null;
         if (null != amendOrderCheckEnum) {
