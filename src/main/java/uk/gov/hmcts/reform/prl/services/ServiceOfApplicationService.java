@@ -1030,6 +1030,9 @@ public class ServiceOfApplicationService {
         //SAVE TEMP GENERATED ACCESS CODE
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
+        //SAVE TEMP GENERATED ACCESS CODE
+        caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
+
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -1050,6 +1053,9 @@ public class ServiceOfApplicationService {
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
 
         cleanUpSoaSelections(caseDataMap);
+        //SAVE TEMP GENERATED ACCESS CODE
+        caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
+
         //SAVE TEMP GENERATED ACCESS CODE
         caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
