@@ -36,6 +36,7 @@ import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -97,11 +98,19 @@ public class ManageOrdersController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    private final DynamicMultiSelectListService dynamicMultiSelectListService;
+    private RoleAssignmentService roleAssignmentService;
 
-    private final HearingService hearingService;
+    private DynamicMultiSelectListService dynamicMultiSelectListService;
+
+    @Autowired
+    private HearingService hearingService;
 
     public static final String ORDERS_NEED_TO_BE_SERVED = "ordersNeedToBeServed";
+
+    @Autowired
+    ManageOrdersController(RoleAssignmentService roleAssignmentService) {
+        this.roleAssignmentService = roleAssignmentService;
+    }
 
     @PostMapping(path = "/populate-preview-order", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback to show preview order in next screen for upload order")
@@ -302,7 +311,10 @@ public class ManageOrdersController {
                     caseData
                 ));
             } else if (caseData.getManageOrdersOptions().equals(servedSavedOrders)) {
-                caseDataUpdated.put(ORDER_COLLECTION, manageOrderService.serveOrder(caseData, caseData.getOrderCollection()));
+                caseDataUpdated.put(
+                    ORDER_COLLECTION,
+                    manageOrderService.serveOrder(caseData, caseData.getOrderCollection())
+                );
             }
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
@@ -312,6 +324,7 @@ public class ManageOrdersController {
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             cleanUpSelectedManageOrderOptions(caseDataUpdated);
+
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));

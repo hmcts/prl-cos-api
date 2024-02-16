@@ -13,8 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,8 +25,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.mapper.citizen.ReasonableAdjustmentsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
-import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
-import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
@@ -56,6 +52,7 @@ public class CaseController {
     private final AuthTokenGenerator authTokenGenerator;
     private final ReasonableAdjustmentsMapper reasonableAdjustmentsMapper;
     private static final String INVALID_CLIENT = "Invalid Client";
+    private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
     @Operation(description = "Frontend to fetch the data")
@@ -140,47 +137,6 @@ public class CaseController {
         }
     }
 
-    @PostMapping(value = "{caseId}/{eventId}/party-update-ra", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Update party flags for citizen")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Updated party flags for citizen"),
-        @ApiResponse(responseCode = "400", description = "Bad Request"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized"),
-        @ApiResponse(responseCode = "404", description = "Not found")})
-    public ResponseEntity<Object> updateCitizenRAflags(
-        @NotNull @RequestBody CitizenPartyFlagsRequest citizenPartyFlagsRequest,
-        @PathVariable("eventId") String eventId,
-        @PathVariable("caseId") String caseId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        log.info("Inside updateCitizenRAflags controller {}");
-        if (isAuthorized(authorisation, s2sToken)) {
-            return caseService.updateCitizenRAflags(
-                caseId,
-                eventId,
-                authorisation,
-                citizenPartyFlagsRequest
-            );
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("unauthorized");
-        }
-    }
-
-    @GetMapping(path = "/citizen/{role}/retrieve-cases/{userId}", produces = APPLICATION_JSON)
-    public List<CaseData> retrieveCases(
-        @PathVariable("role") String role,
-        @PathVariable("userId") String userId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        if (isAuthorized(authorisation, s2sToken)) {
-            return caseService.retrieveCases(authorisation, authTokenGenerator.generate());
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
     @GetMapping(path = "/cases", produces = APPLICATION_JSON)
     public List<CitizenCaseData> retrieveCitizenCases(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
@@ -201,11 +157,21 @@ public class CaseController {
 
     @PostMapping(value = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Linking case to citizen account with access code")
-    public void linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
-                                  @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-                                  @RequestHeader("caseId") String caseId,
-                                  @RequestHeader("accessCode") String accessCode) {
-        caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
+    public CaseData linkCitizenToCase(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
+                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
+                                      @RequestHeader("caseId") String caseId,
+                                      @RequestHeader("accessCode") String accessCode) {
+        if (isAuthorized(authorisation, s2sToken)) {
+            CaseDetails caseDetails = caseService.linkCitizenToCase(authorisation, s2sToken, caseId, accessCode);
+            if (caseDetails != null) {
+                CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+                return caseData.toBuilder().id(caseDetails.getId()).build();
+            } else {
+                throw (new RuntimeException(CASE_LINKING_FAILED));
+            }
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
     }
 
     @GetMapping(value = "/validate-access-code", produces = APPLICATION_JSON)
@@ -213,9 +179,9 @@ public class CaseController {
     public String validateAccessCode(@RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
                                      @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
                                      @RequestHeader(value = "caseId", required = true)
-                                     String caseId,
+                                         String caseId,
                                      @RequestHeader(value = "accessCode", required = true)
-                                     String accessCode) {
+                                         String accessCode) {
         if (isAuthorized(authorisation, s2sToken)) {
             String cosApis2sToken = authTokenGenerator.generate();
             return caseService.validateAccessCode(authorisation, cosApis2sToken, caseId, accessCode);
@@ -281,21 +247,6 @@ public class CaseController {
         @PathVariable("caseId") String caseId) {
         if (isAuthorized(authorisation, s2sToken)) {
             return hearingService.getHearings(authorisation, caseId);
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @GetMapping(path = "/{caseId}/retrieve-ra-flags/{partyId}", produces = APPLICATION_JSON)
-    @Operation(description = "Frontend to fetch RA flags for the given party")
-    public Flags getCaseFlags(
-        @PathVariable("caseId") String caseId,
-        @PathVariable("partyId") String partyId,
-        @RequestHeader(value = "Authorization", required = false) @Parameter(hidden = true) String userToken,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        if (isAuthorized(userToken, s2sToken)) {
-            return caseService.getPartyCaseFlags(userToken, caseId, partyId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }

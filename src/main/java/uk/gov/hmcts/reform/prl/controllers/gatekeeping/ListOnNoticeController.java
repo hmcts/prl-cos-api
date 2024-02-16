@@ -93,11 +93,13 @@ public class ListOnNoticeController {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             //populate legal advisor list
+            log.info("List on notice Before calling ref data for LA users list {}", System.currentTimeMillis());
             caseDataUpdated.put(
                 "legalAdviserList",
                 DynamicList.builder().value(DynamicListElement.EMPTY).listItems(refDataUserService.getLegalAdvisorList())
                     .build()
             );
+            log.info("List on notice After calling ref data for LA users list {}", System.currentTimeMillis());
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -138,6 +140,7 @@ public class ListOnNoticeController {
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
+
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {

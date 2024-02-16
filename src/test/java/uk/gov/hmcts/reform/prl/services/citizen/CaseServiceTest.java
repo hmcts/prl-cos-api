@@ -7,7 +7,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -43,7 +42,12 @@ import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
@@ -71,6 +75,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
@@ -146,6 +151,7 @@ public class CaseServiceTest {
 
     @Mock
     private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     @Before
     public void setup() {
@@ -153,6 +159,7 @@ public class CaseServiceTest {
             .firstName("")
             .lastName("")
             .email("")
+            .citizenSosObject(CitizenSos.builder().build())
             .user(User.builder().email("").idamId("").build())
             .build();
         caseData = CaseData.builder()
@@ -160,9 +167,8 @@ public class CaseServiceTest {
                     "00000000-0000-0000-0000-000000000000"))
                                     .value(partyDetails).build()))
             .respondents(List.of(Element.<PartyDetails>builder().value(partyDetails).build()))
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(Yes)
-                                                                         .partyId(UUID.fromString(
-                                                                             "00000000-0000-0000-0000-000000000000"))
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
+                                                                         .partyId(testUuid)
                                                                          .accessCode("123").build()).build()))
             .build();
 
@@ -171,9 +177,8 @@ public class CaseServiceTest {
             .respondents(List.of(Element.<PartyDetails>builder().id(UUID.fromString(
                     "00000000-0000-0000-0000-000000000000"))
                                      .value(partyDetails).build()))
-            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(No)
-                                                                         .partyId(UUID.fromString(
-                                                                             "00000000-0000-0000-0000-000000000000"))
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.No)
+                                                                         .partyId(testUuid)
                                                                          .accessCode("123").build()).build()))
             .build();
 
@@ -203,6 +208,9 @@ public class CaseServiceTest {
                                         .idamId("123")
                                         .solicitorRepresented(Yes)
                                         .build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed("123,234,1234")
+                                                    .build())
                               .build())
             .partyType(PartyEnum.applicant)
             .build();
@@ -815,8 +823,7 @@ public class CaseServiceTest {
     }
 
     @Test
-    @Ignore
-    public void testUpdateCitizenRaflags() {
+    public void testUpdateCitizenRaFlags() {
         User user1 = User.builder().idamId("applicant-1").build();
         User user2 = User.builder().idamId("respondent-1").build();
         User user3 = User.builder().idamId("respondent-2").build();
@@ -928,11 +935,18 @@ public class CaseServiceTest {
         StartEventResponse startEventResponse = StartEventResponse.builder().eventId("c100RequestSupport")
             .caseDetails(caseDetails)
             .token(eventToken).build();
+        // when(coreCaseDataService.startUpdate(
+        //    authToken,
+        //    EventRequestData.builder().build(),
+        //    caseId,
+        //    false
+        //)).thenReturn(
+        //    startEventResponse);
         when(coreCaseDataService.startUpdate(
-            authToken,
-            EventRequestData.builder().build(),
-            caseId,
-            false
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
         )).thenReturn(
             startEventResponse);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(CaseData.class))).thenReturn(caseData);
@@ -1018,5 +1032,128 @@ public class CaseServiceTest {
         );
         assertThat(updatePartyFlagsResponse.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(updatePartyFlagsResponse.getBody()).isEqualTo("party external flag details not found");
+    }
+
+    public void testUpdateCaseSosWithCitizenDocs() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .lastName("User")
+            .user(User.builder()
+                      .email("testparty@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+
+            .build();
+        updateCaseData = updateCaseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                              .firstName("Test")
+                              .lastName("User")
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed("00000000-0000-0000-0000-000000000000,234,1234")
+                                                    .build())
+                              .build())
+            .partyType(PartyEnum.respondent)
+            .build();
+        caseData = caseData.toBuilder()
+            .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build())))
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
+                                    .build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .build())
+            .respondents(List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build()))
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
+                                                                         .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
+                                                                         .accessCode("123").build()).build()))
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        caseDetails = CaseDetails.builder()
+            .data(caseDataMap)
+            .id(123L)
+            .state("SUBMITTED_PAID")
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
+        when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
+                                                       CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testupdateCaseSosWithCitizenSosDocs() {
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .lastName("User")
+            .user(User.builder()
+                      .email("testparty@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+            .build();
+        updateCaseData = updateCaseData.toBuilder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(PartyDetails.builder()
+                              .firstName("Test")
+                              .lastName("User")
+                              .user(User.builder()
+                                        .email("test@gmail.com")
+                                        .idamId("123")
+                                        .solicitorRepresented(YesOrNo.Yes)
+                                        .build())
+                              .citizenSosObject(CitizenSos.builder()
+                                                    .partiesServed("00000000-0000-0000-0000-000000000000,234,1234")
+                                                    .citizenSosDocs(List.of(TEST_UUID))
+                                                    .build())
+                              .build())
+            .partyType(PartyEnum.applicant)
+            .build();
+        caseData = caseData.toBuilder()
+            .citizenUploadedDocumentList(List.of(element(UploadedDocuments.builder().build())))
+            .documentManagementDetails(DocumentManagementDetails.builder().citizenUploadQuarantineDocsList(List.of(
+                Element.<UploadedDocuments>builder().id(UUID.fromString(TEST_UUID))
+                    .value(UploadedDocuments.builder().build()).build())).build())
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
+                                    .build())
+            .applicants(List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build()))
+            .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
+                                                                         .partyId(UUID.fromString(
+                                                                             "00000000-0000-0000-0000-000000000000"))
+                                                                         .accessCode("123").build()).build()))
+            .build();
+        Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+        caseDetails = CaseDetails.builder()
+            .data(caseDataMap)
+            .id(123L)
+            .state("SUBMITTED_PAID")
+            .build();
+
+        when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
+        when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
+            StartEventResponse.builder().caseDetails(caseDetails).build());
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
+                                                                           CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
+        assertNotNull(caseDetailsAfterUpdate);
     }
 }
