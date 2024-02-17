@@ -33,9 +33,9 @@ import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
+import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.NotFoundException;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
@@ -104,6 +104,11 @@ public class AllocateJudgeController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws JsonProcessingException {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
+            try {
+                log.info(objectMapper.writeValueAsString(callbackRequest));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(
