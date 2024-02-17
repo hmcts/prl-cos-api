@@ -507,17 +507,21 @@ public class PartyLevelCaseFlagsService {
                                                        CaseData updatedCaseData,
                                                        Map<String, Object> updatedCaseDataMap,
                                                        PartyRole.Representing representing) {
+        log.info("PartyRole.Representing is:: " + representing);
         List<Element<PartyDetails>> oldPartyDetailsList = representing.getCaTarget().apply(oldCaseData);
         List<Element<PartyDetails>> updatedPartyDetailsList = representing.getCaTarget().apply(updatedCaseData);
 
         int numElements = null != updatedPartyDetailsList ? updatedPartyDetailsList.size() : 0;
+        log.info("updatedPartyDetailsList size is:: " + numElements);
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
             if (null != updatedPartyDetailsList) {
+                log.info("updatedPartyDetailsList is not null:: ");
+                log.info("partyRoles is :: " + partyRoles.get(i));
                 PartyDetails updatedPartyDetails = i < numElements ? updatedPartyDetailsList.get(i).getValue() : null;
                 PartyDetails oldPartyDetails = i < numElements ? oldPartyDetailsList.get(i).getValue() : null;
 
-                amendPartyCaseFlags(updatedCaseDataMap, representing, updatedPartyDetails, oldPartyDetails);
+                amendParties(updatedCaseDataMap, representing, updatedPartyDetails, oldPartyDetails, i, partyRoles.get(i));
             }
         }
 
@@ -559,9 +563,12 @@ public class PartyLevelCaseFlagsService {
         String groupId = String.format(representing.getGroupId(), i + 1);
         switch (representing) {
             case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY, DAAPPLICANT, DARESPONDENT: {
+                log.info("representing is :: " + representing);
                 if (!StringUtils.isEmpty(updatedPartyDetails.getLabelForDynamicList())) {
+                    log.info("updatedPartyDetails.getLabelForDynamicList() is :: " + updatedPartyDetails.getLabelForDynamicList());
                     if (oldPartyDetails != null
                         && updatedPartyDetails.getLabelForDynamicList().equalsIgnoreCase(oldPartyDetails.getLabelForDynamicList())) {
+                        log.info("oldPartyDetails.getLabelForDynamicList() is :: " + oldPartyDetails.getLabelForDynamicList());
                         amendNameForTheFlags(
                             updatedCaseDataMap,
                             caseDataExternalField,
