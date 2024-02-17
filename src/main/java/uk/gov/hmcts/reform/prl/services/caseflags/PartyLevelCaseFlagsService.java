@@ -603,7 +603,8 @@ public class PartyLevelCaseFlagsService {
                 break;
             }
             case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR, DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
-                if (!StringUtils.isEmpty(updatedPartyDetails.getRepresentativeFullNameForCaseFlags())) {
+                if (updatedPartyDetails != null
+                    && !StringUtils.isEmpty(updatedPartyDetails.getRepresentativeFullNameForCaseFlags())) {
                     if (oldPartyDetails != null
                         && updatedPartyDetails.getRepresentativeFullName().equalsIgnoreCase(oldPartyDetails.getRepresentativeFullName())) {
                         amendNameForTheFlags(
