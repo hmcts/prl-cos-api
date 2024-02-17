@@ -80,7 +80,6 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
@@ -136,7 +135,7 @@ public class UpdatePartyDetailsService {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
         }
-
+        Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
         partyLevelCaseFlagsService.amendPartyFlagsForName(oldCaseDataMap, updatedCaseData);
 
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);

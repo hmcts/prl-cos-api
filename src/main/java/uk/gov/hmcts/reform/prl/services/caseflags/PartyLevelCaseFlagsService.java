@@ -541,13 +541,19 @@ public class PartyLevelCaseFlagsService {
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-            if (null != updatedPartyDetails)
+            if (null != updatedPartyDetails) {
                 amendParties(updatedCaseDataMap, representing, updatedPartyDetails, oldPartyDetails, i, partyRole);
+            }
         }
         return updatedCaseDataMap;
     }
 
-    private void amendParties(Map<String, Object> updatedCaseDataMap, PartyRole.Representing representing, PartyDetails updatedPartyDetails, PartyDetails oldPartyDetails, int i, PartyRole partyRole) {
+    private void amendParties(Map<String, Object> updatedCaseDataMap,
+                              PartyRole.Representing representing,
+                              PartyDetails updatedPartyDetails,
+                              PartyDetails oldPartyDetails,
+                              int i,
+                              PartyRole partyRole) {
         String caseDataExternalField = String.format(representing.getCaseDataExternalField(), i + 1);
         String caseDataInternalField = String.format(representing.getCaseDataInternalField(), i + 1);
         String groupId = String.format(representing.getGroupId(), i + 1);
