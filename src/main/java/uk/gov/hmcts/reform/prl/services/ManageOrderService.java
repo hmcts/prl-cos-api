@@ -2835,6 +2835,7 @@ public class ManageOrderService {
             caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
+
             if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
                 log.info("orders --> {}",caseData.getStandardDirectionOrder());//
                 setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
@@ -2842,18 +2843,22 @@ public class ManageOrderService {
                 setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),
                                        caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
             } else {
+
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
 
                 if (null != caseData.getDraftOrderCollection()) {
                     Object dynamicList = caseData.getDraftOrdersDynamicList();
                     DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                                            dynamicList);
+
+                                                                                                dynamicList);
+
                     if (selectedOrder != null && (standardDirectionsOrder.equals(selectedOrder.getOrderType()))) {
                         log.info("SDOOOOO order");
                     }
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                         DraftOrder draftOrder = e.getValue();
+                        draftOrder.getSdoDetails().getSdoDirectionsForFactFindingHearingDetails();///
                         if (e.getId().equals(selectedOrderId)) {
                             setHearingSelectedInfoForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
                             String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
