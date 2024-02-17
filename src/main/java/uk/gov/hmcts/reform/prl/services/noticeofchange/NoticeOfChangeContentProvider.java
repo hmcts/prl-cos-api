@@ -60,7 +60,7 @@ public class NoticeOfChangeContentProvider {
                 .litigantName(litigantName)
                 .citizenSignUpLink(citizenUrl)
                 .accessCode(accessCode)
-                .caseLink(citizenUrl + CITIZEN_DASHBOARD)
+                .caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
                 .build();
         }
     }
