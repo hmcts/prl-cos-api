@@ -45,6 +45,7 @@ public class NoticeOfChangeEventHandler {
         //PRL-3211 - notify applicants/respondents other parties except litigant
         sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC);
 
+        log.info("Addd time");
         //PRL-3211 - notify other persons if any
         sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC);
 
@@ -203,10 +204,10 @@ public class NoticeOfChangeEventHandler {
             //PRL-3215 - notify applicants/respondents other parties except litigant
             sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
         }
-
+        log.info("removee time Revised");
         //PRL-3215 - notify other persons if any
         sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC_REVISED);
-
+        log.info("removee time");
         //PRL-3215 - notify applicants/respondents LRs
         sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
     }

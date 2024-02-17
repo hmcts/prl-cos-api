@@ -40,6 +40,7 @@ public class NoticeOfChangeContentProvider {
                                                   String litigantName,
                                                   boolean isOtherPerson,
                                                   String accessCode) {
+        System.out.println("isOtherPerson-->" + isOtherPerson);
         if (isOtherPerson) {
             return NoticeOfChangeEmail.builder()
                 .caseReference(String.valueOf(caseData.getId()))

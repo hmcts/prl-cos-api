@@ -38,6 +38,7 @@ public class EmailService {
         final String templateId = getTemplateId(templateName, languagePreference);
 
         try {
+            log.info("templateName-->{}",templateName);
             log.info("templateVars-->{}",templateVars);
             log.info("toMap(templateVars)-->{}",toMap(templateVars));
             SendEmailResponse response = notificationClient.sendEmail(templateId, email, toMap(templateVars),
