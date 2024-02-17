@@ -39,16 +39,17 @@ public class NoticeOfChangeContentProvider {
                                                   String solicitorName,
                                                   String litigantName,
                                                   boolean isOtherPerson,
+                                                  boolean isRemoveLegalRep,
                                                   String accessCode) {
         System.out.println("isOtherPerson-->" + isOtherPerson);
-        if (isOtherPerson) {
+        System.out.println("isRemoveLegalRep-->" + isRemoveLegalRep);
+        if (isOtherPerson && isRemoveLegalRep) {
             return NoticeOfChangeEmail.builder()
                 .caseReference(String.valueOf(caseData.getId()))
                 .caseName(caseData.getApplicantCaseName())
                 .solicitorName(solicitorName)
                 .litigantName(litigantName)
                 .citizenSignUpLink(citizenUrl)
-                .caseLink("")
                 .accessCode(accessCode)
                 .build();
         } else {
