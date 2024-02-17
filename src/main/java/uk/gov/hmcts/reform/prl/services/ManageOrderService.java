@@ -2851,7 +2851,6 @@ public class ManageOrderService {
                                        caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
                 log.info("caseDataUpdated while EaA--Edit--> {}",caseDataUpdated);
             } else {
-
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
 
@@ -2872,6 +2871,7 @@ public class ManageOrderService {
             }
         }
     }
+
 
     private List<Element<HearingData>> buildSdoHearingsListFromStandardDirectionOrder(StandardDirectionOrder sdo) {
 
