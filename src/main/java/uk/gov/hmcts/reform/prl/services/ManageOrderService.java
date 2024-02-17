@@ -2808,8 +2808,6 @@ public class ManageOrderService {
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId, String performingUser) {
-        //log.info("orders sdo--> {}",caseData.getStandardDirectionOrder());
-        log.info("AAAAAAAAAAAAAA}");
         AmendOrderCheckEnum amendOrderCheckEnum = caseData.getManageOrders().getAmendOrderSelectCheckOptions();
         String judgeLaManagerReviewRequired = null;
         if (null != amendOrderCheckEnum) {
@@ -2818,17 +2816,6 @@ public class ManageOrderService {
         caseDataUpdated.put(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED, judgeLaManagerReviewRequired);
 
         if (eventId.equals(MANAGE_ORDERS.getId())) {
-            log.info("BBBBBBBBB}");
-            log.info("CCCCCC{}",caseData);
-            log.info("DDDDDD{}",caseData.getCreateSelectOrderOptions());
-
-            //caseData.orco
-            //if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
-            //
-            //}
-            //CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType())
-            //caseData.getCreateSelectOrderOptions()
-            log.info("orders --> {}",caseData.getStandardDirectionOrder().getSdoSecondHearingDetails());//
             setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
             setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),caseDataUpdated,null,amendOrderCheckEnum,eventId);
             caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
@@ -2836,26 +2823,17 @@ public class ManageOrderService {
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
 
             if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
-                log.info("orders --> {}",caseData.getStandardDirectionOrder());//
                 setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
                 setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),
                                        caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
             } else {
-
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
 
                 if (null != caseData.getDraftOrderCollection()) {
-                    Object dynamicList = caseData.getDraftOrdersDynamicList();
-                    DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                                                                dynamicList);
-                    if (selectedOrder != null && (standardDirectionsOrder.equals(selectedOrder.getOrderType()))) {
-                        log.info("SDOOOOO order");
-                    }
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                         DraftOrder draftOrder = e.getValue();
-                        draftOrder.getSdoDetails().getSdoDirectionsForFactFindingHearingDetails();///
                         if (e.getId().equals(selectedOrderId)) {
                             setHearingSelectedInfoForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
                             String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
@@ -2868,14 +2846,6 @@ public class ManageOrderService {
         }
     }
 
-    public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
-        UUID orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
-        return draftOrderCollection.stream()
-            .filter(element -> element.getId().equals(orderId))
-            .map(Element::getValue)
-            .findFirst()
-            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
-    }
 
     public String isOrderApproved(CaseData caseData, Map<String, Object> caseDataUpdated, String performingUser) {
         String whoApprovedTheOrder = null;

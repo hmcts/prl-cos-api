@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -4223,7 +4222,6 @@ public class ManageOrderServiceTest {
 
 
     @Test
-    @Ignore
     public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderNo() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
@@ -4265,7 +4263,6 @@ public class ManageOrderServiceTest {
     }
 
     @Test
-    @Ignore
     public void testWaSetHearingOptionDetailsForTask_whenManagerOrdersJourney() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
