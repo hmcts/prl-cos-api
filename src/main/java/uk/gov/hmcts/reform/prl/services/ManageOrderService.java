@@ -2808,18 +2808,13 @@ public class ManageOrderService {
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId, String performingUser) {
-        //log.info("orders sdo--> {}",caseData.getStandardDirectionOrder());
         AmendOrderCheckEnum amendOrderCheckEnum = caseData.getManageOrders().getAmendOrderSelectCheckOptions();
         String judgeLaManagerReviewRequired = null;
         if (null != amendOrderCheckEnum) {
             judgeLaManagerReviewRequired = amendOrderCheckEnum.toString();
         }
         caseDataUpdated.put(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED, judgeLaManagerReviewRequired);
-
         if (eventId.equals(MANAGE_ORDERS.getId())) {
-            log.info("=====START====");
-            log.info("HHHHHH {} ",caseData);
-            log.info("=====END====}");
             boolean isSdoOrder = CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions());
             if (isSdoOrder) {
                 log.info("=====SDO order ManageEVENT====");
@@ -2843,37 +2838,36 @@ public class ManageOrderService {
                                                                          dynamicList);
             List<Element<HearingData>> sdoHearings = new ArrayList<>();
             if (selectedDraftOrder != null && (standardDirectionsOrder.equals(selectedDraftOrder.getOrderType()))) {
-                log.info("SDOOOOO order EAA");
+                log.info("sdo EaA");
                 isSdoOrder = true;
                 sdoHearings = buildSdoHearingsListFromSdoDetails(selectedDraftOrder.getSdoDetails());
             }
 
             if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
-                log.info("DURINGG EDITTTTTTTT orders --> {}",caseData);
-                log.info("orders --> {}",caseData.getStandardDirectionOrder());
+                log.info("during edit -->");
                 setHearingSelectedInfoForTask(isSdoOrder ? sdoHearings : caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
                 setIsHearingTaskNeeded(isSdoOrder ? sdoHearings : caseData.getManageOrders().getOrdersHearingDetails(),
                                        caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
+                log.info("caseDataUpdated while EaA--Edit--> {}",caseDataUpdated);
             } else {
 
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
 
                 if (null != caseData.getDraftOrderCollection()) {
-
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
-                        log.info("Yesssss");
+                        log.info("during non edit");
                         DraftOrder draftOrder = e.getValue();
                         if (e.getId().equals(selectedOrderId)) {
-                            log.info("callingg.....");
+                            log.info("during non edit.....");
                             setHearingSelectedInfoForTask(isSdoOrder ? sdoHearings : draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
                             String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
                             setIsHearingTaskNeeded(isSdoOrder ? sdoHearings : draftOrder.getManageOrderHearingDetails(),
                                                    caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
                         }
                     }
-                    log.info("caseDataUpdated while EandApEvent--non-Edit--> {}",caseDataUpdated);
+                    log.info("caseDataUpdated while EaA--non-Edit--> {}",caseDataUpdated);
                 }
             }
         }
