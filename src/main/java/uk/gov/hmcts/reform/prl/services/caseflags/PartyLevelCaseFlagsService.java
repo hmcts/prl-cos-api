@@ -541,90 +541,93 @@ public class PartyLevelCaseFlagsService {
         List<PartyRole> partyRoles = PartyRole.matchingRoles(representing);
         for (int i = 0; i < partyRoles.size(); i++) {
             PartyRole partyRole = partyRoles.get(i);
-            if (null != updatedPartyDetails) {
-                String caseDataExternalField = String.format(representing.getCaseDataExternalField(), i + 1);
-                String caseDataInternalField = String.format(representing.getCaseDataInternalField(), i + 1);
-                String groupId = String.format(representing.getGroupId(), i + 1);
-                switch (representing) {
-                    case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY, DAAPPLICANT, DARESPONDENT: {
-                        if (!StringUtils.isEmpty(updatedPartyDetails.getLabelForDynamicList())) {
-                            if (oldPartyDetails != null
-                                && updatedPartyDetails.getLabelForDynamicList().equalsIgnoreCase(oldPartyDetails.getLabelForDynamicList())) {
-                                amendNameForTheFlags(
-                                    updatedCaseDataMap,
-                                    caseDataExternalField,
-                                    updatedPartyDetails.getLabelForDynamicList()
-                                );
-
-                                amendNameForTheFlags(
-                                    updatedCaseDataMap,
-                                    caseDataInternalField,
-                                    updatedPartyDetails.getLabelForDynamicList()
-                                );
-                            } else {
-                                amendAndRegeneratedFlags(
-                                    updatedCaseDataMap,
-                                    caseDataExternalField,
-                                    updatedPartyDetails.getLabelForDynamicList(),
-                                    partyRole,
-                                    false,
-                                    groupId
-                                );
-                                amendAndRegeneratedFlags(
-                                    updatedCaseDataMap,
-                                    caseDataInternalField,
-                                    updatedPartyDetails.getLabelForDynamicList(),
-                                    partyRole,
-                                    true,
-                                    groupId
-                                );
-                            }
-                        }
-                        break;
-                    }
-                    case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR, DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
-                        if (!StringUtils.isEmpty(updatedPartyDetails.getRepresentativeFullNameForCaseFlags())) {
-                            if (oldPartyDetails != null
-                                && updatedPartyDetails.getRepresentativeFullName().equalsIgnoreCase(oldPartyDetails.getRepresentativeFullName())) {
-                                amendNameForTheFlags(
-                                    updatedCaseDataMap,
-                                    caseDataExternalField,
-                                    updatedPartyDetails.getRepresentativeFullName()
-                                );
-
-                                amendNameForTheFlags(
-                                    updatedCaseDataMap,
-                                    caseDataInternalField,
-                                    updatedPartyDetails.getRepresentativeFullName()
-                                );
-                            } else {
-                                amendAndRegeneratedFlags(
-                                    updatedCaseDataMap,
-                                    caseDataExternalField,
-                                    updatedPartyDetails.getRepresentativeFullName(),
-                                    partyRole,
-                                    false,
-                                    groupId
-                                );
-                                amendAndRegeneratedFlags(
-                                    updatedCaseDataMap,
-                                    caseDataInternalField,
-                                    updatedPartyDetails.getRepresentativeFullName(),
-                                    partyRole,
-                                    true,
-                                    groupId
-                                );
-                            }
-                        }
-                        break;
-                    }
-                    default: {
-                        break;
-                    }
-                }
-            }
+            if (null != updatedPartyDetails)
+                amendParties(updatedCaseDataMap, representing, updatedPartyDetails, oldPartyDetails, i, partyRole);
         }
         return updatedCaseDataMap;
+    }
+
+    private void amendParties(Map<String, Object> updatedCaseDataMap, PartyRole.Representing representing, PartyDetails updatedPartyDetails, PartyDetails oldPartyDetails, int i, PartyRole partyRole) {
+        String caseDataExternalField = String.format(representing.getCaseDataExternalField(), i + 1);
+        String caseDataInternalField = String.format(representing.getCaseDataInternalField(), i + 1);
+        String groupId = String.format(representing.getGroupId(), i + 1);
+        switch (representing) {
+            case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY, DAAPPLICANT, DARESPONDENT: {
+                if (!StringUtils.isEmpty(updatedPartyDetails.getLabelForDynamicList())) {
+                    if (oldPartyDetails != null
+                        && updatedPartyDetails.getLabelForDynamicList().equalsIgnoreCase(oldPartyDetails.getLabelForDynamicList())) {
+                        amendNameForTheFlags(
+                            updatedCaseDataMap,
+                            caseDataExternalField,
+                            updatedPartyDetails.getLabelForDynamicList()
+                        );
+
+                        amendNameForTheFlags(
+                            updatedCaseDataMap,
+                            caseDataInternalField,
+                            updatedPartyDetails.getLabelForDynamicList()
+                        );
+                    } else {
+                        amendAndRegeneratedFlags(
+                            updatedCaseDataMap,
+                            caseDataExternalField,
+                            updatedPartyDetails.getLabelForDynamicList(),
+                            partyRole,
+                            false,
+                            groupId
+                        );
+                        amendAndRegeneratedFlags(
+                            updatedCaseDataMap,
+                            caseDataInternalField,
+                            updatedPartyDetails.getLabelForDynamicList(),
+                            partyRole,
+                            true,
+                            groupId
+                        );
+                    }
+                }
+                break;
+            }
+            case CAAPPLICANTSOLICITOR, CARESPONDENTSOLICITOR, DAAPPLICANTSOLICITOR, DARESPONDENTSOLICITOR: {
+                if (!StringUtils.isEmpty(updatedPartyDetails.getRepresentativeFullNameForCaseFlags())) {
+                    if (oldPartyDetails != null
+                        && updatedPartyDetails.getRepresentativeFullName().equalsIgnoreCase(oldPartyDetails.getRepresentativeFullName())) {
+                        amendNameForTheFlags(
+                            updatedCaseDataMap,
+                            caseDataExternalField,
+                            updatedPartyDetails.getRepresentativeFullName()
+                        );
+
+                        amendNameForTheFlags(
+                            updatedCaseDataMap,
+                            caseDataInternalField,
+                            updatedPartyDetails.getRepresentativeFullName()
+                        );
+                    } else {
+                        amendAndRegeneratedFlags(
+                            updatedCaseDataMap,
+                            caseDataExternalField,
+                            updatedPartyDetails.getRepresentativeFullName(),
+                            partyRole,
+                            false,
+                            groupId
+                        );
+                        amendAndRegeneratedFlags(
+                            updatedCaseDataMap,
+                            caseDataInternalField,
+                            updatedPartyDetails.getRepresentativeFullName(),
+                            partyRole,
+                            true,
+                            groupId
+                        );
+                    }
+                }
+                break;
+            }
+            default: {
+                break;
+            }
+        }
     }
 
     private void amendNameForTheFlags(Map<String, Object> updatedCaseDataMap,

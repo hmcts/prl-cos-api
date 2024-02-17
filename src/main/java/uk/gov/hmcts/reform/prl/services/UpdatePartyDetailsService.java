@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseaccess.OrganisationPolicy;
@@ -84,7 +83,6 @@ public class UpdatePartyDetailsService {
         Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
 
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
-        CaseData oldCaseData = objectMapper.convertValue(oldCaseDataMap, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
         updatedCaseData.put(RESPONDENT_CONFIDENTIAL_DETAILS, caseDataTemp.getRespondentConfidentialDetails());
@@ -103,15 +101,6 @@ public class UpdatePartyDetailsService {
                 log.info("updatedCaseData is:: " + objectMapper.writeValueAsString(updatedCaseData));
             } catch (JsonProcessingException e) {
                 log.info("error");
-            }
-            if (Objects.nonNull(fl401Applicant)) {
-                CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("applicantName", fl401Applicant.getLabelForDynamicList());
-            }
-
-            if (Objects.nonNull(fl401respondent)) {
-                CommonUtils.generatePartyUuidForFL401(caseData);
-                updatedCaseData.put("respondentName", fl401respondent.getLabelForDynamicList());
             }
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());

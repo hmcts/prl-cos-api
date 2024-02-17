@@ -722,6 +722,10 @@ public class UpdatePartyDetailsServiceTest {
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L)
+                                   .data(stringObjectMap)
+                                   .build())
             .build();
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull("respondents");
@@ -1230,6 +1234,9 @@ public class UpdatePartyDetailsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
                 .data(objectMap)
                 .build())
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .data(objectMap)
+                                   .build())
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
                 Mockito.any(CaseData.class),
