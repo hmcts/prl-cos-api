@@ -47,6 +47,7 @@ public class NoticeOfChangeContentProvider {
                 .solicitorName(solicitorName)
                 .litigantName(litigantName)
                 .citizenSignUpLink(citizenUrl)
+                .caseLink("")
                 .accessCode(accessCode)
                 .build();
         } else {
