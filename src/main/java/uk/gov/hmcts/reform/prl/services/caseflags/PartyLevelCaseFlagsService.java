@@ -564,7 +564,8 @@ public class PartyLevelCaseFlagsService {
         switch (representing) {
             case CAAPPLICANT, CARESPONDENT, CAOTHERPARTY, DAAPPLICANT, DARESPONDENT: {
                 log.info("representing is :: " + representing);
-                if (!StringUtils.isEmpty(updatedPartyDetails.getLabelForDynamicList())) {
+                if (updatedPartyDetails != null
+                    && !StringUtils.isEmpty(updatedPartyDetails.getLabelForDynamicList())) {
                     log.info("updatedPartyDetails.getLabelForDynamicList() is :: " + updatedPartyDetails.getLabelForDynamicList());
                     if (oldPartyDetails != null
                         && updatedPartyDetails.getLabelForDynamicList().equalsIgnoreCase(oldPartyDetails.getLabelForDynamicList())) {
