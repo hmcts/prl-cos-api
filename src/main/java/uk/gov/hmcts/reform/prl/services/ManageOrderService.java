@@ -2837,30 +2837,31 @@ public class ManageOrderService {
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
             log.info("caseDataUpdated while manageEvent--> {}",caseDataUpdated);
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
+            boolean isSdoOrder = false;
+            Object dynamicList = caseData.getDraftOrdersDynamicList();
+            DraftOrder selectedDraftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                         dynamicList);
+            List<Element<HearingData>> sdoHearings = new ArrayList<>();
+            if (selectedDraftOrder != null && (standardDirectionsOrder.equals(selectedDraftOrder.getOrderType()))) {
+                log.info("SDOOOOO order EAA");
+                isSdoOrder = true;
+                sdoHearings = buildSdoHearingsListFromSdoDetails(selectedDraftOrder.getSdoDetails());
+            }
 
             if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
-                log.info("if editteddd orders --> {}",caseData);
+                log.info("DURINGG EDITTTTTTTT orders --> {}",caseData);
                 log.info("orders --> {}",caseData.getStandardDirectionOrder());
-                setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
+                setHearingSelectedInfoForTask(isSdoOrder ? sdoHearings : caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
-                setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),
+                setIsHearingTaskNeeded(isSdoOrder ? sdoHearings : caseData.getManageOrders().getOrdersHearingDetails(),
                                        caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
             } else {
-                boolean isSdoOrder = false;
+
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
 
                 if (null != caseData.getDraftOrderCollection()) {
-                    Object dynamicList = caseData.getDraftOrdersDynamicList();
-                    DraftOrder selectedDraftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                                            dynamicList);
-                    List<Element<HearingData>> sdoHearings = new ArrayList<>();
-                    if (selectedDraftOrder != null && (standardDirectionsOrder.equals(selectedDraftOrder.getOrderType()))) {
-                        log.info("SDOOOOO order");
-                        isSdoOrder = true;
-                        sdoHearings = buildSdoHearingsListFromSdoDetails(selectedDraftOrder.getSdoDetails());
 
-                    }
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
                         log.info("Yesssss");
                         DraftOrder draftOrder = e.getValue();

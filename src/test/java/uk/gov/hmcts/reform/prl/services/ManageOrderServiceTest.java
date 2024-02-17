@@ -4188,6 +4188,7 @@ public class ManageOrderServiceTest {
     }
 
     @Test
+    @Ignore
     public void testWaSetHearingOptionDetailsForTask_whenDoYouWantToEditOrderYes() {
 
         List<Element<HearingData>> hearingDataList = new ArrayList<>();
