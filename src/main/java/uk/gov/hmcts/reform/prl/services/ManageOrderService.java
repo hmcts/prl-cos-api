@@ -2814,38 +2814,145 @@ public class ManageOrderService {
             judgeLaManagerReviewRequired = amendOrderCheckEnum.toString();
         }
         caseDataUpdated.put(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED, judgeLaManagerReviewRequired);
-
         if (eventId.equals(MANAGE_ORDERS.getId())) {
-            setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
-            setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),caseDataUpdated,null,amendOrderCheckEnum,eventId);
+            boolean isSdoOrder = CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions());
+            if (isSdoOrder) {
+                log.info("=====SDO order ManageEVENT====");
+                List<Element<HearingData>> sdoHearings = buildSdoHearingsListFromStandardDirectionOrder(caseData.getStandardDirectionOrder());
+
+                log.info("sdo size-->{}",sdoHearings.size());
+                setHearingSelectedInfoForTask(sdoHearings, caseDataUpdated);
+                setIsHearingTaskNeeded(sdoHearings,caseDataUpdated,null,amendOrderCheckEnum,eventId);
+            } else {
+                log.info("=====Non-SDO order ManageEVENT====");
+                setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
+                setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),caseDataUpdated,null,amendOrderCheckEnum,eventId);
+            }
             caseDataUpdated.put(WA_IS_ORDER_APPROVED, null);
             caseDataUpdated.put(WA_WHO_APPROVED_THE_ORDER, null);
+            log.info("caseDataUpdated while manageEvent--> {}",caseDataUpdated);
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
+            boolean isSdoOrder = false;
+            Object dynamicList = caseData.getDraftOrdersDynamicList();
+            DraftOrder selectedDraftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                         dynamicList);
+            List<Element<HearingData>> sdoHearings = new ArrayList<>();
+            if (selectedDraftOrder != null && (standardDirectionsOrder.equals(selectedDraftOrder.getOrderType()))) {
+                log.info("sdo EaA");
+                isSdoOrder = true;
+                sdoHearings = buildSdoHearingsListFromSdoDetails(selectedDraftOrder.getSdoDetails());
+            }
 
             if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
-                setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
+                log.info("during edit -->");
+                setHearingSelectedInfoForTask(isSdoOrder ? sdoHearings : caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
-                setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),
+                setIsHearingTaskNeeded(isSdoOrder ? sdoHearings : caseData.getManageOrders().getOrdersHearingDetails(),
                                        caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
+                log.info("caseDataUpdated while EaA--Edit--> {}",caseDataUpdated);
             } else {
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
 
                 if (null != caseData.getDraftOrderCollection()) {
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+                        log.info("during non edit");
                         DraftOrder draftOrder = e.getValue();
                         if (e.getId().equals(selectedOrderId)) {
-                            setHearingSelectedInfoForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
+                            log.info("during non edit.....");
+                            setHearingSelectedInfoForTask(isSdoOrder ? sdoHearings : draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
                             String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
-                            setIsHearingTaskNeeded(draftOrder.getManageOrderHearingDetails(),
+                            setIsHearingTaskNeeded(isSdoOrder ? sdoHearings : draftOrder.getManageOrderHearingDetails(),
                                                    caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
                         }
                     }
+                    log.info("caseDataUpdated while EaA--non-Edit--> {}",caseDataUpdated);
                 }
             }
         }
     }
 
+
+    private List<Element<HearingData>> buildSdoHearingsListFromStandardDirectionOrder(StandardDirectionOrder sdo) {
+
+        List<Element<HearingData>> sdoHearingsList = new ArrayList<>();
+        if (null != sdo) {
+            if (null != sdo.getSdoSecondHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoSecondHearingDetails()));
+            }
+
+            if (null != sdo.getSdoUrgentHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoUrgentHearingDetails()));
+            }
+
+            if (null != sdo.getSdoFhdraHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoFhdraHearingDetails()));
+            }
+
+            if (null != sdo.getSdoPermissionHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoPermissionHearingDetails()));
+            }
+
+            if (null != sdo.getSdoDraHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoDraHearingDetails()));
+            }
+
+            if (null != sdo.getSdoSettlementHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoSettlementHearingDetails()));
+            }
+
+            if (null != sdo.getSdoDirectionsForFactFindingHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoDirectionsForFactFindingHearingDetails()));
+            }
+        }
+
+        return sdoHearingsList;
+    }
+
+    private List<Element<HearingData>> buildSdoHearingsListFromSdoDetails(SdoDetails sdoDetails) {
+
+        List<Element<HearingData>> sdoHearingsList = new ArrayList<>();
+        if (null != sdoDetails) {
+            if (null != sdoDetails.getSdoSecondHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoSecondHearingDetails()));
+            }
+
+            if (null != sdoDetails.getSdoUrgentHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoUrgentHearingDetails()));
+            }
+
+            if (null != sdoDetails.getSdoFhdraHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoFhdraHearingDetails()));
+            }
+
+            if (null != sdoDetails.getSdoPermissionHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoPermissionHearingDetails()));
+            }
+
+            if (null != sdoDetails.getSdoDraHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoDraHearingDetails()));
+            }
+
+            if (null != sdoDetails.getSdoSettlementHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoSettlementHearingDetails()));
+            }
+
+            if (null != sdoDetails.getSdoDirectionsForFactFindingHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoDirectionsForFactFindingHearingDetails()));
+            }
+        }
+
+        return sdoHearingsList;
+    }
+
+    public DraftOrder getSelectedDraftOrderDetails(List<Element<DraftOrder>> draftOrderCollection, Object dynamicList) {
+        UUID orderId = elementUtils.getDynamicListSelectedValue(dynamicList, objectMapper);
+        return draftOrderCollection.stream()
+            .filter(element -> element.getId().equals(orderId))
+            .map(Element::getValue)
+            .findFirst()
+            .orElseThrow(() -> new UnsupportedOperationException("Could not find order"));
+    }
 
     public String isOrderApproved(CaseData caseData, Map<String, Object> caseDataUpdated, String performingUser) {
         String whoApprovedTheOrder = null;
