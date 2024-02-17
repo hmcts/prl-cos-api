@@ -123,8 +123,9 @@ public class CaseController {
                 eventId,
                 updateCaseData
             );
-            allTabsService.updateAllTabsIncludingConfTab(CaseUtils.getCaseData(caseDetails, objectMapper));
-            return CaseUtils.getCaseData(caseDetails, objectMapper);
+            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+            allTabsService.updateAllTabsIncludingConfTab(caseData);
+            return caseData;
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
