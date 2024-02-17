@@ -34,7 +34,7 @@ import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.NOTICES_OF_ACTING_DISCHARGE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.NOTICE_OF_HEARING;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.ORDERS_FROM_OTHER_PROCEEDINGS;
+import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_RESPONSE;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.OTHER_DOCS;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PUBLIC_FUNDING_CERTIFICATES;
@@ -140,7 +140,8 @@ public class ManageDocumentsControllerFunctionalTest {
                   "data.manageDocuments[0].value.documentCategories.list_items[5].code", equalTo(RESPONDENT_APPLICATION),
                   "data.manageDocuments[0].value.documentCategories.list_items[6].code", equalTo(RESPONDENT_C1A_APPLICATION),
                   "data.manageDocuments[0].value.documentCategories.list_items[7].code", equalTo(RESPONDENT_C1A_RESPONSE),
-                  "data.manageDocuments[0].value.documentCategories.list_items[8].code", equalTo(ORDERS_FROM_OTHER_PROCEEDINGS),
+                  "data.manageDocuments[0].value.documentCategories.list_items[8].code", equalTo(
+                    PREVIOUS_ORDERS_SUBMITTED_WITH_RESPONSE),
                   "data.manageDocuments[0].value.documentCategories.list_items[9].code", equalTo(NOTICE_OF_HEARING),
                   "data.manageDocuments[0].value.documentCategories.list_items[10].code", equalTo(COURT_BUNDLE),
                   "data.manageDocuments[0].value.documentCategories.list_items[11].code", equalTo(CASE_SUMMARY),
