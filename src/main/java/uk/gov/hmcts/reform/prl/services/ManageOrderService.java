@@ -2823,7 +2823,8 @@ public class ManageOrderService {
             boolean isSdoOrder = CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions());
             if (isSdoOrder) {
                 log.info("=====SDO order ManageEVENT====");
-                List<Element<HearingData>> sdoHearings = buildSdoHearingsList(caseData);
+                List<Element<HearingData>> sdoHearings = buildSdoHearingsListFromStandardDirectionOrder(caseData.getStandardDirectionOrder());
+
                 log.info("sdo size-->{}",sdoHearings.size());
                 setHearingSelectedInfoForTask(sdoHearings, caseDataUpdated);
                 setIsHearingTaskNeeded(sdoHearings,caseDataUpdated,null,amendOrderCheckEnum,eventId);
@@ -2838,69 +2839,112 @@ public class ManageOrderService {
         } else if (eventId.equals(Event.EDIT_AND_APPROVE_ORDER.getId())) {
 
             if (ManageOrdersUtils.isOrderEdited(caseData, eventId)) {
-                log.info("orders --> {}",caseData.getStandardDirectionOrder());//
+                log.info("if editteddd orders --> {}",caseData);
+                log.info("orders --> {}",caseData.getStandardDirectionOrder());
                 setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
                 setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),
                                        caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
             } else {
-
+                boolean isSdoOrder = false;
                 UUID selectedOrderId = elementUtils.getDynamicListSelectedValue(
                     caseData.getDraftOrdersDynamicList(), objectMapper);
 
                 if (null != caseData.getDraftOrderCollection()) {
                     Object dynamicList = caseData.getDraftOrdersDynamicList();
-                    DraftOrder selectedOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-
-                                                                                                dynamicList);
-
-                    if (selectedOrder != null && (standardDirectionsOrder.equals(selectedOrder.getOrderType()))) {
+                    DraftOrder selectedDraftOrder = getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
+                                                                            dynamicList);
+                    List<Element<HearingData>> sdoHearings = new ArrayList<>();
+                    if (selectedDraftOrder != null && (standardDirectionsOrder.equals(selectedDraftOrder.getOrderType()))) {
                         log.info("SDOOOOO order");
+                        isSdoOrder = true;
+                        sdoHearings = buildSdoHearingsListFromSdoDetails(selectedDraftOrder.getSdoDetails());
+
                     }
                     for (Element<DraftOrder> e : caseData.getDraftOrderCollection()) {
+                        log.info("Yesssss");
                         DraftOrder draftOrder = e.getValue();
-                        draftOrder.getSdoDetails().getSdoDirectionsForFactFindingHearingDetails();///
                         if (e.getId().equals(selectedOrderId)) {
-                            setHearingSelectedInfoForTask(draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
+                            log.info("callingg.....");
+                            setHearingSelectedInfoForTask(isSdoOrder ? sdoHearings : draftOrder.getManageOrderHearingDetails(), caseDataUpdated);
                             String isOrderApproved = isOrderApproved(caseData, caseDataUpdated, performingUser);
-                            setIsHearingTaskNeeded(draftOrder.getManageOrderHearingDetails(),
+                            setIsHearingTaskNeeded(isSdoOrder ? sdoHearings : draftOrder.getManageOrderHearingDetails(),
                                                    caseDataUpdated,isOrderApproved,amendOrderCheckEnum,eventId);
                         }
                     }
+                    log.info("caseDataUpdated while EandApEvent--non-Edit--> {}",caseDataUpdated);
                 }
             }
         }
     }
 
-    private List<Element<HearingData>> buildSdoHearingsList(CaseData caseData) {
+    private List<Element<HearingData>> buildSdoHearingsListFromStandardDirectionOrder(StandardDirectionOrder sdo) {
 
         List<Element<HearingData>> sdoHearingsList = new ArrayList<>();
-        if (null != caseData.getStandardDirectionOrder().getSdoSecondHearingDetails()) {
-            sdoHearingsList.add(element(caseData.getStandardDirectionOrder().getSdoSecondHearingDetails()));
+        if (null != sdo) {
+            if (null != sdo.getSdoSecondHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoSecondHearingDetails()));
+            }
+
+            if (null != sdo.getSdoUrgentHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoUrgentHearingDetails()));
+            }
+
+            if (null != sdo.getSdoFhdraHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoFhdraHearingDetails()));
+            }
+
+            if (null != sdo.getSdoPermissionHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoPermissionHearingDetails()));
+            }
+
+            if (null != sdo.getSdoDraHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoDraHearingDetails()));
+            }
+
+            if (null != sdo.getSdoSettlementHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoSettlementHearingDetails()));
+            }
+
+            if (null != sdo.getSdoDirectionsForFactFindingHearingDetails()) {
+                sdoHearingsList.add(element(sdo.getSdoDirectionsForFactFindingHearingDetails()));
+            }
         }
 
-        if (null != caseData.getStandardDirectionOrder().getSdoUrgentHearingDetails()) {
-            sdoHearingsList.add(element(caseData.getStandardDirectionOrder().getSdoUrgentHearingDetails()));
-        }
+        return sdoHearingsList;
+    }
 
-        if (null != caseData.getStandardDirectionOrder().getSdoFhdraHearingDetails()) {
-            sdoHearingsList.add(element(caseData.getStandardDirectionOrder().getSdoFhdraHearingDetails()));
-        }
+    private List<Element<HearingData>> buildSdoHearingsListFromSdoDetails(SdoDetails sdoDetails) {
 
-        if (null != caseData.getStandardDirectionOrder().getSdoPermissionHearingDetails()) {
-            sdoHearingsList.add(element(caseData.getStandardDirectionOrder().getSdoPermissionHearingDetails()));
-        }
+        List<Element<HearingData>> sdoHearingsList = new ArrayList<>();
+        if (null != sdoDetails) {
+            if (null != sdoDetails.getSdoSecondHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoSecondHearingDetails()));
+            }
 
-        if (null != caseData.getStandardDirectionOrder().getSdoDraHearingDetails()) {
-            sdoHearingsList.add(element(caseData.getStandardDirectionOrder().getSdoDraHearingDetails()));
-        }
+            if (null != sdoDetails.getSdoUrgentHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoUrgentHearingDetails()));
+            }
 
-        if (null != caseData.getStandardDirectionOrder().getSdoSettlementHearingDetails()) {
-            sdoHearingsList.add(element(caseData.getStandardDirectionOrder().getSdoSettlementHearingDetails()));
-        }
+            if (null != sdoDetails.getSdoFhdraHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoFhdraHearingDetails()));
+            }
 
-        if (null != caseData.getStandardDirectionOrder().getSdoDirectionsForFactFindingHearingDetails()) {
-            sdoHearingsList.add(element(caseData.getStandardDirectionOrder().getSdoDirectionsForFactFindingHearingDetails()));
+            if (null != sdoDetails.getSdoPermissionHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoPermissionHearingDetails()));
+            }
+
+            if (null != sdoDetails.getSdoDraHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoDraHearingDetails()));
+            }
+
+            if (null != sdoDetails.getSdoSettlementHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoSettlementHearingDetails()));
+            }
+
+            if (null != sdoDetails.getSdoDirectionsForFactFindingHearingDetails()) {
+                sdoHearingsList.add(element(sdoDetails.getSdoDirectionsForFactFindingHearingDetails()));
+            }
         }
 
         return sdoHearingsList;
