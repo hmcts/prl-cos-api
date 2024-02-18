@@ -20,12 +20,16 @@ import uk.gov.hmcts.reform.prl.enums.gatekeeping.SendToGatekeeperTypeEnum;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.Attributes;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryRequest;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.QueryResponse;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RequestedRoles;
+import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignment;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -105,6 +109,34 @@ public class RoleAssignmentService {
                 assignmentRequest
             );
         }
+    }
+
+
+    public void removeRoleAssignments(CaseDetails caseDetails) {
+
+        List<String> roles = List.of("allocated-legal-adviser");
+        QueryResponse resp = roleAssignmentApi.queryRoleAssignments(systemUserService.getSysUserToken(), authTokenGenerator.generate(),
+                QueryRequest.builder()
+                        .attributes(Map.of("caseId", List.of(caseDetails.getId().toString())))
+                        .roleName(roles)
+                        .validAt(ZonedDateTime.now())
+                        .build()
+        );
+        List<RoleAssignment> currentAllocatedJudges = resp.getRoleAssignmentResponse();
+        currentAllocatedJudges
+                .stream()
+                .filter(role -> roles.contains(role.getRoleName()))
+                .forEach(this::deleteRoleAssignment);
+
+    }
+
+    private void deleteRoleAssignment(RoleAssignment roleAssignment) {
+        roleAssignmentApi.deleteRoleAssignment(
+                systemUserService.getSysUserToken(),
+                authTokenGenerator.generate(),
+                null,
+                roleAssignment.getId()
+        );
     }
 
     private String populateActorId(String authorization, HashMap<String, Object> caseDataUpdated) {
