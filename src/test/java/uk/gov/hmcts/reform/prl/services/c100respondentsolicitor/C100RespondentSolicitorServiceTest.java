@@ -532,11 +532,9 @@ public class C100RespondentSolicitorServiceTest {
                                                                                                       addressList)
                                                                                                   .build())
                                                                               .build())
-                                         .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                                                                     .attendedMiam(No)
-                                                                                     .willingToAttendMiam(Yes)
-                                                                                     .reasonNotAttendingMiam("test")
-                                                                                     .build())
+                                         .hasRespondentAttendedMiam(No)
+                                         .respondentWillingToAttendMiam(No)
+                                         .respondentReasonNotAttendingMiam("test")
                                          .build())
             .build();
 
@@ -947,11 +945,9 @@ public class C100RespondentSolicitorServiceTest {
                                                                                                       addressList2)
                                                                                                   .build())
                                                                               .build())
-                                         .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                                                                     .attendedMiam(No)
-                                                                                     .willingToAttendMiam(No)
-                                                                                     .reasonNotAttendingMiam("test")
-                                                                                     .build())
+                                         .hasRespondentAttendedMiam(No)
+                                         .respondentWillingToAttendMiam(No)
+                                         .respondentReasonNotAttendingMiam("test")
                                          .build())
             .build();
 
@@ -1666,11 +1662,9 @@ public class C100RespondentSolicitorServiceTest {
                                                                                                       addressList)
                                                                                                   .build())
                                                                               .build())
-                                         .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                                                                     .attendedMiam(No)
-                                                                                     .willingToAttendMiam(No)
-                                                                                     .reasonNotAttendingMiam("test")
-                                                                                     .build())
+                                         .hasRespondentAttendedMiam(No)
+                                         .respondentWillingToAttendMiam(No)
+                                         .respondentReasonNotAttendingMiam("test")
                                          .build())
             .build();
 
@@ -1746,11 +1740,9 @@ public class C100RespondentSolicitorServiceTest {
             CaseData caseData1 = CaseData.builder().respondents(respondentList).id(1)
                 .caseTypeOfApplication(C100_CASE_TYPE)
                 .respondentSolicitorData(RespondentSolicitorData.builder()
-                                             .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                                                                         .attendedMiam(yesOrNo)
-                                                                                         .willingToAttendMiam(yesOrNo)
-                                                                                         .reasonNotAttendingMiam("test")
-                                                                                         .build())
+                                             .hasRespondentAttendedMiam(No)
+                                             .respondentWillingToAttendMiam(No)
+                                             .respondentReasonNotAttendingMiam("test")
                                              .build())
                 .build();
 
@@ -1815,11 +1807,6 @@ public class C100RespondentSolicitorServiceTest {
                                                                         .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                                         .confidentiality(No)
                                                                         .build())
-                                         .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                                                                     .attendedMiam(No)
-                                                                                     .willingToAttendMiam(No)
-                                                                                     .reasonNotAttendingMiam("test")
-                                                                                     .build())
                                          .build())
             .build();
 
@@ -1860,12 +1847,12 @@ public class C100RespondentSolicitorServiceTest {
     @Test
     public void populateAboutToStartCaseDataConsentToApplicationEvent() {
 
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData2.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData2);
 
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
-            "c100ResSolAttendingTheCourt", "c100ResSolMiam", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
+            "c100ResSolAttendingTheCourt", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
             "c100ResSolInternationalElement", "c100ResSolLitigationCapacity", Optional.empty().toString()};
         for (String event : events) {
             CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
