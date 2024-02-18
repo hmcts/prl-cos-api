@@ -15,7 +15,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.abilitytopar
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.confidentiality.KeepDetailsPrivate;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Consent;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.internationalelements.CitizenInternationalElements;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.miam.Miam;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentChildAbduction;
@@ -35,7 +34,6 @@ public class RespondentSolicitorData {
     private String respondentNameForResponse;
     private Consent respondentConsentToApplication;
 
-    private final Miam respondentSolicitorHaveYouAttendedMiam;
     private final String whatIsMiamPlaceHolder;
     private final String helpMiamCostsExemptionsPlaceHolder;
     //PRL-4588 - Miam new case fields
