@@ -1847,9 +1847,9 @@ public class C100RespondentSolicitorServiceTest {
     @Test
     public void populateAboutToStartCaseDataConsentToApplicationEvent() {
 
-        Map<String, Object> stringObjectMap = caseData2.toMap(new ObjectMapper());
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData2);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
 
         String[] events = {"c100ResSolConsentingToApplicationA", "c100ResSolKeepDetailsPrivate", "c100ResSolConfirmOrEditContactDetails",
             "c100ResSolAttendingTheCourt", "c100ResSolMiamA", "c100ResSolCurrentOrPreviousProceedings", "c100ResSolAllegationsOfHarm",
