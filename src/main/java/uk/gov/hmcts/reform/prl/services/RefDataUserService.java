@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.prl.services;
 
-
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +13,7 @@ import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -43,27 +42,22 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFFSORTCOLUMN
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefDataUserService {
-
     private final AuthTokenGenerator authTokenGenerator;
-
     private final StaffResponseDetailsApi staffResponseDetailsApi;
-
     private final JudicialUserDetailsApi judicialUserDetailsApi;
-
     private final IdamClient idamClient;
-
     private final CommonDataRefApi commonDataRefApi;
-
     private final LaunchDarklyClient launchDarklyClient;
 
     @Value("${prl.refdata.username}")
     private String refDataIdamUsername;
-
     @Value("${prl.refdata.password}")
     private String refDataIdamPassword;
 
     private List<DynamicListElement> listOfCategoryValues;
     private CommonDataResponse commonDataResponse;
+
+    private CaseFlag caseFlag;
 
     public List<DynamicListElement> getLegalAdvisorList() {
         try {
@@ -87,7 +81,7 @@ public class RefDataUserService {
 
             }
         } catch (Exception e) {
-            log.error("Staff details Lookup Failed - {}", e.getMessage());
+            log.error("Staff details Lookup Failed - {}", e);
         }
         return List.of(DynamicListElement.builder().build());
     }
@@ -152,6 +146,22 @@ public class RefDataUserService {
         return commonDataResponse;
     }
 
+
+    public CaseFlag retrieveCaseFlags(String authorization, String flagType) {
+        log.info("retrieve case flags for flag type{} ", flagType);
+        try {
+            caseFlag = commonDataRefApi.retrieveCaseFlagsByServiceId(
+                authorization,
+                authTokenGenerator.generate(),
+                SERVICE_ID,
+                flagType
+            );
+        } catch (Exception e) {
+            log.error("Case flags Values look up failed {} ", e.getMessage());
+        }
+        return caseFlag;
+    }
+
     public List<DynamicListElement> filterCategoryValuesByCategoryId(CommonDataResponse commonDataResponse,String categoryId) {
         if (null != commonDataResponse) {
             listOfCategoryValues = commonDataResponse.getCategoryValues().stream()
@@ -177,7 +187,7 @@ public class RefDataUserService {
         if (null != commonDataResponse && null != commonDataResponse.getCategoryValues()) {
             listOfSubCategoryValues = commonDataResponse.getCategoryValues().stream()
                 .filter(categoryValues -> categoryValues.getChildNodes() != null && categoryValues.getValueEn().equalsIgnoreCase(hearingPlatform))
-                .map(CategoryValues::getChildNodes).collect(Collectors.toList()).stream()
+                .map(CategoryValues::getChildNodes).toList().stream()
                 .flatMap(Collection::stream)
                 .map(this::displaySubChannelEntry)
                 .collect(Collectors.toList());

@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -28,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ListWithoutNoticeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -43,18 +45,24 @@ import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMPLETED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIRMED_HEARING_DATES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CUSTOM_DETAILS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_CONFIRMED_IN_HEARINGS_TAB;
@@ -105,12 +113,38 @@ public class HearingDataServiceTest {
     @Mock
     AllocatedJudgeService allocatedJudgeService;
 
+    @Mock
+    DateTimeFormatter dateTimeFormatter;
+
     public static final String authToken = "Bearer TestAuthToken";
     @Mock
     HearingApiClient hearingApiClient;
 
     @Mock
     Hearings hearingDetails;
+
+    private PartyDetails applicant;
+    private PartyDetails respondent;
+
+    @Before
+    public void init() {
+        applicant = PartyDetails.builder()
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .email("app1@test.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("AppSolFN")
+            .representativeLastName("AppSolLN")
+            .build();
+        respondent = PartyDetails.builder()
+            .firstName("RespFN")
+            .lastName("RespLN")
+            .email("resp1@test.com")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .representativeFirstName("RespSolFN")
+            .representativeLastName("RespSolLN")
+            .build();
+    }
 
     @Test()
     public void testPopulateHearingDynamicLists() {
@@ -171,7 +205,8 @@ public class HearingDataServiceTest {
         List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
         HearingDataPrePopulatedDynamicLists expectedResponse = hearingDataService
             .populateHearingDynamicLists(authToken, "45654654", caseData, Hearings.hearingsWith().build());
@@ -243,11 +278,6 @@ public class HearingDataServiceTest {
             listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
-        JudicialUser judicialUser = JudicialUser.builder()
-            .personalCode("Test")
-            .idamId("Test")
-            .build();
-
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
             .label("In Person")
@@ -264,7 +294,6 @@ public class HearingDataServiceTest {
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
             .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -283,6 +312,10 @@ public class HearingDataServiceTest {
                 .retrievedCourtLocations(dynamicList)
                 .hearingListedLinkedCases(dynamicList)
                 .build();
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .idamId("Test")
+            .build();
         HearingData hearingData = HearingData.builder()
             .hearingTypes(dynamicList)
             .confirmedHearingDates(dynamicList)
@@ -315,7 +348,8 @@ public class HearingDataServiceTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
         List<Element<HearingData>> expectedResponse =
             hearingDataService.getHearingDataForOtherOrders(listWithoutNoticeHearingDetails,
@@ -340,11 +374,6 @@ public class HearingDataServiceTest {
             listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
-        JudicialUser judicialUser = JudicialUser.builder()
-            .personalCode("Test")
-            .idamId("Test")
-            .build();
-
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
             .label("In Person")
@@ -361,7 +390,6 @@ public class HearingDataServiceTest {
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
             .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -380,6 +408,10 @@ public class HearingDataServiceTest {
                 .retrievedCourtLocations(dynamicList)
                 .hearingListedLinkedCases(dynamicList)
                 .build();
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .idamId("Test")
+            .build();
         HearingData hearingData = HearingData.builder()
             .hearingTypes(dynamicList)
             .confirmedHearingDates(dynamicList)
@@ -433,10 +465,6 @@ public class HearingDataServiceTest {
             listHearingTypes);
         when(locationRefDataService.getCourtLocations(authToken)).thenReturn(listHearingTypes);
 
-        JudicialUser judicialUser = JudicialUser.builder()
-            .personalCode("Test")
-            .build();
-
         DynamicListElement dynamicListElement2 = DynamicListElement.builder()
             .code("INTER")
             .label("In Person")
@@ -445,15 +473,14 @@ public class HearingDataServiceTest {
         dynamicListElementsList.add(dynamicListElement2);
         List<JudicialUsersApiResponse> judicialUsersApiResponses = new ArrayList<>();
         JudicialUsersApiResponse judicialUsersApiResponse = JudicialUsersApiResponse.builder()
-            //.emailId("Test")
-            //.fullName("Test")
-            //.surname("Test")
+            .emailId("Test")
+            .fullName("Test")
+            .surname("Test")
             .personalCode("Test")
             .build();
         judicialUsersApiResponses.add(judicialUsersApiResponse);
         JudicialUsersApiRequest judicialUsersApiRequest = JudicialUsersApiRequest.builder()
-            .personalCode(new String[]{"Test2", "test", "test5"}).build();
-        when(allocatedJudgeService.getPersonalCode(judicialUser)).thenReturn(new String[]{"Test2", "test", "test5"});
+            .personalCode(new String[]{"Test", null, null}).build();
         when(refDataUserService.getAllJudicialUserDetails(judicialUsersApiRequest)).thenReturn(judicialUsersApiResponses);
         DynamicList dynamicList1 = DynamicList.builder()
             .listItems(dynamicListElementsList)
@@ -472,6 +499,9 @@ public class HearingDataServiceTest {
                 .retrievedCourtLocations(dynamicList)
                 .hearingListedLinkedCases(dynamicList)
                 .build();
+        JudicialUser judicialUser = JudicialUser.builder()
+            .personalCode("Test")
+            .build();
         HearingData hearingData = HearingData.builder()
             .hearingTypes(dynamicList)
             .confirmedHearingDates(dynamicList)
@@ -492,6 +522,7 @@ public class HearingDataServiceTest {
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
             .hearingEstimatedHours("5")
+            .hearingJudgeNameAndEmail(JudicialUser.builder().personalCode("Test").build())
             .hearingEstimatedMinutes("40")
             .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
@@ -504,7 +535,8 @@ public class HearingDataServiceTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
 
         List<Element<HearingData>> expectedResponse =
@@ -805,16 +837,16 @@ public class HearingDataServiceTest {
             .build();
         Hearings hearings = Hearings.hearingsWith()
             .caseHearings(List.of(CaseHearing.caseHearingWith()
-                 .hearingID(123L)
-                 .hearingDaySchedule(List.of(HearingDaySchedule
-                                                 .hearingDayScheduleWith()
-                                                 .hearingStartDateTime(LocalDateTime.now())
-                                                 .hearingEndDateTime(LocalDateTime.now())
-                                                 .hearingVenueAddress("abc")
-                                                 .attendees(List.of(
-                                                     Attendee.attendeeWith().partyID(TEST_UUID)
-                                                         .hearingSubChannel("TEL").build()))
-                                                 .build()))
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
                                       .build())).build();
         assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, "testAuth"));
     }
@@ -1098,9 +1130,221 @@ public class HearingDataServiceTest {
                                       .build())).build();
         assertNotNull(hearingDataService.getHearingDataForSelectedHearing(caseData, hearings, "testAuth"));
     }
+
+    @Test
+    public void testSetHearingDataForSelectedHearing() {
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(Element.<HearingData>builder()
+                                                           .id(UUID.fromString(TEST_UUID))
+                                                           .value(HearingData.builder()
+                                                                      .confirmedHearingDates(DynamicList.builder()
+                                                                                                 .value(
+                                                                                                     DynamicListElement.builder()
+                                                                                                         .code(
+                                                                                                             "123")
+                                                                                                         .build())
+                                                                                                 .build())
+                                                                      .hearingDateConfirmOptionEnum(
+                                                                          HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                                                                      .build())
+                                                           .build()))
+                              .build())
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
+        assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData));
+    }
+
+    @Test
+    public void testSetHearingDataForSelectedHearingForSolicitorOrder() {
+        CaseData caseData = CaseData.builder()
+            .id(123)
+            .manageOrders(ManageOrders.builder()
+                              .solicitorOrdersHearingDetails(List.of(Element.<HearingData>builder()
+                                                                .id(UUID.fromString(TEST_UUID))
+                                                                .value(HearingData.builder()
+                                                                           .confirmedHearingDates(DynamicList.builder()
+                                                                                                      .value(
+                                                                                                          DynamicListElement.builder()
+                                                                                                              .code(
+                                                                                                                  "123")
+                                                                                                              .build())
+                                                                                                      .build())
+                                                                           .hearingDateConfirmOptionEnum(
+                                                                               HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+                                                                           .build())
+                                                                .build()))
+                              .build())
+            .applicantsFL401(PartyDetails.builder().partyId(UUID.fromString(TEST_UUID)).build())
+            .build();
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingStartDateTime(LocalDateTime.now())
+                                                                      .hearingEndDateTime(LocalDateTime.now())
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
+        assertNotNull(hearingDataService.setHearingDataForSelectedHearing(authToken, caseData));
+    }
+
+    @Test
+    public void testFetchingAwaitingAndCompletedHearings() {
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hmcStatus(COMPLETED)
+                                      .nextHearingDate(LocalDateTime.now())
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        when(hearingService.getHearings(authToken,"123")).thenReturn(hearings);
+        assertFalse(hearingDataService.getListOfRequestedStatusHearings(authToken, "123", List.of(COMPLETED)).isEmpty());
+    }
+
+    @Test
+    public void testFetchingAwaitingAndCompletedHearingsForException() {
+        Hearings hearings = Hearings.hearingsWith()
+            .caseHearings(List.of(CaseHearing.caseHearingWith()
+                                      .hearingID(123L)
+                                      .hmcStatus(COMPLETED)
+                                      .hearingDaySchedule(List.of(HearingDaySchedule
+                                                                      .hearingDayScheduleWith()
+                                                                      .hearingVenueAddress("abc")
+                                                                      .attendees(List.of(
+                                                                          Attendee.attendeeWith().partyID(TEST_UUID)
+                                                                              .hearingSubChannel("TEL").build()))
+                                                                      .build()))
+                                      .build())).build();
+        when(hearingService.getHearings(authToken,"123")).thenThrow(new RuntimeException());
+        assertTrue(hearingDataService.getListOfRequestedStatusHearings(authToken, "123", List.of(COMPLETED)).isEmpty());
+    }
+
+    @Test
+    public void testPopulatePartiesNamesForC100() {
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .applicants(Arrays.asList(element(applicant), element(applicant), element(applicant), element(applicant), element(applicant)))
+            .respondents(Arrays.asList(element(respondent), element(respondent), element(respondent), element(respondent), element(respondent)))
+            .caseTypeOfApplication("C100")
+            .build();
+
+        //invoke service
+        hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+
+        //validate
+        assertFalse(tempCaseDetails.isEmpty());
+        Map<String, Object> tempPartyNamesMap = (Map<String, Object>) tempCaseDetails.get("tempPartyNamesForDocGen");
+        assertNotNull(tempPartyNamesMap);
+        assertEquals("AppFN AppLN (Applicant1)", tempPartyNamesMap.get("applicantName1"));
+        assertEquals("AppFN AppLN (Applicant2)", tempPartyNamesMap.get("applicantName2"));
+        assertEquals("AppFN AppLN (Applicant3)", tempPartyNamesMap.get("applicantName3"));
+        assertEquals("AppFN AppLN (Applicant4)", tempPartyNamesMap.get("applicantName4"));
+        assertEquals("AppFN AppLN (Applicant5)", tempPartyNamesMap.get("applicantName5"));
+        assertEquals("AppSolFN AppSolLN (Applicant1 solicitor)", tempPartyNamesMap.get("applicantSolicitor1"));
+        assertEquals("AppSolFN AppSolLN (Applicant2 solicitor)", tempPartyNamesMap.get("applicantSolicitor2"));
+        assertEquals("AppSolFN AppSolLN (Applicant3 solicitor)", tempPartyNamesMap.get("applicantSolicitor3"));
+        assertEquals("AppSolFN AppSolLN (Applicant4 solicitor)", tempPartyNamesMap.get("applicantSolicitor4"));
+        assertEquals("AppSolFN AppSolLN (Applicant5 solicitor)", tempPartyNamesMap.get("applicantSolicitor5"));
+        assertEquals("RespFN RespLN (Respondent1)", tempPartyNamesMap.get("respondentName1"));
+        assertEquals("RespFN RespLN (Respondent2)", tempPartyNamesMap.get("respondentName2"));
+        assertEquals("RespFN RespLN (Respondent3)", tempPartyNamesMap.get("respondentName3"));
+        assertEquals("RespFN RespLN (Respondent4)", tempPartyNamesMap.get("respondentName4"));
+        assertEquals("RespFN RespLN (Respondent5)", tempPartyNamesMap.get("respondentName5"));
+        assertEquals("RespSolFN RespSolLN (Respondent1 solicitor)", tempPartyNamesMap.get("respondentSolicitor1"));
+        assertEquals("RespSolFN RespSolLN (Respondent2 solicitor)", tempPartyNamesMap.get("respondentSolicitor2"));
+        assertEquals("RespSolFN RespSolLN (Respondent3 solicitor)", tempPartyNamesMap.get("respondentSolicitor3"));
+        assertEquals("RespSolFN RespSolLN (Respondent4 solicitor)", tempPartyNamesMap.get("respondentSolicitor4"));
+        assertEquals("RespSolFN RespSolLN (Respondent5 solicitor)", tempPartyNamesMap.get("respondentSolicitor5"));
+    }
+
+    @Test
+    public void testPopulatePartiesNamesForC100WithEmptyData() {
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .applicants(Collections.emptyList())
+            .respondents(Collections.emptyList())
+            .caseTypeOfApplication("C100")
+            .build();
+
+        //invoke service
+        hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+
+        //validate
+        assertFalse(tempCaseDetails.isEmpty());
+        Map<String, Object> tempPartyNamesMap = (Map<String, Object>) tempCaseDetails.get("tempPartyNamesForDocGen");
+        assertTrue(tempPartyNamesMap.isEmpty());
+    }
+
+    @Test
+    public void testPopulatePartiesNamesForFl401() {
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .applicantName("App")
+            .respondentName("Resp")
+            .applicantsFL401(applicant)
+            .respondentsFL401(respondent)
+            .caseTypeOfApplication("FL401")
+            .build();
+
+        //invoke service
+        hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+
+        //validate
+        assertFalse(tempCaseDetails.isEmpty());
+        Map<String, Object> tempPartyNamesMap = (Map<String, Object>) tempCaseDetails.get("tempPartyNamesForDocGen");
+        assertFalse(tempPartyNamesMap.isEmpty());
+        assertEquals("App (Applicant)", tempPartyNamesMap.get("applicantName"));
+        assertEquals("AppSolFN AppSolLN (Applicant solicitor)", tempPartyNamesMap.get("applicantSolicitor"));
+        assertEquals("Resp (Respondent)", tempPartyNamesMap.get("respondentName"));
+        assertEquals("RespSolFN RespSolLN (Respondent solicitor)", tempPartyNamesMap.get("respondentSolicitor"));
+    }
+
+    @Test
+    public void testPopulatePartiesNamesForFl401WithEmptyData() {
+        Map<String, Object> tempCaseDetails = new HashMap<>();
+        CaseData caseData = CaseData.builder()
+            .courtName("testcourt")
+            .applicantsFL401(PartyDetails.builder().build())
+            .respondentsFL401(PartyDetails.builder().build())
+            .caseTypeOfApplication("FL401")
+            .build();
+
+        //invoke service
+        hearingDataService.populatePartiesAndSolicitorsNames(caseData, tempCaseDetails);
+
+        //validate
+        assertFalse(tempCaseDetails.isEmpty());
+        Map<String, Object> tempPartyNamesMap = (Map<String, Object>) tempCaseDetails.get("tempPartyNamesForDocGen");
+        assertTrue(tempPartyNamesMap.isEmpty());
+    }
 }
-
-
-
-
-
