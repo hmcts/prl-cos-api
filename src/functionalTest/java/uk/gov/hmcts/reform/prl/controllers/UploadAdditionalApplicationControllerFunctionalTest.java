@@ -15,6 +15,7 @@ import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.UploadAdditionalApplicationService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
+import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,6 +30,9 @@ public class UploadAdditionalApplicationControllerFunctionalTest {
     private MockMvc mockMvc;
     @Autowired
     private WebApplicationContext webApplicationContext;
+
+    @MockBean
+    protected IdamTokenGenerator idamTokenGenerator;
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
