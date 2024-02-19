@@ -23,8 +23,6 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentMiamChecker implements RespondentEventChecker {
-    public static final String MIAM_IS_FINISHED_BEFORE_CHECK = "miam isFinished: before check:";
-    public static final String MIAM_IS_FINISHED_AFTER_CHECK = "miam isFinished: after check:";
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
@@ -44,38 +42,12 @@ public class RespondentMiamChecker implements RespondentEventChecker {
 
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
-        log.info("miam entering: isFinished: {}",respondingParty);
         Optional<Response> response = findResponse(respondingParty);
         boolean isFinished = false;
         if (response.isPresent()) {
             Optional<Miam> miam
                 = Optional.ofNullable(response.get().getMiam());
-            log.info(
-                MIAM_IS_FINISHED_BEFORE_CHECK + " {}",
-                miam.stream().peek(event -> System.out.println("Attended Miam" + event.getAttendedMiam()))
-            );
-            log.info(
-                MIAM_IS_FINISHED_BEFORE_CHECK + " {}",
-                miam.stream().peek(event -> System.out.println("Reason Not Attending Miam" + event.getReasonNotAttendingMiam()))
-            );
-            log.info(
-                MIAM_IS_FINISHED_BEFORE_CHECK + " {}",
-                miam.stream().peek(event -> System.out.println("Willing To Attend Miam" + event.getWillingToAttendMiam()))
-            );
             if (miam.isPresent() && checkMiamManadatoryCompleted(miam)) {
-                log.info(
-                    MIAM_IS_FINISHED_AFTER_CHECK + " {}",
-                    miam.stream().peek(event -> System.out.println("Attended Miam" + event.getAttendedMiam()))
-                );
-                log.info(
-                    MIAM_IS_FINISHED_AFTER_CHECK + " {}",
-                    miam.stream().peek(event -> System.out.println("Reason Not Attending Miam" + event.getReasonNotAttendingMiam()))
-                );
-                log.info(
-                    MIAM_IS_FINISHED_AFTER_CHECK + " {}",
-                    miam.stream().peek(event -> System.out.println("Willing To Attend Miam" + event.getWillingToAttendMiam()))
-                );
-                respondentTaskErrorService.removeError(MIAM_ERROR);
                 isFinished = true;
                 return isFinished;
             }
@@ -92,12 +64,6 @@ public class RespondentMiamChecker implements RespondentEventChecker {
         List<Optional<?>> fields = new ArrayList<>();
         log.info("entering miam checker if loop...");
         if (miam.isPresent()) {
-            log.info("miam checkMiamManadatoryCompleted: AttendedMiam: {}", miam.get().getAttendedMiam());
-            log.info("miam checkMiamManadatoryCompleted: WillingToAttendMiam: {}", miam.get().getWillingToAttendMiam());
-            log.info(
-                "miam checkMiamManadatoryCompleted: ReasonNotAttendingMiam: {}",
-                miam.get().getReasonNotAttendingMiam()
-            );
             fields.add(ofNullable(miam.get().getAttendedMiam()));
             Optional<YesOrNo> attendMiam = ofNullable(miam.get().getAttendedMiam());
             if (attendMiam.isPresent()
@@ -109,18 +75,6 @@ public class RespondentMiamChecker implements RespondentEventChecker {
                 }
             }
         }
-        log.info(
-            "miam checkMiamManadatoryCompleted: final: {}",
-            miam.stream().peek(event -> System.out.println("Attended Miam" + event.getAttendedMiam()))
-        );
-        log.info(
-            "miam checkMiamManadatoryCompleted: final: {}",
-            miam.stream().peek(event -> System.out.println("Reason Not Attending Miam" + event.getReasonNotAttendingMiam()))
-        );
-        log.info(
-            "miam checkMiamManadatoryCompleted: final: {}",
-            miam.stream().peek(event -> System.out.println("Willing To Attend Miam" + event.getWillingToAttendMiam()))
-        );
         log.info("final value: {}",fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals("")));
         return fields.stream().noneMatch(Optional::isEmpty)
