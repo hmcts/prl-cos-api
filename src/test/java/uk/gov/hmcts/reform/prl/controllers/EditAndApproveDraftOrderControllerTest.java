@@ -907,7 +907,7 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testSaveServeOrderDetailsForEditAndApprove() {
+    public void testSaveServeOrderDetailsForEditAndApprove() throws JsonProcessingException {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
@@ -972,7 +972,7 @@ public class EditAndApproveDraftOrderControllerTest {
     }
 
     @Test
-    public void testSaveServeOrderDetailsForEditAndReturnedOrder() {
+    public void testSaveServeOrderDetailsForEditAndReturnedOrder() throws JsonProcessingException {
 
         Element<DraftOrder> draftOrderElement = Element.<DraftOrder>builder().build();
         List<Element<DraftOrder>> draftOrderCollection = new ArrayList<>();
