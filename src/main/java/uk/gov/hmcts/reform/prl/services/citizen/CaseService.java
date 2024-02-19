@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -85,6 +86,8 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final CaseSummaryTabService caseSummaryTab;
+
     private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
@@ -445,6 +448,7 @@ public class CaseService {
         Map<String, Object> caseDataUpdated  = caseDetails.getData();
         caseDataUpdated.put("state", WITHDRAWN_STATE);
         caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         caseDetails.setData(caseDataUpdated);
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
