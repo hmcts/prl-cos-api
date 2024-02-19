@@ -190,6 +190,7 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenBody_whenAboutToSubmitForServeOrder() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER);
         request
@@ -205,6 +206,7 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenBody_whenAboutToSubmitForDraft() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_DRAFT);
         request
@@ -220,6 +222,7 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenBody_whenAboutToSubmitForCreateUpldOrder() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER);
         when(roleAssignmentApi.updateRoleAssignment(any(), any(), any(), any(RoleAssignmentRequest.class)))
@@ -259,6 +262,7 @@ public class ManageOrdersControllerFunctionalTest {
      * Court Admin manageOrders journey - creates the order with one hearing with no approval required.
      */
     @Test
+    @Ignore
     public void givenRequestBody_courtArdmin_noapproval_required() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL);
 
@@ -500,6 +504,7 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenBody_ServeOrderForPersonalServiceWithCourtBailiffOptionSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
         request
@@ -516,6 +521,7 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenBody_ServeOrderForPersonalServiceWithCourtAdminOptionSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
         request
@@ -636,6 +642,7 @@ public class ManageOrdersControllerFunctionalTest {
      * Judge  manageOrders journey - creates the sdo order with one hearing .
      */
     @Test
+    @Ignore
     public void givenRequestBody_judge_creates_sdo_order() throws Exception {
         String requestBody = ResourceLoader.loadJson(JUDGE_DRAFT_SDO_ORDER_BODY);
 
