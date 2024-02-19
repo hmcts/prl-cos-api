@@ -13,6 +13,7 @@ public class ManageDocumentsCategoryConstants {
     public static final String MIAM_CERTIFICATE = "MIAMCertificate";
     public static final String PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION = "previousOrdersSubmittedWithApplication";
     public static final String RESPONDENT_APPLICATION = "respondentApplication";
+    public static final String ORDERS_FROM_OTHER_PROCEEDINGS = "ordersFromOtherProceedings";
     public static final String RESPONDENT_C1A_APPLICATION = "respondentC1AApplication";
     public static final String RESPONDENT_C1A_RESPONSE = "respondentC1AResponse";
     public static final String APPLICATIONS_FROM_OTHER_PROCEEDINGS = "applicationsFromOtherProceedings";
@@ -34,6 +35,7 @@ public class ManageDocumentsCategoryConstants {
     public static final String LETTERS_OF_COMPLAINTS = "lettersOfComplaint";
     public static final String SPIP_REFERRAL_REQUESTS = "SPIPReferralRequests";
     public static final String HOME_OFFICE_DWP_RESPONSES = "homeOfficeDWPResponses";
+    public static final String INTERNAL_CORRESPONDENCE = "internalCorrespondence";
     public static final String MEDICAL_REPORTS = "medicalReports";
     public static final String DNA_REPORTS_EXPERT_REPORT = "DNAReports_expertReport";
     public static final String RESULTS_OF_HAIR_STRAND_BLOOD_TESTS = "resultsOfHairStrandBloodTests";
