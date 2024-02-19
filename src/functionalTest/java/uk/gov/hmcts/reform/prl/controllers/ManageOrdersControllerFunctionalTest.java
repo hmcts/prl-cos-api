@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -53,6 +54,9 @@ public class ManageOrdersControllerFunctionalTest {
 
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
+
+    @Autowired
+    protected RoleAssignmentService roleAssignmentService;
 
     @MockBean
     private ManageOrderService manageOrderService;
