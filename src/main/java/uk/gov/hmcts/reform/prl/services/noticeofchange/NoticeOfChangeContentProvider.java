@@ -41,8 +41,6 @@ public class NoticeOfChangeContentProvider {
                                                   boolean isOtherPerson,
                                                   boolean isRemoveLegalRep,
                                                   String accessCode) {
-        System.out.println("isOtherPerson-->" + isOtherPerson);
-        System.out.println("isRemoveLegalRep-->" + isRemoveLegalRep);
         if (isOtherPerson && isRemoveLegalRep) {
             return NoticeOfChangeEmail.builder()
                 .caseReference(String.valueOf(caseData.getId()))
