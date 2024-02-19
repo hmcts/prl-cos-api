@@ -7,6 +7,11 @@
   </suppress>
   <suppress>
     <notes><![CDATA[
+     jose4j-0.5.5.jar ]]></notes>
+    <cve>CVE-2023-31582</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
       jackson-databind-2.13.3.jar ]]></notes>
     <cve>CVE-2023-35116</cve>
     <cve>CVE-2022-45688</cve>
@@ -15,6 +20,11 @@
     <notes><![CDATA[
      json-20230227.jar ]]></notes>
     <cve>CVE-2023-5072</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     jose4j-0.5.5.jar ]]></notes>
+    <cve>CVE-2023-31582</cve>
   </suppress>
   <suppress>
     <notes><![CDATA[
@@ -54,10 +64,48 @@
     <cve>CVE-2023-34040</cve>
   </suppress>
   <suppress>
-    <notes>temporary></notes>
-    <cve>CVE-2023-45648</cve>
+    <notes><![CDATA[
+     logback-classic-1.4.11.jar ]]></notes>
+    <cve>CVE-2023-6378</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     logback-core-1.4.11.jar ]]></notes>
+    <cve>CVE-2023-6378</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     tomcat-embed-core-10.1.12.jar ]]></notes>
     <cve>CVE-2023-42795</cve>
+    <cve>CVE-2023-6378</cve>
+    <cve>CVE-2023-45648</cve>
     <cve>CVE-2023-44487</cve>
     <cve>CVE-2023-5072</cve>
+    <cve>CVE-2023-31582</cve>
+    <cve>CVE-2023-33202</cve>
+    <cve>CVE-2023-34053</cve>
+    <cve>CVE-2023-34055</cve>
+    <cve>CVE-2023-46589</cve>
+    <cve>CVE-2023-6378</cve>
+    <cve>CVE-2022-41881</cve>
+    <cve>CVE-2022-41915</cve>
+    <cve>CVE-2023-34462</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     bcprov-jdk15on-1.70.jar ]]></notes>
+    <cve>CVE-2023-33202</cve>
+    <cve>CVE-2023-34053</cve>
+    <cve>CVE-2023-34055</cve>
+    <cve>CVE-2023-46589</cve>
+    <cve>CVE-2023-6378</cve>
+  </suppress>
+  <suppress>
+    <notes><![CDATA[
+     netty ]]></notes>
+    <cve>CVE-2023-34462</cve>
+    <cve>CVE-2022-41881</cve>
+    <cve>CVE-2022-41915</cve>
+    <cve>CVE-2023-6378</cve>
   </suppress>
 </suppressions>

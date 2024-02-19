@@ -36,6 +36,8 @@ public class DraftOrderControllerIntegrationTest {
 
     private final String populateStandardDirectionOrderEndpoint = "/populate-standard-direction-order-fields";
 
+    private final String prepareDraftOrderCollectionEndpoint = "/about-to-submit";
+
     private final String generateDocEndpoint = "/generate-doc";
 
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
@@ -106,6 +108,19 @@ public class DraftOrderControllerIntegrationTest {
     public void testGenerateDocEndpoint() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + generateDocEndpoint);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testPrepareDraftOrderCollection() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_DRAFT_ORDER_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + prepareDraftOrderCollectionEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
         httpPost.addHeader("serviceAuthorization", "s2sToken");
