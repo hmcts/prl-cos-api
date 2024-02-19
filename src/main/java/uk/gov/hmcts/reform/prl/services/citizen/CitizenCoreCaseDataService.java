@@ -140,8 +140,8 @@ public class CitizenCoreCaseDataService {
                 caseId.toString(),
                 !userDetails.getRoles().contains(CITIZEN_ROLE)
             );
-            Iterables.removeIf(caseData.values(), Objects::isNull);
             CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
+            log.info(caseDataContent.toString() + "******");
             return ccdCoreCaseDataService.submitUpdate(
                 authorisation,
                 eventRequestData,
