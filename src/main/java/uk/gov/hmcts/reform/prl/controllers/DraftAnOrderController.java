@@ -205,11 +205,6 @@ public class DraftAnOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
-            try {
-                log.info(objectMapper.writeValueAsString(callbackRequest));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(draftAnOrderService.prepareDraftOrderCollection(
                 authorisation,
                 callbackRequest
