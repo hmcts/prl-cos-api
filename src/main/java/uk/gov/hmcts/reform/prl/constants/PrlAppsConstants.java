@@ -848,12 +848,10 @@ public class PrlAppsConstants {
     public static final String DA_APPLICANT = "DAAPPLICANT";
     public static final String CA_RESPONDENT = "CARESPONDENT";
     public static final String DA_RESPONDENT = "DARESPONDENT";
-    public static final String SOS_CONFIRMATION_HEADER = "# Application was served";
+    public static final String SOS_CONFIRMATION_HEADER = "# Statement of service submitted";
     public static final String SOS_CONFIRMATION_BODY_PREFIX = "### What happens next \n\n "
         + System.lineSeparator()
-        + "The court will contact the people in the case with details of the first court hearing. "
-        + System.lineSeparator()
-        + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
+        + "The statement of service has been added to the case. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
     public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
