@@ -320,7 +320,7 @@ public class ManageOrdersController {
             manageOrderService.setMarkedToServeEmailNotification(caseData, caseDataUpdated);
             //PRL-4216 - save server order additional documents if any
             manageOrderService.saveAdditionalOrderDocuments(authorisation, caseData, caseDataUpdated);
-
+            log.info("AAAAAAAAAAAAA");
             //Added below fields for WA purpose
             caseDataUpdated.putAll(manageOrderService.setFieldsForWaTask(authorisation, caseData,callbackRequest.getEventId()));
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);

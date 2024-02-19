@@ -287,7 +287,6 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_required() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED);
-
         AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -305,6 +304,7 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
         System.out.println("Resssssspp11111 " + resp.getData());
+        log.info("Resssssspp11111 {}",resp.getData());
 
     }
 
