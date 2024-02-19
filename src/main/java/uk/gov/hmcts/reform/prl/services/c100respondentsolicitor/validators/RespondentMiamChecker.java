@@ -77,6 +77,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
                 );
                 respondentTaskErrorService.removeError(MIAM_ERROR);
                 isFinished = true;
+                return isFinished;
             }
         }
         respondentTaskErrorService.addEventError(
