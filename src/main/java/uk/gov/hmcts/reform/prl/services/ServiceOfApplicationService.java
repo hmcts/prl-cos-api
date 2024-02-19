@@ -47,6 +47,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.AccessCode;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.ServedApplicationDetails;
@@ -269,7 +270,7 @@ public class ServiceOfApplicationService {
     private final AuthTokenGenerator authTokenGenerator;
     private final CoreCaseDataApi coreCaseDataApi;
     private final ConfidentialDetailsGenerator confidentialDetailsGenerator;
-
+    private final DocumentLanguageService documentLanguageService;
     private final DgsService dgsService;
 
     @Value("${citizen.url}")
@@ -1669,27 +1670,17 @@ public class ServiceOfApplicationService {
         //Welsh pack generation needs to be reviewed
         List<Document> docs = new ArrayList<>();
         if (CaseUtils.getCaseTypeOfApplication(caseData).equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
-            if (LanguagePreference.english.getDisplayedValue().equalsIgnoreCase(CaseUtils.getLanguageRequirements(caseData))) {
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+            if (documentLanguage.isGenEng()) {
                 if (null != caseData.getFinalDocument()) {
                     docs.add(caseData.getFinalDocument());
                 }
                 if (null != caseData.getC1ADocument()) {
                     docs.add(caseData.getC1ADocument());
                 }
-            } else if (LanguagePreference.welsh.getDisplayedValue().equalsIgnoreCase(CaseUtils.getLanguageRequirements(caseData))) {
-                if (null != caseData.getFinalWelshDocument()) {
-                    docs.add(caseData.getFinalWelshDocument());
-                }
-                if (null != caseData.getC1AWelshDocument()) {
-                    docs.add(caseData.getC1AWelshDocument());
-                }
-            } else {
-                if (null != caseData.getFinalDocument()) {
-                    docs.add(caseData.getFinalDocument());
-                }
-                if (null != caseData.getC1ADocument()) {
-                    docs.add(caseData.getC1ADocument());
-                }
+
+            }
+            if (documentLanguage.isGenWelsh()) {
                 if (null != caseData.getFinalWelshDocument()) {
                     docs.add(caseData.getFinalWelshDocument());
                 }
@@ -1697,7 +1688,6 @@ public class ServiceOfApplicationService {
                     docs.add(caseData.getC1AWelshDocument());
                 }
             }
-
         } else {
             docs.add(caseData.getFinalDocument());
         }
