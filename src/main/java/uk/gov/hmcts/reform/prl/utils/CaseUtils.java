@@ -619,10 +619,10 @@ public class CaseUtils {
 
     public static String getLanguageRequirements(CaseData caseData) {
         if (YesOrNo.Yes.equals(caseData.getWelshLanguageRequirement())) {
-            if ((welsh.equals(caseData.getWelshLanguageRequirementApplication()) &&
-                                 Yes.equals(caseData.getWelshLanguageRequirementApplicationNeedEnglish()))
-            || (english.equals(caseData.getWelshLanguageRequirementApplication()) &&
-                Yes.equals(caseData.getLanguageRequirementApplicationNeedWelsh()))) {
+            if ((welsh.equals(caseData.getWelshLanguageRequirementApplication())
+                && Yes.equals(caseData.getWelshLanguageRequirementApplicationNeedEnglish()))
+                || (english.equals(caseData.getWelshLanguageRequirementApplication())
+                && Yes.equals(caseData.getLanguageRequirementApplicationNeedWelsh()))) {
                 return "Both";
             }
             return LanguagePreference.getLanguagePreference(caseData).getDisplayedValue();
