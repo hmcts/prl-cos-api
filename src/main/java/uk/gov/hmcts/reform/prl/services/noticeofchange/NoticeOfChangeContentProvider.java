@@ -45,10 +45,6 @@ public class NoticeOfChangeContentProvider {
             return NoticeOfChangeEmail.builder()
                 .caseReference(String.valueOf(caseData.getId()))
                 .caseName(caseData.getApplicantCaseName())
-                .solicitorName(solicitorName)
-                .litigantName(litigantName)
-                .citizenSignUpLink(citizenUrl)
-                .accessCode(accessCode)
                 .build();
         } else {
             return NoticeOfChangeEmail.builder()
