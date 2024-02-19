@@ -46,7 +46,7 @@ public class NoticeOfChangeEventHandler {
         sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC, false);
 
         //PRL-3211 - notify other persons if any
-        sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC,false);
+        sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC, false);
 
         //PRL-3211 - notify applicants/respondents LRs
         sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC);
@@ -202,9 +202,9 @@ public class NoticeOfChangeEventHandler {
         if (StringUtils.isNotEmpty(event.getAccessCode())
             && launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")) {
             //PRL-3215 - notify LiP
-            sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC,true);
+            sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_REMOVE_RESPONDENT_NOC, true);
             //PRL-3215 - notify applicants/respondents other parties except litigant
-            sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC,true);
+            sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC, true);
         }
 
         //PRL-3215 - notify other persons if any
