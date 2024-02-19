@@ -2750,17 +2750,20 @@ public class ManageOrderService {
                                        String eventId) {
 
         String isHearingTaskNeeded = NO;
-
+        log.info("KKKKKK1111{}",isOrderApproved);
         // If rejected by judge, then isHearingTaskNeeded should be always 'No'.
         if (null != isOrderApproved && isOrderApproved.equals(NO)) {
+            log.info("KKKKKK2222");
             caseDataUpdated.put(WA_IS_HEARING_TASK_NEEDED, isHearingTaskNeeded);
             return;
         }
-
+        log.info("KKKKKK3333{}",MANAGE_ORDERS.getId());
+        log.info("KKKKKK4444{}",amendOrderCheck);
         // If judge or la or manager approval is required (for managerOrders journey only) , then isHearingTaskNeeded should be always 'No'.
         if (eventId.equals(MANAGE_ORDERS.getId())
             && (AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(amendOrderCheck)
             || AmendOrderCheckEnum.managerCheck.equals(amendOrderCheck))) {
+            log.info("KKKKKK4444{}");
             caseDataUpdated.put(WA_IS_HEARING_TASK_NEEDED, isHearingTaskNeeded);
             return;
         }
