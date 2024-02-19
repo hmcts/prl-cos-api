@@ -78,6 +78,7 @@ public class RoleAssignmentServiceTest {
         when(objectMapper.convertValue(legalAdviserList, DynamicList.class)).thenReturn(legalAdviserList);
         when(userService.getUserByEmailId(auth, "test1@test.com")).thenReturn(List.of(UserDetails.builder()
             .forename("first")
+            .id("1234")
             .surname("test").build()));
         roleAssignmentService.createRoleAssignment(
             auth,
@@ -100,6 +101,7 @@ public class RoleAssignmentServiceTest {
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
         when(userService.getUserByEmailId(auth, "test1@test.com")).thenReturn(List.of(UserDetails.builder()
+            .id("1234")
             .forename("first")
             .surname("test").build()));
 
