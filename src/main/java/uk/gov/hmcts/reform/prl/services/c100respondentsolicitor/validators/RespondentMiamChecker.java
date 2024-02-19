@@ -33,9 +33,6 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             .filter(miam -> anyNonEmpty(
                 miam.getAttendedMiam(),
                 miam.getReasonNotAttendingMiam(),
-                miam.getWillingToAttendMiam(),
-                miam.getAttendedMiam(),
-                miam.getReasonNotAttendingMiam(),
                 miam.getWillingToAttendMiam()
             )).isPresent()).isPresent();
     }
@@ -43,13 +40,12 @@ public class RespondentMiamChecker implements RespondentEventChecker {
     @Override
     public boolean isFinished(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        boolean isFinished = false;
         if (response.isPresent()) {
             Optional<Miam> miam
                 = Optional.ofNullable(response.get().getMiam());
             if (miam.isPresent() && checkMiamManadatoryCompleted(miam)) {
                 respondentTaskErrorService.removeError(MIAM_ERROR);
-                isFinished = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
@@ -57,7 +53,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             MIAM_ERROR,
             MIAM_ERROR.getError()
         );
-        return isFinished;
+        return false;
     }
 
     private boolean checkMiamManadatoryCompleted(Optional<Miam> miam) {
