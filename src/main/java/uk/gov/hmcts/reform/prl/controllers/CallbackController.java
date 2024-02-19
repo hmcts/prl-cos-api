@@ -107,6 +107,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.GATEKEEPING_JUD
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
@@ -519,12 +520,14 @@ public class CallbackController {
             Map<String, Object> allTabsFields = allTabsService.getAllTabsFields(caseData);
             caseDataUpdated.putAll(allTabsFields);
 
-            roleAssignmentService.createRoleAssignment(
-                authorisation,
-                callbackRequest.getCaseDetails(),
-                false,
-                GATEKEEPING_JUDGE_ROLE
-            );
+            if (caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING) != null) {
+                roleAssignmentService.createRoleAssignment(
+                    authorisation,
+                    callbackRequest.getCaseDetails(),
+                    false,
+                    GATEKEEPING_JUDGE_ROLE
+                );
+            }
 
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();

@@ -349,7 +349,7 @@ public class DraftAnOrderService {
                                                                                .getHearingDataForSelectedHearing(caseData,
                                                                                                                  hearings,
                                                                                                                  authorisation));
-                    } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                    } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
                         caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                     }
                     draftOrder = getUpdatedDraftOrder(draftOrder, caseData, loggedInUserType, eventId);
@@ -937,13 +937,13 @@ public class DraftAnOrderService {
                 .listItems(
                     hearingDataPrePopulatedDynamicLists.getRetrievedHearingDates()
                         .getListItems())
-                .build() : DynamicList.builder().listItems(List.of(DynamicListElement.EMPTY)).build())
+                .build() : DynamicList.builder().value(DynamicListElement.EMPTY).listItems(List.of(DynamicListElement.EMPTY)).build())
             .hearingListedLinkedCases(isNotEmpty(hearingData.getHearingListedLinkedCases())
                                           ? hearingData.getHearingListedLinkedCases().toBuilder()
                 .listItems(
                     hearingDataPrePopulatedDynamicLists.getHearingListedLinkedCases()
                         .getListItems())
-                .build() : DynamicList.builder().listItems(List.of(DynamicListElement.EMPTY)).build())
+                .build() : DynamicList.builder().value(DynamicListElement.EMPTY).listItems(List.of(DynamicListElement.EMPTY)).build())
             .build();
     }
 
@@ -980,7 +980,7 @@ public class DraftAnOrderService {
                                                                                    authorisation
                                                                                ));
                         log.info("Updated order hearing details for docmosis");
-                    } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions())) {
+                    } else if (CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(draftOrder.getOrderType())) {
                         caseData = manageOrderService.setHearingDataForSdo(caseData, hearings, authorisation);
                         log.info("Updated sdo order hearing details for docmosis");
                     }
@@ -1097,7 +1097,8 @@ public class DraftAnOrderService {
                                       caseData.getStandardDirectionOrder(),
                                       draftOrder.getOrderType(),
                                       draftOrder.getC21OrderOptions()))
-                                  .instructionsToLegalRepresentative(null)
+                                  .instructionsToLegalRepresentative(Event.EDIT_AND_APPROVE_ORDER.getId().equalsIgnoreCase(
+                                      eventId) ? null : draftOrder.getOtherDetails().getInstructionsToLegalRepresentative())
                                   .build())
                 .isTheOrderByConsent(caseData.getManageOrders().getIsTheOrderByConsent())
                 .wasTheOrderApprovedAtHearing(caseData.getWasTheOrderApprovedAtHearing())
