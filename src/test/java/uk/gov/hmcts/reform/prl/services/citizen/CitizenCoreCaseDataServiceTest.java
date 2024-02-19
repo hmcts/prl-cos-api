@@ -158,6 +158,18 @@ public class CitizenCoreCaseDataServiceTest {
         Assert.assertEquals(caseDetails, updatedDetails);
     }
 
+    @Test
+    public void citizenCoreCaseShouldBeUpdated1() {
+        userDetails = UserDetails.builder()
+            .id("testUser").roles(List.of(CITIZEN_ROLE)).build();
+        when(idamClient.getUserDetails(bearerToken)).thenReturn(userDetails);
+
+        CaseDetails updatedDetails = citizenCoreCaseDataService.updateCaseData(bearerToken,
+                                                                           12345L,
+                                                                               stringObjectMap,
+                                                                           CaseEvent.LINK_CITIZEN);
+    }
+
     @Test(expected = CoreCaseDataStoreException.class)
     public void updateCitizenCoreCaseShouldThrowException() {
         citizenCoreCaseDataService.updateCase(bearerToken, 12345L, caseDataMock, CaseEvent.LINK_CITIZEN);
