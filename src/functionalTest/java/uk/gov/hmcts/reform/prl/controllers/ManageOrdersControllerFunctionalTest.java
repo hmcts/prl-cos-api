@@ -291,7 +291,7 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_courtArdmin_judge_approval_required() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED);
 
-        request
+        AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -307,6 +307,7 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
+        System.out.println("Resssssspp11111 " + resp.getData());
 
     }
 
@@ -340,7 +341,7 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-orders/about-to-submit")
             .then()
-            .body("data.isHearingTaskNeeded", equalTo("No"),
+            .body("data.isHearingTaskNeeded", equalTo("No"),// shud be no
                   "data.isMultipleHearingSelected", equalTo("Yes"),
                   "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
                   "data.isOrderApproved", equalTo(null),
@@ -611,9 +612,9 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_JUDGE_APPROVAL_REQUIRED);
 
         String requestBodyRevised = requestBody
-            .replace("1706997775517206", caseDetails.getId().toString());
+            .replace("1706997775517206", "1702636092071141");
 
-        request
+        AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBodyRevised)
@@ -629,6 +630,7 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
+        System.out.println("Resssssspp " + resp.getData());
 
     }
 
