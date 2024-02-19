@@ -21,9 +21,8 @@ import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.ContactInformation;
 import uk.gov.hmcts.reform.prl.models.DxAddress;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
-import uk.gov.hmcts.reform.prl.models.complextypes.Child;
+import uk.gov.hmcts.reform.prl.models.complextypes.ChildDetailsRevised;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.AddressHistory;
@@ -947,7 +946,7 @@ public class C100RespondentSolicitorService {
         dataMap.put(COURT_NAME_FIELD, callbackRequest.getCaseDetails().getData().get(COURT_NAME));
         dataMap.put(CASE_DATA_ID, callbackRequest.getCaseDetails().getId());
         dataMap.put("issueDate", callbackRequest.getCaseDetails().getData().get(ISSUE_DATE_FIELD));
-        List<Element<Child>> listOfChildren = (List<Element<Child>>) callbackRequest.getCaseDetails().getData().get(
+        List<Element<ChildDetailsRevised>> listOfChildren = (List<Element<ChildDetailsRevised>>) callbackRequest.getCaseDetails().getData().get(
             CHILDREN);
         dataMap.put(CHILDREN, listOfChildren);
 
@@ -961,10 +960,10 @@ public class C100RespondentSolicitorService {
             }
         }
         if (null != solicitorRepresentedRespondent
-            && null != solicitorRepresentedRespondent.getValue()
-            && null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
-            getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
-
+            && null != solicitorRepresentedRespondent.getValue()) {
+            if (null != solicitorRepresentedRespondent.getValue().getSolicitorOrg()) {
+                getOrganisationAddress(solicitorRepresentedRespondent, dataMap);
+            }
             dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
 
@@ -996,8 +995,10 @@ public class C100RespondentSolicitorService {
             populateRepresentativeDetails(solicitorRepresentedRespondent, dataMap);
             populatePartyDetails(solicitorRepresentedRespondent, response, dataMap);
             populateMiscellaneousDetails(solicitorRepresentedRespondent, dataMap, response);
+            if (isConfidentialDataPresent) {
+                dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
+            }
         }
-        dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
         return dataMap;
     }
 
@@ -1065,7 +1066,9 @@ public class C100RespondentSolicitorService {
         } else {
             dataMap.put("dob", solicitorRepresentedRespondent.getValue().getDateOfBirth());
         }
-        dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
+        if (null != solicitorRepresentedRespondent.getValue().getGender()) {
+            dataMap.put("gender", solicitorRepresentedRespondent.getValue().getGender().getDisplayedValue());
+        }
     }
 
     private void populateRepresentativeDetails(Element<PartyDetails> solicitorRepresentedRespondent, Map<String, Object> dataMap) {
@@ -1077,7 +1080,9 @@ public class C100RespondentSolicitorService {
                 .getValue().getRepresentativeFirstName() + " " + solicitorRepresentedRespondent
                 .getValue().getRepresentativeLastName());
         }
-        populateAddressMap(solicitorRepresentedRespondent, dataMap);
+        if (null != solicitorRepresentedRespondent.getValue().getSolicitorAddress()) {
+            populateAddressMap(solicitorRepresentedRespondent, dataMap);
+        }
         dataMap.put("repEmail", solicitorRepresentedRespondent.getValue().getSolicitorEmail());
         dataMap.put("repTelephone", solicitorRepresentedRespondent.getValue().getSolicitorTelephone());
         if (solicitorRepresentedRespondent.getValue().getDxNumber() != null) {
@@ -1148,7 +1153,7 @@ public class C100RespondentSolicitorService {
             isConfidentialDataPresent = true;
         } else if (null != response.getCitizenDetails().getAddress()) {
             dataMap.put(ADDRESS, response.getCitizenDetails().getAddress().getAddressLine1());
-        } else {
+        } else if (null != solicitorRepresentedRespondent.getValue().getAddress()) {
             dataMap.put(ADDRESS, solicitorRepresentedRespondent.getValue().getAddress().getAddressLine1());
         }
         return isConfidentialDataPresent;
@@ -1339,13 +1344,14 @@ public class C100RespondentSolicitorService {
             if (null != orgDetails && null != orgDetails.getContactInformation()) {
                 address = orgDetails.getContactInformation().get(0).toAddress();
                 orgName = orgDetails.getName();
+            } else if (null != respondingParty.getValue().getSendSignUpLink()) {
+                orgName = respondingParty.getValue().getSendSignUpLink();
             }
         } catch (Exception e) {
             log.error("Error fetching organisation for respondent solicitor {}", e.getMessage());
         }
         dataMap.put("solicitorAddress", address);
-        dataMap.put("solicitorOrg", Organisation.builder().organisationName(orgName)
-            .build());
+        dataMap.put("solicitorOrg", orgName);
     }
 
     public SubmittedCallbackResponse submittedC7Response(CaseData caseData) {
