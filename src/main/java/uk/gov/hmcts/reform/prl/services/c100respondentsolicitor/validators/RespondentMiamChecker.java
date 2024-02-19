@@ -23,6 +23,8 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentMiamChecker implements RespondentEventChecker {
+    public static final String MIAM_IS_FINISHED_BEFORE_CHECK = "miam isFinished: before check:";
+    public static final String MIAM_IS_FINISHED_AFTER_CHECK = "miam isFinished: after check:";
     private final RespondentTaskErrorService respondentTaskErrorService;
 
     @Override
@@ -49,28 +51,28 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             Optional<Miam> miam
                 = Optional.ofNullable(response.get().getMiam());
             log.info(
-                "miam isFinished: before check: {}",
+                MIAM_IS_FINISHED_BEFORE_CHECK + " {}",
                 miam.stream().peek(event -> System.out.println("Attended Miam" + event.getAttendedMiam()))
             );
             log.info(
-                "miam isFinished: before check: {}",
+                MIAM_IS_FINISHED_BEFORE_CHECK + " {}",
                 miam.stream().peek(event -> System.out.println("Reason Not Attending Miam" + event.getReasonNotAttendingMiam()))
             );
             log.info(
-                "miam isFinished: before check: {}",
+                MIAM_IS_FINISHED_BEFORE_CHECK + " {}",
                 miam.stream().peek(event -> System.out.println("Willing To Attend Miam" + event.getWillingToAttendMiam()))
             );
             if (miam.isPresent() && checkMiamManadatoryCompleted(miam)) {
                 log.info(
-                    "miam isFinished: after check: {}",
+                    MIAM_IS_FINISHED_AFTER_CHECK + " {}",
                     miam.stream().peek(event -> System.out.println("Attended Miam" + event.getAttendedMiam()))
                 );
                 log.info(
-                    "miam isFinished: after check: {}",
+                    MIAM_IS_FINISHED_AFTER_CHECK + " {}",
                     miam.stream().peek(event -> System.out.println("Reason Not Attending Miam" + event.getReasonNotAttendingMiam()))
                 );
                 log.info(
-                    "miam isFinished: after check: {}",
+                    MIAM_IS_FINISHED_AFTER_CHECK + " {}",
                     miam.stream().peek(event -> System.out.println("Willing To Attend Miam" + event.getWillingToAttendMiam()))
                 );
                 respondentTaskErrorService.removeError(MIAM_ERROR);
@@ -118,6 +120,8 @@ public class RespondentMiamChecker implements RespondentEventChecker {
             "miam checkMiamManadatoryCompleted: final: {}",
             miam.stream().peek(event -> System.out.println("Willing To Attend Miam" + event.getWillingToAttendMiam()))
         );
+        log.info("final value: {}",fields.stream().noneMatch(Optional::isEmpty)
+            && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals("")));
         return fields.stream().noneMatch(Optional::isEmpty)
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
 
