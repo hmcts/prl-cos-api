@@ -42,7 +42,7 @@ import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HEARING_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_ORDER_NAME_JUDGE_APPROVED;
@@ -82,7 +82,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -90,7 +90,11 @@ public class EditAndApproveDraftOrderController {
             if (caseData.getDraftOrderCollection() != null
                 && !caseData.getDraftOrderCollection().isEmpty()) {
                 return AboutToStartOrSubmitCallbackResponse.builder()
-                    .data(draftAnOrderService.getDraftOrderDynamicList(caseData, callbackRequest.getEventId(), authorisation)).build();
+                    .data(draftAnOrderService.getDraftOrderDynamicList(
+                        caseData,
+                        callbackRequest.getEventId(),
+                        authorisation
+                    )).build();
             } else {
                 return AboutToStartOrSubmitCallbackResponse.builder().errors(List.of("There are no draft orders")).build();
             }
@@ -109,7 +113,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -130,7 +134,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = draftAnOrderService.getEligibleServeOrderDetails(
                 authorisation,
                 callbackRequest
@@ -180,9 +184,17 @@ public class EditAndApproveDraftOrderController {
                         .getDraftOrderNameForWA(caseData, true));
                 }
 
-                manageOrderService.setHearingOptionDetailsForTask(caseData, caseDataUpdated,callbackRequest.getEventId(),loggedInUserType);
+                manageOrderService.setHearingOptionDetailsForTask(
+                    caseData,
+                    caseDataUpdated,
+                    callbackRequest.getEventId(),
+                    loggedInUserType
+                );
 
-                caseDataUpdated.put(WA_ORDER_NAME_JUDGE_APPROVED, draftAnOrderService.getDraftOrderNameForWA(caseData, true));
+                caseDataUpdated.put(
+                    WA_ORDER_NAME_JUDGE_APPROVED,
+                    draftAnOrderService.getDraftOrderNameForWA(caseData, true)
+                );
                 caseDataUpdated.putAll(draftAnOrderService.updateDraftOrderCollection(
                     caseData,
                     authorisation,
@@ -191,39 +203,25 @@ public class EditAndApproveDraftOrderController {
             } else if (Event.EDIT_RETURNED_ORDER.getId()
                 .equalsIgnoreCase(callbackRequest.getEventId())) {
                 caseDataUpdated.putAll(editReturnedOrderService.updateDraftOrderCollection(caseData, authorisation));
-                if (caseData.getAllocatedJudge() != null
-                    && caseData.getAllocatedJudge().getIsSpecificJudgeOrLegalAdviserNeeded().equals(Yes)) {
-                    RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-                        .judgeEmail(caseData.getAllocatedJudge().getJudgeEmail())
-                        .legalAdviserList(caseData.getAllocatedJudge().getLegalAdviserList())
-                        .build();
-                    roleAssignmentService.createRoleAssignment(
-                        authorisation,
-                        callbackRequest.getCaseDetails(),
-                        roleAssignmentDto,
-                        DRAFT_AN_ORDER.getName(),
-                        true,
-                        ALLOCATE_JUDGE_ROLE
-                    );
-                } else {
-                    RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-                        .judicialUser(caseData.getManageOrders()
-                                          .getSolicitorOrdersHearingDetails()
-                                          .stream()
-                                          .findFirst()
-                                          .get()
-                                          .getValue()
-                                          .getHearingJudgeNameAndEmail())
-                        .build();
-                    roleAssignmentService.createRoleAssignment(
-                        authorisation,
-                        callbackRequest.getCaseDetails(),
-                        roleAssignmentDto,
-                        DRAFT_AN_ORDER.getName(),
-                        false,
-                        ALLOCATE_JUDGE_ROLE
-                    );
-                }
+
+                RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                    .judicialUser(caseData.getManageOrders()
+                                      .getSolicitorOrdersHearingDetails()
+                                      .stream()
+                                      .findFirst()
+                                      .get()
+                                      .getValue()
+                                      .getHearingJudgeNameAndEmail())
+                    .build();
+                roleAssignmentService.createRoleAssignment(
+                    authorisation,
+                    callbackRequest.getCaseDetails(),
+                    roleAssignmentDto,
+                    DRAFT_AN_ORDER.getName(),
+                    false,
+                    HEARING_JUDGE_ROLE
+                );
+
             }
             ManageOrderService.cleanUpSelectedManageOrderOptions(caseDataUpdated);
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
@@ -243,8 +241,8 @@ public class EditAndApproveDraftOrderController {
     public AboutToStartOrSubmitCallbackResponse populateJudgeOrAdminDraftOrderCustomFields(
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
-        @RequestBody CallbackRequest callbackRequest) throws  Exception {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        @RequestBody CallbackRequest callbackRequest) throws Exception {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -260,17 +258,23 @@ public class EditAndApproveDraftOrderController {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             Object dynamicList = caseData.getDraftOrdersDynamicList();
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
-                if (Yes.getDisplayedValue().equalsIgnoreCase(String.valueOf(caseDataUpdated.get("orderUploadedAsDraftFlag")))) {
+                if (Yes.getDisplayedValue().equalsIgnoreCase(String.valueOf(caseDataUpdated.get(
+                    "orderUploadedAsDraftFlag")))) {
                     return AboutToStartOrSubmitCallbackResponse.builder()
                         .data(caseDataUpdated).build();
                 }
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
-            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(),
-                                                                                        dynamicList);
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                dynamicList
+            );
             if (selectedOrder != null && (CreateSelectOrderOptionsEnum.blankOrderOrDirections.equals(selectedOrder.getOrderType()))
             ) {
-                caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData);
+                caseData = draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(
+                    callbackRequest,
+                    caseData
+                );
                 caseDataUpdated.putAll(draftAnOrderService.getDraftOrderInfo(authorisation, caseData, selectedOrder));
                 return AboutToStartOrSubmitCallbackResponse.builder()
                     .data(caseDataUpdated).build();
@@ -298,7 +302,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -307,8 +311,15 @@ public class EditAndApproveDraftOrderController {
             if (Event.EDIT_RETURNED_ORDER.getId().equals(callbackRequest.getEventId())) {
                 dynamicList = caseData.getManageOrders().getRejectedOrdersDynamicList();
             }
-            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), dynamicList);
-            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(authorisation, caseData, selectedOrder);
+            DraftOrder selectedOrder = draftAnOrderService.getSelectedDraftOrderDetails(
+                caseData.getDraftOrderCollection(),
+                dynamicList
+            );
+            Map<String, Object> response = draftAnOrderService.populateCommonDraftOrderFields(
+                authorisation,
+                caseData,
+                selectedOrder
+            );
 
             if (ManageOrdersUtils.isOrderEdited(caseData, callbackRequest.getEventId())) {
                 response.put("doYouWantToEditTheOrder", Yes);
@@ -327,7 +338,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(org.springframework.http.HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(manageOrderService.serveOrderMidEvent(
                 callbackRequest)).build();
         } else {
@@ -345,7 +356,7 @@ public class EditAndApproveDraftOrderController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
     ) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             CaseData caseData = objectMapper.convertValue(
                 callbackRequest.getCaseDetails().getData(),
                 CaseData.class
@@ -401,7 +412,7 @@ public class EditAndApproveDraftOrderController {
         @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
-        if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+        if (authorisationService.isAuthorized(authorisation, s2sToken)) {
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             ResponseEntity<SubmittedCallbackResponse> responseEntity = ResponseEntity
                 .ok(SubmittedCallbackResponse.builder()
@@ -412,15 +423,21 @@ public class EditAndApproveDraftOrderController {
                 CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
                 try {
                     DraftOrder draftOrder = draftAnOrderService
-                        .getSelectedDraftOrderDetails(caseData.getDraftOrderCollection(), caseData.getDraftOrdersDynamicList());
-                    manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(callbackRequest.getCaseDetails(), draftOrder);
+                        .getSelectedDraftOrderDetails(
+                            caseData.getDraftOrderCollection(),
+                            caseData.getDraftOrdersDynamicList()
+                        );
+                    manageOrderEmailService.sendEmailToLegalRepresentativeOnRejection(
+                        callbackRequest.getCaseDetails(),
+                        draftOrder
+                    );
                 } catch (Exception e) {
                     log.error("Failed to send email to solicitor : {}", e.getMessage());
                 }
                 responseEntity = ResponseEntity.ok(SubmittedCallbackResponse.builder()
-                                             .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
-                                             .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
-                                             .build());
+                                                       .confirmationHeader(CONFIRMATION_HEADER_LEGAL_REP)
+                                                       .confirmationBody(CONFIRMATION_BODY_FURTHER_DIRECTIONS_LEGAL_REP)
+                                                       .build());
             }
             ManageOrdersUtils.clearFieldsAfterApprovalAndServe(caseDataUpdated);
             draftAnOrderService.updateCaseData(callbackRequest, caseDataUpdated);
