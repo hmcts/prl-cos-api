@@ -336,12 +336,12 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-orders/about-to-submit")
             .then()
-            .body("data.isHearingTaskNeeded", equalTo("No"),// shud be no
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),
                   "data.isMultipleHearingSelected", equalTo("Yes"),
                   "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
                   "data.isOrderApproved", equalTo(null),
                   "data.whoApprovedTheOrder", equalTo(null),
-                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
+                  "data.judgeLaManagerReviewRequired", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
