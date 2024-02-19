@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
@@ -396,7 +397,10 @@ public class CaseServiceTest {
             .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
             .state(State.CASE_WITHDRAWN)
             .build();
-
+        Map<String, Object> updatedCaseData1 = caseDetails.getData();
+        updatedCaseData1.putAll(caseSummaryTab.updateTab(updatedCaseData));
+        updatedCaseData1.put("caseStatus", CaseStatus.builder().state(
+            State.CASE_WITHDRAWN.getLabel()).build());
         List<CaseEventDetail> caseEventDetails = Arrays.asList(
             CaseEventDetail.builder().stateId(PrlAppsConstants.SUBMITTED_STATE).build());
 
@@ -404,7 +408,7 @@ public class CaseServiceTest {
         when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         //when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_WITHDRAW)).thenReturn(caseDetails);
+        when(caseRepository.updateCaseData(authToken, caseId, updatedCaseData1, CITIZEN_CASE_WITHDRAW)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
 
         //When

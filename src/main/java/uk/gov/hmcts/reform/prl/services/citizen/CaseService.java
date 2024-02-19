@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
@@ -56,7 +57,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -66,6 +66,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
+
 
 
 @Slf4j
@@ -446,10 +447,7 @@ public class CaseService {
 
         CaseDetails caseDetails = getCase(authToken, caseId);
         Map<String, Object> caseDataUpdated  = caseDetails.getData();
-        caseDataUpdated.put("state", WITHDRAWN_STATE);
-        caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-        caseDetails.setData(caseDataUpdated);
+
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
@@ -459,12 +457,15 @@ public class CaseService {
                 .withDrawApplicationData(withDrawApplicationData)
                 .build();
         }
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(updatedCaseData));
+        caseDataUpdated.put("caseStatus", CaseStatus.builder().state(
+            State.CASE_WITHDRAWN.getLabel()).build());
         try {
-            log.info(objectMapper.writeValueAsString("Case data Updatedcasedata****** " + updatedCaseData));
+            log.info(objectMapper.writeValueAsString("Case data Updatedcasedata****** " + caseDataUpdated));
         } catch (JsonProcessingException e) {
             log.info("error");
         }
-        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
+        return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
 }

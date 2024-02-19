@@ -66,8 +66,17 @@ public class CcdCaseApi {
         );
     }
 
-    public CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent) {
+    public CaseDetails updateCase(String authorisation, String caseId,  CaseData caseData, CaseEvent caseEvent) {
         return citizenCoreCaseDataService.updateCase(
+            authorisation,
+            Long.valueOf(caseId),
+            caseData,
+            caseEvent
+        );
+    }
+
+    public CaseDetails updateCaseData(String authorisation, String caseId,  Map<String, Object>  caseData, CaseEvent caseEvent) {
+        return citizenCoreCaseDataService.updateCaseData(
             authorisation,
             Long.valueOf(caseId),
             caseData,
