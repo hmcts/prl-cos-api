@@ -78,7 +78,7 @@ public class CaseControllerFunctionalTest {
     private static CaseData caseData;
 
     @Before
-    public void setUp() throws Exception{
+    public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
@@ -144,7 +144,7 @@ public class CaseControllerFunctionalTest {
 
     @Test
     public void testCreateDummyCase() {
-         caseData = request
+        caseData = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .when()
