@@ -138,7 +138,7 @@ public class Fl401ListOnNoticeControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
+        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(caseData))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
             .prePopulateHearingPageDataForFl401ListOnNotice(authToken,s2sToken, callbackRequest);
@@ -226,57 +226,10 @@ public class Fl401ListOnNoticeControllerTest {
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .build();
-        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
+        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(caseData))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
             .prePopulateHearingPageDataForFl401ListOnNotice(authToken, s2sToken, callbackRequest);
-        assertNotNull(response);
-    }
-
-
-    @Test
-    public void shouldGenerateFL404bDocForListOnNotice() throws Exception {
-
-        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
-            .url("TestUrl")
-            .binaryUrl("binaryUrl")
-            .hashToken("testHashToken")
-            .build();
-
-        CaseData caseData = CaseData.builder()
-            .courtName("testcourt")
-            .orderWithoutGivingNoticeToRespondent(WithoutNoticeOrderDetails.builder()
-                                                      .orderWithoutGivingNotice(YesOrNo.Yes)
-                                                      .build())
-            .fl401ListOnNotice(Fl401ListOnNotice.builder()
-                                   .fl401ListOnNoticeDocument(Document.builder()
-                                                                  .documentUrl(generatedDocumentInfo.getUrl())
-                                                                  .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-                                                                  .documentHash(generatedDocumentInfo.getHashToken())
-                                                                  .documentFileName("Fl404B_Document.pdf")
-                                                                  .build())
-                                   .build())
-            .build();
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        Document document = Document.builder()
-            .documentUrl(generatedDocumentInfo.getUrl())
-            .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
-            .documentHash(generatedDocumentInfo.getHashToken())
-            .documentFileName("Fl404B_Document.pdf")
-            .build();
-        CaseDetails caseDetails = CaseDetails.builder()
-            .id(123L)
-            .data(stringObjectMap)
-            .build();
-
-        CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails)
-            .build();
-        when(fl401ListOnNoticeService.prePopulateHearingPageDataForFl401ListOnNotice(authToken,caseData))
-            .thenReturn(stringObjectMap);
-        AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
-            .generateFl404bDocument(authToken,s2sToken,callbackRequest);
         assertNotNull(response);
     }
 
@@ -366,7 +319,7 @@ public class Fl401ListOnNoticeControllerTest {
             .caseDetails(caseDetails)
             .build();
 
-        when(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(caseDetails))
+        when(fl401ListOnNoticeService.fl401ListOnNoticeSubmission(caseDetails, authToken))
             .thenReturn(stringObjectMap);
         AboutToStartOrSubmitCallbackResponse response = fl401ListOnNoticeController
             .fl401ListOnNoticeSubmission(authToken,s2sToken,callbackRequest);
@@ -460,26 +413,6 @@ public class Fl401ListOnNoticeControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
         assertExpectedException(() -> {
             fl401ListOnNoticeController.prePopulateHearingPageDataForFl401ListOnNotice(authToken,s2sToken,callbackRequest);
-        }, RuntimeException.class, "Invalid Client");
-
-    }
-
-    @Test
-    public void testExceptionForGenerateFl404bDocument() throws Exception {
-
-        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-            .CallbackRequest.builder()
-            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                             .id(123L)
-                             .data(stringObjectMap)
-                             .build())
-            .build();
-
-        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
-        assertExpectedException(() -> {
-            fl401ListOnNoticeController.generateFl404bDocument(authToken,s2sToken,callbackRequest);
         }, RuntimeException.class, "Invalid Client");
 
     }
