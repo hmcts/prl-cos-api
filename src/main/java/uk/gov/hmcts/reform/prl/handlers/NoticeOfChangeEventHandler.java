@@ -42,15 +42,12 @@ public class NoticeOfChangeEventHandler {
         //PRL-3211 - notify LiP
         sendEmailToLitigant(caseData, event, EmailTemplateNames.CA_DA_APPLICANT_RESPONDENT_NOC, false);
 
-        log.info("Addd time sendEmailToApplicantsRespondents");
         //PRL-3211 - notify applicants/respondents other parties except litigant
         sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC, false);
 
-        log.info("Addd time sendEmailToOtherParties");
         //PRL-3211 - notify other persons if any
         sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC,false);
 
-        log.info("Addd time sendEmailToAppRespSolicitors");
         //PRL-3211 - notify applicants/respondents LRs
         sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_NOC);
     }
