@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -524,7 +525,7 @@ public class CallbackController {
             if (caseDataUpdated.get(IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING) != null
                 && (gatekeepingDetails.getJudgeName() != null
                 || (gatekeepingDetails.getLegalAdviserList() != null
-                && gatekeepingDetails.getLegalAdviserList().getListItems().size() > 0))) {
+                && CollectionUtils.isNotEmpty(gatekeepingDetails.getLegalAdviserList().getListItems())))) {
                 RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
                     .judicialUser(gatekeepingDetails.getJudgeName())
                     .legalAdviserList(gatekeepingDetails.getLegalAdviserList())

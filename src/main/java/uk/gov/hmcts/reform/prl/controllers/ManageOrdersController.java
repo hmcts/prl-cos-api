@@ -103,7 +103,6 @@ public class ManageOrdersController {
     @Autowired
     CoreCaseDataService coreCaseDataService;
 
-    @Autowired
     RoleAssignmentService roleAssignmentService;
 
     private DynamicMultiSelectListService dynamicMultiSelectListService;
