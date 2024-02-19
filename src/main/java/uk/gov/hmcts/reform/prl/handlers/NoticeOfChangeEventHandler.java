@@ -198,8 +198,6 @@ public class NoticeOfChangeEventHandler {
         //PRL-3215 - notify old LR
         sendEmailToSolicitor(caseData, event, EmailTemplateNames.CA_DA_REMOVE_SOLICITOR_NOC);
 
-        log.info("event.getAccessCode()---> {}",event.getAccessCode());
-        log.info("nocc---> {}",launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc"));
         //Access code will not generate if the case has not reached to Hearing state yet
         if (StringUtils.isNotEmpty(event.getAccessCode())
             && launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")) {
@@ -208,10 +206,8 @@ public class NoticeOfChangeEventHandler {
             //PRL-3215 - notify applicants/respondents other parties except litigant
             sendEmailToApplicantsRespondents(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC,true);
         }
-        log.info("removee time Revised");
         //PRL-3215 - notify other persons if any
         sendEmailToOtherParties(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC_REVISED, true);
-        log.info("removee time");
         //PRL-3215 - notify applicants/respondents LRs
         sendEmailToAppRespSolicitors(caseData, event, EmailTemplateNames.CA_DA_OTHER_PARTIES_REMOVE_NOC);
     }
