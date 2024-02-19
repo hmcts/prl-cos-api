@@ -59,7 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REASONS_SELECTE
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@SuppressWarnings({"java:S107"})
+@SuppressWarnings({"java:S107","java:S5665"})
 public class ListWithoutNoticeController extends AbstractCallbackController {
     public static final String LISTING_INSTRUCTIONS_SENT_TO_ADMIN = "Listing instructions sent to admin";
     public static final String LIST_WITHOUT_NOTICE_HEARING_INSTRUCTION = "listWithoutNoticeHearingInstruction";
