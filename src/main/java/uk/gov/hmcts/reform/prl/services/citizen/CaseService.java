@@ -447,12 +447,6 @@ public class CaseService {
         caseDataUpdated.put("caseStatus", CaseStatus.builder().state(
             State.CASE_WITHDRAWN.getLabel()).build());
         caseDetails.setData(caseDataUpdated);
-        try {
-            log.info(objectMapper.writeValueAsString(" CASEDETAILS +++++ " + caseDetails.getData()));
-            log.info(objectMapper.writeValueAsString("Case data ****** " + caseDataUpdated));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
@@ -462,7 +456,11 @@ public class CaseService {
                 .withDrawApplicationData(withDrawApplicationData)
                 .build();
         }
-
+        try {
+            log.info(objectMapper.writeValueAsString("Case data Updatedcasedata****** " + updatedCaseData));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
