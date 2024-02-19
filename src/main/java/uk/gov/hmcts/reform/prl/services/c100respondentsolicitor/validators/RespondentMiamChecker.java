@@ -49,7 +49,7 @@ public class RespondentMiamChecker implements RespondentEventChecker {
                 = Optional.ofNullable(response.get().getMiam());
             if (miam.isPresent() && checkMiamManadatoryCompleted(miam)) {
                 respondentTaskErrorService.removeError(MIAM_ERROR);
-                isFinished = true;
+                return true;
             }
         }
         respondentTaskErrorService.addEventError(
