@@ -2,40 +2,50 @@ package uk.gov.hmcts.reform.prl.services.fl401listonnotice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.prl.enums.State;
-import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
-import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.enums.CaseNoteDetails;
+import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
+import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
+import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
-import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
-import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
+import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
+import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
+import uk.gov.hmcts.reform.prl.services.BulkPrintService;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
+import uk.gov.hmcts.reform.prl.services.DgsService;
+import uk.gov.hmcts.reform.prl.services.EmailService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
+import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
-import uk.gov.hmcts.reform.prl.utils.CaseUtils;
-import uk.gov.hmcts.reform.prl.utils.ElementUtils;
-import uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_DA_LIST_ON_NOTICE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_WITHOUT_NOTICE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_LISTONNOTICE_HEARINGDETAILS;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_LIST_ON_NOTICE_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_ADVISER_LIST;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LINKED_CASES_LIST;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_HEARING_INSTRUCTIONS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -43,6 +53,8 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Service
 public class Fl401ListOnNoticeService {
 
+    public static final String LIST_WITHOUT_NOTICE_LETTER_PDF = "List_without_notice_letter.pdf";
+    public static final String LETTER_TYPE = "ListWithoutNoticeLetter";
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -64,74 +76,213 @@ public class Fl401ListOnNoticeService {
     @Autowired
     @Qualifier("caseSummaryTab")
     private CaseSummaryTabService caseSummaryTabService;
+    @Autowired
+    private AddCaseNoteService addCaseNoteService;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private CoreCaseDataService coreCaseDataService;
+    @Autowired
+    private ListOnNoticeService listOnNoticeService;
+    @Autowired
+    private DgsService dgsService;
+    @Autowired
+    private BulkPrintService bulkPrintService;
 
-    public Map<String, Object> prePopulateHearingPageDataForFl401ListOnNotice(String authorisation, CaseData caseData) {
+    public Map<String, Object> prePopulateHearingPageDataForFl401ListOnNotice(CaseData caseData) {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        List<Element<HearingData>> existingFl401ListOnNoticeHearingDetails = caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails();
-        Hearings hearings = hearingService.getHearings(authorisation, String.valueOf(caseData.getId()));
-        HearingDataPrePopulatedDynamicLists hearingDataPrePopulatedDynamicLists =
-            hearingDataService.populateHearingDynamicLists(authorisation, String.valueOf(caseData.getId()), caseData, hearings);
         String isCaseWithOutNotice = String.valueOf(Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent()
                                                                    .getOrderWithoutGivingNotice())
                                                         ? Yes : No);
         caseDataUpdated.put(FL401_CASE_WITHOUT_NOTICE, isCaseWithOutNotice);
-
-        if (caseDataUpdated.containsKey(FL401_LISTONNOTICE_HEARINGDETAILS)) {
-            caseDataUpdated.put(
-                FL401_LISTONNOTICE_HEARINGDETAILS,
-                hearingDataService.getHearingDataForOtherOrders(existingFl401ListOnNoticeHearingDetails,
-                                                                hearingDataPrePopulatedDynamicLists,
-                                                                caseData));
-        } else {
-            HearingData hearingData = hearingDataService.generateHearingData(hearingDataPrePopulatedDynamicLists, caseData);
-            caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, ElementUtils.wrapElements(hearingData));
-            //add hearing screen field show params
-            ManageOrdersUtils.addHearingScreenFieldShowParams(hearingData, caseDataUpdated, caseData);
-        }
-        List<DynamicListElement> linkedCasesList = hearingDataService.getLinkedCases(authorisation, caseData);
-        caseDataUpdated.put(
-            LINKED_CASES_LIST,
-            hearingDataService.getDynamicList(linkedCasesList));
-
-        log.info("FL401 list on notice Before calling ref data for LA users list {}", System.currentTimeMillis());
-        List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
-        log.info("FL401 list on notice After calling ref data for LA users list {}", System.currentTimeMillis());
-        caseDataUpdated.put(LEGAL_ADVISER_LIST, DynamicList.builder().value(DynamicListElement.EMPTY).listItems(legalAdviserList)
-            .build());
         return caseDataUpdated;
     }
 
-    public Map<String, Object> generateFl404bDocument(String authorisation, CaseData caseData) throws Exception {
-
-        Map<String, Object> caseDataUpdated = new HashMap<>();
-        Document document = documentGenService.generateSingleDocument(
-            authorisation,
-            caseData,
-            DA_LIST_ON_NOTICE_FL404B_DOCUMENT,
-            false
-        );
-        caseDataUpdated.put(FL401_LIST_ON_NOTICE_DOCUMENT, document);
-        return caseDataUpdated;
-    }
-
-    public Map<String, Object> fl401ListOnNoticeSubmission(CaseDetails caseDetails) {
+    public Map<String, Object> fl401ListOnNoticeSubmission(CaseDetails caseDetails, String authorisation) {
         CaseData caseData = objectMapper.convertValue(
             caseDetails.getData(),
             CaseData.class
         );
         Map<String, Object> caseDataUpdated = caseDetails.getData();
-        caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, null);
-        AllocatedJudge allocatedJudge = allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated,
-                                                                                       caseData.getLegalAdviserList(), refDataUserService);
-        caseData = caseData.toBuilder()
-            .allocatedJudge(allocatedJudge)
-            .state(State.valueOf(caseDetails.getState()))
-            .build();
-        caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-        caseDataUpdated.put(FL401_LISTONNOTICE_HEARINGDETAILS, hearingDataService
-            .getHearingDataForOtherOrders(caseData.getFl401ListOnNotice().getFl401ListOnNoticeHearingDetails(),null,caseData));
-        caseDataUpdated.put("caseTypeOfApplication", CaseUtils.getCaseTypeOfApplication(caseData));
+
+        String fl401listOnNoticeHearingInstruction = (String) caseDataUpdated.get(
+            FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION);
+        log.info("fl401listOnNoticeHearingInstruction ===> " + fl401listOnNoticeHearingInstruction);
+        if (!StringUtils.isEmpty(fl401listOnNoticeHearingInstruction)) {
+            CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+                LIST_ON_NOTICE_HEARING_INSTRUCTIONS,
+                fl401listOnNoticeHearingInstruction,
+                userService.getUserDetails(authorisation)
+            );
+            caseDataUpdated.put(
+                CASE_NOTES,
+                addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
+            );
+        }
         return caseDataUpdated;
+    }
+
+    public void sendNotification(Map<String, Object> caseDataUpdated, String authorisation) {
+        CaseData caseData = objectMapper.convertValue(
+            caseDataUpdated,
+            CaseData.class
+        );
+        PartyDetails applicantsInCase = caseData.getApplicantsFL401();
+        String fl401ReasonsForListWithoutNoticeRequested = (String) caseDataUpdated.get(
+            FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED);
+        log.info("fl401ReasonsForListWithoutNoticeRequested ===> " + fl401ReasonsForListWithoutNoticeRequested);
+        if (!StringUtils.isEmpty(fl401ReasonsForListWithoutNoticeRequested)) {
+            UUID bulkPrintId = null;
+            StringBuilder finalReasonsForListWithoutNoticeRequested
+                = new StringBuilder(fl401ReasonsForListWithoutNoticeRequested.replace("\n\n", "\n• "))
+                .insert(0, "• ");
+            if (StringUtils.isNotEmpty(applicantsInCase.getSolicitorEmail())) {
+                log.info(
+                    "Sending the email notification to applicant solicitor for List on Notice for caseId {}",
+                    caseData.getId()
+                );
+                sendEmail(
+                    caseData,
+                    applicantsInCase.getSolicitorEmail(),
+                    finalReasonsForListWithoutNoticeRequested,
+                    applicantsInCase.getRepresentativeFirstName(),
+                    applicantsInCase.getRepresentativeLastName()
+                );
+            } else {
+                if (isNotEmpty(applicantsInCase.getUser())
+                    && isNotEmpty(applicantsInCase.getPartyId())
+                    && applicantsInCase.getPartyId().toString().equals(applicantsInCase.getUser().getIdamId())) {
+                    log.info(
+                        "Sending the email notification to applicant for List on Notice for caseId {}",
+                        caseData.getId()
+                    );
+                    sendEmail(
+                        caseData,
+                        applicantsInCase.getEmail(),
+                        finalReasonsForListWithoutNoticeRequested,
+                        applicantsInCase.getFirstName(),
+                        applicantsInCase.getLastName()
+                    );
+                } else {
+                    log.info(
+                        "Sending document via post to applicant for List on Notice for caseId {}",
+                        caseData.getId()
+                    );
+                    bulkPrintId = sendViaPost(
+                        authorisation,
+                        caseData,
+                        applicantsInCase,
+                        bulkPrintId,
+                        finalReasonsForListWithoutNoticeRequested
+                    );
+                }
+                if (isNotEmpty(bulkPrintId)) {
+                    fl401ReasonsForListWithoutNoticeRequested = fl401ReasonsForListWithoutNoticeRequested
+                        + "\n Bulk Print Id: " + bulkPrintId;
+                }
+                CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
+                    LIST_ON_NOTICE_HEARING_INSTRUCTIONS,
+                    fl401ReasonsForListWithoutNoticeRequested,
+                    userService.getUserDetails(authorisation)
+                );
+                caseDataUpdated.put(
+                    CASE_NOTES,
+                    addCaseNoteService.getCaseNoteDetails(caseData, currentCaseNoteDetails)
+                );
+            }
+        }
+        cleanUpListOnNoticeFields(caseDataUpdated);
+        coreCaseDataService.triggerEvent(
+            JURISDICTION,
+            CASE_TYPE,
+            caseData.getId(),
+            "internal-update-all-tabs",
+            caseDataUpdated
+        );
+    }
+
+    private UUID sendViaPost(String authorisation,
+                             CaseData caseData,
+                             PartyDetails applicantsInCase,
+                             UUID bulkPrintId,
+                             StringBuilder finalReasonsForListWithoutNoticeRequested) {
+        Map<String, Object> dataMap = populateDataMap(
+            caseData,
+            applicantsInCase,
+            finalReasonsForListWithoutNoticeRequested
+        );
+        try {
+            log.info(
+                "generating letter : {} for case : {}",
+                PRL_LET_ENG_DA_LIST_ON_NOTICE,
+                dataMap.get("id")
+            );
+            GeneratedDocumentInfo listOnNoticeLetter = dgsService.generateDocument(
+                authorisation,
+                String.valueOf(dataMap.get("id")),
+                PRL_LET_ENG_DA_LIST_ON_NOTICE,
+                dataMap
+            );
+            Document listOnNoticeLetterDocs = Document.builder().documentUrl(listOnNoticeLetter.getUrl())
+                .documentFileName(LIST_WITHOUT_NOTICE_LETTER_PDF).documentBinaryUrl(listOnNoticeLetter.getBinaryUrl())
+                .documentCreatedOn(new Date())
+                .build();
+
+            bulkPrintId = bulkPrintService.send(
+                String.valueOf(caseData.getId()),
+                authorisation,
+                LETTER_TYPE,
+                List.of(listOnNoticeLetterDocs),
+                applicantsInCase.getLabelForDynamicList()
+            );
+            log.info("ID in the queue from bulk print service : {}", bulkPrintId);
+        } catch (Exception e) {
+            log.error("*** List without notice letter failed for {} :: because of {}", PRL_LET_ENG_DA_LIST_ON_NOTICE, e.getMessage());
+        }
+        return bulkPrintId;
+    }
+
+    private static Map<String, Object> populateDataMap(CaseData caseData,
+                                                       PartyDetails applicantsInCase,
+                                                       StringBuilder finalReasonsForListWithoutNoticeRequested) {
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("id", caseData.getId());
+        dataMap.put("address", applicantsInCase.getAddress());
+        dataMap.put("applicantName", applicantsInCase + " " + applicantsInCase.getLastName());
+        dataMap.put("reasonsForListWithoutNoticeRequested", finalReasonsForListWithoutNoticeRequested);
+        dataMap.put("currentDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
+        log.info("dataMap =====> " + dataMap);
+        return dataMap;
+    }
+
+    private void sendEmail(CaseData caseData,
+                           String emailId,
+                           StringBuilder finalSelectedAndAdditionalReasons,
+                           String firstName,
+                           String lastName) {
+        emailService.send(
+            emailId,
+            EmailTemplateNames.LIST_ON_NOTICE_EMAIL_NOTIFICATION,
+            listOnNoticeService.buildListOnNoticeEmail(
+                caseData,
+                firstName
+                    + EMPTY_SPACE_STRING
+                    + lastName,
+                finalSelectedAndAdditionalReasons.toString()
+            ),
+            LanguagePreference.getPreferenceLanguage(caseData)
+        );
+    }
+
+    public void cleanUpListOnNoticeFields(Map<String, Object> caseDataUpdated) {
+        String[] listOnNoticeFields = {FL401_LIST_ON_NOTICE_HEARING_INSTRUCTION, FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED};
+        for (String field : listOnNoticeFields) {
+            if (caseDataUpdated.containsKey(field)) {
+                caseDataUpdated.put(field, null);
+            }
+        }
     }
 }
