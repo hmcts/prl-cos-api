@@ -40,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.complextypes.AppointedGuardianFullName;
 import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
 import uk.gov.hmcts.reform.prl.models.complextypes.MiamAttendingPersonName;
@@ -85,6 +86,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
@@ -2052,17 +2054,20 @@ public class DraftAnOrderService {
                                                                                 authorisation
                                                                             ));
 
+            Optional<Element<HearingData>> hearingDataElement = caseData.getManageOrders()
+                .getSolicitorOrdersHearingDetails()
+                .stream()
+                .filter(
+                    e -> e.getValue().getHearingJudgeNameAndEmail() != null
+                )
+                .findFirst();
+            JudicialUser judicialUser = null;
+            if (hearingDataElement.isPresent()) {
+                judicialUser = hearingDataElement.get().getValue().getHearingJudgeNameAndEmail();
+            }
+
             RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
-                .judicialUser(caseData.getManageOrders()
-                                  .getSolicitorOrdersHearingDetails()
-                                  .stream()
-                                  .filter(
-                                      e -> e.getValue().getHearingJudgeNameAndEmail() != null
-                                  )
-                                  .findFirst()
-                                  .get()
-                                  .getValue()
-                                  .getHearingJudgeNameAndEmail())
+                .judicialUser(judicialUser)
                 .build();
             roleAssignmentService.createRoleAssignment(
                 authorisation,
