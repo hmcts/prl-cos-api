@@ -607,7 +607,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_JUDGE_APPROVAL_REQUIRED);
 
         String requestBodyRevised = requestBody
-            .replace("1706997775517206", caseDetails.getId().toString());
+            .replace("1706997775517206", "1702636092071141");
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
