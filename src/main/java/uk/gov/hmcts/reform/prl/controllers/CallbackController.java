@@ -465,11 +465,6 @@ public class CallbackController {
             Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             updateTabsOrWithdrawFlag(caseData, previousState, stateList, withdrawApplication, caseDataUpdated);
-            try {
-                log.info(objectMapper.writeValueAsString("Case data Updatedcasedata****** " + caseDataUpdated));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
