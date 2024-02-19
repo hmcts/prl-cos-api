@@ -163,6 +163,11 @@ public class CitizenCoreCaseDataServiceTest {
         citizenCoreCaseDataService.updateCase(bearerToken, 12345L, caseDataMock, CaseEvent.LINK_CITIZEN);
     }
 
+    @Test(expected = CoreCaseDataStoreException.class)
+    public void updateCitizenCoreCaseShouldThrowException1() {
+        citizenCoreCaseDataService.updateCaseData(bearerToken, 12345L, stringObjectMap, CaseEvent.LINK_CITIZEN);
+    }
+
     @Test
     public void citizenCoreCaseShouldBeCreatedForCitizen() {
 
