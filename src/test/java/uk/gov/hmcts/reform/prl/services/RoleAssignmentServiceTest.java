@@ -73,10 +73,16 @@ public class RoleAssignmentServiceTest {
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
+        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
+            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+        when(objectMapper.convertValue(legalAdviserList, DynamicList.class)).thenReturn(legalAdviserList);
+        when(userService.getUserByEmailId(auth, "test1@test.com")).thenReturn(List.of(UserDetails.builder()
+            .forename("first")
+            .surname("test").build()));
         roleAssignmentService.createRoleAssignment(
             auth,
             caseDetails,
-            RoleAssignmentDto.builder().build(),
+            RoleAssignmentDto.builder().legalAdviserList(legalAdviserList).build(),
             "TEST EVENT",
             true,
             "Judge"
@@ -93,13 +99,16 @@ public class RoleAssignmentServiceTest {
         roles.add("caseworker-privatelaw-judge");
         userDetails = UserDetails.builder().id("1").roles(roles).build();
         caseDetails.setData(caseDetailsMap);
+        when(userService.getUserByEmailId(auth, "test1@test.com")).thenReturn(List.of(UserDetails.builder()
+            .forename("first")
+            .surname("test").build()));
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
         roleAssignmentService.createRoleAssignment(
             auth,
             caseDetails,
-            RoleAssignmentDto.builder().build(),
+            RoleAssignmentDto.builder().judgeEmail("test1@test.com").build(),
             "TEST EVENT",
             true,
             "Judge"
@@ -119,8 +128,9 @@ public class RoleAssignmentServiceTest {
 
         when(userService.getUserDetails(auth)).thenReturn(userDetails);
         when(authTokenGenerator.generate()).thenReturn("test");
-        roleAssignmentService.createRoleAssignment(auth, caseDetails, RoleAssignmentDto.builder().build(),
-                                                   "TEST EVENT", true, "Judge"
+        roleAssignmentService.createRoleAssignment(auth, caseDetails, RoleAssignmentDto.builder()
+                .judicialUser(JudicialUser.builder().build()).build(),
+            "TEST EVENT", true, "Judge"
         );
         assertEquals("1", userDetails.getId());
     }
