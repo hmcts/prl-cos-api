@@ -4,6 +4,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -19,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -73,8 +75,10 @@ public class CaseControllerFunctionalTest {
     @MockBean
     private AuthTokenGenerator authTokenGenerator;
 
+    private static CaseData caseData;
+
     @Before
-    public void setUp() {
+    public void setUp() throws Exception{
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
 
@@ -138,4 +142,40 @@ public class CaseControllerFunctionalTest {
             .andReturn();
     }
 
+    @Test
+    public void testCreateDummyCase() {
+         caseData = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-dummy-citizen-case")
+            .then()
+            .extract()
+            .as(CaseData.class);
+        Assert.assertNotNull(caseData);
+        Assert.assertNotNull(caseData.getId());
+    }
+
+    @Test
+    public void testUpdateCaseWithOtherPersonDetails() {
+
+        CaseData responseData = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header("accessCode", " ")
+            .body(caseData)
+            .when()
+            .contentType("application/json")
+            .post(caseData.getId() + "/citizen-case-submit/update-case")
+            .then()
+            .extract()
+            .as(CaseData.class);
+
+        Assert.assertNotNull(responseData);
+        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised());
+        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised().get(0));
+        Assert.assertNotNull("Andrew",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getFirstName());
+        Assert.assertNotNull("Smith",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getLastName());
+    }
 }
