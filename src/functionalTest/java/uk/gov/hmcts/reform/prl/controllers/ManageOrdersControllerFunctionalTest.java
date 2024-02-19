@@ -340,12 +340,12 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-orders/about-to-submit")
             .then()
-            .body("data.isHearingTaskNeeded", equalTo("Yes"),
+            .body("data.isHearingTaskNeeded", equalTo("No"),
                   "data.isMultipleHearingSelected", equalTo("Yes"),
                   "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
                   "data.isOrderApproved", equalTo(null),
                   "data.whoApprovedTheOrder", equalTo(null),
-                  "data.judgeLaManagerReviewRequired", equalTo(null))
+                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
@@ -611,7 +611,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_JUDGE_APPROVAL_REQUIRED);
 
         String requestBodyRevised = requestBody
-            .replace("1706997775517206", "1702636092071141");
+            .replace("1706997775517206", caseDetails.getId().toString());
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
