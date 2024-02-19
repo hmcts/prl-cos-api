@@ -37,7 +37,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_DA_LIST_ON_NOTICE;
+import static uk.gov.hmcts.reform.prl.config.templates.Templates.PRL_LET_ENG_LIST_WITHOUT_NOTICE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
@@ -217,13 +217,13 @@ public class Fl401ListOnNoticeService {
         try {
             log.info(
                 "generating letter : {} for case : {}",
-                PRL_LET_ENG_DA_LIST_ON_NOTICE,
+                PRL_LET_ENG_LIST_WITHOUT_NOTICE,
                 dataMap.get("id")
             );
             GeneratedDocumentInfo listOnNoticeLetter = dgsService.generateDocument(
                 authorisation,
                 String.valueOf(dataMap.get("id")),
-                PRL_LET_ENG_DA_LIST_ON_NOTICE,
+                PRL_LET_ENG_LIST_WITHOUT_NOTICE,
                 dataMap
             );
             Document listOnNoticeLetterDocs = Document.builder().documentUrl(listOnNoticeLetter.getUrl())
@@ -240,7 +240,7 @@ public class Fl401ListOnNoticeService {
             );
             log.info("ID in the queue from bulk print service : {}", bulkPrintId);
         } catch (Exception e) {
-            log.error("*** List without notice letter failed for {} :: because of {}", PRL_LET_ENG_DA_LIST_ON_NOTICE, e.getMessage());
+            log.error("*** List without notice letter failed for {} :: because of {}", PRL_LET_ENG_LIST_WITHOUT_NOTICE, e.getMessage());
         }
         return bulkPrintId;
     }
