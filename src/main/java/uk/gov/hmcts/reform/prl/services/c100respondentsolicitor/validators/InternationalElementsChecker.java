@@ -28,12 +28,22 @@ public class InternationalElementsChecker implements RespondentEventChecker {
     @Override
     public boolean isStarted(PartyDetails respondingParty) {
         Optional<Response> response = findResponse(respondingParty);
-        return response.filter(value -> ofNullable(value.getCitizenInternationalElements())
+        boolean isStarted = false;
+        isStarted = response.filter(value -> ofNullable(value.getCitizenInternationalElements())
             .filter(citizenInternationalElements -> anyNonEmpty(
                 citizenInternationalElements.getChildrenLiveOutsideOfEnWlDetails(),
                 citizenInternationalElements.getAnotherCountryAskedInformation(),
                 citizenInternationalElements.getParentsAnyOneLiveOutsideEnWl()
             )).isPresent()).isPresent();
+        if (isStarted) {
+            respondentTaskErrorService.addEventError(
+                INTERNATIONAL_ELEMENT,
+                INTERNATIONAL_ELEMENT_ERROR,
+                INTERNATIONAL_ELEMENT_ERROR.getError()
+            );
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -49,11 +59,11 @@ public class InternationalElementsChecker implements RespondentEventChecker {
                 return true;
             }
         }
-        respondentTaskErrorService.addEventError(
+        /* respondentTaskErrorService.addEventError(
             INTERNATIONAL_ELEMENT,
             INTERNATIONAL_ELEMENT_ERROR,
             INTERNATIONAL_ELEMENT_ERROR.getError()
-        );
+        );*/
         return false;
     }
 
