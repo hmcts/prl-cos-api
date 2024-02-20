@@ -9,20 +9,20 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.fl401listonnotice.Fl401ListOnNoticeService;
-
-import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -83,14 +83,12 @@ public class Fl401ListOnNoticeController extends AbstractCallbackController {
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "List ON notice submission is success"),
         @ApiResponse(responseCode = "400", description = "Bad Request")})
-    public AboutToStartOrSubmitCallbackResponse sendListOnNoticeNotification(
+    public ResponseEntity<SubmittedCallbackResponse> sendListOnNoticeNotification(
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorisation, s2sToken)) {
-            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-            fl401ListOnNoticeService.sendNotification(caseDataUpdated, authorisation);
-            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
+            return fl401ListOnNoticeService.sendNotification(callbackRequest.getCaseDetails().getData(), authorisation);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
