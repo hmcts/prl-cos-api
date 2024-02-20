@@ -97,6 +97,7 @@ public class ConfidentialityTabService {
                 elementList =  getChildrenConfidentialDetails(children);
             }
         }
+        log.info("elementList {}", elementList);
         return elementList;
     }
 
@@ -137,6 +138,7 @@ public class ConfidentialityTabService {
     }
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetailsV2(CaseData caseData) {
+        log.info("inside getChildrenConfidentialDetailsV2 ------------------>>>>>>>>>>>>>>>>>>");
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
         Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenAndOtherPeopleRelations =
             ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations());
@@ -182,11 +184,13 @@ public class ConfidentialityTabService {
                 }
             }
         }
+        log.info("childrenConfidentialDetails {}", childrenConfidentialDetails);
         return childrenConfidentialDetails;
     }
 
     public List<Element<OtherPersonConfidentialityDetails>> getOtherPersonConfidentialDetails(
         List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList, Map<Object, PartyDetails> objectPartyDetailsMap) {
+        log.info("inside getOtherPersonConfidentialDetails ------------------>>>>>>>>>>>>>>");
         List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails = new ArrayList<>();
         for (ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation : childrenAndOtherPeopleRelationList) {
             Optional<PartyDetails> partyDetails = ofNullable(objectPartyDetailsMap.get(
@@ -207,6 +211,7 @@ public class ConfidentialityTabService {
                 tempOtherPersonConfidentialDetails.add(otherElement);
             }
         }
+        log.info("tempOtherPersonConfidentialDetails {}", tempOtherPersonConfidentialDetails);
         return tempOtherPersonConfidentialDetails;
     }
 
