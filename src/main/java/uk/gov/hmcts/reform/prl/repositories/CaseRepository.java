@@ -13,14 +13,11 @@ public interface CaseRepository {
     void linkDefendant(String userAuthorisation, String systemUserToken, String caseId,
                        EventRequestData eventRequestData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated);
 
-    CaseDetails updateCase(String authorisation, String caseId,  CaseData  caseData, CaseEvent caseEvent);
+    CaseDetails updateCase(String authorisation, String caseId, CaseData caseData, CaseEvent caseEvent);
 
     CaseDetails createCase(String authorisation, CaseData caseData);
 
     CaseDetails getCase(String authorisation, String caseId);
-
-    CaseDetails updateCaseData(String authorisation, String caseId,  Map<String, Object>  caseData, CaseEvent caseEvent);
-
 
 }
 
