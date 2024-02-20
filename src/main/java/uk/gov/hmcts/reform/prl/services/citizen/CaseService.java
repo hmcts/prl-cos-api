@@ -450,11 +450,8 @@ public class CaseService {
 
     public CaseDetails withdrawCase(CaseData oldCaseData, String caseId, String authToken) {
         CaseEvent caseEvent = CaseEvent.CITIZEN_CASE_WITHDRAW;
-        log.info("Following case event will be triggered {}", caseEvent.getValue());
         UserDetails userDetails = idamClient.getUserDetails(authToken);
-
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
-        log.info("startEventResponse start******");
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
                 authToken,
@@ -462,7 +459,6 @@ public class CaseService {
                 caseId,
                 false
             );
-        log.info("startEventResponse end******");
         Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
 
         WithdrawApplication withDrawApplicationData = oldCaseData.getWithDrawApplicationData();
@@ -472,13 +468,10 @@ public class CaseService {
             updatedCaseData.put(STATE, WITHDRAWN_STATE);
             updatedCaseData.put(CASE_STATUS, CaseStatus.builder().state(State.CASE_WITHDRAWN.getLabel()).build());
         }
-        log.info("caseDataContent start******");
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
             startEventResponse,
             updatedCaseData
         );
-        log.info("caseDataContent end******");
-        log.info("submitUpdate start******");
         return coreCaseDataService.submitUpdate(
             authToken,
             eventRequestData,
