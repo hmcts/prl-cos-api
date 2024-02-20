@@ -185,7 +185,7 @@ public class C100RespondentSolicitorService {
                         miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder()
                     );
                     break;
-                case CURRENT_OR_PREVIOUS_PROCEEDINGS:
+                case OTHER_PROCEEDINGS:
                     String[] proceedingsFields = event.getCaseFieldName().split(",");
                     caseDataUpdated.put(
                         proceedingsFields[0],
@@ -317,7 +317,7 @@ public class C100RespondentSolicitorService {
             case MIAM:
                 buildResponseForRespondent = buildMiamResponse(caseData, buildResponseForRespondent);
                 break;
-            case CURRENT_OR_PREVIOUS_PROCEEDINGS:
+            case OTHER_PROCEEDINGS:
                 buildResponseForRespondent = buildOtherProceedingsResponse(
                     caseData,
                     buildResponseForRespondent,

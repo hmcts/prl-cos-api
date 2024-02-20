@@ -95,7 +95,7 @@ public class RespondentSolicitorTaskListRenderer {
             .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
 
         final RespondentTaskSection additionalInformation = newSection("5. Additional information")
-            .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS))
+            .withTask(tasks.get(RespondentSolicitorEvents.OTHER_PROCEEDINGS))
             .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE));
 

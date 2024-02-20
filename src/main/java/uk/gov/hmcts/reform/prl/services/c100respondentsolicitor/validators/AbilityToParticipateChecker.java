@@ -59,11 +59,6 @@ public class AbilityToParticipateChecker implements RespondentEventChecker {
                 return true;
             }
         }
-        /*respondentTaskErrorService.addEventError(
-            ABILITY_TO_PARTICIPATE,
-            ABILITY_TO_PARTICIPATE_ERROR,
-            ABILITY_TO_PARTICIPATE_ERROR.getError()
-        );*/
         return false;
     }
 
