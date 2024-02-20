@@ -453,6 +453,7 @@ public class CaseService {
         log.info("Following case event will be triggered {}", caseEvent.getValue());
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, authToken);
+        log.info("startEventResponse start******");
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
                 authToken,
@@ -460,7 +461,7 @@ public class CaseService {
                 caseId,
                 false
             );
-
+        log.info("startEventResponse end******");
         Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
 
         WithdrawApplication withDrawApplicationData = oldCaseData.getWithDrawApplicationData();
@@ -470,12 +471,13 @@ public class CaseService {
             updatedCaseData.put(STATE, WITHDRAWN_STATE);
             updatedCaseData.put(CASE_STATUS, CaseStatus.builder().state(State.CASE_WITHDRAWN.getLabel()).build());
         }
-
+        log.info("caseDataContent start******");
         CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
             startEventResponse,
             updatedCaseData
         );
-
+        log.info("caseDataContent end******");
+        log.info("submitUpdate start******");
         return coreCaseDataService.submitUpdate(
             authToken,
             eventRequestData,
