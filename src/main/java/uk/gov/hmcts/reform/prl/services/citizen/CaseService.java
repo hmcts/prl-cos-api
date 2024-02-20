@@ -453,11 +453,11 @@ public class CaseService {
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
-
+        State state = State.tryFromValue(caseDetails.getState()).orElse(null);
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             updatedCaseData = updatedCaseData.toBuilder()
                 .withDrawApplicationData(withDrawApplicationData)
-                .state(WITHDRAWN_STATE)
+                .state(state)
                 .build();
         }
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
