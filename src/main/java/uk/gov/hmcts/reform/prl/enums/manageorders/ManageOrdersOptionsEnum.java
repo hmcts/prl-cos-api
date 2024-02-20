@@ -18,9 +18,7 @@ public enum ManageOrdersOptionsEnum {
     @JsonProperty("amendOrderUnderSlipRule")
     amendOrderUnderSlipRule("amendOrderUnderSlipRule", "Amend an order"),
     @JsonProperty("servedSavedOrders")
-    servedSavedOrders("servedSavedOrders", "Served saved orders"),
-    @JsonProperty("adminProduceOrder")
-    adminProduceOrder("adminProduceOrder", "Request that the admin produces an order");
+    servedSavedOrders("servedSavedOrders", "Served saved orders");
 
     private final String id;
     private final String displayedValue;
