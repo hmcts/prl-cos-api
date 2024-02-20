@@ -17,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
@@ -28,6 +29,8 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 
 @Slf4j
 @SpringBootTest
@@ -104,6 +107,7 @@ public class CallbackControllerFunctionalTest {
 
     @Ignore
     @Test
+    @Ignore
     public void givenNoAuthorization_whenPostRequestToDraftDocumentGeneration_then400Response() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         request
@@ -203,4 +207,25 @@ public class CallbackControllerFunctionalTest {
             .body("data.caseNameHmctsInternal", equalTo("Test Name"))
             .assertThat().statusCode(200);
     }
+
+    @Test
+    public void testAttachScanDocsWaChange() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCafcass())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/attach-scan-docs/about-to-submit")
+            .then()
+            .body("data.manageDocumentsRestrictedFlag", equalTo(TRUE),
+                  "data.manageDocumentsTriggeredBy", equalTo(STAFF))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
 }

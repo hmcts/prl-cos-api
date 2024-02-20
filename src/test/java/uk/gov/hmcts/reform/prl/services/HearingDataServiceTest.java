@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingDataPrePopulatedDynamicLists;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ListWithoutNoticeDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ManageOrders;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -204,7 +205,8 @@ public class HearingDataServiceTest {
         List<Element<HearingData>> listWithoutNoticeHearingDetails = Collections.singletonList(childElement);
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
         HearingDataPrePopulatedDynamicLists expectedResponse = hearingDataService
             .populateHearingDynamicLists(authToken, "45654654", caseData, Hearings.hearingsWith().build());
@@ -346,7 +348,8 @@ public class HearingDataServiceTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
         List<Element<HearingData>> expectedResponse =
             hearingDataService.getHearingDataForOtherOrders(listWithoutNoticeHearingDetails,
@@ -532,7 +535,8 @@ public class HearingDataServiceTest {
 
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
-            .listWithoutNoticeHearingDetails(listWithoutNoticeHearingDetails)
+            .listWithoutNoticeDetails(ListWithoutNoticeDetails.builder().listWithoutNoticeHearingDetails(
+                listWithoutNoticeHearingDetails).build())
             .build();
 
         List<Element<HearingData>> expectedResponse =

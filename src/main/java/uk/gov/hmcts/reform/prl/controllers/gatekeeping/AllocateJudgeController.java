@@ -20,10 +20,12 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.controllers.AbstractCallbackController;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
@@ -38,6 +40,7 @@ import javax.ws.rs.NotFoundException;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLOCATED_JUDGE;
 
 @Slf4j
 @RestController
@@ -75,7 +78,9 @@ public class AllocateJudgeController extends AbstractCallbackController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws NotFoundException {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("Allocate to judge Before calling ref data for LA users list {}", System.currentTimeMillis());
             List<DynamicListElement> legalAdviserList = refDataUserService.getLegalAdvisorList();
+            log.info("Allocate to judge After calling ref data for LA users list {}", System.currentTimeMillis());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             caseDataUpdated.put(
                 "legalAdviserList",
@@ -109,12 +114,20 @@ public class AllocateJudgeController extends AbstractCallbackController {
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
 
-            roleAssignmentService.createRoleAssignment(
-                authorisation,
-                callbackRequest.getCaseDetails(),
-                false,
-                ALLOCATE_JUDGE_ROLE
-            );
+            if (allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded().equals(YesOrNo.Yes)) {
+                RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                    .judgeEmail(allocatedJudge.getJudgeEmail())
+                    .legalAdviserList(allocatedJudge.getLegalAdviserList())
+                    .build();
+                roleAssignmentService.createRoleAssignment(
+                    authorisation,
+                    callbackRequest.getCaseDetails(),
+                    roleAssignmentDto,
+                    ALLOCATED_JUDGE.getName(),
+                    false,
+                    ALLOCATE_JUDGE_ROLE
+                );
+            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
