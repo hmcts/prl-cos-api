@@ -148,9 +148,10 @@ public class CaseService {
                                                 UpdateCaseData updateCaseData) {
 
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
         log.info("Following case event will be triggered {}", caseEvent.getValue());
 
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, authToken);
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
                 authToken,
