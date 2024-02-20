@@ -12,9 +12,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
-import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
-import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
+import uk.gov.hmcts.reform.ccd.client.model.*;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
@@ -57,8 +55,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
@@ -373,7 +370,7 @@ public class CaseServiceTest {
         assertThat(actualCaseDetails).isEqualTo(caseDetails);
     }
 
-    //@Test
+    @Test
     public void shouldWithdrawCase() {
         //Given
         CaseData caseData = CaseData.builder()
@@ -390,29 +387,31 @@ public class CaseServiceTest {
             .build();
 
         CaseDetails caseDetails = mock(CaseDetails.class);
-
-        CaseData updatedCaseData = caseData.toBuilder()
-            .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
-            .state(State.CASE_WITHDRAWN)
-            .build();
-        Map<String, Object> updatedCaseData1 = caseDetails.getData();
-        updatedCaseData1.putAll(caseSummaryTab.updateTab(updatedCaseData));
-        updatedCaseData1.put("caseStatus", CaseStatus.builder().state(
-            State.CASE_WITHDRAWN.getLabel()).build());
-        List<CaseEventDetail> caseEventDetails = Arrays.asList(
-            CaseEventDetail.builder().stateId(PrlAppsConstants.SUBMITTED_STATE).build());
-
-        when(caseEventService.findEventsForCase(caseId)).thenReturn(caseEventDetails);
+        EventRequestData eventRequestData = EventRequestData.builder().build();
         when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        //when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
-
-        //When
+        when(coreCaseDataService.eventRequest(CaseEvent.CITIZEN_CASE_WITHDRAW, userDetails.getId())).thenReturn(eventRequestData);        //When
+        when(coreCaseDataService.startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(
+            StartEventResponse.builder().caseDetails(mock(CaseDetails.class)).build());
+        CaseDataContent caseDataContent = CaseDataContent.builder().build();
+        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
+            .thenReturn(caseDataContent);
+        when(coreCaseDataService.submitUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(caseDetails);
         CaseDetails actualCaseDetails =  caseService.withdrawCase(caseData, caseId, authToken);
         //Then
-        //assertNotNull(actualCaseDetails);
+        assertNotNull(actualCaseDetails);
     }
 
 
@@ -719,9 +718,9 @@ public class CaseServiceTest {
 
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
@@ -782,9 +781,9 @@ public class CaseServiceTest {
 
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
