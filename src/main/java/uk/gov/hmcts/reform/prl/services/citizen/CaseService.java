@@ -457,9 +457,10 @@ public class CaseService {
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             updatedCaseData = updatedCaseData.toBuilder()
                 .withDrawApplicationData(withDrawApplicationData)
+                .state(WITHDRAWN_STATE)
                 .build();
         }
-        return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
+        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
 }
