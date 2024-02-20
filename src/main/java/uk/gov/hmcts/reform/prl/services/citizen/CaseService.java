@@ -449,15 +449,17 @@ public class CaseService {
         caseDataUpdated.put("state", WITHDRAWN_STATE);
         caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
         caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
+
         CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
-        State state = State.tryFromValue(caseDetails.getState()).orElse(null);
+        //caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.CASE_WITHDRAWN).build());
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
             updatedCaseData = updatedCaseData.toBuilder()
                 .withDrawApplicationData(withDrawApplicationData)
-                .state(state)
+                .state(State.CASE_WITHDRAWN)
                 .build();
         }
         return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
