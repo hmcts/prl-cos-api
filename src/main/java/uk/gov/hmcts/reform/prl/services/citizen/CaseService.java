@@ -451,10 +451,7 @@ public class CaseService {
     public CaseDetails withdrawCase(CaseData oldCaseData, String caseId, String authToken) {
         CaseEvent caseEvent = CaseEvent.CITIZEN_CASE_WITHDRAW;
         log.info("Following case event will be triggered {}", caseEvent.getValue());
-
-        log.info("authToken is {}", authToken);
         UserDetails userDetails = idamClient.getUserDetails(authToken);
-
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
         log.info("startEventResponse start******");
@@ -489,43 +486,6 @@ public class CaseService {
             caseId,
             false
         );
-
-        //        String systemAuthorisation = systemUserService.getSysUserToken();
-        //        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
-        //
-        //        EventRequestData eventRequestData1 = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
-        //        log.info("startEventResponse start******");
-        //        StartEventResponse startEventResponse1 =
-        //            coreCaseDataService.startUpdate(
-        //                systemAuthorisation,
-        //                eventRequestData1,
-        //                caseId,
-        //                true
-        //            );
-        //        log.info("startEventResponse end******");
-        //        Map<String, Object> updatedCaseData1 = startEventResponse1.getCaseDetails().getData();
-        //
-        //        WithdrawApplication withDrawApplicationData1 = oldCaseData.getWithDrawApplicationData();
-        //        Optional<YesOrNo> withdrawApplication1 = ofNullable(withDrawApplicationData1.getWithDrawApplication());
-        //        if ((withdrawApplication1.isPresent() && Yes.equals(withdrawApplication1.get()))) {
-        //            updatedCaseData1.put(WITHDRAW_APPLICATION_DATA, withdrawApplication1);
-        //            updatedCaseData1.put(STATE, WITHDRAWN_STATE);
-        //            updatedCaseData1.put(CASE_STATUS, CaseStatus.builder().state(State.CASE_WITHDRAWN.getLabel()).build());
-        //        }
-        //        log.info("caseDataContent start******");
-        //        CaseDataContent caseDataContent1 = coreCaseDataService.createCaseDataContent(
-        //            startEventResponse1,
-        //            updatedCaseData1
-        //        );
-        //        log.info("caseDataContent end******");
-        //        log.info("submitUpdate start******");
-        //        return coreCaseDataService.submitUpdate(
-        //            systemAuthorisation,
-        //            eventRequestData1,
-        //            caseDataContent1,
-        //            caseId,
-        //            true
-        //        );
     }
 
     public CaseDetails withdrawCasetest(CaseData caseData, String caseId, String authToken) {
