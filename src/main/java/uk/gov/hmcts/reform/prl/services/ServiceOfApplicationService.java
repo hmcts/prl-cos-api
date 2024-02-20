@@ -498,7 +498,9 @@ public class ServiceOfApplicationService {
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
                 dynamicData.put("c100", true);
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
-
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                dynamicData.put("eng", documentLanguage.isGenEng());
+                dynamicData.put("wel", documentLanguage.isGenWelsh());
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                          .sendEmailUsingTemplateWithAttachments(
                                                              authorization, caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
@@ -573,6 +575,9 @@ public class ServiceOfApplicationService {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        dynamicData.put("eng", documentLanguage.isGenEng());
+        dynamicData.put("wel", documentLanguage.isGenWelsh());
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                    caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                                                    packjDocs,
@@ -601,6 +606,9 @@ public class ServiceOfApplicationService {
         Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
         dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        dynamicData.put("eng", documentLanguage.isGenEng());
+        dynamicData.put("wel", documentLanguage.isGenWelsh());
         EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
             authorization,
             caseData.getApplicantsFL401().getSolicitorEmail(),
@@ -801,6 +809,9 @@ public class ServiceOfApplicationService {
                         dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                         dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                         dynamicData.put("respondent", true);
+                        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                        dynamicData.put("eng", documentLanguage.isGenEng());
+                        dynamicData.put("wel", documentLanguage.isGenWelsh());
                         List<Document> finalDocs = removeCoverLettersFromThePacks(packSdocs);
                         emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                             authorization,
@@ -1273,6 +1284,9 @@ public class ServiceOfApplicationService {
                 dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
                 dynamicData.put("c100", true);
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                dynamicData.put("eng", documentLanguage.isGenEng());
+                dynamicData.put("wel", documentLanguage.isGenWelsh());
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
                     caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
@@ -1308,6 +1322,9 @@ public class ServiceOfApplicationService {
                 Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                 dynamicData.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
                 dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                dynamicData.put("eng", documentLanguage.isGenEng());
+                dynamicData.put("wel", documentLanguage.isGenWelsh());
                 emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
                     caseData.getApplicantsFL401().getSolicitorEmail(),
@@ -1354,6 +1371,9 @@ public class ServiceOfApplicationService {
                     Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
                     dynamicData.put("name", party.get().getValue().getRepresentativeFullName());
                     dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+                    DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+                    dynamicData.put("eng", documentLanguage.isGenEng());
+                    dynamicData.put("wel", documentLanguage.isGenWelsh());
                     emailNotificationDetails.add(element(serviceOfApplicationEmailService
                                                              .sendEmailUsingTemplateWithAttachments(
                                                                  authorization, party.get().getValue().getSolicitorEmail(),
