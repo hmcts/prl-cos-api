@@ -459,7 +459,7 @@ public class CaseService {
                 .withDrawApplicationData(withDrawApplicationData)
                 .build();
         }
-        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
+        return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
 }
