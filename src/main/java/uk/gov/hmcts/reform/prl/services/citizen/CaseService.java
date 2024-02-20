@@ -448,19 +448,7 @@ public class CaseService {
         return caseRepository.createCase(authToken, caseData);
     }
 
-    public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken) {
-        CaseDetails caseDetails = getCase(authToken, caseId);
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
-        WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
-        Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
-        if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            caseDataUpdated.put("state", WITHDRAWN_STATE);
-            caseDataUpdated.put("caseStatus", CaseStatus.builder().state("Withdrawn").build());
-        }
-        return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
-    }
-
-    public CaseDetails withdrawCaseRevised(CaseData oldCaseData, String caseId, String authToken) {
+    public CaseDetails withdrawCase(CaseData oldCaseData, String caseId, String authToken) {
         CaseEvent caseEvent = CaseEvent.CITIZEN_CASE_WITHDRAW;
         log.info("Following case event will be triggered {}", caseEvent.getValue());
 
