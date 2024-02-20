@@ -7,6 +7,7 @@ public enum Roles {
     SOLICITOR("SOLICITOR", "caseworker-privatelaw-solicitor"),
     COURT_ADMIN("COURT_ADMIN","caseworker-privatelaw-courtadmin"),
     CITIZEN("CITIZEN","citizen"),
+    BULK_SCAN("BULK_SCAN","caseworker-privatelaw-bulkscan"),
     SYSTEM_UPDATE("SYSTEM_UPDATE","caseworker-privatelaw-systemupdate");
 
     private final String id;

@@ -47,7 +47,11 @@ def secrets = [
       secret('prl-citizen-frontend-idam-client-secret', 'CITIZEN_IDAM_CLIENT_SECRET'),
       secret('filtered-court-ids', 'COURT_IDS_TO_FILTER'),
       secret('da-filtered-court-ids', 'DA_COURT_IDS_TO_FILTER'),
-      secret('welsh-court-mapping', 'WELSH_COURT_MAPPING')
+      secret('welsh-court-mapping', 'WELSH_COURT_MAPPING'),
+      secret('judge-testuser-one', 'JUDGE_USER_NAME'),
+      secret('judge-testpassword', 'JUDGE_PASSWORD'),
+      secret("courtadmin-swansea-testuser", "IDAM_COURT_ADMIN_USERNAME"),
+      secret("courtadmin-swansea-testuser-password", "IDAM_COURT_ADMIN_PASSWORD")
    ]
 ]
 
@@ -57,6 +61,27 @@ withPipeline(type, product, component) {
   enableAksStagingDeployment()
   enableSlackNotifications(channel)
   disableLegacyDeployment()
+
+  afterSuccess('sonarscan') {
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/test",
+      reportFiles          : "index.html",
+      reportName           : "Unit Tests Report"
+    ]
+
+    publishHTML target: [
+      allowMissing         : true,
+      alwaysLinkToLastBuild: true,
+      keepAll              : true,
+      reportDir            : "build/reports/tests/integration",
+      reportFiles          : "index.html",
+      reportName           : "Integration Test Report"
+    ]
+  }
 
   afterAlways('checkout') {
     echo 'prl-cos-api checked out'
