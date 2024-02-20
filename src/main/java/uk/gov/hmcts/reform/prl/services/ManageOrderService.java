@@ -2750,27 +2750,23 @@ public class ManageOrderService {
                                        String eventId) {
 
         String isHearingTaskNeeded = NO;
-        log.info("KKKKKK1111{}",isOrderApproved);
+
         // If rejected by judge, then isHearingTaskNeeded should be always 'No'.
         if (null != isOrderApproved && isOrderApproved.equals(NO)) {
-            log.info("KKKKKK2222");
             caseDataUpdated.put(WA_IS_HEARING_TASK_NEEDED, isHearingTaskNeeded);
             return;
         }
-        log.info("KKKKKK3333{}",MANAGE_ORDERS.getId());
-        log.info("KKKKKK4444{}",amendOrderCheck);
+
         // If judge or la or manager approval is required (for managerOrders journey only) , then isHearingTaskNeeded should be always 'No'.
         if (eventId.equals(MANAGE_ORDERS.getId())
             && (AmendOrderCheckEnum.judgeOrLegalAdvisorCheck.equals(amendOrderCheck)
             || AmendOrderCheckEnum.managerCheck.equals(amendOrderCheck))) {
-            log.info("KKKKKK4444{}");
             caseDataUpdated.put(WA_IS_HEARING_TASK_NEEDED, isHearingTaskNeeded);
             return;
         }
-        log.info("PPPPPPPPP{}",ordersHearingDetails);
+
         //In case if no hearings at all, then default value for isHearingTaskNeeded should be null
         if (CollectionUtils.isEmpty(ordersHearingDetails)) {
-            log.info("PPPPPPPPP");
             isHearingTaskNeeded = null;
         } else if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
             List<HearingData> hearingList = ordersHearingDetails.stream()
@@ -2791,9 +2787,8 @@ public class ManageOrderService {
     public void setHearingSelectedInfoForTask(List<Element<HearingData>> ordersHearingDetails, Map<String,Object> caseDataUpdated) {
         String isMultipleHearingSelected = null;
         String hearingOptionSelected = null;
-        log.info("GGGGGGGGGGG");
+
         if (CollectionUtils.isNotEmpty(ordersHearingDetails)) {
-            log.info("HHHHHHHH");
             List<HearingData> hearingList = ordersHearingDetails.stream()
                 .map(Element::getValue).toList();
 
@@ -2801,22 +2796,19 @@ public class ManageOrderService {
                 .filter(elem -> null != elem.getValue().getHearingDateConfirmOptionEnum()).toList();
 
             if (hearingsWithOptionsSelected.size() == 1) {
-                log.info("oneeeeeee");
                 hearingOptionSelected =  hearingList.get(0).getHearingDateConfirmOptionEnum().toString();
                 isMultipleHearingSelected = NO;
             } else if (hearingsWithOptionsSelected.size() > 1) {
-                log.info("twooooooo");
                 hearingOptionSelected = WA_MULTIPLE_OPTIONS_SELECTED_VALUE;
                 isMultipleHearingSelected = YES;
             }
-            log.info("IIIIIIIIII");
         }
         caseDataUpdated.put(WA_IS_MULTIPLE_HEARING_SELECTED, isMultipleHearingSelected);
         caseDataUpdated.put(WA_HEARING_OPTION_SELECTED, hearingOptionSelected);
     }
 
     public void setHearingOptionDetailsForTask(CaseData caseData, Map<String, Object> caseDataUpdated, String eventId, String performingUser) {
-        log.info("DDDDDDDDDD{}",caseData.getId());
+
         AmendOrderCheckEnum amendOrderCheckEnum = caseData.getManageOrders().getAmendOrderSelectCheckOptions();
         String judgeLaManagerReviewRequired = null;
         if (null != amendOrderCheckEnum) {
@@ -2825,14 +2817,12 @@ public class ManageOrderService {
         caseDataUpdated.put(WA_JUDGE_LA_MANAGER_REVIEW_REQUIRED, judgeLaManagerReviewRequired);
 
         if (eventId.equals(MANAGE_ORDERS.getId())) {
-            log.info("EEEEEEEEEE");
             boolean isSdoOrder = CreateSelectOrderOptionsEnum.standardDirectionsOrder.equals(caseData.getCreateSelectOrderOptions());
             if (isSdoOrder) {
                 List<Element<HearingData>> sdoHearings = buildSdoHearingsListFromStandardDirectionOrder(caseData.getStandardDirectionOrder());
                 setHearingSelectedInfoForTask(sdoHearings, caseDataUpdated);
                 setIsHearingTaskNeeded(sdoHearings,caseDataUpdated,null,amendOrderCheckEnum,eventId);
             } else {
-                log.info("FFFFFFFF");
                 setHearingSelectedInfoForTask(caseData.getManageOrders().getOrdersHearingDetails(), caseDataUpdated);
                 setIsHearingTaskNeeded(caseData.getManageOrders().getOrdersHearingDetails(),caseDataUpdated,null,amendOrderCheckEnum,eventId);
             }
@@ -3131,7 +3121,6 @@ public class ManageOrderService {
         Map<String, Object> waFieldsMap = new HashMap<>();
         if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())
             || ManageOrdersOptionsEnum.uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
-            log.info("BBBBBBBBBB");
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
                 orderNameForWA = ManageOrdersUtils.getOrderNameAlongWithTime(caseData.getCreateSelectOrderOptions() != null
                                                                                  ? caseData.getCreateSelectOrderOptions().getDisplayedValue() : " ");
@@ -3142,7 +3131,6 @@ public class ManageOrderService {
             performingAction = caseData.getManageOrdersOptions().getDisplayedValue();
 
             if (ManageOrdersOptionsEnum.createAnOrder.equals(caseData.getManageOrdersOptions())) {
-                log.info("cccccccccccc");
                 setHearingOptionDetailsForTask(caseData, waFieldsMap, eventId, performingUser);
             }
 

@@ -27,6 +27,7 @@ import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
@@ -54,6 +55,8 @@ public class ManageOrdersControllerFunctionalTest {
     @Autowired
     protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
+    @Autowired
+    protected RoleAssignmentService roleAssignmentService;
 
     @MockBean
     private ManageOrderService manageOrderService;
@@ -190,7 +193,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenBody_whenAboutToSubmitForServeOrder() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER);
         request
@@ -206,7 +208,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenBody_whenAboutToSubmitForDraft() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_DRAFT);
         request
@@ -222,7 +223,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenBody_whenAboutToSubmitForCreateUpldOrder() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_CREATE_OR_UPLOAD_ORDER);
         when(roleAssignmentApi.updateRoleAssignment(any(), any(), any(), any(RoleAssignmentRequest.class)))
@@ -262,7 +262,6 @@ public class ManageOrdersControllerFunctionalTest {
      * Court Admin manageOrders journey - creates the order with one hearing with no approval required.
      */
     @Test
-    @Ignore
     public void givenRequestBody_courtArdmin_noapproval_required() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_NO_NEED_JUDGE_APPROVAL);
 
@@ -291,10 +290,14 @@ public class ManageOrdersControllerFunctionalTest {
     @Test
     public void givenRequestBody_courtArdmin_judge_approval_required() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED);
+
+        String requestBodyRevised = requestBody
+            .replace("1702636092071141", "1708388034079121");
+
         AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/manage-orders/about-to-submit")
@@ -308,7 +311,6 @@ public class ManageOrdersControllerFunctionalTest {
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
         System.out.println("Resssssspp11111 " + resp.getData());
-        log.info("Resssssspp11111 {}",resp.getData());
 
     }
 
@@ -334,10 +336,13 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_courtArdmin_judge_approval_requiredMultiple() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED_MANY_HEARING);
 
+        String requestBodyRevised = requestBody
+            .replace("1702636092071141", "1708388034079121");
+
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/manage-orders/about-to-submit")
@@ -504,7 +509,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenBody_ServeOrderForPersonalServiceWithCourtBailiffOptionSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
         request
@@ -521,7 +525,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenBody_ServeOrderForPersonalServiceWithCourtAdminOptionSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
         request
@@ -615,7 +618,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_JUDGE_APPROVAL_REQUIRED);
 
         String requestBodyRevised = requestBody
-            .replace("1706997775517206", caseDetails.getId().toString());
+            .replace("1706997775517206", "1708388034079121");
 
         AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -642,7 +645,6 @@ public class ManageOrdersControllerFunctionalTest {
      * Judge  manageOrders journey - creates the sdo order with one hearing .
      */
     @Test
-    @Ignore
     public void givenRequestBody_judge_creates_sdo_order() throws Exception {
         String requestBody = ResourceLoader.loadJson(JUDGE_DRAFT_SDO_ORDER_BODY);
 

@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.hamcrest.Matchers;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -39,7 +38,6 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppC
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ContextConfiguration
-@Ignore
 public class EditAndApproveDraftOrderControllerFunctionalTest {
 
     private final String userToken = "Bearer testToken";
