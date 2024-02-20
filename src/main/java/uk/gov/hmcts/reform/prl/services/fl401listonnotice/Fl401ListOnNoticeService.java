@@ -93,16 +93,14 @@ public class Fl401ListOnNoticeService {
     @Autowired
     private BulkPrintService bulkPrintService;
 
-    public static final String CONFIRMATION_BODY_WITHOUT_NOTICE = """
-        ### What happens next
-        Admin will be notified to list the hearing on notice.
-        The reasons you have given to list the hearing on notice will be shared with the applicant.
-        Your request details will be saved in case notes.""";
+    public static final String CONFIRMATION_BODY_WITHOUT_NOTICE = "### What happens next"
+        + "\nAdmin will be notified to list the hearing on notice."
+        + "\nThe reasons you have given to list the hearing on notice will be shared with the applicant."
+        + "\nYour request details will be saved in case notes.";
 
-    public static final String CONFIRMATION_BODY_WITH_NOTICE = """
-        ### What happens next
-        Admin will be notified to list the hearing on notice.
-        Your request details will be saved in case notes.""";
+    public static final String CONFIRMATION_BODY_WITH_NOTICE = "### What happens next"
+        + "\nAdmin will be notified to list the hearing on notice."
+        + "\nYour request details will be saved in case notes.";
 
     public static final String CONFIRMATION_HEADER = "# Listing instructions sent to admin";
 
@@ -197,7 +195,7 @@ public class Fl401ListOnNoticeService {
                 }
                 if (isNotEmpty(bulkPrintId)) {
                     fl401ReasonsForListWithoutNoticeRequested = fl401ReasonsForListWithoutNoticeRequested
-                        + "\n Bulk Print Id: " + bulkPrintId;
+                        + ", Bulk Print Id: " + bulkPrintId;
                 }
             }
             CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
