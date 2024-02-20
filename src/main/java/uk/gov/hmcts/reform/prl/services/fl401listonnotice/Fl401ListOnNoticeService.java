@@ -56,8 +56,6 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 @Slf4j
 @Service
 public class Fl401ListOnNoticeService {
-
-    public static final String LIST_WITHOUT_NOTICE_LETTER_PDF = "List_without_notice_letter.pdf";
     public static final String LETTER_TYPE = "ListWithoutNoticeLetter";
     @Autowired
     private ObjectMapper objectMapper;
@@ -254,7 +252,7 @@ public class Fl401ListOnNoticeService {
                 dataMap
             );
             Document listOnNoticeLetterDocs = Document.builder().documentUrl(listOnNoticeLetter.getUrl())
-                .documentFileName(LIST_WITHOUT_NOTICE_LETTER_PDF).documentBinaryUrl(listOnNoticeLetter.getBinaryUrl())
+                .documentFileName(listOnNoticeLetter.getDocName()).documentBinaryUrl(listOnNoticeLetter.getBinaryUrl())
                 .documentCreatedOn(new Date())
                 .build();
 
