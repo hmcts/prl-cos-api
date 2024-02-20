@@ -46,14 +46,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.common.CitizenFlags;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplication;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.ServiceOfApplicationUploadDocs;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.WelshCourtEmail;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.*;
 import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.EmailNotificationDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.DocumentListForLa;
@@ -88,6 +86,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
@@ -3572,12 +3571,21 @@ public class ServiceOfApplicationServiceTest {
         List<Element<PartyDetails>> applicants = new ArrayList<>();
         Element applicantElement = element(partyDetails);
         applicants.add(applicantElement);
-
+        List<Element<ResponseDocuments>> c8Docs = List.of(Element.<ResponseDocuments>builder()
+                                                              .value(ResponseDocuments.builder().build())
+            .build());
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .applicants(applicants)
             .caseCreatedBy(CaseCreatedBy.CITIZEN)
             .applicantCaseName("Test Case 45678")
+            .respondentC8Document(RespondentC8Document.builder()
+                                      .respondentAc8Documents(c8Docs)
+                                      .respondentBc8Documents(c8Docs)
+                                      .respondentCc8Documents(c8Docs)
+                                      .respondentDc8Documents(c8Docs)
+                                      .respondentEc8Documents(c8Docs)
+                                      .build())
             .orderCollection(List.of(Element.<OrderDetails>builder().build()))
             .serviceOfApplication(ServiceOfApplication.builder()
                                       .soaServeToRespondentOptions(No)
@@ -3590,7 +3598,7 @@ public class ServiceOfApplicationServiceTest {
                                       .soaServingRespondentsOptionsCA(SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative)
                                       .build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
-            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .caseTypeOfApplication(C100_CASE_TYPE)
             .build();
         uk.gov.hmcts.reform.ccd.client.model.Document document = new uk.gov.hmcts.reform.ccd.client.model.Document("documentURL",
                                                                                                                    "fileName",
@@ -3847,6 +3855,45 @@ public class ServiceOfApplicationServiceTest {
             Event.CONFIDENTIAL_CHECK.getId()
         );
         assertEquals(YES, resultMap.get("isC8CheckApproved"));
+    }
+
+
+    @Test
+    public void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderSelected() {
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
+            SoaPack.builder().build()).build();
+        CaseData caseData = CaseData.builder()
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(Collections.singletonList(
+                FL401OrderTypeEnum.occupationOrder)).build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(serviceOfApplication)
+            .build();
+        Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
+            caseData,
+            Event.CONFIDENTIAL_CHECK.getId()
+        );
+        assertEquals(YES, resultMap.get("isC8CheckApproved"));
+        assertEquals(YES, resultMap.get("isOccupationOrderSelected"));
+    }
+
+    @Test
+    public void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderNotSelected() {
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
+            SoaPack.builder().build()).build();
+        CaseData caseData = CaseData.builder()
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(Collections.singletonList(
+                FL401OrderTypeEnum.nonMolestationOrder)).build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(serviceOfApplication)
+            .build();
+        Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
+            caseData,
+            Event.CONFIDENTIAL_CHECK.getId()
+        );
+        assertEquals(YES, resultMap.get("isC8CheckApproved"));
+        assertEquals(NO, resultMap.get("isOccupationOrderSelected"));
     }
 
 }

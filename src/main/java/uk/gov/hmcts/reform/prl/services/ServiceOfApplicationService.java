@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -930,8 +931,7 @@ public class ServiceOfApplicationService {
             }
             responsibleForService = getResponsibleForService(caseData);
             if (!C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                soaWaMap.put("isOccupationOrderSelected", caseData.getTypeOfApplicationOrders().getOrderType().contains(
-                    FL401OrderTypeEnum.occupationOrder) ? YES : NO);
+                soaWaMap.put("isOccupationOrderSelected", isOccupationOrderSelected(caseData.getTypeOfApplicationOrders()));
             }
             soaWaMap.put("isC8CheckNeeded", isC8CheckNeeded);
         } else if (Event.CONFIDENTIAL_CHECK.getId().equals(eventId)) {
@@ -940,9 +940,19 @@ public class ServiceOfApplicationService {
             responsibleForService = (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
                 && caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy() != null)
                 ? caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy() : null;
+            if (!C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                soaWaMap.put("isOccupationOrderSelected", isOccupationOrderSelected(caseData.getTypeOfApplicationOrders()));
+            }
         }
         soaWaMap.put("responsibleForService", responsibleForService);
         return soaWaMap;
+    }
+
+    private String isOccupationOrderSelected(TypeOfApplicationOrders typeOfApplicationOrders) {
+        return null != typeOfApplicationOrders
+            && null != typeOfApplicationOrders.getOrderType()
+            && typeOfApplicationOrders.getOrderType().contains(
+            FL401OrderTypeEnum.occupationOrder) ? YES : NO;
     }
 
     private String getResponsibleForService(CaseData caseData) {
@@ -1099,6 +1109,38 @@ public class ServiceOfApplicationService {
                 }
             }
             if (Yes.equals(caseData.getServiceOfApplication().getSoaServeC8ToLocalAuthorityYesOrNo())) {
+                if (null != caseData.getRespondentC8Document()) {
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentAc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentAc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentBc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentBc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentCc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentCc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentDc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentDc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentEc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentEc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                }
                 docs.add(caseData.getC8Document());
             }
             return docs;
