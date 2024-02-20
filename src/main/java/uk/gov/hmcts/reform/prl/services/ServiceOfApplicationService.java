@@ -1097,6 +1097,38 @@ public class ServiceOfApplicationService {
                 }
             }
             if (Yes.equals(caseData.getServiceOfApplication().getSoaServeC8ToLocalAuthorityYesOrNo())) {
+                if (null != caseData.getRespondentC8Document()) {
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentAc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentAc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentBc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentBc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentCc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentCc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentDc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentDc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                    if (CollectionUtils.isNotEmpty(caseData.getRespondentC8Document().getRespondentEc8Documents())) {
+                        caseData.getRespondentC8Document().getRespondentEc8Documents().forEach(document -> {
+                            docs.add(document.getValue().getRespondentC8Document());
+                            docs.add(document.getValue().getRespondentC8DocumentWelsh());
+                        });
+                    }
+                }
                 docs.add(caseData.getC8Document());
             }
             return docs;
