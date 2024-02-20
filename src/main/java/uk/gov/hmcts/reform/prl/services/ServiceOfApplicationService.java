@@ -37,6 +37,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiselectListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.ConfidentialCheckFailed;
 import uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication.SoaPack;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
@@ -918,8 +919,7 @@ public class ServiceOfApplicationService {
             }
             responsibleForService = getResponsibleForService(caseData);
             if (!C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-                soaWaMap.put("isOccupationOrderSelected", caseData.getTypeOfApplicationOrders().getOrderType().contains(
-                    FL401OrderTypeEnum.occupationOrder) ? YES : NO);
+                soaWaMap.put("isOccupationOrderSelected", isOccupationOrderSelected(caseData.getTypeOfApplicationOrders()));
             }
             soaWaMap.put("isC8CheckNeeded", isC8CheckNeeded);
         } else if (Event.CONFIDENTIAL_CHECK.getId().equals(eventId)) {
@@ -928,9 +928,19 @@ public class ServiceOfApplicationService {
             responsibleForService = (caseData.getServiceOfApplication().getUnServedRespondentPack() != null
                 && caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy() != null)
                 ? caseData.getServiceOfApplication().getUnServedRespondentPack().getPersonalServiceBy() : null;
+            if (!C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+                soaWaMap.put("isOccupationOrderSelected", isOccupationOrderSelected(caseData.getTypeOfApplicationOrders()));
+            }
         }
         soaWaMap.put("responsibleForService", responsibleForService);
         return soaWaMap;
+    }
+
+    private String isOccupationOrderSelected(TypeOfApplicationOrders typeOfApplicationOrders) {
+        return null != typeOfApplicationOrders
+            && null != typeOfApplicationOrders.getOrderType()
+            && typeOfApplicationOrders.getOrderType().contains(
+            FL401OrderTypeEnum.occupationOrder) ? YES : NO;
     }
 
     private String getResponsibleForService(CaseData caseData) {
@@ -1027,6 +1037,9 @@ public class ServiceOfApplicationService {
         caseDataMap.put(FINAL_SERVED_APPLICATION_DETAILS_LIST, finalServedApplicationDetailsList);
         cleanUpSoaSelections(caseDataMap);
 
+        //SAVE TEMP GENERATED ACCESS CODE
+        caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
+
         coreCaseDataService.triggerEvent(
             JURISDICTION,
             CASE_TYPE,
@@ -1047,6 +1060,9 @@ public class ServiceOfApplicationService {
                             : generatePacksForConfidentialCheckFl401(callbackRequest.getCaseDetails(), authorisation);
 
         cleanUpSoaSelections(caseDataMap);
+
+        //SAVE TEMP GENERATED ACCESS CODE
+        caseDataMap.put(CASE_INVITES, caseData.getCaseInvites());
 
         coreCaseDataService.triggerEvent(
             JURISDICTION,
