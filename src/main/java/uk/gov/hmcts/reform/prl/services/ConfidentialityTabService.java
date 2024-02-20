@@ -144,6 +144,7 @@ public class ConfidentialityTabService {
             ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations());
         Optional<List<Element<PartyDetails>>> otherPersons = ofNullable(caseData.getOtherPartyInTheCaseRevised());
         Map<Object, PartyDetails> objectPartyDetailsMap = new HashMap<>();
+
         if (otherPersons.isPresent()) {
             List<PartyDetails> partyDetailsList =
                 otherPersons.get()
@@ -171,6 +172,7 @@ public class ConfidentialityTabService {
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
                     .toList();
             for (ChildDetailsRevised childDetailsRevised : childDetailsReviseds) {
+                log.info("objectPartyDetailsMap {}", objectPartyDetailsMap);
                 List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
                     getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList,objectPartyDetailsMap);
                 if (!tempOtherPersonConfidentialDetails.isEmpty()) {
@@ -192,9 +194,13 @@ public class ConfidentialityTabService {
         List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList, Map<Object, PartyDetails> objectPartyDetailsMap) {
         log.info("inside getOtherPersonConfidentialDetails ------------------>>>>>>>>>>>>>>");
         List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails = new ArrayList<>();
+        log.info("childrenAndOtherPeopleRelationList size {}", childrenAndOtherPeopleRelationList.size());
+
         for (ChildrenAndOtherPeopleRelation childrenAndOtherPeopleRelation : childrenAndOtherPeopleRelationList) {
+            log.info("childrenAndOtherPeopleRelation.getOtherPeopleFullName() {}", childrenAndOtherPeopleRelation.getOtherPeopleFullName());
             Optional<PartyDetails> partyDetails = ofNullable(objectPartyDetailsMap.get(
                 childrenAndOtherPeopleRelation.getOtherPeopleFullName()));
+            log.info("partyDetails {}", partyDetails);
             if (partyDetails.isPresent()) {
                 Element<OtherPersonConfidentialityDetails> otherElement = Element
                     .<OtherPersonConfidentialityDetails>builder()
