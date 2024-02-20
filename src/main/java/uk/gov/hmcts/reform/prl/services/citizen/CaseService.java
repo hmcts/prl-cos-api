@@ -468,7 +468,7 @@ public class CaseService {
         WithdrawApplication withDrawApplicationData = oldCaseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            updatedCaseData.put(WITHDRAW_APPLICATION_DATA, withdrawApplication);
+            updatedCaseData.put(WITHDRAW_APPLICATION_DATA, withDrawApplicationData);
             updatedCaseData.put(STATE, WITHDRAWN_STATE);
             updatedCaseData.put(CASE_STATUS, CaseStatus.builder().state(State.CASE_WITHDRAWN.getLabel()).build());
         }
