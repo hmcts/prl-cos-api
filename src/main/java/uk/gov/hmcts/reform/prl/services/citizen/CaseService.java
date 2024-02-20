@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
+//import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
@@ -447,9 +447,9 @@ public class CaseService {
     public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken) {
         CaseDetails caseDetails = getCase(authToken, caseId);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
-        //caseDataUpdated.put("state", WITHDRAWN_STATE);
-        //caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-        //caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
+        caseDataUpdated.put("state", WITHDRAWN_STATE);
+        caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
 
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
@@ -463,9 +463,13 @@ public class CaseService {
                 .state(State.CASE_WITHDRAWN)
                 .build();
         }
+        //caseDataUpdated.put("state", WITHDRAWN_STATE);
+        //caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.CASE_WITHDRAWN).build());
+
         caseDataUpdated.put("state", WITHDRAWN_STATE);
-        caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.CASE_WITHDRAWN).build());
-        return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
+        caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+        caseSummaryTab.updateTab(caseData);
+        return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
 }
