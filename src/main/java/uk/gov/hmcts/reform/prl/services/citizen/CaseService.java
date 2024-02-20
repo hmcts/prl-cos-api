@@ -488,15 +488,4 @@ public class CaseService {
         );
     }
 
-    public CaseDetails withdrawCasetest(CaseData caseData, String caseId, String authToken) {
-        CaseDetails caseDetails = getCase(authToken, caseId);
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
-        WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
-        Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
-        if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            caseDataUpdated.put("state", WITHDRAWN_STATE);
-            caseDataUpdated.put("caseStatus", CaseStatus.builder().state("Withdrawn").build());
-        }
-        return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
-    }
 }

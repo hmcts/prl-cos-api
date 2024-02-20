@@ -65,7 +65,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_WITHDRAW;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -408,7 +407,6 @@ public class CaseServiceTest {
         when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
         //when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
-        when(caseRepository.updateCaseData(authToken, caseId, updatedCaseData1, CITIZEN_CASE_WITHDRAW)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
 
         //When
