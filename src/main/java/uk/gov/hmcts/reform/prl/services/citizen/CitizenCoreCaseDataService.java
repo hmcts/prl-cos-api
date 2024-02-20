@@ -125,41 +125,6 @@ public class CitizenCoreCaseDataService {
         }
     }
 
-    public CaseDetails updateCaseData(
-        String authorisation,
-        Long caseId,
-        Map<String, Object>  caseData,
-        CaseEvent caseEvent
-    ) {
-        try {
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            EventRequestData eventRequestData = eventRequest(caseEvent, userDetails.getId());
-            StartEventResponse startEventResponse = ccdCoreCaseDataService.startUpdate(
-                authorisation,
-                eventRequestData,
-                caseId.toString(),
-                !userDetails.getRoles().contains(CITIZEN_ROLE)
-            );
-            CaseDataContent caseDataContent = caseDataContent(startEventResponse, caseData);
-            log.info(caseDataContent.toString() + "******");
-            return ccdCoreCaseDataService.submitUpdate(
-                authorisation,
-                eventRequestData,
-                caseDataContent,
-                String.valueOf(caseId),
-                !userDetails.getRoles().contains(CITIZEN_ROLE)
-            );
-        } catch (Exception exception) {
-            throw new CoreCaseDataStoreException(
-                String.format(
-                    CCD_UPDATE_FAILURE_MESSAGE,
-                    caseId,
-                    caseEvent
-                ), exception
-            );
-        }
-    }
-
     public CaseDetails createCase(String authorisation, CaseData caseData) {
         String cosApis2sToken = authTokenGenerator.generate();
         UserDetails userDetails = idamClient.getUserDetails(authorisation);
