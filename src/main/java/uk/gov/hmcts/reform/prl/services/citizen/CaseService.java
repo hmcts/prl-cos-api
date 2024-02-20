@@ -448,30 +448,12 @@ public class CaseService {
     public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken) {
         CaseDetails caseDetails = getCase(authToken, caseId);
         Map<String, Object> caseDataUpdated = caseDetails.getData();
-        caseDataUpdated.put("state", WITHDRAWN_STATE);
-        //caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-        caseDataUpdated.put("caseStatus", CaseStatus.builder().state("CASE_WITHDRAWN").build());
-        //caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
-
-        CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder().id(caseDetails.getId()).build();
-        //caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.CASE_WITHDRAWN).build());
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            updatedCaseData = updatedCaseData.toBuilder()
-                .withDrawApplicationData(withDrawApplicationData)
-                .state(State.CASE_WITHDRAWN)
-                .build();
+            caseDataUpdated.put("state", WITHDRAWN_STATE);
+            caseDataUpdated.put("caseStatus", CaseStatus.builder().state("Withdrawn").build());
         }
-        caseDataUpdated.put("state", WITHDRAWN_STATE);
-        //caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.CASE_WITHDRAWN).build());
-
-        /*caseDataUpdated.put("state", WITHDRAWN_STATE);
-        caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-        caseSummaryTab.updateTab(caseData);*/
-
         return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
