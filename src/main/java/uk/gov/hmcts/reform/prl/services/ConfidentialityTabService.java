@@ -138,7 +138,6 @@ public class ConfidentialityTabService {
     }
 
     public List<Element<ChildConfidentialityDetails>> getChildrenConfidentialDetailsV2(CaseData caseData) {
-        log.info("inside getChildrenConfidentialDetailsV2 ------------------>>>>>>>>>>>>>>>>>>");
         List<Element<ChildConfidentialityDetails>> childrenConfidentialDetails = new ArrayList<>();
         Optional<List<Element<ChildrenAndOtherPeopleRelation>>> childrenAndOtherPeopleRelations =
             ofNullable(caseData.getRelations().getChildAndOtherPeopleRelations());
@@ -162,17 +161,21 @@ public class ConfidentialityTabService {
                 .map(Element::getValue)
                 .toList();
         }
+
         if (!childrenAndOtherPeopleRelations.isEmpty()) {
+            log.info("childrenAndOtherPeopleRelations.get() {}", childrenAndOtherPeopleRelations.get());
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
                 childrenAndOtherPeopleRelations.get()
                     .stream()
                     .map(Element::getValue)
                     .toList()
-                    .stream().filter(other -> !ofNullable(other.getIsChildLivesWithPersonConfidential()).isEmpty()
+                    .stream()
+                    .peek(other -> log.info(String.valueOf(other)))
+                    .filter(other -> !ofNullable(other.getIsChildLivesWithPersonConfidential()).isEmpty()
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
                     .toList();
             for (ChildDetailsRevised childDetailsRevised : childDetailsReviseds) {
-                log.info("objectPartyDetailsMap {}", objectPartyDetailsMap);
+                //log.info("objectPartyDetailsMap {}", objectPartyDetailsMap);
                 List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
                     getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList,objectPartyDetailsMap);
                 if (!tempOtherPersonConfidentialDetails.isEmpty()) {
@@ -192,7 +195,6 @@ public class ConfidentialityTabService {
 
     public List<Element<OtherPersonConfidentialityDetails>> getOtherPersonConfidentialDetails(
         List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList, Map<Object, PartyDetails> objectPartyDetailsMap) {
-        log.info("inside getOtherPersonConfidentialDetails ------------------>>>>>>>>>>>>>>");
         List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails = new ArrayList<>();
         log.info("childrenAndOtherPeopleRelationList size {}", childrenAndOtherPeopleRelationList.size());
 
