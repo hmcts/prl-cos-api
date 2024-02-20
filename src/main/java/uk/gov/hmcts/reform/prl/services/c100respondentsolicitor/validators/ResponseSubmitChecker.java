@@ -15,10 +15,10 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.INTERNATIONAL_ELEMENT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.MIAM;
+import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.OTHER_PROCEEDINGS;
 
 @Slf4j
 @Service
@@ -45,7 +45,7 @@ public class ResponseSubmitChecker implements RespondentEventChecker {
         mandatoryEvents.put(CONFIRM_EDIT_CONTACT_DETAILS, respondentEventsChecker.getRespondentContactDetailsChecker());
 
         EnumMap<RespondentSolicitorEvents, RespondentEventChecker> optionalEvents = new EnumMap<>(RespondentSolicitorEvents.class);
-        optionalEvents.put(CURRENT_OR_PREVIOUS_PROCEEDINGS, respondentEventsChecker.getCurrentOrPastProceedingsChecker());
+        optionalEvents.put(OTHER_PROCEEDINGS, respondentEventsChecker.getCurrentOrPastProceedingsChecker());
         optionalEvents.put(INTERNATIONAL_ELEMENT,respondentEventsChecker.getInternationalElementsChecker());
         optionalEvents.put(ABILITY_TO_PARTICIPATE, respondentEventsChecker.getAbilityToParticipateChecker());
 
