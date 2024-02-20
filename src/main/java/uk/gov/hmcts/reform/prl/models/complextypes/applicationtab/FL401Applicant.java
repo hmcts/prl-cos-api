@@ -25,4 +25,5 @@ public class FL401Applicant {
     private final YesOrNo isEmailAddressConfidential;
     private final String phoneNumber;
     private final YesOrNo isPhoneNumberConfidential;
+    private final String contactPreferences;
 }
