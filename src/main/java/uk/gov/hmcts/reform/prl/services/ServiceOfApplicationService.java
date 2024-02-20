@@ -112,6 +112,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIAL_DETAILS_PRESENT;
@@ -1587,12 +1588,14 @@ public class ServiceOfApplicationService {
 
     public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
+            SOA_C6A_OTHER_PARTIES_ORDER) || d.getDocumentFileName().equalsIgnoreCase(
+            SOA_C6A_OTHER_PARTIES_ORDER_WELSH)).collect(Collectors.toList());
     }
 
     private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
-        return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
+        return soaSelectedOrders.stream().filter(d -> !(d.getDocumentFileName().equalsIgnoreCase(
+            SOA_C6A_OTHER_PARTIES_ORDER) || d.getDocumentFileName().equalsIgnoreCase(
+            SOA_C6A_OTHER_PARTIES_ORDER_WELSH))).collect(Collectors.toList());
     }
 
     private List<Document> generatePackH(CaseData caseData, List<Document> staticDocs) {
@@ -1782,10 +1785,12 @@ public class ServiceOfApplicationService {
             List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode).toList();
             orderCodes.forEach(orderCode ->
-                caseData.getOrderCollection().stream()
-                    .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
-                    .findFirst()
-                    .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument())));
+                                   caseData.getOrderCollection().stream()
+                                       .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
+                                       .findFirst()
+                                       .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument() != null
+                                                                              ? o.getValue().getOrderDocument()
+                                                                              : o.getValue().getOrderDocumentWelsh())));
             return selectedOrders;
         }
         return Collections.emptyList();
@@ -2817,8 +2822,11 @@ public class ServiceOfApplicationService {
             log.info("inside other people check");
             if (null != caseData.getOrderCollection()) {
                 c6aOrderIds = caseData.getOrderCollection().stream()
-                    .filter(element -> element.getValue() != null && element.getValue().getOrderTypeId().equals(
-                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()))
+                    .filter(element -> element.getValue() != null && (element.getValue().getOrderTypeId().equals(
+                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString())
+                        || element.getValue().getOrderTypeId().equals(
+                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue())
+                    ))
                     .map(s -> s.getId().toString()).toList();
             }
 
