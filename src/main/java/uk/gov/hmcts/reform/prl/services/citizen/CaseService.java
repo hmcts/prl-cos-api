@@ -463,6 +463,7 @@ public class CaseService {
                 .state(State.CASE_WITHDRAWN)
                 .build();
         }
+        caseDataUpdated.put("state", WITHDRAWN_STATE);
         caseDataUpdated.put("caseStatus", CaseStatus.builder().state(State.CASE_WITHDRAWN).build());
         return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
