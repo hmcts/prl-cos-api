@@ -9,7 +9,6 @@ import lombok.Builder;
 import lombok.Data;
 import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
-import uk.gov.hmcts.reform.prl.enums.ContactPreferencesEnum;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
@@ -90,7 +89,6 @@ public class PartyDetails {
     private Flags partyLevelFlag;
 
     private ContactPreferences contactPreferences;
-    private ContactPreferencesEnum contactPreferenceType;
 
     private YesOrNo isRemoveLegalRepresentativeRequested;
 
