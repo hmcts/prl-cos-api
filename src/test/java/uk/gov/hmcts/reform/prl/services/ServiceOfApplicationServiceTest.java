@@ -865,6 +865,8 @@ public class ServiceOfApplicationServiceTest {
             .applicantCaseName("Test Case 45678")
             .caseInvites(caseInvites)
             .finalDocument(Document.builder().documentFileName("").build())
+            .finalWelshDocument(Document.builder().documentFileName("").build())
+            .c1AWelshDocument(Document.builder().documentFileName("").build())
             .orderCollection(List.of(Element.<OrderDetails>builder().value(OrderDetails.builder()
                                                                                .orderTypeId("Blank order or directions (C21)")
                                                                                .build())
