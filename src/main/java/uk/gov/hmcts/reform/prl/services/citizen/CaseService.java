@@ -444,10 +444,13 @@ public class CaseService {
     }
 
     public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken) {
-
+        CaseDetails caseDetails = getCase(authToken, caseId);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        caseDataUpdated.put("state", WITHDRAWN_STATE);
+        caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
+        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
         WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
-        CaseDetails caseDetails = getCase(authToken, caseId);
         CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
             .toBuilder().id(caseDetails.getId()).build();
 
@@ -456,11 +459,7 @@ public class CaseService {
                 .withDrawApplicationData(withDrawApplicationData)
                 .build();
         }
-        Map<String, Object> caseDataUpdated = caseDetails.getData();
-        caseDataUpdated.put("state", WITHDRAWN_STATE);
-        caseData = caseData.toBuilder().state(State.CASE_WITHDRAWN).build();
-        caseDataUpdated.putAll(caseSummaryTab.updateTab(caseData));
-        return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
+        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
 }
