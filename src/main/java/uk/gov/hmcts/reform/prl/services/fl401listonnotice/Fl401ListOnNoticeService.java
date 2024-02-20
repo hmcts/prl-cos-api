@@ -95,13 +95,13 @@ public class Fl401ListOnNoticeService {
 
     public static final String CONFIRMATION_BODY_WITHOUT_NOTICE = """
         ### What happens next
-        Admin will be notified to list the hearing on notice.\n
-        The reasons you have given to list the hearing on notice will be shared with the applicant.\n
+        Admin will be notified to list the hearing on notice.
+        The reasons you have given to list the hearing on notice will be shared with the applicant.
         Your request details will be saved in case notes.""";
 
     public static final String CONFIRMATION_BODY_WITH_NOTICE = """
         ### What happens next
-        Admin will be notified to list the hearing on notice.\n
+        Admin will be notified to list the hearing on notice.
         Your request details will be saved in case notes.""";
 
     public static final String CONFIRMATION_HEADER = "# Listing instructions sent to admin";
