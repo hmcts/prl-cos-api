@@ -105,7 +105,6 @@ public class CallbackControllerFunctionalTest {
             .assertThat().statusCode(200);
     }
 
-    @Ignore
     @Test
     @Ignore
     public void givenNoAuthorization_whenPostRequestToDraftDocumentGeneration_then400Response() throws Exception {
