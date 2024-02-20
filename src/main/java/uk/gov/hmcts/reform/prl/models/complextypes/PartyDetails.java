@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -157,4 +158,7 @@ public class PartyDetails {
     private UUID solicitorOrgUuid;
 
     private UUID solicitorPartyId;
+
+    @JsonIgnore
+    private CitizenSos citizenSosObject;
 }
