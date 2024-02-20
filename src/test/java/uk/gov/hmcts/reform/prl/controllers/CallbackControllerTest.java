@@ -51,6 +51,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.LocalCourtAdminEmail;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherPersonWhoLivesWithChild;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
+import uk.gov.hmcts.reform.prl.models.complextypes.ScannedDocument;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
@@ -66,6 +68,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.WorkflowResult;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.GatekeepingDetails;
 import uk.gov.hmcts.reform.prl.models.dto.judicial.JudicialUsersApiRequest;
@@ -88,6 +91,7 @@ import uk.gov.hmcts.reform.prl.services.LocationRefDataService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.PaymentRequestService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SendgridService;
 import uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService;
 import uk.gov.hmcts.reform.prl.services.SolicitorEmailService;
@@ -97,6 +101,7 @@ import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.GatekeepingDetailsService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.ApplicantsListGenerator;
@@ -122,11 +127,14 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_WELSH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C8_WELSH;
@@ -135,8 +143,10 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_WELSH_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.LanguagePreference.english;
 import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
@@ -145,6 +155,8 @@ import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_RESTRICTED_FLAG;
+import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService.MANAGE_DOCUMENTS_TRIGGERED_BY;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
@@ -201,6 +213,9 @@ public class CallbackControllerTest {
     AllTabServiceImpl allTabsService;
 
     @Mock
+    ManageDocumentsService manageDocumentsService;
+
+    @Mock
     UpdatePartyDetailsService updatePartyDetailsService;
 
     @Mock
@@ -247,6 +262,9 @@ public class CallbackControllerTest {
 
     @Mock
     private AssignCaseAccessClient assignCaseAccessClient;
+
+    @Mock
+    private RoleAssignmentService roleAssignmentService;
 
     @Mock
     private LocationRefDataService locationRefDataService;
@@ -803,7 +821,7 @@ public class CallbackControllerTest {
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(caseDataUpdated).build()).build();
         when(objectMapper.convertValue(caseDataUpdated, CaseData.class)).thenReturn(caseData);
-        when(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest)).thenReturn(
+        when(updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest,authToken)).thenReturn(
             caseDetailsUpdatedwithName);
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
@@ -1000,7 +1018,35 @@ public class CallbackControllerTest {
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
     }
 
+    @Test
+    public void testC100CaseCreationWhenOrPolicyNotPresentInCaseData() throws Exception {
 
+        Map<String, Object> caseDetails = new HashMap<>();
+        caseDetails.put("applicantOrRespondentCaseName", "test");
+        caseDetails.put(CASE_TYPE_OF_APPLICATION, C100_CASE_TYPE);
+        when(userService.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
+        Organisations org = Organisations.builder().name("testOrg").organisationIdentifier("abcd").build();
+        when(organisationService.findUserOrganisation(Mockito.anyString()))
+            .thenReturn(Optional.of(org));
+        CaseData caseData = CaseData.builder().id(123L)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .applicantCaseName("abcd").build();
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .caseTypeId(C100_CASE_TYPE)
+                             .data(caseDetails).build()).build();
+        when(launchDarklyClient.isFeatureEnabled("share-a-case")).thenReturn(true);
+        when(launchDarklyClient.isFeatureEnabled("task-list-v2")).thenReturn(true);
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .aboutToSubmitCaseCreation(authToken,s2sToken, callbackRequest);
+        assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
+        assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
+    }
 
     @Test
     public void testCreateCaseC100ForAllegationHarmRevised() throws Exception {
@@ -2303,7 +2349,291 @@ public class CallbackControllerTest {
                            .personalCode("testCode")
                            .build())
             .build();
-        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null, refDataUserService)).thenReturn(gatekeepingDetails);
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
+            refDataUserService)).thenReturn(gatekeepingDetails);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
+        assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
+
+    }
+
+    @Test
+    public void testSendToGatekeeperChangesJudgeIsNull() {
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        Address address = Address.builder()
+            .addressLine1("address")
+            .postTown("London")
+            .build();
+        List<Element<ApplicantConfidentialityDetails>> applicants = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                .value(ApplicantConfidentialityDetails.builder()
+                    .firstName("ABC 1")
+                    .lastName("XYZ 2")
+                    .email("abc1@xyz.com")
+                    .phoneNumber("09876543211")
+                    .address(address)
+                    .build()).build());
+
+        List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
+            Element.<ChildConfidentialityDetails>builder()
+                .value(ChildConfidentialityDetails
+                    .builder()
+                    .firstName("Test")
+                    .lastName("Name")
+                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                        OtherPersonConfidentialityDetails.builder()
+                            .firstName("Confidential First Name")
+                            .lastName("Confidential Last Name")
+                            .relationshipToChildDetails("test")
+                            .address(address)
+                            .build()).build()))
+                    .build()).build());
+        CaseData caseData = CaseData.builder()
+            .children(listOfChildren)
+            .applicants(applicantList)
+            .consentOrder(Yes)
+            .id(123L)
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(false).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap).build()).build();
+        String[] personalCodes = new String[3];
+        personalCodes[0] = "123456";
+        List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
+        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname").build());
+        stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
+            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+        GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
+            .isSpecificGateKeeperNeeded(Yes)
+            .judgeName(JudicialUser.builder()
+                .idamId("testId")
+                .personalCode("testCode")
+                .build())
+            .build();
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
+            refDataUserService)).thenReturn(gatekeepingDetails);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
+
+    }
+
+    @Test
+    public void testSendToGatekeeperChangesJudgeNameNull() {
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        Address address = Address.builder()
+            .addressLine1("address")
+            .postTown("London")
+            .build();
+        List<Element<ApplicantConfidentialityDetails>> applicants = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                .value(ApplicantConfidentialityDetails.builder()
+                    .firstName("ABC 1")
+                    .lastName("XYZ 2")
+                    .email("abc1@xyz.com")
+                    .phoneNumber("09876543211")
+                    .address(address)
+                    .build()).build());
+
+        List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
+            Element.<ChildConfidentialityDetails>builder()
+                .value(ChildConfidentialityDetails
+                    .builder()
+                    .firstName("Test")
+                    .lastName("Name")
+                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                        OtherPersonConfidentialityDetails.builder()
+                            .firstName("Confidential First Name")
+                            .lastName("Confidential Last Name")
+                            .relationshipToChildDetails("test")
+                            .address(address)
+                            .build()).build()))
+                    .build()).build());
+        CaseData caseData = CaseData.builder()
+            .children(listOfChildren)
+            .applicants(applicantList)
+            .consentOrder(Yes)
+            .id(123L)
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(false).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap).build()).build();
+        String[] personalCodes = new String[3];
+        personalCodes[0] = "123456";
+        List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
+        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname").build());
+        stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
+        stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
+            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+        GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
+            .isSpecificGateKeeperNeeded(Yes)
+            .isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge)
+            .build();
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
+            refDataUserService)).thenReturn(gatekeepingDetails);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
+        assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
+
+    }
+
+    @Test
+    public void testSendToGatekeeperChangesLegalAdvisorListNotNull() {
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        Address address = Address.builder()
+            .addressLine1("address")
+            .postTown("London")
+            .build();
+        List<Element<ApplicantConfidentialityDetails>> applicants = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                .value(ApplicantConfidentialityDetails.builder()
+                    .firstName("ABC 1")
+                    .lastName("XYZ 2")
+                    .email("abc1@xyz.com")
+                    .phoneNumber("09876543211")
+                    .address(address)
+                    .build()).build());
+
+        List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
+            Element.<ChildConfidentialityDetails>builder()
+                .value(ChildConfidentialityDetails
+                    .builder()
+                    .firstName("Test")
+                    .lastName("Name")
+                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                        OtherPersonConfidentialityDetails.builder()
+                            .firstName("Confidential First Name")
+                            .lastName("Confidential Last Name")
+                            .relationshipToChildDetails("test")
+                            .address(address)
+                            .build()).build()))
+                    .build()).build());
+        CaseData caseData = CaseData.builder()
+            .children(listOfChildren)
+            .applicants(applicantList)
+            .consentOrder(Yes)
+            .id(123L)
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(false).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap).build()).build();
+        String[] personalCodes = new String[3];
+        personalCodes[0] = "123456";
+        List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
+        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname").build());
+        stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
+        stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
+            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
+            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+        GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
+            .isSpecificGateKeeperNeeded(Yes)
+            .legalAdviserList(legalAdviserList)
+            .isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge)
+            .build();
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
+            refDataUserService)).thenReturn(gatekeepingDetails);
         Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
         AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
         assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
@@ -2647,6 +2977,112 @@ public class CallbackControllerTest {
         assertEquals("test", aboutToStartOrSubmitCallbackResponse.getData().get("applicantCaseName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorName"));
         assertNotNull(aboutToStartOrSubmitCallbackResponse.getData().get("caseSolicitorOrgName"));
+    }
+
+    @Test
+    public void fetchRoleAssignmentUserDoesntHaveRightRoles() {
+        when(roleAssignmentService.validateIfUserHasRightRoles(authToken, CallbackRequest.builder().build())).thenReturn(false);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
+        assertEquals("The selected user does not have right roles to assign this case",
+            aboutToStartOrSubmitCallbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void fetchRoleAssignmentUserHasRightRoles() {
+        when(roleAssignmentService.validateIfUserHasRightRoles(authToken, CallbackRequest.builder().build())).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = callbackController
+            .fetchRoleAssignmentForUser(authToken, CallbackRequest.builder().build());
+        assertNotNull(aboutToStartOrSubmitCallbackResponse);
+    }
+
+    @Test
+    public void testAttachScanDocsWaChangeWithQuarantineDocsAndScannedDocs() {
+
+        Element<QuarantineLegalDoc> courtStaffQuanElement = element(QuarantineLegalDoc.builder().build());
+        Element<QuarantineLegalDoc> cafcassQuanElement = element(QuarantineLegalDoc.builder().build());
+        Element<QuarantineLegalDoc> legalProfDocQuanElement = element(QuarantineLegalDoc.builder().build());
+
+        List<Element<QuarantineLegalDoc>> courtStaffQuanList = Collections.singletonList(courtStaffQuanElement);
+        List<Element<QuarantineLegalDoc>> cafcassQuanList = Collections.singletonList(cafcassQuanElement);
+        List<Element<QuarantineLegalDoc>> legalProfDocQuanList = Collections.singletonList(legalProfDocQuanElement);
+
+        Element<ScannedDocument> scannedDocElement = element(ScannedDocument.builder().build());
+        List<Element<ScannedDocument>> scannedDocList = Collections.singletonList(scannedDocElement);
+
+        CaseData caseData = CaseData.builder()
+            .issueDate(LocalDate.now())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .courtStaffQuarantineDocsList(courtStaffQuanList)
+                                           .cafcassQuarantineDocsList(cafcassQuanList)
+                                           .legalProfQuarantineDocsList(legalProfDocQuanList)
+                                           .build())
+            .scannedDocuments(scannedDocList)
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+
+        doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
+
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
+        assertNotNull(response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals(TRUE, response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNull(response.getData().get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testAttachScanDocsWaChangeWithoutQuarantineDocsAndScannedDocs() {
+
+        CaseData caseData = CaseData.builder()
+            .issueDate(LocalDate.now())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = new HashMap<>();
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
+
+        doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
+
+        AboutToStartOrSubmitCallbackResponse response = callbackController
+            .attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
+        assertNotNull(response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertNotNull(response.getData().get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+        assertEquals(TRUE, response.getData().get(MANAGE_DOCUMENTS_RESTRICTED_FLAG));
+        assertEquals(STAFF, response.getData().get(MANAGE_DOCUMENTS_TRIGGERED_BY));
+    }
+
+    @Test
+    public void testAttachScanDocsWaChangeInvalidClientException() {
+        Map<String, Object> stringObjectMap = new HashMap<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(1L)
+                             .data(stringObjectMap).build()).build();
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+
+        doCallRealMethod().when(manageDocumentsService).setFlagsForWaTask(any(),any(),any(),any());
+
+        assertExpectedException(() -> {
+            callbackController.attachScanDocsWaChange(authToken, s2sToken, callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
     }
 
 }
