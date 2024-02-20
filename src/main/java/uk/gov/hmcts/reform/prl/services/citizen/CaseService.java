@@ -452,14 +452,18 @@ public class CaseService {
         CaseEvent caseEvent = CaseEvent.CITIZEN_CASE_WITHDRAW;
         log.info("Following case event will be triggered {}", caseEvent.getValue());
 
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, authToken);
+        log.info("authToken is {}", authToken);
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        log.info("userDetails.getEmail() is {}", userDetails.getEmail());
+
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
         log.info("startEventResponse start******");
         StartEventResponse startEventResponse =
             coreCaseDataService.startUpdate(
                 authToken,
                 eventRequestData,
                 caseId,
-                false
+                true
             );
         log.info("startEventResponse end******");
         Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
@@ -483,7 +487,7 @@ public class CaseService {
             eventRequestData,
             caseDataContent,
             caseId,
-            false
+            true
         );
     }
 
