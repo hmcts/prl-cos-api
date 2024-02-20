@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
@@ -25,7 +26,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-//import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -57,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
@@ -81,6 +82,8 @@ public class CaseService {
     public static final String LINKED = "Linked";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
+    public static final String CASE_STATUS = "caseStatus";
+    public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
     private final CoreCaseDataApi coreCaseDataApi;
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
@@ -457,4 +460,40 @@ public class CaseService {
         return caseRepository.updateCaseData(authToken, caseId, caseDataUpdated, CaseEvent.CITIZEN_CASE_WITHDRAW);
     }
 
+    public CaseDetails withdrawCaseRevised(CaseData oldCaseData, String caseId, String authToken) {
+        CaseEvent caseEvent = CaseEvent.CITIZEN_CASE_WITHDRAW;
+        log.info("Following case event will be triggered {}", caseEvent.getValue());
+
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, authToken);
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+
+        Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
+
+        WithdrawApplication withDrawApplicationData = oldCaseData.getWithDrawApplicationData();
+        Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
+        if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
+            updatedCaseData.put(WITHDRAW_APPLICATION_DATA, withdrawApplication);
+            updatedCaseData.put(STATE, WITHDRAWN_STATE);
+            updatedCaseData.put(CASE_STATUS, CaseStatus.builder().state(State.CASE_WITHDRAWN.getLabel()).build());
+        }
+
+        CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            updatedCaseData
+        );
+
+        return coreCaseDataService.submitUpdate(
+            authToken,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
+    }
 }
