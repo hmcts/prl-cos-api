@@ -49,6 +49,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_LIST_ON_N
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_REASONS_FOR_LIST_WITHOUT_NOTICE_REQUESTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LIST_ON_NOTICE_HEARING_INSTRUCTIONS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REJECT_WITHOUT_NOTICE_REASONS;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
@@ -202,7 +203,7 @@ public class Fl401ListOnNoticeService {
                 }
             }
             CaseNoteDetails currentCaseNoteDetails = addCaseNoteService.getCurrentCaseNoteDetails(
-                LIST_ON_NOTICE_HEARING_INSTRUCTIONS,
+                REJECT_WITHOUT_NOTICE_REASONS,
                 fl401ReasonsForListWithoutNoticeRequested,
                 userService.getUserDetails(authorisation)
             );
