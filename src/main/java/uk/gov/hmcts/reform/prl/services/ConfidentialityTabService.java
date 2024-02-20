@@ -170,9 +170,9 @@ public class ConfidentialityTabService {
                     .map(Element::getValue)
                     .toList()
                     .stream()
-                    .peek(other -> log.info(String.valueOf(other)))
-                    .filter(other -> !ofNullable(other.getIsChildLivesWithPersonConfidential()).isEmpty()
-                        && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes))
+                    .peek(other -> log.info("-------- peek {}", String.valueOf(other)))
+                    .filter(other -> !(ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
+                        && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes)))
                     .toList();
             for (ChildDetailsRevised childDetailsRevised : childDetailsReviseds) {
                 //log.info("objectPartyDetailsMap {}", objectPartyDetailsMap);
