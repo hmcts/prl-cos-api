@@ -163,7 +163,9 @@ public class AllTabServiceImpl implements AllTabsService {
     }
 
     private Map<String, Object> findCaseDataMap(CaseData caseData) {
+        Map<String, Object> confidentialDetails = confidentialityTabService.updateConfidentialityDetails(caseData);
         Map<String, Object> combinedFieldsMap = getCombinedMap(caseData);
+        combinedFieldsMap.putAll(confidentialDetails);
 
         if (caseData.getDateSubmitted() != null) {
             combinedFieldsMap.put(DATE_SUBMITTED_FIELD, caseData.getDateSubmitted());
