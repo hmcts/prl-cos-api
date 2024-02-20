@@ -57,18 +57,7 @@ import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT_TABLE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.*;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
@@ -281,7 +270,14 @@ public class C100RespondentSolicitorService {
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
+        cleanUpRespondentTasksFieldOptions(updatedCaseData);
         return updatedCaseData;
+    }
+
+    private static void cleanUpRespondentTasksFieldOptions(Map<String, Object> updatedCaseData) {
+        for (String field : RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS.getCaseFieldName().split(COMMA)) {
+            updatedCaseData.remove(field);
+        }
     }
 
     private void buildResponseForRespondent(CaseData caseData,
