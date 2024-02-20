@@ -278,7 +278,7 @@ public class Fl401ListOnNoticeService {
         Map<String, Object> dataMap = new HashMap<>();
         dataMap.put("id", caseData.getId());
         dataMap.put("address", applicantsInCase.getAddress());
-        dataMap.put("recipientName", applicantsInCase + " " + applicantsInCase.getLastName());
+        dataMap.put("recipientName", applicantsInCase.getFirstName() + " " + applicantsInCase.getLastName());
         dataMap.put("reasonsForListWithoutNoticeRequested", finalReasonsForListWithoutNoticeRequested);
         dataMap.put("currentDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd MMM yyyy")));
         log.info("dataMap =====> " + dataMap);
