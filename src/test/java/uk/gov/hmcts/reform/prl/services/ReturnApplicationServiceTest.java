@@ -299,7 +299,7 @@ public class ReturnApplicationServiceTest {
         //returnMsgStr.append("                            \n\n");
         returnMsgStr.append("""
                                 <div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!</span>
-                                <strong class='govuk-warning-text__text'>Application has been returned</strong></div>
+                                <strong class='govuk-warning-text__text'>Application has been returned123</strong></div>
 
                                 """);
 
@@ -336,7 +336,7 @@ public class ReturnApplicationServiceTest {
         //returnMsgStr.append("                            \n\n");
         returnMsgStr.append("""
                                 <div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!</span>
-                                <strong class='govuk-warning-text__text'>Application has been returned</strong></div>
+                                <strong class='govuk-warning-text__text'>Application has been returned123</strong></div>
 
                                 """);
 
