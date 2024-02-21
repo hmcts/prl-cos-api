@@ -446,7 +446,7 @@
       }
     }
   ],
-  "currentOrPastProceedingsForChildren": "Yes",
+  "currentOrPastProceedingsForChildren": "yes",
   "factorsAffectingAbilityToParticipate": "Yes",
   "provideDetailsForFactorsAffectingAbilityToParticipate": "yes a lot of factors"
 }
