@@ -72,12 +72,14 @@ public class InternationalElementsCheckerTest {
         Boolean bool = internationalElementsChecker.isStarted(respondent);
         assertTrue(bool);
     }
+
     @Test
     public void isNotStartedTest() {
         PartyDetails blankRespondent = PartyDetails.builder().build();
         Boolean bool = internationalElementsChecker.isStarted(blankRespondent);
         assertFalse(bool);
     }
+
     @Test
     public void mandatoryCompletedTest() {
         Boolean bool = internationalElementsChecker.isFinished(respondent);
@@ -109,6 +111,7 @@ public class InternationalElementsCheckerTest {
         Boolean bool = internationalElementsChecker.isFinished(respondent);
         assertFalse(bool);
     }
+
     @Test
     public void mandatoryCompletedWithoutDetailsTest() {
         respondent = PartyDetails
