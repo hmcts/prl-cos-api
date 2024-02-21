@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.services.fl401listonnotice;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,33 +49,40 @@ import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class Fl401ListOnNoticeService {
     public static final String LETTER_TYPE = "ListWithoutNoticeLetter";
-    @Autowired
-    private ObjectMapper objectMapper;
 
-    @Autowired
-    private AddCaseNoteService addCaseNoteService;
-    @Autowired
-    private UserService userService;
-    @Autowired
-    private EmailService emailService;
-    @Autowired
-    private CoreCaseDataService coreCaseDataService;
-    @Autowired
-    private ListOnNoticeService listOnNoticeService;
-    @Autowired
-    private DgsService dgsService;
-    @Autowired
-    private BulkPrintService bulkPrintService;
+    private final ObjectMapper objectMapper;
+
+    private final AddCaseNoteService addCaseNoteService;
+
+    private final UserService userService;
+
+    private final EmailService emailService;
+
+    private final CoreCaseDataService coreCaseDataService;
+
+    private final ListOnNoticeService listOnNoticeService;
+
+    private final DgsService dgsService;
+
+    private final BulkPrintService bulkPrintService;
 
     public static final String CONFIRMATION_BODY_WITHOUT_NOTICE = """
-        ### What happens next \n\n Admin will be notified to list the hearing on notice.
+        ### What happens next
+
+        Admin will be notified to list the hearing on notice.
+
         The reasons you have given to list the hearing on notice will be shared with the applicant.
+
         Your request details will be saved in case notes.""";
 
     public static final String CONFIRMATION_BODY_WITH_NOTICE = """
-        ### What happens next \n\n Admin will be notified to list the hearing on notice.
+        ### What happens next
+
+        Admin will be notified to list the hearing on notice.
+
         Your request details will be saved in case notes.""";
 
     public static final String CONFIRMATION_HEADER = "# Listing instructions sent to admin";
