@@ -1782,15 +1782,21 @@ public class ServiceOfApplicationService {
         if (null != caseData.getServiceOfApplicationScreen1()
             && null != caseData.getServiceOfApplicationScreen1().getValue()
             && !caseData.getServiceOfApplicationScreen1().getValue().isEmpty()) {
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
             List<String> orderCodes = caseData.getServiceOfApplicationScreen1()
                 .getValue().stream().map(DynamicMultiselectListElement::getCode).toList();
             orderCodes.forEach(orderCode ->
                                    caseData.getOrderCollection().stream()
                                        .filter(order -> String.valueOf(order.getId()).equalsIgnoreCase(orderCode))
                                        .findFirst()
-                                       .ifPresent(o -> selectedOrders.add(o.getValue().getOrderDocument() != null
-                                                                              ? o.getValue().getOrderDocument()
-                                                                              : o.getValue().getOrderDocumentWelsh())));
+                                       .ifPresent(o -> {
+                                           if (documentLanguage.isGenEng()) {
+                                               selectedOrders.add(o.getValue().getOrderDocument());
+                                           }
+                                           if (documentLanguage.isGenWelsh()) {
+                                               selectedOrders.add(o.getValue().getOrderDocumentWelsh());
+                                           }
+                                       }));
             return selectedOrders;
         }
         return Collections.emptyList();
