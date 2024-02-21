@@ -11,9 +11,11 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.ResponseEntity;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
@@ -44,7 +46,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
 @Slf4j
@@ -421,5 +426,26 @@ public class Fl401ListOnNoticeControllerTest {
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testSendListOnNoticeNotification() throws Exception {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        when(fl401ListOnNoticeService.sendNotification(anyMap(), anyString()))
+            .thenReturn(ok(SubmittedCallbackResponse.builder()
+                               .confirmationHeader("test")
+                               .confirmationBody("test").build()));
+        ResponseEntity<SubmittedCallbackResponse> response = fl401ListOnNoticeController
+            .sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
+        assertNotNull(response);
+    }
+
+    @Test
+    public void testExceptionSendListOnNoticeNotification() throws Exception {
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            fl401ListOnNoticeController.sendListOnNoticeNotification(authToken,s2sToken,callbackRequest);
+        }, RuntimeException.class, "Invalid Client");
+
     }
 }
