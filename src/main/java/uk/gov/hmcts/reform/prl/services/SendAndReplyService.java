@@ -1091,7 +1091,14 @@ public class SendAndReplyService {
         Message replyMessageObject = null;
         if (null != caseData.getSendOrReplyMessage().getSendMessageObject()) {
             sendMessageObject = caseData.getSendOrReplyMessage().getSendMessageObject();
-
+            if (canClearInternalWhoToSendFields(
+                sendMessageObject.getInternalMessageWhoToSendTo(),
+                InternalMessageWhoToSendToEnum.LEGAL_ADVISER,
+                sendMessageObject.getLegalAdvisersList()
+            )) {
+                sendMessageObject.setLegalAdvisersList(sendMessageObject.getLegalAdvisersList().toBuilder()
+                                                          .value(DynamicListElement.EMPTY).build());
+            }
             if (canClearInternalWhoToSendFields(
                 sendMessageObject.getInternalMessageWhoToSendTo(),
                 InternalMessageWhoToSendToEnum.JUDICIARY,
@@ -1147,6 +1154,11 @@ public class SendAndReplyService {
                 replyMessageObject.setJudicialOrMagistrateTierList(replyMessageObject.getJudicialOrMagistrateTierList().toBuilder()
                                                                        .value(DynamicListElement.EMPTY).build());
                 replyMessageObject.setSendReplyJudgeName(null);
+            }
+            if (!InternalMessageReplyToEnum.LEGAL_ADVISER.equals(replyMessageObject.getInternalMessageReplyTo())
+                && isNotNull(replyMessageObject.getLegalAdvisersList())) {
+                replyMessageObject.setLegalAdvisersList(replyMessageObject.getLegalAdvisersList().toBuilder()
+                                                                       .value(DynamicListElement.EMPTY).build());
             }
         }
 
