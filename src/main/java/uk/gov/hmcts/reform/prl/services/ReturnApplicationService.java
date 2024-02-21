@@ -109,8 +109,10 @@ public class ReturnApplicationService {
     public String getReturnMessageForTaskList(CaseData caseData) {
         StringBuilder returnMsgStr = new StringBuilder();
         returnMsgStr.append("""
+                                <br>
+                                <br>
                                 <div class='govuk-warning-text'><span class='govuk-warning-text__icon'>!</span>
-                                <strong class='govuk-warning-text__text'>Application has been returned123</strong></div>
+                                <strong class='govuk-warning-text__text'>Application has been returned</strong></div>
 
                                 """);
 
