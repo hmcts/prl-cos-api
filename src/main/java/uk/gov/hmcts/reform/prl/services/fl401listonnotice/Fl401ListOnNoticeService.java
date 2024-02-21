@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
@@ -21,14 +20,8 @@ import uk.gov.hmcts.reform.prl.services.BulkPrintService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.EmailService;
-import uk.gov.hmcts.reform.prl.services.HearingDataService;
-import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
-import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
-import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
-import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -61,24 +54,6 @@ public class Fl401ListOnNoticeService {
     private ObjectMapper objectMapper;
 
     @Autowired
-    HearingDataService hearingDataService;
-
-    @Autowired
-    RefDataUserService refDataUserService;
-
-    @Autowired
-    AllocatedJudgeService allocatedJudgeService;
-
-    @Autowired
-    private DocumentGenService documentGenService;
-
-    @Autowired
-    private HearingService hearingService;
-
-    @Autowired
-    @Qualifier("caseSummaryTab")
-    private CaseSummaryTabService caseSummaryTabService;
-    @Autowired
     private AddCaseNoteService addCaseNoteService;
     @Autowired
     private UserService userService;
@@ -95,12 +70,12 @@ public class Fl401ListOnNoticeService {
 
     public static final String CONFIRMATION_BODY_WITHOUT_NOTICE = """
         ### What happens next \n\n Admin will be notified to list the hearing on notice.
-        \n The reasons you have given to list the hearing on notice will be shared with the applicant.
-        \n Your request details will be saved in case notes.""";
+        The reasons you have given to list the hearing on notice will be shared with the applicant.
+        Your request details will be saved in case notes.""";
 
     public static final String CONFIRMATION_BODY_WITH_NOTICE = """
         ### What happens next \n\n Admin will be notified to list the hearing on notice.
-        \n Your request details will be saved in case notes.""";
+        Your request details will be saved in case notes.""";
 
     public static final String CONFIRMATION_HEADER = "# Listing instructions sent to admin";
 
