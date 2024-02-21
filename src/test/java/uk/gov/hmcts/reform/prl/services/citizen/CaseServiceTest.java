@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import javassist.NotFoundException;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -805,7 +804,7 @@ public class CaseServiceTest {
   
     @Ignore
     @Test
-    public void testupdateCaseSosWithCitizenDocs() {
+    public void testUpdateCaseSosWithCitizenDocs() {
         PartyDetails partyDetails = PartyDetails.builder()
             .firstName("Test")
             .lastName("User")
@@ -837,6 +836,8 @@ public class CaseServiceTest {
             .statementOfService(StatementOfService.builder()
                                     .stmtOfServiceAddRecipient(List.of(element(StmtOfServiceAddRecipient.builder().build())))
                                     .build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .build())
             .respondents(List.of(Element.<PartyDetails>builder().id(testUuid).value(partyDetails).build()))
             .caseInvites(List.of(Element.<CaseInvite>builder().value(CaseInvite.builder().isApplicant(YesOrNo.Yes)
                                                                          .partyId(UUID.fromString("00000000-0000-0000-0000-000000000000"))
