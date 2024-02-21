@@ -41,7 +41,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentA
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
@@ -66,6 +68,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
@@ -96,6 +100,7 @@ public class C100RespondentSolicitorService {
     private final SystemUserService systemUserService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final OrganisationService organisationService;
+    private final DocumentLanguageService documentLanguageService;
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
@@ -847,15 +852,32 @@ public class C100RespondentSolicitorService {
         }
 
         Document c1aFinalDocument = null;
+        Document c1aFinalDocumentWelsh = null;
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
-            c1aFinalDocument = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                SOLICITOR_C1A_FINAL_DOCUMENT,
-                false,
-                dataMap
-            );
+
+            if (documentLanguage.isGenEng()) {
+                c1aFinalDocument = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_FINAL_DOCUMENT,
+                    false,
+                    dataMap
+                );
+            }
+
+            if (documentLanguage.isGenWelsh()) {
+                c1aFinalDocumentWelsh = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_WELSH_FINAL_DOCUMENT,
+                    true,
+                    dataMap
+                );
+            }
+
             updatedCaseData.put("finalC1AResponseDoc", c1aFinalDocument);
+            updatedCaseData.put("finalC1AResponseDocWelsh", c1aFinalDocumentWelsh);
         }
 
         if (null != c1aFinalDocument) {
@@ -867,10 +889,12 @@ public class C100RespondentSolicitorService {
                                  .createdBy(createdBy)
                                  .dateCreated(LocalDate.now())
                                  .citizenDocument(c1aFinalDocument)
+                                 .citizenDocumentWelsh(c1aFinalDocumentWelsh)
                                  .build()
                 )
                 .build();
         }
+        log.info("BBBBBBB -->{}", respondentDocs);
 
         if (null != caseData.getRespondentDocsList()) {
             caseData.getRespondentDocsList().add(element(respondentDocs));
@@ -1307,15 +1331,35 @@ public class C100RespondentSolicitorService {
         caseDataUpdated.put("draftC7ResponseDoc", document);
 
         if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
-            Document documentForC1A = documentGenService.generateSingleDocument(
-                authorisation,
-                caseData,
-                SOLICITOR_C1A_DRAFT_DOCUMENT,
-                false,
-                dataMap
-            );
+
+            Document documentForC1A = null;
+            Document documentForC1AWelsh = null;
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+            if (documentLanguage.isGenEng()) {
+                documentForC1A = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_DRAFT_DOCUMENT,
+                    false,
+                    dataMap
+                );
+            }
+
+            if (documentLanguage.isGenWelsh()) {
+                documentForC1AWelsh = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT,
+                    true,
+                    dataMap
+                );
+            }
+
             caseDataUpdated.put("draftC1ADoc", documentForC1A);
+            caseDataUpdated.put("draftC1ADocWelsh", documentForC1AWelsh);
         }
+        log.info("AAAAAAA DRAFTTT -->{}", caseDataUpdated);
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
         Element<PartyDetails> solicitorRepresentedRespondent = null;
         if (solicitorRole.isPresent()) {
