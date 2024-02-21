@@ -10,9 +10,9 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum YesNoDontKnow {
 
-    @JsonProperty("Yes")
+    @JsonProperty("yes")
     yes("yes", "Yes"),
-    @JsonProperty("No")
+    @JsonProperty("no")
     no("no", "No"),
     @JsonProperty("dontKnow")
     dontKnow("dontKnow", "Don't know");
