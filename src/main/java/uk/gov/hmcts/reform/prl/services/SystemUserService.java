@@ -28,6 +28,7 @@ public class SystemUserService {
 
     @Cacheable(cacheNames = {SYS_USER_CACHE})
     public String getSysUserToken() {
+        log.info("Fetching system user token");
         return idamClient.getAccessToken(userConfig.getUserName(), userConfig.getPassword());
     }
 
