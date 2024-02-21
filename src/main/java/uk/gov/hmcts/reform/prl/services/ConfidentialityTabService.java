@@ -97,7 +97,6 @@ public class ConfidentialityTabService {
                 elementList =  getChildrenConfidentialDetails(children);
             }
         }
-        log.info("elementList {}", elementList);
         return elementList;
     }
 
@@ -163,19 +162,16 @@ public class ConfidentialityTabService {
         }
 
         if (!childrenAndOtherPeopleRelations.isEmpty()) {
-            log.info("childrenAndOtherPeopleRelations.get() {}", childrenAndOtherPeopleRelations.get());
             List<ChildrenAndOtherPeopleRelation> childrenAndOtherPeopleRelationList =
                 childrenAndOtherPeopleRelations.get()
                     .stream()
                     .map(Element::getValue)
                     .toList()
                     .stream()
-                    .peek(other -> log.info("-------- peek {}", String.valueOf(other)))
                     .filter(other -> !(ofNullable(other.getIsChildLivesWithPersonConfidential()).isPresent()
                         && other.getIsChildLivesWithPersonConfidential().equals(YesOrNo.Yes)))
                     .toList();
             for (ChildDetailsRevised childDetailsRevised : childDetailsReviseds) {
-                //log.info("objectPartyDetailsMap {}", objectPartyDetailsMap);
                 List<Element<OtherPersonConfidentialityDetails>> tempOtherPersonConfidentialDetails =
                     getOtherPersonConfidentialDetails(childrenAndOtherPeopleRelationList,objectPartyDetailsMap);
                 if (!tempOtherPersonConfidentialDetails.isEmpty()) {
@@ -189,7 +185,6 @@ public class ConfidentialityTabService {
                 }
             }
         }
-        log.info("childrenConfidentialDetails {}", childrenConfidentialDetails);
         return childrenConfidentialDetails;
     }
 
