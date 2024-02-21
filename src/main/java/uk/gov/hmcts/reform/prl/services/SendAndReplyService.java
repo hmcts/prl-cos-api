@@ -400,8 +400,16 @@ public class SendAndReplyService {
                                                s2sToken,
                                                caseReference
                                            ))
+                                           .legalAdvisersList(getLegalAdvisersList())
                                            .build())
                     .build())
+            .build();
+    }
+
+    private DynamicList getLegalAdvisersList() {
+        return DynamicList.builder()
+            .value(DynamicListElement.EMPTY)
+            .listItems(refDataUserService.getLegalAdvisorList())
             .build();
     }
 
@@ -867,6 +875,7 @@ public class SendAndReplyService {
                             ))
                             .ctscEmailList(getDynamicList(List.of(DynamicListElement.builder()
                                                                       .label(loggedInUserEmail).code(loggedInUserEmail).build())))
+                            .legalAdvisersList(getLegalAdvisersList())
                             .build())
                     .sendReplyTempDocs4(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
                     .sendReplyTempDocs5(isNotEmpty(sendReplyTempDocs) ? sendReplyTempDocs : null)
