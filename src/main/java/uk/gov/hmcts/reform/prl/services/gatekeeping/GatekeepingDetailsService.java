@@ -19,6 +19,7 @@ import java.util.Map;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEGAL_ADVISOR_GATEKEEPING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_NAME;
+import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getIdamId;
 import static uk.gov.hmcts.reform.prl.utils.CommonUtils.getPersonalCode;
 
 
