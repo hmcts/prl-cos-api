@@ -889,6 +889,19 @@ public class C100RespondentSolicitorService {
                                  .createdBy(createdBy)
                                  .dateCreated(LocalDate.now())
                                  .citizenDocument(c1aFinalDocument)
+                                 .build()
+                )
+                .build();
+        }
+
+        if (null != c1aFinalDocumentWelsh) {
+            respondentDocs = respondentDocs
+                .toBuilder()
+                .c1aDocumentWelsh(ResponseDocuments
+                                 .builder()
+                                 .partyName(party)
+                                 .createdBy(createdBy)
+                                 .dateCreated(LocalDate.now())
                                  .citizenDocumentWelsh(c1aFinalDocumentWelsh)
                                  .build()
                 )
