@@ -87,6 +87,46 @@ public class InternationalElementsCheckerTest {
     }
 
     @Test
+    public void isNotFinishedEmptyResponseTest() {
+        PartyDetails blankRespondent = PartyDetails.builder().response(Response
+                                                                           .builder().build()).build();
+        Boolean bool = internationalElementsChecker.isFinished(blankRespondent);
+        assertFalse(bool);
+    }
+
+    @Test
+    public void isNotFinishedEmptyStringChildrenLiveOutsideOfEnWlDetails() {
+        PartyDetails blankRespondent = PartyDetails
+            .builder()
+            .response(Response
+                          .builder()
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .build())
+                          .build())
+            .build();
+        Boolean bool = internationalElementsChecker.isFinished(blankRespondent);
+        assertFalse(bool);
+    }
+
+    @Test
+    public void isNotFinishedEmptyCitizenInternationalElementsTest() {
+        PartyDetails blankRespondent = PartyDetails
+            .builder()
+            .response(Response
+                          .builder()
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("")
+                                                            .build())
+                          .build())
+            .build();
+        Boolean bool = internationalElementsChecker.isFinished(blankRespondent);
+        assertFalse(bool);
+    }
+
+    @Test
     public void mandatoryCompletedWithoutRespdntTest() {
         respondent = null;
         Boolean bool = internationalElementsChecker.isFinished(respondent);
