@@ -1047,15 +1047,6 @@ public class ServiceOfApplicationServiceTest {
         List<Element<PartyDetails>> partyList = new ArrayList<>();
         Element applicantElement = element(UUID.fromString("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f"), partyDetails);
         partyList.add(applicantElement);
-
-
-        DynamicMultiSelectList soaRecipientsOptions = DynamicMultiSelectList.builder()
-            .value(List.of(DynamicMultiselectListElement.builder()
-                               .code("a496a3e5-f8f6-44ec-9e12-13f5ec214e0f")
-                               .label("recipient1")
-                               .build()))
-            .build();
-
         DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(DynamicMultiselectListElement.builder().code("Blank order or directions (C21) - to withdraw application")
                                .label("Blank order or directions (C21) - to withdraw application").build())).build();
@@ -2854,10 +2845,18 @@ public class ServiceOfApplicationServiceTest {
 
     @Test
     public void testGetNotificationPacks() {
+        DynamicMultiSelectList dynamicMultiSelectList = DynamicMultiSelectList.builder()
+            .value(List.of(DynamicMultiselectListElement.builder().code(TEST_UUID)
+                               .label("Blank order or directions (C21) - to withdraw application").build())).build();
+
         CaseData caseData = CaseData.builder()
             .id(12345L)
             .caseCreatedBy(CaseCreatedBy.SOLICITOR)
-            .finalDocument(Document.builder().build())
+            .orderCollection(List.of(element(UUID.fromString(TEST_UUID), OrderDetails.builder().orderTypeId("Blank order or directions (C21)")
+                .orderDocument(Document.builder().documentFileName("Test").build())
+                .orderDocumentWelsh(Document.builder().documentFileName("Test").build())
+                .build())))
+            .serviceOfApplicationScreen1(dynamicMultiSelectList)
             .serviceOfApplication(ServiceOfApplication.builder().build())
             .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
             .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
