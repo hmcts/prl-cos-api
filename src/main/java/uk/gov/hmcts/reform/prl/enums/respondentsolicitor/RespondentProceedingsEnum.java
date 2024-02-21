@@ -11,10 +11,10 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum RespondentProceedingsEnum {
 
-    @JsonProperty("Ongoing")
-    Ongoing("Ongoing", "Ongoing"),
-    @JsonProperty("Previous")
-    Previous("Previous", "Previous");
+    @JsonProperty("ongoing")
+    ongoing("ongoing", "Ongoing"),
+    @JsonProperty("previous")
+    previous("previous", "Previous");
 
     private final String id;
     private final String displayedValue;
