@@ -82,7 +82,8 @@ public class Fl401ListOnNoticeService {
     public Map<String, Object> prePopulateHearingPageDataForFl401ListOnNotice(CaseData caseData) {
 
         Map<String, Object> caseDataUpdated = new HashMap<>();
-        String isCaseWithOutNotice = String.valueOf(Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent()
+        String isCaseWithOutNotice = String.valueOf(isNotEmpty(caseData.getOrderWithoutGivingNoticeToRespondent())
+                                                    && Yes.equals(caseData.getOrderWithoutGivingNoticeToRespondent()
                                                                    .getOrderWithoutGivingNotice())
                                                         ? Yes : No);
         caseDataUpdated.put(FL401_CASE_WITHOUT_NOTICE, isCaseWithOutNotice);
