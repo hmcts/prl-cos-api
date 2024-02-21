@@ -81,7 +81,7 @@ public class GatekeepingDetailsServiceTest {
         assertNotNull(actualResponse);
         assertEquals(SendToGatekeeperTypeEnum.judge,actualResponse.getIsJudgeOrLegalAdviserGatekeeping());
         assertEquals(YesOrNo.Yes,actualResponse.getIsSpecificGateKeeperNeeded());
-        assertEquals(new JudicialUser((String) (idamId = null), personalCodes[0]), actualResponse.getJudgeName());
+        assertEquals(new JudicialUser((String) (idamId = "123"), personalCodes[0]), actualResponse.getJudgeName());
     }
 
     @Test
