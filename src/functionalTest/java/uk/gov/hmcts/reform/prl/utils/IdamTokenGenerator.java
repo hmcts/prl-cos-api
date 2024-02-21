@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.services.SystemUserService;
 
 @TestPropertySource("classpath:application.yaml")
 @Service
@@ -20,12 +21,6 @@ public class IdamTokenGenerator {
     @Value("${idam.solicitor.password}")
     private String solicitorPassword;
 
-    @Value("${idam.systemupdate.username}")
-    private String systemUpdateUsername;
-
-    @Value("${idam.systemupdate.password}")
-    private String systemUpdatePassword;
-
     @Value("${idam.citizen.username}")
     private String citizenUsername;
 
@@ -34,6 +29,9 @@ public class IdamTokenGenerator {
 
     @Autowired
     private IdamClient idamClient;
+
+    @Autowired
+    private SystemUserService systemUserService;
 
     @Value("${idam.apigateway.username}")
     private String apiGwUserName;
@@ -111,7 +109,7 @@ public class IdamTokenGenerator {
     public void beforeTestClass() {
         log.info(":::: Generating Bearer Token From Idam");
         solicitorIdamToken = idamClient.getAccessToken(solicitorUsername, solicitorPassword);
-        systemIdamToken = idamClient.getAccessToken(systemUpdateUsername, systemUpdatePassword);
+        systemIdamToken = systemUserService.getSysUserToken();
         judgeIdamToken = idamClient.getAccessToken(judgeUserName, judgePassword);
         cafcassIdamToken = idamClient.getAccessToken(cafcassUserName, cafcassPassword);
         citizenIdamToken = idamClient.getAccessToken(citizenUsername, citizenPassword);
