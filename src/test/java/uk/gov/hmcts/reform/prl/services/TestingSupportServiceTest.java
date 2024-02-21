@@ -11,6 +11,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
@@ -18,6 +19,7 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
@@ -45,6 +47,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentP
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
+import uk.gov.hmcts.reform.prl.services.caseinitiation.CaseInitiationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -104,6 +108,13 @@ public class TestingSupportServiceTest {
     private AuthTokenGenerator authTokenGenerator;
     @Mock
     private CaseService caseService;
+    @Mock
+    private PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+    @Mock
+    private CaseInitiationService caseInitiationService;
+
+    @Mock
+    private TaskListService taskListService;
 
     Map<String, Object> caseDataMap;
     CaseDetails caseDetails;
@@ -159,7 +170,7 @@ public class TestingSupportServiceTest {
                           .c7ResponseSubmitted(No)
                           .keepDetailsPrivate(KeepDetailsPrivate
                                                   .builder()
-                                                  .otherPeopleKnowYourContactDetails(YesNoDontKnow.yes)
+                                                  .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                                   .confidentiality(Yes)
                                                   .confidentialityList(confidentialityListEnums)
                                                   .build())
@@ -474,7 +485,10 @@ public class TestingSupportServiceTest {
             .caseDetails(caseDetails)
             .eventId(TS_ADMIN_APPLICATION_NOC.getId())
             .build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse =
+            AboutToStartOrSubmitCallbackResponse.builder().data(caseDataMap).build();
         when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseData);
+        when(taskListService.updateTaskList(callbackRequest, auth)).thenReturn(aboutToStartOrSubmitCallbackResponse);
         Map<String, Object> stringObjectMap = testingSupportService.submittedCaseCreation(callbackRequest, auth);
         Assert.assertTrue(!stringObjectMap.isEmpty());
     }

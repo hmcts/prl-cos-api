@@ -24,12 +24,16 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
+import uk.gov.hmcts.reform.prl.enums.noticeofchange.TypeOfNocEventEnum;
 import uk.gov.hmcts.reform.prl.events.NoticeOfChangeEvent;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.OrgSolicitors;
 import uk.gov.hmcts.reform.prl.models.Organisation;
+import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.SolicitorUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
 import uk.gov.hmcts.reform.prl.models.caseaccess.FindUserCaseRolesResponse;
@@ -52,6 +56,7 @@ import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.caseaccess.AssignCaseAccessClient;
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.pin.CaseInviteManager;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
@@ -70,6 +75,8 @@ import java.util.UUID;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -141,6 +148,10 @@ public class NoticeOfChangePartiesServiceTest {
     CaseEventService caseEventService;
     @Mock
     private Time time;
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+
+    private StartEventResponse startEventResponse;
 
     @Before
     public void setUp() {
@@ -178,6 +189,7 @@ public class NoticeOfChangePartiesServiceTest {
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
         caseData = CaseData.builder()
             .caseTypeOfApplication("c100")
+            .id(123456789L)
             .respondents(respondentList)
             .build();
 
@@ -327,6 +339,12 @@ public class NoticeOfChangePartiesServiceTest {
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
                 OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData,
+            0,
+            PartyRole.Representing.CARESPONDENTSOLICITOR,
+            true
+        )).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -412,6 +430,12 @@ public class NoticeOfChangePartiesServiceTest {
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
             OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData,
+            0,
+            PartyRole.Representing.CARESPONDENTSOLICITOR,
+            true
+        )).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -482,7 +506,12 @@ public class NoticeOfChangePartiesServiceTest {
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
                 OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
-
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
+        )).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
@@ -540,6 +569,12 @@ public class NoticeOfChangePartiesServiceTest {
         when(ccdCoreCaseDataService.startUpdate("test", EventRequestData.builder().build(), "12345678", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData,
+            0,
+            PartyRole.Representing.CARESPONDENTSOLICITOR,
+            true
+        )).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
@@ -592,7 +627,10 @@ public class NoticeOfChangePartiesServiceTest {
         userList.add(SolicitorUser.builder().email("test_solicitor@mailinator.com").build());
 
         ChangeOrganisationRequest changeOrganisationRequest = caseData.getChangeOrganisationRequestField();
-
+        PartyDetails updPartyDetails = updatePartyDetails(SolicitorUser
+                                                              .builder()
+                                                              .email("test_solicitor@mailinator.com").build(),
+                                                          changeOrganisationRequest, partyDetails,TypeOfNocEventEnum.addLegalRepresentation);
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails("testAuth")).thenReturn(UserDetails.builder()
@@ -606,13 +644,21 @@ public class NoticeOfChangePartiesServiceTest {
         when(organisationService.getOrganisationSolicitorDetails("test", changeOrganisationRequest
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
                 OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
+        when(organisationService.getOrganisationDetails("test", changeOrganisationRequest
+            .getOrganisationToAdd().getOrganisationID())).thenReturn(
+            Organisations.builder().organisationIdentifier("test").name("test").build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
+        )).thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
             .build();
-
         noticeOfChangePartiesService.nocRequestSubmitted(callbackRequest);
         verify(tabService, times(1)).updatePartyDetailsForNoc(
             isNull(),
@@ -661,7 +707,10 @@ public class NoticeOfChangePartiesServiceTest {
 
         ChangeOrganisationRequest changeOrganisationRequest = caseData.getChangeOrganisationRequestField();
 
-
+        PartyDetails updPartyDetails = updatePartyDetails(SolicitorUser
+                                                              .builder()
+                                                              .email("test_solicitor@mailinator.com").build(),
+                                                          changeOrganisationRequest, partyDetails,TypeOfNocEventEnum.addLegalRepresentation);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(userService.getUserDetails("testAuth")).thenReturn(UserDetails.builder()
                                                                     .forename("solicitorResp")
@@ -675,7 +724,12 @@ public class NoticeOfChangePartiesServiceTest {
             .getOrganisationToAdd().getOrganisationID())).thenReturn(
                 OrgSolicitors.builder().organisationIdentifier("test").users(userList).build());
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
-
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
+        )).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
@@ -1105,7 +1159,12 @@ public class NoticeOfChangePartiesServiceTest {
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
-
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            any(),
+            anyInt(),
+            any(),
+            anyBoolean()
+        )).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails)
             .caseDetailsBefore(caseDetails)
@@ -1153,7 +1212,12 @@ public class NoticeOfChangePartiesServiceTest {
             .build();
 
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
-
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData,
+            0,
+            PartyRole.Representing.CAAPPLICANTSOLICITOR,
+            false
+        )).thenReturn(caseData);
         String authToken = "test";
 
         Map<String, Object> caseDataUpdated = noticeOfChangePartiesService
@@ -1324,6 +1388,23 @@ public class NoticeOfChangePartiesServiceTest {
             CaseEventDetail.builder().stateId(State.SUBMITTED_PAID.getValue()).build(),
             CaseEventDetail.builder().stateId(State.AWAITING_SUBMISSION_TO_HMCTS.getValue()).build()
         );
+        DynamicListElement dynamicListElementRole = DynamicListElement.builder()
+            .code("[FL401RESPONDENTSOLICITOR]")
+            .label("[FL401RESPONDENTSOLICITOR]")
+            .build();
+        ChangeOrganisationRequest changeOrganisationRequest = ChangeOrganisationRequest.builder()
+            .createdBy("test_solicitor@mailinator.com")
+            .caseRoleId(DynamicList.builder()
+                            .value(dynamicListElementRole)
+                            .listItems(List.of(dynamicListElementRole))
+                            .build())
+            .organisationToAdd(Organisation.builder()
+                                   .organisationID("EOILU2A")
+                                   .organisationName("FPRL-test-organisation")
+                                   .build())
+            .build();
+        PartyDetails updPartyDetails =
+            updatePartyDetails(null, changeOrganisationRequest, partyDetails,TypeOfNocEventEnum.removeLegalRepresentation);
 
         when(objectMapper.convertValue(anyMap(), eq(CaseData.class))).thenReturn(caseData);
         when(systemUserService.getSysUserToken()).thenReturn("test");
@@ -1334,9 +1415,42 @@ public class NoticeOfChangePartiesServiceTest {
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(caseEventService.findEventsForCase(String.valueOf(caseData.getId()))).thenReturn(caseEvents);
         when(ccdCoreCaseDataService.findCaseById("test", "12345678")).thenReturn(caseDetails);
-
-
-        SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService.submittedAdminRemoveLegalRepresentative(callbackRequest);
+        when(partyLevelCaseFlagsService.generateIndividualPartySolicitorCaseFlags(
+            caseData.toBuilder().respondentsFL401(updPartyDetails).build(),
+            0,
+            PartyRole.Representing.DARESPONDENTSOLICITOR,
+            false
+        )).thenReturn(caseData);
+        SubmittedCallbackResponse submittedCallbackResponse = noticeOfChangePartiesService
+            .submittedAdminRemoveLegalRepresentative(callbackRequest);
         assertNotNull(submittedCallbackResponse);
     }
+
+    private static PartyDetails updatePartyDetails(SolicitorUser legalRepresentativeSolicitorDetails,
+                                                   ChangeOrganisationRequest changeOrganisationRequest,
+                                                   PartyDetails partyDetails, TypeOfNocEventEnum typeOfNocEvent) {
+        return partyDetails.toBuilder()
+            .user(partyDetails.getUser().toBuilder()
+                      .solicitorRepresented(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
+                                                ? YesOrNo.Yes : YesOrNo.No)
+                      .build())
+            .doTheyHaveLegalRepresentation(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
+                                               ? YesNoDontKnow.yes : YesNoDontKnow.no)
+            .solicitorEmail(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
+                                ? legalRepresentativeSolicitorDetails.getEmail() : null)
+            .representativeFirstName(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
+                                         ? legalRepresentativeSolicitorDetails.getFirstName() : null)
+            .representativeLastName(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
+                                        ? legalRepresentativeSolicitorDetails.getLastName() : null)
+            .solicitorOrg(TypeOfNocEventEnum.addLegalRepresentation.equals(typeOfNocEvent)
+                              ? changeOrganisationRequest.getOrganisationToAdd() : Organisation.builder().build())
+            .response(null != partyDetails.getResponse()
+                          && YesOrNo.Yes.equals(partyDetails.getResponse().getC7ResponseSubmitted())
+                          ? partyDetails.getResponse() : Response.builder().build())
+            .isRemoveLegalRepresentativeRequested(TypeOfNocEventEnum.removeLegalRepresentation.equals(typeOfNocEvent)
+                                                      && YesOrNo.Yes.equals(partyDetails.getIsRemoveLegalRepresentativeRequested())
+                                                      ? YesOrNo.No : partyDetails.getIsRemoveLegalRepresentativeRequested())
+            .build();
+    }
+
 }

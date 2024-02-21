@@ -1,20 +1,23 @@
-package uk.gov.hmcts.reform.prl.enums.serveorder;
+package uk.gov.hmcts.reform.prl.enums.serviceofapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
+
+@Getter
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
-public enum DeliveryByEnum {
-    @JsonProperty("email")
-    email("email", "Email"),
-    @JsonProperty("post")
-    post("post", "Post");
+public enum StatementOfServiceWhatWasServed {
 
+    @JsonProperty("statementOfServiceApplicationPack")
+    statementOfServiceApplicationPack("statementOfServiceApplicationPack", "Application pack"),
+    @JsonProperty("statementOfServiceOrder")
+    statementOfServiceOrder("statementOfServiceOrder", "Order");
 
     private final String id;
     private final String displayedValue;
@@ -25,7 +28,8 @@ public enum DeliveryByEnum {
     }
 
     @JsonCreator
-    public static DeliveryByEnum getValue(String key) {
-        return DeliveryByEnum.valueOf(key);
+    public static StatementOfServiceWhatWasServed getValue(String key) {
+        return StatementOfServiceWhatWasServed.valueOf(key);
     }
+
 }

@@ -27,10 +27,12 @@ java:
         - prl-rd-api-system-user-password
         - welsh-court-mapping
         - app-insights-connection-string
+        - judge-testuser-one
+        - judge-testpassword
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PAY_CALLBACK_URL: https://prl-cos-pr-1975.preview.platform.hmcts.net/service-request-update
+    PAY_CALLBACK_URL: https://prl-cos-pr-2066.preview.platform.hmcts.net/service-request-update
     FEE_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RUNS_LOCALLY: false
     IDAM_CLIENT_ID: prl-cos-api
@@ -49,7 +51,7 @@ java:
     IDAM_S2S_AUTH_MICROSERVICE: prl_cos_api
     PRL_DGS_API_URL: http://prl-dgs-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     FEE_REGISTER_API_URL: http://fees-register-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,ccd_data
+    PRL_S2S_AUTHORISED_SERVICES: api_gw,prl_citizen_frontend,fis_hmc_api,ccd_data,prl_cos_api
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     ACA_SERVICE_API_BASEURL: http://prl-ccd-definitions-pr-1739-aac-manage-case-assignment
