@@ -423,7 +423,7 @@
         "dateEnded": "2023-01-01",
         "caseNumber": "123445",
         "dateStarted": "2022-01-01",
-        "nameOfCourt": "court of sodor",
+        "nameOfCourt": "Court of sodor",
         "nameOfJudge": "judge test",
         "typeOfOrder": [
           "emergencyProtectionOrder",
@@ -442,11 +442,11 @@
         "otherTypeOfOrder": "a lot of orders",
         "uploadRelevantOrder": null,
         "nameOfChildrenInvolved": "timothy \njessica",
-        "previousOrOngoingProceedings": "ongoing"
+        "previousOrOngoingProceedings": "Ongoing"
       }
     }
   ],
-  "currentOrPastProceedingsForChildren": "yes",
+  "currentOrPastProceedingsForChildren": "Yes",
   "factorsAffectingAbilityToParticipate": "Yes",
   "provideDetailsForFactorsAffectingAbilityToParticipate": "yes a lot of factors"
 }
