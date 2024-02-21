@@ -81,6 +81,9 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
     private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
         = "requests/judge-edit-approve-court-admin-1hearing-judge-appr-request.json";
 
+    private static final String DRAFT_SDO_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY
+        = "requests/judge-edit-approve-court-admin-sdo-1hearing-judge-appr-request.json";
+
     private static final String DRAFT_ORDER_JUDGE_APPRV_ADMIN_MANY_HEARING_BODY
         = "requests/judge-edit-approve-court-admin-manyhearing-judgeappr-request.json";
 
@@ -396,4 +399,30 @@ public class EditAndApproveDraftOrderControllerFunctionalTest {
             .as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
+
+    /**
+     * Judge editApprove - approves the sdo order with one hearing which is created by court admin.
+     */
+    @Test
+    public void givenRequestBody_whenJudge_edit_approve_court_admin_Sdo_order_then200Response() throws Exception {
+        String requestBody = ResourceLoader.loadJson(DRAFT_SDO_ORDER_JUDGE_APPRV_ADMIN_ONE_HEARING_BODY);
+
+        request1
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/judge-or-admin-edit-approve/about-to-submit")
+            .then()
+            .body("data.isHearingTaskNeeded", equalTo("Yes"),
+                  "data.isMultipleHearingSelected", equalTo("No"),
+                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
+                  "data.isOrderApproved", equalTo("Yes"),
+                  "data.whoApprovedTheOrder", equalTo("SYSTEM_UPDATE"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
 }
