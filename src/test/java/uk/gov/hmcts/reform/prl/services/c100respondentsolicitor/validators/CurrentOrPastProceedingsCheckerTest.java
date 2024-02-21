@@ -88,7 +88,6 @@ public class CurrentOrPastProceedingsCheckerTest {
         assertFalse(anyNonEmpty);
     }
 
-
     @Test
     public void hasMandatoryCompletedTest() {
         boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
@@ -104,6 +103,30 @@ public class CurrentOrPastProceedingsCheckerTest {
             .build();
         boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
         Assert.assertFalse(anyNonEmpty);
+    }
+
+    @Test
+    public void hasMandatoryCompletedPastProceedingAsNoTest() {
+        respondent = PartyDetails.builder()
+            .response(Response
+                          .builder()
+                          .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
+                          .build())
+            .build();
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
+        Assert.assertTrue(anyNonEmpty);
+    }
+
+    @Test
+    public void hasMandatoryNotCompletedPastProceedingAsEmptyValeuTest() {
+        respondent = PartyDetails.builder()
+            .response(Response
+                          .builder()
+                          .currentOrPastProceedingsForChildren(YesNoDontKnow.no)
+                          .build())
+            .build();
+        boolean anyNonEmpty = currentOrPastProceedingsChecker.isFinished(respondent);
+        Assert.assertTrue(anyNonEmpty);
     }
 
 }
