@@ -139,18 +139,19 @@ public class CaseControllerFunctionalTest {
     }
 
     @Test
-    public void testCitizenWithdraw() throws Exception {
+    public void testCitizenWithdrawn() throws Exception {
         String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .header("caseId", "12345678")
-            .post("/{caseId}/withdraw")
-            .then().assertThat().statusCode(200);
+
+        mockMvc.perform(post("/{caseID}/withdraw")
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .header("serviceAuthorization", "auth")
+                            .header("accessCode", "auth")
+                            .header("caseId", "12345678"))
+            .andExpect(status().isOk())
+            .andReturn();
     }
 
 }
