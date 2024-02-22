@@ -138,4 +138,19 @@ public class CaseControllerFunctionalTest {
             .andReturn();
     }
 
+    @Test
+    public void testCitizenWithdraw() throws Exception {
+        String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
+        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .header("caseId", "12345678")
+            .post("/{caseId}/withdraw")
+            .then().assertThat().statusCode(200);
+    }
+
 }
