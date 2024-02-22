@@ -140,16 +140,40 @@ public class CaseControllerFunctionalTest {
 
     @Test
     public void testCitizenWithdrawn() throws Exception {
-        String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
-        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
 
-        mockMvc.perform(post("/12345678/withdraw")
+        String caseId = "1234567891234567";
+        CaseData caseData = CaseData.builder()
+            .id(1234567891234567L)
+            .applicantCaseName("test")
+            .state(State.CASE_WITHDRAWN)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            1234567891234567L).data(stringObjectMap).state(PrlAppsConstants.WITHDRAWN_STATE).build();
+
+        Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        Mockito.when(caseService.withdrawCase(caseData, caseId, "authToken")).thenReturn(caseDetails);
+        //When
+        String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
+        mockMvc.perform(post("/1234567891234567L/withdraw")
                             .content(requestBody)
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .header("serviceAuthorization", "auth"))
             .andExpect(status().isOk())
             .andReturn();
+
+
+        /*String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
+        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
+        when(caseService.withdrawCase(requestBody, "12345678", "auth")).thenReturn()
+        mockMvc.perform(post("/12345678/withdraw")
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "auth")
+                            .header("serviceAuthorization", "auth"))
+            .andExpect(status().isOk())
+            .andReturn();*/
     }
 
 }
