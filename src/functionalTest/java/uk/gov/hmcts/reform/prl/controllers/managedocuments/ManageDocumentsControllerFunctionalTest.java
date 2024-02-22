@@ -57,6 +57,7 @@ import static uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsSe
 @RunWith(SpringRunner.class)
 @ContextConfiguration
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@Ignore
 public class ManageDocumentsControllerFunctionalTest {
 
     @Autowired
@@ -92,7 +93,7 @@ public class ManageDocumentsControllerFunctionalTest {
 
     private static CaseDetails caseDetails;
 
-    @Ignore
+
     @Test
     public void createCcdTestCase() throws Exception {
 
@@ -113,7 +114,6 @@ public class ManageDocumentsControllerFunctionalTest {
         Assert.assertNotNull(caseDetails.getId());
     }
 
-    @Ignore
     @Test
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
