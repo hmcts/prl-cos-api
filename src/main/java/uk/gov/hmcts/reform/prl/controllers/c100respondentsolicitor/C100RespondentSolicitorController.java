@@ -155,7 +155,7 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
             ObjectMapper om = new ObjectMapper();
             objectMapper.registerModule(new JavaTimeModule());
             String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-            log.info("DDDDDDDDDDDD ", result);
+            log.info("DDDDDDDDDDDD {} ", result);
             List<String> errorList = new ArrayList<>();
             log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
             return AboutToStartOrSubmitCallbackResponse

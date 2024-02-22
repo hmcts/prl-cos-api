@@ -104,6 +104,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.POLICE_REPORTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PREVIOUS_ORDERS_SUBMITTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_PDF;
@@ -738,6 +740,12 @@ public class DocumentGenService {
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 fileName = solicitorC1ADraftFilename;
                 break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                fileName = solicitorC1AFinalWelshFilename;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                fileName = solicitorC1ADraftWelshFilename;
+                break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 fileName = daListOnNoticeFl404bFile;
                 break;
@@ -849,6 +857,12 @@ public class DocumentGenService {
                 break;
             case SOLICITOR_C1A_DRAFT_DOCUMENT:
                 template = solicitorC1ADraftTemplate;
+                break;
+            case SOLICITOR_C1A_WELSH_FINAL_DOCUMENT:
+                template = solicitorC1AFinalWelshTemplate;
+                break;
+            case SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT:
+                template = solicitorC1ADraftWelshTemplate;
                 break;
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
