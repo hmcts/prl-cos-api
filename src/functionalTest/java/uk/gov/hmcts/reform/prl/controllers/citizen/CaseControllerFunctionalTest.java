@@ -154,13 +154,13 @@ public class CaseControllerFunctionalTest {
     public void testCitizenWithdrawn() throws Exception {
         String caseId = "12345678";
         CaseData caseData = CaseData.builder()
-            .id(12345678)
+            .id(12345678L)
             .applicantCaseName("test")
             .state(State.CASE_WITHDRAWN)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
-            12345678).data(stringObjectMap).state(PrlAppsConstants.WITHDRAWN_STATE).build();
+            12345678L).data(stringObjectMap).state(PrlAppsConstants.WITHDRAWN_STATE).build();
 
         Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         Mockito.when(caseService.withdrawCase(caseData, caseId, "authToken")).thenReturn(caseDetails);
