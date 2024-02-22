@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -151,6 +152,10 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            ObjectMapper om = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+            log.info("DDDDDDDDDDDD ", result);
             List<String> errorList = new ArrayList<>();
             log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
             return AboutToStartOrSubmitCallbackResponse

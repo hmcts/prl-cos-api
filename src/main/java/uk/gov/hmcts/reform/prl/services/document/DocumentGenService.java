@@ -620,6 +620,11 @@ public class DocumentGenService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         if (isWelsh) {
+            log.info("authorisation--->{}",authorisation);
+            log.info("caseData.getId()--->{}",caseData.getId());
+            log.info("getCaseTypeOfApplication--->{}",caseData.getCaseTypeOfApplication());
+            log.info("template--->{}",template);
+            log.info("dataMap--->{}",dataMap);
             generatedDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 String.valueOf(caseData.getId()),
@@ -951,6 +956,11 @@ public class DocumentGenService {
                                            CaseData caseData,
                                            String hint,
                                            boolean isWelsh, Map<String, Object> respondentDetails) throws Exception {
+        log.info("authorisation...{} ",authorisation);
+        log.info("hint...{} ",hint);
+        log.info("isWelsh...{} ",isWelsh);
+        log.info("caseData957...{} ",caseData);
+        log.info("respondentDetails...{} ",respondentDetails);
         return getDocument(authorisation, caseData, hint, isWelsh, respondentDetails);
     }
 
