@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
+import uk.gov.hmcts.reform.prl.models.roleassignment.RoleAssignmentDto;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
@@ -39,6 +40,7 @@ import javax.ws.rs.NotFoundException;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
+import static uk.gov.hmcts.reform.prl.enums.Event.ALLOCATED_JUDGE;
 
 @Slf4j
 @RestController
@@ -113,9 +115,15 @@ public class AllocateJudgeController extends AbstractCallbackController {
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
 
             if (allocatedJudge.getIsSpecificJudgeOrLegalAdviserNeeded().equals(YesOrNo.Yes)) {
+                RoleAssignmentDto roleAssignmentDto = RoleAssignmentDto.builder()
+                    .judgeEmail(allocatedJudge.getJudgeEmail())
+                    .legalAdviserList(allocatedJudge.getLegalAdviserList())
+                    .build();
                 roleAssignmentService.createRoleAssignment(
                     authorisation,
                     callbackRequest.getCaseDetails(),
+                    roleAssignmentDto,
+                    ALLOCATED_JUDGE.getName(),
                     false,
                     ALLOCATE_JUDGE_ROLE
                 );
