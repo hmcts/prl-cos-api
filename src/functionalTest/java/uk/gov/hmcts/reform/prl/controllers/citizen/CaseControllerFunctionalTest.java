@@ -143,12 +143,12 @@ public class CaseControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(LINK_CITIZEN_REQUEST_BODY);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
 
-        mockMvc.perform(post("/{caseID}/withdraw")
+        mockMvc.perform(post("/12345678/withdraw")
                             .content(requestBody)
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .header("serviceAuthorization", "auth")
-                            .header("caseId", "12345678"))
+                            )
             .andExpect(status().isOk())
             .andReturn();
     }
