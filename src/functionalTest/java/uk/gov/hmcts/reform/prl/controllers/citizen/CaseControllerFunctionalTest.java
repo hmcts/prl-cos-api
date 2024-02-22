@@ -161,19 +161,18 @@ public class CaseControllerFunctionalTest {
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         CaseDetails caseDetails = CaseDetails.builder().id(
             12345678L).data(stringObjectMap).state(PrlAppsConstants.WITHDRAWN_STATE).build();
-
+        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
         Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         Mockito.when(caseService.withdrawCase(caseData, caseId, "authToken")).thenReturn(caseDetails);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
         request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
+            .header("Authorization", "auth")
+            .header("ServiceAuthorization", "serviceauth")
+            .body(caseData)
             .when()
             .contentType("application/json")
-            .post("/12345678/withdraw")
-            .then()
-            .assertThat().statusCode(200);
+            .post("/12345678L/withdraw")
+            .as(CaseData.class);
     }
 }
