@@ -558,7 +558,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
                           .getCoverLetter(caseData,
-                                                          AUTH, address, "test name"));
+                                                          AUTH, address, "test name", false));
 
     }
 
@@ -583,7 +583,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertNotNull(serviceOfApplicationPostService
                           .getCoverLetter(caseData,
-                                          AUTH, address, "test name"));
+                                          AUTH, address, "test name", false));
 
     }
 
@@ -607,7 +607,7 @@ public class ServiceOfApplicationPostServiceTest {
             Mockito.any(CaseData.class), Mockito.anyString(), Mockito.anyBoolean())).thenReturn(Mockito.anyString());
         assertTrue(serviceOfApplicationPostService
                           .getCoverLetter(caseData,
-                                          AUTH, address, "test name").isEmpty());
+                                          AUTH, address, "test name", false).isEmpty());
 
     }
 
