@@ -152,9 +152,9 @@ public class CaseControllerFunctionalTest {
 
     @Test
     public void testCitizenWithdrawn() throws Exception {
-        String caseId = "1234567891234567";
+        String caseId = "1708439656982454";
         CaseData caseData = CaseData.builder()
-            .id(1234567891234567L)
+            .id(1708439656982454)
             .applicantCaseName("test")
             .state(State.CASE_WITHDRAWN)
             .build();
@@ -165,35 +165,15 @@ public class CaseControllerFunctionalTest {
         Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         Mockito.when(caseService.withdrawCase(caseData, caseId, "authToken")).thenReturn(caseDetails);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
-
-        //When
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
-        /*mockMvc.perform(post("/1234567891234567L/withdraw")
-                            .content(requestBody)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("serviceAuthorization", "auth"))
-            .andExpect(status().isOk())
-            .andReturn();*/
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
             .when()
             .contentType("application/json")
-            .post("/1234567891234567L/withdraw")
+            .post("/1708439656982454/withdraw")
             .then()
             .assertThat().statusCode(200);
-
-        /*String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
-        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
-        when(caseService.withdrawCase(requestBody, "12345678", "auth")).thenReturn()
-        mockMvc.perform(post("/12345678/withdraw")
-                            .content(requestBody)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "auth")
-                            .header("serviceAuthorization", "auth"))
-            .andExpect(status().isOk())
-            .andReturn();*/
     }
 }
