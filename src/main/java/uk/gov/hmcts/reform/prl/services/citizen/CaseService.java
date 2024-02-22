@@ -178,7 +178,7 @@ public class CaseService {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             }
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-            caseDataMap.putAll(allTabService.findCaseDataMap(caseData));
+            //caseDataMap.putAll(allTabService.findCaseDataMap(caseData));
             CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
                 caseDataMap
