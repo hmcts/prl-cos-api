@@ -67,7 +67,7 @@ public class BundleCreateRequestMapper {
                                                                 String bundleConfigFileName) {
         BundleCreateRequest bundleCreateRequest = BundleCreateRequest.builder()
             .caseDetails(BundlingCaseDetails.builder()
-                .id(caseData.getApplicantName())
+                .id(String.valueOf(caseData.getId()))
                 .caseData(mapCaseData(caseData,hearingDetails,
                     bundleConfigFileName))
                 .build())
