@@ -75,15 +75,15 @@ public class RespondentSolicitorMiamService {
             + "that provides up to £500 towards the cost of mediation for eligible cases.</p>");
         collapsibleWillingnessToAttendMiam.add("<p>At your MIAM, your mediator will explain the voucher scheme and you may be offered a "
             + "voucher if your case meets the scheme's criteria. Not all cases qualify for a voucher.</p>");
-        collapsibleWillingnessToAttendMiam.add("<p>See the <a href=\"https://www.gov.uk\" class=\"govuk-link\" rel=\"external\" "
+        collapsibleWillingnessToAttendMiam.add("<p>See the <a href=\"https://www.gov.uk\" class=\"govuk-link\""
             + "target=\"_blank\">GOV.UK</a> guidance on the <a href=\"https://www.gov.uk/guidance/family-mediation-voucher-scheme\" "
-            + "class=\"govuk-link\" rel=\"external\" target=\"_blank\">Family Mediation Voucher Scheme</a> for more information.</p>");
+            + "class=\"govuk-link\" target=\"_blank\">Family Mediation Voucher Scheme</a> for more information.</p>");
         collapsibleWillingnessToAttendMiam.add("<p>The MIAM process works, with agreement reached in over 70% of cases.</p>");
         collapsibleWillingnessToAttendMiam.add("<h3 class=\"govuk-heading-s\">Exemptions</h3>");
         collapsibleWillingnessToAttendMiam.add("<p>You don't need to attend a MIAM if you have a valid reason. For example, "
             + "you or the children are at risk of harm.</p>");
         collapsibleWillingnessToAttendMiam.add("<p>Find out more about <a href=\"https://apply-to-court-about-child-arrangements.service.justice.gov.uk/about/miam_exemptions\" "
-            + "class=\"govuk-link\" rel=\"external\" target=\"_blank\">the reasons for a MIAM exemption</a>.</p>");
+            + "class=\"govuk-link\" target=\"_blank\">the reasons for a MIAM exemption</a>.</p>");
         collapsibleWillingnessToAttendMiam.add("</div>");
         collapsibleWillingnessToAttendMiam.add("</details>");
 
