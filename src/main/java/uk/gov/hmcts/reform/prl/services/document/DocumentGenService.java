@@ -66,6 +66,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C8_BLANK_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_COVER_SHEET_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_FIELD_C1A_DRAFT_WELSH;
@@ -247,6 +248,11 @@ public class DocumentGenService {
     protected String respC8TemplateWelsh;
     @Value("${document.templates.c100.c100_resp_c8_welsh_filename}")
     protected String respC8FilenameWelsh;
+
+    @Value("${document.templates.common.doc_cover_sheet_citizen_template}")
+    protected String docCoverSheetCitizenTemplate;
+    @Value("${document.templates.common.doc_cover_sheet_welsh_citizen_template}")
+    protected String docCoverSheetWelshCitizenTemplate;
 
     private final DgsService dgsService;
     private final DocumentLanguageService documentLanguageService;
@@ -840,6 +846,9 @@ public class DocumentGenService {
             case DA_LIST_ON_NOTICE_FL404B_DOCUMENT:
                 template = daListOnNoticeFl404bTemplate;
                 break;
+            case DOCUMENT_COVER_SHEET_CITIZEN_HINT:
+                template = findDocCoverSheetTemplateForCitizen(isWelsh);
+                break;
             default:
                 template = "";
         }
@@ -890,6 +899,10 @@ public class DocumentGenService {
 
     private String findDocCoverSheetTemplate(boolean isWelsh) {
         return !isWelsh ? docCoverSheetTemplate : docCoverSheetWelshTemplate;
+    }
+
+    private String findDocCoverSheetTemplateForCitizen(boolean isWelsh) {
+        return !isWelsh ? docCoverSheetCitizenTemplate : docCoverSheetWelshCitizenTemplate;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {
