@@ -157,7 +157,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_C1A);
 
-        request
+        AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -167,6 +167,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .then()
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
+        System.out.println("KKKK {}" + resp);
 
     }
 
