@@ -147,8 +147,7 @@ public class CaseControllerFunctionalTest {
                             .content(requestBody)
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
-                            .header("serviceAuthorization", "auth")
-                            )
+                            .header("serviceAuthorization", "auth"))
             .andExpect(status().isOk())
             .andReturn();
     }
