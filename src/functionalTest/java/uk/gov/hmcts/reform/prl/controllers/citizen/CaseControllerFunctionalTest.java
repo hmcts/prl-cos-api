@@ -152,7 +152,6 @@ public class CaseControllerFunctionalTest {
 
     @Test
     public void testCitizenWithdrawn() throws Exception {
-
         String caseId = "1234567891234567";
         CaseData caseData = CaseData.builder()
             .id(1234567891234567L)
@@ -165,16 +164,26 @@ public class CaseControllerFunctionalTest {
 
         Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         Mockito.when(caseService.withdrawCase(caseData, caseId, "authToken")).thenReturn(caseDetails);
+        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
+
         //When
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
-        mockMvc.perform(post("/1234567891234567L/withdraw")
+        /*mockMvc.perform(post("/1234567891234567L/withdraw")
                             .content(requestBody)
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "auth")
                             .header("serviceAuthorization", "auth"))
             .andExpect(status().isOk())
-            .andReturn();
-
+            .andReturn();*/
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/1234567891234567L/withdraw")
+            .then()
+            .assertThat().statusCode(200);
 
         /*String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
@@ -187,5 +196,4 @@ public class CaseControllerFunctionalTest {
             .andExpect(status().isOk())
             .andReturn();*/
     }
-
 }
