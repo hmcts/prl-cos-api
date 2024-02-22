@@ -167,8 +167,8 @@ public class CaseControllerFunctionalTest {
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
         request
-            .header("Authorization", "auth")
-            .header("ServiceAuthorization", "serviceauth")
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
             .body(caseData)
             .when()
             .contentType("application/json")
