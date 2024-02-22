@@ -65,6 +65,9 @@ public class CaseControllerFunctionalTest {
 
     private static final String LINK_CITIZEN_REQUEST_BODY = "requests/link-citizen-case.json";
 
+    @Mock
+    private ObjectMapper objectMapper;
+
     private final String targetInstance =
             StringUtils.defaultIfBlank(
                     System.getenv("TEST_URL"),
