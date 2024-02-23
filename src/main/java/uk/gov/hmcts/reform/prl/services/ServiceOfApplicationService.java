@@ -97,6 +97,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FALSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -912,9 +913,13 @@ public class ServiceOfApplicationService {
         String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
 
         log.info("isApplicantRepresented---beginning--> {}",isAllApplicantsAreLiP);
-        if (!TRUE.equals(isAllApplicantsAreLiP) && !FALSE.equals(isAllApplicantsAreLiP)) {
-            log.info("being called...");
+
+        if (null == isAllApplicantsAreLiP) {
+            log.info("First time only...");
             caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, isApplicantRepresented(caseData) ? TRUE : FALSE);
+        } else if (!EMPTY_STRING.equals(isAllApplicantsAreLiP)) {
+            log.info("Not empty, So make it empty...");
+            caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, EMPTY_STRING);
         }
 
         log.info("isApplicantRepresented---After--> {}", caseDataMap.get(WA_IS_APPLICANT_REPRESENTED));
@@ -1826,7 +1831,6 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
-        log.info("about to startttt");
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(
@@ -1869,7 +1873,6 @@ public class ServiceOfApplicationService {
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
-
         return caseDataUpdated;
     }
 
