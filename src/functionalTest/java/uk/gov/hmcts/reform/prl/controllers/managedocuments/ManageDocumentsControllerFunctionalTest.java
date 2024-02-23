@@ -7,7 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -92,7 +91,6 @@ public class ManageDocumentsControllerFunctionalTest {
 
     private static CaseDetails caseDetails;
 
-    @Ignore
     @Test
     public void createCcdTestCase() throws Exception {
 
@@ -113,7 +111,6 @@ public class ManageDocumentsControllerFunctionalTest {
         Assert.assertNotNull(caseDetails.getId());
     }
 
-    @Ignore
     @Test
     public void givenCaseId_whenAboutToStartEndPoint_thenRespWithDocumentCategories() throws Exception {
 
