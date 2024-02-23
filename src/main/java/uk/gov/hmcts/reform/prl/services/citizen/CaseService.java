@@ -203,8 +203,8 @@ public class CaseService {
 
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
 
-        String systemAuthorisation = systemUserService.getSysUserToken();
-        String systemUpdateUserId = systemUserService.getUserId(systemAuthorisation);
+
+        String systemUpdateUserId = systemUserService.getUserId(authToken);
         log.info("Following case event will be triggered {}", caseEvent.getValue());
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, systemUpdateUserId);
