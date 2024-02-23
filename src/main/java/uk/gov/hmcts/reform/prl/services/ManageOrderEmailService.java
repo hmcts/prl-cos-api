@@ -58,7 +58,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_LOWER_CASE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.AM_UPPER_CASE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DATE_TIME_PATTERN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ORDER_COLLECTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PM_LOWER_CASE;
@@ -357,9 +356,9 @@ public class ManageOrderEmailService {
                 log.info("*** CA personal service notifications ***");
                 String servingRespondentsOptions = isNotEmpty(manageOrders.getServingRespondentsOptionsCA())
                     ? manageOrders.getServingRespondentsOptionsCA().getId() : manageOrders.getServingOptionsForNonLegalRep().getId();
-                handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
-                                                   servingRespondentsOptions,
-                                                   bulkPrintOrderDetails
+                handleC100PersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
+                                                       servingRespondentsOptions,
+                                                       bulkPrintOrderDetails
                 );
             }
             //PRL-4225 - send order & additional docs to other people via post only
@@ -386,8 +385,8 @@ public class ManageOrderEmailService {
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
             log.info("*** Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
-            handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
-                                               manageOrders.getServingRespondentsOptionsDA().getId(), bulkPrintOrderDetails);
+            handleFL401PersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
+                                                   manageOrders.getServingRespondentsOptionsDA().getId(), bulkPrintOrderDetails);
             if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
                 .contains(ServeOtherPartiesOptions.other)) {
                 manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
@@ -413,32 +412,32 @@ public class ManageOrderEmailService {
         caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
     }
 
-    private void handlePersonalServiceNotifications(String authorisation, CaseData caseData,
-                                                    List<Document> orderDocuments,
-                                                    Map<String, Object> dynamicDataForEmail,
-                                                    String respondentOption,
-                                                    List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
-        String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
-        if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-            if (!SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
-                .equals(respondentOption)) {
-                nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
-                    dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
-                    sendPersonalServiceNotifications(
-                        party.getValue().getSolicitorEmail(),
-                        respondentOption,
-                        authorisation,
-                        orderDocuments,
-                        dynamicDataForEmail
-                    );
-                });
-            } else {
-                log.info(" respondentOption ====> " + respondentOption);
-                caseData.getApplicants().stream().forEach(party -> {
-                    log.info("party name ====> " + party.getValue().getFirstName());
-                    if (isNotEmpty(party.getValue().getContactPreferences())
-                        && ContactPreferences.post.equals(party.getValue().getContactPreferences())
-                        && isNotEmpty(party.getValue().getAddress())
+    private void handleC100PersonalServiceNotifications(String authorisation, CaseData caseData,
+                                                        List<Document> orderDocuments,
+                                                        Map<String, Object> dynamicDataForEmail,
+                                                        String respondentOption,
+                                                        List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
+        if (!SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
+            .equals(respondentOption)) {
+            nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
+                dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
+                sendPersonalServiceNotifications(
+                    party.getValue().getSolicitorEmail(),
+                    respondentOption,
+                    authorisation,
+                    orderDocuments,
+                    dynamicDataForEmail
+                );
+            });
+        } else {
+            log.info(" respondentOption ====> " + respondentOption);
+            caseData.getApplicants().forEach(party -> {
+                log.info("party name ====> " + party.getValue().getFirstName());
+                if (isNotEmpty(party.getValue().getContactPreferences())
+                    && ContactPreferences.digital.equals(party.getValue().getContactPreferences())) {
+                    log.info("TODO - implement send email for applicant");
+                } else {
+                    if (isNotEmpty(party.getValue().getAddress())
                         && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
                         sendPersonalServiceNotificationsForUnrepresentedApplicant(
                             authorisation,
@@ -447,19 +446,49 @@ public class ManageOrderEmailService {
                             bulkPrintOrderDetails,
                             party
                         );
+                    } else {
+                        log.info("Address is null/empty for C100 applicant id {}", party.getId());
                     }
-                });
-            }
-        } else {
-            String solicitorEmail = caseData.getApplicantsFL401().getSolicitorEmail();
+                }
+
+            });
+        }
+    }
+
+    private void handleFL401PersonalServiceNotifications(String authorisation, CaseData caseData,
+                                                        List<Document> orderDocuments,
+                                                        Map<String, Object> dynamicDataForEmail,
+                                                        String respondentOption,
+                                                        List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
+        //represented applicant options - applicantLegalRepresentative, courtAdmin and courtBailiff
+        if (!SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId().equals(respondentOption)) {
             dynamicDataForEmail.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
             sendPersonalServiceNotifications(
-                solicitorEmail,
+                caseData.getApplicantsFL401().getSolicitorEmail(),
                 respondentOption,
                 authorisation,
                 orderDocuments,
                 dynamicDataForEmail
             );
+        } else {
+            //PRL-5206 unrepresented applicant option - unrepresentedApplicant
+            if (isNotEmpty(caseData.getApplicantsFL401().getContactPreferences())
+                && ContactPreferences.digital.equals(caseData.getApplicantsFL401().getContactPreferences())) {
+                log.info("TODO - implement send email for applicant");
+            } else {
+                if (isNotEmpty(caseData.getApplicantsFL401().getAddress())
+                    && isNotEmpty(caseData.getApplicantsFL401().getAddress().getAddressLine1())) {
+                    sendPersonalServiceNotificationsForUnrepresentedApplicant(
+                        authorisation,
+                        caseData,
+                        orderDocuments,
+                        bulkPrintOrderDetails,
+                        element(caseData.getApplicantsFL401().getPartyId(), caseData.getApplicantsFL401())
+                    );
+                } else {
+                    log.info("Address is null/empty for FL401 applicant");
+                }
+            }
         }
     }
 
