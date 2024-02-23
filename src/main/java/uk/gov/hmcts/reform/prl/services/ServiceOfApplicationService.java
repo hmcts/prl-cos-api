@@ -1857,7 +1857,7 @@ public class ServiceOfApplicationService {
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
-        caseDataUpdated.put(SOA_IS_ALL_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? Yes : No);
+        caseDataUpdated.put(SOA_IS_ALL_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? "true" : "false");
         log.info("MMMMMMM {}", caseDataUpdated.get(SOA_IS_ALL_APPLICANTS_LIP));
         return caseDataUpdated;
     }
