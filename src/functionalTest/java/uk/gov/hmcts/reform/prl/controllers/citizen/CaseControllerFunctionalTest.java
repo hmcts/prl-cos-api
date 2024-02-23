@@ -5,6 +5,7 @@ import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -165,7 +166,7 @@ public class CaseControllerFunctionalTest {
         Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         Mockito.when(caseService.withdrawCase(caseData, caseId, "authToken")).thenReturn(caseDetails);
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
-        request
+        CaseData caseDataObj = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
             .body(caseData)
@@ -173,5 +174,6 @@ public class CaseControllerFunctionalTest {
             .contentType("application/json")
             .post("/12345678L/withdraw")
             .as(CaseData.class);
+        Assert.assertNotNull(caseDataObj);
     }
 }
