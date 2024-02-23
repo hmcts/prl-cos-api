@@ -1813,6 +1813,7 @@ public class ServiceOfApplicationService {
     }
 
     public Map<String, Object> getSoaCaseFieldsMap(String authorisation, CaseDetails caseDetails) {
+        log.info("about to startttt");
         Map<String, Object> caseDataUpdated = new HashMap<>();
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         List<DynamicMultiselectListElement> otherPeopleList = dynamicMultiSelectListService.getOtherPeopleMultiSelectList(

@@ -65,6 +65,7 @@ public class ServiceOfApplicationController {
         @RequestBody CallbackRequest callbackRequest
     ) {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("about to submitttt");
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService.handleAboutToSubmit(
                 callbackRequest)).build();
         } else {
@@ -83,6 +84,7 @@ public class ServiceOfApplicationController {
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("submitteddddd");
             return serviceOfApplicationService
                 .handleSoaSubmitted(authorisation, callbackRequest);
         } else {
