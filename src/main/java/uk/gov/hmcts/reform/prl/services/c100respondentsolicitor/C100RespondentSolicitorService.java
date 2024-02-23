@@ -372,17 +372,7 @@ public class C100RespondentSolicitorService {
                 break;
             case RESPOND_ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildRespondAllegationOfHarm(caseData, buildResponseForRespondent);
-                //caseData = removeDocumentFromCaseData(caseData);
-                caseData = caseData.toBuilder()
-                    .respondentSolicitorData(caseData.getRespondentSolicitorData()
-                                                 .toBuilder()
-                                                 .responseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
-                                                                                  .getResponseToAllegationsOfHarm()
-                                                                                  .toBuilder()
-                                                                                  .responseToAllegationsOfHarmDocument(null)
-                                                                                  .build())
-                                                 .build())
-                    .build();
+                caseData = removeDocumentFromCaseData(caseData);
                 log.info("casedata ResponseToAllegationsOfHarm: {}", caseData.getRespondentSolicitorData()
                              .getResponseToAllegationsOfHarm());
                 log.info("buildResponseForRespondent ResponseToAllegationsOfHarm: {}", buildResponseForRespondent
@@ -410,21 +400,18 @@ public class C100RespondentSolicitorService {
         }
     }
 
-    private CaseData removeDocumentFromCaseData(CaseData caseData) {
-
-        log.info("BEFORE: {}", caseData.getRespondentSolicitorData()
-            .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument());
-
-        return caseData.toBuilder()
+    private static CaseData removeDocumentFromCaseData(CaseData caseData) {
+        caseData = caseData.toBuilder()
             .respondentSolicitorData(caseData.getRespondentSolicitorData()
-                 .toBuilder()
-                 .responseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
-                      .getResponseToAllegationsOfHarm()
-                      .toBuilder()
-                      .responseToAllegationsOfHarmDocument(null)
-                      .build())
-                 .build())
+                                         .toBuilder()
+                                         .responseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
+                                                                          .getResponseToAllegationsOfHarm()
+                                                                          .toBuilder()
+                                                                          .responseToAllegationsOfHarmDocument(null)
+                                                                          .build())
+                                         .build())
             .build();
+        return caseData;
     }
 
     private Response buildRespondAllegationOfHarm(CaseData caseData, Response buildResponseForRespondent) {
