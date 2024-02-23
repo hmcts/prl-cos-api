@@ -159,6 +159,9 @@ public class DraftAnOrderServiceTest {
     private Time dateTime;
 
     @Mock
+    RoleAssignmentService roleAssignmentService;
+
+    @Mock
     private ObjectMapper objectMapper;
 
     @Mock
@@ -3166,6 +3169,43 @@ public class DraftAnOrderServiceTest {
         Assert.assertEquals(1, ((List<Element<DraftOrder>>) response.get("draftOrderCollection")).size());
 
 
+    }
+
+    @Test
+    public void testPrepareDraftOrderCollectionWithHearingPage() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .caseTypeOfApplication("FL401")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.blankOrderOrDirections)
+            .manageOrders(ManageOrders.builder().c21OrderOptions(C21OrderOptionsEnum.c21other).build())
+            .draftOrderOptions(DraftOrderOptionsEnum.draftAnOrder)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap)
+                .build())
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        doReturn(caseData).when(objectMapper).convertValue(
+            caseData,
+            CaseData.class
+        );
+        when(manageOrderService.setChildOptionsIfOrderAboutAllChildrenYes(caseData))
+            .thenReturn(caseData);
+        when(manageOrderService.getLoggedInUserType("auth-token")).thenReturn("Solicitor");
+        when(manageOrderService.getCurrentUploadDraftOrderDetails(Mockito.any(CaseData.class),Mockito.anyString(),
+            Mockito.any(UserDetails.class)))
+            .thenReturn(DraftOrder.builder().orderTypeId("abc").build());
+        Map<String, Object> response = draftAnOrderService.prepareDraftOrderCollection(authToken,callbackRequest);
+        Assert.assertEquals(
+            stringObjectMap.get("applicantCaseName"),
+            response.get("applicantCaseName")
+        );
+        Assert.assertNotNull(response.get("draftOrderCollection"));
+        Assert.assertEquals(1, ((List<Element<DraftOrder>>) response.get("draftOrderCollection")).size());
     }
 
     @Test
