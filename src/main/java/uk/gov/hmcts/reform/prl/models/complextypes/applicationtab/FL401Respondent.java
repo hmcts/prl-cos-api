@@ -32,5 +32,6 @@ public class FL401Respondent {
     private final String solicitorReference;
     private final String dxNumber;
     private final Organisation solicitorOrg;
+    private final String contactPreferences;
 }
 
