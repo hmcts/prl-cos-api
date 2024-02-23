@@ -354,18 +354,13 @@ public class ManageOrderEmailService {
                     dynamicDataForEmail
                 );
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
-                log.info("*** CA personal service email notifications ***");
-                if (isNotEmpty(manageOrders.getServingRespondentsOptionsCA())) {
-                    handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
-                                                       manageOrders.getServingRespondentsOptionsCA().getId(),
-                                                       bulkPrintOrderDetails
-                    );
-                } else {
-                    handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
-                                                       manageOrders.getServingOptionsForNonLegalRep().getId(),
-                                                       bulkPrintOrderDetails
-                    );
-                }
+                log.info("*** CA personal service notifications ***");
+                String servingRespondentsOptions = isNotEmpty(manageOrders.getServingRespondentsOptionsCA())
+                    ? manageOrders.getServingRespondentsOptionsCA().getId() : manageOrders.getServingOptionsForNonLegalRep().getId();
+                handlePersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
+                                                   servingRespondentsOptions,
+                                                   bulkPrintOrderDetails
+                );
             }
             //PRL-4225 - send order & additional docs to other people via post only
             if (isNotEmpty(manageOrders.getOtherParties())) {
@@ -426,6 +421,7 @@ public class ManageOrderEmailService {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
+                log.info(" part name ====> " + party.getValue().getFirstName());
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
                 if (!SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
                     .equals(respondentOption)) {
@@ -437,11 +433,12 @@ public class ManageOrderEmailService {
                         dynamicDataForEmail
                     );
                 } else {
+                    log.info(" respondentOption ====> " + respondentOption);
                     if (isNotEmpty(party.getValue().getContactPreferences())
                         && ContactPreferences.post.equals(party.getValue().getContactPreferences())
                         && isNotEmpty(party.getValue().getAddress())
                         && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
-                        sendPersonalSerivceNotificationsForUnrepresentedApplicant(
+                        sendPersonalServiceNotificationsForUnrepresentedApplicant(
                             authorisation,
                             caseData,
                             orderDocuments,
@@ -464,11 +461,13 @@ public class ManageOrderEmailService {
         }
     }
 
-    private void sendPersonalSerivceNotificationsForUnrepresentedApplicant(String authorisation,
+    private void sendPersonalServiceNotificationsForUnrepresentedApplicant(String authorisation,
                                                                            CaseData caseData,
                                                                            List<Document> orderDocuments,
                                                                            List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                                            Element<PartyDetails> party) {
+        log.info("inside  sendPersonalServiceNotificationsForUnrepresentedApplicant");
+        log.info("partyDeatils ===>" +  party.getValue().getLabelForDynamicList());
         try {
             UUID bulkPrintId = sendOrderDocumentViaPost(
                 caseData,
