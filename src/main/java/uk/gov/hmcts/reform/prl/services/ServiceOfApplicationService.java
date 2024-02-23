@@ -117,7 +117,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_IS_All_APPLICANTS_LIP;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_IS_ALL_APPLICANTS_LIP;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
@@ -1857,8 +1857,8 @@ public class ServiceOfApplicationService {
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
-        caseDataUpdated.put(SOA_IS_All_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? Yes : No);
-        log.info("MMMMMMM {}", caseDataUpdated.get(SOA_IS_All_APPLICANTS_LIP));
+        caseDataUpdated.put(SOA_IS_ALL_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? Yes : No);
+        log.info("MMMMMMM {}", caseDataUpdated.get(SOA_IS_ALL_APPLICANTS_LIP));
         return caseDataUpdated;
     }
 
