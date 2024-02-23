@@ -98,6 +98,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DD_MMM_YYYY_HH_MM_SS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EUROPE_LONDON_TIME_ZONE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FALSE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HI;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_CAFCASS;
@@ -110,6 +111,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ARE_ALL_APPLICANTS_LIP;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
@@ -117,7 +119,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_IS_ALL_APPLICANTS_LIP;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
@@ -125,6 +126,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PEOPL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_RECIPIENT_OPTIONS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -907,15 +909,15 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
 
-        String isAllApplicantsAreLiP = (String) caseDataMap.get(SOA_IS_ALL_APPLICANTS_LIP);
+        String isAllApplicantsAreLiP = (String) caseDataMap.get(SOA_ARE_ALL_APPLICANTS_LIP);
 
-        log.info("KKKKKK, {}",isAllApplicantsAreLiP);
-        if (!"true".equals(isAllApplicantsAreLiP) && !"false".equals(isAllApplicantsAreLiP)) {
-            log.info("INNNNNN");
-            caseDataMap.put(SOA_IS_ALL_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? "true" : "false");
+        log.info("areAllApplicantsLiP---beginning--> {}",isAllApplicantsAreLiP);
+        if (!TRUE.equals(isAllApplicantsAreLiP) && !FALSE.equals(isAllApplicantsAreLiP)) {
+            log.info("being called...");
+            caseDataMap.put(SOA_ARE_ALL_APPLICANTS_LIP, areAllApplicantsLiP(caseData) ? TRUE : FALSE);
         }
 
-        log.info("ABBBBBBB {}", caseDataMap.get(SOA_IS_ALL_APPLICANTS_LIP));
+        log.info("areAllApplicantsLiP---After--> {}", caseDataMap.get(SOA_ARE_ALL_APPLICANTS_LIP));
         return caseDataMap;
     }
 
@@ -1932,18 +1934,16 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private boolean isAllApplicantsAreLiP(CaseData caseData) {
-
-
+    private boolean areAllApplicantsLiP(CaseData caseData) {
 
         if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            return isAllCaApplicantsAreLiP(caseData);
+            return areAllCaApplicantsLiP(caseData);
         } else {
-            return isAllDaApplicantsAreLiP(caseData);
+            return areAllDaApplicantsLiP(caseData);
         }
     }
 
-    private boolean isAllCaApplicantsAreLiP(CaseData caseData) {
+    private boolean areAllCaApplicantsLiP(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
         if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
@@ -1964,7 +1964,7 @@ public class ServiceOfApplicationService {
         return false;
     }
 
-    private boolean isAllDaApplicantsAreLiP(CaseData caseData) {
+    private boolean areAllDaApplicantsLiP(CaseData caseData) {
         Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
         if (flApplicants.isPresent()) {
             PartyDetails partyDetails = flApplicants.get();

@@ -952,6 +952,7 @@ public class PrlAppsConstants {
 
     public static final String STAFF = "STAFF";
     public static final String TRUE = "True";
+    public static final String FALSE = "False";
     public static final String WA_SOA_C8_CHECK_NEEDED = "isC8CheckNeeded";
     public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
     public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
@@ -959,5 +960,5 @@ public class PrlAppsConstants {
 
     public static final String HEARINGS_TYPE = "hearingsType";
 
-    public static final String SOA_IS_ALL_APPLICANTS_LIP = "isAllApplicantLiP";
+    public static final String SOA_ARE_ALL_APPLICANTS_LIP = "areAllApplicantsLiP";
 }
