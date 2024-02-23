@@ -325,7 +325,7 @@ public class C100RespondentSolicitorService {
         }
         log.info("Optional.empty() {}", Optional.empty());
         log.info("Optional.empty().isPresent() {}", Optional.empty().isPresent());
-        if(ofNullable(updatedCaseData.getOrDefault("responseToAllegationsOfHarmDocument", Optional.empty())).isPresent()){
+        if (ofNullable(updatedCaseData.getOrDefault("responseToAllegationsOfHarmDocument", Optional.empty())).isPresent()) {
             updatedCaseData.remove("responseToAllegationsOfHarmDocument");
         }
         updatedCaseData.putAll(data);
