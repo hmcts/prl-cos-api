@@ -172,7 +172,7 @@ public class CaseControllerFunctionalTest {
             .body(caseData)
             .when()
             .contentType("application/json")
-            .post(caseId+"/withdraw")
+            .post("/12345678L/withdraw")
             .as(CaseData.class);
         Assert.assertNotNull(caseDataObj);
     }
