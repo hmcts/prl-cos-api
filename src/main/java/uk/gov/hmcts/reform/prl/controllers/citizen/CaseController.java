@@ -256,7 +256,8 @@ public class CaseController {
     public Map<String, String> fetchIdamAmRoles(
         @RequestHeader(AUTHORIZATION) String authorisation,
         @PathVariable("emailId") String emailId) {
-        if (authorisationService.authoriseUser(authorisation)) {
+        boolean isAuthorised = authorisationService.authoriseUser(authorisation);
+        if (isAuthorised) {
             return caseService.fetchIdamAmRoles(authorisation, emailId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
