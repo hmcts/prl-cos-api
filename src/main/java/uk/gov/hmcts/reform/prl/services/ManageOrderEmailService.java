@@ -420,11 +420,10 @@ public class ManageOrderEmailService {
                                                     List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
-            nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
-                log.info(" part name ====> " + party.getValue().getFirstName());
-                dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
-                if (!SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
-                    .equals(respondentOption)) {
+            if (!SoaCitizenServingRespondentsEnum.unrepresentedApplicant.getId()
+                .equals(respondentOption)) {
+                nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
+                    dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
                     sendPersonalServiceNotifications(
                         party.getValue().getSolicitorEmail(),
                         respondentOption,
@@ -432,8 +431,11 @@ public class ManageOrderEmailService {
                         orderDocuments,
                         dynamicDataForEmail
                     );
-                } else {
-                    log.info(" respondentOption ====> " + respondentOption);
+                });
+            } else {
+                log.info(" respondentOption ====> " + respondentOption);
+                caseData.getApplicants().stream().forEach(party -> {
+                    log.info("party name ====> " + party.getValue().getFirstName());
                     if (isNotEmpty(party.getValue().getContactPreferences())
                         && ContactPreferences.post.equals(party.getValue().getContactPreferences())
                         && isNotEmpty(party.getValue().getAddress())
@@ -446,8 +448,8 @@ public class ManageOrderEmailService {
                             party
                         );
                     }
-                }
-            });
+                });
+            }
         } else {
             String solicitorEmail = caseData.getApplicantsFL401().getSolicitorEmail();
             dynamicDataForEmail.put("name", caseData.getApplicantsFL401().getRepresentativeFullName());
