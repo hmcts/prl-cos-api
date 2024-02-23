@@ -399,14 +399,19 @@ public class C100RespondentSolicitorService {
     }
 
     private void removeDocumentFromCaseData(CaseData caseData) {
+
+        log.info("BEFORE: {}", caseData.getRespondentSolicitorData()
+            .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument());
         caseData.getRespondentSolicitorData()
             .getResponseToAllegationsOfHarm().toBuilder()
             .responseToAllegationsOfHarmDocument(null)
             .build();
-        log.info("Inside removeDocumentFromCaseData- post deletion case data value of ResponseToAllegationsOfHarmYesOrNoResponse",
+        log.info("AFTER: {}", caseData.getRespondentSolicitorData()
+            .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument());
+        log.info("Inside removeDocumentFromCaseData- post deletion case data value of ResponseToAllegationsOfHarmYesOrNoResponse {}",
                  caseData.getRespondentSolicitorData()
                      .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmYesOrNoResponse());
-        log.info("Inside removeDocumentFromCaseData- post deletion case data value of getResponseToAllegationsOfHarmDocument",
+        log.info("Inside removeDocumentFromCaseData- post deletion case data value of getResponseToAllegationsOfHarmDocument {}",
                  caseData.getRespondentSolicitorData()
                      .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument());
     }
