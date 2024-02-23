@@ -164,11 +164,9 @@ public class RoleAssignmentService {
         Map<String, String> finalRoles = new HashMap<>();
         List<UserDetails> userDetails = userService.getUserByEmailId(authorisation, emailId);
         userDetails.stream().forEach(
-            userDetail -> {
-                userDetail.getRoles().stream().forEach(
-                    e -> finalRoles.put(userDetail.getId(), e)
-                );
-            }
+            userDetail -> userDetail.getRoles().stream().forEach(
+                e -> finalRoles.put(userDetail.getId(), e)
+            )
         );
 
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
@@ -178,11 +176,9 @@ public class RoleAssignmentService {
             emailId
         );
         roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().forEach(
-            roleAssignmentResponse -> {
-                finalRoles.put("AM ROles", roleAssignmentResponse.getRoleName()
-                    .concat(UNDERSCORE)
-                    .concat(roleAssignmentResponse.getRoleCategory()));
-            }
+            roleAssignmentResponse -> finalRoles.put("AM ROles", roleAssignmentResponse.getRoleName()
+                .concat(UNDERSCORE)
+                .concat(roleAssignmentResponse.getRoleCategory()))
         );
         return finalRoles;
     }
