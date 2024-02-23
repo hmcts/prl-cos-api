@@ -906,8 +906,16 @@ public class ServiceOfApplicationService {
 
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
-        caseDataMap.put(SOA_IS_ALL_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? "true" : "false");
-        log.info("VVVVVV {}", caseDataMap.get(SOA_IS_ALL_APPLICANTS_LIP));
+
+        String isAllApplicantsAreLiP = (String) caseDataMap.get(SOA_IS_ALL_APPLICANTS_LIP);
+
+        log.info("KKKKKK, {}",isAllApplicantsAreLiP);
+        if (!"true".equals(isAllApplicantsAreLiP) && !"false".equals(isAllApplicantsAreLiP)) {
+            log.info("INNNNNN");
+            caseDataMap.put(SOA_IS_ALL_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? "true" : "false");
+        }
+
+        log.info("ABBBBBBB {}", caseDataMap.get(SOA_IS_ALL_APPLICANTS_LIP));
         return caseDataMap;
     }
 
@@ -1925,6 +1933,9 @@ public class ServiceOfApplicationService {
     }
 
     private boolean isAllApplicantsAreLiP(CaseData caseData) {
+
+
+
         if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
             return isAllCaApplicantsAreLiP(caseData);
         } else {
@@ -1933,7 +1944,6 @@ public class ServiceOfApplicationService {
     }
 
     private boolean isAllCaApplicantsAreLiP(CaseData caseData) {
-        // Checking the Respondent Details..
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
         if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
@@ -1942,8 +1952,12 @@ public class ServiceOfApplicationService {
                 .map(Element::getValue).toList();
 
             applicants = applicants.stream()
-                .filter(applicant -> (!applicant.getRepresentativeFirstName().isEmpty() && !applicant.getRepresentativeLastName().isEmpty()))
-                .toList();
+                .filter(
+                    applicant -> (
+                        isNotEmpty(applicant.getRepresentativeFirstName())
+                            && isNotEmpty(applicant.getRepresentativeLastName())
+                    )
+                ).toList();
 
             return applicants.isEmpty();
         }
