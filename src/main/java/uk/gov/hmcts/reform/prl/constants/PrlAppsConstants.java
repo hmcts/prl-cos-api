@@ -958,4 +958,6 @@ public class PrlAppsConstants {
     public static final String WA_SOA_C8_CHECK_APPROVED = "isC8CheckApproved";
 
     public static final String HEARINGS_TYPE = "hearingsType";
+
+    public static final String SOA_IS_All_APPLICANTS_LIP = "isAllApplicantLiP";
 }

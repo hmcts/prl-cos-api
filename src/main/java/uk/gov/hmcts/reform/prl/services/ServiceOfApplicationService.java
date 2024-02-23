@@ -117,6 +117,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CONFIDENTIA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CYMRU_EMAIL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_DOCUMENT_PLACE_HOLDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_FL415_FILENAME;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_IS_All_APPLICANTS_LIP;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_NOTICE_SAFETY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ORDER_LIST_EMPTY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_OTHER_PARTIES;
@@ -1856,6 +1857,8 @@ public class ServiceOfApplicationService {
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
+        caseDataUpdated.put(SOA_IS_All_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? Yes : No);
+        log.info("MMMMMMM {}", caseDataUpdated.get(SOA_IS_All_APPLICANTS_LIP));
         return caseDataUpdated;
     }
 
@@ -1918,6 +1921,42 @@ public class ServiceOfApplicationService {
         } else {
             return validateRespondentConfidentialDetailsDA(caseData);
         }
+    }
+
+    private boolean isAllApplicantsAreLiP(CaseData caseData) {
+        if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            return isAllCaApplicantsAreLiP(caseData);
+        } else {
+            return isAllDaApplicantsAreLiP(caseData);
+        }
+    }
+
+    private boolean isAllCaApplicantsAreLiP(CaseData caseData) {
+        // Checking the Respondent Details..
+        Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
+
+        if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
+            List<PartyDetails> applicants = applicantsWrapped.get()
+                .stream()
+                .map(Element::getValue).toList();
+
+            applicants = applicants.stream()
+                .filter(applicant -> (!applicant.getRepresentativeFirstName().isEmpty() && !applicant.getRepresentativeLastName().isEmpty()))
+                .toList();
+
+            return applicants.isEmpty();
+        }
+        return false;
+    }
+
+    private boolean isAllDaApplicantsAreLiP(CaseData caseData) {
+        Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
+        if (flApplicants.isPresent()) {
+            PartyDetails partyDetails = flApplicants.get();
+            return isNotEmpty(partyDetails.getRepresentativeFirstName())
+                    && isNotEmpty(partyDetails.getRepresentativeLastName());
+        }
+        return false;
     }
 
     private boolean validateRespondentConfidentialDetailsDA(CaseData caseData) {
