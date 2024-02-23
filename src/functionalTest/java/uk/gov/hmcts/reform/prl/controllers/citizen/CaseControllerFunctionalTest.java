@@ -164,7 +164,6 @@ public class CaseControllerFunctionalTest {
         when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
         Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         Mockito.when(caseService.withdrawCase(caseData, caseId, "authToken")).thenReturn(caseDetails);
-        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
         String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
