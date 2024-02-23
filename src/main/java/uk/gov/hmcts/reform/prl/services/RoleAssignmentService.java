@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.document.am.model.Classification;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.RoleAssignmentApi;
 import uk.gov.hmcts.reform.prl.enums.GrantType;
 import uk.gov.hmcts.reform.prl.enums.RoleCategory;
@@ -25,6 +26,7 @@ import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleReque
 import uk.gov.hmcts.reform.prl.models.roleassignment.getroleassignment.RoleAssignmentServiceResponse;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -156,5 +158,28 @@ public class RoleAssignmentService {
             log.error(e.getMessage());
         }
         return idamIds;
+    }
+
+    public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
+        Map<String, String> finalRoles = new HashMap<>();
+        List<UserDetails> userDetails = userService.getUserByEmailId(authorisation, emailId);
+        userDetails.stream().forEach(
+            userDetail -> userDetail.getRoles().stream().forEach(
+                e -> finalRoles.put(userDetail.getId(), e)
+            )
+        );
+
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
+            systemUserService.getSysUserToken(),
+            authTokenGenerator.generate(),
+            null,
+            emailId
+        );
+        roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().forEach(
+            roleAssignmentResponse -> finalRoles.put("AM ROles", roleAssignmentResponse.getRoleName()
+                .concat(UNDERSCORE)
+                .concat(roleAssignmentResponse.getRoleCategory()))
+        );
+        return finalRoles;
     }
 }
