@@ -372,17 +372,11 @@ public class C100RespondentSolicitorService {
                 break;
             case RESPOND_ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildRespondAllegationOfHarm(caseData, buildResponseForRespondent);
-                log.info("The documents are stored at 2 places now. Mentioning the places and category ID as well");
-                log.info("1.1- Inside caseData {}", caseData.getRespondentSolicitorData()
-                    .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument().getCategoryId());
-                log.info("1.2- inside response object {}", buildResponseForRespondent.getResponseToAllegationsOfHarm()
-                    .getResponseToAllegationsOfHarmDocument().getCategoryId());
                 removeDocumentFromCaseData(caseData);
-                log.info("The documents are stored at 1 places now. Mentioning the places and category ID as well");
-                log.info("2.1- Inside caseData {}", caseData.getRespondentSolicitorData()
-                    .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument().getCategoryId());
-                log.info("2.2- inside response object {}", buildResponseForRespondent.getResponseToAllegationsOfHarm()
-                    .getResponseToAllegationsOfHarmDocument().getCategoryId());
+                log.info("casedata ResponseToAllegationsOfHarm: {}", caseData.getRespondentSolicitorData()
+                             .getResponseToAllegationsOfHarm());
+                log.info("buildResponseForRespondent ResponseToAllegationsOfHarm: {}", buildResponseForRespondent
+                    .getResponseToAllegationsOfHarm());
                 break;
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildInternationalElementResponse(caseData, buildResponseForRespondent);
@@ -438,10 +432,6 @@ public class C100RespondentSolicitorService {
     private Response buildRespondAllegationOfHarm(CaseData caseData, Response buildResponseForRespondent) {
         ResponseToAllegationsOfHarm responseToAllegationsOfHarm = optimiseResponseToAllegationsOfHarm(caseData.getRespondentSolicitorData()
                                                                                                           .getResponseToAllegationsOfHarm());
-        log.info(
-            "CategoryId of document in about-to-submit inside response {}",
-            responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument().getCategoryId()
-        );
         return buildResponseForRespondent.toBuilder()
             .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
             .build();
@@ -451,10 +441,6 @@ public class C100RespondentSolicitorService {
         if (null != responseToAllegationsOfHarm
             && responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse().equals(Yes)) {
 
-            log.info(
-                "CategoryId of document in about-to-submit inside casedata {}",
-                responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument().getCategoryId()
-            );
             return responseToAllegationsOfHarm.toBuilder()
                 .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
                 .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
