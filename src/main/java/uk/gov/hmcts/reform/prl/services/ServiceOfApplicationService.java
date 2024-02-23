@@ -1960,7 +1960,7 @@ public class ServiceOfApplicationService {
                     )
                 ).toList();
 
-            return applicants.isEmpty();
+            return !applicants.isEmpty();
         }
         return false;
     }
