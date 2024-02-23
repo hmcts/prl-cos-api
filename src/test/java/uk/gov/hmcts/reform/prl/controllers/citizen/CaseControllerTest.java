@@ -39,6 +39,7 @@ import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -512,5 +513,34 @@ public class CaseControllerTest {
         caseController.getAllHearingsForCitizenCase(authToken, servAuthToken, caseId);
 
         throw new RuntimeException("Invalid Client");
+    }
+
+    @Test
+    public void testFetchIdamAmRoles() throws IOException {
+        String emailId = "test@email.com";
+        Map<String, String> amRoles = new HashMap<>();
+        amRoles.put("amRoles","case-worker");
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        Mockito.when(caseService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
+
+        Map<String, String> roles = caseController.fetchIdamAmRoles(
+            authToken, emailId);
+        Assert.assertFalse(roles.isEmpty());
+    }
+
+    @Test
+    public void testFetchIdamAmRolesFails() throws IOException {
+
+        expectedEx.expect(RuntimeException.class);
+        expectedEx.expectMessage("Invalid Client");
+
+        String emailId = "test@email.com";
+        Map<String, String> amRoles = new HashMap<>();
+        amRoles.put("amRoles","case-worker");
+        Mockito.when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+        Mockito.when(caseService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
+
+        Map<String, String> roles = caseController.fetchIdamAmRoles(
+            authToken, emailId);
     }
 }
