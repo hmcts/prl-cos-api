@@ -31,7 +31,8 @@ public enum ServeOrderFieldsEnum {
     serveOtherPartiesCaOnlyC47a("serveOtherPartiesCaOnlyC47a"),
     deliveryByOptionsCaOnlyC47a("deliveryByOptionsCaOnlyC47a"),
     postalInformationCaOnlyC47a("postalInformationCaOnlyC47a"),
-    emailInformationCaOnlyC47a("emailInformationCaOnlyC47a");
+    emailInformationCaOnlyC47a("emailInformationCaOnlyC47a"),
+    isOrderCompleteToServe("isOrderCompleteToServe");
 
     private final String value;
 
