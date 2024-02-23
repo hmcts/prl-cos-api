@@ -960,5 +960,5 @@ public class PrlAppsConstants {
 
     public static final String HEARINGS_TYPE = "hearingsType";
 
-    public static final String SOA_ARE_ALL_APPLICANTS_LIP = "areAllApplicantsLiP";
+    public static final String WA_IS_APPLICANT_REPRESENTED = "isApplicantRepresented";
 }

@@ -111,7 +111,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_AP
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_APPLICATION_SCREEN_1;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_ARE_ALL_APPLICANTS_LIP;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C6A_OTHER_PARTIES_ORDER;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_C9_PERSONAL_SERVICE_FILENAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_CITIZEN;
@@ -128,6 +127,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TRUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WARNING_TEXT_DIV;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WA_IS_APPLICANT_REPRESENTED;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YES;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -909,15 +909,15 @@ public class ServiceOfApplicationService {
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
 
-        String isAllApplicantsAreLiP = (String) caseDataMap.get(SOA_ARE_ALL_APPLICANTS_LIP);
+        String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
 
-        log.info("areAllApplicantsLiP---beginning--> {}",isAllApplicantsAreLiP);
+        log.info("isApplicantRepresented---beginning--> {}",isAllApplicantsAreLiP);
         if (!TRUE.equals(isAllApplicantsAreLiP) && !FALSE.equals(isAllApplicantsAreLiP)) {
             log.info("being called...");
-            caseDataMap.put(SOA_ARE_ALL_APPLICANTS_LIP, areAllApplicantsLiP(caseData) ? TRUE : FALSE);
+            caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, isApplicantRepresented(caseData) ? TRUE : FALSE);
         }
 
-        log.info("areAllApplicantsLiP---After--> {}", caseDataMap.get(SOA_ARE_ALL_APPLICANTS_LIP));
+        log.info("isApplicantRepresented---After--> {}", caseDataMap.get(WA_IS_APPLICANT_REPRESENTED));
         return caseDataMap;
     }
 
@@ -1934,16 +1934,16 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private boolean areAllApplicantsLiP(CaseData caseData) {
+    private boolean isApplicantRepresented(CaseData caseData) {
 
         if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            return areAllCaApplicantsLiP(caseData);
+            return isCaApplicantRepresented(caseData);
         } else {
-            return areAllDaApplicantsLiP(caseData);
+            return isDaApplicantRepresented(caseData);
         }
     }
 
-    private boolean areAllCaApplicantsLiP(CaseData caseData) {
+    private boolean isCaApplicantRepresented(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
         if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
@@ -1964,7 +1964,7 @@ public class ServiceOfApplicationService {
         return false;
     }
 
-    private boolean areAllDaApplicantsLiP(CaseData caseData) {
+    private boolean isDaApplicantRepresented(CaseData caseData) {
         Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
         if (flApplicants.isPresent()) {
             PartyDetails partyDetails = flApplicants.get();
