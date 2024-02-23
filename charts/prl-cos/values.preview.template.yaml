@@ -29,6 +29,10 @@ java:
         - app-insights-connection-string
         - judge-testuser-one
         - judge-testpassword
+  memoryRequests: "768Mi"
+  cpuRequests: "1000m"
+  memoryLimits: "3072Mi"
+  cpuLimits: "2500m"
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
