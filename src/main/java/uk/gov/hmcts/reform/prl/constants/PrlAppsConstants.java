@@ -952,7 +952,6 @@ public class PrlAppsConstants {
 
     public static final String STAFF = "STAFF";
     public static final String TRUE = "True";
-    public static final String FALSE = "False";
     public static final String WA_SOA_C8_CHECK_NEEDED = "isC8CheckNeeded";
     public static final String WA_SOA_RESPONSIBLE_FOR_SERVICE = "responsibleForService";
     public static final String WA_SOA_OCCUPATION_ORDER_SELECTED = "isOccupationOrderSelected";
