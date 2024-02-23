@@ -323,6 +323,11 @@ public class C100RespondentSolicitorService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        log.info("Optional.empty() {}", Optional.empty());
+        log.info("Optional.empty().isPresent() {}", Optional.empty().isPresent());
+        if(ofNullable(updatedCaseData.getOrDefault("responseToAllegationsOfHarmDocument", Optional.empty())).isPresent()){
+            updatedCaseData.remove("responseToAllegationsOfHarmDocument");
+        }
         updatedCaseData.putAll(data);
         return updatedCaseData;
     }
@@ -372,11 +377,6 @@ public class C100RespondentSolicitorService {
                 break;
             case RESPOND_ALLEGATION_OF_HARM:
                 buildResponseForRespondent = buildRespondAllegationOfHarm(caseData, buildResponseForRespondent);
-                caseData = removeDocumentFromCaseData(caseData);
-                log.info("casedata ResponseToAllegationsOfHarm: {}", caseData.getRespondentSolicitorData()
-                             .getResponseToAllegationsOfHarm());
-                log.info("buildResponseForRespondent ResponseToAllegationsOfHarm: {}", buildResponseForRespondent
-                    .getResponseToAllegationsOfHarm());
                 break;
             case INTERNATIONAL_ELEMENT:
                 buildResponseForRespondent = buildInternationalElementResponse(caseData, buildResponseForRespondent);
