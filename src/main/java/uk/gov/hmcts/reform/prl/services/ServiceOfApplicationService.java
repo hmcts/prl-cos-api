@@ -906,6 +906,8 @@ public class ServiceOfApplicationService {
 
         caseDataMap.put(CASE_INVITES, generateCaseInvitesForParties(caseData));
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
+        caseDataMap.put(SOA_IS_ALL_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? "true" : "false");
+        log.info("VVVVVV {}", caseDataMap.get(SOA_IS_ALL_APPLICANTS_LIP));
         return caseDataMap;
     }
 
@@ -1857,8 +1859,7 @@ public class ServiceOfApplicationService {
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
-        caseDataUpdated.put(SOA_IS_ALL_APPLICANTS_LIP, isAllApplicantsAreLiP(caseData) ? "true" : "false");
-        log.info("MMMMMMM {}", caseDataUpdated.get(SOA_IS_ALL_APPLICANTS_LIP));
+
         return caseDataUpdated;
     }
 
