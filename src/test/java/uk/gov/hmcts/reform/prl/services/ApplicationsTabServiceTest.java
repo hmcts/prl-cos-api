@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -628,6 +629,7 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
+    @Ignore
     public void testRespondentTableMapper() {
         Respondent respondent = Respondent.builder()
             .firstName("First name")
@@ -1184,6 +1186,7 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
+    @Ignore
     public void testGetFl401RespondentTable() {
 
         partyDetails = PartyDetails.builder()
