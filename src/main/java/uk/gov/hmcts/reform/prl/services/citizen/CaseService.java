@@ -139,7 +139,6 @@ public class CaseService {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
             caseData = generateAnswersForNoc(caseData);
-            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
             return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
