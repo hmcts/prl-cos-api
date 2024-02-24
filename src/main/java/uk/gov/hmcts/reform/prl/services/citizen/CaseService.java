@@ -251,8 +251,8 @@ public class CaseService {
             } catch (JsonProcessingException e) {
                 log.info("error");
             }
-            caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
-                caseData));
+            //            caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
+            //                caseData));
             try {
                 log.info("caseDataMap is after ===>" + objectMapper.writeValueAsString(caseDataMap));
             } catch (JsonProcessingException e) {
