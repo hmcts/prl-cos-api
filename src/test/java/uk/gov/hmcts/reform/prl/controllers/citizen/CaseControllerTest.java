@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.confidentiality.ApplicantConfidentialityDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
@@ -414,7 +415,7 @@ public class CaseControllerTest {
         caseDetails.add(CaseDetails.builder().id(
             1234567891234567L).data(stringObjectMap).build());
 
-        List<uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData> citizenCaseDataList = new ArrayList<>();
+        List<CitizenCaseData> citizenCaseDataList = new ArrayList<>();
 
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(caseService.retrieveCases(authToken, servAuthToken)).thenReturn(caseDataList);
