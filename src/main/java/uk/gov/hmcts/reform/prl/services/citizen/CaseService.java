@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
-import uk.gov.hmcts.reform.prl.models.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
@@ -122,37 +122,11 @@ public class CaseService {
     }
 
     public CaseDetails updateCaseDetails(String authToken,
-                                         String caseId, String eventId, CitizenCaseData citizenCaseData) {
-
-        CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
-        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        PartyDetails partyDetails = citizenCaseData.getPartyDetails();
-        PartyEnum partyType = citizenCaseData.getPartyType();
-        if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
-            eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
-            handleCitizenStatementOfService(caseData, partyDetails, partyType);
-        }
-        if (null != partyDetails.getUser()) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(citizenCaseData.getCaseTypeOfApplication())) {
-                caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
-            } else {
-                caseData = getFlCaseData(caseData, partyDetails, partyType);
-            }
-            caseData = generateAnswersForNoc(caseData);
-            return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    public CaseDetails updateCaseDetailsRevised(String authToken,
                                                 String caseId,
                                                 String eventId,
-                                                CitizenCaseData citizenCaseData) {
-
+                                                CitizenUpdatedCaseData citizenUpdatedCaseData) {
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         UserDetails userDetails = idamClient.getUserDetails(authToken);
-        log.info("Following case event will be triggered {}", caseEvent.getValue());
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
         StartEventResponse startEventResponse =
@@ -164,14 +138,14 @@ public class CaseService {
             );
 
         CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
-        PartyDetails partyDetails = citizenCaseData.getPartyDetails();
-        PartyEnum partyType = citizenCaseData.getPartyType();
+        PartyDetails partyDetails = citizenUpdatedCaseData.getPartyDetails();
+        PartyEnum partyType = citizenUpdatedCaseData.getPartyType();
         if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
             eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
             handleCitizenStatementOfService(caseData, partyDetails, partyType);
         }
         if (null != partyDetails.getUser()) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(citizenCaseData.getCaseTypeOfApplication())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(citizenUpdatedCaseData.getCaseTypeOfApplication())) {
                 caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
@@ -181,90 +155,9 @@ public class CaseService {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             }
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-            // caseDataMap.putAll(allTabService.findCaseDataMap(caseData));
-            CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
-                startEventResponse,
-                caseDataMap
-            );
-            return coreCaseDataService.submitUpdate(
-                authToken,
-                eventRequestData,
-                caseDataContent,
-                caseId,
-                false
-            );
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-
-    public CaseDetails updateCaseDetailsRevised2(String authToken,
-                                                String caseId,
-                                                String eventId,
-                                                CitizenCaseData citizenCaseData) {
-        CaseEvent caseEvent = CaseEvent.fromValue(eventId);
-        UserDetails userDetails = idamClient.getUserDetails(authToken);
-        log.info("Following case event will be triggered {}", caseEvent.getValue());
-        log.info("Logged in user is {}", userDetails.getEmail());
-        log.info("Logged in user roles are {}", userDetails.getRoles());
-
-        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
-        StartEventResponse startEventResponse =
-            coreCaseDataService.startUpdate(
-                authToken,
-                eventRequestData,
-                caseId,
-                false
-            );
-        try {
-            log.info("Start event response we have received ===>" + objectMapper.writeValueAsString(startEventResponse.getCaseDetails()));
-        } catch (JsonProcessingException e) {
-            log.info("error");
-        }
-
-        CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
-        PartyDetails partyDetails = citizenCaseData.getPartyDetails();
-        PartyEnum partyType = citizenCaseData.getPartyType();
-        if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
-            eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
-            handleCitizenStatementOfService(caseData, partyDetails, partyType);
-        }
-        if (null != partyDetails.getUser()) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(citizenCaseData.getCaseTypeOfApplication())) {
-                caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
-            } else {
-                caseData = getFlCaseData(caseData, partyDetails, partyType);
-            }
-            caseData = generateAnswersForNoc(caseData);
-            if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(eventId)) {
-                caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-            }
-
-            try {
-                log.info("Updated case data is now ===>" + objectMapper.writeValueAsString(caseData));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
-            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-            try {
-                log.info("caseDataMap is before ===>" + objectMapper.writeValueAsString(caseDataMap));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
                 caseData));
-            try {
-                log.info("before null removal ===>" + objectMapper.writeValueAsString(caseDataMap));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             Iterables.removeIf(caseDataMap.values(), Objects::isNull);
-            try {
-                log.info("caseDataMap is after ===>" + objectMapper.writeValueAsString(caseDataMap));
-            } catch (JsonProcessingException e) {
-                log.info("error");
-            }
             CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
                 caseDataMap

@@ -45,7 +45,6 @@ public class AuthorisationService {
     public Boolean authoriseUser(String authorisation) {
         try {
             userInfo = idamClient.getUserInfo(authorisation);
-            log.info("Logged in user roles", userInfo.getRoles());
             if (null != userInfo) {
                 return true;
             }
