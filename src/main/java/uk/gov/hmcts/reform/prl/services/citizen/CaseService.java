@@ -20,7 +20,7 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -121,18 +121,18 @@ public class CaseService {
     }
 
     public CaseDetails updateCaseDetails(String authToken,
-                                         String caseId, String eventId, UpdateCaseData updateCaseData) {
+                                         String caseId, String eventId, CitizenCaseData citizenCaseData) {
 
         CaseDetails caseDetails = caseRepository.getCase(authToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        PartyDetails partyDetails = updateCaseData.getPartyDetails();
-        PartyEnum partyType = updateCaseData.getPartyType();
+        PartyDetails partyDetails = citizenCaseData.getPartyDetails();
+        PartyEnum partyType = citizenCaseData.getPartyType();
         if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
             eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
             handleCitizenStatementOfService(caseData, partyDetails, partyType);
         }
         if (null != partyDetails.getUser()) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(citizenCaseData.getCaseTypeOfApplication())) {
                 caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
@@ -147,7 +147,7 @@ public class CaseService {
     public CaseDetails updateCaseDetailsRevised(String authToken,
                                                 String caseId,
                                                 String eventId,
-                                                UpdateCaseData updateCaseData) {
+                                                CitizenCaseData citizenCaseData) {
 
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
         UserDetails userDetails = idamClient.getUserDetails(authToken);
@@ -163,14 +163,14 @@ public class CaseService {
             );
 
         CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
-        PartyDetails partyDetails = updateCaseData.getPartyDetails();
-        PartyEnum partyType = updateCaseData.getPartyType();
+        PartyDetails partyDetails = citizenCaseData.getPartyDetails();
+        PartyEnum partyType = citizenCaseData.getPartyType();
         if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
             eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
             handleCitizenStatementOfService(caseData, partyDetails, partyType);
         }
         if (null != partyDetails.getUser()) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(citizenCaseData.getCaseTypeOfApplication())) {
                 caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
@@ -201,13 +201,12 @@ public class CaseService {
     public CaseDetails updateCaseDetailsRevised2(String authToken,
                                                 String caseId,
                                                 String eventId,
-                                                UpdateCaseData updateCaseData) {
-
+                                                CitizenCaseData citizenCaseData) {
         CaseEvent caseEvent = CaseEvent.fromValue(eventId);
-
-
         UserDetails userDetails = idamClient.getUserDetails(authToken);
         log.info("Following case event will be triggered {}", caseEvent.getValue());
+        log.info("Logged in user is {}", userDetails.getEmail());
+        log.info("Logged in user roles are {}", userDetails.getRoles());
 
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
         StartEventResponse startEventResponse =
@@ -217,16 +216,21 @@ public class CaseService {
                 caseId,
                 false
             );
+        try {
+            log.info("Start event response we have received ===>" + objectMapper.writeValueAsString(startEventResponse.getCaseDetails()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
 
         CaseData caseData = CaseUtils.getCaseData(startEventResponse.getCaseDetails(), objectMapper);
-        PartyDetails partyDetails = updateCaseData.getPartyDetails();
-        PartyEnum partyType = updateCaseData.getPartyType();
+        PartyDetails partyDetails = citizenCaseData.getPartyDetails();
+        PartyEnum partyType = citizenCaseData.getPartyType();
         if (CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue().equalsIgnoreCase(eventId)) {
             eventId = CaseEvent.CITIZEN_INTERNAL_CASE_UPDATE.getValue();
             handleCitizenStatementOfService(caseData, partyDetails, partyType);
         }
         if (null != partyDetails.getUser()) {
-            if (C100_CASE_TYPE.equalsIgnoreCase(updateCaseData.getCaseTypeOfApplication())) {
+            if (C100_CASE_TYPE.equalsIgnoreCase(citizenCaseData.getCaseTypeOfApplication())) {
                 caseData = updatingPartyDetailsCa(caseData, partyDetails, partyType);
             } else {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
@@ -235,9 +239,25 @@ public class CaseService {
             if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(eventId)) {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             }
+
+            try {
+                log.info("Updated case data is now ===>" + objectMapper.writeValueAsString(caseData));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
+            try {
+                log.info("caseDataMap is before ===>" + objectMapper.writeValueAsString(caseDataMap));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
                 caseData));
+            try {
+                log.info("caseDataMap is after ===>" + objectMapper.writeValueAsString(caseDataMap));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
                 caseDataMap
