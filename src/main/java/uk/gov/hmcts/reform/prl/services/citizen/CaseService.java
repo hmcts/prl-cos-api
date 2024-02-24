@@ -236,9 +236,9 @@ public class CaseService {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
             caseData = generateAnswersForNoc(caseData);
-            if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(eventId)) {
-                caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-            }
+            //            if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(eventId)) {
+            //                caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+            //            }
 
             try {
                 log.info("Updated case data is now ===>" + objectMapper.writeValueAsString(caseData));
