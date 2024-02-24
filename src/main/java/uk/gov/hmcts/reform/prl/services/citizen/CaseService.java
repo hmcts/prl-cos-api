@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.collect.Iterables;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,6 +139,7 @@ public class CaseService {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
             caseData = generateAnswersForNoc(caseData);
+            Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
             return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
@@ -180,7 +182,7 @@ public class CaseService {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             }
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
-            //caseDataMap.putAll(allTabService.findCaseDataMap(caseData));
+            // caseDataMap.putAll(allTabService.findCaseDataMap(caseData));
             CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
                 startEventResponse,
                 caseDataMap
@@ -236,9 +238,9 @@ public class CaseService {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
             caseData = generateAnswersForNoc(caseData);
-            //            if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(eventId)) {
-            //                caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-            //            }
+            if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(eventId)) {
+                caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
+            }
 
             try {
                 log.info("Updated case data is now ===>" + objectMapper.writeValueAsString(caseData));
@@ -251,8 +253,14 @@ public class CaseService {
             } catch (JsonProcessingException e) {
                 log.info("error");
             }
-            //            caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
-            //                caseData));
+            caseDataMap.putAll(applicationsTabService.updateCitizenPartiesTab(
+                caseData));
+            try {
+                log.info("before null removal ===>" + objectMapper.writeValueAsString(caseDataMap));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
+            Iterables.removeIf(caseDataMap.values(), Objects::isNull);
             try {
                 log.info("caseDataMap is after ===>" + objectMapper.writeValueAsString(caseDataMap));
             } catch (JsonProcessingException e) {
