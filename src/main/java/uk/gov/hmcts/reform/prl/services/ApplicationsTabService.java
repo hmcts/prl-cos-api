@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -215,6 +216,11 @@ public class ApplicationsTabService implements TabService {
         } else if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
             applicationTab.put(FL401_APPLICANT_TABLE, getFl401ApplicantsTable(caseData));
             applicationTab.put(FL401_RESPONDENT_TABLE, getFl401RespondentTable(caseData));
+        }
+        try {
+            log.info("returned value here is  ===>" + objectMapper.writeValueAsString(applicationTab));
+        } catch (JsonProcessingException e) {
+            log.info("error");
         }
         return applicationTab;
     }
