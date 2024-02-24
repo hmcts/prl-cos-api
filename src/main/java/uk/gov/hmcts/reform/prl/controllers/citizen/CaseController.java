@@ -22,15 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
-import uk.gov.hmcts.reform.prl.models.CitizenCaseData;
+import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
-import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
@@ -50,8 +49,6 @@ public class CaseController {
     private final AuthorisationService authorisationService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final AuthTokenGenerator authTokenGenerator;
-    private final AllTabServiceImpl allTabsService;
-
     private static final String INVALID_CLIENT = "Invalid Client";
 
     @GetMapping(path = "/{caseId}", produces = APPLICATION_JSON)
@@ -108,78 +105,22 @@ public class CaseController {
     }
 
     @PostMapping(value = "{caseId}/{eventId}/case-update", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Updating casedata")
-    public CaseData caseUpdate(
-        @NotNull @Valid @RequestBody CitizenCaseData citizenCaseData,
-        @PathVariable("eventId") String eventId,
-        @PathVariable("caseId") String caseId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        if (isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = null;
-            caseDetails = caseService.updateCaseDetails(
-                authorisation,
-                caseId,
-                eventId,
-                citizenCaseData
-            );
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(eventId)) {
-                caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
-            }
-            allTabsService.updateAllTabsIncludingConfTab(caseData);
-            return caseData;
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @PostMapping(value = "{caseId}/{eventId}/case-update-1", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "Updating casedata")
-    public CaseData caseUpdateRevised(
-        @NotNull @Valid @RequestBody CitizenCaseData citizenCaseData,
-        @PathVariable("eventId") String eventId,
-        @PathVariable("caseId") String caseId,
-        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
-        @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
-    ) {
-        if (isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = null;
-            caseDetails = caseService.updateCaseDetailsRevised(
-                authorisation,
-                caseId,
-                eventId,
-                citizenCaseData
-            );
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            allTabsService.updateAllTabsIncludingConfTab(caseData);
-            return caseData;
-        } else {
-            throw (new RuntimeException(INVALID_CLIENT));
-        }
-    }
-
-    @PostMapping(value = "{caseId}/{eventId}/case-update-2", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Processing citizen updates")
-    public CaseData caseUpdateRevised2(
-        @NotNull @Valid @RequestBody CitizenCaseData citizenCaseData,
+    public CaseData caseUpdate(
+        @NotNull @Valid @RequestBody CitizenUpdatedCaseData citizenUpdatedCaseData,
         @PathVariable("eventId") String eventId,
         @PathVariable("caseId") String caseId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
         if (isAuthorized(authorisation, s2sToken)) {
-            CaseDetails caseDetails = null;
-            caseDetails = caseService.updateCaseDetailsRevised2(
+            CaseDetails caseDetails = caseService.updateCaseDetails(
                 authorisation,
                 caseId,
                 eventId,
-                citizenCaseData
+                citizenUpdatedCaseData
             );
-            CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-            //allTabsService.updateAllTabsIncludingConfTab(caseData);
-            return caseData;
+            return CaseUtils.getCaseData(caseDetails, objectMapper);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
@@ -200,7 +141,7 @@ public class CaseController {
     }
 
     @GetMapping(path = "/cases", produces = APPLICATION_JSON)
-    public List<uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData> retrieveCitizenCases(
+    public List<CitizenCaseData> retrieveCitizenCases(
         @RequestHeader(HttpHeaders.AUTHORIZATION) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken
     ) {
@@ -213,8 +154,8 @@ public class CaseController {
         return caseDataList.stream().map(this::buildCitizenCaseData).toList();
     }
 
-    private uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData buildCitizenCaseData(CaseData caseData) {
-        return new uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenCaseData(caseData, caseData.getState().getLabel());
+    private CitizenCaseData buildCitizenCaseData(CaseData caseData) {
+        return new CitizenCaseData(caseData, caseData.getState().getLabel());
     }
 
     @PostMapping(value = "/citizen/link", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
