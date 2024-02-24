@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 @Getter
 @Setter
 @Builder(toBuilder = true)
-public class UpdateCaseData {
+public class CitizenCaseData {
 
     private PartyDetails partyDetails;
     private PartyEnum partyType;

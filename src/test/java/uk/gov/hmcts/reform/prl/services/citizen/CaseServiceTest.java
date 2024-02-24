@@ -25,7 +25,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
-import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.CitizenCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
@@ -130,7 +130,7 @@ public class CaseServiceTest {
     private UserDetails userDetails;
     private Map<String, Object> caseDataMap;
     private PartyDetails partyDetails;
-    private UpdateCaseData updateCaseData;
+    private CitizenCaseData citizenCaseData;
     private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     @Before
@@ -176,7 +176,7 @@ public class CaseServiceTest {
             .state("SUBMITTED_PAID")
             .build();
         userDetails = UserDetails.builder().id("tesUserId").email("testEmail").build();
-        updateCaseData = UpdateCaseData.builder()
+        citizenCaseData = CitizenCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
                               .firstName("Test")
@@ -440,7 +440,7 @@ public class CaseServiceTest {
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .build();
-        updateCaseData = UpdateCaseData.builder()
+        citizenCaseData = CitizenCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(partyDetails1)
             .partyType(PartyEnum.applicant)
@@ -452,7 +452,9 @@ public class CaseServiceTest {
         when(caseRepository.getCase(authToken,"123")).thenReturn(caseDetails);
         when(caseRepository.updateCase(authToken, "123", caseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit", updateCaseData);
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",
+                                                                           citizenCaseData
+        );
 
         assertNotNull(caseDetailsAfterUpdate);
     }
@@ -482,7 +484,7 @@ public class CaseServiceTest {
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .build();
-        updateCaseData = UpdateCaseData.builder()
+        citizenCaseData = CitizenCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(partyDetails1)
             .partyType(PartyEnum.respondent)
@@ -494,7 +496,9 @@ public class CaseServiceTest {
         when(caseRepository.getCase(authToken,"123")).thenReturn(caseDetails);
         when(caseRepository.updateCase(authToken, "123", caseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit", updateCaseData);
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",
+                                                                           citizenCaseData
+        );
 
         assertNotNull(caseDetailsAfterUpdate);
     }
@@ -519,7 +523,7 @@ public class CaseServiceTest {
             .firstName("Test")
             .lastName("User")
             .build();
-        updateCaseData = UpdateCaseData.builder()
+        citizenCaseData = CitizenCaseData.builder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(partyDetails1)
             .partyType(PartyEnum.applicant)
@@ -531,7 +535,9 @@ public class CaseServiceTest {
         when(caseRepository.getCase(authToken,"123")).thenReturn(caseDetails);
         when(caseRepository.updateCase(authToken, "123", caseData, CITIZEN_CASE_UPDATE)).thenReturn(caseDetails);
 
-        Assert.assertThrows(RuntimeException.class, () -> caseService.updateCaseDetails(authToken, "123", "citizen-case-submit", updateCaseData));
+        Assert.assertThrows(RuntimeException.class, () -> caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",
+                                                                                        citizenCaseData
+        ));
     }
 
 
@@ -569,7 +575,7 @@ public class CaseServiceTest {
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .build();
-        updateCaseData = UpdateCaseData.builder()
+        citizenCaseData = CitizenCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(partyDetails1)
             .partyType(PartyEnum.respondent)
@@ -584,7 +590,8 @@ public class CaseServiceTest {
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",updateCaseData);
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",
+                                                                           citizenCaseData);
         assertNotNull(caseDetailsAfterUpdate);
     }
 
@@ -621,7 +628,7 @@ public class CaseServiceTest {
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .build();
-        updateCaseData = UpdateCaseData.builder()
+        citizenCaseData = CitizenCaseData.builder()
             .caseTypeOfApplication(FL401_CASE_TYPE)
             .partyDetails(partyDetails1)
             .partyType(PartyEnum.applicant)
@@ -636,7 +643,8 @@ public class CaseServiceTest {
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
-        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",updateCaseData);
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123", "citizen-case-submit",
+                                                                           citizenCaseData);
         assertNotNull(caseDetailsAfterUpdate);
     }
 
@@ -681,7 +689,7 @@ public class CaseServiceTest {
                       .build())
 
             .build();
-        updateCaseData = updateCaseData.toBuilder()
+        citizenCaseData = citizenCaseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
                               .firstName("Test")
@@ -726,7 +734,9 @@ public class CaseServiceTest {
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
-                                                       CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
+                                                                           CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),
+                                                                           citizenCaseData
+        );
         assertNotNull(caseDetailsAfterUpdate);
     }
 
@@ -741,7 +751,7 @@ public class CaseServiceTest {
                       .solicitorRepresented(YesOrNo.Yes)
                       .build())
             .build();
-        updateCaseData = updateCaseData.toBuilder()
+        citizenCaseData = citizenCaseData.toBuilder()
             .caseTypeOfApplication(C100_CASE_TYPE)
             .partyDetails(PartyDetails.builder()
                               .firstName("Test")
@@ -789,7 +799,9 @@ public class CaseServiceTest {
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
-                                                                           CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
+                                                                           CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),
+                                                                           citizenCaseData
+        );
         assertNotNull(caseDetailsAfterUpdate);
     }
 
