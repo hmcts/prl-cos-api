@@ -910,17 +910,11 @@ public class ServiceOfApplicationService {
 
         String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
 
-        log.info("isApplicantRepresented---beginning--> {}",isAllApplicantsAreLiP);
-
         if (null == isAllApplicantsAreLiP) {
-            log.info("First time only...");
             caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, isApplicantRepresented(caseData) ? YES : NO);
         } else if (!EMPTY_STRING.equals(isAllApplicantsAreLiP)) {
-            log.info("Not empty, So make it empty...");
             caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, EMPTY_STRING);
         }
-
-        log.info("isApplicantRepresented---After--> {}", caseDataMap.get(WA_IS_APPLICANT_REPRESENTED));
         return caseDataMap;
     }
 

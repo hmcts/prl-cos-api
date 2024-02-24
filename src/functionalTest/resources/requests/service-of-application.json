@@ -6,6 +6,7 @@
       "id": 1701277056588266,
       "applicantCaseName": "John Smith",
       "caseTypeOfApplication": "C100",
+      "isApplicantRepresented" : null,
       "caseManagementLocation": {
         "baseLocationId": "1",
         "regionId": "1",

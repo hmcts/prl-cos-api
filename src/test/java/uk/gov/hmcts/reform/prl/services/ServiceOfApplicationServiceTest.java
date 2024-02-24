@@ -4106,6 +4106,4 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
         assertEquals(EMPTY_STRING,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
-
-
 }

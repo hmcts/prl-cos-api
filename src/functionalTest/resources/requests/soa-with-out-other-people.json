@@ -580,6 +580,7 @@
           }
         }
       ],
+      "isApplicantRepresented" : null,
       "newOrdersRestrainingDocument": null,
       "setOutReasonsBelow": null,
       "allegationsOfHarmRevisedDATable": [
@@ -4075,8 +4076,6 @@
             "contactPreferences": null,
             "solicitorReference": null,
             "isAddressConfidential": "No",
-            "representativeLastName": "Solicitor",
-            "representativeFirstName": "Legal",
             "canYouProvideEmailAddress": "Yes",
             "isAtAddressLessThan5Years": "No",
             "isPhoneNumberConfidential": "Yes",
@@ -4114,8 +4113,6 @@
             "contactPreferences": null,
             "solicitorReference": null,
             "isAddressConfidential": "Yes",
-            "representativeLastName": "Solicitor Jr",
-            "representativeFirstName": "Legal",
             "canYouProvideEmailAddress": "Yes",
             "isAtAddressLessThan5Years": "No",
             "isPhoneNumberConfidential": "Yes",
@@ -4153,8 +4150,6 @@
             "contactPreferences": null,
             "solicitorReference": null,
             "isAddressConfidential": "Yes",
-            "representativeLastName": "Solicitor",
-            "representativeFirstName": "Sr Legal",
             "canYouProvideEmailAddress": "Yes",
             "isAtAddressLessThan5Years": "No",
             "isPhoneNumberConfidential": "Yes",
@@ -5669,8 +5664,6 @@
             "isAddressConfidential": "No",
             "isCurrentAddressKnown": null,
             "relationshipToChildren": null,
-            "representativeLastName": "Solicitor",
-            "representativeFirstName": "Legal",
             "canYouProvidePhoneNumber": null,
             "applicantPreferredContact": [
 
@@ -6162,8 +6155,6 @@
             "isAddressConfidential": "Yes",
             "isCurrentAddressKnown": null,
             "relationshipToChildren": null,
-            "representativeLastName": "Solicitor Jr",
-            "representativeFirstName": "Legal",
             "canYouProvidePhoneNumber": null,
             "applicantPreferredContact": [
 
@@ -6655,8 +6646,6 @@
             "isAddressConfidential": "Yes",
             "isCurrentAddressKnown": null,
             "relationshipToChildren": null,
-            "representativeLastName": "Solicitor",
-            "representativeFirstName": "Sr Legal",
             "canYouProvidePhoneNumber": null,
             "applicantPreferredContact": [
 
@@ -7202,8 +7191,6 @@
             "isAddressConfidential": null,
             "isCurrentAddressKnown": "No",
             "relationshipToChildren": null,
-            "representativeLastName": null,
-            "representativeFirstName": null,
             "canYouProvidePhoneNumber": "No",
             "applicantPreferredContact": [
 

@@ -17,6 +17,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -40,6 +41,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.setup.MockMvcBuilders.webAppContextSetup;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.ADDRESS_MISSED_FOR_OTHER_PARTIES;
 import static uk.gov.hmcts.reform.prl.services.ServiceOfApplicationService.CONFIRMATION_HEADER_PERSONAL;
@@ -284,5 +286,75 @@ public class ServiceOfApplicationControllerFT {
                                                                                                 Mockito.any(), Mockito.any(), Mockito.any(),
                                                                                                 Mockito.anyString());
     }
+
+
+    /**
+     * Service of Application journey.
+     * When Soa being done for first time with any of the applicant has Representative
+     * Then isApplicantRepresented should be 'Yes'.
+     */
+    @Test
+    public void givenRequestWithCaseData_Response_isApplicantRepresented_firstTimeWithRep() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/about-to-submit")
+            .then()
+            .body("data.isApplicantRepresented", equalTo("Yes"))
+            .extract().as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    /**
+     * Service of Application journey.
+     * When Soa being done for first time with none of the applicant has representative
+     * Then isApplicantRepresented should be 'No'.
+     */
+    @Test
+    public void givenRequestWithCaseData_Response_isApplicantRepresented_firstTime_withOutAnyRep() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITHOUT_OTHER_PEOPLE);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/about-to-submit")
+            .then()
+            .body("data.isApplicantRepresented", equalTo("No"))
+            .extract().as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    /**
+     * Service of Application journey.
+     * When Soa being done for second time onwards with or without  Representative
+     * Then isApplicantRepresented should be an empty string value.
+     */
+    @Test
+    public void givenRequestWithCaseData_Response_isApplicantRepresented_secondTimeOnwards() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_WITH_OTHER_PEOPLE);
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/service-of-application/about-to-submit")
+            .then()
+            .body("data.isApplicantRepresented", equalTo(EMPTY_STRING))
+            .extract().as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+
 
 }
