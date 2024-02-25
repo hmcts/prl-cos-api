@@ -190,7 +190,7 @@ public class RespondentSolicitorTaskListRenderer {
         if (isEmpty(taskErrors)) {
             return emptyList();
         }
-        List<String> errors = taskErrors.stream()
+        final List<String> errors = taskErrors.stream()
                 .flatMap(task -> task.getErrors()
                         .stream()
                         .map(error -> format(
@@ -199,8 +199,6 @@ public class RespondentSolicitorTaskListRenderer {
                                 taskListRenderElements.renderRespondentSolicitorLink(task.getEvent(), respondent)
                         )))
                 .toList();
-        log.info("ERrrorrrrrrr {}",errors);
-        return emptyList();
-        //return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
+        return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
     }
 }
