@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.prl.controllers.c100respondentsolicitor;
 
+import io.restassured.RestAssured;
+import io.restassured.specification.RequestSpecification;
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -12,6 +15,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
@@ -41,6 +45,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     private ConfidentialDetailsMapper confidentialDetailsMapper;
     private static final String VALID_REQUEST_BODY = "requests/c100-respondent-solicitor-call-back-controller.json";
 
+    private static final String VALID_REQUEST_BODY_C1A = "requests/c100-respondent-solicitor-C1A.json";
+
     @Autowired
     protected IdamTokenGenerator idamTokenGenerator;
 
@@ -51,6 +57,14 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
     }
+
+    private final String targetInstance =
+        StringUtils.defaultIfBlank(
+            System.getenv("TEST_URL"),
+            "http://localhost:4044"
+        );
+
+    private final RequestSpecification request = RestAssured.given().relaxedHTTPSValidation().baseUri(targetInstance);
 
     @Test
     public void givenRequestBody_whenRespondent_solicitor_about_to_start_then200Response() throws Exception {
@@ -135,6 +149,24 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("errors").isEmpty())
             .andReturn();
+    }
+
+    @Test
+    public void givenRequestBody_whenAbout_to_start_response_validation_then200Response_C1A() throws Exception {
+
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_C1A);
+
+        AboutToStartOrSubmitCallbackResponse resp = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/respondent-solicitor/about-to-start-response-validation")
+            .then()
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
     }
 
 }
