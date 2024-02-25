@@ -163,23 +163,30 @@ public class RoleAssignmentService {
     public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
         Map<String, String> finalRoles = new HashMap<>();
         List<UserDetails> userDetails = userService.getUserByEmailId(authorisation, emailId);
+        final String[] idamRoles = {null};
         userDetails.stream().forEach(
-            userDetail -> userDetail.getRoles().stream().forEach(
-                e -> finalRoles.put(userDetail.getId(), e)
-            )
+            userDetail -> {
+                idamRoles[0] = "";
+                userDetail.getRoles().stream().forEach(
+                    e -> idamRoles[0] = idamRoles[0].concat(e).concat(", ")
+                );
+                finalRoles.put(userDetail.getId(), idamRoles[0].substring(0, idamRoles[0].lastIndexOf(", ")));
+            }
         );
 
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = roleAssignmentApi.getRoleAssignments(
             systemUserService.getSysUserToken(),
             authTokenGenerator.generate(),
             null,
-            emailId
+            userService.getUserByEmailId(authorisation, emailId).get(0).getId()
         );
+
+        final int[] i = {0};
         roleAssignmentServiceResponse.getRoleAssignmentResponse().stream().forEach(
-            roleAssignmentResponse -> finalRoles.put("AM ROles", roleAssignmentResponse.getRoleName()
-                .concat(UNDERSCORE)
-                .concat(roleAssignmentResponse.getRoleCategory()))
+            roleAssignmentResponse ->
+                finalRoles.put(String.valueOf(i[0]++), roleAssignmentResponse.toString())
         );
+
         return finalRoles;
     }
 }
