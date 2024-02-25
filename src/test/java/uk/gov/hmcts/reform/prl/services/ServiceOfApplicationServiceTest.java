@@ -4108,7 +4108,25 @@ public class ServiceOfApplicationServiceTest {
     }
 
     @Test
-    public void testIsCaApplicantRepresentedWhenApplicantsEmpty() {
+    public void testIsCaApplicantRepresentedWhenApplicantsIsPresentButEmpty() {
+
+        parties = new ArrayList<>();
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(parties)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isApplicantRepresented(YES)
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .othersToNotify(parties)
+            .build();
+
+        boolean isCaApplicantRepresented = serviceOfApplicationService.isCaApplicantRepresented(caseData);
+
+        assertFalse(isCaApplicantRepresented);
+    }
+
+    @Test
+    public void testIsCaApplicantRepresentedWhenApplicantsIsNotPresent() {
 
         CaseData caseData = CaseData.builder().id(12345L)
             .applicants(null)
