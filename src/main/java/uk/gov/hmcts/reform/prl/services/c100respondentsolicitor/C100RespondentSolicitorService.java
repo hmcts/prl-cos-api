@@ -46,7 +46,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentP
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -79,6 +81,8 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIEL
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
@@ -113,6 +117,7 @@ public class C100RespondentSolicitorService {
     private final RespondentAllegationOfHarmService respondentAllegationOfHarmService;
     private final ManageDocumentsService manageDocumentsService;
     private final UserService userService;
+    private final DocumentLanguageService documentLanguageService;
     public static final String RESPONSE_SUBMITTED_LABEL = "# Response Submitted";
     public static final String CONTACT_LOCAL_COURT_LABEL = """
         ### Your response is now submitted.
@@ -887,19 +892,33 @@ public class C100RespondentSolicitorService {
         );
         UserDetails userDetails = userService.getUserDetails(authorisation);
         quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
-
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (representedRespondent.getValue().getResponse() != null
                 && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
-            Document c1aFinalDocument = documentGenService.generateSingleDocument(
+            if (documentLanguage.isGenEng()) {
+                Document c1aFinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
                     SOLICITOR_C1A_FINAL_DOCUMENT,
                     false,
                     dataMap
-            );
-            quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails,c1aFinalDocument));
+                );
+                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocument));
+            }
+
+            if (documentLanguage.isGenWelsh()) {
+                Document c1aFinalDocumentWelsh = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_WELSH_FINAL_DOCUMENT,
+                    true,
+                    dataMap
+                );
+                quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocumentWelsh));
+            }
         }
+        log.info("BBBBBBB -->{}", quarantineLegalDocList);
         return dataMap;
     }
 
@@ -1247,18 +1266,32 @@ public class C100RespondentSolicitorService {
                 dataMap
         );
         caseDataUpdated.put("draftC7ResponseDoc", document);
-
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
-            Document documentForC1A = documentGenService.generateSingleDocument(
+            if (documentLanguage.isGenEng()) {
+                Document documentForC1A = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
                     SOLICITOR_C1A_DRAFT_DOCUMENT,
                     false,
                     dataMap
-            );
-            caseDataUpdated.put("draftC1ADoc", documentForC1A);
+                );
+                caseDataUpdated.put("draftC1ADoc", documentForC1A);
+            }
+
+            if (documentLanguage.isGenWelsh()) {
+                Document documentForC1AWelsh = documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT,
+                    true,
+                    dataMap
+                );
+                caseDataUpdated.put("draftC1ADocWelsh", documentForC1AWelsh);
+            }
         }
+        log.info("AAAAAAA -->{}", caseDataUpdated);
         Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
         Element<PartyDetails> solicitorRepresentedRespondent = null;
         if (solicitorRole.isPresent()) {
