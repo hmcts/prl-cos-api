@@ -4106,4 +4106,21 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
         assertEquals(EMPTY_STRING,caseDataUpdated.get(WA_IS_APPLICANT_REPRESENTED));
     }
+
+    @Test
+    public void testIsCaApplicantRepresentedWhenApplicantsEmpty() {
+
+        CaseData caseData = CaseData.builder().id(12345L)
+            .applicants(null)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .isApplicantRepresented(YES)
+            .serviceOfApplicationUploadDocs(ServiceOfApplicationUploadDocs.builder().build())
+            .othersToNotify(parties)
+            .build();
+
+        boolean isCaApplicantRepresented = serviceOfApplicationService.isCaApplicantRepresented(caseData);
+
+        assertFalse(isCaApplicantRepresented);
+    }
+
 }

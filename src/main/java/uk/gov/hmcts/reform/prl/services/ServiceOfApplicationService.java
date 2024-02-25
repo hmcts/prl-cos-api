@@ -1938,7 +1938,7 @@ public class ServiceOfApplicationService {
         }
     }
 
-    private boolean isCaApplicantRepresented(CaseData caseData) {
+    public boolean isCaApplicantRepresented(CaseData caseData) {
         Optional<List<Element<PartyDetails>>> applicantsWrapped = ofNullable(caseData.getApplicants());
 
         if (applicantsWrapped.isPresent() && !applicantsWrapped.get().isEmpty()) {
