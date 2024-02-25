@@ -436,9 +436,9 @@ public class ManageOrderEmailService {
         } else {
             caseData.getApplicants().forEach(party -> {
                 log.info("party name ====> " + party.getValue().getFirstName());
-                if (isNotEmpty(party.getValue().getContactPreferences())
-                    && ContactPreferences.digital.equals(party.getValue().getContactPreferences())) {
-                    log.info("TODO - implement send email for applicant");
+                if (ContactPreferences.digital.equals(party.getValue().getContactPreferences())
+                    && isPartyProvidedWithEmail(party.getValue())) {
+                    log.info("===== CA serving unrepresented applicant via email ====");
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
                         && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
@@ -479,8 +479,8 @@ public class ManageOrderEmailService {
             //PRL-5206 unrepresented applicant option - unrepresentedApplicant
             log.info("===== DA Serving unrepresented applicant ====");
             log.debug("===== DA unrepresented applicant contact preference ==== {}", caseData.getApplicantsFL401().getContactPreferences());
-            if (isNotEmpty(caseData.getApplicantsFL401().getContactPreferences())
-                && ContactPreferences.digital.equals(caseData.getApplicantsFL401().getContactPreferences())) {
+            if (ContactPreferences.digital.equals(caseData.getApplicantsFL401().getContactPreferences())
+                && isPartyProvidedWithEmail(caseData.getApplicantsFL401())) {
                 log.info("===== DA serving unrepresented applicant via email ====");
             } else {
                 log.info("===== DA serving unrepresented applicant via post ====");
