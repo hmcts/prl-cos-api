@@ -185,6 +185,7 @@ public class ServiceOfApplicationServiceTest {
                                                                              .surname("test").build());
         PartyDetails testParty = PartyDetails.builder()
             .firstName(testString).lastName(testString)
+            .user(User.builder().solicitorRepresented(No).build())
             .representativeFirstName(testString)
             .representativeLastName(testString)
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
@@ -3889,6 +3890,14 @@ public class ServiceOfApplicationServiceTest {
     public void testIsApplicantRepresentedFirstTimeWhenSoa_CA_withRepresentative() {
         List<Element<CaseInvite>> caseInviteList = new ArrayList<>();
 
+        PartyDetails testParty = PartyDetails.builder()
+            .firstName(testString).lastName(testString)
+            .user(User.builder().solicitorRepresented(null).build())
+            .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
+            .build();
+
+        parties = List.of(Element.<PartyDetails>builder().id(testUuid).value(testParty).build());
+
         CaseData caseData = CaseData.builder().id(12345L)
             .applicants(parties)
             .respondents(parties)
@@ -3928,6 +3937,7 @@ public class ServiceOfApplicationServiceTest {
 
         PartyDetails testParty = PartyDetails.builder()
             .firstName(testString).lastName(testString)
+            .user(User.builder().solicitorRepresented(No).build())
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
 
@@ -4024,6 +4034,7 @@ public class ServiceOfApplicationServiceTest {
         PartyDetails testParty = PartyDetails.builder()
             .firstName(testString).lastName(testString).representativeFirstName(testString)
             .representativeLastName(testString)
+            .user(User.builder().solicitorRepresented(null).build())
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
 
@@ -4053,6 +4064,7 @@ public class ServiceOfApplicationServiceTest {
 
         PartyDetails testParty = PartyDetails.builder()
             .firstName(testString).lastName(testString)
+            .user(User.builder().solicitorRepresented(No).build())
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
 

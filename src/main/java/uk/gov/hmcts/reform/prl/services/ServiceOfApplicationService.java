@@ -1946,15 +1946,15 @@ public class ServiceOfApplicationService {
                 .stream()
                 .map(Element::getValue).toList();
 
-            applicants = applicants.stream()
+            List<PartyDetails> unRepresentedApplicants = applicants.stream()
                 .filter(
                     applicant -> (
-                        isNotEmpty(applicant.getRepresentativeFirstName())
-                            && isNotEmpty(applicant.getRepresentativeLastName())
+                        null != applicant.getUser().getSolicitorRepresented()
+                        && No.equals(applicant.getUser().getSolicitorRepresented())
                     )
                 ).toList();
 
-            return !applicants.isEmpty();
+            return unRepresentedApplicants.size() != applicants.size();
         }
         return false;
     }
@@ -1963,8 +1963,8 @@ public class ServiceOfApplicationService {
         Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
         if (flApplicants.isPresent()) {
             PartyDetails partyDetails = flApplicants.get();
-            return isNotEmpty(partyDetails.getRepresentativeFirstName())
-                    && isNotEmpty(partyDetails.getRepresentativeLastName());
+            return null == partyDetails.getUser().getSolicitorRepresented()
+                || !partyDetails.getUser().getSolicitorRepresented().equals(No);
         }
         return false;
     }

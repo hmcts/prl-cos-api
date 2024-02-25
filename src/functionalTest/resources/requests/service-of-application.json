@@ -17,6 +17,11 @@
         {
           "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
           "value": {
+            "user": {
+              "email": null,
+              "idamId": null,
+              "solicitorRepresented": null
+            },
             "firstName": "test",
             "lastName": "data",
             "previousName": null,

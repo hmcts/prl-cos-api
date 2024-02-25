@@ -5198,7 +5198,7 @@
             "user": {
               "email": null,
               "idamId": null,
-              "solicitorRepresented": null
+              "solicitorRepresented": "No"
             },
             "email": "applicant1@example.net",
             "gender": "male",
@@ -5689,7 +5689,7 @@
             "user": {
               "email": null,
               "idamId": null,
-              "solicitorRepresented": null
+              "solicitorRepresented": "No"
             },
             "email": "applicant2@example.net",
             "gender": "male",
@@ -6180,7 +6180,7 @@
             "user": {
               "email": null,
               "idamId": null,
-              "solicitorRepresented": null
+              "solicitorRepresented": "No"
             },
             "email": "applicant3@example.net",
             "gender": "female",
