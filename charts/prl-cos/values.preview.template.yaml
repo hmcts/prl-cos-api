@@ -1,4 +1,8 @@
 java:
+  devcpuRequests: 250m
+  devmemoryRequests: 1Gi
+  devcpuLimits: 1
+  devmemoryLimits: 1Gi
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
@@ -29,10 +33,6 @@ java:
         - app-insights-connection-string
         - judge-testuser-one
         - judge-testpassword
-  memoryRequests: "768Mi"
-  cpuRequests: "1000m"
-  memoryLimits: "3072Mi"
-  cpuLimits: "2500m"
   environment:
     PRD_API_BASEURL: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     PAY_URL: http://payment-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
@@ -62,7 +62,6 @@ java:
     FACT_API: http://fact-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     LOCATION_REF_API: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     RD_PROFESSIONAL_API: http://rd-professional-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-
     CITIZEN_URL: https://privatelaw.{{ .Values.global.environment }}.platform.hmcts.net
     HEARING_API_BASEURL : http://fis-hmc-api-aat.service.core-compute-aat.internal
     REFDATA_API_URL: http://rd-commondata-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
