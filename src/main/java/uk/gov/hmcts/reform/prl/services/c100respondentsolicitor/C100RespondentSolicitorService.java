@@ -867,9 +867,6 @@ public class C100RespondentSolicitorService {
                     caseData.getRespondents().indexOf(representedRespondent),
                     element(representedRespondent.getId(), amended)
             );
-
-            log.info("Amended AllegationOfHarm document: {}", amended.getResponse()
-                .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument());
             String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
                 ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
