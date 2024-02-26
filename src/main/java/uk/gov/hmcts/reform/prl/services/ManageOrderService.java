@@ -1082,14 +1082,13 @@ public class ManageOrderService {
             List<PartyDetails> applicants = caseData
                 .getApplicants()
                 .stream()
-                .map(Element::getValue)
-                .collect(Collectors.toList());
+                .map(Element::getValue).toList();
 
             List<String> applicantSolicitorNames = applicants.stream()
                 .map(party -> Objects.nonNull(party.getSolicitorOrg().getOrganisationName())
                     ? party.getSolicitorOrg().getOrganisationName() + APPLICANT_SOLICITOR
                     : APPLICANT_SOLICITOR)
-                .collect(Collectors.toList());
+                .toList();
             return String.join("\n", applicantSolicitorNames);
         } else {
             PartyDetails applicantFl401 = caseData.getApplicantsFL401();
@@ -1103,14 +1102,13 @@ public class ManageOrderService {
                 .getRespondents()
                 .stream()
                 .map(Element::getValue)
-                .filter(r -> YesNoDontKnow.yes.equals(r.getDoTheyHaveLegalRepresentation()))
-                .collect(Collectors.toList());
+                .filter(r -> YesNoDontKnow.yes.equals(r.getDoTheyHaveLegalRepresentation())).toList();
             if (respondents.isEmpty()) {
                 return "";
             }
             List<String> respondentSolicitorNames = respondents.stream()
                 .map(party -> party.getSolicitorOrg().getOrganisationName() + RESPONDENT_SOLICITOR)
-                .collect(Collectors.toList());
+                .toList();
             return String.join("\n", respondentSolicitorNames);
         } else {
             PartyDetails respondentFl401 = caseData.getRespondentsFL401();
@@ -1174,8 +1172,8 @@ public class ManageOrderService {
                                             List<Element<OrderDetails>> newOrderDetails) {
         String currentOrderId;
         List<String> selectedOrderIds = serveOrderDynamicList.getValue()
-            .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
-        List<UUID> existingOrderIds = existingOrderCollection.stream().map(Element::getId).collect(Collectors.toList());
+            .stream().map(DynamicMultiselectListElement::getCode).toList();
+        List<UUID> existingOrderIds = existingOrderCollection.stream().map(Element::getId).toList();
 
         currentOrderId = selectedOrderIds
             .stream()
@@ -1446,7 +1444,7 @@ public class ManageOrderService {
     public List<Element<OrderDetails>> serveOrder(CaseData caseData, List<Element<OrderDetails>> orders) {
         if (null != caseData.getManageOrders() && null != caseData.getManageOrders().getServeOrderDynamicList()) {
             List<String> selectedOrderIds = caseData.getManageOrders().getServeOrderDynamicList().getValue()
-                .stream().map(DynamicMultiselectListElement::getCode).collect(Collectors.toList());
+                .stream().map(DynamicMultiselectListElement::getCode).toList();
             orders.stream()
                 .filter(order -> selectedOrderIds.contains(order.getId().toString()))
                 .forEach(order -> {
@@ -1742,12 +1740,12 @@ public class ManageOrderService {
         String organisationsName = null;
         if (null != postalInformation) {
             orgNameList.addAll(postalInformation.stream()
-                .map(postalInfoElem -> postalInfoElem.getValue().getPostalName()).collect(Collectors.toList()));
+                .map(postalInfoElem -> postalInfoElem.getValue().getPostalName()).toList());
         }
 
         if (null != emailInformation) {
             orgNameList.addAll(emailInformation.stream()
-                .map(emailInfoElem -> emailInfoElem.getValue().getEmailName()).collect(Collectors.toList()));
+                .map(emailInfoElem -> emailInfoElem.getValue().getEmailName()).toList());
         }
 
         if (!orgNameList.isEmpty()) {
@@ -1802,11 +1800,11 @@ public class ManageOrderService {
             .getAppointedGuardianName()
             .stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> nameList = appointedGuardianFullNameList.stream()
             .map(AppointedGuardianFullName::getGuardianFullName)
-            .collect(Collectors.toList());
+            .toList();
 
         nameList.forEach(name -> {
             AppointedGuardianFullName appointedGuardianFullName
@@ -2012,7 +2010,7 @@ public class ManageOrderService {
             .stream()
             .filter(element -> ((element.getValue().getHearingTypes() != null && element.getValue().getHearingTypes().getValue() != null)
                 || element.getValue().getHearingDateConfirmOptionEnum() != null))
-            .collect(Collectors.toList());
+            .toList();
         return caseData.toBuilder()
             .manageOrders(caseData.getManageOrders().toBuilder()
                               .ordersHearingDetails(filteredHearingDataList).build()).build();
@@ -2463,10 +2461,10 @@ public class ManageOrderService {
                         return concat(concat(hearingType, " - "), hearingDate);
                     }
                     return null;
-                }).filter(Objects::nonNull).collect(Collectors.toList())).orElse(Collections.emptyList());
+                }).filter(Objects::nonNull).toList()).orElse(Collections.emptyList());
             }).map(this::getDynamicListElements)
             .flatMap(Collection::stream)
-            .collect(Collectors.toList());
+            .toList();
 
         //if there are no hearings then dropdown would be empty
         DynamicList existingHearingsType = (null != caseData.getManageOrders() && null != caseData.getManageOrders().getHearingsType())
@@ -3330,7 +3328,7 @@ public class ManageOrderService {
                                                  Boolean isRespondent) {
         List<Element<PartyDetails>> selectedPartyList = partyDetails.stream()
             .filter(party -> selectedPartyIds.contains(party.getId().toString()))
-            .collect(Collectors.toList());
+            .toList();
         for (Element<PartyDetails> party : selectedPartyList) {
             if ((isRespondent
                 && YesNoDontKnow.no.equals(party.getValue().getDoTheyHaveLegalRepresentation()))
