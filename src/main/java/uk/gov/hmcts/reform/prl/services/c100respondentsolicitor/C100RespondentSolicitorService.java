@@ -1059,11 +1059,6 @@ public class C100RespondentSolicitorService {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
         }
-        try {
-            log.info("dataMap  : {}",objectMapper.writeValueAsString(dataMap));
-        } catch (JsonProcessingException e) {
-            throw new RespondentSolicitorException("Failed while trying to log the dataMap ",e);
-        }
         return dataMap;
     }
 
