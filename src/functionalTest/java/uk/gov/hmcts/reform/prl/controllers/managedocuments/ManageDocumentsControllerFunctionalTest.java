@@ -92,7 +92,6 @@ public class ManageDocumentsControllerFunctionalTest {
 
     private static CaseDetails caseDetails;
 
-    @Ignore
     @Test
     public void createCcdTestCase() throws Exception {
 
