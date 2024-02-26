@@ -264,8 +264,7 @@ public class DocumentGenService {
     private final C100DocumentTemplateFinderService c100DocumentTemplateFinderService;
     private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
-    @Autowired
-    private DgsApiClient dgsApiClient;
+    private final DgsApiClient dgsApiClient;
 
     private final AuthTokenGenerator authTokenGenerator;
 
