@@ -315,6 +315,16 @@ public class C100RespondentSolicitorService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
+        /**
+         * Deleting the document from the casedata for fixing the
+         * duplication issue of Response to Allegation of Harm
+         * Document in the case file view. The same document
+         * will flow to quarantine docs list upon Respondent task
+         * lost submission
+         */
+        if (ofNullable(updatedCaseData.getOrDefault("responseToAllegationsOfHarmDocument", Optional.empty())).isPresent()) {
+            updatedCaseData.remove("responseToAllegationsOfHarmDocument");
+        }
         updatedCaseData.putAll(data);
         return updatedCaseData;
     }
@@ -833,6 +843,19 @@ public class C100RespondentSolicitorService {
                     .getResponseToAllegationsOfHarmDocument() != null) {
                 quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(userDetails,representedRespondent.getValue().getResponse()
                         .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()));
+                /**
+                 * After adding the document to the Quarantine List,
+                 * will be removing the document from the Response to allegation
+                 * of harm object so that no duplicates are present
+                 * in the case file view tab
+                 */
+                representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                    .toBuilder()
+                    .responseToAllegationsOfHarmDocument(null)
+                    .build();
+
+                log.info("Post deletion document value: {}", representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
+                    .getResponseToAllegationsOfHarmDocument());
             }
             PartyDetails amended = representedRespondent.getValue().toBuilder()
                     .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
