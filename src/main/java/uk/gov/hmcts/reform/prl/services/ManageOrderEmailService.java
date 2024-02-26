@@ -97,7 +97,6 @@ public class ManageOrderEmailService {
     private final BulkPrintService bulkPrintService;
     private final SendgridService sendgridService;
     private final Time dateTime;
-    private final CourtFinderService courtLocatorService;
 
     public void sendEmail(CaseDetails caseDetails) {
         List<String> emailList = new ArrayList<>();
@@ -298,7 +297,7 @@ public class ManageOrderEmailService {
             otherEmails = manageOrders.getOtherEmailAddress()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
         }
 
         cafcassEmails.addAll(otherEmails);
@@ -385,22 +384,8 @@ public class ManageOrderEmailService {
                 });
             }
         } else if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.FL401_CASE_TYPE)) {
-            log.info("*** DA Personal service represented serving option selected {}",manageOrders.getServingRespondentsOptionsDA());
-            log.info("*** DA Personal service unrepresented serving option selected {}", manageOrders.getServingOptionsForNonLegalRep());
-            String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
-                ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsDA().getId();
-            handleFL401PersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
-                                                    servingOptions, bulkPrintOrderDetails);
-            if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
-                .contains(ServeOtherPartiesOptions.other)) {
-                manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
-                    if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
-                        otherOrganisationEmailList.add(value.getEmailInformation());
-                    } else {
-                        otherOrganisationPostList.add(value.getPostalInformation());
-                    }
-                });
-            }
+            handleFL401ServeOrderNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
+                                               bulkPrintOrderDetails, otherOrganisationEmailList, otherOrganisationPostList);
         }
         // Send email notification to other organisations
         if (!otherOrganisationEmailList.isEmpty()) {
@@ -414,6 +399,32 @@ public class ManageOrderEmailService {
         //PRL-4225 - set bulkIds in the orderCollection & update in caseDataMap
         addBulkPrintIdsInOrderCollection(caseData, bulkPrintOrderDetails);
         caseDataMap.put(ORDER_COLLECTION, caseData.getOrderCollection());
+    }
+
+    private void handleFL401ServeOrderNotifications(String authorisation,
+                                                    CaseData caseData,
+                                                    List<Document> orderDocuments,
+                                                    Map<String, Object> dynamicDataForEmail,
+                                                    List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
+                                                    List<EmailInformation> otherOrganisationEmailList,
+                                                    List<PostalInformation> otherOrganisationPostList) {
+        ManageOrders manageOrders = caseData.getManageOrders();
+        log.info("*** DA Personal service represented serving option selected {}",manageOrders.getServingRespondentsOptionsDA());
+        log.info("*** DA Personal service unrepresented serving option selected {}", manageOrders.getServingOptionsForNonLegalRep());
+        String servingOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
+            ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsDA().getId();
+        handleFL401PersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
+                                                servingOptions, bulkPrintOrderDetails);
+        if (manageOrders.getServeOtherPartiesDA() != null && manageOrders.getServeOtherPartiesDA()
+            .contains(ServeOtherPartiesOptions.other)) {
+            manageOrders.getServeOrgDetailsList().stream().map(Element::getValue).forEach(value -> {
+                if (DeliveryByEnum.email.equals(value.getServeByPostOrEmail())) {
+                    otherOrganisationEmailList.add(value.getEmailInformation());
+                } else {
+                    otherOrganisationPostList.add(value.getPostalInformation());
+                }
+            });
+        }
     }
 
     private void handleC100PersonalServiceNotifications(String authorisation, CaseData caseData,
@@ -597,13 +608,11 @@ public class ManageOrderEmailService {
                                                        List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                        List<Document> orderDocuments, Map<String, Object> dynamicDataForEmail) {
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
-        SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         if (recipientsOptions != null) {
 
             //applicants
             sendEmailToApplicantOrSolicitor(recipientsOptions.getValue(),
                                                       caseData.getApplicants(),
-                                                      isFinalOrder,
                                                       caseData,
                                                       authorisation,
                                                       dynamicDataForEmail, bulkPrintOrderDetails,
@@ -842,11 +851,11 @@ public class ManageOrderEmailService {
 
     private void sendEmailToApplicantOrSolicitor(List<DynamicMultiselectListElement> value,
                                                            List<Element<PartyDetails>> partyDetails,
-                                                           SelectTypeOfOrderEnum isFinalOrder,
                                                            CaseData caseData, String authorisation,
                                                            Map<String, Object> dynamicDataForEmail,
                                                            List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                            List<Document> orderDocuments) {
+        SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         value.forEach(element -> {
             Optional<Element<PartyDetails>> partyDataOptional = partyDetails.stream()
                 .filter(party -> party.getId().toString().equalsIgnoreCase(element.getCode())).findFirst();
