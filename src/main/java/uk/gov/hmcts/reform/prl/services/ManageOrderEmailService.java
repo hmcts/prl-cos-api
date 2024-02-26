@@ -354,8 +354,8 @@ public class ManageOrderEmailService {
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA personal service notifications ***");
                 log.info("*** CA Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
-                String servingRespondentsOptions = isNotEmpty(manageOrders.getServingRespondentsOptionsCA())
-                    ? manageOrders.getServingRespondentsOptionsCA().getId() : manageOrders.getServingOptionsForNonLegalRep().getId();
+                String servingRespondentsOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
+                    ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsCA().getId();
                 handleC100PersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
                                                        servingRespondentsOptions,
                                                        bulkPrintOrderDetails
