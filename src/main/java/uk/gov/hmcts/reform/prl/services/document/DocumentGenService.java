@@ -911,8 +911,7 @@ public class DocumentGenService {
             && Objects.nonNull(caseData.getHome())
             && YesOrNo.Yes.equals(caseData.getHome().getDoAnyChildrenLiveAtAddress())) {
             List<ChildrenLiveAtAddress> childrenLiveAtAddresses =
-                caseData.getHome().getChildren().stream().map(Element::getValue).collect(
-                    Collectors.toList());
+                caseData.getHome().getChildren().stream().map(Element::getValue).toList();
 
             for (ChildrenLiveAtAddress address : childrenLiveAtAddresses) {
                 if (YesOrNo.Yes.equals(address.getKeepChildrenInfoConfidential())) {
