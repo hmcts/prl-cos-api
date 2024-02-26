@@ -4729,6 +4729,7 @@ public class DraftAnOrderServiceTest {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
         LocalDateTime nowTime = LocalDateTime.parse(dtf.format(LocalDateTime.now()));
         DraftOrder draftOrder = DraftOrder.builder()
+            .typeOfOrder(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue())
             .orderType(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder)
             .orderTypeId(CreateSelectOrderOptionsEnum.childArrangementsSpecificProhibitedOrder.getDisplayedValue())
             .manageOrderHearingDetails(List.of(element(HearingData.builder()

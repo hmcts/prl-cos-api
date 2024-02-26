@@ -1534,12 +1534,12 @@ public class ServiceOfApplicationService {
 
     public List<Document> getC6aIfPresent(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
+            SOA_C6A_OTHER_PARTIES_ORDER)).toList();
     }
 
     private List<Document> getNonC6aOrders(List<Document> soaSelectedOrders) {
         return soaSelectedOrders.stream().filter(d -> ! d.getDocumentFileName().equalsIgnoreCase(
-            SOA_C6A_OTHER_PARTIES_ORDER)).collect(Collectors.toList());
+            SOA_C6A_OTHER_PARTIES_ORDER)).toList();
     }
 
     private List<Document> generatePackH(CaseData caseData, List<Document> staticDocs) {

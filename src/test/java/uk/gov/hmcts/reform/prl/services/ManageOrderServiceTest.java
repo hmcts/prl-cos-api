@@ -4530,7 +4530,7 @@ public class ManageOrderServiceTest {
         );
         List<Element<OrderDetails>> orderCollection = (List<Element<OrderDetails>>) response.get("orderCollection");
 
-        assertEquals("Financial compensation order following C79 enforcement application (C82)",
+        assertEquals("financialCompensationC82",
                      orderCollection.get(0).getValue().getOrderTypeId());
         assertNotNull(response);
 
