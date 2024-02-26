@@ -13,5 +13,6 @@ public class DocumentLanguage {
     public boolean isGenWelsh = false;
 
     public boolean isGenWelsh() {
+        return this.isGenWelsh;
     }
 }
