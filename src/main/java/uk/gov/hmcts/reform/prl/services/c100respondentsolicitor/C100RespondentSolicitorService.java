@@ -426,6 +426,8 @@ public class C100RespondentSolicitorService {
         if (null != responseToAllegationsOfHarm
             && responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse().equals(Yes)) {
 
+            log.info("Category ID: responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument.getCategoryId() {}",
+                     responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument().getCategoryId());
             return responseToAllegationsOfHarm.toBuilder()
                 .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
                 .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
