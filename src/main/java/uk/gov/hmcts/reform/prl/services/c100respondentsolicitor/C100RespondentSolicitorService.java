@@ -843,39 +843,35 @@ public class C100RespondentSolicitorService {
                     .getResponseToAllegationsOfHarmDocument() != null) {
                 quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(userDetails,representedRespondent.getValue().getResponse()
                         .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()));
-                /**
-                 * After adding the document to the Quarantine List,
-                 * will be removing the document from the Response to allegation
-                 * of harm object so that no duplicates are present
-                 * in the case file view tab
-                 */
-                representedRespondent.getValue().setResponse(representedRespondent.getValue().getResponse()
-                                                                 .toBuilder()
-                                                                 .responseToAllegationsOfHarm(
-                                                                     ResponseToAllegationsOfHarm.builder()
-                                                                         .responseToAllegationsOfHarmYesOrNoResponse(
-                                                                             representedRespondent.getValue()
-                                                                                 .getResponse().getResponseToAllegationsOfHarm()
-                                                                                 .getResponseToAllegationsOfHarmYesOrNoResponse())
-                                                                         .build()
-                                                                 )
-                                                                 .build());
-
-                log.info("Post deletion document value: {}", representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
-                    .getResponseToAllegationsOfHarmDocument());
             }
+
+            /**
+             * After adding the document to the Quarantine List,
+             * will be removing the document from the Response to allegation
+             * of harm object so that no duplicates are present
+             * in the case file view tab
+             */
             PartyDetails amended = representedRespondent.getValue().toBuilder()
-                    .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
+                    .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes)
+                                  .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
+                                                                   .responseToAllegationsOfHarmYesOrNoResponse(
+                                                                       representedRespondent.getValue()
+                                                                           .getResponse().getResponseToAllegationsOfHarm()
+                                                                           .getResponseToAllegationsOfHarmYesOrNoResponse())
+                                                                   .build())
+                                  .build())
                     .build();
             String party = representedRespondent.getValue().getLabelForDynamicList();
-            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
-                    ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
 
             caseData.getRespondents().set(
                     caseData.getRespondents().indexOf(representedRespondent),
                     element(representedRespondent.getId(), amended)
             );
 
+            log.info("Amended AllegationOfHarm document: {}", amended.getResponse()
+                .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument());
+            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
+                ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
 
             Map<String, Object> dataMap = generateRespondentDocsAndUpdateCaseData(
