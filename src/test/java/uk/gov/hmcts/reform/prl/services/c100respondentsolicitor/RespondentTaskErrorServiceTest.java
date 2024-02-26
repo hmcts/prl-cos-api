@@ -52,6 +52,12 @@ public class RespondentTaskErrorServiceTest {
     }
 
     @Test
+    public void whenClearingErrorsCalledThenMapCleared() {
+        respondentTaskErrorService.clearErrors();
+        assertThat(respondentTaskErrorService.eventErrors).isEmpty();
+    }
+
+    @Test
     public void whenGetErrorsCalledThenListOfErrorsReturned() {
         respondentTaskErrorService.addEventError(event, error, errorString);
         List<RespondentEventValidationErrors> expectedList = new ArrayList<>();
