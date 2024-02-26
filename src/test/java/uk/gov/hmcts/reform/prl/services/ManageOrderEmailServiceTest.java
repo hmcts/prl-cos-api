@@ -1291,7 +1291,6 @@ public class ManageOrderEmailServiceTest {
     }
 
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServedShouldInvoke() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -1335,7 +1334,6 @@ public class ManageOrderEmailServiceTest {
                                                                                                Mockito.any());
     }
 
-    @Ignore
     @Test
     public void testSendEmailWhenOrderServedShouldInvokeForRespondentContactPrefDigital() throws Exception {
         CaseDetails caseDetails = CaseDetails.builder().build();
@@ -1381,7 +1379,7 @@ public class ManageOrderEmailServiceTest {
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
-        Mockito.verify(sendgridService,Mockito.times(1)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
+        Mockito.verify(sendgridService,Mockito.times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(),
                                                                                                Mockito.any(),
                                                                                                Mockito.any());
     }
@@ -2545,7 +2543,10 @@ public class ManageOrderEmailServiceTest {
         DynamicMultiSelectList serveOrderDynamicMultiSelectList = DynamicMultiSelectList.builder()
             .value(List.of(serveOrderDynamicMultiselectListElement))
             .build();
-        applicant = applicant.toBuilder()
+
+        PartyDetails applicant = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
             .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .representativeLastName("")
             .representativeFirstName("")
