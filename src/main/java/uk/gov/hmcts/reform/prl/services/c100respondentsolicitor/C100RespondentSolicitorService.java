@@ -893,10 +893,13 @@ public class C100RespondentSolicitorService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("QQQQQQQQ {}", documentLanguage);
         if (representedRespondent.getValue().getResponse() != null
                 && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+            log.info("11111 ");
             if (documentLanguage.isGenEng()) {
+                log.info("22222 ");
                 Document c1aFinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -908,6 +911,7 @@ public class C100RespondentSolicitorService {
             }
 
             if (documentLanguage.isGenWelsh()) {
+                log.info("3333333 ");
                 Document c1aFinalDocumentWelsh = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -1255,6 +1259,7 @@ public class C100RespondentSolicitorService {
     }
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
+        log.info("PPPPPPPPPP {}");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> dataMap = populateDataMap(callbackRequest, null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1267,9 +1272,12 @@ public class C100RespondentSolicitorService {
         );
         caseDataUpdated.put("draftC7ResponseDoc", document);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        log.info("PPPPPPPPPP {}",documentLanguage);
         if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+            log.info("11111111111fff");
             if (documentLanguage.isGenEng()) {
+                log.info("2222222fff");
                 Document documentForC1A = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -1281,6 +1289,7 @@ public class C100RespondentSolicitorService {
             }
 
             if (documentLanguage.isGenWelsh()) {
+                log.info("3333333333fff");
                 Document documentForC1AWelsh = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
