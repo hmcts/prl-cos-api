@@ -1327,13 +1327,6 @@ public class ManageOrderService {
         return null;
     }
 
-    public String getApplicantReference(CaseData caseData) {
-        if (!C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            return caseData.getApplicantsFL401().getSolicitorReference();
-        }
-        return null;
-    }
-
     public SdoDetails copyPropertiesToSdoDetails(CaseData caseData) {
         if (null != caseData.getStandardDirectionOrder()) {
             SdoDetails sdoDetails;
