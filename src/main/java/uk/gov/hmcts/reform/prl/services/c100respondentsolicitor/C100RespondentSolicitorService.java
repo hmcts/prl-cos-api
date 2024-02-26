@@ -105,7 +105,7 @@ public class C100RespondentSolicitorService {
 
         You can contact your local court at\s""";
 
-    DocumentLanguageService documentLanguageService;
+    private final DocumentLanguageService documentLanguageService;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
