@@ -230,7 +230,7 @@ public class C100RespondentSolicitorService {
                     try {
                         log.info("caseData prepoulation aoh {}",objectMapper.writeValueAsString(caseDataUpdated));
                     } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
+                        throw new RespondentSolicitorException("Failed while trying to log the caseData ",e);
                     }
 
                     break;
@@ -313,7 +313,7 @@ public class C100RespondentSolicitorService {
         try {
             log.info("caseData flusing aoh {}",objectMapper.writeValueAsString(data));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RespondentSolicitorException("Failed while trying to log the caseData ",e);
         }
         /**
          * Deleting the document from the casedata for fixing the
@@ -406,18 +406,20 @@ public class C100RespondentSolicitorService {
     }
 
     private ResponseToAllegationsOfHarm optimiseResponseToAllegationsOfHarm(ResponseToAllegationsOfHarm responseToAllegationsOfHarm) {
-        if (null != responseToAllegationsOfHarm
-                && responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse().equals(Yes)) {
-            return responseToAllegationsOfHarm.toBuilder()
+        if (null != responseToAllegationsOfHarm) {
+            if (responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse().equals(Yes)) {
+                return responseToAllegationsOfHarm.toBuilder()
                     .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
                     .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
                     .build();
-        } else {
-            return responseToAllegationsOfHarm.toBuilder()
+            } else {
+                return responseToAllegationsOfHarm.toBuilder()
                     .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
                     .responseToAllegationsOfHarmDocument(null)
                     .build();
+            }
         }
+        return null;
     }
 
     private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
@@ -1060,7 +1062,7 @@ public class C100RespondentSolicitorService {
         try {
             log.info("dataMap  : {}",objectMapper.writeValueAsString(dataMap));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RespondentSolicitorException("Failed while trying to log the dataMap ",e);
         }
         return dataMap;
     }
