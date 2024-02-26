@@ -3619,12 +3619,21 @@ public class DocumentGenServiceTest {
     }
 
     @Test
-    public void testCitizenDocCoverLetterGeneration() throws Exception {
-        ReflectionTestUtils.setField(documentGenService, "docCoverSheetCitizenTemplate", "citizen_cover_letter");
+    public void testCitizenCoverLetterTemplateEnglish() throws Exception {
+        ReflectionTestUtils.setField(documentGenService, "docCoverSheetCitizenTemplate", "citizen_cover_letter_en");
         String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_CITIZEN_HINT, false);
 
         assertNotNull(template);
         assertEquals("citizen_cover_letter", template);
+    }
+
+    @Test
+    public void testCitizenCoverLetterTemplateWelsh() throws Exception {
+        ReflectionTestUtils.setField(documentGenService, "docCoverSheetWelshCitizenTemplate", "citizen_cover_letter_wel");
+        String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_CITIZEN_HINT, true);
+
+        assertNotNull(template);
+        assertEquals("", template);
     }
 }
 
