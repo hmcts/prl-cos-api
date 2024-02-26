@@ -61,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -281,7 +282,14 @@ public class C100RespondentSolicitorService {
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
+        cleanUpRespondentTasksFieldOptions(updatedCaseData);
         return updatedCaseData;
+    }
+
+    private static void cleanUpRespondentTasksFieldOptions(Map<String, Object> updatedCaseData) {
+        for (String field : RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS.getCaseFieldName().split(COMMA)) {
+            updatedCaseData.remove(field);
+        }
     }
 
     private void buildResponseForRespondent(CaseData caseData,
@@ -359,12 +367,14 @@ public class C100RespondentSolicitorService {
         if (respondentExistingProceedings != null) {
             for (Element<RespondentProceedingDetails> proceedings : respondentExistingProceedings) {
                 if (null != proceedings.getValue()
-                    && null != proceedings.getValue().getUploadRelevantOrder()) {
+                    && null != proceedings.getValue().getUploadRespondentRelevantOrder()) {
+                    log.info("category for proceeding document => {}",proceedings.getValue().getUploadRespondentRelevantOrder()
+                        .getCategoryId());
                     buildRespondentDocs(
                         caseData,
                         caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
                         solicitor + SOLICITOR,
-                        proceedings.getValue().getUploadRelevantOrder()
+                        proceedings.getValue().getUploadRespondentRelevantOrder()
                     );
                 }
             }

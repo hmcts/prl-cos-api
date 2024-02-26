@@ -27,5 +27,5 @@ public class RespondentProceedingDetails {
     private final String nameOfChildrenInvolved;
     private final String nameOfGuardian;
     private final String nameAndOffice;
-    private final Document uploadRelevantOrder;
+    private final Document uploadRespondentRelevantOrder;
 }

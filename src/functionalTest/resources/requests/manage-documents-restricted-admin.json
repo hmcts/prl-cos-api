@@ -922,7 +922,7 @@
                   "label": "Respondent C1A response"
                 },
                 {
-                  "code": "ordersFromOtherProceedings",
+                  "code": "previousOrdersSubmittedWithResponse",
                   "label": "Orders from other proceedings"
                 },
                 {

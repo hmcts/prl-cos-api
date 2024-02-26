@@ -156,7 +156,7 @@ public class C100RespondentSolicitorServiceTest {
             .caseNumber("122344")
             .nameAndOffice("testoffice")
             .nameOfCourt("testCourt")
-            .uploadRelevantOrder(Document.builder().build())
+            .uploadRespondentRelevantOrder(Document.builder().build())
             .build();
 
         Element<RespondentProceedingDetails> proceedingDetailsElement = Element.<RespondentProceedingDetails>builder()
@@ -567,7 +567,7 @@ public class C100RespondentSolicitorServiceTest {
             .caseNumber("122344")
             .nameAndOffice("testoffice")
             .nameOfCourt("testCourt")
-            .uploadRelevantOrder(Document.builder().build())
+            .uploadRespondentRelevantOrder(Document.builder().build())
             .build();
 
         Element<RespondentProceedingDetails> proceedingDetailsElement2 = Element.<RespondentProceedingDetails>builder()
@@ -1298,7 +1298,7 @@ public class C100RespondentSolicitorServiceTest {
             .caseNumber("122344")
             .nameAndOffice("testoffice")
             .nameOfCourt("testCourt")
-            .uploadRelevantOrder(Document.builder().build())
+            .uploadRespondentRelevantOrder(Document.builder().build())
             .build();
 
         Element<RespondentProceedingDetails> proceedingDetailsElement = Element.<RespondentProceedingDetails>builder()
