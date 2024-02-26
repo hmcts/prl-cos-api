@@ -368,6 +368,8 @@ public class C100RespondentSolicitorService {
             for (Element<RespondentProceedingDetails> proceedings : respondentExistingProceedings) {
                 if (null != proceedings.getValue()
                     && null != proceedings.getValue().getUploadRelevantOrder()) {
+                    log.info("category for proceeding document => {}",proceedings.getValue().getUploadRelevantOrder()
+                        .getCategoryId());
                     buildRespondentDocs(
                         caseData,
                         caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
