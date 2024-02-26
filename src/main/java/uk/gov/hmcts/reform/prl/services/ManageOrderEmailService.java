@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.Respondent
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
@@ -97,6 +98,7 @@ public class ManageOrderEmailService {
     private final SendgridService sendgridService;
     private final Time dateTime;
     private final CourtFinderService courtLocatorService;
+    private final DocumentLanguageService documentLanguageService;
 
     public void sendEmail(CaseDetails caseDetails) {
         List<String> emailList = new ArrayList<>();
@@ -421,7 +423,8 @@ public class ManageOrderEmailService {
                     respondentOption,
                     authorisation,
                     orderDocuments,
-                    dynamicDataForEmail
+                    dynamicDataForEmail,
+                    caseData
                 );
             });
         } else {
@@ -432,7 +435,8 @@ public class ManageOrderEmailService {
                 respondentOption,
                 authorisation,
                 orderDocuments,
-                dynamicDataForEmail
+                dynamicDataForEmail,
+                caseData
             );
         }
     }
@@ -440,12 +444,23 @@ public class ManageOrderEmailService {
     private void sendPersonalServiceNotifications(String solicitorEmail,
                                                   SoaSolicitorServingRespondentsEnum respondentOption,
                                                   String authorisation, List<Document> orderDocuments, Map<String,
-        Object> dynamicDataForEmail) {
+        Object> dynamicDataForEmail, CaseData caseData) {
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(respondentOption)) {
-            sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
-                                 SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
-            );
+            log.info("CA personal service email notifications: sendPersonalServiceNotifications");
+            if (documentLanguage.isGenEng()) {
+                log.info("CA personal service email notifications: English");
+                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
+                                     SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
+                );
+            }
+            if (documentLanguage.isGenWelsh()) {
+                log.info("CA personal service email notifications: Welsh");
+                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
+                                     SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
+                );
+            }
         } else if (null != solicitorEmail && (SoaSolicitorServingRespondentsEnum.courtAdmin.equals(respondentOption)
             || SoaSolicitorServingRespondentsEnum.courtBailiff.equals(respondentOption))) {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
