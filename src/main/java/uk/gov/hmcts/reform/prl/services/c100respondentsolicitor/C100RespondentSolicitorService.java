@@ -367,14 +367,14 @@ public class C100RespondentSolicitorService {
         if (respondentExistingProceedings != null) {
             for (Element<RespondentProceedingDetails> proceedings : respondentExistingProceedings) {
                 if (null != proceedings.getValue()
-                    && null != proceedings.getValue().getUploadRelevantOrder()) {
-                    log.info("category for proceeding document => {}",proceedings.getValue().getUploadRelevantOrder()
+                    && null != proceedings.getValue().getUploadRespondentRelevantOrder()) {
+                    log.info("category for proceeding document => {}",proceedings.getValue().getUploadRespondentRelevantOrder()
                         .getCategoryId());
                     buildRespondentDocs(
                         caseData,
                         caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
                         solicitor + SOLICITOR,
-                        proceedings.getValue().getUploadRelevantOrder()
+                        proceedings.getValue().getUploadRespondentRelevantOrder()
                     );
                 }
             }
