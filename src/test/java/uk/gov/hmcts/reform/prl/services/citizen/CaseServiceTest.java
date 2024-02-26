@@ -51,6 +51,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecip
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -135,6 +136,9 @@ public class CaseServiceTest {
 
     @Mock
     CaseUtils caseUtils;
+
+    @Mock
+    RoleAssignmentService roleAssignmentService;
 
     private CaseData caseData;
     private CaseData caseData2;
@@ -1153,5 +1157,15 @@ public class CaseServiceTest {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
                                                                            CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
         assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testFetchIdamAmRoles() {
+        String emailId = "test@email.com";
+        Map<String, String> amRoles = new HashMap<>();
+        amRoles.put("amRoles","case-worker");
+        Mockito.when(roleAssignmentService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
+        Map<String, String> roles = caseService.fetchIdamAmRoles(authToken, emailId);
+        Assert.assertFalse(roles.isEmpty());
     }
 }

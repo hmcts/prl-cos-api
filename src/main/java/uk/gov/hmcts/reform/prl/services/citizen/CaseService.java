@@ -42,6 +42,7 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
@@ -95,6 +96,7 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final RoleAssignmentService roleAssignmentService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
@@ -668,5 +670,9 @@ public class CaseService {
         }
 
         return partyExternalCaseFlagField;
+    }
+  
+    public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
+        return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
     }
 }
