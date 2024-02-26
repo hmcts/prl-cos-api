@@ -152,7 +152,7 @@ public class CaseEventHandler {
                                 caseData.getId()
                             );
                     } else {
-                        taskErrorService.clearErrors();
+                        respondentTaskErrorService.clearErrors();
                         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
 
                         List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
