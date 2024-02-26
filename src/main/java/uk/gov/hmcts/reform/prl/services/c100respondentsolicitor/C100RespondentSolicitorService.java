@@ -41,7 +41,9 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentA
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentProceedingDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.ResponseSubmitChecker;
@@ -102,6 +104,8 @@ public class C100RespondentSolicitorService {
 
 
         You can contact your local court at\s""";
+
+    DocumentLanguageService documentLanguageService;
 
     public Map<String, Object> populateAboutToStartCaseData(CallbackRequest callbackRequest) {
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -820,8 +824,24 @@ public class C100RespondentSolicitorService {
         String party,
         String createdBy
     ) throws Exception {
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
         Document c7FinalDocument = null;
+        Document c7WelshFinalDocument = null;
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
+
+        if (documentLanguage.isGenWelsh()) {
+            c7WelshFinalDocument = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                SOLICITOR_C7_FINAL_DOCUMENT,
+                true,
+                dataMap
+            );
+            updatedCaseData.put("finalC7ResponseDoc", c7WelshFinalDocument);
+        }
+
         c7FinalDocument = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
@@ -1297,7 +1317,8 @@ public class C100RespondentSolicitorService {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> dataMap = populateDataMap(callbackRequest, null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        Document document = documentGenService.generateSingleDocument(
+        Document document = null;
+        document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             SOLICITOR_C7_DRAFT_DOCUMENT,
@@ -1305,6 +1326,19 @@ public class C100RespondentSolicitorService {
             dataMap
         );
         caseDataUpdated.put("draftC7ResponseDoc", document);
+
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+
+        if (documentLanguage.isGenWelsh()) {
+            document = documentGenService.generateSingleDocument(
+                authorisation,
+                caseData,
+                SOLICITOR_C7_DRAFT_DOCUMENT,
+                true,
+                dataMap
+            );
+            caseDataUpdated.put("draftC7WelshResponseDoc", document);
+        }
 
         if (Yes.equals(caseData.getRespondentSolicitorData().getRespondentAohYesNo())) {
             Document documentForC1A = documentGenService.generateSingleDocument(
