@@ -50,6 +50,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.EmailTemplateVars;
 import uk.gov.hmcts.reform.prl.models.dto.notify.ManageOrderEmail;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 
 import java.io.IOException;
@@ -138,6 +139,8 @@ public class ManageOrderEmailServiceTest {
 
     @Mock
     Time time;
+    @Mock
+    private DocumentLanguageService documentLanguageService;
 
     Document englishOrderDoc;
     Document welshOrderDoc;
@@ -1500,6 +1503,9 @@ public class ManageOrderEmailServiceTest {
             .build();
         Map<String, Object> dataMap = new HashMap<>();
 
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verify(sendgridService,Mockito.times(1))
             .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
@@ -1549,6 +1555,9 @@ public class ManageOrderEmailServiceTest {
                 .build();
         Map<String, Object> dataMap = new HashMap<>();
 
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verify(sendgridService,Mockito.times(1))
             .sendEmailUsingTemplateWithAttachments(Mockito.any(), any(), any());
@@ -1597,6 +1606,9 @@ public class ManageOrderEmailServiceTest {
                         .cafcassEmailId("test").build())
                 .build();
         Map<String, Object> dataMap = new HashMap<>();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
 
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verify(sendgridService,Mockito.times(1))
@@ -2095,6 +2107,10 @@ public class ManageOrderEmailServiceTest {
         String applicantNames = "TestFirst TestLast";
 
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(Mockito.any(CaseData.class))).thenReturn(documentLanguage);
+
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         verify(sendgridService, times(2)).sendEmailUsingTemplateWithAttachments(Mockito.any(), Mockito.any(), Mockito.any());
     }
