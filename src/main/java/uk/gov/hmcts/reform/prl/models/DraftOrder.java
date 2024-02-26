@@ -153,7 +153,7 @@ public class DraftOrder {
     public String getLabelForOrdersDynamicList() {
         return String.format(
             "%s - %s",
-            this.typeOfOrder,
+            this.orderTypeId,
             this.getOtherDetails().getDateCreated().format(DateTimeFormatter.ofPattern(
                 PrlAppsConstants.D_MMM_YYYY_HH_MM,
                 Locale.ENGLISH

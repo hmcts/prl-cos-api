@@ -1217,7 +1217,7 @@ public class ManageOrderService {
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
-            .orderTypeId(String.valueOf(caseData.getCreateSelectOrderOptions()))
+            .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
             .orderDocument(
                 CreateSelectOrderOptionsEnum.other.equals(caseData.getCreateSelectOrderOptions())
                     ? caseData.getUploadOrderDoc() : caseData.getPreviewOrderDoc())
@@ -1349,13 +1349,14 @@ public class ManageOrderService {
     }
 
     public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
-        String flagSelectedOrderId = getSelectedOrderIdForUpload(caseData);
+        String flagSelectedOrder = getSelectedOrderInfoForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 
         return DraftOrder.builder()
             .typeOfOrder(typeOfOrder != null ? typeOfOrder.getDisplayedValue() : null)
-            .orderTypeId(flagSelectedOrderId)
+            .orderType(CreateSelectOrderOptionsEnum.getIdFromValue(flagSelectedOrder))
+            .orderTypeId(flagSelectedOrder)
             .orderDocument(caseData.getUploadOrderDoc())
             .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
             .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
@@ -1771,12 +1772,7 @@ public class ManageOrderService {
             .build();
 
         OrderDetails amended = order.getValue().toBuilder()
-            .orderDocument(order.getValue().getOrderDocument())
-            .orderType(order.getValue().getOrderType())
-            .typeOfOrder(order.getValue().getTypeOfOrder())
             .otherDetails(updateOtherOrderDetails(order.getValue().getOtherDetails()))
-            .dateCreated(order.getValue().getDateCreated())
-            .orderTypeId(order.getValue().getOrderTypeId())
             .serveOrderDetails(serveOrderDetails)
             .build();
 
