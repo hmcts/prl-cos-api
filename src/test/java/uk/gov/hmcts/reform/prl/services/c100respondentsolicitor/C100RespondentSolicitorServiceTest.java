@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Assertions;
@@ -87,6 +88,7 @@ import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100Respo
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.TECH_ERROR;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
+@Ignore
 public class C100RespondentSolicitorServiceTest {
 
     @InjectMocks

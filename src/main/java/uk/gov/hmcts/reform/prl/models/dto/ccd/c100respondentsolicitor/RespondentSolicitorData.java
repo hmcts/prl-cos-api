@@ -80,7 +80,11 @@ public class RespondentSolicitorData {
 
     private final Document draftC1ADoc;
 
+    private final Document draftC1ADocWelsh;
+
     private final Document finalC1AResponseDoc;
+
+    private final Document finalC1AResponseDocWelsh;
     /**
      * Respondent solicitor's Current or Past proceedings.
      */
