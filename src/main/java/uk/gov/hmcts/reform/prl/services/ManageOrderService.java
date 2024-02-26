@@ -891,6 +891,22 @@ public class ManageOrderService {
         return selectedOrder;
     }
 
+    public String getSelectedOrderIdForUpload(CaseData caseData) {
+        String selectedOrder;
+        if (caseData.getChildArrangementOrders() != null) {
+            selectedOrder = String.valueOf(caseData.getChildArrangementOrders());
+        } else if (caseData.getDomesticAbuseOrders() != null) {
+            selectedOrder = String.valueOf(caseData.getDomesticAbuseOrders());
+        } else if (caseData.getFcOrders() != null) {
+            selectedOrder = String.valueOf(caseData.getFcOrders());
+        } else if (caseData.getOtherOrdersOption() != null && caseData.getNameOfOrder() != null) {
+            selectedOrder = caseData.getOtherOrdersOption() + " : " + caseData.getNameOfOrder();
+        } else {
+            selectedOrder = "";
+        }
+        return selectedOrder;
+    }
+
     private String getSelectedOrderInfo(CaseData caseData) {
         StringBuilder selectedOrder = new StringBuilder();
         if (caseData.getManageOrdersOptions() != null) {
@@ -917,7 +933,7 @@ public class ManageOrderService {
         if (caseData.getManageOrdersOptions() == ManageOrdersOptionsEnum.createAnOrder) {
             flagSelectedOrderId = String.valueOf(caseData.getCreateSelectOrderOptions());
         } else {
-            flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
+            flagSelectedOrderId = getSelectedOrderIdForUpload(caseData);
         }
         if (caseData.getCreateSelectOrderOptions() != null
             && !uploadAnOrder.equals(caseData.getManageOrdersOptions())) {
@@ -1203,7 +1219,7 @@ public class ManageOrderService {
                                  ? caseData.getManageOrders().getC21OrderOptions() : null)
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
-            .orderTypeId(caseData.getCreateSelectOrderOptions().getDisplayedValue())
+            .orderTypeId(String.valueOf(caseData.getCreateSelectOrderOptions()))
             .orderDocument(
                 CreateSelectOrderOptionsEnum.other.equals(caseData.getCreateSelectOrderOptions())
                     ? caseData.getUploadOrderDoc() : caseData.getPreviewOrderDoc())
@@ -1335,7 +1351,7 @@ public class ManageOrderService {
     }
 
     public DraftOrder getCurrentUploadDraftOrderDetails(CaseData caseData, String loggedInUserType, UserDetails userDetails) {
-        String flagSelectedOrderId = getSelectedOrderInfoForUpload(caseData);
+        String flagSelectedOrderId = getSelectedOrderIdForUpload(caseData);
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
 

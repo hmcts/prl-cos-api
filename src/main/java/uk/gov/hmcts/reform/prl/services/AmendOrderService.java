@@ -156,12 +156,14 @@ public class AmendOrderService {
             .filter(order -> Objects.equals(order.getId(), selectedOrderId))
             .findFirst();
 
-        String orderType = orderDetails.isPresent() ? orderDetails.get().getValue().getOrderType() : null;
+        String orderType = orderDetails.map(orderDetailsElement -> orderDetailsElement.getValue().getOrderType()).orElse(
+            null);
 
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         return DraftOrder.builder()
             .typeOfOrder(orderType)
-            .orderTypeId(orderType)
+            .orderTypeId(orderDetails.map(orderDetailsElement -> orderDetailsElement.getValue().getOrderTypeId()).orElse(
+                null))
             .orderDocument(amendedDocument)
             .orderSelectionType(orderSelectionType)
             .isOrderUploadedByJudgeOrAdmin(YesOrNo.Yes)
