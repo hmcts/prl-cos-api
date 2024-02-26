@@ -898,9 +898,7 @@ public class ServiceOfApplicationService {
 
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        log.info("caseDataaaaaa==> {}", caseData);
         Map<String, Object> caseDataMap = callbackRequest.getCaseDetails().getData();
-        log.info("caseDataMappppp==> {}", caseDataMap);
         if (caseData.getServiceOfApplication() != null && SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             caseData.getApplicants().get(0).getValue().getResponse().getCitizenFlags().setIsApplicationToBeServed(YesOrNo.Yes);
