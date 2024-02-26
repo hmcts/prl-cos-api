@@ -839,7 +839,7 @@ public class C100RespondentSolicitorService {
                 true,
                 dataMap
             );
-            updatedCaseData.put("finalC7ResponseDoc", c7WelshFinalDocument);
+            updatedCaseData.put("finalC7WelshResponseDoc", c7WelshFinalDocument);
         }
 
         c7FinalDocument = documentGenService.generateSingleDocument(
