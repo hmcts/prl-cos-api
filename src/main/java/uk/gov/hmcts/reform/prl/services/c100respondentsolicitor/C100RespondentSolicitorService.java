@@ -1034,11 +1034,6 @@ public class C100RespondentSolicitorService {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
         }
-        try {
-            log.info("dataMap  : {}",objectMapper.writeValueAsString(dataMap));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
         return dataMap;
     }
 
