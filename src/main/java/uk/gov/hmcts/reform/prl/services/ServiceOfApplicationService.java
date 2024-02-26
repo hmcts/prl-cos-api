@@ -1868,7 +1868,6 @@ public class ServiceOfApplicationService {
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
         );
-        caseDataUpdated.put(WA_IS_APPLICANT_REPRESENTED, "Yes");
         return caseDataUpdated;
     }
 
