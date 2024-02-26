@@ -593,6 +593,11 @@
             "gender": "male",
             "otherGender": null,
             "placeOfBirth": "London",
+            "user": {
+              "email": null,
+              "idamId": null,
+              "solicitorRepresented": "Yes"
+            },
             "address": {
               "AddressLine1": "Ministry Of Justice",
               "AddressLine2": "Seventh Floor 102 Petty France",
