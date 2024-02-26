@@ -235,7 +235,7 @@ public class C100RespondentSolicitorService {
                     try {
                         log.info("caseData prepoulation aoh {}",objectMapper.writeValueAsString(caseDataUpdated));
                     } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
+                        throw new RespondentSolicitorException("Failed while trying to log the caseData ",e);
                     }
 
                     break;
@@ -318,7 +318,17 @@ public class C100RespondentSolicitorService {
         try {
             log.info("caseData flusing aoh {}",objectMapper.writeValueAsString(data));
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new RespondentSolicitorException("Failed while trying to log the caseData ",e);
+        }
+        /**
+         * Deleting the document from the casedata for fixing the
+         * duplication issue of Response to Allegation of Harm
+         * Document in the case file view. The same document
+         * will flow to quarantine docs list upon Respondent task
+         * lost submission
+         */
+        if (ofNullable(updatedCaseData.getOrDefault("responseToAllegationsOfHarmDocument", Optional.empty())).isPresent()) {
+            updatedCaseData.remove("responseToAllegationsOfHarmDocument");
         }
         updatedCaseData.putAll(data);
         return updatedCaseData;
@@ -401,18 +411,20 @@ public class C100RespondentSolicitorService {
     }
 
     private ResponseToAllegationsOfHarm optimiseResponseToAllegationsOfHarm(ResponseToAllegationsOfHarm responseToAllegationsOfHarm) {
-        if (null != responseToAllegationsOfHarm
-                && responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse().equals(Yes)) {
-            return responseToAllegationsOfHarm.toBuilder()
+        if (null != responseToAllegationsOfHarm) {
+            if (responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse().equals(Yes)) {
+                return responseToAllegationsOfHarm.toBuilder()
                     .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
                     .responseToAllegationsOfHarmDocument(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmDocument())
                     .build();
-        } else {
-            return responseToAllegationsOfHarm.toBuilder()
+            } else {
+                return responseToAllegationsOfHarm.toBuilder()
                     .responseToAllegationsOfHarmYesOrNoResponse(responseToAllegationsOfHarm.getResponseToAllegationsOfHarmYesOrNoResponse())
                     .responseToAllegationsOfHarmDocument(null)
                     .build();
+            }
         }
+        return null;
     }
 
     private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
@@ -839,18 +851,31 @@ public class C100RespondentSolicitorService {
                 quarantineLegalDocList.add(getUploadedResponseToApplicantAoh(userDetails,representedRespondent.getValue().getResponse()
                         .getResponseToAllegationsOfHarm().getResponseToAllegationsOfHarmDocument()));
             }
+
+            /**
+             * After adding the document to the Quarantine List,
+             * will be removing the document from the Response to allegation
+             * of harm object so that no duplicates are present
+             * in the case file view tab
+             */
             PartyDetails amended = representedRespondent.getValue().toBuilder()
-                    .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes).build())
+                    .response(representedRespondent.getValue().getResponse().toBuilder().c7ResponseSubmitted(Yes)
+                                  .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm.builder()
+                                                                   .responseToAllegationsOfHarmYesOrNoResponse(
+                                                                       representedRespondent.getValue()
+                                                                           .getResponse().getResponseToAllegationsOfHarm()
+                                                                           .getResponseToAllegationsOfHarmYesOrNoResponse())
+                                                                   .build())
+                                  .build())
                     .build();
             String party = representedRespondent.getValue().getLabelForDynamicList();
-            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
-                    ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
 
             caseData.getRespondents().set(
                     caseData.getRespondents().indexOf(representedRespondent),
                     element(representedRespondent.getId(), amended)
             );
-
+            String createdBy = StringUtils.isEmpty(representedRespondent.getValue().getRepresentativeFullNameForCaseFlags())
+                ? party : representedRespondent.getValue().getRepresentativeFullNameForCaseFlags() + SOLICITOR;
             updatedCaseData.put(RESPONDENTS, caseData.getRespondents());
 
             Map<String, Object> dataMap = generateRespondentDocsAndUpdateCaseData(
@@ -1056,11 +1081,6 @@ public class C100RespondentSolicitorService {
             if (isConfidentialDataPresent) {
                 dataMap.put(IS_CONFIDENTIAL_DATA_PRESENT, isConfidentialDataPresent);
             }
-        }
-        try {
-            log.info("dataMap  : {}",objectMapper.writeValueAsString(dataMap));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
         }
         return dataMap;
     }
