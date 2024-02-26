@@ -367,12 +367,12 @@ public class C100RespondentSolicitorService {
         if (respondentExistingProceedings != null) {
             for (Element<RespondentProceedingDetails> proceedings : respondentExistingProceedings) {
                 if (null != proceedings.getValue()
-                    && null != proceedings.getValue().getUploadRespondentRelevantOrder()) {
+                    && null != proceedings.getValue().getUploadRelevantOrder()) {
                     buildRespondentDocs(
                         caseData,
                         caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
                         solicitor + SOLICITOR,
-                        proceedings.getValue().getUploadRespondentRelevantOrder()
+                        proceedings.getValue().getUploadRelevantOrder()
                     );
                 }
             }

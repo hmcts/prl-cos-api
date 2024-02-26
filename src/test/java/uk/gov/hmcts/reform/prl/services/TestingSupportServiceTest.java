@@ -144,7 +144,7 @@ public class TestingSupportServiceTest {
             .caseNumber("122344")
             .nameAndOffice("testoffice")
             .nameOfCourt("testCourt")
-            .uploadRespondentRelevantOrder(Document.builder().build())
+            .uploadRelevantOrder(Document.builder().build())
             .build();
 
         Element<RespondentProceedingDetails> proceedingDetailsElement = Element.<RespondentProceedingDetails>builder()
