@@ -849,10 +849,17 @@ public class C100RespondentSolicitorService {
                  * of harm object so that no duplicates are present
                  * in the case file view tab
                  */
-                representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
-                    .toBuilder()
-                    .responseToAllegationsOfHarmDocument(null)
-                    .build();
+                representedRespondent.getValue().setResponse(representedRespondent.getValue().getResponse()
+                                                                 .toBuilder()
+                                                                 .responseToAllegationsOfHarm(
+                                                                     ResponseToAllegationsOfHarm.builder()
+                                                                         .responseToAllegationsOfHarmYesOrNoResponse(
+                                                                             representedRespondent.getValue()
+                                                                                 .getResponse().getResponseToAllegationsOfHarm()
+                                                                                 .getResponseToAllegationsOfHarmYesOrNoResponse())
+                                                                         .build()
+                                                                 )
+                                                                 .build());
 
                 log.info("Post deletion document value: {}", representedRespondent.getValue().getResponse().getResponseToAllegationsOfHarm()
                     .getResponseToAllegationsOfHarmDocument());
