@@ -270,11 +270,8 @@ public class ManageDocumentsService {
         return finalQuarantineDocument.toBuilder()
             .documentParty(quarantineLegalDoc.getDocumentParty())
             .documentUploadedDate(quarantineLegalDoc.getDocumentUploadedDate())
-            .notes(quarantineLegalDoc.getNotes())
             .categoryId(quarantineLegalDoc.getCategoryId())
             .categoryName(quarantineLegalDoc.getCategoryName())
-            //move document into confidential category/folder
-            .notes(quarantineLegalDoc.getNotes())
             //PRL-4320 - Manage documents redesign
             .isConfidential(quarantineLegalDoc.getIsConfidential())
             .isRestricted(quarantineLegalDoc.getIsRestricted())
@@ -290,6 +287,7 @@ public class ManageDocumentsService {
             .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
             .scannedDate(quarantineLegalDoc.getScannedDate())
             .deliveryDate(quarantineLegalDoc.getDeliveryDate())
+            .partyDetails(quarantineLegalDoc.getPartyDetails())
             .build();
 
     }
@@ -301,11 +299,8 @@ public class ManageDocumentsService {
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
             .documentParty(manageDocument.getDocumentParty().getDisplayedValue())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            .notes(manageDocument.getDocumentDetails())
             .categoryId(isCourtPartySelected ? INTERNAL_CORRESPONDENCE_CATEGORY_ID : manageDocument.getDocumentCategories().getValueCode())
             .categoryName(isCourtPartySelected ? INTERNAL_CORRESPONDENCE_LABEL : manageDocument.getDocumentCategories().getValueLabel())
-            //move document into confidential category/folder
-            .notes(manageDocument.getDocumentDetails())
             //PRL-4320 - Manage documents redesign
             .isConfidential(manageDocument.getIsConfidential())
             .isRestricted(manageDocument.getIsRestricted())
@@ -488,6 +483,7 @@ public class ManageDocumentsService {
             case COURT_STAFF ->
                 quarantineLegalDoc.toBuilder().courtStaffQuarantineDocument(manageDocument.getDocument()).build();
             case BULK_SCAN -> quarantineLegalDoc.toBuilder().url(manageDocument.getDocument()).build();
+            case CITIZEN -> quarantineLegalDoc.toBuilder().citizenQuarantineDocument(manageDocument.getDocument()).build();
             default -> null;
         };
     }
@@ -584,7 +580,7 @@ public class ManageDocumentsService {
         }
     }
 
-    public List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
+    private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
                                                                 String userRole,
                                                                 boolean isDocumentTab) {
         if (CommonUtils.isEmpty(userRole)) {
