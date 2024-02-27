@@ -32,7 +32,9 @@ public class SendAndReplyNotificationEmail extends EmailTemplateVars {
                                          String senderEmail,
                                          String messageUrgency,
                                          String messageContent,
-                                         String caseLink) {
+                                         String caseLink,
+                                         String caseReference) {
+        super(caseReference);
         this.caseName = caseName;
         this.messageSubject = messageSubject;
         this.senderEmail = senderEmail;

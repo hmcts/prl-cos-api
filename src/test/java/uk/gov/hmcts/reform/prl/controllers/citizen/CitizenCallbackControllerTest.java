@@ -41,7 +41,6 @@ import static uk.gov.hmcts.reform.prl.enums.LiveWithEnum.anotherPerson;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.father;
 import static uk.gov.hmcts.reform.prl.enums.RelationshipsEnum.specialGuardian;
-import static uk.gov.hmcts.reform.prl.services.pin.CaseInviteEmailService.CITIZEN_HOME;
 
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -158,7 +157,7 @@ public class CitizenCallbackControllerTest {
 
         EmailTemplateVars email = CitizenCaseSubmissionEmail.builder()
             .caseNumber(String.valueOf(caseData.getId()))
-            .caseLink(citizenSignUpLink + CITIZEN_HOME)
+            .caseLink(citizenSignUpLink)
             .applicantName(userDetails.getFullName())
             .build();
 

@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @Builder
 @AllArgsConstructor
@@ -31,4 +33,8 @@ public class JudicialUsersApiResponse {
 
     @JsonProperty("surname")
     private final String surname;
+
+    //PRL-4403 - populate tier of judge
+    @JsonProperty("appointments")
+    private final List<Appointment> appointments;
 }

@@ -28,6 +28,8 @@ public class C100IssueCaseControllerIntegrationTest {
 
     private final String issueAndSendToLocalCourtEndpoint = "/issue-and-send-to-local-court";
 
+    private final String issueAndSendToLocalCourtEndpointNotify = "/issue-and-send-to-local-court-notification";
+
     private static final String VALID_REQUEST_BODY = "requests/call-back-controller.json";
 
     @Autowired
@@ -39,10 +41,23 @@ public class C100IssueCaseControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + issueAndSendToLocalCourtEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
         assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
     }
 
+    @Test
+    public void testIssueAndSendToLocalCourtEndpointNotification() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
+        HttpPost httpPost = new HttpPost(serviceUrl + issueAndSendToLocalCourtEndpointNotify);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(HttpStatus.SC_OK, httpResponse.getStatusLine().getStatusCode());
+    }
 }

@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.tasklist;
 
 import lombok.Getter;
+import lombok.Setter;
+import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +17,13 @@ public class TaskSection {
     private List<Task> tasks;
     private String hint;
     private String info;
+    @Setter
+    private List<EventValidationErrors> errors;
+
+    public TaskSection withErrors(List<EventValidationErrors> errors) {
+        this.setErrors(errors);
+        return this;
+    }
 
     private TaskSection(String name, List<Task> tasks) {
         this.name = name;

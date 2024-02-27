@@ -1,0 +1,493 @@
+{
+  "case_details": {
+    "callback_response_status": "string",
+    "case_data": {
+      "id": "1705348332562551",
+      "manageDocuments": [
+        {
+          "value": {
+            "documentParty": "APPLICANT",
+            "documentCategories": {
+              "value": {
+                "code": "applicantApplication",
+                "label": "Applicant application"
+              },
+              "list_items": [
+                {
+                  "code": "applicantApplication",
+                  "label": "Applicant application"
+                },
+                {
+                  "code": "applicantC1AApplication",
+                  "label": "Applicant C1A application"
+                },
+                {
+                  "code": "applicantC1AResponse",
+                  "label": "Applicant C1A response"
+                },
+                {
+                  "code": "MIAMCertificate",
+                  "label": "MIAM certificate"
+                },
+                {
+                  "code": "previousOrdersSubmittedWithApplication",
+                  "label": "Orders from other proceedings"
+                },
+                {
+                  "code": "respondentApplication",
+                  "label": "Respondent application"
+                },
+                {
+                  "code": "respondentC1AApplication",
+                  "label": "Respondent C1A application"
+                },
+                {
+                  "code": "respondentC1AResponse",
+                  "label": "Respondent C1A response"
+                },
+                {
+                  "code": "ordersFromOtherProceedings",
+                  "label": "Orders from other proceedings"
+                },
+                {
+                  "code": "noticeOfHearing",
+                  "label": "Notice of hearing"
+                },
+                {
+                  "code": "courtBundle",
+                  "label": "Court bundle"
+                },
+                {
+                  "code": "caseSummary",
+                  "label": "Case summary"
+                },
+                {
+                  "code": "safeguardingLetter",
+                  "label": "Safeguarding letter"
+                },
+                {
+                  "code": "section7Report",
+                  "label": "Section 7 report"
+                },
+                {
+                  "code": "section37Report",
+                  "label": "Section 37 report"
+                },
+                {
+                  "code": "16aRiskAssessment",
+                  "label": "16a risk assessment"
+                },
+                {
+                  "code": "guardianReport",
+                  "label": "Guardian report"
+                },
+                {
+                  "code": "specialGuardianshipReport",
+                  "label": "Special guardianship report"
+                },
+                {
+                  "code": "otherDocs",
+                  "label": "Other documents"
+                },
+                {
+                  "code": "emailsToCourtToRequestHearingsAdjourned",
+                  "label": "Emails to request hearings adjourned"
+                },
+                {
+                  "code": "publicFundingCertificates",
+                  "label": "Public funding certificates"
+                },
+                {
+                  "code": "noticesOfActingDischarge",
+                  "label": "Notices of acting/discharge"
+                },
+                {
+                  "code": "requestForFASFormsToBeChanged",
+                  "label": "Request for FAS forms to be changed"
+                },
+                {
+                  "code": "witnessAvailability",
+                  "label": "Witness availability"
+                },
+                {
+                  "code": "lettersOfComplaint",
+                  "label": "Letters of complaint"
+                },
+                {
+                  "code": "SPIPReferralRequests",
+                  "label": "SPIP referral requests"
+                },
+                {
+                  "code": "homeOfficeDWPResponses",
+                  "label": "Home Office/ DWP responses"
+                },
+                {
+                  "code": "internalCorrespondence",
+                  "label": "Internal correspondence"
+                },
+                {
+                  "code": "bulkScanQuarantine",
+                  "label": "Bulk scan uploaded"
+                },
+                {
+                  "code": "medicalReports",
+                  "label": "Medical reports"
+                },
+                {
+                  "code": "DNAReports_expertReport",
+                  "label": "DNA reports"
+                },
+                {
+                  "code": "resultsOfHairStrandBloodTests",
+                  "label": "Results of hair strand/blood tests"
+                },
+                {
+                  "code": "policeDisclosures",
+                  "label": "Police disclosures"
+                },
+                {
+                  "code": "medicalRecords",
+                  "label": "Medical records"
+                },
+                {
+                  "code": "drugAndAlcoholTest(toxicology)",
+                  "label": "Drug and alcohol test (toxicology)"
+                },
+                {
+                  "code": "policeReport",
+                  "label": "Police report"
+                },
+                {
+                  "code": "sec37Report",
+                  "label": "Section 37 report"
+                },
+                {
+                  "code": "localAuthorityOtherDoc",
+                  "label": "Other documents"
+                },
+                {
+                  "code": "ordersSubmittedWithApplication",
+                  "label": "Draft orders"
+                },
+                {
+                  "code": "approvedOrders",
+                  "label": "Approved orders"
+                },
+                {
+                  "code": "standardDirectionsOrder",
+                  "label": "Standard directions order"
+                },
+                {
+                  "code": "transcriptsOfJudgements",
+                  "label": "Transcripts of judgements"
+                },
+                {
+                  "code": "magistratesFactsAndReasons",
+                  "label": "Magistrates facts and reasons"
+                },
+                {
+                  "code": "judgeNotesFromHearing",
+                  "label": "Judge notes from hearing"
+                },
+                {
+                  "code": "importantInfoAboutAddressAndContact",
+                  "label": "Important info about address and contact"
+                },
+                {
+                  "code": "privacyNotice",
+                  "label": "Privacy notice"
+                },
+                {
+                  "code": "specialMeasures",
+                  "label": "Reasonable adjustments and special measures"
+                },
+                {
+                  "code": "anyOtherDoc",
+                  "label": "Any other documents"
+                },
+                {
+                  "code": "pathfinder",
+                  "label": "Pathfinder"
+                },
+                {
+                  "code": "positionStatements",
+                  "label": "Position statements"
+                },
+                {
+                  "code": "applicantStatements",
+                  "label": "Applicant's statements"
+                },
+                {
+                  "code": "respondentStatements",
+                  "label": "Respondent's statements"
+                },
+                {
+                  "code": "otherWitnessStatements",
+                  "label": "Other witness statements"
+                }
+              ]
+            },
+            "isConfidential": "Yes",
+            "isRestricted": "Yes",
+            "restrictedDetails": null,
+            "documentDetails": null,
+            "documentRelatedToCaseCheckbox": [
+              "RELATED_TO_CASE"
+            ],
+            "document": {
+              "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a8232731-9d13-4ea8-a2e9-7362b0fe5f87",
+              "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a8232731-9d13-4ea8-a2e9-7362b0fe5f87/binary",
+              "document_filename": "Test doc1.pdf"
+            },
+            "documentRestrictCheckbox": [
+
+            ]
+          },
+          "id": "0f2b9409-0fe8-434f-9e76-f78661919eec"
+        }
+      ],
+      "applicantAttendedMiam": "No",
+      "caseTypeOfApplication": "C100",
+      "claimingExemptionMiam": "Yes",
+      "draftConsentOrderFile": {
+        "document_url": "http://dm-store:8080/documents/6bb61ec7-df31-4c14-b11d-48379307aa8c",
+        "document_filename": "C100-Final-Document.docx",
+        "document_binary_url": "http://dm-store:8080/documents/6bb61ec7-df31-4c14-b11d-48379307aa8c/binary"
+      },
+      "otherProceedingsTable": {
+        "previousOrOngoingProceedings": "No"
+      },
+      "allegationsOfHarmYesNo": "No",
+      "childDetailsExtraTable": {
+        "childrenKnownToLocalAuthority": "No",
+        "childrenSubjectOfChildProtectionPlan": "No"
+      },
+      "reasonsForIntermediary": null,
+      "typeOfApplicationTable": {
+        "natureOfOrder": "asdf",
+        "ordersApplyingFor": "Prohibited Steps Order",
+        "typeOfChildArrangementsOrder": ""
+      },
+      "litigationCapacityTable": {
+        "litigationCapacityFactors": "Give details of any factors affecting litigation capacity (Optional)",
+        "litigationCapacityReferrals": "Provide details of any referral to or assessment by the Adult Learning Disability team, and/or any adult health service, where known, together with the outcome (Optional)",
+        "litigationCapacityOtherFactors": "Yes",
+        "litigationCapacityOtherFactorsDetails": "*Give Details (Optional)"
+      },
+      "miamExemptionsChecklist": [
+        "other"
+      ],
+      "attendingTheHearingTable": {
+        "isWelshNeeded": "Yes",
+        "adjustmentsRequired": null,
+        "isDisabilityPresent": "No",
+        "isInterpreterNeeded": "Yes",
+        "isIntermediaryNeeded": "No",
+        "reasonsForIntermediary": null,
+        "specialArrangementsRequired": null,
+        "isSpecialArrangementsRequired": "No"
+      },
+      "caseUrgencyTimeAndReason": null,
+      "welshLanguageRequirement": "Yes",
+      "internationalElementTable": {
+        "jurisdictionIssue": "No",
+        "requestToForeignAuthority": "No",
+        "habitualResidentInOtherState": "No",
+        "requestToForeignAuthorityGiveReason": null,
+        "habitualResidentInOtherStateGiveReason": null
+      },
+      "litigationCapacityFactors": "Give details of any factors affecting litigation capacity (Optional)",
+      "miamOtherGroundsChecklist": "miamOtherGroundsChecklistEnum_Value_1",
+      "otherPeopleInTheCaseTable": [
+        {
+          "id": "6e25ffa9-0db4-4c6e-8b5a-5c38acdb7f19",
+          "value": {
+            "email": null,
+            "gender": "male",
+            "address": {
+              "County": null,
+              "Country": null,
+              "PostCode": null,
+              "PostTown": null,
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null
+            },
+            "lastName": "Doe",
+            "firstName": "John",
+            "dateOfBirth": null,
+            "otherGender": null,
+            "phoneNumber": null,
+            "placeOfBirth": null,
+            "previousName": null,
+            "isDateOfBirthKnown": "No",
+            "isPlaceOfBirthKnown": "No",
+            "relationshipToChild": [
+              {
+                "id": "7e9b5855-43c2-4d18-b44b-75b0a54a8b7b",
+                "value": {
+                  "personRelationshipToChild": "neice"
+                }
+              }
+            ],
+            "isCurrentAddressKnown": "No",
+            "canYouProvidePhoneNumber": "No",
+            "canYouProvideEmailAddress": "No"
+          }
+        }
+      ],
+      "otherProceedingEmptyTable": {
+        "otherProceedingEmptyField": " "
+      },
+      "requestToForeignAuthority": "No",
+      "effortsMadeWithRespondents": null,
+      "jurisdictionIssueGiveReason": null,
+      "litigationCapacityReferrals": "Provide details of any referral to or assessment by the Adult Learning Disability team, and/or any adult health service, where known, together with the outcome (Optional)",
+      "specialArrangementsRequired": null,
+      "allegationsOfHarmOrdersTable": {
+        "occupationOrder": {
+
+        },
+        "ordersOccupation": null,
+        "restrainingOrder": {
+
+        },
+        "ordersRestraining": null,
+        "nonMolestationOrder": {
+
+        },
+        "ordersNonMolestation": null,
+        "otherInjunctiveOrder": {
+
+        },
+        "ordersOtherInjunctive": null,
+        "undertakingInPlaceOrder": {
+
+        },
+        "ordersUndertakingInPlace": null,
+        "forcedMarriageProtectionOrder": {
+
+        },
+        "ordersForcedMarriageProtection": null
+      },
+      "habitualResidentInOtherState": "No",
+      "otherProceedingsDetailsTable": [
+        {
+          "id": "d9419665-e40f-42f5-b190-a1a6bc72673a",
+          "value": {
+            "dateEnded": null,
+            "caseNumber": null,
+            "dateStarted": null,
+            "nameOfCourt": null,
+            "nameOfJudge": null,
+            "typeOfOrder": null,
+            "nameAndOffice": null,
+            "nameOfGuardian": null,
+            "otherTypeOfOrder": null,
+            "nameOfChildrenInvolved": null,
+            "previousOrOngoingProceedings": null
+          }
+        }
+      ],
+      "summaryTabForOrderAppliedFor": {
+        "ordersApplyingFor": "Prohibited Steps Order",
+        "typeOfChildArrangementsOrder": ""
+      },
+      "typeOfChildArrangementsOrder": null,
+      "applicationPermissionRequired": "noNotRequired",
+      "childrenKnownToLocalAuthority": "no",
+      "isSpecialArrangementsRequired": "No",
+      "otherProceedingsForSummaryTab": [
+        {
+          "id": "b256f9f8-7fce-4754-b9c0-1f0e6ea2fe94",
+          "value": {
+            "caseNumber": null,
+            "nameOfCourt": null,
+            "typeOfOrder": null
+          }
+        }
+      ],
+      "allegationsOfHarmOverviewTable": {
+        "allegationsOfHarmYesNo": "No",
+        "allegationsOfHarmChildAbuseYesNo": null,
+        "allegationsOfHarmDomesticAbuseYesNo": null,
+        "allegationsOfHarmOtherConcernsYesNo": null,
+        "allegationsOfHarmChildAbductionYesNo": null,
+        "allegationsOfHarmSubstanceAbuseYesNo": null
+      },
+      "doYouNeedAWithoutNoticeHearing": "No",
+      "litigationCapacityOtherFactors": "Yes",
+      "welshLanguageRequirementsTable": {
+        "welshLanguageRequirement": "Yes",
+        "welshLanguageRequirementApplication": "english",
+        "languageRequirementApplicationNeedWelsh": "Yes",
+        "welshLanguageRequirementApplicationNeedEnglish": null
+      },
+      "miamPreviousAttendanceChecklist": null,
+      "areRespondentsAwareOfProceedings": "No",
+      "reasonsForApplicationWithoutNotice": null,
+      "allegationsOfHarmDomesticAbuseTable": {
+        "sexualAbuseVictim": "",
+        "physicalAbuseVictim": "",
+        "emotionalAbuseVictim": "",
+        "financialAbuseVictim": "",
+        "psychologicalAbuseVictim": ""
+      },
+      "allegationsOfHarmOtherConcernsTable": {
+        "agreeChildOtherContact": null,
+        "agreeChildSupervisedTime": null,
+        "agreeChildUnsupervisedTime": null,
+        "allegationsOfHarmOtherConcerns": null,
+        "allegationsOfHarmOtherConcernsDetails": null,
+        "allegationsOfHarmOtherConcernsCourtActions": null
+      },
+      "applicationPermissionRequiredReason": null,
+      "requestToForeignAuthorityGiveReason": null,
+      "welshLanguageRequirementApplication": "english",
+      "allegationsOfHarmChildAbductionTable": {
+        "childrenLocationNow": null,
+        "previousAbductionThreats": null,
+        "childAtRiskOfAbductionReason": null,
+        "abductionPassportOfficeNotified": null,
+        "previousAbductionThreatsDetails": null,
+        "abductionPreviousPoliceInvolvement": null,
+        "abductionPreviousPoliceInvolvementDetails": null
+      },
+      "childrenSubjectOfChildProtectionPlan": "no",
+      "childrenKnownToLocalAuthorityTextArea": null,
+      "doYouRequireAHearingWithReducedNotice": "No",
+      "litigationCapacityOtherFactorsDetails": "*Give Details (Optional)",
+      "c100ConfidentialityStatementDisclaimer": [
+        "confidentialityStatementUnderstood"
+      ],
+      "habitualResidentInOtherStateGiveReason": null,
+      "languageRequirementApplicationNeedWelsh": "Yes",
+      "previousOrOngoingProceedingsForChildren": "no",
+      "welshLanguageRequirementApplicationNeedEnglish": null
+
+    },
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 1705348332562551,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "case_details_before": {
+    "callback_response_status": "string",
+    "case_data": {},
+    "case_type_id": "string",
+    "created_date": "2022-03-15T15:02:33.880Z",
+    "id": 0,
+    "jurisdiction": "string",
+    "last_modified": "2022-03-15T15:02:33.880Z",
+    "locked_by_user_id": 0,
+    "security_classification": "PRIVATE",
+    "security_level": 0,
+    "state": "string"
+  },
+  "event_id": "string"
+}

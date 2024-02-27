@@ -3,16 +3,17 @@ package uk.gov.hmcts.reform.prl.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.function.ThrowingRunnable;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.CourtFinderApi;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
@@ -39,6 +40,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CaseWorkerEmailService;
 import uk.gov.hmcts.reform.prl.services.ConfidentialityTabService;
 import uk.gov.hmcts.reform.prl.services.CourtFinderService;
@@ -58,8 +60,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -127,7 +132,11 @@ public class FL401SubmitApplicationControllerTest {
     @Mock
     private CourtFinderApi courtFinderApi;
 
+    @Mock
+    private AuthorisationService authorisationService;
+
     public static final String authToken = "Bearer TestAuthToken";
+    public static final String s2sToken = "s2s AuthToken";
 
     private TypeOfApplicationOrders orders;
     private LinkToCA linkToCA;
@@ -138,7 +147,6 @@ public class FL401SubmitApplicationControllerTest {
     @Before
     public void setUp() {
 
-        MockitoAnnotations.openMocks(this);
 
         CourtEmailAddress courtEmailAddress = CourtEmailAddress.builder()
             .address("brighton.breathingspace@justice.gov.uk")
@@ -185,6 +193,7 @@ public class FL401SubmitApplicationControllerTest {
                                         .siteName("test")
                                         .region("test")
                                         .build()));
+        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
     }
 
     @Test
@@ -210,8 +219,6 @@ public class FL401SubmitApplicationControllerTest {
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
-
-
         CallbackResponse callbackResponse = CallbackResponse.builder()
             .data(caseData)
             .errors(Collections.singletonList("test"))
@@ -234,7 +241,7 @@ public class FL401SubmitApplicationControllerTest {
                              .build())
             .build();
 
-        fl401SubmitApplicationController.fl401SubmitApplicationValidation(authToken, callbackRequest);
+        fl401SubmitApplicationController.fl401SubmitApplicationValidation(authToken, s2sToken, callbackRequest);
         verify(fl401StatementOfTruthAndSubmitChecker, times(1)).hasMandatoryCompleted(caseData);
     }
 
@@ -278,6 +285,7 @@ public class FL401SubmitApplicationControllerTest {
         when(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData)).thenReturn(false);
         AboutToStartOrSubmitCallbackResponse callbackResponseTest = fl401SubmitApplicationController.fl401SubmitApplicationValidation(
             authToken,
+            s2sToken,
             callbackRequest
         );
         verify(fl401StatementOfTruthAndSubmitChecker, times(1)).hasMandatoryCompleted(caseData);
@@ -385,7 +393,7 @@ public class FL401SubmitApplicationControllerTest {
         )).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse response = fl401SubmitApplicationController
-            .fl401GenerateDocumentSubmitApplication(authToken, callbackRequest);
+            .fl401GenerateDocumentSubmitApplication(authToken, s2sToken, callbackRequest);
 
         assertNotNull(response.getData());
     }
@@ -417,12 +425,88 @@ public class FL401SubmitApplicationControllerTest {
         when(fl401SubmitApplicationService.fl401SendApplicationNotification(
             Mockito.anyString(),
             Mockito.any(uk.gov.hmcts.reform.ccd.client.model.CallbackRequest.class)
-        )).thenReturn(caseData);
+        )).thenReturn(null);
 
         assertNull(fl401SubmitApplicationController.fl401SendApplicationNotification(
             authToken,
+            s2sToken,
             callbackRequest
         ).getData());
 
+    }
+
+    @Test
+    public void testExceptionForFl401SubmitApplicationValidation() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            fl401SubmitApplicationController.fl401SubmitApplicationValidation(
+                authToken,
+                s2sToken,
+                callbackRequest
+            );
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForFl401GenerateDocumentSubmitApplication() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            fl401SubmitApplicationController.fl401GenerateDocumentSubmitApplication(
+                authToken,
+                s2sToken,
+                callbackRequest
+            );
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    @Test
+    public void testExceptionForFl401SendApplicationNotification() throws Exception {
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(false);
+        assertExpectedException(() -> {
+            fl401SubmitApplicationController.fl401SendApplicationNotification(
+                authToken,
+                s2sToken,
+                callbackRequest
+            );
+        }, RuntimeException.class, "Invalid Client");
+    }
+
+    protected <T extends Throwable> void assertExpectedException(ThrowingRunnable methodExpectedToFail, Class<T> expectedThrowableClass,
+                                                                 String expectedMessage) {
+        T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
+        assertEquals(expectedMessage, exception.getMessage());
     }
 }

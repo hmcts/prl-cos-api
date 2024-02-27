@@ -22,9 +22,9 @@ public enum SdoHearingsAndNextStepsEnum {
     @JsonProperty("hearingNotNeeded")
     hearingNotNeeded("hearingNotNeeded", "Hearing is not needed"),
     @JsonProperty("fhdra")
-    fhdra("fhdra", "First hearing dispute resolution (FHDRA)"),
+    fhdra("fhdra", "First hearing dispute resolution appointment (FHDRA)"),
     @JsonProperty("positionStatement")
-    positionStatement("positionStatement", "Position statements"),
+    positionStatement("positionStatement", "Position statement"),
     @JsonProperty("participationDirections")
     participationDirections("participationDirections", "Participation directions"),
     @JsonProperty("miamAttendance")
@@ -42,7 +42,11 @@ public enum SdoHearingsAndNextStepsEnum {
     @JsonProperty("interpreters")
     interpreters("interpreters", "Court to arrange interpreters"),
     @JsonProperty("updateContactDetails")
-    updateContactDetails("updateContactDetails", "Update your contact details");
+    updateContactDetails("updateContactDetails", "Update your contact details"),
+    @JsonProperty("partyRaisedDomesticAbuse")
+    partyRaisedDomesticAbuse("partyRaisedDomesticAbuse", "Party or parties raising domestic abuse issues"),
+    @JsonProperty("nextStepsAfterSecondGatekeeping")
+    nextStepsAfterSecondGatekeeping("nextStepsAfterSecondGatekeeping", "Next steps after second gatekeeping appointment");
 
     private final String id;
     private final String displayedValue;

@@ -1,11 +1,11 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,30 +15,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.AuthorisationService;
+import uk.gov.hmcts.reform.prl.services.EventService;
 import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
 @Slf4j
 @RestController
 @SecurityRequirement(name = "Bearer Authentication")
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @RequestMapping("/bundle")
 public class BundlingController extends AbstractCallbackController {
+    private final BundlingService bundlingService;
+    private final AuthorisationService authorisationService;
+
     @Autowired
-    private BundlingService bundlingService;
+    protected BundlingController(ObjectMapper objectMapper,
+                                 EventService eventPublisher,
+                                 BundlingService bundlingService,
+                                 AuthorisationService authorisationService) {
+        super(objectMapper, eventPublisher);
+        this.bundlingService = bundlingService;
+        this.authorisationService = authorisationService;
+    }
 
     @PostMapping(path = "/createBundle", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Creating bundle. ")
@@ -50,42 +59,35 @@ public class BundlingController extends AbstractCallbackController {
                                                              @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
                                                              String serviceAuthorization,
                                                              @RequestBody CallbackRequest callbackRequest) {
-        CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
-        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        moveExistingCaseBundlesToHistoricalBundles(caseData);
-        log.info("*** Creating Bundle for the case id : {}", caseData.getId());
-        BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
-            callbackRequest.getEventId(), authorization);
-        if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
-            caseDataUpdated.put("bundleInformation",
-                BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
-                    .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
-                    .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
-                    .bundleCreationDateAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME
-                        .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
-                    .bundleHearingDateAndTime(null != bundleCreateResponse.getData().getData()
-                        && null != bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime()
-                        ? bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime() : "")
-                    .build());
-            log.info("*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}", caseData.getId());
-        }
-        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
-    }
-
-    private void moveExistingCaseBundlesToHistoricalBundles(CaseData caseData) {
-        List<Bundle> historicalBundles = new ArrayList<>();
-        BundlingInformation existingBundleInformation = caseData.getBundleInformation();
-        if (nonNull(existingBundleInformation)) {
-            if (nonNull(existingBundleInformation.getHistoricalBundles())) {
-                historicalBundles.addAll(existingBundleInformation.getHistoricalBundles());
+        if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
+            CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
+            Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            log.info("*** Creating Bundle for the case id : {}", caseData.getId());
+            BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
+                                                                                                   callbackRequest.getEventId(),
+                                                                                                   authorization
+            );
+            if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
+                caseDataUpdated.put(
+                    "bundleInformation",
+                    BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
+                        .historicalBundles(null)
+                        .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
+                        .bundleCreationDateAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                                                       .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
+                        .bundleHearingDateAndTime(null != bundleCreateResponse.getData().getData()
+                                                      && null != bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime()
+                                                      ? bundleCreateResponse.getData().getData().getHearingDetails().getHearingDateAndTime() : "")
+                        .build()
+                );
+                log.info(
+                    "*** Bundle created successfully.. Updating bundle Information in case data for the case id: {}",
+                    caseData.getId()
+                );
             }
-            if (nonNull(existingBundleInformation.getCaseBundles())) {
-                historicalBundles.addAll(existingBundleInformation.getCaseBundles());
-            }
-            existingBundleInformation.setHistoricalBundles(historicalBundles);
-            existingBundleInformation.setCaseBundles(null);
+            return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
-            caseData.setBundleInformation(BundlingInformation.builder().build());
+            throw (new RuntimeException(INVALID_CLIENT));
         }
     }
 }

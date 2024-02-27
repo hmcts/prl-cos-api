@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
@@ -99,23 +100,31 @@ public class CaseEventHandler {
     }
 
     public String getUpdatedTaskList(CaseData caseData) {
-        final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
+        String taskList = "";
+        if (caseData.getState() != null
+            && (caseData.getState().equals(State.AWAITING_SUBMISSION_TO_HMCTS)
+            || caseData.getState().equals(State.AWAITING_RESUBMISSION_TO_HMCTS))) {
+            final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
+            List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
+            if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
+                List<Event> events = taskListService.getC100Events(caseData);
+                eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+            }
 
-        List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
+            if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
+                List<Event> events = taskListService.getFL401Events(caseData);
+                eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+            }
 
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
-            List<Event> events = taskListService.getC100Events();
-            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+            taskList = taskListRenderer
+                .render(
+                    tasks,
+                    eventErrors,
+                    caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE),
+                    caseData
+                );
         }
-
-        if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(FL401_CASE_TYPE)) {
-            List<Event> events = taskListService.getFL401Events(caseData);
-            eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-        }
-
-        return taskListRenderer
-            .render(tasks, eventErrors, caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE), caseData);
-
+        return taskList;
     }
 
     public String getRespondentTaskList(CaseData caseData, String respondent) {
@@ -128,28 +137,36 @@ public class CaseEventHandler {
                 if (respondingParty.getValue() != null
                     && respondingParty.getValue().getUser() != null
                     && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())
-                    && respondingParty.getValue().getResponse() != null
-                    && !YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted())) {
-                    final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
+                    && respondingParty.getValue().getResponse() != null) {
+                    final boolean hasSubmitted = YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
+                    String representedRespondentName = respondingParty.getValue().getLabelForDynamicList();
+                    if (hasSubmitted) {
+                        return respondentSolicitorTaskListRenderer
+                            .render(
+                                null,
+                                null,
+                                respondent,
+                                representedRespondentName,
+                                hasSubmitted,
+                                caseData.getId()
+                            );
+                    } else {
+                        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
 
-                    List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
+                        List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
 
-                    List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
-                    eventErrors.removeIf(e -> !events.contains(e.getEvent()));
-
-                    String representedRespondentName = respondingParty.getValue().getFirstName().trim() + " "
-                        + respondingParty.getValue().getLastName().trim();
-                    final boolean hasSubmitted = respondingParty.getValue().getResponse() != null
-                        && YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
-                    return respondentSolicitorTaskListRenderer
-                        .render(
-                            tasks,
-                            eventErrors,
-                            respondent,
-                            representedRespondentName,
-                            hasSubmitted,
-                            caseData.getId()
-                        );
+                        List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
+                        eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+                        return respondentSolicitorTaskListRenderer
+                            .render(
+                                tasks,
+                                eventErrors,
+                                respondent,
+                                representedRespondentName,
+                                hasSubmitted,
+                                caseData.getId()
+                            );
+                    }
                 }
             }
         }

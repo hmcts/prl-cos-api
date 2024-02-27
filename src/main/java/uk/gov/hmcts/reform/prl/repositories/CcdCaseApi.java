@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.CaseAccessApi;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.ccd.client.model.UserId;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
@@ -18,36 +19,24 @@ import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenCoreCaseDataService;
 
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class CcdCaseApi {
-    @Autowired
-    AuthTokenGenerator authTokenGenerator;
-    @Autowired
-    CaseAccessApi caseAccessApi;
-
-    @Autowired
-    CitizenCoreCaseDataService citizenCoreCaseDataService;
-
-    @Autowired
-    IdamClient idamClient;
+    private final AuthTokenGenerator authTokenGenerator;
+    private final CaseAccessApi caseAccessApi;
+    private final CitizenCoreCaseDataService citizenCoreCaseDataService;
+    private final IdamClient idamClient;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CcdCaseApi.class);
 
-    public void linkCitizenToCase(String authorisation, String anonymousUserToken, String caseId,
-                                  CaseData caseData, StartEventResponse startEventResponse) {
-        linkToCase(authorisation, anonymousUserToken, caseId, caseData, startEventResponse);
-    }
-
-    private void linkToCase(String authorisation, String anonymousUserToken, String caseId,
-                            CaseData caseData, StartEventResponse startEventResponse) {
-        UserDetails userDetails = idamClient.getUserDetails(authorisation);
-        LOGGER.info("linkToCase  Linking the case {} ", caseId);
-        LOGGER.debug("Granting access to case {} for citizen {}", caseId, userDetails.getId());
-        this.grantAccessToCase(userDetails.getId(), anonymousUserToken, caseId);
-        this.linkCitizen(anonymousUserToken, caseId, caseData, startEventResponse);
-        LOGGER.info("case is now linked {}", caseId);
+    public void linkCitizenToCase(String userAuthorisation, String systemUserToken, String caseId,
+                                  EventRequestData eventRequestData, StartEventResponse startEventResponse, Map<String, Object> caseDataUpdated) {
+        UserDetails userDetails = idamClient.getUserDetails(userAuthorisation);
+        this.grantAccessToCase(userDetails.getId(), systemUserToken, caseId);
+        this.linkCitizen(systemUserToken, caseId, eventRequestData, startEventResponse, caseDataUpdated);
     }
 
     private void grantAccessToCase(String citizenId, String anonymousUserToken, String caseId) {
@@ -63,17 +52,17 @@ public class CcdCaseApi {
     }
 
     private CaseDetails linkCitizen(
-        String anonymousUserToken,
+        String systemUserToken,
         String caseId,
-        CaseData caseData,
-        StartEventResponse startEventResponse) {
-        LOGGER.info("updateCitizenIdAndEmail {}", caseId);
+        EventRequestData eventRequestData,
+        StartEventResponse startEventResponse,
+        Map<String, Object> caseDataUpdated) {
         return citizenCoreCaseDataService.linkDefendant(
-            anonymousUserToken,
+            systemUserToken,
             Long.valueOf(caseId),
-            caseData,
-            CaseEvent.LINK_CITIZEN,
-            startEventResponse
+            eventRequestData,
+            startEventResponse,
+            caseDataUpdated
         );
     }
 

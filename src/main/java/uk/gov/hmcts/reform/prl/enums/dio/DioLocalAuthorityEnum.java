@@ -11,7 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum DioLocalAuthorityEnum {
     @JsonProperty("localAuthorityLetter")
-    localAuthorityLetter("localAuthorityLetter", "Local authority letter");
+    localAuthorityLetter("localAuthorityLetter", "Local Authority letter");
 
     private final String id;
     private final String displayedValue;

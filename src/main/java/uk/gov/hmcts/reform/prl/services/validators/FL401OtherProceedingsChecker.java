@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -7,11 +8,11 @@ import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.FL401Proceedings;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.TaskErrorService;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Optional.ofNullable;
@@ -22,10 +23,10 @@ import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.no;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class FL401OtherProceedingsChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     @Override
     public boolean isFinished(CaseData caseData) {
@@ -50,7 +51,7 @@ public class FL401OtherProceedingsChecker implements EventChecker {
             List<FL401Proceedings> allProceedings = proceedingDetails.get()
                 .stream()
                 .map(Element::getValue)
-                .collect(Collectors.toList());
+                .toList();
 
             //if a collection item is added and then removed the collection exists as length 0
             if (allProceedings.isEmpty()) {
@@ -101,4 +102,8 @@ public class FL401OtherProceedingsChecker implements EventChecker {
         return Stream.of(properties).anyMatch(ObjectUtils::isEmpty);
     }
 
+    @Override
+    public TaskState getDefaultTaskState(CaseData caseData) {
+        return TaskState.NOT_STARTED;
+    }
 }

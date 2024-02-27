@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
@@ -31,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithoutNoticeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.AttendHearing;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +42,7 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
+import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingEnum.applicantStopFromRespondentEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum.applicantStopFromRespondentDoingToChildEnum_Value_1;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
@@ -106,7 +107,6 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
 
         List<FL401OrderTypeEnum> orderList = new ArrayList<>();
         orderList.add(FL401OrderTypeEnum.nonMolestationOrder);
@@ -189,8 +189,8 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
             .applicantRelationship(ApplicantRelationshipEnum.noneOfTheAbove)
             .build();
         respondentRelationOptionsInfo = RespondentRelationOptionsInfo.builder()
-                                           .applicantRelationshipOptions(ApplicantRelationshipOptionsEnum.aunt)
-                                           .build();
+            .applicantRelationshipOptions(ApplicantRelationshipOptionsEnum.aunt)
+            .build();
 
         //Respondentbehaviour
         respondentBehaviour = RespondentBehaviour.builder()
@@ -397,4 +397,10 @@ public class FL401StatementOfTruthAndSubmitCheckerTest {
 
         assertTrue(fl401StatementOfTruthAndSubmitChecker.hasMandatoryCompleted(caseData));
     }
+
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(fl401StatementOfTruthAndSubmitChecker.getDefaultTaskState(caseData));
+    }
+
 }

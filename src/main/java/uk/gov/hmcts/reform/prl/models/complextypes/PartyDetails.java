@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.Gender;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.courtnav.enums.PreferredContactEnum;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -31,6 +33,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class PartyDetails {
 
+    public static final String FULL_NAME_FORMAT = "%s %s";
     private final String firstName;
     private final String lastName;
     private final String previousName;
@@ -41,13 +44,13 @@ public class PartyDetails {
     private final String otherGender;
     private final String placeOfBirth;
     private final DontKnow isAddressUnknown;
-    private final YesOrNo isAddressConfidential;
+    private YesOrNo isAddressConfidential;
     private final YesOrNo isAtAddressLessThan5Years;
     private final String addressLivedLessThan5YearsDetails;
     private final YesOrNo canYouProvideEmailAddress;
-    private final YesOrNo isEmailAddressConfidential;
+    private YesOrNo isEmailAddressConfidential;
     private final String landline;
-    private final YesOrNo isPhoneNumberConfidential;
+    private YesOrNo isPhoneNumberConfidential;
     private final String relationshipToChildren;
     private final YesOrNo isDateOfBirthKnown;
     private final YesOrNo isCurrentAddressKnown;
@@ -82,9 +85,12 @@ public class PartyDetails {
     private YesOrNo currentRespondent;
 
     // it will hold either applicant flag or respondent flag
+    // Deprecated. kept for backward compatibility
     private Flags partyLevelFlag;
 
     private ContactPreferences contactPreferences;
+
+    private YesOrNo isRemoveLegalRepresentativeRequested;
 
     public boolean hasConfidentialInfo() {
         return this.isAddressConfidential.equals(YesOrNo.Yes)
@@ -106,10 +112,45 @@ public class PartyDetails {
     @JsonIgnore
     public String getLabelForDynamicList() {
         return String.format(
-            "%s %s",
+            FULL_NAME_FORMAT,
             this.firstName,
             this.lastName
         );
+    }
+
+    @JsonIgnore
+    public String getRepresentativeFullName() {
+        return String.format(
+            FULL_NAME_FORMAT,
+            this.representativeFirstName,
+            this.representativeLastName
+        );
+    }
+
+    @JsonIgnore
+    public String getRepresentativeFullNameForCaseFlags() {
+        if (!StringUtils.isEmpty(this.representativeFirstName)
+            && !StringUtils.isEmpty(this.representativeLastName)) {
+            return String.format(
+                FULL_NAME_FORMAT,
+                StringUtils.capitalize(this.representativeFirstName.trim()),
+                StringUtils.capitalize(this.representativeLastName.trim())
+            );
+        } else if (!StringUtils.isEmpty(this.representativeFirstName)
+            && StringUtils.isEmpty(this.representativeLastName)) {
+            return String.format(
+                "%s",
+                StringUtils.capitalize(this.representativeFirstName.trim())
+            );
+        } else if (StringUtils.isEmpty(this.representativeFirstName)
+            && !StringUtils.isEmpty(this.representativeLastName)) {
+            return String.format(
+                "%s",
+                StringUtils.capitalize(this.representativeLastName.trim())
+            );
+        } else {
+            return StringUtils.EMPTY;
+        }
     }
 
     private UUID partyId;
@@ -117,4 +158,7 @@ public class PartyDetails {
     private UUID solicitorOrgUuid;
 
     private UUID solicitorPartyId;
+
+    @JsonIgnore
+    private CitizenSos citizenSosObject;
 }
