@@ -86,6 +86,8 @@ public class CaseControllerFunctionalTest {
     @MockBean
     private AuthTokenGenerator authTokenGenerator;
 
+    private static CaseData caseData;
+
     @Before
     public void setUp() {
         this.mockMvc = webAppContextSetup(webApplicationContext).build();
@@ -149,6 +151,43 @@ public class CaseControllerFunctionalTest {
                             .header("caseId", "12345678"))
             .andExpect(status().is4xxClientError())
             .andReturn();
+    }
+
+    @Test
+    public void testCreateDummyCase() {
+        caseData = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .when()
+            .contentType("application/json")
+            .post("/testing-support/create-dummy-citizen-case")
+            .then()
+            .extract()
+            .as(CaseData.class);
+        Assert.assertNotNull(caseData);
+        Assert.assertNotNull(caseData.getId());
+    }
+
+    @Test
+    public void testUpdateCaseWithOtherPersonDetails() {
+
+        CaseData responseData = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .header("accessCode", " ")
+            .body(caseData)
+            .when()
+            .contentType("application/json")
+            .post(caseData.getId() + "/citizen-case-submit/update-case")
+            .then()
+            .extract()
+            .as(CaseData.class);
+
+        Assert.assertNotNull(responseData);
+        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised());
+        Assert.assertNotNull(responseData.getOtherPartyInTheCaseRevised().get(0));
+        Assert.assertEquals("Andrew",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getFirstName());
+        Assert.assertEquals("Smith",responseData.getOtherPartyInTheCaseRevised().get(0).getValue().getLastName());
     }
 
     @Test
