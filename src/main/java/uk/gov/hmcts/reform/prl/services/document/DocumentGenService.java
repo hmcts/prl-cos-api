@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClient;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.DgsApiClient;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -34,7 +35,6 @@ import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.GenerateAndUploadDocumentRequest;
@@ -44,6 +44,7 @@ import uk.gov.hmcts.reform.prl.services.DgsService;
 import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
@@ -52,6 +53,7 @@ import uk.gov.hmcts.reform.prl.utils.NumberToWords;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -134,8 +136,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_POSITION_S
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_STATEMENTS;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.addCitizenQuarantineFields;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
 @Service
@@ -287,8 +287,7 @@ public class DocumentGenService {
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
     private final ManageDocumentsService manageDocumentsService;
-
-    private static final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
+    private final UserService userService;
 
     protected static final String[] ALLOWED_FILE_TYPES = {"jpeg", "jpg", "doc", "docx", "png", "txt"};
 
@@ -1320,17 +1319,17 @@ public class DocumentGenService {
     public CaseDetails citizenSubmitDocuments(String authorisation, DocumentRequest documentRequest) throws JsonProcessingException {
         //Get case data from caseId
         String caseId = documentRequest.getCaseId();
-        CaseData caseData = CaseUtils.getCaseData(caseService.getCase(authorisation, caseId), objectMapper);
+        CaseDetails caseDetails = caseService.getCase(authorisation, caseId);
 
-        if (null == caseData) {
-            log.info("Retrieved caseData is null for caseId {}", caseId);
+        if (null == caseDetails) {
+            log.info("Retrieved caseDetails is null for caseId {}", caseId);
             return null;
         }
 
-        List<Element<QuarantineLegalDoc>> citizenQuarantineDocs = manageDocumentsService.getQuarantineDocs(caseData,
-                                                                                                           CITIZEN,
-                                                                                                           false);
-        log.info("Existing quarantine docs {}", citizenQuarantineDocs);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        Map<String, Object> caseDataUpdated = caseDetails.getData();
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+
         if (isNotBlank(documentRequest.getCategoryId())
             && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
 
@@ -1342,31 +1341,82 @@ public class DocumentGenService {
 
             //move all documents to citizen quarantine
             for (Document document : documentRequest.getDocuments()) {
-                QuarantineLegalDoc quarantineLegalDoc = getCitizenQuarantineDocument(document);
-                quarantineLegalDoc = addCitizenQuarantineFields(quarantineLegalDoc,
-                                                                documentRequest,
-                                                                category,
-                                                                servedParties);
-                log.info("quarantineLegalDoc {}", quarantineLegalDoc);
-                //move citizen quarantine list
-                citizenQuarantineDocs.add(element(quarantineLegalDoc));
+                QuarantineLegalDoc quarantineLegalDoc = getCitizenQuarantineDocument(document,
+                                                                                     documentRequest,
+                                                                                     category,
+                                                                                     servedParties,
+                                                                                     userDetails);
+                //if marked as confidential/restricted
+                if (Yes.equals(documentRequest.getIsConfidential())
+                    || Yes.equals(documentRequest.getIsRestricted())) {
+                    //confidential/restricted - move documents to quarantine
+                    caseData = moveCitizenDocumentsToQuarantineTab(quarantineLegalDoc,
+                                                                   caseData,
+                                                                   caseDataUpdated);
+
+                } else {
+                    //non-confidential, move to respective category & case documents tab
+                    caseData = moveCitizenDocumentsToCaseDocumentsTab(quarantineLegalDoc,
+                                                                      caseData,
+                                                                      caseDataUpdated,
+                                                                      userDetails);
+                }
             }
 
-            //update caseData with quarantine list
-            caseData = caseData.toBuilder().documentManagementDetails(DocumentManagementDetails.builder()
-                                                                          .citizenQuarantineDocsList(citizenQuarantineDocs)
-                                                                          .build())
-                .build();
             return caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, CITIZEN_CASE_UPDATE.getValue(), null);
 
         }
         return null;
     }
 
-    private static QuarantineLegalDoc getCitizenQuarantineDocument(Document document) {
+    private CaseData moveCitizenDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
+                                                         CaseData caseData,
+                                                         Map<String, Object> caseDataUpdated) {
+        //invoke common manage docs
+        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, CITIZEN);
+
+        return objectMapper.convertValue(caseDataUpdated, CaseData.class);
+    }
+
+    private CaseData moveCitizenDocumentsToCaseDocumentsTab(QuarantineLegalDoc quarantineLegalDoc,
+                                                            CaseData caseData,
+                                                            Map<String, Object> caseDataUpdated,
+                                                            UserDetails userDetails) {
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .isConfidential(null)
+            .isRestricted(null)
+            .restrictedDetails(null)
+            .build();
+        //invoke common manage docs
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc,
+                                                                      userDetails,
+                                                                      caseData,
+                                                                      caseDataUpdated,
+                                                                      CITIZEN);
+
+        return objectMapper.convertValue(caseDataUpdated, CaseData.class);
+    }
+
+    private QuarantineLegalDoc getCitizenQuarantineDocument(Document document,
+                                                                  DocumentRequest documentRequest,
+                                                                  DocumentCategory category,
+                                                                  ServedParties servedParties,
+                                                                  UserDetails userDetails) {
         return QuarantineLegalDoc.builder()
             .citizenQuarantineDocument(document.toBuilder()
-                                           .documentCreatedOn(localZoneDate).build())
+                                           .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant()))
+                                           .build())
+            .documentParty(documentRequest.getPartyType())
+            .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+            .categoryId(category.getCategoryId())
+            .categoryName(category.getDisplayedValue())
+            .isConfidential(documentRequest.getIsConfidential())
+            .isRestricted(documentRequest.getIsRestricted())
+            .restrictedDetails(documentRequest.getRestrictDocumentDetails())
+            .partyDetails(servedParties)
+            .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
+            .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
+            .uploaderRole(CITIZEN)
             .build();
     }
 }

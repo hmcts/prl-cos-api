@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
+import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 
 import java.util.List;
@@ -38,7 +39,17 @@ public class DocumentRequest {
     @JsonProperty("partyType")
     private final String partyType;
     /**
-     * Explanation provided by citizen on why keep document as restricted.
+     * Flag to indicate document has confidential data.
+     */
+    @JsonProperty("isConfidential")
+    private final YesOrNo isConfidential;
+    /**
+     * Flag to indicate document has sensitive info.
+     */
+    @JsonProperty("isRestricted")
+    private final YesOrNo isRestricted;
+    /**
+     * Explanation provided by citizen on why the document should be restricted.
      */
     @JsonProperty("restrictDocumentDetails")
     private final String restrictDocumentDetails;
