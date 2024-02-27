@@ -1652,6 +1652,22 @@ public class ApplicationsTabServiceTest {
         assertNotNull(applicationsTabService.updateTab(caseDataWithParties));
     }
 
+    @Test
+    public void testUpdateCitizenPartiesTabForNocC100Respondent() {
+        CaseData caseData =  CaseData.builder()
+            .caseTypeOfApplication("C100")
+            .build();
+        assertNotNull(applicationsTabService.updateCitizenPartiesTab(caseData));
+    }
+
+    @Test
+    public void testUpdateCitizenPartiesTabForNocFL401Respondent() {
+        CaseData caseData =  CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .build();
+        assertNotNull(applicationsTabService.updateCitizenPartiesTab(caseData));
+    }
+
     private Element<PartyDetails> getElement(PartyDetails partyDetails) {
         return Element.<PartyDetails>builder()
             .id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
