@@ -1,13 +1,17 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.RestAssured;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,11 +22,17 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.context.WebApplicationContext;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.ResourceLoader;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
+
+import java.util.Map;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -56,6 +66,9 @@ public class CaseControllerFunctionalTest {
     private static final String CASE_DATA_INPUT = "requests/create-case-valid-casedata-input.json";
 
     private static final String LINK_CITIZEN_REQUEST_BODY = "requests/link-citizen-case.json";
+
+    @Mock
+    private ObjectMapper objectMapper;
 
     private final String targetInstance =
         StringUtils.defaultIfBlank(
@@ -163,5 +176,31 @@ public class CaseControllerFunctionalTest {
                             .accept(MediaType.APPLICATION_JSON))
             .andExpect(status().isOk())
             .andReturn();
+    }
+
+    @Test
+    public void testCitizenWithdrawn() throws Exception {
+        String caseId = "12345678";
+        CaseData caseData = CaseData.builder()
+            .id(12345678L)
+            .applicantCaseName("test")
+            .state(State.CASE_WITHDRAWN)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        CaseDetails caseDetails = CaseDetails.builder().id(
+            12345678L).data(stringObjectMap).state(PrlAppsConstants.WITHDRAWN_STATE).build();
+        when(authorisationService.authoriseService(anyString())).thenReturn(Boolean.TRUE);
+        Mockito.when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        Mockito.when(caseService.withdrawCase(caseData, caseId, "authToken")).thenReturn(caseDetails);
+        String requestBody = ResourceLoader.loadJson(CASE_DATA_INPUT);
+        CaseData caseDataObj = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForCitizen())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generate())
+            .body(caseData)
+            .when()
+            .contentType("application/json")
+            .post("/12345678L/withdraw")
+            .as(CaseData.class);
+        Assert.assertNotNull(caseDataObj);
     }
 }
