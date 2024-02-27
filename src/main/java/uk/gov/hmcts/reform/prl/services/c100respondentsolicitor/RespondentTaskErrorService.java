@@ -45,4 +45,8 @@ public class RespondentTaskErrorService {
         eventErrors.remove(errorType);
     }
 
+    public void clearErrors() {
+        eventErrors.clear();
+    }
+
 }
