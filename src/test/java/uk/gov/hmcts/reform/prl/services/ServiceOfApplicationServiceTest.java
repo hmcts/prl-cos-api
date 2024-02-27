@@ -87,6 +87,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BLANK_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MISSING_ADDRESS_WARNING_TEXT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.NO;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OTHER_PEOPLE_SELECTED_C6A_MISSING_ERROR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT_SOLICITOR;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
@@ -3839,6 +3840,45 @@ public class ServiceOfApplicationServiceTest {
             Event.CONFIDENTIAL_CHECK.getId()
         );
         assertEquals(YES, resultMap.get("isC8CheckApproved"));
+    }
+
+
+    @Test
+    public void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderSelected() {
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
+            SoaPack.builder().build()).build();
+        CaseData caseData = CaseData.builder()
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(Collections.singletonList(
+                FL401OrderTypeEnum.occupationOrder)).build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(serviceOfApplication)
+            .build();
+        Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
+            caseData,
+            Event.CONFIDENTIAL_CHECK.getId()
+        );
+        assertEquals(YES, resultMap.get("isC8CheckApproved"));
+        assertEquals(YES, resultMap.get("isOccupationOrderSelected"));
+    }
+
+    @Test
+    public void checkFL401ConfidentialCheckEventWaFieldsWhenConfidentialDetailsPresentAndOccupationOrderNotSelected() {
+
+        ServiceOfApplication serviceOfApplication = ServiceOfApplication.builder().applicationServedYesNo(Yes).unServedRespondentPack(
+            SoaPack.builder().build()).build();
+        CaseData caseData = CaseData.builder()
+            .typeOfApplicationOrders(TypeOfApplicationOrders.builder().orderType(Collections.singletonList(
+                FL401OrderTypeEnum.nonMolestationOrder)).build())
+            .caseTypeOfApplication(FL401_CASE_TYPE)
+            .serviceOfApplication(serviceOfApplication)
+            .build();
+        Map<String, Object> resultMap = serviceOfApplicationService.setSoaOrConfidentialWaFields(
+            caseData,
+            Event.CONFIDENTIAL_CHECK.getId()
+        );
+        assertEquals(YES, resultMap.get("isC8CheckApproved"));
+        assertEquals(NO, resultMap.get("isOccupationOrderSelected"));
     }
 
 }

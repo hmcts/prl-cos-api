@@ -589,7 +589,7 @@ public class PrlAppsConstants {
 
     public static final String WAITING_TO_BE_LISTED = "WAITING_TO_BE_LISTED";
     public static final String LISTED = "LISTED";
-    public static final String AWAITING_HEARING_DETAILS = "AWAITING_HEARING_DETAILS";
+    public static final String AWAITING_HEARING_DETAILS = "AWAITING_ACTUALS";
     public static final String CANCELLED = "CANCELLED";
     public static final String ADJOURNED = "ADJOURNED";
     public static final String POSTPONED = "POSTPONED";
