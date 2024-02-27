@@ -151,7 +151,7 @@ public class CaseService {
                 caseData = getFlCaseData(caseData, partyDetails, partyType);
             }
             caseData = generateAnswersForNoc(caseData);
-            if (CaseEvent.KEEP_DETAILS_PRIVATE.equals(eventId)) {
+            if (CaseEvent.KEEP_DETAILS_PRIVATE.getValue().equals(eventId)) {
                 caseData = confidentialDetailsMapper.mapConfidentialData(caseData, false);
             }
             Map<String, Object> caseDataMap = caseData.toMap(objectMapper);
