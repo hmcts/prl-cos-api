@@ -970,11 +970,6 @@ public class DocumentGenService {
                                            CaseData caseData,
                                            String hint,
                                            boolean isWelsh, Map<String, Object> respondentDetails) throws Exception {
-        log.info("authorisation2...{} ",authorisation);
-        log.info("hint...{} ",hint);
-        log.info("isWelsh...{} ",isWelsh);
-        log.info("caseData957...{} ",caseData);
-        log.info("respondentDetails...{} ",respondentDetails);
         return getDocument(authorisation, caseData, hint, isWelsh, respondentDetails);
     }
 
