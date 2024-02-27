@@ -856,7 +856,6 @@ public class PrlAppsConstants {
         + "If Cafcass are involved in the case, they will provide the court with a safeguarding letter. ";
     public static final String ALL_RESPONDENTS = "All respondents";
     public static final String TEST_UUID = "00000000-0000-0000-0000-000000000000";
-
     public static final String ADD_PEOPLE_TO_THE_CASE = "Add people to the case";
     public static final String ONLY_COMPLETE_IF_RELEVANT = "Only complete if relevant";
     public static final String  ADD_APPLICATION_DETAILS = "Add application details";

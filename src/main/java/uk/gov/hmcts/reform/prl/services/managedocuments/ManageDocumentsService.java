@@ -56,6 +56,7 @@ import static org.springframework.util.CollectionUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
@@ -335,11 +336,10 @@ public class ManageDocumentsService {
         }
     }
 
-    public void moveDocumentsToQuarantineTab(
-        QuarantineLegalDoc quarantineLegalDoc,
-        CaseData caseData,
-        Map<String, Object> caseDataUpdated,
-        String userRole) {
+    public void moveDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
+                                             CaseData caseData,
+                                             Map<String, Object> caseDataUpdated,
+                                             String userRole) {
         List<Element<QuarantineLegalDoc>> existingQuarantineDocuments = getQuarantineDocs(caseData, userRole, false);
         existingQuarantineDocuments.add(element(quarantineLegalDoc));
         updateQuarantineDocs(caseDataUpdated, existingQuarantineDocuments, userRole, false);
@@ -474,6 +474,7 @@ public class ManageDocumentsService {
             case CAFCASS -> quarantineLegalDoc.getCafcassQuarantineDocument();
             case COURT_STAFF -> quarantineLegalDoc.getCourtStaffQuarantineDocument();
             case BULK_SCAN -> quarantineLegalDoc.getUrl();
+            case CITIZEN -> quarantineLegalDoc.getCitizenQuarantineDocument();
             default -> null;
         };
     }
@@ -519,6 +520,8 @@ public class ManageDocumentsService {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CAFCASS");
         } else if (COURT_STAFF.equals(userRole)) {
             caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "STAFF");
+        } else if (CITIZEN.equals(userRole)) {
+            caseDataUpdated.put(MANAGE_DOCUMENTS_TRIGGERED_BY, "CITIZEN");
         }
     }
 
@@ -567,13 +570,21 @@ public class ManageDocumentsService {
                 }
                 break;
 
+            case CITIZEN:
+                if (isDocumentTab) {
+                    caseDataUpdated.put("citizenUploadedDocListDocTab", quarantineDocs);
+                } else {
+                    caseDataUpdated.put("citizenQuarantineDocsList", quarantineDocs);
+                }
+                break;
+
             default:
                 throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
 
         }
     }
 
-    private List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
+    public List<Element<QuarantineLegalDoc>> getQuarantineDocs(CaseData caseData,
                                                                 String userRole,
                                                                 boolean isDocumentTab) {
         if (CommonUtils.isEmpty(userRole)) {
@@ -605,6 +616,11 @@ public class ManageDocumentsService {
                 isDocumentTab,
                 caseData.getReviewDocuments().getBulkScannedDocListDocTab(),
                 caseData.getReviewDocuments().getBulkScannedDocListConfTab()//not in use
+            );
+            case CITIZEN -> getQuarantineOrUploadDocsBasedOnDocumentTab(
+                isDocumentTab,
+                caseData.getReviewDocuments().getCitizenUploadedDocListDocTab(),
+                caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList()
             );
             default -> throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         };
