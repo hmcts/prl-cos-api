@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
@@ -89,13 +90,14 @@ public class RespondentSolicitorTaskListRenderer {
             .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));
 
         final RespondentTaskSection applicationDetails = newSection("3. Application details")
-            .withTask(tasks.get(RespondentSolicitorEvents.MIAM))
-            .withTask(tasks.get(RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS));
+            .withTask(tasks.get(RespondentSolicitorEvents.MIAM));
 
         final RespondentTaskSection safetyConcerns = newSection("4. Safety Concerns")
             .withTask(tasks.get(RespondentSolicitorEvents.ALLEGATION_OF_HARM));
 
         final RespondentTaskSection additionalInformation = newSection("5. Additional information")
+            .withInfo(PrlAppsConstants.ONLY_COMPLETE_IF_RELEVANT)
+            .withTask(tasks.get(RespondentSolicitorEvents.OTHER_PROCEEDINGS))
             .withTask(tasks.get(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT))
             .withTask(tasks.get(RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE));
 

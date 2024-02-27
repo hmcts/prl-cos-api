@@ -57,6 +57,9 @@ public class ResponseSubmitCheckerTest {
     @Mock
     RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
 
+    @Mock
+    InternationalElementsChecker internationalElementsChecker;
+
     CaseData emptyCaseData;
 
     PartyDetails respondent;
@@ -147,6 +150,9 @@ public class ResponseSubmitCheckerTest {
 
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
         when(respondentContactDetailsChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getInternationalElementsChecker()).thenReturn(internationalElementsChecker);
+        when(internationalElementsChecker.isFinished(respondent)).thenReturn(true);
 
         Boolean bool = responseSubmitChecker.isFinished(respondent);
 
