@@ -454,7 +454,10 @@ public class ManageOrderEmailService {
                     sendEmailToParty1("anshika.nigam1@hmcts.net",  caseData,  authorisation,
                                       party.getValue().getFirstName());
                 } else {
-                    if (isNotEmpty(party.getValue().getAddress())
+                    Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+                    sendEmailToParty1("anshika.nigam1@hmcts.net",  caseData,  authorisation,
+                                      party.getValue().getFirstName());
+                    /*if (isNotEmpty(party.getValue().getAddress())
                         && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
                         sendPersonalServiceNotificationsForUnrepresentedApplicant(
                             authorisation,
@@ -465,7 +468,7 @@ public class ManageOrderEmailService {
                         );
                     } else {
                         log.info("Address is null/empty for C100 applicant id {}", party.getId());
-                    }
+                    }*/
                 }
 
             });
