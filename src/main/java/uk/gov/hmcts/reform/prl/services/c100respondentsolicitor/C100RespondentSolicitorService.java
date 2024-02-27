@@ -860,6 +860,20 @@ public class C100RespondentSolicitorService {
                 .build();
         }
 
+        if (null != c7WelshFinalDocument) {
+            respondentDocs = respondentDocs
+                .toBuilder()
+                .c7Document(ResponseDocuments
+                    .builder()
+                    .partyName(party)
+                    .createdBy(createdBy)
+                    .dateCreated(LocalDate.now())
+                    .citizenDocument(c7WelshFinalDocument)
+                    .build()
+                )
+                .build();
+        }
+
         Document c1aFinalDocument = null;
         if (representedRespondent.getValue().getResponse() != null
                 && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
