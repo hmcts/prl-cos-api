@@ -61,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -281,7 +282,14 @@ public class C100RespondentSolicitorService {
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
+        cleanUpRespondentTasksFieldOptions(updatedCaseData);
         return updatedCaseData;
+    }
+
+    private static void cleanUpRespondentTasksFieldOptions(Map<String, Object> updatedCaseData) {
+        for (String field : RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS.getCaseFieldName().split(COMMA)) {
+            updatedCaseData.remove(field);
+        }
     }
 
     private void buildResponseForRespondent(CaseData caseData,
@@ -320,8 +328,7 @@ public class C100RespondentSolicitorService {
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
                 buildResponseForRespondent = buildOtherProceedingsResponse(
                     caseData,
-                    buildResponseForRespondent,
-                    solicitor
+                    buildResponseForRespondent
                 );
                 break;
             case ALLEGATION_OF_HARM:
@@ -349,26 +356,12 @@ public class C100RespondentSolicitorService {
         }
     }
 
-    private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent, String solicitor) {
+    private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent) {
         List<Element<RespondentProceedingDetails>> respondentExistingProceedings
             = YesNoDontKnow.yes.equals(caseData.getRespondentSolicitorData()
                                            .getCurrentOrPastProceedingsForChildren())
             ? caseData.getRespondentSolicitorData()
             .getRespondentExistingProceedings() : null;
-
-        if (respondentExistingProceedings != null) {
-            for (Element<RespondentProceedingDetails> proceedings : respondentExistingProceedings) {
-                if (null != proceedings.getValue()
-                    && null != proceedings.getValue().getUploadRelevantOrder()) {
-                    buildRespondentDocs(
-                        caseData,
-                        caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                        solicitor + SOLICITOR,
-                        proceedings.getValue().getUploadRelevantOrder()
-                    );
-                }
-            }
-        }
 
         return buildResponseForRespondent.toBuilder()
             .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
