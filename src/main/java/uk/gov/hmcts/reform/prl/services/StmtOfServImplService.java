@@ -130,6 +130,7 @@ public class StmtOfServImplService {
             }
             if (isNotEmpty(caseData.getServiceOfApplication())
                 && isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack())
+                && CollectionUtils.isNotEmpty(caseData.getServiceOfApplication().getUnServedRespondentPack().getPackDocument())
                 && StatementOfServiceWhatWasServed.statementOfServiceApplicationPack
                 .equals(caseData.getStatementOfService()
                             .getStmtOfServiceWhatWasServed())
