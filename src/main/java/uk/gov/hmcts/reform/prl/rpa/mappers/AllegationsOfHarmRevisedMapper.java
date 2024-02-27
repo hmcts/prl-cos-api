@@ -123,8 +123,10 @@ public class AllegationsOfHarmRevisedMapper {
             return new NullAwareJsonObjectBuilder()
                     .add("newChildHasMultiplePassports", CommonUtils.getYesOrNoValue(childPassportDetails.getNewChildHasMultiplePassports()))
                     .add("newChildPassportPossessionOtherDetails", childPassportDetails.getNewChildPassportPossessionOtherDetails())
-                    .add("newChildPassportPossession", childPassportDetails.getNewChildPassportPossession().stream()
-                            .map(NewPassportPossessionEnum::getDisplayedValue).collect(Collectors.joining(COMMA_SEPARATOR))).build();
+                    .add("newChildPassportPossession", childPassportDetails.getNewChildPassportPossession() != null ? childPassportDetails
+                            .getNewChildPassportPossession().stream()
+                            .map(NewPassportPossessionEnum::getDisplayedValue)
+                            .collect(Collectors.joining(COMMA_SEPARATOR)) : null).build();
         }
         return JsonValue.EMPTY_JSON_OBJECT;
     }
