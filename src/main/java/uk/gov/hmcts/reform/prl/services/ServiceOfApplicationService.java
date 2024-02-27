@@ -1178,7 +1178,7 @@ public class ServiceOfApplicationService {
                 }
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                    if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                         List<Document> docs = getNotificationPack(caseData, PrlAppsConstants.P, staticDocs);
                         sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
@@ -1188,7 +1188,7 @@ public class ServiceOfApplicationService {
                                                             SERVED_PARTY_APPLICANT);
                     }
                 } else {
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                    if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                         Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedApplicant, caseInvite,
                                                                       Templates.AP6_LETTER);
                         List<Document> docs = new ArrayList<>(Collections.singletonList(ap6Letter));
@@ -2704,7 +2704,7 @@ public class ServiceOfApplicationService {
                 }
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                    if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                         sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
@@ -2714,7 +2714,7 @@ public class ServiceOfApplicationService {
                     }
                 } else {
                     log.info("Access to be granted");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                    if (ContactPreferences.email.equals(selectedApplicant.getValue().getContactPreferences())) {
                         Document ap6Letter = generateAccessCodeLetter(authorization, caseData, selectedApplicant, caseInvite,
                                                                       Templates.AP6_LETTER);
                         List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
