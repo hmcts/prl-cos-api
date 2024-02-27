@@ -1028,7 +1028,7 @@ public class ManageOrderEmailService {
 
         try {
             sendgridService.sendEmailUsingTemplateWithAttachments(
-                SendgridEmailTemplateNames.SERVE_ORDER_APPLICANT_RESPONDENT,
+                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL,
                 authorisation,
                 SendgridEmailConfig.builder().toEmailAddress(
                     emailAddress).dynamicTemplateData(
