@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
+import uk.gov.hmcts.reform.prl.enums.serviceofapplication.StatementOfServiceWhatWasServed;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.StmtOfServImplService;
@@ -102,7 +104,9 @@ public class StatementOfServiceControllerTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
             .respondents(listOfRespondents)
-            .stmtOfServiceAddRecipient(listOfSos)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceAddRecipient(listOfSos)
+                                    .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -154,7 +158,9 @@ public class StatementOfServiceControllerTest {
                                   .firstName("testFl401")
                                   .lastName("lastFl401")
                                   .build())
-            .stmtOfServiceAddRecipient(listOfSos)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceAddRecipient(listOfSos)
+                                    .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -209,7 +215,9 @@ public class StatementOfServiceControllerTest {
         CaseData caseData = CaseData.builder()
             .caseTypeOfApplication("C100")
             .respondents(listOfRespondents)
-            .stmtOfServiceAddRecipient(listOfSos)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceAddRecipient(listOfSos)
+                                    .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -269,7 +277,9 @@ public class StatementOfServiceControllerTest {
                                   .firstName("testFl401")
                                   .lastName("lastFl401")
                                   .build())
-            .stmtOfServiceAddRecipient(listOfSos)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceAddRecipient(listOfSos)
+                                    .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
@@ -294,7 +304,7 @@ public class StatementOfServiceControllerTest {
     }
 
     @Test
-    public void testSubmittedConfirmatin() throws Exception {
+    public void testSubmittedConfirmationForApplicationPack() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
             .binaryUrl("binaryUrl")
@@ -327,7 +337,69 @@ public class StatementOfServiceControllerTest {
                                   .firstName("testFl401")
                                   .lastName("lastFl401")
                                   .build())
-            .stmtOfServiceAddRecipient(listOfSos)
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceApplicationPack)
+                                    .stmtOfServiceAddRecipient(listOfSos)
+                                    .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(12345678L)
+            .data(stringObjectMap)
+            .build();
+
+        when(authorisationService.authoriseService(any())).thenReturn(true);
+        when(authorisationService.authoriseUser(any())).thenReturn(true);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(stmtOfServImplService.retrieveRespondentsList(caseDetails)).thenReturn(stringObjectMap);
+        assertNotNull(statementOfServiceController.sosSubmitConfirmation(authToken, s2sToken, callbackRequest));
+    }
+
+    @Test
+    public void testSubmittedConfirmationForOrder() throws Exception {
+        GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
+            .url("TestUrl")
+            .binaryUrl("binaryUrl")
+            .hashToken("testHashToken")
+            .build();
+
+        DynamicList dynamicList = DynamicList.builder()
+            .listItems(List.of(DynamicListElement.builder().code(TEST_UUID).label("").build()))
+            .value(DynamicListElement.builder().code(TEST_UUID).label(ALL_RESPONDENTS).build())
+            .build();
+
+        StmtOfServiceAddRecipient stmtOfServiceAddRecipient = StmtOfServiceAddRecipient.builder()
+            .respondentDynamicList(dynamicList)
+            .stmtOfServiceDocument(Document.builder()
+                                       .documentUrl(generatedDocumentInfo.getUrl())
+                                       .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
+                                       .documentHash(generatedDocumentInfo.getHashToken())
+                                       .documentFileName("testFile.pdf")
+                                       .build())
+            .build();
+
+        Element<StmtOfServiceAddRecipient> wrappedSos = Element.<StmtOfServiceAddRecipient>builder()
+            .id(UUID.fromString(TEST_UUID))
+            .value(stmtOfServiceAddRecipient).build();
+        List<Element<StmtOfServiceAddRecipient>> listOfSos = Collections.singletonList(wrappedSos);
+
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication("FL401")
+            .respondentsFL401(PartyDetails.builder()
+                                  .firstName("testFl401")
+                                  .lastName("lastFl401")
+                                  .build())
+            .statementOfService(StatementOfService.builder()
+                                    .stmtOfServiceWhatWasServed(StatementOfServiceWhatWasServed.statementOfServiceOrder)
+                                    .stmtOfServiceAddRecipient(listOfSos)
+                                    .build())
             .build();
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());

@@ -45,7 +45,8 @@ import java.math.BigDecimal;
         "rd_professional.api.url=",
         "payments.api.url=",
         "pba.validation.service.api.baseurl=",
-        "staffDetails.api.url="
+        "staffDetails.api.url=",
+        "amRoleAssignment.api.url="
     }
 )
 

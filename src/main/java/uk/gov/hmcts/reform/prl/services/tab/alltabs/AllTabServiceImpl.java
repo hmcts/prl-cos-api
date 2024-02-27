@@ -40,24 +40,14 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Qualifier("allTabsService")
 public class AllTabServiceImpl implements AllTabsService {
-    @Autowired
-    ApplicationsTabService applicationsTabService;
 
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
-
-    @Autowired
+    private final ApplicationsTabService applicationsTabService;
+    private final CoreCaseDataService coreCaseDataService;
     @Qualifier("caseSummaryTab")
-    CaseSummaryTabService caseSummaryTabService;
-
-    @Autowired
-    ConfidentialityTabService confidentialityTabService;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    CcdCoreCaseDataService coreCaseDataServiceCcdClient;
+    private final CaseSummaryTabService caseSummaryTabService;
+    private final ConfidentialityTabService confidentialityTabService;
+    private final ObjectMapper objectMapper;
+    private final CcdCoreCaseDataService coreCaseDataServiceCcdClient;
 
     @Override
     public void updateAllTabs(CaseData caseData) {
@@ -187,6 +177,7 @@ public class AllTabServiceImpl implements AllTabsService {
             combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
         }
         getDocumentsMap(caseData, combinedFieldsMap);
+        combinedFieldsMap.putAll(applicationsTabService.toMap(caseData.getAllPartyFlags()));
         return combinedFieldsMap;
     }
 

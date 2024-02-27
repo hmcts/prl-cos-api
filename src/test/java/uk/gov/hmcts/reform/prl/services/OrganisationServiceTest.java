@@ -31,6 +31,7 @@ import static feign.Request.HttpMethod.GET;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -294,6 +295,99 @@ public class OrganisationServiceTest {
     }
 
     @Test
+    public void testRespondentOrganisationDetailsForFl401() throws NotFoundException {
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("79ZRSOU")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .build();
+
+        List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
+                                                                                        .addressLine1("29, SEATON DRIVE")
+                                                                                        .addressLine2("test line")
+                                                                                        .townCity("NORTHAMPTON")
+                                                                                        .postCode("NN3 9SS")
+                                                                                        .build());
+
+        Organisations organisations = Organisations.builder()
+            .organisationIdentifier("79ZRSOU")
+            .name("Civil - Organisation 2")
+            .contactInformation(contactInformationList)
+            .build();
+
+        PartyDetails partyDetailsWithOrganisations = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("79ZRSOU")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .organisations(organisations)
+            .build();
+
+        when(organisationApi.findOrganisation(authToken,
+                                              serviceAuthToken,
+                                              respondent.getSolicitorOrg().getOrganisationID()))
+            .thenReturn(organisations);
+        String organisationId = respondent.getSolicitorOrg().getOrganisationID();
+
+        when(organisationService.getOrganisationDetails(authToken, organisationId)).thenReturn(organisations);
+        CaseData expectedCaseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .respondentsFL401(partyDetailsWithOrganisations)
+            .build();
+        assertEquals(organisations.getOrganisationIdentifier(), organisationId);
+
+        CaseData caseData = CaseData.builder()
+            .id(12345L)
+            .applicantCaseName("TestCaseName")
+            .respondentsFL401(respondent)
+            .build();
+        CaseData actualCaseData = organisationService.getRespondentOrganisationDetailsForFL401(caseData);
+        assertEquals(actualCaseData,expectedCaseData);
+    }
+
+    @Test
+    public void testRespondentOrganisationDetailsForFl401NotFound() throws NotFoundException {
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("TestFirst")
+            .lastName("TestLast")
+            .solicitorOrg(Organisation.builder()
+                              .organisationID("79ZRSOU")
+                              .organisationName("Civil - Organisation 2")
+                              .build())
+            .build();
+
+        when(organisationApi.findOrganisation(Mockito.anyString(),
+                                              Mockito.anyString(),
+                                              Mockito.anyString()))
+            .thenThrow(feignException(404, "Not found"));
+
+        CaseData caseData = CaseData.builder().respondentsFL401(respondent).build();
+
+        CaseData orgData =  organisationService.getRespondentOrganisationDetailsForFL401(caseData);
+        assertEquals(orgData, caseData);
+    }
+
+    @Test
+    public void testRespondentOrganisationDetailsForFl401WhenRespondentNull() {
+
+        CaseData caseData = CaseData.builder().respondentsFL401(null).build();
+
+        CaseData orgData =  organisationService.getRespondentOrganisationDetailsForFL401(caseData);
+        assertEquals(orgData, caseData);
+    }
+
+
+    @Test
     public void findUserOrganisationTest() {
         Organisations organisations = Organisations.builder()
             .organisationIdentifier("79ZRSOU")
@@ -332,5 +426,29 @@ public class OrganisationServiceTest {
             .status(status)
             .request(Request.create(GET, EMPTY, Map.of(), new byte[]{}, UTF_8, null))
             .build());
+    }
+
+    @Test
+    public void testGetAllActiveOrganisations() {
+
+        List<ContactInformation> contactInformationList = Collections.singletonList(ContactInformation.builder()
+                                                                                        .addressLine1("29, SEATON DRIVE")
+                                                                                        .addressLine2("test line")
+                                                                                        .townCity("NORTHAMPTON")
+                                                                                        .postCode("NN3 9SS")
+                                                                                        .build());
+        Organisations organisations = Organisations.builder()
+            .organisationIdentifier("79ZRSOU")
+            .name("Civil - Organisation 2")
+            .contactInformation(contactInformationList)
+            .build();
+
+        when(organisationApi.findOrganisations(
+            authToken,
+            serviceAuthToken,
+            "Active"
+        ))
+            .thenReturn(List.of(organisations));
+        assertNotNull(organisationService.getAllActiveOrganisations(authToken));
     }
 }

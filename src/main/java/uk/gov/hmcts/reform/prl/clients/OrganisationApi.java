@@ -37,4 +37,11 @@ public interface OrganisationApi {
         @RequestHeader(AUTHORIZATION) String authorisation,
         @RequestHeader(SERVICE_AUTHORIZATION) String serviceAuthorization
     );
+
+    @GetMapping("/refdata/internal/v1/organisations")
+    Object findOrganisations(
+        @RequestHeader("Authorization") String authorisation,
+        @RequestHeader("ServiceAuthorization") String serviceAuthorization,
+        @RequestParam(value = "status") String status
+    );
 }
