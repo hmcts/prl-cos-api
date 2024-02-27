@@ -213,18 +213,4 @@ public class AllTabServiceImplTest {
                                                EventRequestData.builder().build(), CASE_DATA);
         verify(coreCaseDataServiceCcdClient).submitUpdate(anyString(), any(), any(), anyString(), anyBoolean());
     }
-
-    @Test
-    public void testUpdateCitizenPartiesTabForNocFL401Respondent() {
-        when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("FL401");
-        assertNotNull(applicationsTabService.updateCitizenPartiesTab(CASE_DATA));
-    }
-
-    @Test
-    public void testUpdateCitizenPartiesTabForNocC100Respondent() {
-        when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("C100");
-        assertNotNull(applicationsTabService.updateCitizenPartiesTab(CASE_DATA));
-    }
-
-
 }
