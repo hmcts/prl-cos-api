@@ -451,7 +451,7 @@ public class ManageOrderEmailService {
                 if (true) {
                     log.info("=====  CA serving unrepresented applicant via email ====");
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-                    sendEmailToParty("anshika.nigam1@hmcts.net",  caseData,  authorisation,orderDocuments,
+                    sendEmailToParty1("anshika.nigam1@hmcts.net",  caseData,  authorisation,orderDocuments,
                                       party.getValue().getFirstName());
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
@@ -1046,7 +1046,6 @@ public class ManageOrderEmailService {
                                    List<Document> orderDocuments, String serveParty) {
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
         dynamicData.put("name",serveParty);
-        orderDocuments = new ArrayList<>();
         try {
             sendgridService.sendEmailUsingTemplateWithAttachments(
                 SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL,
