@@ -13,9 +13,9 @@ import java.util.Arrays;
 public enum ContactPreferences {
 
     @JsonProperty("email")
-    email("email", "email"),
+    email("email", "Email"),
     @JsonProperty("post")
-    post("post", "post");
+    post("post", "Post");
 
     private final String id;
     private final String displayedValue;
@@ -32,7 +32,7 @@ public enum ContactPreferences {
 
     public static ContactPreferences fromValue(String value) {
         return Arrays.stream(values())
-            .filter(contactPref -> contactPref.getDisplayedValue().equals(value))
+            .filter(contactPref -> contactPref.getDisplayedValue().equalsIgnoreCase(value))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Unknown contact preference: " + value));
     }
