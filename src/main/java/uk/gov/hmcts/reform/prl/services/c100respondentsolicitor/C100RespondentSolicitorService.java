@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -806,6 +807,7 @@ public class C100RespondentSolicitorService {
                 caseDataUpdated,
                 CaseData.class
         );
+        log.info("validateActiveRespondentResponseeeeeee");
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         boolean mandatoryFinished = false;
         generateDraftDocumentsForRespondent(callbackRequest, authorisation);
@@ -1279,7 +1281,6 @@ public class C100RespondentSolicitorService {
     }
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
-        log.info("PPPPPPPPPP {}");
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         Map<String, Object> dataMap = populateDataMap(callbackRequest, null);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
@@ -1290,9 +1291,16 @@ public class C100RespondentSolicitorService {
                 false,
                 dataMap
         );
+        ObjectMapper om = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+        System.out.println("=======KKKK=====" + result);
+
         caseDataUpdated.put("draftC7ResponseDoc", document);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("PPPPPPPPPP {}",documentLanguage);
+        log.info("P1P1P1P1P1P1 {}",documentLanguage);
+        log.info("P1P1P1P1P1P1 {}",documentLanguage.isGenEng());
+        log.info("P1P1P1P1P1P1 {}",documentLanguage.isGenWelsh());
         if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
             log.info("11111111111fff");

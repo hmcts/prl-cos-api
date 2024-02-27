@@ -131,6 +131,7 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         @RequestBody @Parameter(name = "CaseData") uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest
     ) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            log.info("generate-c7response-documenttttttt");
             return AboutToStartOrSubmitCallbackResponse.builder()
                 .data(respondentSolicitorService.generateDraftDocumentsForRespondent(
                     callbackRequest,
