@@ -450,6 +450,15 @@ public class ManageOrderEmailService {
                 if (ContactPreferences.digital.equals(party.getValue().getContactPreferences())
                     && isPartyProvidedWithEmail(party.getValue())) {
                     log.info("===== CA serving unrepresented applicant via email ====");
+                    Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+                    dynamicData.put("name",party.getValue().getFirstName());
+                    sendgridService.sendEmailUsingTemplateWithAttachments(
+                        SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL,
+                        authorisation,
+                        SendgridEmailConfig.builder().toEmailAddress(
+                            cafcassCymruEmailId).dynamicTemplateData(
+                            dynamicData).languagePreference(LanguagePreference.english).build()
+                    );
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
                         && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
