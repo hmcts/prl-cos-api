@@ -629,7 +629,7 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Ignoring temporarily")
     public void testRespondentTableMapper() {
         Respondent respondent = Respondent.builder()
             .firstName("First name")
@@ -1186,7 +1186,7 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
-    @Ignore
+    @Ignore("Ignoring temporarily")
     public void testGetFl401RespondentTable() {
 
         partyDetails = PartyDetails.builder()
@@ -1673,7 +1673,7 @@ public class ApplicationsTabServiceTest {
         CaseData caseData =  CaseData.builder()
             .caseTypeOfApplication("FL400")
             .build();
-        assertEquals(applicationsTabService.updateCitizenPartiesTab(caseData).size(),0);
+        assertEquals(0,applicationsTabService.updateCitizenPartiesTab(caseData).size());
     }
 
     private Element<PartyDetails> getElement(PartyDetails partyDetails) {
