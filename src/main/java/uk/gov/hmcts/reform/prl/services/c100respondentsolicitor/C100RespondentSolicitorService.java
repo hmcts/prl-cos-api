@@ -863,7 +863,7 @@ public class C100RespondentSolicitorService {
         if (null != c7WelshFinalDocument) {
             respondentDocs = respondentDocs
                 .toBuilder()
-                .c7Document(ResponseDocuments
+                .c7WelshDocument(ResponseDocuments
                     .builder()
                     .partyName(party)
                     .createdBy(createdBy)
