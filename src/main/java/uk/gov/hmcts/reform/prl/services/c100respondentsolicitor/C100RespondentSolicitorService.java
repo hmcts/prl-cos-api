@@ -328,7 +328,8 @@ public class C100RespondentSolicitorService {
             case CURRENT_OR_PREVIOUS_PROCEEDINGS:
                 buildResponseForRespondent = buildOtherProceedingsResponse(
                     caseData,
-                    buildResponseForRespondent
+                    buildResponseForRespondent,
+                    solicitor
                 );
                 break;
             case ALLEGATION_OF_HARM:
@@ -356,12 +357,27 @@ public class C100RespondentSolicitorService {
         }
     }
 
-    private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent) {
+    private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent,
+                                                   String solicitor) {
         List<Element<RespondentProceedingDetails>> respondentExistingProceedings
             = YesNoDontKnow.yes.equals(caseData.getRespondentSolicitorData()
                                            .getCurrentOrPastProceedingsForChildren())
             ? caseData.getRespondentSolicitorData()
             .getRespondentExistingProceedings() : null;
+
+        if (respondentExistingProceedings != null) {
+            for (Element<RespondentProceedingDetails> proceedings : respondentExistingProceedings) {
+                if (null != proceedings.getValue()
+                    && null != proceedings.getValue().getUploadRelevantOrder()) {
+                    buildRespondentDocs(
+                        caseData,
+                        caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
+                        solicitor + SOLICITOR,
+                        proceedings.getValue().getUploadRelevantOrder()
+                    );
+                }
+            }
+        }
 
         return buildResponseForRespondent.toBuilder()
             .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
