@@ -1668,6 +1668,14 @@ public class ApplicationsTabServiceTest {
         assertNotNull(applicationsTabService.updateCitizenPartiesTab(caseData));
     }
 
+    @Test
+    public void testUpdateCitizenPartiesTabForNocNegativeScenario() {
+        CaseData caseData =  CaseData.builder()
+            .caseTypeOfApplication("FL400")
+            .build();
+        assertEquals(applicationsTabService.updateCitizenPartiesTab(caseData).size(),0);
+    }
+
     private Element<PartyDetails> getElement(PartyDetails partyDetails) {
         return Element.<PartyDetails>builder()
             .id(UUID.fromString("00000000-0000-0000-0000-000000000000"))
