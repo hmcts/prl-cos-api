@@ -1329,8 +1329,8 @@ public class C100RespondentSolicitorService {
                                                         UserDetails userDetails, List<QuarantineLegalDoc> quarantineLegalDocList) {
         CaseData parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         String userRole = CaseUtils.getUserRole(userDetails);
+        manageDocumentsService.setFlagsForWaTask(parsedCaseData, caseDataUpdated, userRole, quarantineLegalDocList.get(0));
         for (QuarantineLegalDoc eachDoc : quarantineLegalDocList) {
-            manageDocumentsService.setFlagsForWaTask(parsedCaseData, caseDataUpdated, userRole, eachDoc);
             manageDocumentsService.moveDocumentsToQuarantineTab(eachDoc, parsedCaseData, caseDataUpdated, userRole);
             parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         }
