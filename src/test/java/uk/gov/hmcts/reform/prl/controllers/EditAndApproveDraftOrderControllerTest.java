@@ -26,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.serveorder.WhatToDoWithOrderEnum;
 import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicMultiSelectList;
+import uk.gov.hmcts.reform.prl.models.common.judicial.JudicialUser;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -42,6 +43,7 @@ import uk.gov.hmcts.reform.prl.services.EditReturnedOrderService;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderEmailService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelectListService;
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
@@ -93,6 +95,8 @@ public class EditAndApproveDraftOrderControllerTest {
 
     @Mock
     private GeneratedDocumentInfo generatedDocumentInfo;
+    @Mock
+    private RoleAssignmentService roleAssignmentService;
     @Mock
     private DynamicMultiSelectListService dynamicMultiSelectListService;
 
@@ -979,7 +983,12 @@ public class EditAndApproveDraftOrderControllerTest {
         draftOrderCollection.add(draftOrderElement);
 
 
-        Element<HearingData> hearingDataElement = Element.<HearingData>builder().build();
+        Element<HearingData> hearingDataElement = Element.<HearingData>builder()
+            .value(HearingData.builder()
+                       .hearingJudgeNameAndEmail(
+                           JudicialUser.builder().build()
+                       )
+                       .build()).build();
 
         List<Element<HearingData>> hearingDataCollection = new ArrayList<>();
         hearingDataCollection.add(hearingDataElement);
