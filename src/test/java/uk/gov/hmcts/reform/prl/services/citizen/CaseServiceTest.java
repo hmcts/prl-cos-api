@@ -13,8 +13,10 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -23,8 +25,11 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
+import uk.gov.hmcts.reform.prl.enums.YesNoNotSure;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
+import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.CitizenUpdatedCaseData;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -34,11 +39,13 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -57,6 +64,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -76,8 +84,22 @@ public class CaseServiceTest {
     public static final String authToken = "Bearer TestAuthToken";
     public static final String s2sToken = "Bearer TestAuthToken";
     public static final String caseId = "1234567891234567";
+    public static final String eventId = "1234567891234567";
+
     public static final String accessCode = "123456";
     public static final String INVALID = "Invalid";
+    private final String eventName = "paymentSuccessCallback";
+    private final String eventToken = "eventToken";
+
+    private static final CaseData CASE_DATA = mock(CaseData.class);
+
+    @Mock
+    ConfidentialDetailsMapper confidentialDetailsMapper;
+    Map<String, Object> applicaionFieldsMap = Map.of(
+        "field1", "value1",
+        "field2", "value2",
+        "field3", "value3"
+    );
 
     @InjectMocks
     private CaseService caseService;
@@ -87,6 +109,9 @@ public class CaseServiceTest {
     @Mock
     CoreCaseDataApi coreCaseDataApi;
 
+
+    @Mock
+    private CaseData caseDataMock;
     @Mock
     CaseDetailsConverter caseDetailsConverter;
 
@@ -123,6 +148,9 @@ public class CaseServiceTest {
     @Mock
     RoleAssignmentService roleAssignmentService;
 
+    @Mock
+    ApplicationsTabService applicationsTabService;
+
     private CaseData caseData;
     private CaseData caseData2;
 
@@ -133,6 +161,8 @@ public class CaseServiceTest {
     private Map<String, Object> caseDataMap;
     private PartyDetails partyDetails;
     private CitizenUpdatedCaseData citizenUpdatedCaseData;
+
+    private StartEventResponse startEventResponse;
     private final UUID testUuid = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     @Before
@@ -414,6 +444,158 @@ public class CaseServiceTest {
 
         //Then
         assertNotNull(actualCaseDetails);
+    }
+
+    @Test
+    public void testUpdateCaseDetailsCitizenNew() {
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(coreCaseDataService.eventRequest(any(),any())).thenReturn(EventRequestData.builder().build());
+        startEventResponse = StartEventResponse.builder().eventId(eventName)
+            .caseDetails(caseDetails)
+            .token(eventToken).build();
+        when(coreCaseDataService.startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(
+            startEventResponse);
+        User user1 = User.builder().idamId("123").build();
+        PartyDetails applicant1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test")
+            .citizenSosObject(CitizenSos.builder().build()).build();
+        PartyDetails applicant2 = PartyDetails.builder().email("test@hmcts.net").firstName("test")
+            .citizenSosObject(CitizenSos.builder().build()).build();
+        caseData = CaseData.builder()
+            .applicants(Arrays.asList(element(applicant1), element(applicant2)))
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
+            .statementOfService(StatementOfService.builder()
+
+                                    .build())
+            .build();
+
+        when(CaseUtils.getCaseData(
+            startEventResponse.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        caseDataMap = caseData.toMap(objectMapper);
+        when(caseDataMock.toMap(any())).thenReturn(new HashMap<>());
+
+        caseDetails = caseDetails.toBuilder()
+            .data(caseDataMap)
+            .id(123L)
+            .state("SUBMITTED_PAID")
+            .build();
+        PartyDetails partyDetails1 = PartyDetails.builder()
+            .firstName("Test")
+            .lastName("User")
+            .user(User.builder()
+                      .email("test@gmail.com")
+                      .idamId("123")
+                      .solicitorRepresented(YesOrNo.Yes)
+                      .build())
+            .citizenSosObject(CitizenSos.builder().build())
+            .build();
+        citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(partyDetails1)
+            .partyType(PartyEnum.applicant)
+            .build();
+        CaseDataContent caseDataContent = CaseDataContent.builder().build();
+        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
+            .thenReturn(caseDataContent);
+        when(applicationsTabService.updateCitizenPartiesTab(CASE_DATA)).thenReturn(applicaionFieldsMap);
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseDataMock);
+        when(coreCaseDataService.submitUpdate(
+            any(),any(),any(),any(),anyBoolean())).thenReturn(
+            CaseDetails.builder().build());
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
+                                                                           "citizenStatementOfService",
+                                                                           citizenUpdatedCaseData
+        );
+
+        assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testUpdateCaseDetailsCitizenNewKeepDetailsPrivate() {
+
+        when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
+        when(coreCaseDataService.eventRequest(any(),any())).thenReturn(EventRequestData.builder().build());
+        startEventResponse = StartEventResponse.builder().eventId(eventName)
+            .caseDetails(caseDetails)
+            .token(eventToken).build();
+        when(coreCaseDataService.startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(
+            startEventResponse);
+        User user1 = User.builder().idamId("123").build();
+        PartyDetails respondent1 = PartyDetails.builder().user(user1).email("test@hmcts.net").firstName("test").build();
+        PartyDetails respondent2 = PartyDetails.builder().email("test@hmcts.net").firstName("test").build();
+        caseData = CaseData.builder()
+            .applicants(Arrays.asList(element(respondent1), element(respondent2)))
+            .documentManagementDetails(DocumentManagementDetails.builder().build())
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .reviewDecisionYesOrNo(YesNoNotSure.notSure).build())
+            .statementOfService(StatementOfService.builder().build())
+            .build();
+
+        when(CaseUtils.getCaseData(
+            startEventResponse.getCaseDetails(),
+            objectMapper
+        )).thenReturn(caseData);
+        caseDataMap = caseData.toMap(objectMapper);
+        when(caseDataMock.toMap(any())).thenReturn(new HashMap<>());
+
+        caseDetails = caseDetails.toBuilder()
+            .data(caseDataMap)
+            .id(123L)
+            .state("SUBMITTED_PAID")
+            .build();
+
+        PartyDetails respondent = PartyDetails.builder()
+            .firstName("test1")
+            .lastName("test22")
+            .user(user1)
+            .canYouProvideEmailAddress(YesOrNo.No)
+            .isAddressConfidential(YesOrNo.No)
+            .isPhoneNumberConfidential(YesOrNo.No)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .isAtAddressLessThan5YearsWithDontKnow(YesNoDontKnow.yes)
+            .build();
+
+        when(confidentialDetailsMapper.mapConfidentialData(
+            Mockito.any(CaseData.class),
+            Mockito.anyBoolean()
+        )).thenReturn(caseDataMock);
+
+        citizenUpdatedCaseData = CitizenUpdatedCaseData.builder()
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .partyDetails(respondent)
+            .partyType(PartyEnum.applicant)
+            .build();
+        CaseDataContent caseDataContent = CaseDataContent.builder().build();
+        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
+            .thenReturn(caseDataContent);
+        when(applicationsTabService.updateCitizenPartiesTab(CASE_DATA)).thenReturn(applicaionFieldsMap);
+
+        when(objectMapper.convertValue(caseDataMap, CaseData.class)).thenReturn(caseDataMock);
+
+        when(coreCaseDataService.submitUpdate(
+            any(),any(),any(),any(),anyBoolean())).thenReturn(
+            CaseDetails.builder().build());
+        CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
+                                                                           "keepYourDetailsPrivate",
+                                                                           citizenUpdatedCaseData
+        );
+
+        assertNotNull(caseDetailsAfterUpdate);
     }
 
 
