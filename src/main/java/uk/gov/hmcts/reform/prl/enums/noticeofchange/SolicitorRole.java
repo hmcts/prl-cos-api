@@ -27,7 +27,7 @@ public enum SolicitorRole {
     C100RESPONDENTSOLICITOR3("[C100RESPONDENTSOLICITOR3]", 3, Representing.CARESPONDENT, "C"),
     C100RESPONDENTSOLICITOR4("[C100RESPONDENTSOLICITOR4]", 4, Representing.CARESPONDENT, "D"),
     C100RESPONDENTSOLICITOR5("[C100RESPONDENTSOLICITOR5]", 5, Representing.CARESPONDENT, "E"),
-    FL401APPLICANTSOLICITOR("[FL401APPLICANTSOLICITOR]", 1, Representing.DAAPPLICANT, BLANK_STRING),
+    FL401APPLICANTSOLICITOR("[APPLICANTSOLICITOR]", 1, Representing.DAAPPLICANT, BLANK_STRING),
     FL401RESPONDENTSOLICITOR("[FL401RESPONDENTSOLICITOR]", 1, Representing.DARESPONDENT, BLANK_STRING);
 
     private final String caseRoleLabel;
@@ -37,6 +37,12 @@ public enum SolicitorRole {
 
     public int getIndex() {
         return index - 1;
+    }
+
+    public static Optional<SolicitorRole> fromRepresentingAndIndex(Representing representing, int index) {
+        return Arrays.stream(uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.values())
+            .filter(role -> role.representing.equals(representing) && role.index == index)
+            .findFirst();
     }
 
     public static Optional<SolicitorRole> from(String eventId) {
@@ -136,7 +142,7 @@ public enum SolicitorRole {
             public static final String CA_RESPONDENT_POLICY = "caRespondent%dPolicy";
             public static final String CA_RESPONDENT = "caRespondent%d";
             public static final String CA_RESPONDENTS = "caRespondents";
-            public static final String DA_APPLICANT_POLICY = "daApplicantPolicy";
+            public static final String DA_APPLICANT_POLICY = "applicantOrganisationPolicy";
             public static final String DA_APPLICANT = "daApplicant";
             public static final String DA_APPLICANTS = "daApplicants";
             public static final String DA_RESPONDENT_POLICY = "daRespondentPolicy";

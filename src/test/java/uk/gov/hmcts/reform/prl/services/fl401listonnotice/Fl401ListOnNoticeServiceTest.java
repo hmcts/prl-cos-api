@@ -7,11 +7,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Qualifier;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.dio.DioBeforeAEnum;
 import uk.gov.hmcts.reform.prl.enums.gatekeeping.TierOfJudiciaryEnum;
@@ -25,10 +27,12 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.HearingData;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.AllocatedJudge;
 import uk.gov.hmcts.reform.prl.models.dto.gatekeeping.Fl401ListOnNotice;
+import uk.gov.hmcts.reform.prl.models.dto.hearings.Hearings;
 import uk.gov.hmcts.reform.prl.services.HearingDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
+import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 
 import java.util.ArrayList;
@@ -66,6 +70,9 @@ public class Fl401ListOnNoticeServiceTest {
     @Mock
     private DocumentGenService documentGenService;
 
+    @Mock
+    HearingService hearingService;
+
     private CaseData caseData;
     private CallbackRequest callbackRequest;
 
@@ -95,6 +102,7 @@ public class Fl401ListOnNoticeServiceTest {
             "field4", "value4",
             "field5", "value5"
         );
+        when(hearingService.getHearings(Mockito.anyString(), Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
 
     @Test
@@ -169,9 +177,9 @@ public class Fl401ListOnNoticeServiceTest {
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
-            .hearingEstimatedHours(5)
-            .hearingEstimatedMinutes(40)
-            .hearingEstimatedDays(15)
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .hearingJudgePersonalCode("test")
@@ -290,9 +298,9 @@ public class Fl401ListOnNoticeServiceTest {
             .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
             .additionalHearingDetails("Test")
             .instructionsForRemoteHearing("Test")
-            .hearingEstimatedHours(5)
-            .hearingEstimatedMinutes(40)
-            .hearingEstimatedDays(15)
+            .hearingEstimatedHours("5")
+            .hearingEstimatedMinutes("40")
+            .hearingEstimatedDays("15")
             .allPartiesAttendHearingSameWayYesOrNo(YesOrNo.Yes)
             .hearingAuthority(DioBeforeAEnum.circuitJudge)
             .hearingJudgePersonalCode("test")
@@ -303,7 +311,14 @@ public class Fl401ListOnNoticeServiceTest {
 
         Element<HearingData> childElement = Element.<HearingData>builder().value(hearingData).build();
         List<Element<HearingData>> listOnNoticeHearingDetails = Collections.singletonList(childElement);
-
+        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
+            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
+            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+            .build();
+        Map<String, Object> summaryTabFields = Map.of(
+            "field4", "value4",
+            "field5", "value5"
+        );
         CaseData caseData = CaseData.builder()
             .courtName("testcourt")
             .orderWithoutGivingNoticeToRespondent(WithoutNoticeOrderDetails.builder()
@@ -318,18 +333,19 @@ public class Fl401ListOnNoticeServiceTest {
                                                                   .build())
                                    .fl401ListOnNoticeHearingDetails(listOnNoticeHearingDetails)
                                    .build())
+            .allocatedJudge(allocatedJudge)
             .build();
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        AllocatedJudge allocatedJudge = AllocatedJudge.builder()
-            .isSpecificJudgeOrLegalAdviserNeeded(YesOrNo.No)
-            .tierOfJudiciary(TierOfJudiciaryEnum.DISTRICT_JUDGE)
+        CaseDetails caseDetails = CaseDetails.builder()
+            .id(123L)
+            .state(State.JUDICIAL_REVIEW.getValue())
+            .data(stringObjectMap)
             .build();
-        Map<String, Object> summaryTabFields = Map.of(
-            "field4", "value4",
-            "field5", "value5"
-        );
 
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(allocatedJudgeService.getAllocatedJudgeDetails(caseDataUpdated, caseData.getLegalAdviserList(), refDataUserService)).thenReturn(
             allocatedJudge);
@@ -339,7 +355,7 @@ public class Fl401ListOnNoticeServiceTest {
         when(refDataUserService.getLegalAdvisorList()).thenReturn(List.of(DynamicListElement.builder().build()));
 
         Map<String, Object> responseDataMap = fl401ListOnNoticeService
-            .fl401ListOnNoticeSubmission(caseData);
+            .fl401ListOnNoticeSubmission(caseDetails);
         assertTrue(responseDataMap.containsKey("fl401ListOnNoticeHearingDetails"));
 
     }

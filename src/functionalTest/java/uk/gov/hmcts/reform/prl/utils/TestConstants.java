@@ -1,8 +1,9 @@
 package uk.gov.hmcts.reform.prl.utils;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TestConstants {
 
     public static final String AUTHORISATION_HEADER = "Authorization";

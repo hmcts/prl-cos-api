@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
@@ -8,7 +10,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 
 import java.util.EnumMap;
 import java.util.Map;
-import javax.annotation.PostConstruct;
 
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ABILITY_TO_PARTICIPATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ALLEGATION_OF_HARM;
@@ -24,40 +25,19 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 
 @Getter
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RespondentEventsChecker {
-
-    @Autowired
-    private ConsentToApplicationChecker consentToApplicationChecker;
-
-    @Autowired
-    private KeepDetailsPrivateChecker keepDetailsPrivateChecker;
-
-    @Autowired
-    private RespondentMiamChecker respondentMiamChecker;
-
-    @Autowired
-    private AbilityToParticipateChecker abilityToParticipateChecker;
-
-    @Autowired
-    private AttendToCourtChecker attendToCourtChecker;
-
-    @Autowired
-    private CurrentOrPastProceedingsChecker currentOrPastProceedingsChecker;
-
-    @Autowired
-    private InternationalElementsChecker internationalElementsChecker;
-
-    @Autowired
-    private RespondentContactDetailsChecker respondentContactDetailsChecker;
-
-    @Autowired
-    private RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
-
-    @Autowired
-    private ViewDraftResponseChecker viewDraftResponseChecker;
-
-    @Autowired
-    private ResponseSubmitChecker responseSubmitChecker;
+    private final ConsentToApplicationChecker consentToApplicationChecker;
+    private final KeepDetailsPrivateChecker keepDetailsPrivateChecker;
+    private final RespondentMiamChecker respondentMiamChecker;
+    private final AbilityToParticipateChecker abilityToParticipateChecker;
+    private final AttendToCourtChecker attendToCourtChecker;
+    private final CurrentOrPastProceedingsChecker currentOrPastProceedingsChecker;
+    private final InternationalElementsChecker internationalElementsChecker;
+    private final RespondentContactDetailsChecker respondentContactDetailsChecker;
+    private final RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
+    private final ViewDraftResponseChecker viewDraftResponseChecker;
+    private final ResponseSubmitChecker responseSubmitChecker;
 
     private Map<RespondentSolicitorEvents, RespondentEventChecker> eventStatus = new EnumMap<>(RespondentSolicitorEvents.class);
 

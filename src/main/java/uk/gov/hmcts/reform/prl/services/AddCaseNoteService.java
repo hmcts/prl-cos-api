@@ -32,9 +32,12 @@ public class AddCaseNoteService {
     private final Time dateTime;
 
     public List<Element<CaseNoteDetails>> addCaseNoteDetails(CaseData caseData,  UserDetails userDetails) {
-        List<Element<CaseNoteDetails>> caseNotesCollection = null;
-
         CaseNoteDetails currentCaseNoteDetails = getCurrentCaseNoteDetails(caseData, userDetails);
+        return getCaseNoteDetails(caseData, currentCaseNoteDetails);
+    }
+
+    public List<Element<CaseNoteDetails>> getCaseNoteDetails(CaseData caseData, CaseNoteDetails currentCaseNoteDetails) {
+        List<Element<CaseNoteDetails>> caseNotesCollection = null;
         if (currentCaseNoteDetails != null) {
             Element<CaseNoteDetails>  caseNoteDetails = element(currentCaseNoteDetails);
             if (caseData.getCaseNotes() != null) {
@@ -53,6 +56,16 @@ public class AddCaseNoteService {
         return CaseNoteDetails.builder()
             .subject(caseData.getSubject())
             .caseNote(caseData.getCaseNote())
+            .user(userDetails.getFullName())
+            .dateAdded(LocalDate.now().toString())
+            .dateCreated(LocalDateTime.now())
+            .build();
+    }
+
+    public CaseNoteDetails getCurrentCaseNoteDetails(String subject, String caseNote, UserDetails userDetails) {
+        return CaseNoteDetails.builder()
+            .subject(subject)
+            .caseNote(caseNote)
             .user(userDetails.getFullName())
             .dateAdded(LocalDate.now().toString())
             .dateCreated(LocalDateTime.now())

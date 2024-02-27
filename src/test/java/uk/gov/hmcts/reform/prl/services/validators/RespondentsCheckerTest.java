@@ -20,7 +20,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -55,6 +57,15 @@ public class RespondentsCheckerTest {
     public void whenNoCaseDataThenIsFinishedReturnsFalse() {
 
         CaseData caseData = CaseData.builder().build();
+
+        Assert.assertFalse(respondentsChecker.isFinished(caseData));
+    }
+
+    @Test
+    public void whenIncompleteCaseDataThenIsFinishedReturnsFalse() {
+
+        CaseData caseData = CaseData.builder().caseTypeOfApplication(FL401_CASE_TYPE)
+            .respondentsFL401(PartyDetails.builder().build()).build();
 
         Assert.assertFalse(respondentsChecker.isFinished(caseData));
     }
@@ -239,4 +250,8 @@ public class RespondentsCheckerTest {
 
     }
 
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(respondentsChecker.getDefaultTaskState(CaseData.builder().build()));
+    }
 }

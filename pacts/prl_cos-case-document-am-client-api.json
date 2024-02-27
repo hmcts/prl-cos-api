@@ -61,18 +61,18 @@
         "body": {
           "documents": [
             {
-              "_links": null,
               "classification": "RESTRICTED",
-              "createdBy": null,
-              "createdOn": null,
-              "hashToken": null,
-              "lastModifiedBy": null,
-              "metadata": null,
-              "mimeType": null,
-              "modifiedOn": null,
-              "originalDocumentName": "Test.pdf",
               "size": 0,
-              "ttl": null
+              "mimeType": null,
+              "originalDocumentName": "Test.pdf",
+              "createdOn": null,
+              "modifiedOn": null,
+              "createdBy": null,
+              "lastModifiedBy": null,
+              "ttl": null,
+              "hashToken": null,
+              "metadata": null,
+              "_links": null
             }
           ]
         }

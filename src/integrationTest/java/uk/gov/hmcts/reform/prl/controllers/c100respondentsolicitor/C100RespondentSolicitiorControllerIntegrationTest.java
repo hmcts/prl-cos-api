@@ -57,6 +57,7 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + respSolicitorAboutToStartEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -68,6 +69,7 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         HttpPost httpPost = new HttpPost(serviceUrl + respSolicitorAboutToSubmitEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
@@ -81,6 +83,7 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + populateSolicitorRespondentEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -93,6 +96,7 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + respondentSelectionAboutToSubmitEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -105,6 +109,7 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + keepDetailsPrivateEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
@@ -117,6 +122,7 @@ public class C100RespondentSolicitiorControllerIntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + generateC7DraftDocumentEndpoint);
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpPost.addHeader(AUTHORIZATION, idamTokenGenerator.generateIdamTokenForSystem());
+        httpPost.addHeader("serviceAuthorization", serviceAuthenticationGenerator.generate());
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);

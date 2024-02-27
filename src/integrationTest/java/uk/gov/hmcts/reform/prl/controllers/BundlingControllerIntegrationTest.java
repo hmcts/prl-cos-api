@@ -33,6 +33,7 @@ public class BundlingControllerIntegrationTest extends IntegrationTest {
         HttpPost httpPost = new HttpPost(serviceUrl + bundleControllerEndpoint);
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY);
         httpPost.addHeader("Authorization", "Bearer testauthtoken");
+        httpPost.addHeader("serviceAuthorization", "s2sToken");
         httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         StringEntity body = new StringEntity(requestBody);
         httpPost.setEntity(body);

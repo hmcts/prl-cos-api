@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.prl.models.complextypes.serviceofapplication;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import uk.gov.hmcts.reform.prl.enums.manageorders.OtherEnum;
@@ -12,15 +14,9 @@ import java.util.List;
 
 @Data
 @Builder
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ConfirmRecipients {
-    @JsonProperty("applicantsList")
-    private final DynamicMultiSelectList applicantsList;
-    @JsonProperty("respondentsList")
-    private final DynamicMultiSelectList respondentsList;
-    @JsonProperty("applicantSolicitorList")
-    private final DynamicMultiSelectList applicantSolicitorList;
-    @JsonProperty("respondentSolicitorList")
-    private final DynamicMultiSelectList respondentSolicitorList;
     @JsonProperty("otherPeopleList")
     private final DynamicMultiSelectList otherPeopleList;
     private final List<CafcassServiceApplicationEnum> cafcassEmailOptionChecked;

@@ -17,6 +17,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 
@@ -139,5 +140,9 @@ public class ApplicantsCheckerTest {
         assertTrue(applicantsChecker.verifyAddressCompleted(address));
     }
 
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(applicantsChecker.getDefaultTaskState(CaseData.builder().build()));
+    }
 
 }

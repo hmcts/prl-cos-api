@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.NoticeOfChangeEmail;
 import uk.gov.hmcts.reform.prl.utils.CommonUtils;
 
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_DASHBOARD;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_YYYY;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMM_YYYY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.URL_STRING;
 
 @Component
@@ -23,6 +23,7 @@ public class NoticeOfChangeContentProvider {
     @Value("${citizen.url}")
     private String citizenUrl;
 
+
     public EmailTemplateVars buildNocEmailSolicitor(CaseData caseData,
                                                     String solicitorName) {
         return NoticeOfChangeEmail.builder()
@@ -30,20 +31,31 @@ public class NoticeOfChangeContentProvider {
             .caseName(caseData.getApplicantCaseName())
             .solicitorName(solicitorName)
             .caseLink(manageCaseUrl + URL_STRING + caseData.getId())
-            .issueDate(CommonUtils.formatDate(D_MMMM_YYYY, caseData.getIssueDate()))
+            .issueDate(CommonUtils.formatDate(D_MMM_YYYY, caseData.getIssueDate()))
             .build();
     }
 
     public EmailTemplateVars buildNocEmailCitizen(CaseData caseData,
                                                   String solicitorName,
                                                   String litigantName,
-                                                  boolean isOtherPerson) {
-        return NoticeOfChangeEmail.builder()
-            .caseReference(String.valueOf(caseData.getId()))
-            .caseName(caseData.getApplicantCaseName())
-            .solicitorName(solicitorName)
-            .litigantName(litigantName)
-            .caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
-            .build();
+                                                  boolean isOtherPerson,
+                                                  boolean isRemoveLegalRep,
+                                                  String accessCode) {
+        if (isOtherPerson && isRemoveLegalRep) {
+            return NoticeOfChangeEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .build();
+        } else {
+            return NoticeOfChangeEmail.builder()
+                .caseReference(String.valueOf(caseData.getId()))
+                .caseName(caseData.getApplicantCaseName())
+                .solicitorName(solicitorName)
+                .litigantName(litigantName)
+                .citizenSignUpLink(citizenUrl)
+                .accessCode(accessCode)
+                .caseLink(isOtherPerson ? String.valueOf(caseData.getId()) : (citizenUrl + CITIZEN_DASHBOARD))
+                .build();
+        }
     }
 }

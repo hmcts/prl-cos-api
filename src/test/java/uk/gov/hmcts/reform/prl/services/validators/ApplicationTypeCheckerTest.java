@@ -12,6 +12,7 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.testng.AssertJUnit.assertNotNull;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
 import static uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum.noNotRequired;
 import static uk.gov.hmcts.reform.prl.enums.PermissionRequiredEnum.noNowSought;
@@ -102,5 +103,10 @@ public class ApplicationTypeCheckerTest {
             .build();
 
         assertFalse(applicationTypeChecker.hasMandatoryCompleted(caseData));
+    }
+
+    @Test
+    public void whenNoCaseDataPresentThenDefaultTaskStateReturnsNotNull() {
+        assertNotNull(applicationTypeChecker.getDefaultTaskState(CaseData.builder().build()));
     }
 }

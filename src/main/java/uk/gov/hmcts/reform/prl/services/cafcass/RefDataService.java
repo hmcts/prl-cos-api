@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.prl.services.cafcass;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.clients.cafcass.ReferenceDataApi;
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.refdata.Categories;
@@ -15,14 +14,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class RefDataService {
 
-    @Value("${refdata.cateogry-id}")
-    private String categoryId;
-
-    @Autowired
     private final ReferenceDataApi referenceDataApiefDataApi;
 
     public Map<String, String> getRefDataCategoryValueMap(
-        String authorization, String serviceAuthorization, String serviceCode) {
+        String authorization, String serviceAuthorization, String serviceCode, String categoryId) {
         // Call hearing api to get hmc status value
         final Categories categoriesByCategoryId =
             referenceDataApiefDataApi.retrieveListOfValuesByCategoryId(

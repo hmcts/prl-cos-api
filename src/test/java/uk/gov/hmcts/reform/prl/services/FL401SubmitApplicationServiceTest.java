@@ -41,6 +41,7 @@ import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.FL401StatementOfTruthAndSubmitChecker;
@@ -116,6 +117,12 @@ public class FL401SubmitApplicationServiceTest {
 
     @Mock
     UserDetails userDetails;
+
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
+
+    @Mock
+    private EventService eventPublisher;
 
     public static final String authToken = "Bearer TestAuthToken";
 
@@ -861,18 +868,14 @@ public class FL401SubmitApplicationServiceTest {
 
         Map<String, Object> stringObjectMap = new HashMap<>();
         when(allTabsService.getAllTabsFields(any(CaseData.class))).thenReturn(stringObjectMap);
-
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(1L)
                                                        .data(stringObjectMap).build()).build();
 
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
-        verify(caseWorkerEmailService, times(0))
-            .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
-        verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
-            callbackRequest.getCaseDetails(),
-            userDetails
-        );
+        verify(eventPublisher, times(2))
+            .publishEvent(Mockito.any());
     }
 
     @Test
@@ -901,9 +904,5 @@ public class FL401SubmitApplicationServiceTest {
         fl401SubmitApplicationService.fl401SendApplicationNotification(authToken, callbackRequest);
         verify(caseWorkerEmailService, times(0))
             .sendEmailToFl401LocalCourt(callbackRequest.getCaseDetails(), caseData.getCourtEmailAddress());
-        verify(solicitorEmailService, times(1)).sendEmailToFl401Solicitor(
-            callbackRequest.getCaseDetails(),
-            userDetails
-        );
     }
 }

@@ -102,4 +102,33 @@ public class ConsentToApplicationCheckerTest {
 
         Assert.assertTrue(anyNonEmpty);
     }
+
+    @Test
+    public void hasStartedNoResponse() {
+        PartyDetails blankRespondent = PartyDetails.builder().build();
+        boolean anyNonEmpty = consentToApplicationChecker.isStarted(blankRespondent);
+
+        Assert.assertFalse(anyNonEmpty);
+    }
+
+    @Test
+    public void hasFinishedNoResponse() {
+        PartyDetails blankRespondent = PartyDetails.builder().build();
+        boolean anyNonEmpty = consentToApplicationChecker.isFinished(blankRespondent);
+
+        Assert.assertFalse(anyNonEmpty);
+    }
+
+    @Test
+    public void hasFinishedEmptyResponse() {
+        PartyDetails blankRespondent = PartyDetails
+            .builder()
+            .response(Response
+                          .builder()
+                          .build())
+            .build();
+        boolean anyNonEmpty = consentToApplicationChecker.isFinished(blankRespondent);
+
+        Assert.assertFalse(anyNonEmpty);
+    }
 }
