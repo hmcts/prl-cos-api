@@ -12,8 +12,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
+import uk.gov.hmcts.reform.ccd.client.model.CaseDataContent;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
-import uk.gov.hmcts.reform.ccd.client.model.CaseEventDetail;
+import uk.gov.hmcts.reform.ccd.client.model.EventRequestData;
 import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -21,7 +22,6 @@ import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
-import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -40,9 +40,11 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecip
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.CaseEventService;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseDetailsConverter;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
@@ -66,7 +68,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
-import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_WITHDRAW;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
@@ -103,6 +104,9 @@ public class CaseServiceTest {
     SystemUserService systemUserService;
 
     @Mock
+    private CaseSummaryTabService caseSummaryTab;
+
+    @Mock
     CaseDataMapper caseDataMapper;
 
     @Mock
@@ -119,6 +123,9 @@ public class CaseServiceTest {
 
     @Mock
     CaseUtils caseUtils;
+
+    @Mock
+    RoleAssignmentService roleAssignmentService;
 
     private CaseData caseData;
     private CaseData caseData2;
@@ -389,26 +396,29 @@ public class CaseServiceTest {
             .build();
 
         CaseDetails caseDetails = mock(CaseDetails.class);
-
-        CaseData updatedCaseData = caseData.toBuilder()
-            .userInfo(wrapElements(UserInfo.builder().emailAddress(userDetails.getEmail()).build()))
-            .courtName(PrlAppsConstants.C100_DEFAULT_COURT_NAME)
-            .state(State.CASE_WITHDRAWN)
-            .build();
-
-        List<CaseEventDetail> caseEventDetails = Arrays.asList(
-            CaseEventDetail.builder().stateId(PrlAppsConstants.SUBMITTED_STATE).build());
-
-        when(caseEventService.findEventsForCase(caseId)).thenReturn(caseEventDetails);
+        EventRequestData eventRequestData = EventRequestData.builder().build();
         when(caseService.getCase(authToken, caseId)).thenReturn(caseDetails);
         when(idamClient.getUserDetails(authToken)).thenReturn(userDetails);
-        //when(caseDataMapper.buildUpdatedCaseData(updatedCaseData)).thenReturn(updatedCaseData);
-        when(caseRepository.updateCase(authToken, caseId, updatedCaseData, CITIZEN_CASE_WITHDRAW)).thenReturn(caseDetails);
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
-
-        //When
+        when(coreCaseDataService.eventRequest(CaseEvent.CITIZEN_CASE_WITHDRAW, userDetails.getId())).thenReturn(eventRequestData);        //When
+        when(coreCaseDataService.startUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(
+            StartEventResponse.builder().caseDetails(mock(CaseDetails.class)).build());
+        CaseDataContent caseDataContent = CaseDataContent.builder().build();
+        when(coreCaseDataService.createCaseDataContent(Mockito.any(), Mockito.any()))
+            .thenReturn(caseDataContent);
+        when(coreCaseDataService.submitUpdate(
+            Mockito.anyString(),
+            Mockito.any(),
+            Mockito.any(),
+            Mockito.anyString(),
+            Mockito.anyBoolean()
+        )).thenReturn(caseDetails);
         CaseDetails actualCaseDetails =  caseService.withdrawCase(caseData, caseId, authToken);
-
         //Then
         assertNotNull(actualCaseDetails);
     }
@@ -848,9 +858,9 @@ public class CaseServiceTest {
 
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
@@ -911,9 +921,9 @@ public class CaseServiceTest {
 
         when(objectMapper.convertValue(caseDataMap,CaseData.class)).thenReturn(caseData);
         when(caseRepository.getCase(Mockito.anyString(), Mockito.anyString())).thenReturn(caseDetails);
-        when(caseRepository.updateCase(Mockito.any(),Mockito.any(),Mockito.any(),Mockito.any())).thenReturn(caseDetails);
+        when(caseRepository.updateCase(any(), any(), any(), any())).thenReturn(caseDetails);
         when(idamClient.getUserDetails(Mockito.anyString())).thenReturn(userDetails);
-        when(coreCaseDataApi.getCase(Mockito.any(),Mockito.any(), Mockito.any())).thenReturn(caseDetails);
+        when(coreCaseDataApi.getCase(any(), any(), any())).thenReturn(caseDetails);
         when(coreCaseDataService.startUpdate("", null, "", true)).thenReturn(
             StartEventResponse.builder().caseDetails(caseDetails).build());
         when(coreCaseDataService.startUpdate(null, null, "", true)).thenReturn(
@@ -921,5 +931,15 @@ public class CaseServiceTest {
         CaseDetails caseDetailsAfterUpdate = caseService.updateCaseDetails(authToken, "123",
                                                                            CaseEvent.CITIZEN_STATEMENT_OF_SERVICE.getValue(),updateCaseData);
         assertNotNull(caseDetailsAfterUpdate);
+    }
+
+    @Test
+    public void testFetchIdamAmRoles() {
+        String emailId = "test@email.com";
+        Map<String, String> amRoles = new HashMap<>();
+        amRoles.put("amRoles","case-worker");
+        Mockito.when(roleAssignmentService.fetchIdamAmRoles(authToken, emailId)).thenReturn(amRoles);
+        Map<String, String> roles = caseService.fetchIdamAmRoles(authToken, emailId);
+        Assert.assertFalse(roles.isEmpty());
     }
 }
