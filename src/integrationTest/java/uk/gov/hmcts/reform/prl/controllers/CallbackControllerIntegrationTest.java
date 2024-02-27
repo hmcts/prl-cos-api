@@ -41,6 +41,8 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
 
     private static final String PRE_POPULATE_COURT_DETAILS_END_POINT = "/pre-populate-court-details";
 
+    private static final String ALLOCATE_JUDGE_ENDPOINT = "/allocateJudgeTest";
+
     @Test
     public void testDocumentGenerate_return200() throws Exception {
 
@@ -87,6 +89,31 @@ public class CallbackControllerIntegrationTest extends IntegrationTest {
         httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
         httpGet.addHeader(AUTHORIZATION, "Bearer testauth");
         httpGet.addHeader("serviceAuthorization", "s2sToken");
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
+        assertEquals(
+            HttpStatus.SC_NOT_FOUND,
+            httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testAllocateJudge200() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
+        HttpPost httpPost = new HttpPost(serviceUrl + ALLOCATE_JUDGE_ENDPOINT);
+        httpPost.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpPost.addHeader(AUTHORIZATION, "Bearer testauth");
+        StringEntity body = new StringEntity(requestBody);
+        httpPost.setEntity(body);
+        HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpPost);
+        assertEquals(
+            HttpStatus.SC_OK,
+            httpResponse.getStatusLine().getStatusCode());
+    }
+
+    @Test
+    public void testAllocateJudge400() throws Exception {
+        HttpGet httpGet = new HttpGet(serviceUrl + ALLOCATE_JUDGE_ENDPOINT);
+        httpGet.addHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+        httpGet.addHeader(AUTHORIZATION, "Bearer testauth");
         HttpResponse httpResponse = HttpClientBuilder.create().build().execute(httpGet);
         assertEquals(
             HttpStatus.SC_NOT_FOUND,

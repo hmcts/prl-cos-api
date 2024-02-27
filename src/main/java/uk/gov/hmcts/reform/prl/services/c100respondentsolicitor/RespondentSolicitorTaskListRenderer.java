@@ -19,7 +19,6 @@ import java.util.stream.Stream;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.models.tasklist.RespondentTaskSection.newSection;
@@ -84,7 +83,7 @@ public class RespondentSolicitorTaskListRenderer {
         final RespondentTaskSection consent = newSection("1. Consent to the Application")
             .withTask(tasks.get(RespondentSolicitorEvents.CONSENT));
 
-        final RespondentTaskSection yourDetails = newSection("2. Your details")
+        final RespondentTaskSection yourDetails = newSection("2. Respondent's details")
             .withTask(tasks.get(RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE))
             .withTask(tasks.get(RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS))
             .withTask(tasks.get(RespondentSolicitorEvents.ATTENDING_THE_COURT));
@@ -116,7 +115,7 @@ public class RespondentSolicitorTaskListRenderer {
             submit
         )
             .filter(RespondentTaskSection::hasAnyTask)
-            .collect(toList());
+            .toList();
     }
 
     private List<String> renderSection(RespondentTaskSection sec, String respondent) {
@@ -190,7 +189,7 @@ public class RespondentSolicitorTaskListRenderer {
                     error,
                     taskListRenderElements.renderRespondentSolicitorLink(task.getEvent(), respondent)
                 )))
-            .collect(toList());
+            .toList();
         return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
     }
 }

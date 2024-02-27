@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -71,7 +72,7 @@ public class CaseDataMapper {
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
-        CaseData.CaseDataBuilder caseDataBuilder = caseData.toBuilder();
+        CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
 
@@ -173,8 +174,10 @@ public class CaseDataMapper {
                                                     c100C100RebuildSafetyConcernsElements,
                                                     c100RebuildChildDetailsElements);
         }
-      
-        caseDataBuilder.citizenQuarantineDocsList(quarantineDocList);
+
+        caseDataBuilder.documentManagementDetails(DocumentManagementDetails.builder()
+                                                      .citizenQuarantineDocsList(quarantineDocList)
+                                                      .build());
 
         return caseDataBuilder.build();
     }

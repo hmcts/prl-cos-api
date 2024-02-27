@@ -56,7 +56,12 @@ public enum Event {
     DRAFT_AN_ORDER("draftAnOrder", "Draft an order"),
     EDIT_AND_APPROVE_ORDER("editAndApproveAnOrder", "Edit and approve a draft order"),
     UPLOAD_ADDITIONAL_APPLICATIONS("uploadAdditionalApplications", "Upload additional applications"),
-    TRANSFER_TO_ANOTHER_COURT("transferToAnotherCourt", "Transfer to another court");
+    TRANSFER_TO_ANOTHER_COURT("transferToAnotherCourt", "Transfer to another court"),
+    EDIT_RETURNED_ORDER("editReturnedOrder", "Edit a returned order"),
+    SOA("serviceOfApplication", "Service of application"),
+    CONFIDENTIAL_CHECK("confidentialityCheck", "Confidentiality check"),
+    ALLOCATED_JUDGE("allocatedJudge", "Allocated Judge"),
+    SEND_TO_GATEKEEPER("sendToGateKeeper", "Send to Gatekeeper");
 
     private final String id;
     private final String name;

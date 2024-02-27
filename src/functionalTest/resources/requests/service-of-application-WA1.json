@@ -1,0 +1,334 @@
+{
+  "case_details": {
+    "state": "JUDICIAL_REVIEW",
+    "id": "1702638919767299",
+    "case_data": {
+      "id": 1701277056588266,
+      "applicantCaseName": "John Smith",
+      "caseTypeOfApplication": "C100",
+      "caseManagementLocation": {
+        "baseLocationId": "1",
+        "regionId": "1",
+        "baseName": "1",
+        "email": "test1@test.com"
+      },
+      "applicants": [
+        {
+          "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+          "value": {
+            "firstName": "test",
+            "lastName": "data",
+            "previousName": null,
+            "dateOfBirth": "1989-11-30",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "placeOfBirth": "London",
+            "address": {
+              "AddressLine1": "Ministry Of Justice",
+              "AddressLine2": "Seventh Floor 102 Petty France",
+              "AddressLine3": "",
+              "PostTown": "",
+              "County": "",
+              "Country": "",
+              "PostCode": "RH117RQ"
+            },
+            "isAddressUnknown": null,
+            "isAddressConfidential": "No",
+            "isAtAddressLessThan5Years": "No",
+            "addressLivedLessThan5YearsDetails": null,
+            "canYouProvideEmailAddress": "No",
+            "email": null,
+            "isEmailAddressConfidential": null,
+            "landline": null,
+            "phoneNumber": "4635635636",
+            "isPhoneNumberConfidential": "No",
+            "relationshipToChildren": null,
+            "isDateOfBirthKnown": null,
+            "isCurrentAddressKnown": null,
+            "canYouProvidePhoneNumber": null,
+            "isPlaceOfBirthKnown": null,
+            "solicitorOrg": {},
+            "solicitorAddress": {
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null,
+              "PostTown": null,
+              "County": null,
+              "Country": null,
+              "PostCode": null
+            },
+            "dxNumber": null,
+            "solicitorReference": null,
+            "representativeFirstName": "repFirstName",
+            "representativeLastName": "repLastName",
+            "isAtAddressLessThan5YearsWithDontKnow": null,
+            "doTheyHaveLegalRepresentation": "yes",
+            "sendSignUpLink": null,
+            "solicitorEmail": null
+          }
+        }
+      ],
+      "othersToNotify": [
+        {
+          "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+          "value": {
+            "firstName": "test",
+            "lastName": "data",
+            "previousName": null,
+            "dateOfBirth": "1989-11-30",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "placeOfBirth": "London",
+            "address": null,
+            "isAddressUnknown": null,
+            "isAddressConfidential": "No",
+            "isAtAddressLessThan5Years": "No",
+            "addressLivedLessThan5YearsDetails": null,
+            "canYouProvideEmailAddress": "No",
+            "email": null,
+            "isEmailAddressConfidential": null,
+            "landline": null,
+            "phoneNumber": "4635635636",
+            "isPhoneNumberConfidential": "No",
+            "relationshipToChildren": null,
+            "isDateOfBirthKnown": null,
+            "isCurrentAddressKnown": null,
+            "canYouProvidePhoneNumber": null,
+            "isPlaceOfBirthKnown": null,
+            "solicitorOrg": {},
+            "solicitorAddress": {
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null,
+              "PostTown": null,
+              "County": null,
+              "Country": null,
+              "PostCode": null
+            },
+            "dxNumber": null,
+            "solicitorReference": null,
+            "representativeFirstName": null,
+            "representativeLastName": null,
+            "isAtAddressLessThan5YearsWithDontKnow": null,
+            "doTheyHaveLegalRepresentation": null,
+            "sendSignUpLink": null,
+            "solicitorEmail": null
+          }
+        }
+      ],
+      "children": [
+        {
+          "id": "f5fa0db3-502d-459f-9a7a-7bb7be08ce6b",
+          "value": {
+            "firstName": "Test",
+            "lastName": "Child",
+            "dateOfBirth": "2000-10-10",
+            "isDateOfBirthUnknown": null,
+            "gender": "male",
+            "otherGender": null,
+            "orderAppliedFor": [
+              "childArrangementsOrder"
+            ],
+            "applicantsRelationshipToChild": "grandParent",
+            "otherApplicantsRelationshipToChild": null,
+            "respondentsRelationshipToChild": "mother",
+            "otherRespondentsRelationshipToChild": null,
+            "childLiveWith": [
+              "anotherPerson",
+              "respondent",
+              "applicant"
+            ],
+            "childrenKnownToLocalAuthority": null,
+            "childrenKnownToLocalAuthorityTextArea": null,
+            "childrenSubjectOfChildProtectionPlan": null,
+            "otherPersonWhoLivesWithChild": null,
+            "isChildCurrentAddressKnown": "Yes",
+            "childUnsupervisedTime": "No",
+            "childContactFromOtherRecipients": "No",
+            "relationshipToApplicant": null,
+            "relationshipToRespondent": null
+          }
+        }
+      ],
+      "respondentsFL401": {
+        "email": "soli@gmail.com",
+        "gender": null,
+        "address": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "dxNumber": null,
+        "landline": null,
+        "lastName": "Doe",
+        "firstName": "John",
+        "dateOfBirth": null,
+        "otherGender": null,
+        "phoneNumber": "01234567891",
+        "placeOfBirth": null,
+        "previousName": null,
+        "solicitorOrg": {
+          "OrganisationID": null,
+          "OrganisationName": null
+        },
+        "sendSignUpLink": null,
+        "solicitorEmail": null,
+        "isAddressUnknown": null,
+        "solicitorAddress": {
+          "County": null,
+          "Country": null,
+          "PostCode": null,
+          "PostTown": null,
+          "AddressLine1": null,
+          "AddressLine2": null,
+          "AddressLine3": null
+        },
+        "isDateOfBirthKnown": "No",
+        "solicitorReference": null,
+        "solicitorTelephone": null,
+        "isPlaceOfBirthKnown": null,
+        "isDateOfBirthUnknown": null,
+        "isAddressConfidential": "Yes",
+        "isCurrentAddressKnown": "No",
+        "relationshipToChildren": null,
+        "representativeLastName": null,
+        "representativeFirstName": null,
+        "canYouProvidePhoneNumber": "Yes",
+        "canYouProvideEmailAddress": "Yes",
+        "isAtAddressLessThan5Years": null,
+        "isPhoneNumberConfidential": null,
+        "isEmailAddressConfidential": null,
+        "respondentLivedWithApplicant": "No",
+        "doTheyHaveLegalRepresentation": null,
+        "addressLivedLessThan5YearsDetails": "*Provide details of all previous addresses for the last 5 years below(if known, including the dates and starting with most recent) (Optional)",
+        "otherPersonRelationshipToChildren": [
+
+        ],
+        "isAtAddressLessThan5YearsWithDontKnow": "yes"
+      },
+      "respondents": [
+        {
+          "id": "29959b30-f49e-483b-a963-d53a88a93209",
+          "value": {
+            "firstName": "Ball",
+            "lastName": "Lowe",
+            "previousName": null,
+            "dateOfBirth": null,
+            "isDateOfBirthUnknown": null,
+            "gender": "female",
+            "otherGender": null,
+            "placeOfBirth": null,
+            "address": {
+              "AddressLine1": "Ministry Of Justice",
+              "AddressLine2": "Seventh Floor 102 Petty France",
+              "AddressLine3": "",
+              "PostTown": "London",
+              "County": "",
+              "Country": "",
+              "PostCode": "N14 5AL"
+            },
+            "isAddressUnknown": null,
+            "isAddressConfidential": "Yes",
+            "isAtAddressLessThan5Years": null,
+            "addressLivedLessThan5YearsDetails": null,
+            "canYouProvideEmailAddress": "No",
+            "email": null,
+            "isEmailAddressConfidential": null,
+            "landline": null,
+            "phoneNumber": null,
+            "isPhoneNumberConfidential": null,
+            "relationshipToChildren": null,
+            "isDateOfBirthKnown": "No",
+            "isCurrentAddressKnown": "Yes",
+            "canYouProvidePhoneNumber": "No",
+            "isPlaceOfBirthKnown": "No",
+            "solicitorOrg": {},
+            "solicitorAddress": {
+              "AddressLine1": null,
+              "AddressLine2": null,
+              "AddressLine3": null,
+              "PostTown": null,
+              "County": null,
+              "Country": null,
+              "PostCode": null
+            },
+            "dxNumber": null,
+            "solicitorReference": null,
+            "representativeFirstName": null,
+            "representativeLastName": null,
+            "isAtAddressLessThan5YearsWithDontKnow": "dontKnow",
+            "doTheyHaveLegalRepresentation": "no",
+            "sendSignUpLink": null,
+            "solicitorEmail": null
+          }
+        }
+      ],
+      "c8Document": {
+        "category_id": null,
+        "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/04d2b51b-9bed-403f-ae9f-7b371a9ca248",
+        "document_filename": "C8Document.pdf",
+        "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/04d2b51b-9bed-403f-ae9f-7b371a9ca248/binary",
+        "document_creation_date": null
+      },
+      "createSelectOrderOptions": "blankOrderOrDirections",
+      "isConfidential": "Yes",
+      "soaServeToRespondentOptions": "Yes",
+      "soaServingRespondentsOptionsCA": "applicantLegalRepresentative",
+      "soaCitizenServingRespondentsOptionsDA": "courtBailiff",
+      "typeOfApplicationOrders": {
+        "orderType": [
+          "nonMolestationOrder",
+          "occupationOrder"
+        ]
+      },
+      "manageOrdersOptions": "uploadAnOrder",
+      "childArrangementOrders": "standardDirectionsOrder",
+      "applicationServedYesNo": "Yes",
+      "unServedApplicantPack": {
+        "packDocument": [
+          {
+            "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+            "value": {
+              "documentUrl": ""
+            }
+          }
+        ],
+        "partyIds": [
+          {
+            "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+            "value": "97e25c77-f915-4b4e-8436-89a0d1678813"
+          }
+        ],
+        "servedBy": "",
+        "packCreatedDate": ""
+      },
+      "unServedRespondentPack": {
+        "packDocument": [
+          {
+            "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+            "value": {
+              "documentUrl": ""
+            }
+          }
+        ],
+        "partyIds": [
+          {
+            "id": "97e25c77-f915-4b4e-8436-89a0d1678813",
+            "value": "97e25c77-f915-4b4e-8436-89a0d1678813"
+          }
+        ],
+        "servedBy": "",
+        "personalServiceBy": "Court admin",
+        "packCreatedDate": ""
+      },
+      "caseCreatedBy": "SOLICITOR"
+    }
+  },
+  "event_id": "litigationCapacity"
+}

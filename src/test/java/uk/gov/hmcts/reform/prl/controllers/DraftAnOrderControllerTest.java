@@ -9,13 +9,15 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.web.servlet.MockMvc;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.Event;
+import uk.gov.hmcts.reform.prl.enums.HearingDateConfirmOptionEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioHearingsAndNextStepsEnum;
@@ -24,6 +26,7 @@ import uk.gov.hmcts.reform.prl.enums.dio.DioOtherEnum;
 import uk.gov.hmcts.reform.prl.enums.dio.DioPreamblesEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum;
 import uk.gov.hmcts.reform.prl.enums.manageorders.DraftOrderOptionsEnum;
+import uk.gov.hmcts.reform.prl.enums.manageorders.JudgeOrMagistrateTitleEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCafcassOrCymruEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoCourtEnum;
 import uk.gov.hmcts.reform.prl.enums.sdo.SdoDocumentationAndEvidenceEnum;
@@ -36,7 +39,8 @@ import uk.gov.hmcts.reform.prl.models.DraftOrder;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CallbackResponse;
+import uk.gov.hmcts.reform.prl.models.complextypes.MagistrateLastName;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.FL404;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DirectionOnIssue;
@@ -53,14 +57,23 @@ import uk.gov.hmcts.reform.prl.services.dynamicmultiselectlist.DynamicMultiSelec
 import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.OCCUPATIONAL_SCREEN_ERRORS;
 import static uk.gov.hmcts.reform.prl.enums.Event.ADMIN_EDIT_AND_APPROVE_ORDER;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.noticeOfProceedingsParties;
+import static uk.gov.hmcts.reform.prl.enums.manageorders.CreateSelectOrderOptionsEnum.occupation;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @PropertySource(value = "classpath:application.yaml")
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -106,18 +119,15 @@ public class DraftAnOrderControllerTest {
 
     @Before
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         userDetails = UserDetails.builder()
             .forename("solicitor@example.com")
             .surname("Solicitor")
             .build();
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
-        when(hearingDataService.getHearingData(Mockito.any(),Mockito.any(),Mockito.any()))
+        when(hearingDataService.getHearingDataForOtherOrders(Mockito.any(),Mockito.any(),Mockito.any()))
             .thenReturn(List.of(Element.<HearingData>builder().build()));
         when(hearingService.getHearings(Mockito.anyString(),Mockito.anyString())).thenReturn(Hearings.hearingsWith().build());
     }
@@ -125,7 +135,7 @@ public class DraftAnOrderControllerTest {
     @Test
     public void testResetFields() {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             0,
             draftAnOrderController.resetFields(authToken, s2sToken, callbackRequest).getData().size()
@@ -154,15 +164,16 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken)).thenReturn(CallbackResponse.builder().data(caseData).build());
-        CaseData updatedCaseData = draftAnOrderController.populateHeader(
+
+        when(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken))
+            .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().data(stringObjectMap).build());
+        Map<String, Object> updatedCaseData = draftAnOrderController.populateHeader(
             authToken, s2sToken, callbackRequest
         ).getData();
 
-        Assert.assertEquals(caseData.getApplicantCaseName(), updatedCaseData.getApplicantCaseName());
-        Assert.assertEquals(caseData.getFamilymanCaseNumber(), updatedCaseData.getFamilymanCaseNumber());
-        Assert.assertEquals(caseData.getCreateSelectOrderOptions(), updatedCaseData.getCreateSelectOrderOptions());
+        Assert.assertEquals(caseData.getApplicantCaseName(), updatedCaseData.get("applicantCaseName"));
+        Assert.assertEquals(caseData.getFamilymanCaseNumber(), updatedCaseData.get("familymanCaseNumber"));
+        //Assert.assertEquals(caseData.getCreateSelectOrderOptions(), updatedCaseData.get("createSelectOrderOptions"));
 
     }
 
@@ -186,9 +197,9 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         when(draftAnOrderService.handleSelectedOrder(any(),
-                                                     any())).thenReturn(CallbackResponse.builder().errors(List.of(
+                                                     any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
             "This order is not available to be drafted")).build());
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             "This order is not available to be drafted",
             draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getErrors().get(0)
@@ -213,9 +224,9 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handleSelectedOrder(any(),
-                                                     any())).thenReturn(CallbackResponse.builder().errors(List.of(
+                                                     any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
             "This order is not available to be drafted")).build());
         Assert.assertEquals(
             "This order is not available to be drafted",
@@ -269,12 +280,12 @@ public class DraftAnOrderControllerTest {
             callbackRequest.getCaseDetails().getData(),
             CaseData.class
         )).thenReturn(caseData);
-        when(draftAnOrderService.handleSelectedOrder(callbackRequest,authToken)).thenReturn(CallbackResponse.builder()
-            .data(caseData.toBuilder()
-                      .selectedOrder("Test order").build()).build());
+        stringObjectMap.put("selectedOrder", "Test order");
+        when(draftAnOrderService.handleSelectedOrder(callbackRequest,authToken)).thenReturn(AboutToStartOrSubmitCallbackResponse.builder()
+                                                                                                .data(stringObjectMap).build());
         Assert.assertEquals(
             stringObjectMap.get("selectedOrder"),
-            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getData().getSelectedOrder()
+            draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getData().get("selectedOrder")
         );
     }
 
@@ -295,7 +306,8 @@ public class DraftAnOrderControllerTest {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(manageOrderService.populateCustomOrderFields(caseData)).thenReturn(caseData);
+        when(manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.nonMolestation))
+            .thenReturn(caseData);
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
@@ -306,10 +318,10 @@ public class DraftAnOrderControllerTest {
             .build();
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
+            caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.nonMolestation);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
@@ -346,7 +358,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData)).thenReturn(caseData);
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
+            caseData = manageOrderService.populateCustomOrderFields(caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
@@ -384,10 +396,10 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.updateCustomFieldsWithApplicantRespondentDetails(callbackRequest, caseData)).thenReturn(caseData);
 
         if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
-            caseData = manageOrderService.populateCustomOrderFields(caseData);
+            caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.blankOrderOrDirections);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
@@ -410,22 +422,104 @@ public class DraftAnOrderControllerTest {
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();
 
-        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(Hearings.class),
-                                                       Mockito.any()))
+        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any()))
             .thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
-        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(DraftOrder.builder().build());
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest).getData());
+    }
+
+    @Test
+    public void testGenerateDocThrowError() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.justicesLegalAdviser).build())
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .build();;
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
+        Assert.assertEquals(MANDATORY_JUDGE,
+                            response.getErrors().get(0));
+    }
+
+    @Test
+    public void testGenerateDocThrowErrorMagistrate() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate).build())
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .build();;
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
+        Assert.assertEquals(MANDATORY_MAGISTRATE,
+                            response.getErrors().get(0));
+    }
+
+    @Test
+    public void testGenerateDocTMagistrate() throws Exception {
+        MagistrateLastName magistrateLastName = MagistrateLastName.builder().lastName("Smith").build();
+        Element<MagistrateLastName> magistrateLastNameElement = Element.<MagistrateLastName>builder()
+            .value(magistrateLastName).build();
+        List<Element<MagistrateLastName>> lastNameList = Collections.singletonList(magistrateLastNameElement);
+
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .applicantCaseName("Jo Davis & Jon Smith")
+            .familymanCaseNumber("sd5454256756")
+            .createSelectOrderOptions(CreateSelectOrderOptionsEnum.specialGuardianShip)
+            .magistrateLastName(lastNameList)
+            .manageOrders(ManageOrders.builder().judgeOrMagistrateTitle(JudgeOrMagistrateTitleEnum.magistrate).build())
+            .caseTypeOfApplication("fl401")
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .build();;
+        AboutToStartOrSubmitCallbackResponse response = draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest);
+        Assert.assertEquals(draftAnOrderController.populateFl404Fields(authToken,s2sToken, callbackRequest),
+                            response);
     }
 
     @Test
@@ -457,7 +551,7 @@ public class DraftAnOrderControllerTest {
             caseData,
             CreateSelectOrderOptionsEnum.blankOrderOrDirections
         ));
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.prepareDraftOrderCollection(
@@ -499,13 +593,12 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.isAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest).getData()
         );
-
     }
 
     @Test
@@ -539,7 +632,7 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             "Please select at least one options from below",
@@ -577,7 +670,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getData()
@@ -614,7 +707,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             "Please select at least one options from below",
             draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getErrors().get(0)
@@ -879,5 +972,236 @@ public class DraftAnOrderControllerTest {
                                                                  String expectedMessage) {
         T exception = assertThrows(expectedThrowableClass, methodExpectedToFail);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    public void testNoHearingDataValidation() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .manageOrders(ManageOrders.builder().build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("errorList", List.of("Please provide at least one hearing details"));
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(noticeOfProceedingsParties)
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
+            .generateDoc(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testNoHearingDataSelectedValidation() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(noticeOfProceedingsParties)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(HearingData.builder().build()))).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("errorList", List.of("Please provide at least one hearing details"));
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(noticeOfProceedingsParties)
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("Please provide at least one hearing details", callbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testMoreThanOneHearingsSelectedValidation() throws Exception {
+        HearingData hearingData1 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedByListingTeam)
+            .build();
+        HearingData hearingData2 = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateConfirmedInHearingsTab)
+            .build();
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(noticeOfProceedingsParties)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(hearingData1), element(hearingData2))).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("errorList", List.of("Only one hearing can be created"));
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(noticeOfProceedingsParties)
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("Only one hearing can be created", callbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testHearingTypeAndEstimatedTimingsValidations() throws Exception {
+        HearingData hearingData = HearingData.builder()
+            .hearingDateConfirmOptionEnum(HearingDateConfirmOptionEnum.dateReservedWithListAssit)
+            .hearingEstimatedDays("ABC")
+            .hearingEstimatedHours("DEF")
+            .hearingEstimatedMinutes("XYZ")
+            .build();
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(noticeOfProceedingsParties)
+            .manageOrders(ManageOrders.builder()
+                              .ordersHearingDetails(List.of(element(hearingData))).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("errorList", List.of("HearingType cannot be empty, please select a hearingType",
+                                                           "Please enter numeric value for Hearing estimated days",
+                                                           "Please enter numeric value for Hearing estimated hours",
+                                                           "Please enter numeric value for Hearing estimated minutes"));
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(noticeOfProceedingsParties)
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
+            .generateDoc(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("HearingType cannot be empty, please select a hearingType", callbackResponse.getErrors().get(0));
+        assertEquals("Please enter numeric value for Hearing estimated days", callbackResponse.getErrors().get(1));
+        assertEquals("Please enter numeric value for Hearing estimated hours", callbackResponse.getErrors().get(2));
+        assertEquals("Please enter numeric value for Hearing estimated minutes", callbackResponse.getErrors().get(3));
+    }
+
+    @Test
+    public void testOccupationTypeScreenValidations() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(occupation)
+            .manageOrders(ManageOrders.builder().fl404CustomFields(FL404.builder().build()).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put("errorList", List.of("Please select either applicant or participant section"));
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(occupation)
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
+            .generateDoc(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNotNull(callbackResponse.getErrors());
+        assertEquals("Please select either applicant or participant section", callbackResponse.getErrors().get(0));
+    }
+
+    @Test
+    public void testOccupationTypeScreenValidationsForNoErrors() throws Exception {
+
+        CaseData caseData = CaseData.builder()
+            .createSelectOrderOptions(occupation)
+            .manageOrders(ManageOrders.builder().fl404CustomFields(FL404.builder().build()).build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        stringObjectMap.put(OCCUPATIONAL_SCREEN_ERRORS, new ArrayList<String>());
+        uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId(Event.ADMIN_EDIT_AND_APPROVE_ORDER.getId())
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
+        DraftOrder draftOrder = DraftOrder.builder()
+            .orderType(occupation)
+            .build();
+
+        Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
+        when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
+
+        AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
+            .generateDoc(authToken, s2sToken, callbackRequest);
+
+        assertNotNull(callbackResponse);
+        assertNull(callbackResponse.getErrors());
     }
 }

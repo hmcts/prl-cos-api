@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -43,6 +45,9 @@ public class NoticeOfChangeEventHandlerTest {
 
     @Mock
     private EmailTemplateVars emailTemplateVars;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @InjectMocks
     private NoticeOfChangeEventHandler noticeOfChangeEventHandler;
@@ -113,6 +118,7 @@ public class NoticeOfChangeEventHandlerTest {
 
     @Test
     public void shouldNotifyWhenLegalRepresentativeRemoved() {
+        when(launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")).thenReturn(true);
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         verify(emailService,times(6)).send(Mockito.anyString(),
@@ -164,6 +170,8 @@ public class NoticeOfChangeEventHandlerTest {
         final int representedPartyIndex = 0;
 
         final SolicitorRole.Representing representing = CARESPONDENT;
+
+        when(launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")).thenReturn(true);
 
         noticeOfChangeEvent = NoticeOfChangeEvent.builder()
             .caseData(caseData).solicitorEmailAddress(solicitorEmailAddress)
@@ -219,6 +227,7 @@ public class NoticeOfChangeEventHandlerTest {
             .accessCode("ABCD1234")
             .build();
 
+        when(launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")).thenReturn(true);
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         verify(emailService,times(3)).send(Mockito.anyString(),
@@ -279,6 +288,7 @@ public class NoticeOfChangeEventHandlerTest {
             .accessCode("ABCD1234")
             .build();
 
+        when(launchDarklyClient.isFeatureEnabled("generate-access-code-for-noc")).thenReturn(true);
         noticeOfChangeEventHandler.notifyWhenLegalRepresentativeRemoved(noticeOfChangeEvent);
 
         verify(emailService,times(3)).send(Mockito.anyString(),

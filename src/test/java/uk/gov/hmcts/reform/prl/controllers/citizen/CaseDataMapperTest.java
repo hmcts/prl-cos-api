@@ -12,6 +12,7 @@ import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
@@ -27,6 +28,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
+//TO BE DELETED - NOT IN USE
 @Ignore
 @RunWith(MockitoJUnitRunner.class)
 public class CaseDataMapperTest {
@@ -61,7 +63,9 @@ public class CaseDataMapperTest {
         caseData = CaseData.builder()
             .id(1234567891234567L)
             .caseTypeOfApplication(CASE_TYPE)
-            .citizenQuarantineDocsList(new ArrayList<>())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(new ArrayList<>())
+                                           .build())
             .c100RebuildData(c100RebuildData)
                 .build();
     }
@@ -268,7 +272,9 @@ public class CaseDataMapperTest {
 
         //When
         CaseData caseData1 = CaseData.builder()
-            .citizenQuarantineDocsList(new ArrayList<>())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(new ArrayList<>())
+                                           .build())
             .c100RebuildData(C100RebuildData.builder().build())
             .build();
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
