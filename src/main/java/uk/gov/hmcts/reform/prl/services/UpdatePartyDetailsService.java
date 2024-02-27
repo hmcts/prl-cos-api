@@ -86,10 +86,6 @@ public class UpdatePartyDetailsService {
 
         updatedCaseData.putAll(caseSummaryTabService.updateTab(caseData));
 
-        final Flags caseFlags = Flags.builder().build();
-
-        updatedCaseData.put("caseFlags", caseFlags);
-
         if (FL401_CASE_TYPE.equals(caseData.getCaseTypeOfApplication())) {
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DARESPONDENT));
             updatedCaseData.putAll(noticeOfChangePartiesService.generate(caseData, DAAPPLICANT));
