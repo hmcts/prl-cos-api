@@ -221,7 +221,7 @@ public class AllTabServiceImplTest {
     }
 
     @Test
-    public void testUpdateCitizenPartiesTabForC100_CASE_TYPE() {
+    public void testUpdateCitizenPartiesTabForNocC100Respondent() {
         when(CASE_DATA.getCaseTypeOfApplication()).thenReturn("C100");
         assertNotNull(applicationsTabService.updateCitizenPartiesTab(CASE_DATA));
     }
