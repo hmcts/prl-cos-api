@@ -456,7 +456,7 @@ public class ManageOrderEmailService {
                         SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL,
                         authorisation,
                         SendgridEmailConfig.builder().toEmailAddress(
-                            cafcassCymruEmailId).dynamicTemplateData(
+                            "anshika.nigam1@hmcts.net").dynamicTemplateData(
                             dynamicData).languagePreference(LanguagePreference.english).build()
                     );
                 } else {
