@@ -449,7 +449,7 @@ public class ManageOrderEmailService {
                 log.info("party name ====> " + party.getValue().getFirstName());
                 if (ContactPreferences.digital.equals(party.getValue().getContactPreferences())
                     && isPartyProvidedWithEmail(party.getValue())) {
-                    log.info("===== CA serving unrepresented applicant via email ====");
+                    log.info("=====  CA serving unrepresented applicant via email ====");
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
                     dynamicData.put("name",party.getValue().getFirstName());
                     sendgridService.sendEmailUsingTemplateWithAttachments(
