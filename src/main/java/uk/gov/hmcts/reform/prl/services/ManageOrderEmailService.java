@@ -451,7 +451,7 @@ public class ManageOrderEmailService {
                 if (true) {
                     log.info("=====  CA serving unrepresented applicant via email ====");
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-                    sendEmailToParty1("anshika.nigam1@hmcts.net",  caseData,  authorisation,
+                    sendEmailToParty1("anshika.nigam1@hmcts.net",  caseData,  authorisation,orderDocuments,
                                       party.getValue().getFirstName());
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
