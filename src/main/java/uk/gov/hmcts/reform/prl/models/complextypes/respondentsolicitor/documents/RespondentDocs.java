@@ -11,7 +11,6 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class RespondentDocs {
     private ResponseDocuments c1aDocument;
-    private ResponseDocuments c1aDocumentWelsh;
     private ResponseDocuments c7Document;
     private List<Element<ResponseDocuments>> otherDocuments;
 }
