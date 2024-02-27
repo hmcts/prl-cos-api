@@ -245,7 +245,7 @@ public class CaseController {
         }
     }
 
-    @PostMapping(value = "/fetchIdam-Am-roles/{emailId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @GetMapping(value = "/fetchIdam-Am-roles/{emailId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Get hearing details for a case")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "success"),
