@@ -12,8 +12,8 @@ import java.util.Arrays;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum ContactPreferences {
 
-    @JsonProperty("digital")
-    digital("digital", "digital"),
+    @JsonProperty("email")
+    email("email", "email"),
     @JsonProperty("post")
     post("post", "post");
 
