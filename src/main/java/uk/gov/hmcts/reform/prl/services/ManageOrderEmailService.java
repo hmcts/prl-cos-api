@@ -451,14 +451,8 @@ public class ManageOrderEmailService {
                     && isPartyProvidedWithEmail(party.getValue())) {
                     log.info("=====  CA serving unrepresented applicant via email ====");
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-                    dynamicData.put("name",party.getValue().getFirstName());
-                    sendgridService.sendEmailUsingTemplateWithAttachments(
-                        SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL,
-                        authorisation,
-                        SendgridEmailConfig.builder().toEmailAddress(
-                            "anshika.nigam1@hmcts.net").dynamicTemplateData(
-                            dynamicData).languagePreference(LanguagePreference.english).build()
-                    );
+                    sendEmailToParty1("anshika.nigam1@hmcts.net",  caseData,  authorisation,
+                                      party.getValue().getFirstName()) ;
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
                         && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
@@ -1040,6 +1034,26 @@ public class ManageOrderEmailService {
                     emailAddress).dynamicTemplateData(
                     dynamicData).listOfAttachments(
                     orderDocuments).languagePreference(LanguagePreference.english).build()
+            );
+        } catch (IOException e) {
+            log.error("there is a failure in sending email for email {} with exception {}",
+                      emailAddress, e.getMessage()
+            );
+        }
+    }
+
+    private void sendEmailToParty1(String emailAddress, CaseData caseData, String authorisation,
+                                   String serveParty) {
+        Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+        dynamicData.put("name",serveParty);
+
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL,
+                authorisation,
+                SendgridEmailConfig.builder().toEmailAddress(
+                    emailAddress).dynamicTemplateData(
+                    dynamicData).languagePreference(LanguagePreference.english).build()
             );
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
