@@ -83,7 +83,6 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.CANNOT_START_YET;
@@ -176,7 +175,7 @@ public class TaskListServiceTest {
             RespondentTask.builder().event(CONFIRM_EDIT_CONTACT_DETAILS).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(ATTENDING_THE_COURT).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(RespondentSolicitorEvents.MIAM).state(TaskState.NOT_STARTED).build(),
-            RespondentTask.builder().event(CURRENT_OR_PREVIOUS_PROCEEDINGS).state(TaskState.NOT_STARTED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.OTHER_PROCEEDINGS).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(ALLEGATION_OF_HARM).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).state(TaskState.NOT_STARTED).build(),
@@ -478,7 +477,7 @@ public class TaskListServiceTest {
             CONFIRM_EDIT_CONTACT_DETAILS,
             ATTENDING_THE_COURT,
             RespondentSolicitorEvents.MIAM,
-            CURRENT_OR_PREVIOUS_PROCEEDINGS,
+                RespondentSolicitorEvents.OTHER_PROCEEDINGS,
             RespondentSolicitorEvents.ALLEGATION_OF_HARM,
             RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
             ABILITY_TO_PARTICIPATE,
