@@ -91,8 +91,6 @@ public class AmendOrderService {
                         .orderDocument(amendedDocument)
                         .dateCreated(caseData.getManageOrders().getCurrentOrderCreatedDateTime() != null
                                          ? caseData.getManageOrders().getCurrentOrderCreatedDateTime() : LocalDateTime.now())
-                        .orderType(order.getValue().getOrderType())
-                        .typeOfOrder(order.getValue().getTypeOfOrder())
                         .otherDetails(order.getValue().getOtherDetails().toBuilder()
                                           .orderServedDate(null)
                                           .createdBy(order.getValue().getOtherDetails().getCreatedBy())
