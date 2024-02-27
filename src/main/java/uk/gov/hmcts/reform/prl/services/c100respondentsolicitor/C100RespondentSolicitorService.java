@@ -1294,15 +1294,12 @@ public class C100RespondentSolicitorService {
         ObjectMapper om = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("=======KKKK=====" + result);
+        System.out.println("=======CCCCCC=====" + result);
 
         caseDataUpdated.put("draftC7ResponseDoc", document);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("P1P1P1P1P1P1 {}",documentLanguage);
-        log.info("P1P1P1P1P1P1 {}",documentLanguage.isGenEng());
-        log.info("P1P1P1P1P1P1 {}",documentLanguage.isGenWelsh());
-        if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null
-                && Yes.equals(caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+        log.info("MMMMMMM {}",documentLanguage);
+        if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null) {
             log.info("11111111111fff");
             if (documentLanguage.isGenEng()) {
                 log.info("2222222fff");
