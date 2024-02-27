@@ -563,8 +563,8 @@ public class DraftAnOrderService {
             }
         }
         return OrderDetails.builder()
-            .orderType(draftOrder.getOrderTypeId())
-            .orderTypeId(String.valueOf(draftOrder.getOrderType()))
+            .orderType(String.valueOf(draftOrder.getOrderType()))
+            .orderTypeId(draftOrder.getOrderTypeId())
             .typeOfOrder(typeOfOrder != null
                              ? typeOfOrder.getDisplayedValue() : null)
             .doesOrderClosesCase(caseData.getDoesOrderClosesCase())

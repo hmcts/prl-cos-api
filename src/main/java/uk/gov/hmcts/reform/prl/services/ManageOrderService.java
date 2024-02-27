@@ -971,8 +971,8 @@ public class ManageOrderService {
         SelectTypeOfOrderEnum typeOfOrder = CaseUtils.getSelectTypeOfOrder(caseData);
         String orderSelectionType = CaseUtils.getOrderSelectionType(caseData);
         List<Element<OrderDetails>> newOrderDetails = new ArrayList<>();
-        newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrder)
-                                   .orderTypeId(flagSelectedOrderId)
+        newOrderDetails.add(element(OrderDetails.builder().orderType(flagSelectedOrderId)
+                                   .orderTypeId(flagSelectedOrder)
                                    .orderDocument(caseData.getUploadOrderDoc())
                                    .isTheOrderAboutChildren(caseData.getManageOrders().getIsTheOrderAboutChildren())
                                    .isTheOrderAboutAllChildren(caseData.getManageOrders().getIsTheOrderAboutAllChildren())
@@ -2270,8 +2270,8 @@ public class ManageOrderService {
     private OrderDetails getNewOrderDetails(String flagSelectedOrderId, String flagSelectedOrder,
                                             CaseData caseData, SelectTypeOfOrderEnum typeOfOrder,
                                             ServeOrderData serveOrderData) {
-        return OrderDetails.builder().orderType(flagSelectedOrder)
-            .orderTypeId(flagSelectedOrderId)
+        return OrderDetails.builder().orderType(flagSelectedOrderId)
+            .orderTypeId(flagSelectedOrder)
             .withdrawnRequestType(null != caseData.getManageOrders().getWithdrawnOrRefusedOrder()
                                       ? caseData.getManageOrders().getWithdrawnOrRefusedOrder().getDisplayedValue() : null)
             .isWithdrawnRequestApproved(getWithdrawRequestInfo(caseData))
