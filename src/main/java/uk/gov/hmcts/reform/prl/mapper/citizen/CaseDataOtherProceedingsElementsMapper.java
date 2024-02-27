@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.Order;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.OrderDate;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.ProceedingDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
@@ -20,17 +19,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION;
 import static uk.gov.hmcts.reform.prl.enums.ProceedingsEnum.ongoing;
 import static uk.gov.hmcts.reform.prl.enums.ProceedingsEnum.previous;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.no;
 import static uk.gov.hmcts.reform.prl.enums.YesNoDontKnow.yes;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper.getCitizenQuarantineDocuments;
 
 public class CaseDataOtherProceedingsElementsMapper {
 
@@ -38,16 +34,14 @@ public class CaseDataOtherProceedingsElementsMapper {
     }
 
     public static void updateOtherProceedingsElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
-                                                                 C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements,
-                                                                 List<Element<QuarantineLegalDoc>> quarantineDocList) {
+                                                                 C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements) {
         caseDataBuilder
                 .previousOrOngoingProceedingsForChildren(buildPreviousOrOngoingProceedingsForChildren(c100RebuildOtherProceedingsElements))
-                .existingProceedings(buildExistingProceedings(c100RebuildOtherProceedingsElements, caseDataBuilder, quarantineDocList));
+                .existingProceedings(buildExistingProceedings(c100RebuildOtherProceedingsElements));
     }
 
-    private static List<Element<ProceedingDetails>> buildExistingProceedings(C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements,
-                                                                             CaseData.CaseDataBuilder caseDataBuilder,
-                                                                             List<Element<QuarantineLegalDoc>> quarantineDocList) {
+    private static List<Element<ProceedingDetails>> buildExistingProceedings(C100RebuildOtherProceedingsElements
+                                                                                     c100RebuildOtherProceedingsElements) {
         List<Element<ProceedingDetails>> ordersElements = new ArrayList<>();
         if (nonNull(c100RebuildOtherProceedingsElements.getCourtProceedingsOrders())
                 && CollectionUtils.isNotEmpty(Arrays.asList(c100RebuildOtherProceedingsElements.getCourtProceedingsOrders()))) {
@@ -80,19 +74,6 @@ public class CaseDataOtherProceedingsElementsMapper {
             for (List<Order> orderList : ordersLists) {
                 ordersElements.addAll(orderList.stream()
                         .map(order -> mapToProceedingDetails(order, order.getTypeOfOrderEnum())).toList());
-                orderList.forEach(order -> {
-                    //move documents to quarantine
-                    Optional.of(getCitizenQuarantineDocuments(
-                            caseDataBuilder.build(),
-                            order.getOrderDocument(),
-                            PREVIOUS_ORDERS_SUBMITTED_WITH_APPLICATION,
-                            "Prev orders submitted with application"
-                        ))
-                        .ifPresent(quarantineDocList::addAll);
-
-                    //map citizen to solicitor fields for other proceedings
-                    ordersElements.add(mapToProceedingDetails(order, order.getTypeOfOrderEnum()));
-                });
             }
 
             return ordersElements;
@@ -206,6 +187,7 @@ public class CaseDataOtherProceedingsElementsMapper {
                 .dateEnded(buildDate(endDate))
                 .typeOfOrder(List.of(typeOfOrderEnum))
                 .nameOfCourt(order.getOrderDetail())
+                .uploadRelevantOrder(buildDocument(order.getOrderDocument()))
                 .build()).build();
     }
 
@@ -229,7 +211,7 @@ public class CaseDataOtherProceedingsElementsMapper {
     }
 
     private static YesNoDontKnow buildPreviousOrOngoingProceedingsForChildren(C100RebuildOtherProceedingsElements
-                                                                                  c100RebuildOtherProceedingsElements) {
+                                                                                      c100RebuildOtherProceedingsElements) {
         if (Yes.equals(c100RebuildOtherProceedingsElements.getChildrenInvolvedCourtCase())
                 || Yes.equals(c100RebuildOtherProceedingsElements.getCourtOrderProtection())) {
             return yes;
