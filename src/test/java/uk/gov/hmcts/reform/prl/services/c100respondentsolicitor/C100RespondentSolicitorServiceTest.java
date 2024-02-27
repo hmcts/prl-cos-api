@@ -152,8 +152,9 @@ public class C100RespondentSolicitorServiceTest {
     @Mock
     OrganisationService organisationService;
 
-    @Mock
     ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
+
+    ResponseToAllegationsOfHarm responseToAllegationsOfHarm2;
 
     boolean mandatoryFinished = false;
 
@@ -267,6 +268,10 @@ public class C100RespondentSolicitorServiceTest {
                 .responseToAllegationsOfHarmYesOrNoResponse(Yes)
                 .responseToAllegationsOfHarmDocument(Document.builder().build())
                 .build();
+
+        responseToAllegationsOfHarm2 = ResponseToAllegationsOfHarm.builder()
+            .responseToAllegationsOfHarmYesOrNoResponse(No)
+            .build();
 
         User user = User.builder().email("respondent@example.net")
                 .idamId("1234-5678").solicitorRepresented(Yes).build();
@@ -815,7 +820,7 @@ public class C100RespondentSolicitorServiceTest {
             "c100ResSolConfirmOrEditContactDetailsA", "c100ResSolAttendingTheCourtA", "c100ResSolMiamA",
             "c100ResSolCurrentOrPreviousProceedingsA",
             "c100ResSolAllegationsOfHarmA", "c100ResSolInternationalElementA", "c100ResSolLitigationCapacityA",
-            "c100ResSolViewResponseDraftDocumentA"};
+            "c100ResSolViewResponseDraftDocumentA", "c100ResSolResponseToAllegationsOfHarmA"};
         for (String event : events) {
             callbackRequest.setEventId(event);
             Map<String, Object> response = respondentSolicitorService.populateAboutToStartCaseData(
@@ -1967,7 +1972,7 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    public void populateAboutToSubmitCaseDataSolResponseToAllegationOfHarmTest() {
+    public void populateAboutToSubmitCaseDataSolResponseToAllegationOfHarmYesTest() {
 
         Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
 
@@ -1983,6 +1988,43 @@ public class C100RespondentSolicitorServiceTest {
                         .data(stringObjectMap)
                         .build())
                 .build();
+
+        Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest);
+
+        assertTrue(response.containsKey("respondents"));
+    }
+
+    @Test
+    public void populateAboutToSubmitCaseDataSolResponseToAllegationOfHarmNoTest() {
+
+        Element<PartyDetails> wrappedRespondents1 = Element.<PartyDetails>builder()
+            .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+            .value(respondent2).build();
+        List<Element<PartyDetails>> respondentList = new ArrayList<>();
+        respondentList.add(wrappedRespondents1);
+
+        CaseData caseData = CaseData.builder().respondents(respondentList).id(1)
+            .caseTypeOfApplication(C100_CASE_TYPE)
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                                         .responseToAllegationsOfHarm(responseToAllegationsOfHarm2)
+                                         .build())
+            .build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(Mockito.<RespondentAllegationsOfHarmData>any(),
+                                       Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
+        List<String> errorList = new ArrayList<>();
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .eventId("c100ResSolResponseToAllegationsOfHarmA")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
 
         Map<String, Object> response = respondentSolicitorService.populateAboutToSubmitCaseData(callbackRequest);
 
