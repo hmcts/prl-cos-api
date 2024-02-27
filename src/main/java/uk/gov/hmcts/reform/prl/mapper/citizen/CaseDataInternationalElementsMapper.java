@@ -17,7 +17,7 @@ public class CaseDataInternationalElementsMapper {
     private CaseDataInternationalElementsMapper() {
     }
 
-    public static void updateInternationalElementsForCaseData(CaseData.CaseDataBuilder caseDataBuilder,
+    public static void updateInternationalElementsForCaseData(CaseData.CaseDataBuilder<?,?> caseDataBuilder,
                                                               C100RebuildInternationalElements c100RebuildInternationalElements) {
         caseDataBuilder
                 .habitualResidentInOtherState(buildHabitualResidentInOtherState(c100RebuildInternationalElements))

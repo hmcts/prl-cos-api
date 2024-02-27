@@ -558,7 +558,6 @@
             "email": "op1@test.com",
             "gender": "male",
             "address": {
-              "County": "",
               "Country": "United Kingdom",
               "PostCode": "SY23 3TL",
               "PostTown": "Aberystwyth",
@@ -1133,7 +1132,6 @@
             "email": "op2@test.com",
             "gender": "male",
             "address": {
-              "County": "",
               "Country": "United Kingdom",
               "PostCode": "SY23 3TL",
               "PostTown": "Aberystwyth",
@@ -1716,6 +1714,11 @@
             "OrganisationID" : "ECKZ4BE",
             "OrganisationName" : "Aat orgtest65"
           },
+          "solicitorAddress" : {
+            "AddressLine1" : "Physio In The City",
+            "AddressLine2" : "1 Kingdom Street",
+            "PostCode" : "W2 6BD"
+          },
           "representativeFirstName" : "applicant",
           "representativeLastName" : "solicitor",
           "solicitorEmail" : "applicant.solicitor@example.com",
@@ -1747,6 +1750,11 @@
           "solicitorOrg" : {
             "OrganisationID" : "ECKZ4BE",
             "OrganisationName" : "Aat orgtest65"
+          },
+          "solicitorAddress" : {
+            "AddressLine1" : "Physio In The City",
+            "AddressLine2" : "1 Kingdom Street",
+            "PostCode" : "W2 6BD"
           },
           "representativeFirstName" : "respondent",
           "representativeLastName" : "solicitor",
@@ -2080,6 +2088,11 @@
             "OrganisationID" : "O5RBZSW",
             "OrganisationName" : "test 1"
           },
+          "solicitorAddress" : {
+            "AddressLine1" : "Physio In The City",
+            "AddressLine2" : "1 Kingdom Street",
+            "PostCode" : "W2 6BD"
+          },
           "representativeFirstName" : "Ted",
           "representativeLastName" : "Robinson",
           "solicitorEmail" : "test@example.com",
@@ -2110,6 +2123,11 @@
           "solicitorOrg" : {
             "OrganisationID" : "EJK3DHI",
             "OrganisationName" : "pppptest1"
+          },
+          "solicitorAddress" : {
+            "AddressLine1" : "Physio In The City",
+            "AddressLine2" : "1 Kingdom Street",
+            "PostCode" : "W2 6BD"
           },
           "representativeFirstName" : "Ted",
           "representativeLastName" : "Robinson",
@@ -2244,6 +2262,11 @@
             "OrganisationID" : "EJK3DHI",
             "OrganisationName" : "pppptest1"
           },
+          "solicitorAddress" : {
+            "AddressLine1" : "Physio In The City",
+            "AddressLine2" : "1 Kingdom Street",
+            "PostCode" : "W2 6BD"
+          },
           "representativeFirstName" : "Ted",
           "representativeLastName" : "Robinson",
           "solicitorEmail" : "test@example.com",
@@ -2274,6 +2297,11 @@
           "solicitorOrg" : {
             "OrganisationID" : "EJK3DHI",
             "OrganisationName" : "pppptest1"
+          },
+          "solicitorAddress" : {
+            "AddressLine1" : "Physio In The City",
+            "AddressLine2" : "1 Kingdom Street",
+            "PostCode" : "W2 6BD"
           },
           "representativeFirstName" : "Ted",
           "representativeLastName" : "Robinson",

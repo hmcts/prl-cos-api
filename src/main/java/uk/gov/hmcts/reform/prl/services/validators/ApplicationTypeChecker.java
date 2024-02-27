@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.validators;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -13,10 +14,10 @@ import static uk.gov.hmcts.reform.prl.services.validators.EventCheckerHelper.any
 
 
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationTypeChecker implements EventChecker {
 
-    @Autowired
-    TaskErrorService taskErrorService;
+    private final TaskErrorService taskErrorService;
 
     public boolean isStarted(CaseData caseData) {
         return anyNonEmpty(

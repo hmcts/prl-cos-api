@@ -11,10 +11,10 @@ import java.util.Optional;
 @Getter
 public enum RespondentSolicitorEvents {
     CONSENT("c100ResSolConsentingToApplication", "Do you give your consent?", "respondentConsentToApplication"),
-    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep your details private", "keepContactDetailsPrivate"),
+    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep details private", "keepContactDetailsPrivate"),
     CONFIRM_EDIT_CONTACT_DETAILS(
         "c100ResSolConfirmOrEditContactDetails",
-        "Edit your contact details",
+        "Edit contact details",
         "resSolConfirmEditContactDetails"
     ),
     ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "Attending the court", "respondentAttendingTheCourt"),
@@ -32,8 +32,8 @@ public enum RespondentSolicitorEvents {
         + "respondentChildAbduction,respondentOtherConcerns"),
     INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild"),
     ABILITY_TO_PARTICIPATE(
-        "c100ResSolAbilityToParticipate",
-        "Ability to participate",
+        "c100ResSolLitigationCapacity",
+        "Litigation capacity",
         "abilityToParticipateInProceedings"
     ),
     VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response", ""),

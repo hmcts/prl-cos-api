@@ -2,15 +2,18 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
-import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.skyscreamer.jsonassert.JSONAssert;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.utils.TestUtil;
 
 import java.io.IOException;
@@ -29,7 +32,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.prohibitedStepsOrder;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CaseDataMapperTest {
+ class CaseDataMapperTest {
 
     private static final String CASE_TYPE = "C100";
     private final ObjectMapper mapper = new ObjectMapper();
@@ -39,13 +42,25 @@ public class CaseDataMapperTest {
 
     private CaseData caseData;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
+        setValue();
+    }
+
+    @BeforeEach
+    public void beforeEach() throws IOException {
+        setValue();
+    }
+
+    private void setValue() throws IOException {
+        MockitoAnnotations.openMocks(this);
         mapper.registerModule(new JSR310Module());
         caseData = CaseData.builder()
                 .id(1234567891234567L)
                 .caseTypeOfApplication(CASE_TYPE)
-                .citizenQuarantineDocsList(new ArrayList<>())
+                .documentManagementDetails(DocumentManagementDetails.builder()
+                                               .citizenQuarantineDocsList(new ArrayList<>())
+                                               .build())
                 .c100RebuildData(C100RebuildData.builder()
                 .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
                 .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
@@ -66,7 +81,6 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    @Ignore
     public void testCaseDataMapper() throws IOException {
 
         //When
@@ -99,7 +113,6 @@ public class CaseDataMapperTest {
     }
 
     @Test
-    @Ignore
     public void testCaseDataMapperWhenNoOtherProceedingOrdersExist() throws IOException {
 
         //Given
@@ -190,44 +203,13 @@ public class CaseDataMapperTest {
         assertNull(updatedCaseData.getOtherChildren());
     }
 
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields1() throws IOException {
-        CaseData caseData1 = caseData
-                .toBuilder()
-                .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                        .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra1.json"))
-                        .build())
-                .build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
-        //Then
-        assertNotNull(updatedCaseData);
-    }
-
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields2() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/ra1.json", "classpath:c100-rebuild/ra2.json", "classpath:c100-rebuild/ra3.json"})
+    void testCaseDataMapperReasonableAdjustmentsExtraFields1(String resourcePath) throws IOException {
         CaseData caseData1 = caseData
             .toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                                 .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra2.json"))
-                                 .build())
-            .build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-
-        //Then
-        assertNotNull(updatedCaseData);
-    }
-
-    @Test
-    public void testCaseDataMapperReasonableAdjustmentsExtraFields3() throws IOException {
-        CaseData caseData1 = caseData
-            .toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                                 .c100RebuildReasonableAdjustments(TestUtil.readFileFrom("classpath:c100-rebuild/ra3.json"))
+                                 .c100RebuildReasonableAdjustments(TestUtil.readFileFrom(resourcePath))
                                  .build())
             .build();
 
@@ -297,7 +279,8 @@ public class CaseDataMapperTest {
 
         //When
         CaseData caseData1 = CaseData.builder()
-            .citizenQuarantineDocsList(new ArrayList<>())
+            .documentManagementDetails(DocumentManagementDetails.builder().citizenQuarantineDocsList(new ArrayList<>())
+                                           .build())
             .c100RebuildData(C100RebuildData.builder().build()).build();
         CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
 
@@ -440,13 +423,15 @@ public class CaseDataMapperTest {
         assertNotNull(updatedCaseData.getConsentOrder());
     }
 
-    @Test
-    public void testCaseDataMapperForSafetyConcerns() throws IOException {
+    @ParameterizedTest
+    @ValueSource(strings = {"classpath:c100-rebuild/saftycrns.json", "classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json",
+        "classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"})
+     void testCaseDataMapperForSafetyConcerns(String resourcePath) throws IOException {
         //Given
         CaseData caseData1 = caseData.toBuilder()
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
                                  .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
-                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrns.json"))
+                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom(resourcePath))
                                  .build()).build();
 
         //When
@@ -466,40 +451,6 @@ public class CaseDataMapperTest {
             .c100RebuildData(caseData.getC100RebuildData().toBuilder()
                                  .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
                                  .c100RebuildSafetyConcerns(whenHaveSafetyConcernsIsNo)
-                                 .build()).build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-        //Then
-        assertNotNull(updatedCaseData);
-
-    }
-
-    @Test
-    public void testCaseWithoutDomesticAbuses() throws IOException {
-
-        //Given
-        CaseData caseData1 = caseData.toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
-                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrnsWithoutDomesticAbuse.json"))
-                                 .build()).build();
-
-        //When
-        CaseData updatedCaseData = caseDataMapper.buildUpdatedCaseData(caseData1);
-        //Then
-        assertNotNull(updatedCaseData);
-
-    }
-
-    @Test
-    public void testCaseDataMapperForSafetyConcernsWithoutChildAbuses() throws IOException {
-
-        //Given
-        CaseData caseData1 = caseData.toBuilder()
-            .c100RebuildData(caseData.getC100RebuildData().toBuilder()
-                                 .c100RebuildChildDetails(TestUtil.readFileFrom("classpath:c100-rebuild/cd.json"))
-                                 .c100RebuildSafetyConcerns(TestUtil.readFileFrom("classpath:c100-rebuild/saftycrnsWithoutChildAbuses.json"))
                                  .build()).build();
 
         //When
