@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
@@ -15,6 +16,7 @@ import java.util.List;
 @Data
 @Builder(toBuilder = true)
 @AllArgsConstructor
+@NoArgsConstructor
 public class DocumentManagementDetails {
 
     @JsonProperty("isC8DocumentPresent")
@@ -24,16 +26,16 @@ public class DocumentManagementDetails {
     private List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList;
     @JsonProperty("courtStaffQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> courtStaffQuarantineDocsList;
-    @JsonProperty("citizenUploadQuarantineDocsList")
-    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
-    @JsonProperty("citizenQuarantineDocsList")
-    private List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList;
-
-    @JsonProperty("tempQuarantineDocumentList")
-    List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList;
     @JsonProperty("cafcassQuarantineDocsList")
     private List<Element<QuarantineLegalDoc>> cafcassQuarantineDocsList;
+    @JsonProperty("citizenQuarantineDocsList")
+    private List<Element<QuarantineLegalDoc>> citizenQuarantineDocsList;
+    @JsonProperty("tempQuarantineDocumentList")
+    List<Element<QuarantineLegalDoc>> tempQuarantineDocumentList;
 
+    //NOT IN USE
+    @JsonProperty("citizenUploadQuarantineDocsList")
+    private List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList;
 
     //PRL-3562 - manage document enhancements
     @JsonProperty("manageDocuments")
@@ -41,7 +43,4 @@ public class DocumentManagementDetails {
     private String manageDocumentsTriggeredBy;
     private String manageDocumentsRestrictedFlag;
 
-
-    public DocumentManagementDetails() {
-    }
 }

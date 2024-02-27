@@ -12,27 +12,25 @@ import uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.managedocuments.ManageDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentCategory;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.DocumentRequest;
 import uk.gov.hmcts.reform.prl.models.user.UserRoles;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.apache.commons.collections.CollectionUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.BULK_SCAN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
@@ -248,25 +246,16 @@ public class DocumentUtils {
         return loggedInUserType;
     }
 
-    public static List<Element<QuarantineLegalDoc>> getExistingCitizenQuarantineDocuments(CaseData caseData) {
-        if (isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())) {
-            return caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList();
-        }
-        return new ArrayList<>();
-    }
-
     public static QuarantineLegalDoc addCitizenQuarantineFields(QuarantineLegalDoc quarantineLegalDoc,
-                                                                String documentParty,
-                                                                String categoryId,
-                                                                String categoryName,
-                                                                String notes,
+                                                                DocumentRequest documentRequest,
+                                                                DocumentCategory category,
                                                                 ServedParties servedParties) {
         return quarantineLegalDoc.toBuilder()
-            .documentParty(documentParty)
+            .documentParty(documentRequest.getPartyType())
             .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
-            .categoryId(categoryId)
-            .categoryName(categoryName)
-            .notes(notes)
+            .categoryId(category.getCategoryId())
+            .categoryName(category.getDisplayedValue())
+            .restrictedDetails(documentRequest.getRestrictDocumentDetails())
             .partyDetails(servedParties)
             .build();
     }

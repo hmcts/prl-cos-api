@@ -45,6 +45,7 @@ import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.UploadDocumentService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
+import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.NumberToWords;
@@ -77,6 +78,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_DRAFT_H
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FL401_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_ID;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DA_LIST_ON_NOTICE_FL404B_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_BLANK_HINT;
@@ -133,7 +135,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.YOUR_WITNESS_ST
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.addCitizenQuarantineFields;
-import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.getExistingCitizenQuarantineDocuments;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @Slf4j
@@ -285,6 +286,7 @@ public class DocumentGenService {
     private final DgsApiClient dgsApiClient;
     private final ObjectMapper objectMapper;
     private final AuthTokenGenerator authTokenGenerator;
+    private final ManageDocumentsService manageDocumentsService;
 
     private static final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
 
@@ -1325,7 +1327,9 @@ public class DocumentGenService {
             return null;
         }
 
-        List<Element<QuarantineLegalDoc>> citizenQuarantineDocs = getExistingCitizenQuarantineDocuments(caseData);
+        List<Element<QuarantineLegalDoc>> citizenQuarantineDocs = manageDocumentsService.getQuarantineDocs(caseData,
+                                                                                                           CITIZEN,
+                                                                                                           false);
         log.info("Existing quarantine docs {}", citizenQuarantineDocs);
         if (isNotBlank(documentRequest.getCategoryId())
             && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
@@ -1340,13 +1344,11 @@ public class DocumentGenService {
             for (Document document : documentRequest.getDocuments()) {
                 QuarantineLegalDoc quarantineLegalDoc = getCitizenQuarantineDocument(document);
                 quarantineLegalDoc = addCitizenQuarantineFields(quarantineLegalDoc,
-                                                                documentRequest.getPartyType(),
-                                                                category.getCategoryId(),
-                                                                category.getDisplayedValue(),
-                                                                documentRequest.getRestrictDocumentDetails(),
+                                                                documentRequest,
+                                                                category,
                                                                 servedParties);
                 log.info("quarantineLegalDoc {}", quarantineLegalDoc);
-                //add to citizen quarantine list
+                //move citizen quarantine list
                 citizenQuarantineDocs.add(element(quarantineLegalDoc));
             }
 
