@@ -1282,8 +1282,24 @@ public class C100RespondentSolicitorService {
 
     public Map<String, Object> generateDraftDocumentsForRespondent(CallbackRequest callbackRequest, String authorisation) throws Exception {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-        Map<String, Object> dataMap = populateDataMap(callbackRequest, null);
+
+
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+
+        Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
+        Element<PartyDetails> solicitorRepresentedRespondent = null;
+        if (solicitorRole.isPresent()) {
+            solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
+            if (null != solicitorRepresentedRespondent) {
+                String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
+                        + solicitorRepresentedRespondent.getValue().getLastName();
+
+                caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
+            }
+
+        }
+        Map<String, Object> dataMap = populateDataMap(callbackRequest, solicitorRepresentedRespondent);
         Document document = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
@@ -1299,7 +1315,9 @@ public class C100RespondentSolicitorService {
         caseDataUpdated.put("draftC7ResponseDoc", document);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         log.info("MMMMMMM {}",documentLanguage);
-        if (caseData.getRespondentSolicitorData().getRespondentAllegationsOfHarmData() != null) {
+        if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue().getResponse() != null
+                && solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
+                && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
             log.info("11111111111fff");
             if (documentLanguage.isGenEng()) {
                 log.info("2222222fff");
@@ -1324,19 +1342,6 @@ public class C100RespondentSolicitorService {
                 );
                 caseDataUpdated.put("draftC1ADocWelsh", documentForC1AWelsh);
             }
-        }
-        log.info("AAAAAAA -->{}", caseDataUpdated);
-        Optional<SolicitorRole> solicitorRole = getSolicitorRole(callbackRequest);
-        Element<PartyDetails> solicitorRepresentedRespondent = null;
-        if (solicitorRole.isPresent()) {
-            solicitorRepresentedRespondent = findSolicitorRepresentedRespondents(callbackRequest, solicitorRole.get());
-            if (null != solicitorRepresentedRespondent) {
-                String representedRespondentName = solicitorRepresentedRespondent.getValue().getFirstName() + " "
-                        + solicitorRepresentedRespondent.getValue().getLastName();
-
-                caseDataUpdated.put(RESPONDENT_NAME_FOR_RESPONSE, representedRespondentName);
-            }
-
         }
         return caseDataUpdated;
     }
@@ -1376,8 +1381,8 @@ public class C100RespondentSolicitorService {
                                                         UserDetails userDetails, List<QuarantineLegalDoc> quarantineLegalDocList) {
         CaseData parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         String userRole = CaseUtils.getUserRole(userDetails);
+        manageDocumentsService.setFlagsForWaTask(parsedCaseData, caseDataUpdated, userRole, quarantineLegalDocList.get(0));
         for (QuarantineLegalDoc eachDoc : quarantineLegalDocList) {
-            manageDocumentsService.setFlagsForWaTask(parsedCaseData, caseDataUpdated, userRole, eachDoc);
             manageDocumentsService.moveDocumentsToQuarantineTab(eachDoc, parsedCaseData, caseDataUpdated, userRole);
             parsedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
         }
