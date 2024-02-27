@@ -2,9 +2,7 @@ package uk.gov.hmcts.reform.prl.mapper.citizen;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildChildDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildConsentOrderDetails;
@@ -20,23 +18,9 @@ import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildReasonableAdjustmen
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildSafetyConcernsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildUrgencyElements;
-import uk.gov.hmcts.reform.prl.models.c100rebuild.Document;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
-
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.APPLICANT_APPLICATION;
-import static uk.gov.hmcts.reform.prl.constants.ManageDocumentsCategoryConstants.MIAM_CERTIFICATE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SERVED_PARTY_APPLICANT;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataApplicantElementsMapper.updateApplicantElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataChildDetailsElementsMapper.updateChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataConsentOrderDetailsElementsMapper.updateConsentOrderDetailsForCaseData;
@@ -45,19 +29,14 @@ import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataInternationalElemen
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMiamElementsMapper.updateMiamElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherChildrenDetailsElementsMapper.updateOtherChildDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherPersonsElementsMapper.updateOtherPersonDetailsElementsForCaseData;
-import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsElementsMapper.buildDocument;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataOtherProceedingsElementsMapper.updateOtherProceedingsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataReasonableAdjustmentsElementsMapper.updateReasonableAdjustmentsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataRespondentDetailsElementsMapper.updateRespondentDetailsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataSafetyConcernsElementsMapper.updateSafetyConcernsElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataTypeOfOrderElementsMapper.updateTypeOfOrderElementsForCaseData;
 import static uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataUrgencyElementsMapper.updateUrgencyElementsForCaseData;
-import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.addCitizenQuarantineFields;
-import static uk.gov.hmcts.reform.prl.utils.DocumentUtils.getExistingCitizenQuarantineDocuments;
-import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 
-@Slf4j
 @Component
 public class CaseDataMapper {
 
@@ -67,16 +46,12 @@ public class CaseDataMapper {
     public static final String COMMA_SEPARATOR = ", ";
     public static final String HYPHEN_SEPARATOR = " - ";
 
-    private static final Date localZoneDate = Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE)).toInstant());
-
     public CaseData buildUpdatedCaseData(CaseData caseData) throws JsonProcessingException {
         C100RebuildChildDetailsElements c100RebuildChildDetailsElements = null;
         ObjectMapper mapper = new ObjectMapper();
         CaseData.CaseDataBuilder<?,?> caseDataBuilder = caseData.toBuilder();
 
         C100RebuildData c100RebuildData = caseData.getC100RebuildData();
-
-        List<Element<QuarantineLegalDoc>> quarantineDocList = new ArrayList<>();
 
         if (isNotEmpty(c100RebuildData.getC100RebuildInternationalElements())) {
             C100RebuildInternationalElements c100RebuildInternationalElements = mapper
@@ -99,7 +74,7 @@ public class CaseDataMapper {
         if (isNotEmpty(c100RebuildData.getC100RebuildOtherProceedings())) {
             C100RebuildOtherProceedingsElements c100RebuildOtherProceedingsElements = mapper
                     .readValue(c100RebuildData.getC100RebuildOtherProceedings(), C100RebuildOtherProceedingsElements.class);
-            updateOtherProceedingsElementsForCaseData(caseDataBuilder, c100RebuildOtherProceedingsElements, quarantineDocList);
+            updateOtherProceedingsElementsForCaseData(caseDataBuilder, c100RebuildOtherProceedingsElements);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildHearingUrgency())) {
@@ -112,12 +87,6 @@ public class CaseDataMapper {
             C100RebuildMiamElements c100RebuildMiamElements = mapper
                     .readValue(c100RebuildData.getC100RebuildMaim(), C100RebuildMiamElements.class);
             updateMiamElementsForCaseData(caseDataBuilder, c100RebuildMiamElements);
-
-            // for miam
-            Optional.of(getCitizenQuarantineDocuments(caseData, c100RebuildMiamElements.getMiamCertificate(),
-                                                              MIAM_CERTIFICATE,"MIAM Certificate"))
-                .ifPresent(quarantineDocList::addAll);
-
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildChildDetails())) {
@@ -160,11 +129,6 @@ public class CaseDataMapper {
             C100RebuildConsentOrderDetails c100RebuildConsentOrderDetails = mapper
                     .readValue(c100RebuildData.getC100RebuildConsentOrderDetails(), C100RebuildConsentOrderDetails.class);
             updateConsentOrderDetailsForCaseData(caseDataBuilder, c100RebuildConsentOrderDetails);
-
-            //for c100Rebuild of Consent Documents
-            Optional.of(getCitizenQuarantineDocuments(caseData, c100RebuildConsentOrderDetails.getConsentOrderCertificate(),
-                                                              APPLICANT_APPLICATION,"Applicant Application"))
-                .ifPresent(quarantineDocList::addAll);
         }
 
         if (isNotEmpty(c100RebuildData.getC100RebuildSafetyConcerns())) {
@@ -175,32 +139,6 @@ public class CaseDataMapper {
                                                     c100RebuildChildDetailsElements);
         }
 
-        caseDataBuilder.documentManagementDetails(DocumentManagementDetails.builder()
-                                                      .citizenQuarantineDocsList(quarantineDocList)
-                                                      .build());
-
         return caseDataBuilder.build();
-    }
-
-    public static List<Element<QuarantineLegalDoc>> getCitizenQuarantineDocuments(CaseData caseData,
-                                                                                  uk.gov.hmcts.reform.prl.models.c100rebuild.Document uploadedDoc,
-                                                                                  String categoryId,
-                                                                                  String categoryName) {
-        List<Element<QuarantineLegalDoc>> citizenQuarantineDocs = getExistingCitizenQuarantineDocuments(caseData);
-
-        if (uploadedDoc != null) {
-            QuarantineLegalDoc quarantineLegalDoc = getCitizenQuarantineDocument(uploadedDoc);
-            quarantineLegalDoc = addCitizenQuarantineFields(quarantineLegalDoc, SERVED_PARTY_APPLICANT,
-                                                            categoryId, categoryName, null, null);
-
-            citizenQuarantineDocs.add(element(quarantineLegalDoc));
-        }
-        return citizenQuarantineDocs;
-    }
-
-    private static QuarantineLegalDoc getCitizenQuarantineDocument(Document uploadedDoc) {
-        return QuarantineLegalDoc.builder()
-            .citizenQuarantineDocument(buildDocument(uploadedDoc).toBuilder()
-                                           .documentCreatedOn(localZoneDate).build()).build();
     }
 }
