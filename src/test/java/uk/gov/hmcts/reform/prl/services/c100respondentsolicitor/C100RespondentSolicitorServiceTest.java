@@ -877,25 +877,27 @@ public class C100RespondentSolicitorServiceTest {
             .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
             .value(respondent).build();
         caseData = caseData.toBuilder()
-            .respondentSolicitorData(RespondentSolicitorData.builder().respondentAohYesNo(Yes).build())
+            .respondentSolicitorData(RespondentSolicitorData.builder()
+                                         .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                                         .build())
             .respondents(List.of(wrappedRespondents, wrappedRespondents))
             .build();
 
         when(documentLanguageService.docGenerateLang(any())).thenReturn(DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build());
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
-                .CallbackRequest.builder()
-                .eventId("c100ResSolConsentingToApplicationA")
-                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
-                        .id(123L)
-                        .data(stringObjectMap)
-                        .build())
-                .build();
+            .CallbackRequest.builder()
+            .eventId("c100ResSolConsentingToApplicationA")
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .build())
+            .build();
 
         List<String> errorList = new ArrayList<>();
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
-                callbackRequest, errorList, authToken
+            callbackRequest, errorList, authToken
         );
 
         assertTrue(response.containsKey("respondents"));
