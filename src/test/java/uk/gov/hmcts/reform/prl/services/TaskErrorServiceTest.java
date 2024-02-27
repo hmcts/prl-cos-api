@@ -60,6 +60,12 @@ public class TaskErrorServiceTest {
     }
 
     @Test
+    public void whenClearingErrorsCalledThenMapCleared() {
+        taskErrorService.clearErrors();
+        assertThat(taskErrorService.eventErrors).isEmpty();
+    }
+
+    @Test
     public void whenGetErrorsCalledThenListOfErrorsReturned() {
         taskErrorService.addEventError(event, error, errorString);
 
