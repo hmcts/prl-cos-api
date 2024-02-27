@@ -1043,17 +1043,18 @@ public class ManageOrderEmailService {
     }
 
     private void sendEmailToParty1(String emailAddress, CaseData caseData, String authorisation,
-                                   String serveParty) {
+                                   List<Document> orderDocuments, String serveParty) {
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
         dynamicData.put("name",serveParty);
-
+        orderDocuments = new ArrayList<>();
         try {
             sendgridService.sendEmailUsingTemplateWithAttachments(
                 SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL,
                 authorisation,
                 SendgridEmailConfig.builder().toEmailAddress(
                     emailAddress).dynamicTemplateData(
-                    dynamicData).languagePreference(LanguagePreference.english).build()
+                    dynamicData).listOfAttachments(
+                orderDocuments).languagePreference(LanguagePreference.english).build()
             );
         } catch (IOException e) {
             log.error("there is a failure in sending email for email {} with exception {}",
