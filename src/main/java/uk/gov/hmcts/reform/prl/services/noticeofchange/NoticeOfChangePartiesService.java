@@ -964,6 +964,19 @@ public class NoticeOfChangePartiesService {
             + " " + oldPartyDetails.getValue().getRepresentativeLastName() : newPartyDetails.getValue().getRepresentativeFirstName()
             + " " + newPartyDetails.getValue().getRepresentativeLastName();
         String accessCode = getAccessCode(caseData, newPartyDetails);
+
+        List<Element<CaseInvite>> caseInvites = caseData.getCaseInvites() != null
+            ? caseData.getCaseInvites() : new ArrayList<>();
+        if (accessCode.equalsIgnoreCase(BLANK_STRING)) {
+            generateNewAccessCode(
+                caseData,
+                newPartyDetails,
+                solicitorRole, caseInvites
+            );
+        } else {
+            log.info("Set existing pin citizen after removing legal representation");
+        }
+
         NoticeOfChangeEvent noticeOfChangeEvent = prepareNoticeOfChangeEvent(
             caseData,
             solicitorRole,
