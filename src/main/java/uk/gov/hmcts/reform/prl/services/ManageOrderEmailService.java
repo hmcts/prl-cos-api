@@ -447,9 +447,11 @@ public class ManageOrderEmailService {
         } else {
             caseData.getApplicants().forEach(party -> {
                 log.info("party name ====> " + party.getValue().getFirstName());
-                if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
-                    && isPartyProvidedWithEmail(party.getValue())) {
-                    log.info("===== CA serving unrepresented applicant via email ====");
+                if (true) {
+                    log.info("=====  CA serving unrepresented applicant via email ====");
+                    Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+                    sendEmailToParty1("anshika.nigam1@hmcts.net",  caseData,  authorisation,orderDocuments,
+                                      party.getValue().getFirstName());
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
                         && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
@@ -542,7 +544,25 @@ public class ManageOrderEmailService {
             log.error("Exception occurred in sending order docs to unrepresented applicant", e);
         }
     }
-
+    private void sendEmailToParty1(String emailAddress, CaseData caseData, String authorisation,
+                                   List<Document> orderDocuments, String serveParty) {
+        Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
+        dynamicData.put("name",serveParty);
+        try {
+            sendgridService.sendEmailUsingTemplateWithAttachments(
+                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL,
+                authorisation,
+                SendgridEmailConfig.builder().toEmailAddress(
+                    emailAddress).dynamicTemplateData(
+                    dynamicData).listOfAttachments(
+                    orderDocuments).languagePreference(LanguagePreference.english).build()
+            );
+        } catch (IOException e) {
+            log.error("there is a failure in sending email for email {} with exception {}",
+                      emailAddress, e.getMessage()
+            );
+        }
+    }
     private void sendPersonalServiceNotifications(String solicitorEmail,
                                                   String respondentOption,
                                                   String authorisation, List<Document> orderDocuments, Map<String,
