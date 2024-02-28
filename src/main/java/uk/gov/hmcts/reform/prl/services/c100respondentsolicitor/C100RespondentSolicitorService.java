@@ -1322,7 +1322,7 @@ public class C100RespondentSolicitorService {
                 caseDataUpdated.put("draftC1ADocWelsh", documentForC1AWelsh);
             }
         }
-        log.info("AAAAAAA {}",documentLanguage);
+        log.info("AAAAAAAnew {}",documentLanguage);
         return caseDataUpdated;
     }
 
