@@ -544,6 +544,7 @@ public class ManageOrderEmailService {
             log.error("Exception occurred in sending order docs to unrepresented applicant", e);
         }
     }
+
     private void sendEmailToParty1(String emailAddress, CaseData caseData, String authorisation,
                                    List<Document> orderDocuments, String serveParty) {
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
@@ -563,6 +564,7 @@ public class ManageOrderEmailService {
             );
         }
     }
+
     private void sendPersonalServiceNotifications(String solicitorEmail,
                                                   String respondentOption,
                                                   String authorisation, List<Document> orderDocuments, Map<String,
