@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
@@ -60,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -280,7 +282,14 @@ public class C100RespondentSolicitorService {
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
+        cleanUpRespondentTasksFieldOptions(updatedCaseData);
         return updatedCaseData;
+    }
+
+    private static void cleanUpRespondentTasksFieldOptions(Map<String, Object> updatedCaseData) {
+        for (String field : RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS.getCaseFieldName().split(COMMA)) {
+            updatedCaseData.remove(field);
+        }
     }
 
     private void buildResponseForRespondent(CaseData caseData,
@@ -348,9 +357,16 @@ public class C100RespondentSolicitorService {
     }
 
     private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent) {
+        List<Element<RespondentProceedingDetails>> respondentExistingProceedings
+            = YesNoDontKnow.yes.equals(caseData.getRespondentSolicitorData()
+                                           .getCurrentOrPastProceedingsForChildren())
+            ? caseData.getRespondentSolicitorData()
+            .getRespondentExistingProceedings() : null;
+
         return buildResponseForRespondent.toBuilder()
             .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
                                                      .getCurrentOrPastProceedingsForChildren())
+            .respondentExistingProceedings(respondentExistingProceedings)
             .build();
     }
 
