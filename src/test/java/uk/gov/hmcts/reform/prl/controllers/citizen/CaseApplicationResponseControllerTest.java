@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -354,6 +355,7 @@ public class CaseApplicationResponseControllerTest {
         CaseData caseData1 = caseApplicationResponseController
             .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
         assertNotNull(caseData1);
+        assertEquals(YesOrNo.Yes, caseData1.getRespondents().get(0).getValue().getResponse().getC7ResponseSubmitted());
     }
 
     @Test
