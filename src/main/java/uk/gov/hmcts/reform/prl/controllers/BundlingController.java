@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.DocumentLink;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.EventService;
@@ -105,7 +106,11 @@ public class BundlingController extends AbstractCallbackController {
                 historicalBundles.addAll(existingBundleInformation.getHistoricalBundles());
             }
             if (nonNull(existingBundleInformation.getCaseBundles())) {
-                historicalBundles.addAll(existingBundleInformation.getCaseBundles());
+                List<Bundle> existingCaseBundles = existingBundleInformation.getCaseBundles() ;
+                existingCaseBundles.forEach(existingBundle ->
+                                                 existingBundle.getValue().setHistoricalStitchedDocument(existingBundle.getValue().getStitchedDocument())
+                ) ;
+                historicalBundles.addAll(existingCaseBundles);
             }
             existingBundleInformation.setHistoricalBundles(historicalBundles);
             existingBundleInformation.setCaseBundles(null);
