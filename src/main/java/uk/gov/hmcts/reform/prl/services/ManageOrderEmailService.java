@@ -419,8 +419,8 @@ public class ManageOrderEmailService {
                                                     SoaSolicitorServingRespondentsEnum respondentOption) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        dynamicDataForEmail.put(ENGLISH_EMAIL, isNotEmpty(documentLanguage.isGenEng()));
-        dynamicDataForEmail.put(WELSH_EMAIL, isNotEmpty(documentLanguage.isGenWelsh()));
+        dynamicDataForEmail.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
+        dynamicDataForEmail.put(WELSH_EMAIL, documentLanguage.isGenWelsh());
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
