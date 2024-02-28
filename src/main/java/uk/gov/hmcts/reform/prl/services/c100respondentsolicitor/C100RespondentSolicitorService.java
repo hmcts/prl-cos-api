@@ -286,11 +286,11 @@ public class C100RespondentSolicitorService {
         return updatedCaseData;
     }
 
-    private static void cleanUpRespondentTasksFieldOptions(Map<String, Object> updatedCaseData) {
-        for (String field : RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS.getCaseFieldName().split(COMMA)) {
-            updatedCaseData.remove(field);
-        }
-    }
+//    private static void cleanUpRespondentTasksFieldOptions(Map<String, Object> updatedCaseData) {
+//        for (String field : RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS.getCaseFieldName().split(COMMA)) {
+//            updatedCaseData.remove(field);
+//        }
+//    }
 
     private void buildResponseForRespondent(CaseData caseData,
                                             List<Element<PartyDetails>> respondents,
