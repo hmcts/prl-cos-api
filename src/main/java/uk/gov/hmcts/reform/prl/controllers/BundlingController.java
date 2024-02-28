@@ -60,16 +60,17 @@ public class BundlingController extends AbstractCallbackController {
 
     public AboutToStartOrSubmitCallbackResponse createBundle(@RequestHeader("Authorization") @Parameter(hidden = true) String authorization,
                                                              @RequestHeader("ServiceAuthorization") @Parameter(hidden = true)
-                                                             String serviceAuthorization,
+                                                                 String serviceAuthorization,
                                                              @RequestBody CallbackRequest callbackRequest) {
         if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
             moveExistingCaseBundlesToHistoricalBundles(caseData);
             log.info("*** Creating Bundle for the case id : {}", caseData.getId());
-            BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
-                                                                                                   callbackRequest.getEventId(),
-                                                                                                   authorization
+            BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(
+                caseData,
+                callbackRequest.getEventId(),
+                authorization
             );
             if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
                 caseDataUpdated.put(
@@ -111,4 +112,5 @@ public class BundlingController extends AbstractCallbackController {
         } else {
             caseData.setBundleInformation(BundlingInformation.builder().build());
         }
+    }
 }
