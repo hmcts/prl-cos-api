@@ -1359,7 +1359,7 @@ public class ManageOrderEmailServiceTest {
             .representativeFirstName("")
             .solicitorEmail("")
             .user(User.builder().idamId("abc123").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
@@ -1733,7 +1733,7 @@ public class ManageOrderEmailServiceTest {
             .lastName("RespLN2")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
 
         String uuid1 = "00000000-0000-0000-0000-000000000000";
