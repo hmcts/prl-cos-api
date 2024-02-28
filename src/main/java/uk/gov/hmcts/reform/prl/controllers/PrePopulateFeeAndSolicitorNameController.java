@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -168,6 +169,7 @@ public class PrePopulateFeeAndSolicitorNameController {
                                                               .documentHash(generatedWelshDocumentInfo.getHashToken())
                                                               .documentFileName(c100DraftWelshFilename).build()).build();
         }
+        log.info("caseData : {}", new ObjectMapper().writeValueAsString(caseData));
         return caseData;
     }
 }
