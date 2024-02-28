@@ -100,6 +100,9 @@ public class ManageOrderEmailService {
     private final CourtFinderService courtLocatorService;
     private final DocumentLanguageService documentLanguageService;
 
+    public static final String ENGLISH_EMAIL = "english";
+    public static final String WELSH_EMAIL = "welsh";
+
     public void sendEmail(CaseDetails caseDetails) {
         List<String> emailList = new ArrayList<>();
 
@@ -415,14 +418,14 @@ public class ManageOrderEmailService {
                                                     Map<String, Object> dynamicDataForEmail,
                                                     SoaSolicitorServingRespondentsEnum respondentOption) {
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        dynamicDataForEmail.put(ENGLISH_EMAIL, isNotEmpty(documentLanguage.isGenEng()));
+        dynamicDataForEmail.put(WELSH_EMAIL, isNotEmpty(documentLanguage.isGenWelsh()));
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
-                DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
-                dynamicDataForEmail.put("english", documentLanguage.isGenEng());
-                dynamicDataForEmail.put("welsh", documentLanguage.isGenWelsh());
-                log.info("CA personal service email notifications: handlePersonalServiceNotifications: english: {}",dynamicDataForEmail.get("eng"));
-                log.info("CA personal service email notifications: handlePersonalServiceNotifications: welsh: {}",dynamicDataForEmail.get("wel"));
+                log.info("CA personal service email notifications: handlePersonalServiceNotifications: english: {}",dynamicDataForEmail.get(ENGLISH_EMAIL));
+                log.info("CA personal service email notifications: handlePersonalServiceNotifications: welsh: {}",dynamicDataForEmail.get(WELSH_EMAIL));
                 sendPersonalServiceNotifications(
                     party.getValue().getSolicitorEmail(),
                     respondentOption,
@@ -451,13 +454,12 @@ public class ManageOrderEmailService {
         if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(respondentOption)) {
             log.info("CA personal service email notifications: sendPersonalServiceNotifications");
-            if (dynamicDataForEmail.get("english").equals(Boolean.TRUE)) {
+            if (dynamicDataForEmail.get(ENGLISH_EMAIL).equals(Boolean.TRUE)) {
                 log.info("CA personal service email notifications: English");
                 sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                      SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
                 );
-            }
-            if (dynamicDataForEmail.get("welsh").equals(Boolean.TRUE)) {
+            } else if (dynamicDataForEmail.get(WELSH_EMAIL).equals(Boolean.TRUE)) {
                 log.info("CA personal service email notifications: Welsh");
                 sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
                                      SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR_WELSH
