@@ -424,8 +424,10 @@ public class ManageOrderEmailService {
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
                 dynamicDataForEmail.put("name", party.getValue().getRepresentativeFullName());
-                log.info("CA personal service email notifications: handlePersonalServiceNotifications: english: {}",dynamicDataForEmail.get(ENGLISH_EMAIL));
-                log.info("CA personal service email notifications: handlePersonalServiceNotifications: welsh: {}",dynamicDataForEmail.get(WELSH_EMAIL));
+                log.info("CA personal service email notifications: handlePersonalServiceNotifications: english: {}",
+                         dynamicDataForEmail.get(ENGLISH_EMAIL));
+                log.info("CA personal service email notifications: handlePersonalServiceNotifications: welsh: {}",
+                         dynamicDataForEmail.get(WELSH_EMAIL));
                 sendPersonalServiceNotifications(
                     party.getValue().getSolicitorEmail(),
                     respondentOption,
