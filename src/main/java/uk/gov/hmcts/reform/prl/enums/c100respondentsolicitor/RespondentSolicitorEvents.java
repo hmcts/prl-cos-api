@@ -21,11 +21,11 @@ public enum RespondentSolicitorEvents {
     MIAM(
         "c100ResSolMiam",
         "MIAM",
-        "respondentSolicitorHaveYouAttendedMiam,"
+        "hasRespondentAttendedMiam,respondentWillingToAttendMiam,respondentReasonNotAttendingMiam,"
             + "whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
     ),
-    CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Current or past proceedings",
-                                    "currentOrPastProceedingsForChildren,respondentExistingProceedings"
+    OTHER_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Other proceedings",
+                      "currentOrPastProceedingsForChildren,respondentExistingProceedings"
     ),
     ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", "respondentAohYesNo,"
         + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour,respondentChildAbuseBehaviour,"
@@ -60,7 +60,7 @@ public enum RespondentSolicitorEvents {
             CONFIRM_EDIT_CONTACT_DETAILS,
             ATTENDING_THE_COURT,
             MIAM,
-            CURRENT_OR_PREVIOUS_PROCEEDINGS,
+            OTHER_PROCEEDINGS,
             ALLEGATION_OF_HARM,
             INTERNATIONAL_ELEMENT,
             ABILITY_TO_PARTICIPATE
