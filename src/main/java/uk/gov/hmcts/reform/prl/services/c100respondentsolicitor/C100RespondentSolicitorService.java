@@ -282,7 +282,7 @@ public class C100RespondentSolicitorService {
         updatedCaseData.put(RESPONDENT_DOCS_LIST, caseData.getRespondentDocsList());
         updatedCaseData.put(C100_RESPONDENT_TABLE, applicationsTabService.getRespondentsTable(caseData));
         updatedCaseData.put(RESPONDENTS, respondents);
-        cleanUpRespondentTasksFieldOptions(updatedCaseData);
+        //cleanUpRespondentTasksFieldOptions(updatedCaseData);
         return updatedCaseData;
     }
 
@@ -364,20 +364,6 @@ public class C100RespondentSolicitorService {
                                            .getCurrentOrPastProceedingsForChildren())
             ? caseData.getRespondentSolicitorData()
             .getRespondentExistingProceedings() : null;
-
-        if (respondentExistingProceedings != null) {
-            for (Element<RespondentProceedingDetails> proceedings : respondentExistingProceedings) {
-                if (null != proceedings.getValue()
-                    && null != proceedings.getValue().getUploadRelevantOrder()) {
-                    buildRespondentDocs(
-                        caseData,
-                        caseData.getRespondentSolicitorData().getRespondentNameForResponse(),
-                        solicitor + SOLICITOR,
-                        proceedings.getValue().getUploadRelevantOrder()
-                    );
-                }
-            }
-        }
 
         return buildResponseForRespondent.toBuilder()
             .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
