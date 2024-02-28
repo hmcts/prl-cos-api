@@ -21,6 +21,7 @@ import java.util.List;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
+import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -73,9 +74,56 @@ public class InternationalElementsCheckerTest {
     }
 
     @Test
+    public void isNotStartedTest() {
+        PartyDetails blankRespondent = PartyDetails.builder().build();
+        Boolean bool = internationalElementsChecker.isStarted(blankRespondent);
+        assertFalse(bool);
+    }
+
+    @Test
     public void mandatoryCompletedTest() {
         Boolean bool = internationalElementsChecker.isFinished(respondent);
         assertTrue(bool);
+    }
+
+    @Test
+    public void isNotFinishedEmptyResponseTest() {
+        PartyDetails blankRespondent = PartyDetails.builder().response(Response
+                                                                           .builder().build()).build();
+        Boolean bool = internationalElementsChecker.isFinished(blankRespondent);
+        assertFalse(bool);
+    }
+
+    @Test
+    public void isNotFinishedEmptyStringChildrenLiveOutsideOfEnWlDetails() {
+        PartyDetails blankRespondent = PartyDetails
+            .builder()
+            .response(Response
+                          .builder()
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .build())
+                          .build())
+            .build();
+        Boolean bool = internationalElementsChecker.isFinished(blankRespondent);
+        assertFalse(bool);
+    }
+
+    @Test
+    public void isNotFinishedEmptyCitizenInternationalElementsTest() {
+        PartyDetails blankRespondent = PartyDetails
+            .builder()
+            .response(Response
+                          .builder()
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .childrenLiveOutsideOfEnWlDetails("")
+                                                            .build())
+                          .build())
+            .build();
+        Boolean bool = internationalElementsChecker.isFinished(blankRespondent);
+        assertFalse(bool);
     }
 
     @Test
@@ -83,6 +131,44 @@ public class InternationalElementsCheckerTest {
         respondent = null;
         Boolean bool = internationalElementsChecker.isFinished(respondent);
         assertFalse(bool);
+    }
+
+    @Test
+    public void mandatoryNotCompletedWithoutDetailsTest() {
+        respondent = PartyDetails
+            .builder()
+            .response(Response
+                          .builder()
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(Yes)
+                                                            .parentsAnyOneLiveOutsideEnWl(Yes)
+                                                            .anotherPersonOrderOutsideEnWl(Yes)
+                                                            .anotherCountryAskedInformation(Yes)
+                                                            .build())
+                          .build())
+            .build();
+        Boolean bool = internationalElementsChecker.isFinished(respondent);
+        assertFalse(bool);
+    }
+
+    @Test
+    public void mandatoryCompletedWithoutDetailsTest() {
+        respondent = PartyDetails
+            .builder()
+            .response(Response
+                          .builder()
+                          .citizenInternationalElements(CitizenInternationalElements
+                                                            .builder()
+                                                            .childrenLiveOutsideOfEnWl(No)
+                                                            .parentsAnyOneLiveOutsideEnWl(No)
+                                                            .anotherPersonOrderOutsideEnWl(No)
+                                                            .anotherCountryAskedInformation(No)
+                                                            .build())
+                          .build())
+            .build();
+        Boolean bool = internationalElementsChecker.isFinished(respondent);
+        assertTrue(bool);
     }
 
 }

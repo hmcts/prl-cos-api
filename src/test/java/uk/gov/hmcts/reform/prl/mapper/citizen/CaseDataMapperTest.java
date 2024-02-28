@@ -61,6 +61,7 @@ import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.specificIssueOrder;
                 .documentManagementDetails(DocumentManagementDetails.builder()
                                                .citizenQuarantineDocsList(new ArrayList<>())
                                                .build())
+                .taskListVersion("v2")
                 .c100RebuildData(C100RebuildData.builder()
                 .c100RebuildInternationalElements(TestUtil.readFileFrom("classpath:c100-rebuild/ie.json"))
                 .c100RebuildHearingWithoutNotice(TestUtil.readFileFrom("classpath:c100-rebuild/hwn.json"))
