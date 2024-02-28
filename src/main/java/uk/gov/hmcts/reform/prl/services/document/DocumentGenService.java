@@ -622,11 +622,6 @@ public class DocumentGenService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         if (isWelsh) {
-            log.info("authorisation1--->{}",authorisation);
-            log.info("caseData.getId()--->{}",caseData.getId());
-            log.info("getCaseTypeOfApplication--->{}",caseData.getCaseTypeOfApplication());
-            log.info("template--->{}",template);
-            log.info("dataMap--->{}",dataMap);
             generatedDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 String.valueOf(caseData.getId()),
