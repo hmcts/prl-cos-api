@@ -64,6 +64,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATA_ID;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CHILDREN;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COMMA;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_NAME_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUE_DATE_FIELD;
@@ -179,16 +180,16 @@ public class C100RespondentSolicitorService {
                     );
                     break;
                 case MIAM:
-                    String[] miamFields = event.getCaseFieldName().split(",");
-                    caseDataUpdated.put(
-                        miamFields[0],
-                        solicitorRepresentedRespondent.getValue().getResponse().getMiam()
-                    );
-                    caseDataUpdated.put(miamFields[1], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
-                    caseDataUpdated.put(
-                        miamFields[2],
-                        miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder()
-                    );
+                    String[] miamFields = event.getCaseFieldName().split(COMMA);
+                    //PRL-4588 - align miam screen as per figma
+                    Miam existingMiam = solicitorRepresentedRespondent.getValue().getResponse().getMiam();
+                    if (null != existingMiam) {
+                        caseDataUpdated.put(miamFields[0], existingMiam.getAttendedMiam());
+                        caseDataUpdated.put(miamFields[1], existingMiam.getWillingToAttendMiam());
+                        caseDataUpdated.put(miamFields[2], existingMiam.getReasonNotAttendingMiam());
+                    }
+                    caseDataUpdated.put(miamFields[3], miamService.getCollapsableOfWhatIsMiamPlaceHolder());
+                    caseDataUpdated.put(miamFields[4], miamService.getCollapsableOfHelpMiamCostsExemptionsPlaceHolder());
                     break;
                 case OTHER_PROCEEDINGS:
                     String[] proceedingsFields = event.getCaseFieldName().split(",");
@@ -283,7 +284,17 @@ public class C100RespondentSolicitorService {
             throw new RuntimeException(e);
         }
         updatedCaseData.putAll(data);
+        //PRL-4588 - cleanup
+        cleanUpRespondentTasksFieldOptions(updatedCaseData);
+
         return updatedCaseData;
+    }
+
+    private static void cleanUpRespondentTasksFieldOptions(Map<String, Object> updatedCaseData) {
+        //miam
+        for (String field : RespondentSolicitorEvents.MIAM.getCaseFieldName().split(COMMA)) {
+            updatedCaseData.remove(field);
+        }
     }
 
     private void buildResponseForRespondent(CaseData caseData,
@@ -551,22 +562,13 @@ public class C100RespondentSolicitorService {
     }
 
     private Response buildMiamResponse(CaseData caseData, Response buildResponseForRespondent) {
-        boolean attendedMiam = Yes.equals(caseData.getRespondentSolicitorData()
-                                              .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam());
-        boolean willingToAttendMiam = !attendedMiam && No.equals(caseData.getRespondentSolicitorData()
-                                                                     .getRespondentSolicitorHaveYouAttendedMiam()
-                                                                     .getWillingToAttendMiam());
-        buildResponseForRespondent = buildResponseForRespondent.toBuilder()
+        return buildResponseForRespondent.toBuilder()
             .miam(Miam.builder()
-                      .attendedMiam(caseData.getRespondentSolicitorData()
-                                        .getRespondentSolicitorHaveYouAttendedMiam().getAttendedMiam())
-                      .willingToAttendMiam(attendedMiam ? null : caseData.getRespondentSolicitorData()
-                          .getRespondentSolicitorHaveYouAttendedMiam().getWillingToAttendMiam())
-                      .reasonNotAttendingMiam(
-                          willingToAttendMiam ? caseData
-                              .getRespondentSolicitorData().getRespondentSolicitorHaveYouAttendedMiam()
-                              .getReasonNotAttendingMiam() : null).build()).build();
-        return buildResponseForRespondent;
+                      .attendedMiam(caseData.getRespondentSolicitorData().getHasRespondentAttendedMiam())
+                      .willingToAttendMiam(caseData.getRespondentSolicitorData().getRespondentWillingToAttendMiam())
+                      .reasonNotAttendingMiam(caseData.getRespondentSolicitorData().getRespondentReasonNotAttendingMiam())
+                      .build())
+            .build();
     }
 
     private Response buildCitizenDetailsResponse(CaseData caseData, Response buildResponseForRespondent) {
