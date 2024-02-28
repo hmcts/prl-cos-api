@@ -56,6 +56,12 @@ public class RespondentTaskErrorServiceTest {
     }
 
     @Test
+    public void whenClearingErrorsCalledThenMapCleared() {
+        respondentTaskErrorService.clearErrors();
+        assertThat(respondentTaskErrorService.eventErrors).isEmpty();
+    }
+
+    @Test
     public void whenGetErrorsCalledThenListOfErrorsReturned() {
         final CaseData caseData = CaseData.builder()
                 .id(nextLong())
