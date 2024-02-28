@@ -171,8 +171,9 @@ public class C100RespondentSolicitorServiceTest {
     @Mock
     OrganisationService organisationService;
 
-    @Mock
     ResponseToAllegationsOfHarm responseToAllegationsOfHarm;
+
+    ResponseToAllegationsOfHarm responseToAllegationsOfHarm2;
 
     boolean mandatoryFinished = false;
 
@@ -530,11 +531,6 @@ public class C100RespondentSolicitorServiceTest {
                                                 addressList)
                                         .build())
                                 .build())
-                        .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                .attendedMiam(No)
-                                .willingToAttendMiam(Yes)
-                                .reasonNotAttendingMiam("test")
-                                .build())
                         .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
                         .build())
                 .build();
@@ -802,11 +798,6 @@ public class C100RespondentSolicitorServiceTest {
                                         .previousAddressHistory(
                                                 addressList2)
                                         .build())
-                                .build())
-                        .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                .attendedMiam(No)
-                                .willingToAttendMiam(No)
-                                .reasonNotAttendingMiam("test")
                                 .build())
                         .responseToAllegationsOfHarm(responseToAllegationsOfHarm)
                         .build())
@@ -1434,11 +1425,6 @@ public class C100RespondentSolicitorServiceTest {
                                                 addressList)
                                         .build())
                                 .build())
-                        .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                .attendedMiam(No)
-                                .willingToAttendMiam(No)
-                                .reasonNotAttendingMiam("test")
-                                .build())
                         .build())
                 .build();
 
@@ -1518,11 +1504,6 @@ public class C100RespondentSolicitorServiceTest {
                     .respondents(respondentList)
                     .respondentSolicitorData(RespondentSolicitorData.builder()
                             .respondentAllegationsOfHarmData(allegationsOfHarmData)
-                            .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                    .attendedMiam(yesOrNo)
-                                    .willingToAttendMiam(yesOrNo)
-                                    .reasonNotAttendingMiam("test")
-                                    .build())
                             .build())
                     .build();
 
@@ -1592,11 +1573,6 @@ public class C100RespondentSolicitorServiceTest {
                         .keepContactDetailsPrivate(KeepDetailsPrivate.builder()
                                 .otherPeopleKnowYourContactDetails(YesNoIDontKnow.yes)
                                 .confidentiality(No)
-                                .build())
-                        .respondentSolicitorHaveYouAttendedMiam(Miam.builder()
-                                .attendedMiam(No)
-                                .willingToAttendMiam(No)
-                                .reasonNotAttendingMiam("test")
                                 .build())
                         .build())
                 .build();
