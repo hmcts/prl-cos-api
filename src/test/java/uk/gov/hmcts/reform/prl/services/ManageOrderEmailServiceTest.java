@@ -1359,7 +1359,7 @@ public class ManageOrderEmailServiceTest {
             .representativeFirstName("")
             .solicitorEmail("")
             .user(User.builder().idamId("abc123").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
         caseData = caseData.toBuilder()
             .caseTypeOfApplication("C100")
@@ -1733,7 +1733,7 @@ public class ManageOrderEmailServiceTest {
             .lastName("RespLN2")
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("test@test.com")
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
 
         String uuid1 = "00000000-0000-0000-0000-000000000000";
@@ -2813,7 +2813,8 @@ public class ManageOrderEmailServiceTest {
             .firstName("AppFN")
             .lastName("AppLN")
             .address(Address.builder().addressLine1("#123").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
             .build();
 
         caseData = caseData.toBuilder()
@@ -2827,8 +2828,6 @@ public class ManageOrderEmailServiceTest {
                               .build())
             .build();
 
-        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any(), anyBoolean())).thenReturn(List.of(coverLetterDoc));
-        when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When
@@ -2912,7 +2911,7 @@ public class ManageOrderEmailServiceTest {
             .firstName("AppFN")
             .lastName("AppLN")
             .address(Address.builder().addressLine1("#123").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
 
         caseData = caseData.toBuilder()
@@ -2927,6 +2926,72 @@ public class ManageOrderEmailServiceTest {
 
         when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any(), anyBoolean())).thenReturn(List.of(coverLetterDoc));
         when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenReturn(uuid);
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //ADD MORE ASSERTIONS WHEN EMAIL IS IMPLEMENTED
+    }
+
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailFL401ThrowException() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
+
+        when(serviceOfApplicationPostService.getCoverLetter(any(), any(), any(), any(), anyBoolean())).thenReturn(List.of(coverLetterDoc));
+        when(bulkPrintService.send(any(), any(), any(), anyList(), any())).thenThrow(new RuntimeException());
+
+        Map<String, Object> caseDataMap = new HashMap<>();
+        //When
+        manageOrderEmailService.sendEmailWhenOrderIsServed(authToken, caseData, caseDataMap);
+
+        //Then
+        assertNotNull(caseDataMap.get("orderCollection"));
+        //ADD MORE ASSERTIONS WHEN EMAIL IS IMPLEMENTED
+    }
+
+    @Test
+    public void testServeOrderDocsToUnrepresentedApplicantViaEmailDa() throws Exception {
+        //Given
+        PartyDetails applicant = PartyDetails.builder()
+            .partyId(uuid)
+            .firstName("AppFN")
+            .lastName("AppLN")
+            .address(Address.builder().addressLine1("#123").build())
+            .contactPreferences(ContactPreferences.email)
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .email("abc@test.com")
+            .build();
+
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .applicantsFL401(applicant)
+            .manageOrders(ManageOrders.builder()
+                              .displayLegalRepOption(PrlAppsConstants.NO)
+                              .servingOptionsForNonLegalRep(SoaCitizenServingRespondentsEnum.unrepresentedApplicant)
+                              .serveOrderDynamicList(dynamicMultiSelectList)
+                              .build())
+            .build();
 
         Map<String, Object> caseDataMap = new HashMap<>();
         //When

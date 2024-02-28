@@ -86,7 +86,6 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_DOCUMENT_
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRUG_AND_ALCOHOL_TESTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DUMMY;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_STRING;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ENGDOCGEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -903,7 +902,7 @@ public class DocumentGenService {
 
     private String findDocCoverSheetTemplateForCitizen(boolean isWelsh) {
         //Need to replace EMPTY_STRING with received welsh template
-        return !isWelsh ? docCoverSheetCitizenTemplate : EMPTY_STRING;
+        return !isWelsh ? docCoverSheetCitizenTemplate : docCoverSheetWelshCitizenTemplate;
     }
 
     private boolean isApplicantOrChildDetailsConfidential(CaseData caseData) {

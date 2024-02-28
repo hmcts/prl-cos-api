@@ -354,8 +354,8 @@ public class ManageOrderEmailService {
             } else if (YesOrNo.Yes.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA personal service notifications ***");
                 log.info("*** CA Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
-                String servingRespondentsOptions = isNotEmpty(manageOrders.getServingRespondentsOptionsCA())
-                    ? manageOrders.getServingRespondentsOptionsCA().getId() : manageOrders.getServingOptionsForNonLegalRep().getId();
+                String servingRespondentsOptions = NO.equals(manageOrders.getDisplayLegalRepOption())
+                    ? manageOrders.getServingOptionsForNonLegalRep().getId() : manageOrders.getServingRespondentsOptionsCA().getId();
                 handleC100PersonalServiceNotifications(authorisation, caseData, orderDocuments, dynamicDataForEmail,
                                                        servingRespondentsOptions,
                                                        bulkPrintOrderDetails
@@ -493,7 +493,7 @@ public class ManageOrderEmailService {
             //PRL-5206 unrepresented applicant option - unrepresentedApplicant
             log.info("===== DA Serving unrepresented applicant ====");
             log.debug("===== DA unrepresented applicant contact preference ==== {}", caseData.getApplicantsFL401().getContactPreferences());
-            if (ContactPreferences.digital.equals(caseData.getApplicantsFL401().getContactPreferences())
+            if (ContactPreferences.email.equals(caseData.getApplicantsFL401().getContactPreferences())
                 && isPartyProvidedWithEmail(caseData.getApplicantsFL401())) {
                 log.info("===== DA serving unrepresented applicant via email ====");
             } else {
@@ -873,7 +873,7 @@ public class ManageOrderEmailService {
                                          SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
                 } else if (isPartyProvidedWithEmail(partyData)) {
                     sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());
-                } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
+                } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
                     && isPartyProvidedWithEmail(partyData)) {
                     log.info("Contact preference set as email");
                     sendEmailToPartyOrPartySolicitor(isFinalOrder, partyData.getEmail(),
@@ -914,7 +914,7 @@ public class ManageOrderEmailService {
                                          dynamicDataForEmail,
                                          partyData.getSolicitorEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR);
-                } else if (ContactPreferences.digital.equals(partyData.getContactPreferences())
+                } else if (ContactPreferences.email.equals(partyData.getContactPreferences())
                     && isPartyProvidedWithEmail(partyData)) {
                     log.info("Contact preference set as email");
                     sendEmailToParty(partyData.getEmail(), caseData, authorisation, orderDocuments, partyData.getLabelForDynamicList());

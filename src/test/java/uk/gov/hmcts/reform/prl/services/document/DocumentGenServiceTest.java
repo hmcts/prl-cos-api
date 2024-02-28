@@ -3633,7 +3633,7 @@ public class DocumentGenServiceTest {
         String template = documentGenService.getTemplate(c100CaseData, DOCUMENT_COVER_SHEET_CITIZEN_HINT, true);
 
         assertNotNull(template);
-        assertEquals("", template);
+        assertEquals("citizen_cover_letter_wel", template);
     }
 }
 
