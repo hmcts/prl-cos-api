@@ -76,7 +76,7 @@ public class BundlingController extends AbstractCallbackController {
                 caseDataUpdated.put(
                     "bundleInformation",
                     BundlingInformation.builder().caseBundles(bundleCreateResponse.getData().getCaseBundles())
-                        .historicalBundles(null)
+                        .historicalBundles(caseData.getBundleInformation().getHistoricalBundles())
                         .bundleConfiguration(bundleCreateResponse.data.getBundleConfiguration())
                         .bundleCreationDateAndTime(DateTimeFormatter.ISO_OFFSET_DATE_TIME
                                                        .format(ZonedDateTime.now(ZoneId.of("Europe/London"))))
