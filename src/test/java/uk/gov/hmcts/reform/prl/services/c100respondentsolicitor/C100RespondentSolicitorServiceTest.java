@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -23,6 +24,7 @@ import uk.gov.hmcts.reform.prl.enums.YesNoIDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.citizen.ConfidentialityListEnum;
 import uk.gov.hmcts.reform.prl.enums.citizen.ReasonableAdjustmentsEnum;
+import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.enums.respondentsolicitor.RespondentWelshNeedsListEnum;
 import uk.gov.hmcts.reform.prl.exception.RespondentSolicitorException;
@@ -34,8 +36,10 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.Organisation;
 import uk.gov.hmcts.reform.prl.models.Organisations;
 import uk.gov.hmcts.reform.prl.models.caseaccess.CaseUser;
+import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicList;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespChildAbuse;
 import uk.gov.hmcts.reform.prl.models.complextypes.RespDomesticAbuseBehaviours;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Respondent;
@@ -59,8 +63,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToA
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.GeneratedDocumentInfo;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.c100respondentsolicitor.RespondentSolicitorData;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.ApplicationsTabService;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.OrganisationService;
 import uk.gov.hmcts.reform.prl.services.RespondentAllegationOfHarmService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
@@ -69,7 +77,9 @@ import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.Respo
 import uk.gov.hmcts.reform.prl.services.caseaccess.CcdDataStoreService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.managedocuments.ManageDocumentsService;
+import uk.gov.hmcts.reform.prl.services.reviewdocument.ReviewDocumentService;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -86,21 +96,27 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.HYPHEN_SEPARATOR;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LEGAL_PROFESSIONAL;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C7_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.No;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.RESPONSE_ALREADY_SUBMITTED_ERROR;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.TECH_ERROR;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class C100RespondentSolicitorServiceTest {
 
     @InjectMocks
     C100RespondentSolicitorService respondentSolicitorService;
+
+    @Mock
+    ReviewDocumentService reviewDocumentService;
 
     CaseData caseData;
 
@@ -132,6 +148,9 @@ public class C100RespondentSolicitorServiceTest {
 
     @Mock
     DocumentGenService documentGenService;
+
+    @Mock
+    DocumentLanguageService documentLanguageService;
 
     @Mock
     RespondentAllegationsOfHarmData allegationsOfHarmData;
@@ -168,8 +187,23 @@ public class C100RespondentSolicitorServiceTest {
 
     CallbackRequest callbackRequest2;
 
+    QuarantineLegalDoc quarantineLegalDoc;
+
+    Document document;
+
     @Before
     public void setUp() {
+
+        document = Document.builder()
+            .documentFileName("test.pdf")
+            .documentUrl("http://dm-store.com/documents/7ab2e6e0-c1f3-49d0-a09d-771ab99a2f15")
+            .build();
+
+        quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .documentParty(DocumentPartyEnum.APPLICANT.getDisplayedValue())
+            .categoryId("respondentC1AApplication")
+            .documentUploadedDate(LocalDateTime.now())
+            .build();
 
         RespDomesticAbuseBehaviours domesticAbuseBehaviours = RespDomesticAbuseBehaviours.builder()
                 .respTypeOfAbuse(TypeOfAbuseEnum.TypeOfAbuseEnum_value_1)
@@ -806,6 +840,11 @@ public class C100RespondentSolicitorServiceTest {
 
         when(objectMapper.convertValue(eq(allegationsOfHarmData),
                 Mockito.<TypeReference<Map<String, Object>>>any())).thenReturn(allegationsOfHarmDataMap);
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
     }
 
     @Test
@@ -2061,4 +2100,91 @@ public class C100RespondentSolicitorServiceTest {
                 .value(respondent2).build();
         assertNotNull(respondentSolicitorService.populateDataMap(callbackRequest1, wrappedRespondents2));
     }
+
+    @Test
+    public void testC1ADocumentQuarantine() throws Exception {
+        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+            .document(document)
+            .restrictedDetails("test details")
+            .uploaderRole(LEGAL_PROFESSIONAL)
+            .build();
+
+        when(documentGenService.generateSingleDocument(
+            Mockito.anyString(),
+            Mockito.any(CaseData.class),
+            Mockito.anyString(),
+            Mockito.anyBoolean(),
+            Mockito.any(HashMap.class)
+        )).thenReturn(document);
+
+
+        String[] events = {"c100ResSolAllegationsOfHarmA", "c100ResSolAllegationsOfHarmB",
+            "c100ResSolAllegationsOfHarmC", "c100ResSolAllegationsOfHarmD"};
+
+        for (String event : events) {
+
+            Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder()
+                .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+                .value(respondent).build();
+            Element<PartyDetails> wrappedRespondents2 = Element.<PartyDetails>builder()
+                .id(UUID.fromString("1afdfa01-8280-4e2c-b810-ab7cf741988a"))
+                .value(respondent2).build();
+            List<Element<PartyDetails>> respondentList = new ArrayList<>();
+            respondentList.add(wrappedRespondents);
+            respondentList.add(wrappedRespondents2);
+            respondentList.add(wrappedRespondents);
+            respondentList.add(wrappedRespondents2);
+
+            CaseData caseData = CaseData.builder().respondents(respondentList).id(1)
+                .caseTypeOfApplication(C100_CASE_TYPE)
+                .documentManagementDetails(
+                    DocumentManagementDetails.builder()
+                        .tempQuarantineDocumentList(List.of(element(UUID.fromString("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355"),quarantineLegalDoc)))
+                        .build()
+                ).reviewDocuments(ReviewDocuments.builder()
+                                     .reviewDocsDynamicList(DynamicList.builder().value(
+                                         DynamicListElement.builder()
+                                             .code("33dff5a7-3b6f-45f1-b5e7-5f9be1ede355").build()
+                                     ).build()).build())
+                .respondentSolicitorData(RespondentSolicitorData.builder()
+                                             .respondentAllegationsOfHarmData(allegationsOfHarmData)
+                                             .build())
+                .build();
+
+            Map<String, Object> stringObjectMap = new HashMap<>();
+            reviewDocumentService.getReviewedDocumentDetailsNew(caseData, stringObjectMap);
+
+            when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+
+            CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+                .CallbackRequest.builder()
+                .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                 .id(123L)
+                                 .data(stringObjectMap)
+                                 .build())
+                .build();
+            callbackRequest.setEventId(event);
+            UserDetails userDetails = UserDetails.builder().forename("test")
+                .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+
+            doCallRealMethod().when(manageDocumentsService).moveDocumentsToRespectiveCategoriesNew(any(), any(), any(), any(), any());
+            doCallRealMethod().when(manageDocumentsService).getRestrictedOrConfidentialKey(any());
+            doCallRealMethod().when(manageDocumentsService).getQuarantineDocumentForUploader(any(),any());
+            doCallRealMethod().when(manageDocumentsService).moveToConfidentialOrRestricted(any(),any(),any(),any());
+            doCallRealMethod().when(manageDocumentsService).moveDocumentsToQuarantineTab(any(),any(),any(),any());
+
+            when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
+            Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
+                authToken, callbackRequest
+            );
+
+            List<Element<QuarantineLegalDoc>> legalProfQuarantineDocsList
+                = (List<Element<QuarantineLegalDoc>>) response.get("legalProfQuarantineDocsList");
+            assertNotNull(legalProfQuarantineDocsList);
+            assertEquals(1,legalProfQuarantineDocsList.size());
+            Assert.assertEquals("respondentC1AApplication", legalProfQuarantineDocsList.get(0).getValue().getCategoryId());
+
+        }
+    }
+
 }
