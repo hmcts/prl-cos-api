@@ -368,7 +368,6 @@ public class C100RespondentSolicitorService {
         return buildResponseForRespondent.toBuilder()
             .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
                                                      .getCurrentOrPastProceedingsForChildren())
-            .respondentExistingProceedings(respondentExistingProceedings)
             .build();
     }
 
