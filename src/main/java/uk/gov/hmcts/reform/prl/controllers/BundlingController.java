@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -25,8 +26,11 @@ import uk.gov.hmcts.reform.prl.services.bundle.BundlingService;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import static java.util.Objects.nonNull;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
 
@@ -61,6 +65,7 @@ public class BundlingController extends AbstractCallbackController {
         if (authorisationService.isAuthorized(authorization, serviceAuthorization)) {
             CaseData caseData = getCaseData(callbackRequest.getCaseDetails());
             Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+            moveExistingCaseBundlesToHistoricalBundles(caseData);
             log.info("*** Creating Bundle for the case id : {}", caseData.getId());
             BundleCreateResponse bundleCreateResponse = bundlingService.createBundleServiceRequest(caseData,
                                                                                                    callbackRequest.getEventId(),
@@ -89,4 +94,21 @@ public class BundlingController extends AbstractCallbackController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+
+    private void moveExistingCaseBundlesToHistoricalBundles(CaseData caseData) {
+        List<Bundle> historicalBundles = new ArrayList<>();
+        BundlingInformation existingBundleInformation = caseData.getBundleInformation();
+        if (nonNull(existingBundleInformation)) {
+            if (nonNull(existingBundleInformation.getHistoricalBundles())) {
+                historicalBundles.addAll(existingBundleInformation.getHistoricalBundles());
+            }
+            if (nonNull(existingBundleInformation.getCaseBundles())) {
+                historicalBundles.addAll(existingBundleInformation.getCaseBundles());
+            }
+            existingBundleInformation.setHistoricalBundles(historicalBundles);
+            existingBundleInformation.setCaseBundles(null);
+        } else {
+            caseData.setBundleInformation(BundlingInformation.builder().build());
+        }
 }
