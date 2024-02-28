@@ -359,11 +359,11 @@ public class C100RespondentSolicitorService {
 
     private Response buildOtherProceedingsResponse(CaseData caseData, Response buildResponseForRespondent,
                                                    String solicitor) {
-        List<Element<RespondentProceedingDetails>> respondentExistingProceedings
-            = YesNoDontKnow.yes.equals(caseData.getRespondentSolicitorData()
-                                           .getCurrentOrPastProceedingsForChildren())
-            ? caseData.getRespondentSolicitorData()
-            .getRespondentExistingProceedings() : null;
+//        List<Element<RespondentProceedingDetails>> respondentExistingProceedings
+//            = YesNoDontKnow.yes.equals(caseData.getRespondentSolicitorData()
+//                                           .getCurrentOrPastProceedingsForChildren())
+//            ? caseData.getRespondentSolicitorData()
+//            .getRespondentExistingProceedings() : null;
 
         return buildResponseForRespondent.toBuilder()
             .currentOrPastProceedingsForChildren(caseData.getRespondentSolicitorData()
