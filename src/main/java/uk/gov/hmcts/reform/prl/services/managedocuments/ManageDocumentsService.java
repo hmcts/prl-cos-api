@@ -530,13 +530,6 @@ public class ManageDocumentsService {
             throw new IllegalStateException(UNEXPECTED_USER_ROLE + userRole);
         }
 
-        log.info("userRole {}",userRole);
-        log.info("isDocumentTab {}",isDocumentTab);
-        quarantineDocs.forEach(s -> {
-            log.info("SSS {}", s.getValue().getDocument());
-            log.info("====== ");
-        });
-
         switch (userRole) {
             case SOLICITOR:
                 if (isDocumentTab) {
