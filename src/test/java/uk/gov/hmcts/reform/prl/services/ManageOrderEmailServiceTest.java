@@ -2813,7 +2813,7 @@ public class ManageOrderEmailServiceTest {
             .firstName("AppFN")
             .lastName("AppLN")
             .address(Address.builder().addressLine1("#123").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .build();
 
@@ -2911,7 +2911,7 @@ public class ManageOrderEmailServiceTest {
             .firstName("AppFN")
             .lastName("AppLN")
             .address(Address.builder().addressLine1("#123").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
 
         caseData = caseData.toBuilder()
@@ -2945,7 +2945,7 @@ public class ManageOrderEmailServiceTest {
             .firstName("AppFN")
             .lastName("AppLN")
             .address(Address.builder().addressLine1("#123").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .build();
 
         caseData = caseData.toBuilder()
@@ -2978,7 +2978,7 @@ public class ManageOrderEmailServiceTest {
             .firstName("AppFN")
             .lastName("AppLN")
             .address(Address.builder().addressLine1("#123").build())
-            .contactPreferences(ContactPreferences.digital)
+            .contactPreferences(ContactPreferences.email)
             .canYouProvideEmailAddress(YesOrNo.Yes)
             .email("abc@test.com")
             .build();
