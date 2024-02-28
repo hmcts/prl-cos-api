@@ -17,6 +17,7 @@ public class BundleDetails {
     private String eligibleForStitching;
     private String stitchStatus;
     private DocumentLink stitchedDocument;
+    private DocumentLink historicalStitchedDocument;
     private String stitchingFailureMessage;
 
 
@@ -34,6 +35,7 @@ public class BundleDetails {
         this.eligibleForStitching = eligibleForStitching;
         this.stitchStatus = stitchStatus;
         this.stitchedDocument = stitchedDocument;
+        this.historicalStitchedDocument = historicalStitchedDocument;
         this.stitchingFailureMessage = stitchingFailureMessage;
     }
 }
