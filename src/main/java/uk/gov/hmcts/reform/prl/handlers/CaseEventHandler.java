@@ -104,6 +104,7 @@ public class CaseEventHandler {
         if (caseData.getState() != null
                 && (caseData.getState().equals(State.AWAITING_SUBMISSION_TO_HMCTS)
                 || caseData.getState().equals(State.AWAITING_RESUBMISSION_TO_HMCTS))) {
+            taskErrorService.clearErrors();
             final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
             List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
             if (caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE)) {
@@ -151,6 +152,7 @@ public class CaseEventHandler {
                                         caseData
                                 );
                     } else {
+                        respondentTaskErrorService.clearErrors();
                         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue(),caseData);
                         log.info("Tasks are as : {} ", tasks);
                         List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(caseData);

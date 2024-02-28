@@ -61,6 +61,9 @@ public class ResponseSubmitCheckerTest {
     @Mock
     ResponseToAllegationsOfHarmChecker responseToAllegationsOfHarmChecker;
 
+    @Mock
+    InternationalElementsChecker internationalElementsChecker;
+
     CaseData emptyCaseData;
 
     PartyDetails respondent;
@@ -155,6 +158,9 @@ public class ResponseSubmitCheckerTest {
 
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
         when(respondentContactDetailsChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getInternationalElementsChecker()).thenReturn(internationalElementsChecker);
+        when(internationalElementsChecker.isFinished(respondent)).thenReturn(true);
 
         when(respondentEventsChecker.getResponseToAllegationsOfHarmChecker()).thenReturn(responseToAllegationsOfHarmChecker);
         when(responseToAllegationsOfHarmChecker.isFinished(respondent)).thenReturn(true);
