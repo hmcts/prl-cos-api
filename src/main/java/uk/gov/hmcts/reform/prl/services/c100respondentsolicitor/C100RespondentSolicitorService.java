@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
@@ -807,7 +806,7 @@ public class C100RespondentSolicitorService {
                 caseDataUpdated,
                 CaseData.class
         );
-        log.info("validateActiveRespondentResponseeeeeee");
+        log.info("validateActiveRespondentResponseeeee");
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         boolean mandatoryFinished = false;
         generateDraftDocumentsForRespondent(callbackRequest, authorisation);
@@ -920,13 +919,10 @@ public class C100RespondentSolicitorService {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("QQQQQQQQ {}", documentLanguage);
         if (representedRespondent.getValue().getResponse() != null
                 && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
-            log.info("11111 ");
             if (documentLanguage.isGenEng()) {
-                log.info("22222 ");
                 Document c1aFinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -938,7 +934,6 @@ public class C100RespondentSolicitorService {
             }
 
             if (documentLanguage.isGenWelsh()) {
-                log.info("3333333 ");
                 Document c1aFinalDocumentWelsh = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -1307,20 +1302,13 @@ public class C100RespondentSolicitorService {
                 false,
                 dataMap
         );
-        ObjectMapper om = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule());
-        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
-        System.out.println("=======CCCCCC=====" + result);
-
         caseDataUpdated.put("draftC7ResponseDoc", document);
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
-        log.info("MMMMMMM {}",documentLanguage);
+
         if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue().getResponse() != null
                 && solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
-            log.info("11111111111fff");
             if (documentLanguage.isGenEng()) {
-                log.info("2222222fff");
                 Document documentForC1A = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -1332,7 +1320,6 @@ public class C100RespondentSolicitorService {
             }
 
             if (documentLanguage.isGenWelsh()) {
-                log.info("3333333333fff");
                 Document documentForC1AWelsh = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -1343,6 +1330,7 @@ public class C100RespondentSolicitorService {
                 caseDataUpdated.put("draftC1ADocWelsh", documentForC1AWelsh);
             }
         }
+        log.info("AAAAAAA {}",documentLanguage);
         return caseDataUpdated;
     }
 
