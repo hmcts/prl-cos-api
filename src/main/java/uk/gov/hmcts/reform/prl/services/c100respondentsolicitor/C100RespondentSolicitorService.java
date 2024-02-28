@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.services.c100respondentsolicitor;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -227,11 +226,6 @@ public class C100RespondentSolicitorService {
                     caseDataUpdated.putAll(data);
                     respondentAllegationOfHarmService.prePopulatedChildData(caseData,
                             caseDataUpdated,solicitorRepresentedRespondentAllegationsOfHarmData);
-                    try {
-                        log.info("caseData prepoulation aoh {}",objectMapper.writeValueAsString(caseDataUpdated));
-                    } catch (JsonProcessingException e) {
-                        throw new RespondentSolicitorException("Failed while trying to log the caseData ",e);
-                    }
 
                     break;
                 case RESPOND_ALLEGATION_OF_HARM:
@@ -310,11 +304,7 @@ public class C100RespondentSolicitorService {
         updatedCaseData.put(RESPONDENTS, respondents);
         Map<String, Object> data = objectMapper
                 .convertValue(RespondentAllegationsOfHarmData.builder().build(),new TypeReference<Map<String, Object>>() {});
-        try {
-            log.info("caseData flusing aoh {}",objectMapper.writeValueAsString(data));
-        } catch (JsonProcessingException e) {
-            throw new RespondentSolicitorException("Failed while trying to log the caseData ",e);
-        }
+
         /**
          * Deleting the document from the casedata for fixing the
          * duplication issue of Response to Allegation of Harm
