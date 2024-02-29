@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.controllers.citizen;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +11,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.multipart.MultipartFile;
 import uk.gov.hmcts.reform.ccd.client.CoreCaseDataApi;
@@ -502,8 +504,28 @@ public class CaseDocumentControllerTest {
             .downloadDocument(authToken, s2sToken, "TEST_DOCUMENT_ID");
     }
 
+    @Test (expected = RuntimeException.class)
+    public void testGenerateDocumentThrowInvalidClientException() throws Exception {
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+
+        caseDocumentController.citizenGenerateDocument(authToken, s2sToken, DocumentRequest.builder().build());
+    }
+
     @Test
-    public void testGenerateDocument() throws DocumentGenerationException, IOException {
+    public void testGenerateDocumentThrowDocumentGenerationException() {
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        when(caseDocumentController.citizenGenerateDocument(authToken, s2sToken, DocumentRequest.builder().build()))
+            .thenThrow(DocumentGenerationException.class);
+
+        ResponseEntity<Object> responseEntity = caseDocumentController.citizenGenerateDocument(authToken, s2sToken,
+                                                                                               DocumentRequest.builder().build());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals("Error in generating a document", responseEntity.getBody());
+    }
+
+    @Test
+    public void testGenerateDocument() throws DocumentGenerationException {
         //Given
         DocumentRequest documentRequest = DocumentRequest.builder()
             .caseId("123")
@@ -531,6 +553,26 @@ public class CaseDocumentControllerTest {
         assertEquals(OK, response.getStatusCode());
         assertEquals(DocumentResponse.class, response.getBody().getClass());
         assertNotNull(response.getBody());
+    }
+
+    @Test (expected = RuntimeException.class)
+    public void testSubmitCitizenDocumentsThrowInvalidClientException() {
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.FALSE);
+
+        caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, DocumentRequest.builder().build());
+    }
+
+    @Test
+    public void testCitizenUploadDocumentThrowsJsonProcessingException() {
+        when(authorisationService.authoriseUser(authToken)).thenReturn(Boolean.TRUE);
+        when(authorisationService.authoriseService(s2sToken)).thenReturn(Boolean.TRUE);
+        when(caseDocumentController.citizenSubmitDocuments(authToken, s2sToken, DocumentRequest.builder().build()))
+            .thenThrow(JsonProcessingException.class);
+
+        ResponseEntity<Object> responseEntity = caseDocumentController.citizenSubmitDocuments(authToken, s2sToken,
+                                                                                              DocumentRequest.builder().build());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, responseEntity.getStatusCode());
+        assertEquals("Error in submitting citizen documents", responseEntity.getBody());
     }
 
     @Test
