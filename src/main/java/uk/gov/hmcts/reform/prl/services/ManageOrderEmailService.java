@@ -450,9 +450,12 @@ public class ManageOrderEmailService {
                 if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
                     && isPartyProvidedWithEmail(party.getValue())) {
                     log.info("=====  CA serving unrepresented applicant via email ====");
+                    /*sendEmailToPartyforServedOrder("anshika.nigam1@hmcts.net",  caseData,  authorisation,orderDocuments,
+                                      party.getValue().getFirstName());*/
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-                    sendEmailToPartyforServedOrder("anshika.nigam1@hmcts.net",  caseData,  authorisation,orderDocuments,
-                                      party.getValue().getFirstName());
+                    sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData, "anshika.nigam1@hmcts.net",
+                                         SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
+                    );
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
                         && isNotEmpty(party.getValue().getAddress().getAddressLine1())) {
@@ -546,7 +549,7 @@ public class ManageOrderEmailService {
         }
     }
 
-    private void sendEmailToPartyforServedOrder(String emailAddress, CaseData caseData, String authorisation,
+    /*private void sendEmailToPartyforServedOrder(String emailAddress, CaseData caseData, String authorisation,
                                    List<Document> orderDocuments, String serveParty) {
         Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
         dynamicData.put("name",serveParty);
@@ -564,7 +567,7 @@ public class ManageOrderEmailService {
                       emailAddress, e.getMessage()
             );
         }
-    }
+    }*/
 
     private void sendPersonalServiceNotifications(String solicitorEmail,
                                                   String respondentOption,
