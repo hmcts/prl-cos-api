@@ -11,31 +11,25 @@ import lombok.Data;
 @Data
 @Builder(toBuilder = true)
 public class BundleDetails {
-    private String id;
     private String title;
     private String description;
-    private String eligibleForStitching;
     private String stitchStatus;
     private DocumentLink stitchedDocument;
     private DocumentLink historicalStitchedDocument;
-    private String stitchingFailureMessage;
 
 
     @JsonCreator
-    public BundleDetails(@JsonProperty("id") String id,
-                         @JsonProperty("title") String title,
+    public BundleDetails(@JsonProperty("title") String title,
                          @JsonProperty("description") String description,
-                         @JsonProperty("eligibleForStitching") String eligibleForStitching,
                          @JsonProperty("stitchStatus") String stitchStatus,
                          @JsonProperty("stitchedDocument") DocumentLink stitchedDocument,
-                         @JsonProperty("stitchingFailureMessage") String stitchingFailureMessage) {
-        this.id = id;
+                         @JsonProperty("historicalStitchedDocument") DocumentLink historicalStitchedDocument) {
+
         this.title = title;
         this.description = description;
-        this.eligibleForStitching = eligibleForStitching;
         this.stitchStatus = stitchStatus;
         this.stitchedDocument = stitchedDocument;
         this.historicalStitchedDocument = historicalStitchedDocument;
-        this.stitchingFailureMessage = stitchingFailureMessage;
+
     }
 }
