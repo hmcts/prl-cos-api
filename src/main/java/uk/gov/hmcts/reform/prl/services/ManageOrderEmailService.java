@@ -447,6 +447,8 @@ public class ManageOrderEmailService {
         } else {
             caseData.getApplicants().forEach(party -> {
                 log.info("party name ====> " + party.getValue().getFirstName());
+                log.info("party name ====> " + party.getValue().getCanYouProvideEmailAddress());
+                log.info("getContactPreferences name ====> " + party.getValue().getContactPreferences());
                 if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
                     && isPartyProvidedWithEmail(party.getValue())) {
 
