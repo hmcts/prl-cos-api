@@ -1300,6 +1300,7 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue().getResponse() != null
                 && solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
+            log.info("insideeeeee");
             if (documentLanguage.isGenEng()) {
                 Document documentForC1A = documentGenService.generateSingleDocument(
                     authorisation,
