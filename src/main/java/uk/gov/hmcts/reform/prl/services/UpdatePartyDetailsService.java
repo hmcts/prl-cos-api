@@ -33,11 +33,13 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -471,5 +473,21 @@ public class UpdatePartyDetailsService {
             newC8Documents.add(newC8Document);
             return newC8Documents;
         }
+    }
+
+    public Map<String, Object> setDefaultEmptyApplicantForC100(CaseData caseData) {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<Element<PartyDetails>> applicants = caseData.getApplicants();
+        if (CollectionUtils.isEmpty(applicants) || CollectionUtils.size(applicants) < 1) {
+            applicants = new ArrayList<Element<PartyDetails>>();
+            Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
+            applicants.add(partyDetails);
+            caseDataUpdated.put("applicants", applicants);
+            return caseDataUpdated;
+        }
+        caseDataUpdated.put("applicants", caseData.getApplicants());
+        return caseDataUpdated;
+
     }
 }
