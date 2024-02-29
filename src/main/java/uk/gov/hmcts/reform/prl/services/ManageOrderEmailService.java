@@ -447,8 +447,9 @@ public class ManageOrderEmailService {
         } else {
             caseData.getApplicants().forEach(party -> {
                 log.info("party name ====> " + party.getValue().getFirstName());
-                if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
-                    && isPartyProvidedWithEmail(party.getValue())) {
+                /*if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+                    && isPartyProvidedWithEmail(party.getValue())) {*/
+                if (true) {
                     log.info("=====  CA serving unrepresented applicant via email ====");
                     /*sendEmailToPartyforServedOrder("anshika.nigam1@hmcts.net",  caseData,  authorisation,orderDocuments,
                                       party.getValue().getFirstName());*/
