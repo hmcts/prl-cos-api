@@ -1253,6 +1253,7 @@ public class UpdatePartyDetailsServiceTest {
                 .updateApplicantRespondentAndChildData(callbackRequest, "test");
         assertNotNull(updatedCaseData);
     }
+
     @Test
     public void testSetApplicantDefaultApplicant() {
 
