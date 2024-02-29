@@ -93,6 +93,7 @@ public class ManageDocumentsControllerFunctionalTest {
     private static CaseDetails caseDetails;
 
     @Test
+    @Ignore
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);

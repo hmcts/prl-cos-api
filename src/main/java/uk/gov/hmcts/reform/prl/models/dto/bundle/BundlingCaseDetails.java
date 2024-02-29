@@ -13,7 +13,7 @@ public class BundlingCaseDetails {
     @JsonProperty("case_data")
     public BundlingCaseData caseData;
 
-    @JsonProperty("id")
-    public String id;
+    @JsonProperty("bundle_name")
+    public String bundleName;
 
 }
