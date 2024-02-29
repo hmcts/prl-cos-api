@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
+import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -109,10 +110,13 @@ public class BundlingController extends AbstractCallbackController {
                 List<Bundle> existingCaseBundles = existingBundleInformation.getCaseBundles();
                 log.info("The existing Bundles are {}",existingCaseBundles);
 
-                existingCaseBundles.stream().forEach(existingBundle ->
-                    existingBundle.getValue().toBuilder()
+                existingCaseBundles.stream().forEach(existingBundle -> {
+                    BundleDetails bundleDetails = existingBundle.getValue().toBuilder()
                         .historicalStitchedDocument(existingBundle.getValue().getStitchedDocument())
-                        .stitchedDocument(null).build()
+                        .stitchedDocument(null).build();
+                    existingCaseBundles.set(existingCaseBundles.indexOf(existingBundle),Bundle.builder().value(bundleDetails).build());
+                }
+
                 );
                 historicalBundles.addAll(existingCaseBundles);
                 log.info("The historical bundles are {}",historicalBundles);
