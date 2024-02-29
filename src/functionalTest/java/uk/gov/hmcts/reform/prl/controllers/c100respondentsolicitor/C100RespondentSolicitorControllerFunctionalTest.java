@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -158,7 +159,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
 
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_C1A);
 
-        AboutToStartOrSubmitCallbackResponse resp = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -175,7 +176,7 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     public void givenRequestBody_whenGenerate_c7c1a_draft_welshAndEnglish_document() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_FOR_C1A_DRAFT);
 
-        AboutToStartOrSubmitCallbackResponse resp = request
+        request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
             .body(requestBody)
@@ -183,12 +184,10 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .contentType("application/json")
             .post("/respondent-solicitor/generate-c7response-document")
             .then()
+            .body("data.draftC1ADocWelsh.document_filename", equalTo("Draft_C1A_allegation_of_harm_Welsh.pdf"),
+                  "data.draftC1ADoc.document_filename", equalTo("Draft_C1A_allegation_of_harm.pdf"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
-        System.out.println("JJJJJ " + resp);
-
-
     }
 
 }
