@@ -11,6 +11,7 @@ import lombok.Data;
 @Data
 @Builder(toBuilder = true)
 public class BundleDetails {
+    private String id;
     private String title;
     private String description;
     private String stitchStatus;
@@ -19,12 +20,13 @@ public class BundleDetails {
 
 
     @JsonCreator
-    public BundleDetails(@JsonProperty("title") String title,
+    public BundleDetails(@JsonProperty("id") String id,
+                         @JsonProperty("title") String title,
                          @JsonProperty("description") String description,
                          @JsonProperty("stitchStatus") String stitchStatus,
                          @JsonProperty("stitchedDocument") DocumentLink stitchedDocument,
                          @JsonProperty("historicalStitchedDocument") DocumentLink historicalStitchedDocument) {
-
+        this.id = id;
         this.title = title;
         this.description = description;
         this.stitchStatus = stitchStatus;
