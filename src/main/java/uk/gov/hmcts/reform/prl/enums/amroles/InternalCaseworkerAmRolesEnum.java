@@ -3,9 +3,7 @@ package uk.gov.hmcts.reform.prl.enums.amroles;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Getter
