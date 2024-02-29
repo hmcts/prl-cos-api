@@ -168,7 +168,7 @@ import static uk.gov.hmcts.reform.prl.utils.ManageOrdersUtils.isHearingPageNeede
 @Service
 @Slf4j
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@SuppressWarnings({"java:S3776", "java:S6204"})
+@SuppressWarnings({"java:S3776", "java:S6204", "java:S6541"})
 public class ManageOrderService {
 
     public static final String IS_THE_ORDER_ABOUT_CHILDREN = "isTheOrderAboutChildren";
