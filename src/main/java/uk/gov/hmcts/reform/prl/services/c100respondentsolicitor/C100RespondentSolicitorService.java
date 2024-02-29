@@ -798,7 +798,6 @@ public class C100RespondentSolicitorService {
                 caseDataUpdated,
                 CaseData.class
         );
-        log.info("validateActiveRespondentResponseeeee");
         String invokingRespondent = callbackRequest.getEventId().substring(callbackRequest.getEventId().length() - 1);
         boolean mandatoryFinished = false;
         generateDraftDocumentsForRespondent(callbackRequest, authorisation);
@@ -936,7 +935,7 @@ public class C100RespondentSolicitorService {
                 quarantineLegalDocList.add(getC1AQuarantineLegalDoc(userDetails, c1aFinalDocumentWelsh));
             }
         }
-        log.info("BBBBBBB -->{}", quarantineLegalDocList);
+        log.info("after submit -->");
         return dataMap;
     }
 
@@ -1300,7 +1299,6 @@ public class C100RespondentSolicitorService {
         if (solicitorRepresentedRespondent != null && solicitorRepresentedRespondent.getValue().getResponse() != null
                 && solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
                 && Yes.equals(solicitorRepresentedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData().getRespAohYesOrNo())) {
-            log.info("insideeeeee");
             if (documentLanguage.isGenEng()) {
                 Document documentForC1A = documentGenService.generateSingleDocument(
                     authorisation,
@@ -1323,7 +1321,7 @@ public class C100RespondentSolicitorService {
                 caseDataUpdated.put("draftC1ADocWelsh", documentForC1AWelsh);
             }
         }
-        log.info("AAAAAAA {}",documentLanguage);
+        log.info("viewDraftDocs--->");
         return caseDataUpdated;
     }
 
