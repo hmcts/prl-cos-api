@@ -207,6 +207,7 @@ public class ManageDocumentsService {
         String restrcitedKey = getRestrictedOrConfidentialKey(quarantineLegalDoc);
 
         if (restrcitedKey != null) {
+            //This will be executed only during review documents
             if (!userRole.equals(COURT_ADMIN)
                 && !DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 String loggedInUserType = DocumentUtils.getLoggedInUserType(userDetails);
@@ -226,6 +227,7 @@ public class ManageDocumentsService {
                 quarantineLegalDoc,
                 userDetails
             );
+            //This will be executed only during manage documents
             if (userRole.equals(COURT_ADMIN) || DocumentPartyEnum.COURT.getDisplayedValue().equals(quarantineLegalDoc.getDocumentParty())) {
                 finalConfidentialDocument = finalConfidentialDocument.toBuilder()
                     .hasTheConfidentialDocumentBeenRenamed(YesOrNo.No)
