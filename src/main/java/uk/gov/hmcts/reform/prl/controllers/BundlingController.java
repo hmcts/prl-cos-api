@@ -106,12 +106,11 @@ public class BundlingController extends AbstractCallbackController {
             }
             if (nonNull(existingBundleInformation.getCaseBundles())) {
                 List<Bundle> existingCaseBundles = existingBundleInformation.getCaseBundles();
-                existingCaseBundles.forEach(existingBundle -> {
+                existingCaseBundles.forEach(existingBundle ->
                     existingBundle.getValue().toBuilder()
                          .historicalStitchedDocument(existingBundle.getValue().getStitchedDocument())
-                         .stitchedDocument(null);
-
-                });
+                         .stitchedDocument(null)
+                );
                 historicalBundles.addAll(existingCaseBundles);
             }
             existingBundleInformation.setHistoricalBundles(historicalBundles);
