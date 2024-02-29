@@ -48,6 +48,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
 
     private static final String VALID_REQUEST_BODY_FOR_C1A_DRAFT = "requests/c100-respondent-solicitor-c1adraft-generate.json";
 
+    private static final String VALID_REQUEST_BODY_FOR_C1A_FINAL = "requests/c100-respondent-solicitor-c1afinal-generate.json";
+
     private static final String VALID_REQUEST_BODY_C1A = "requests/c100-respondent-solicitor-C1A.json";
 
     @Autowired
@@ -172,6 +174,9 @@ public class C100RespondentSolicitorControllerFunctionalTest {
 
     }
 
+    /**
+     * Respondent solicitor ViewResponseDraftDocument journey - C1A both English and Welsh Draft document should be generated.
+     */
     @Test
     public void givenRequestBody_whenGenerate_c7c1a_draft_welshAndEnglish_document() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_FOR_C1A_DRAFT);
@@ -188,6 +193,33 @@ public class C100RespondentSolicitorControllerFunctionalTest {
                   "data.draftC1ADoc.document_filename", equalTo("Draft_C1A_allegation_of_harm.pdf"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
+    }
+
+    /**
+     * Respondent solicitor submit journey - C1A both English and Welsh Final document should be generated
+     * and moved to quarantine (Documents To be Reviewed).
+     */
+    @Test
+    public void givenRequestBody_whenSubmit_c7C1A_final_welshAndEnglish_document() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_FOR_C1A_FINAL);
+
+        request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/respondent-solicitor/submit-c7-response")
+            .then()
+            .body("data.legalProfQuarantineDocsList[2].value.document.document_filename", equalTo("C1A_allegation_of_harm.pdf"),
+                  "data.legalProfQuarantineDocsList[2].value.categoryId", equalTo("respondentC1AApplication"),
+                  "data.legalProfQuarantineDocsList[2].value.categoryName", equalTo("Respondent C1A Application"),
+                  "data.legalProfQuarantineDocsList[3].value.document.document_filename", equalTo("Final_C1A_allegation_of_harm_Welsh.pdf"),
+                  "data.legalProfQuarantineDocsList[3].value.categoryId", equalTo("respondentC1AApplication"),
+                  "data.legalProfQuarantineDocsList[3].value.categoryName", equalTo("Respondent C1A Application"))
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
     }
 
 }
