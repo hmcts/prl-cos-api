@@ -428,6 +428,8 @@ public class ManageOrderEmailService {
                          dynamicDataForEmail.get(ENGLISH_EMAIL));
                 log.info("CA personal service email notifications: handlePersonalServiceNotifications: welsh: {}",
                          dynamicDataForEmail.get(WELSH_EMAIL));
+                log.info("CA personal service email notifications: handlePersonalServiceNotifications: dynamicDataForEmail: {}",
+                         dynamicDataForEmail);
                 sendPersonalServiceNotifications(
                     party.getValue().getSolicitorEmail(),
                     respondentOption,
