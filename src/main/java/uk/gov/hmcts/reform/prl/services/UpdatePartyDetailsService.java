@@ -489,4 +489,20 @@ public class UpdatePartyDetailsService {
         return caseDataUpdated;
 
     }
+
+    public Map<String, Object> setDefaultEmptyRespondentForC100(CaseData caseData) {
+
+        Map<String, Object> caseDataUpdated = new HashMap<>();
+        List<Element<PartyDetails>> respondents = caseData.getRespondents();
+        if (CollectionUtils.isEmpty(respondents) || CollectionUtils.size(respondents) < 1) {
+            respondents = new ArrayList<Element<PartyDetails>>();
+            Element<PartyDetails> partyDetails = element(PartyDetails.builder().build());
+            respondents.add(partyDetails);
+            caseDataUpdated.put("respondents", respondents);
+            return caseDataUpdated;
+        }
+        caseDataUpdated.put("respondents", caseData.getRespondents());
+        return caseDataUpdated;
+
+    }
 }

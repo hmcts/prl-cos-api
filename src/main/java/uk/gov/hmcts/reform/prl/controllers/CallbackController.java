@@ -571,7 +571,7 @@ public class CallbackController {
     }
 
     @PostMapping(path = "/pre-populate-party-information", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
-    @Operation(description = "pre populate C100 applicants with one entry ")
+    @Operation(description = "pre populate C100 applicants and respondents with one entry ")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Callback processed.", content = @Content(mediaType = "application/json",
             schema = @Schema(implementation = AboutToStartOrSubmitCallbackResponse.class))),
@@ -586,6 +586,7 @@ public class CallbackController {
         CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
         if (C100_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))) {
             caseDataUpdated.putAll(updatePartyDetailsService.setDefaultEmptyApplicantForC100(caseData));
+            caseDataUpdated.putAll(updatePartyDetailsService.setDefaultEmptyRespondentForC100(caseData));
         }
         return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
