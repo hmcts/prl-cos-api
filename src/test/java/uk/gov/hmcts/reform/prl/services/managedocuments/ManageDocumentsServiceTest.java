@@ -67,6 +67,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
@@ -150,6 +151,8 @@ public class ManageDocumentsServiceTest {
 
     UserDetails userDetailsSolicitorRole;
 
+    UserDetails userDetailsCitizenRole;
+
     UserDetails userDetailsCafcassRole;
 
     UserDetails userDetailsCourtAdminRole;
@@ -212,6 +215,12 @@ public class ManageDocumentsServiceTest {
             .forename("test")
             .surname("test")
             .roles(Collections.singletonList(JUDGE_ROLE))
+            .build();
+
+        userDetailsCitizenRole = UserDetails.builder()
+            .forename("test")
+            .surname("test")
+            .roles(Collections.singletonList(CITIZEN_ROLE))
             .build();
 
         confidentialDoc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
@@ -1337,6 +1346,7 @@ public class ManageDocumentsServiceTest {
         assertEquals(YesOrNo.Yes,restrictedDocuments.get(0).getValue().getHasTheConfidentialDocumentBeenRenamed());
     }
 
+
     @Test
     public void testGetQuarantineDocumentForUploaderCafcass() {
         QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
@@ -1467,16 +1477,6 @@ public class ManageDocumentsServiceTest {
         CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
 
-        when(systemUserService.getSysUserToken()).thenReturn("test");
-        when(authTokenGenerator.generate()).thenReturn("test");
-        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
-        HttpHeaders headers = new HttpHeaders();
-        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
-        when(caseDocumentClient
-                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
-            .thenReturn(expectedResponse);
-        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
-            .thenReturn(expectedResponse);
 
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(QuarantineLegalDoc.class))).thenReturn(quarantineLegalDoc);
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
@@ -1491,6 +1491,74 @@ public class ManageDocumentsServiceTest {
         assertNotNull(citizenUploadDocListDocTab);
         assertEquals(2,citizenUploadDocListDocTab.size());
 
+    }
+
+
+    @Test
+    public void testMoveCitizenDocumentsToRespectiveCategoriesNew() {
+
+        ManageDocuments manageDocuments = ManageDocuments.builder()
+            .documentParty(DocumentPartyEnum.APPLICANT)
+            .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").label("test").build()).build())
+            .isRestricted(YesOrNo.Yes)
+            .isConfidential(YesOrNo.Yes)
+            .document(uk.gov.hmcts.reform.prl.models.documents.Document.builder().build())
+            .build();
+
+        Map<String, Object> caseDataMapInitial = new HashMap<>();
+        caseDataMapInitial.put("manageDocuments",manageDocuments);
+
+        manageDocumentsElement = element(manageDocuments);
+
+        uk.gov.hmcts.reform.prl.models.documents.Document doc = uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+            .documentFileName("Confidential_test.pdf")
+            .documentBinaryUrl("http://test.link")
+            .documentUrl("http://test.link").build();
+
+        HashMap hashMap = new HashMap();
+        hashMap.put("testDocument", doc);
+
+        quarantineLegalDocElement = element(quarantineConfidentialDoc);
+        ReviewDocuments reviewDocuments = ReviewDocuments.builder().build();
+        CaseData caseData = CaseData.builder()
+            .reviewDocuments(reviewDocuments)
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .manageDocuments(List.of(manageDocumentsElement))
+                                           .build())
+            .build();
+        CaseDetails caseDetails = CaseDetails.builder().id(12345L).data(caseDataMapInitial).build();
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+
+        when(systemUserService.getSysUserToken()).thenReturn("test");
+        when(authTokenGenerator.generate()).thenReturn("test");
+        Resource expectedResource = new ClassPathResource("task-list-markdown.md");
+        HttpHeaders headers = new HttpHeaders();
+        ResponseEntity<Resource> expectedResponse = new ResponseEntity<>(expectedResource, headers, HttpStatus.OK);
+        when(caseDocumentClient
+                 .getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.anyString()))
+            .thenReturn(expectedResponse);
+        when(caseDocumentClientApi.getDocumentBinary(Mockito.anyString(), Mockito.anyString(), Mockito.any()))
+            .thenReturn(expectedResponse);
+        QuarantineLegalDoc quarantineLegalDoc = QuarantineLegalDoc.builder()
+            .isConfidential(YesOrNo.Yes)
+            .citizenQuarantineDocument(uk.gov.hmcts.reform.prl.models.documents.Document.builder()
+                          .documentFileName("testFileName")
+                          .documentUrl("1accfb1e-2574-4084-b97e-1cd53fd14815").build())
+            .isRestricted(YesOrNo.No).categoryId("test").build();
+        when(objectMapper.convertValue(hashMap, QuarantineLegalDoc.class)).thenReturn(quarantineLegalDoc);
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+        when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
+        when(userService.getUserDetails(auth)).thenReturn(userDetailsCitizenRole);
+
+        manageDocumentsService
+            .moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc, userDetailsCitizenRole, caseData, caseDataMapInitial, "Citizen");
+        List<Element<QuarantineLegalDoc>> confidentialDocuments = (List<Element<QuarantineLegalDoc>>) caseDataMapInitial.get("confidentialDocuments");
+
+        assertNotNull(confidentialDocuments);
+        assertEquals(1,confidentialDocuments.size());
+        assertEquals("testFileName",confidentialDocuments.get(0).getValue().getCitizenQuarantineDocument().getDocumentFileName());
+
+        assertNotNull(quarantineLegalDoc);
     }
 
 
