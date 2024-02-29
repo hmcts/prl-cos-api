@@ -11,29 +11,29 @@ import java.util.Optional;
 @Getter
 public enum RespondentSolicitorEvents {
     CONSENT("c100ResSolConsentingToApplication", "Do you give your consent?", "respondentConsentToApplication"),
-    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep your details private", "keepContactDetailsPrivate"),
+    KEEP_DETAILS_PRIVATE("c100ResSolKeepDetailsPrivate", "Keep details private", "keepContactDetailsPrivate"),
     CONFIRM_EDIT_CONTACT_DETAILS(
         "c100ResSolConfirmOrEditContactDetails",
-        "Edit your contact details",
+        "Edit contact details",
         "resSolConfirmEditContactDetails"
     ),
     ATTENDING_THE_COURT("c100ResSolAttendingTheCourt", "Attending the court", "respondentAttendingTheCourt"),
     MIAM(
         "c100ResSolMiam",
         "MIAM",
-        "respondentSolicitorHaveYouAttendedMiam,"
+        "hasRespondentAttendedMiam,respondentWillingToAttendMiam,respondentReasonNotAttendingMiam,"
             + "whatIsMiamPlaceHolder,helpMiamCostsExemptionsPlaceHolder"
     ),
-    CURRENT_OR_PREVIOUS_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Current or past proceedings",
-                                    "currentOrPastProceedingsForChildren,respondentExistingProceedings"
+    OTHER_PROCEEDINGS("c100ResSolCurrentOrPreviousProceedings", "Other proceedings",
+                      "currentOrPastProceedingsForChildren,respondentExistingProceedings"
     ),
     ALLEGATION_OF_HARM("c100ResSolAllegationsOfHarm", "Allegations of harm", "respondentAohYesNo,"
         + "respondentAllegationsOfHarm,respondentDomesticAbuseBehaviour,respondentChildAbuseBehaviour,"
         + "respondentChildAbduction,respondentOtherConcerns"),
     INTERNATIONAL_ELEMENT("c100ResSolInternationalElement", "International element", "internationalElementChild"),
     ABILITY_TO_PARTICIPATE(
-        "c100ResSolAbilityToParticipate",
-        "Ability to participate",
+        "c100ResSolLitigationCapacity",
+        "Litigation capacity",
         "abilityToParticipateInProceedings"
     ),
     VIEW_DRAFT_RESPONSE("c100ResSolViewResponseDraftDocument", "View a draft of your response", ""),
@@ -60,7 +60,7 @@ public enum RespondentSolicitorEvents {
             CONFIRM_EDIT_CONTACT_DETAILS,
             ATTENDING_THE_COURT,
             MIAM,
-            CURRENT_OR_PREVIOUS_PROCEEDINGS,
+            OTHER_PROCEEDINGS,
             ALLEGATION_OF_HARM,
             INTERNATIONAL_ELEMENT,
             ABILITY_TO_PARTICIPATE

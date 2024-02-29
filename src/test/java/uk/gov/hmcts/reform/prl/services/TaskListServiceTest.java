@@ -1,16 +1,22 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesNoDontKnow;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
@@ -24,10 +30,14 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
@@ -73,7 +83,6 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
 import static uk.gov.hmcts.reform.prl.models.tasklist.TaskState.CANNOT_START_YET;
@@ -97,6 +106,23 @@ public class TaskListServiceTest {
 
     @Mock
     RespondentEventsChecker respondentEventsChecker;
+
+    @Mock
+    EventService eventPublisher;
+
+    public static final String authToken = "Bearer TestAuthToken";
+
+    @Mock
+    UserService userService;
+
+    @Mock
+    DocumentGenService dgsService;
+
+    @Mock
+    ObjectMapper objectMapper;
+
+    @Mock
+    AllTabServiceImpl tabService;
 
     @Test
     public void getTasksShouldReturnListOfTasks() {
@@ -149,7 +175,7 @@ public class TaskListServiceTest {
             RespondentTask.builder().event(CONFIRM_EDIT_CONTACT_DETAILS).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(ATTENDING_THE_COURT).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(RespondentSolicitorEvents.MIAM).state(TaskState.NOT_STARTED).build(),
-            RespondentTask.builder().event(CURRENT_OR_PREVIOUS_PROCEEDINGS).state(TaskState.NOT_STARTED).build(),
+            RespondentTask.builder().event(RespondentSolicitorEvents.OTHER_PROCEEDINGS).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(ALLEGATION_OF_HARM).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(RespondentSolicitorEvents.INTERNATIONAL_ELEMENT).state(TaskState.NOT_STARTED).build(),
             RespondentTask.builder().event(ABILITY_TO_PARTICIPATE).state(TaskState.NOT_STARTED).build(),
@@ -451,7 +477,7 @@ public class TaskListServiceTest {
             CONFIRM_EDIT_CONTACT_DETAILS,
             ATTENDING_THE_COURT,
             RespondentSolicitorEvents.MIAM,
-            CURRENT_OR_PREVIOUS_PROCEEDINGS,
+                RespondentSolicitorEvents.OTHER_PROCEEDINGS,
             RespondentSolicitorEvents.ALLEGATION_OF_HARM,
             RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
             ABILITY_TO_PARTICIPATE,
@@ -498,6 +524,133 @@ public class TaskListServiceTest {
         List<Task> actualTasks = taskListService.getTasksForOpenCase(caseData);
 
         assertThat(expectedTasks).isEqualTo(actualTasks);
+    }
+
+    @Test
+    public void updateTaskListAsCourtAdminWhenCaseIsInSubmittedState() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.SUBMITTED_PAID)
+            .build();
+
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> documentMap = new HashMap<>();
+        stringObjectMap.putAll(documentMap);
+        when(userService.getUserDetails(authToken))
+            .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
+        when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .state("SUBMITTED_PAID")
+                             .build())
+            .build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
+            .updateTaskList(callbackRequest, authToken);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+    }
+
+    @Test
+    public void updateTaskListAsCourtAdminWhenCaseIsInIssuedState() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.CASE_ISSUED)
+            .build();
+
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> documentMap = new HashMap<>();
+        stringObjectMap.putAll(documentMap);
+        when(userService.getUserDetails(authToken))
+            .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
+        when(dgsService.generateDocuments(authToken, caseData)).thenReturn(documentMap);
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .state("CASE_ISSUED")
+                             .build())
+            .build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
+            .updateTaskList(callbackRequest, authToken);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        Assert.assertEquals("CASE_ISSUED", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+    }
+
+    @Test
+    public void testNoEventPublishedAsSolicitorWhenCaseIsInSubmittedState() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.SUBMITTED_PAID)
+            .build();
+
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> documentMap = new HashMap<>();
+        stringObjectMap.putAll(documentMap);
+        when(userService.getUserDetails(authToken))
+            .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-solicitor")).build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .state("SUBMITTED_PAID")
+                             .build())
+            .build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
+            .updateTaskList(callbackRequest, authToken);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
+    }
+
+    @Test
+    public void testErrorWhenFailedIDocumentGeneration() throws Exception {
+        CaseData caseData = CaseData.builder()
+            .caseTypeOfApplication(PrlAppsConstants.C100_CASE_TYPE)
+            .typeOfApplicationOrders(orders)
+            .typeOfApplicationLinkToCA(linkToCA)
+            .state(State.SUBMITTED_PAID)
+            .build();
+
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        Map<String, Object> documentMap = new HashMap<>();
+        stringObjectMap.putAll(documentMap);
+        when(userService.getUserDetails(authToken))
+            .thenReturn(UserDetails.builder().roles(List.of("caseworker-privatelaw-courtadmin")).build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(dgsService.generateDocuments(authToken, caseData)).thenThrow(new Exception());
+        CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder()
+            .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                             .id(123L)
+                             .data(stringObjectMap)
+                             .state("SUBMITTED_PAID")
+                             .build())
+            .build();
+        AboutToStartOrSubmitCallbackResponse aboutToStartOrSubmitCallbackResponse = taskListService
+            .updateTaskList(callbackRequest, authToken);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse);
+        Assert.assertNotNull(aboutToStartOrSubmitCallbackResponse.getData());
+        Assert.assertEquals("SUBMITTED_PAID", aboutToStartOrSubmitCallbackResponse.getData().get("state"));
     }
 }
 

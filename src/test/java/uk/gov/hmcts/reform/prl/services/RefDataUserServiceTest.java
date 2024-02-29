@@ -16,6 +16,9 @@ import uk.gov.hmcts.reform.prl.clients.JudicialUserDetailsApi;
 import uk.gov.hmcts.reform.prl.clients.StaffResponseDetailsApi;
 import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.common.dynamic.DynamicListElement;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.CaseFlag;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.Flag;
+import uk.gov.hmcts.reform.prl.models.dto.datamigration.caseflag.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategorySubValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CategoryValues;
 import uk.gov.hmcts.reform.prl.models.dto.hearingdetails.CommonDataResponse;
@@ -50,6 +53,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VIDEOPLATFORM;
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class RefDataUserServiceTest {
 
+    public static final String FLAG_TYPE = "PARTY";
     @InjectMocks
     RefDataUserService refDataUserService;
 
@@ -218,6 +222,29 @@ public class RefDataUserServiceTest {
         );
         assertNotNull(commonResponse);
         assertEquals("Celebration hearing",commonResponse.getCategoryValues().get(0).getValueEn());
+    }
+
+    @Test
+    public void testRetrieveCaseFlags() {
+        FlagDetail flagDetail1 = FlagDetail.builder().flagCode("ABCD").externallyAvailable(true).flagComment(true).cateGoryId(0).build();
+        FlagDetail flagDetail2 = FlagDetail.builder().flagCode("CDEF")
+            .childFlags(List.of(flagDetail1)).externallyAvailable(false).flagComment(true).cateGoryId(0).build();
+        List<FlagDetail> flagDetails = new ArrayList<>();
+        flagDetails.add(flagDetail1);
+        flagDetails.add(flagDetail2);
+        Flag flag1 = Flag.builder().flagDetails(flagDetails).build();
+        List<Flag> flags = new ArrayList<>();
+        flags.add(flag1);
+        CaseFlag caseFlagResponse = CaseFlag.builder().flags(flags).build();
+        when(authTokenGenerator.generate()).thenReturn(s2sToken);
+        when(commonDataRefApi.retrieveCaseFlagsByServiceId(authToken, authTokenGenerator.generate(), SERVICE_ID,
+                                                           FLAG_TYPE)).thenReturn(caseFlagResponse);
+        CaseFlag caseFlag = refDataUserService.retrieveCaseFlags(
+            authToken,
+            FLAG_TYPE
+        );
+        assertEquals("ABCD",caseFlag.getFlags().get(0).getFlagDetails().get(0).getFlagCode());
+
     }
 
 

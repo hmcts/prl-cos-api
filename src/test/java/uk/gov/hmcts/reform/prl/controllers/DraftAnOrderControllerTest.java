@@ -66,7 +66,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_JUDGE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.MANDATORY_MAGISTRATE;
@@ -125,7 +124,6 @@ public class DraftAnOrderControllerTest {
             .surname("Solicitor")
             .build();
         when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
-        when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
         when(hearingDataService.populateHearingDynamicLists(Mockito.anyString(),Mockito.anyString(),Mockito.any(),Mockito.any()))
             .thenReturn(HearingDataPrePopulatedDynamicLists.builder().build());
 
@@ -137,7 +135,7 @@ public class DraftAnOrderControllerTest {
     @Test
     public void testResetFields() {
         CallbackRequest callbackRequest = CallbackRequest.builder().build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             0,
             draftAnOrderController.resetFields(authToken, s2sToken, callbackRequest).getData().size()
@@ -166,10 +164,9 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handleSelectedOrder(callbackRequest, authToken))
             .thenReturn(AboutToStartOrSubmitCallbackResponse.builder().data(stringObjectMap).build());
-
         Map<String, Object> updatedCaseData = draftAnOrderController.populateHeader(
             authToken, s2sToken, callbackRequest
         ).getData();
@@ -202,7 +199,7 @@ public class DraftAnOrderControllerTest {
         when(draftAnOrderService.handleSelectedOrder(any(),
                                                      any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
             "This order is not available to be drafted")).build());
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             "This order is not available to be drafted",
             draftAnOrderController.populateHeader(authToken, s2sToken, callbackRequest).getErrors().get(0)
@@ -227,7 +224,7 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handleSelectedOrder(any(),
                                                      any())).thenReturn(AboutToStartOrSubmitCallbackResponse.builder().errors(List.of(
             "This order is not available to be drafted")).build());
@@ -324,7 +321,7 @@ public class DraftAnOrderControllerTest {
             caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.nonMolestation);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
@@ -402,7 +399,7 @@ public class DraftAnOrderControllerTest {
             caseData = manageOrderService.populateCustomOrderFields(caseData,CreateSelectOrderOptionsEnum.blankOrderOrDirections);
         }
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         when(draftAnOrderService.handlePopulateDraftOrderFields(any(), any())).thenReturn(caseDataUpdated);
         Assert.assertEquals(
             caseDataUpdated,
@@ -431,12 +428,12 @@ public class DraftAnOrderControllerTest {
             .eventId(ADMIN_EDIT_AND_APPROVE_ORDER.getId())
             .build();
 
-        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any(), anyBoolean()))
+        when(draftAnOrderService.generateOrderDocument(Mockito.anyString(), Mockito.any(CallbackRequest.class), Mockito.any()))
             .thenReturn(stringObjectMap);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         caseDataUpdated.putAll(manageOrderService.getCaseData("test token", caseData, CreateSelectOrderOptionsEnum.blankOrderOrDirections));
         when(authorisationService.isAuthorized(any(),any())).thenReturn(true);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any())).thenReturn(DraftOrder.builder().build());
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(DraftOrder.builder().build());
         when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
         Assert.assertEquals(caseDataUpdated, draftAnOrderController.generateDoc(authToken,s2sToken, callbackRequest).getData());
     }
@@ -554,7 +551,7 @@ public class DraftAnOrderControllerTest {
             caseData,
             CreateSelectOrderOptionsEnum.blankOrderOrDirections
         ));
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.prepareDraftOrderCollection(
@@ -596,13 +593,12 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+        when(authorisationService.isAuthorized(Mockito.anyString(), Mockito.anyString())).thenReturn(true);
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.populateSdoFields(authToken, s2sToken, callbackRequest).getData()
         );
-
     }
 
     @Test
@@ -636,7 +632,7 @@ public class DraftAnOrderControllerTest {
                              .data(stringObjectMap)
                              .build())
             .build();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
         Assert.assertEquals(
             "Please select at least one options from below",
@@ -674,7 +670,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             caseDataUpdated,
             draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getData()
@@ -711,7 +707,7 @@ public class DraftAnOrderControllerTest {
                              .build())
             .build();
         Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
-        when(authorisationService.isAuthorized(any(), any())).thenReturn(true);
+
         Assert.assertEquals(
             "Please select at least one options from below",
             draftAnOrderController.populateDioFields(authToken, s2sToken, callbackRequest).getErrors().get(0)
@@ -1002,7 +998,7 @@ public class DraftAnOrderControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
         when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
@@ -1039,7 +1035,7 @@ public class DraftAnOrderControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
         when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest);
@@ -1080,7 +1076,7 @@ public class DraftAnOrderControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
         when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController.generateDoc(authToken, s2sToken, callbackRequest);
@@ -1124,7 +1120,7 @@ public class DraftAnOrderControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
         when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
@@ -1163,7 +1159,7 @@ public class DraftAnOrderControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
         when(draftAnOrderService.handleDocumentGeneration(authToken, callbackRequest)).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController
@@ -1199,7 +1195,7 @@ public class DraftAnOrderControllerTest {
         Mockito.when(authorisationService.isAuthorized(authToken,s2sToken)).thenReturn(true);
         when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
-        when(draftAnOrderService.getSelectedDraftOrderDetails(caseData)).thenReturn(draftOrder);
+        when(draftAnOrderService.getSelectedDraftOrderDetails(Mockito.any(), Mockito.any())).thenReturn(draftOrder);
         when(draftAnOrderService.handleDocumentGenerationForaDraftOrder(Mockito.anyString(), Mockito.any())).thenReturn(stringObjectMap);
 
         AboutToStartOrSubmitCallbackResponse callbackResponse = draftAnOrderController

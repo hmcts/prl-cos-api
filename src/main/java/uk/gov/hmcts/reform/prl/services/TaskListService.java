@@ -1,13 +1,19 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse;
+import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
+import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents;
+import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -15,14 +21,21 @@ import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskState;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.validators.RespondentEventsChecker;
+import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
+import uk.gov.hmcts.reform.prl.services.tab.alltabs.AllTabServiceImpl;
 import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ISSUED_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM;
 import static uk.gov.hmcts.reform.prl.enums.Event.ALLEGATIONS_OF_HARM_REVISED;
@@ -63,9 +76,9 @@ import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSo
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.ATTENDING_THE_COURT;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONFIRM_EDIT_CONTACT_DETAILS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CONSENT;
-import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.CURRENT_OR_PREVIOUS_PROCEEDINGS;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.KEEP_DETAILS_PRIVATE;
 import static uk.gov.hmcts.reform.prl.enums.c100respondentsolicitor.RespondentSolicitorEvents.VIEW_DRAFT_RESPONSE;
+import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getCaseData;
 
 
 @Slf4j
@@ -75,6 +88,12 @@ public class TaskListService {
 
     private final EventsChecker eventsChecker;
     private final RespondentEventsChecker respondentEventsChecker;
+    @Qualifier("allTabsService")
+    private final AllTabServiceImpl tabService;
+    private final UserService userService;
+    private final DocumentGenService dgsService;
+    private final ObjectMapper objectMapper;
+    private final EventService eventPublisher;
 
     public List<Task> getTasksForOpenCase(CaseData caseData) {
         return getEvents(caseData).stream()
@@ -212,12 +231,47 @@ public class TaskListService {
             CONFIRM_EDIT_CONTACT_DETAILS,
             ATTENDING_THE_COURT,
             RespondentSolicitorEvents.MIAM,
-            CURRENT_OR_PREVIOUS_PROCEEDINGS,
+            RespondentSolicitorEvents.OTHER_PROCEEDINGS,
             RespondentSolicitorEvents.ALLEGATION_OF_HARM,
             RespondentSolicitorEvents.INTERNATIONAL_ELEMENT,
             ABILITY_TO_PARTICIPATE,
             VIEW_DRAFT_RESPONSE,
             RespondentSolicitorEvents.SUBMIT
         ));
+    }
+
+    public AboutToStartOrSubmitCallbackResponse updateTaskList(CallbackRequest callbackRequest, String authorisation) {
+        CaseData caseData = getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+        Map<String, Object> caseDataUpdated = callbackRequest.getCaseDetails().getData();
+        eventPublisher.publishEvent(new CaseDataChanged(caseData));
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        List<String> roles = userDetails.getRoles();
+        boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
+        String state = callbackRequest.getCaseDetails().getState();
+        if (isCourtStaff && (SUBMITTED_STATE.equalsIgnoreCase(state) || ISSUED_STATE.equalsIgnoreCase(state))
+            || JUDICIAL_REVIEW_STATE.equalsIgnoreCase(state)) {
+            try {
+                caseDataUpdated.putAll(dgsService.generateDocuments(authorisation, caseData));
+                CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+                caseData = caseData.toBuilder()
+                    .c8Document(updatedCaseData.getC8Document())
+                    .c1ADocument(updatedCaseData.getC1ADocument())
+                    .c8WelshDocument(updatedCaseData.getC8WelshDocument())
+                    .finalDocument(updatedCaseData.getFinalDocument())
+                    .finalWelshDocument(updatedCaseData.getFinalWelshDocument())
+                    .c1AWelshDocument(updatedCaseData.getC1AWelshDocument())
+                    .build();
+            } catch (Exception e) {
+                log.error("Error regenerating the document", e);
+            }
+        }
+
+        tabService.updateAllTabsIncludingConfTab(caseData);
+
+        if (!isCourtStaff) {
+            eventPublisher.publishEvent(new CaseDataChanged(caseData));
+        }
+
+        return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
     }
 }

@@ -50,10 +50,14 @@ public class ApplicationsTabServiceHelper {
         }
         List<PartyDetails> otherPeople = caseData.getOtherPartyInTheCaseRevised().stream().map(Element::getValue).toList();
         otherPeople = maskConfidentialDetails(otherPeople);
-        for (PartyDetails p : otherPeople) {
-            OtherPersonInTheCaseRevised other = objectMapper.convertValue(p, OtherPersonInTheCaseRevised.class);
+        for (PartyDetails currentOtherPerson : otherPeople) {
+            OtherPersonInTheCaseRevised otherPerson = objectMapper.convertValue(currentOtherPerson, OtherPersonInTheCaseRevised.class);
+
             Element<OtherPersonInTheCaseRevised> wrappedPerson = Element.<OtherPersonInTheCaseRevised>builder()
-                .value(other).build();
+                .value(otherPerson.toBuilder()
+                           .gender(otherPerson.getGender() != null
+                                       ? Gender.getDisplayedValueFromEnumString(otherPerson.getGender()).getDisplayedValue() : null)
+                           .build()).build();
             otherPersonsInTheCase.add(wrappedPerson);
         }
         return otherPersonsInTheCase;
