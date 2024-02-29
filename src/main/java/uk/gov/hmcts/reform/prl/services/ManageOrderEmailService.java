@@ -456,17 +456,9 @@ public class ManageOrderEmailService {
         if (null != solicitorEmail && SoaSolicitorServingRespondentsEnum.applicantLegalRepresentative
             .equals(respondentOption)) {
             log.info("CA personal service email notifications: sendPersonalServiceNotifications");
-            if (dynamicDataForEmail.get(ENGLISH_EMAIL).equals(Boolean.TRUE)) {
-                log.info("CA personal service email notifications: English");
-                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
-                                     SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
-                );
-            } else if (dynamicDataForEmail.get(WELSH_EMAIL).equals(Boolean.TRUE)) {
-                log.info("CA personal service email notifications: Welsh");
-                sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
-                                     SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR_WELSH
-                );
-            }
+            sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
+                                 SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
+            );
         } else if (null != solicitorEmail && (SoaSolicitorServingRespondentsEnum.courtAdmin.equals(respondentOption)
             || SoaSolicitorServingRespondentsEnum.courtBailiff.equals(respondentOption))) {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
