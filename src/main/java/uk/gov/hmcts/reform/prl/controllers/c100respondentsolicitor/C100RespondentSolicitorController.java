@@ -189,6 +189,10 @@ public class C100RespondentSolicitorController extends AbstractCallbackControlle
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest) throws Exception {
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
+            ObjectMapper om = new ObjectMapper();
+            objectMapper.registerModule(new JavaTimeModule());
+            String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+            log.info("SUBMITTTTT-c7-response {} ", result);
             List<String> errorList = new ArrayList<>();
             log.info("validateTheResponseBeforeSubmit: Callback for Respondent Solicitor - validate response");
             return AboutToStartOrSubmitCallbackResponse
