@@ -919,6 +919,11 @@ public class C100RespondentSolicitorServiceTest {
 
         List<String> errorList = new ArrayList<>();
 
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
+
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
                 callbackRequest, errorList, authToken
         );
@@ -946,6 +951,11 @@ public class C100RespondentSolicitorServiceTest {
                 .build();
 
         List<String> errorList = new ArrayList<>();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
 
         Map<String, Object> response = respondentSolicitorService.validateActiveRespondentResponse(
                 callbackRequest, errorList, authToken
@@ -1023,6 +1033,11 @@ public class C100RespondentSolicitorServiceTest {
         )).thenReturn(document2);
         UserDetails userDetails = UserDetails.builder().forename("test")
                 .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(false).build();
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
 
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
@@ -1147,6 +1162,11 @@ public class C100RespondentSolicitorServiceTest {
         when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
         callbackRequest.setEventId("c100ResSolConsentingToApplicationE");
         List<String> errorList = new ArrayList<>();
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(true).build();
+        when(documentLanguageService.docGenerateLang(
+            Mockito.any(CaseData.class)
+        )).thenReturn(documentLanguage);
+
         Map<String, Object> response = respondentSolicitorService.submitC7ResponseForActiveRespondent(
                 authToken, callbackRequest
         );
