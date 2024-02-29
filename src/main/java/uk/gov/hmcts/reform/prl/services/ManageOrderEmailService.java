@@ -454,7 +454,7 @@ public class ManageOrderEmailService {
                                       party.getValue().getFirstName());*/
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
                     sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData, "anshika.nigam1@hmcts.net",
-                                         SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_SOLICITOR
+                                         SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL
                     );
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
