@@ -32,6 +32,8 @@ import uk.gov.hmcts.reform.prl.enums.SpokenOrWrittenWelshEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfOrderEnum;
 import uk.gov.hmcts.reform.prl.enums.YesNoBothEnum;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoHearingUrgentCheckListEnum;
+import uk.gov.hmcts.reform.prl.enums.sdo.SdoTransferApplicationReasonEnum;
 
 import java.util.Arrays;
 import java.util.List;
@@ -939,6 +941,32 @@ public class WelshLangMapper {
         welshMap.put("welshLanguageRequirementApplicationNeedEnglish_No", WELSH_NO_NAC_OES);
         welshMap.put("languageRequirementApplicationNeedWelsh_Yes", WELSH_YES_OES);
         welshMap.put("languageRequirementApplicationNeedWelsh_No", WELSH_NO_NAC_OES);
+
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.immediateRisk.getDisplayedValue(),
+            "Mae tystiolaeth o risg uniongyrchol o niwed i'r plentyn(plant)"
+        );
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.applicantsCare.getDisplayedValue(),
+            "Mae tystiolaeth i awgrymu bod yr atebydd yn ceisio tynnu'r plentyn(plant) o ofal y ceisydd"
+        );
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.seekToFrustrate.getDisplayedValue(),
+            "Mae tystiolaeth i awgrymu y byddai'r atebydd yn ceisio rhwystro'r broses os na wrandewir y cais ar frys"
+        );
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.leaveTheJurisdiction.getDisplayedValue(),
+            "Mae tystiolaeth i awgrymu y gall yr atebydd geisio gadael yr awdurdodaeth gyda'r plentyn (plant) os na wrandewir y cais ar frys"
+        );
+
+        welshMap.put(
+            SdoTransferApplicationReasonEnum.courtInAreaChildLives.getDisplayedValue(),
+            "Mae llys arall yn yr ardal lle mae'r plentyn fel arfer yn byw"
+        );
+        welshMap.put(
+            SdoTransferApplicationReasonEnum.ongoingProceedings.getDisplayedValue(),
+            "Mae achosion parhaus mewn llys arall"
+        );
 
         return welshMap;
     }
