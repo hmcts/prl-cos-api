@@ -45,6 +45,8 @@ public class C100RespondentSolicitorControllerFunctionalTest {
     private ConfidentialDetailsMapper confidentialDetailsMapper;
     private static final String VALID_REQUEST_BODY = "requests/c100-respondent-solicitor-call-back-controller.json";
 
+    private static final String VALID_REQUEST_BODY_FOR_C1A_DRAFT = "requests/c100-respondent-solicitor-c1adraft-generate.json";
+
     private static final String VALID_REQUEST_BODY_C1A = "requests/c100-respondent-solicitor-C1A.json";
 
     @Autowired
@@ -166,6 +168,26 @@ public class C100RespondentSolicitorControllerFunctionalTest {
             .then()
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
+
+    }
+
+    @Test
+    public void givenRequestBody_whenGenerate_c7c1a_draft_welshAndEnglish_document() throws Exception {
+        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_FOR_C1A_DRAFT);
+
+        AboutToStartOrSubmitCallbackResponse resp = request
+            .header("Authorization", idamTokenGenerator.generateIdamTokenForSolicitor())
+            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
+            .body(requestBody)
+            .when()
+            .contentType("application/json")
+            .post("/respondent-solicitor/generate-c7response-document")
+            .then()
+            .extract()
+            .as(AboutToStartOrSubmitCallbackResponse.class);
+
+        System.out.println("JJJJJ " + resp);
+
 
     }
 
