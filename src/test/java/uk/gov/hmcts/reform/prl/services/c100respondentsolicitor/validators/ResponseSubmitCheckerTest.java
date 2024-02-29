@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.consent.Cons
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.AttendToCourt;
 import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.RespondentAllegationsOfHarmData;
+import uk.gov.hmcts.reform.prl.models.complextypes.solicitorresponse.ResponseToAllegationsOfHarm;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.Collections;
@@ -57,6 +58,12 @@ public class ResponseSubmitCheckerTest {
     @Mock
     RespondentAllegationsOfHarmChecker respondentAllegationsOfHarmChecker;
 
+    @Mock
+    ResponseToAllegationsOfHarmChecker responseToAllegationsOfHarmChecker;
+
+    @Mock
+    InternationalElementsChecker internationalElementsChecker;
+
     CaseData emptyCaseData;
 
     PartyDetails respondent;
@@ -68,28 +75,31 @@ public class ResponseSubmitCheckerTest {
         emptyRespondent = PartyDetails.builder().build();
 
         PartyDetails respondent = PartyDetails.builder()
-            .response(Response
-                          .builder()
-                          .consent(Consent
-                                       .builder()
-                                       .build())
-                          .keepDetailsPrivate(KeepDetailsPrivate
-                                                  .builder()
-                                                  .build())
-                          .abilityToParticipate(AbilityToParticipate
-                                                    .builder()
-                                                    .build())
-                          .attendToCourt(AttendToCourt
-                                             .builder()
-                                             .build())
-                          .currentOrPreviousProceedings(CurrentOrPreviousProceedings
-                                                            .builder()
-                                                            .build())
-                          .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
-                                                               .builder()
-                                                               .build())
-                          .build())
-            .build();
+                .response(Response
+                        .builder()
+                        .consent(Consent
+                                .builder()
+                                .build())
+                        .keepDetailsPrivate(KeepDetailsPrivate
+                                .builder()
+                                .build())
+                        .abilityToParticipate(AbilityToParticipate
+                                .builder()
+                                .build())
+                        .attendToCourt(AttendToCourt
+                                .builder()
+                                .build())
+                        .currentOrPreviousProceedings(CurrentOrPreviousProceedings
+                                .builder()
+                                .build())
+                        .respondentAllegationsOfHarmData(RespondentAllegationsOfHarmData
+                                .builder()
+                                .build())
+                        .responseToAllegationsOfHarm(ResponseToAllegationsOfHarm
+                                .builder()
+                                .build())
+                        .build())
+                .build();
 
         Element<PartyDetails> wrappedRespondents = Element.<PartyDetails>builder().value(respondent).build();
         List<Element<PartyDetails>> respondentList = Collections.singletonList(wrappedRespondents);
@@ -114,6 +124,7 @@ public class ResponseSubmitCheckerTest {
         when(respondentEventsChecker.getCurrentOrPastProceedingsChecker()).thenReturn(currentOrPastProceedingsChecker);
         when(respondentEventsChecker.getRespondentAllegationsOfHarmChecker()).thenReturn(respondentAllegationsOfHarmChecker);
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
+        when(respondentEventsChecker.getResponseToAllegationsOfHarmChecker()).thenReturn(responseToAllegationsOfHarmChecker);
 
 
         Boolean bool = responseSubmitChecker.isFinished(emptyRespondent);
@@ -147,6 +158,12 @@ public class ResponseSubmitCheckerTest {
 
         when(respondentEventsChecker.getRespondentContactDetailsChecker()).thenReturn(respondentContactDetailsChecker);
         when(respondentContactDetailsChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getInternationalElementsChecker()).thenReturn(internationalElementsChecker);
+        when(internationalElementsChecker.isFinished(respondent)).thenReturn(true);
+
+        when(respondentEventsChecker.getResponseToAllegationsOfHarmChecker()).thenReturn(responseToAllegationsOfHarmChecker);
+        when(responseToAllegationsOfHarmChecker.isFinished(respondent)).thenReturn(true);
 
         Boolean bool = responseSubmitChecker.isFinished(respondent);
 
