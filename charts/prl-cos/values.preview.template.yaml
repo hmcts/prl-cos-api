@@ -1,8 +1,8 @@
 java:
   devcpuRequests: 250m
-  devmemoryRequests: 1Gi
+  devmemoryRequests: 2Gi
   devcpuLimits: 1
-  devmemoryLimits: 1Gi
+  devmemoryLimits: 2Gi
   image: ${IMAGE_NAME}
   ingressHost: ${SERVICE_FQDN}
   keyVaults:
