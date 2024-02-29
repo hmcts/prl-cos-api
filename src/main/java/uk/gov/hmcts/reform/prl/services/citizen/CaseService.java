@@ -23,12 +23,14 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
@@ -36,9 +38,11 @@ import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
+import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
+import uk.gov.hmcts.reform.prl.utils.DocumentUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +59,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
@@ -69,6 +74,7 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.DARESPONDENT;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.nullSafeCollection;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
 
 
@@ -95,6 +101,7 @@ public class CaseService {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final CaseSummaryTabService caseSummaryTab;
     private final RoleAssignmentService roleAssignmentService;
+    private final UserService userService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
@@ -484,5 +491,71 @@ public class CaseService {
 
     public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
         return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
+    }
+
+    public List<CitizenDocuments> getCitizenDocuments(String authToken,
+                                                      CaseData caseData) {
+        List<CitizenDocuments> citizenDocuments = new ArrayList<>();
+        UserDetails userDetails = userService.getUserDetails(authToken);
+
+        if (null != caseData.getReviewDocuments()) {
+            //add solicitor uploaded docs
+            citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getLegalProfUploadDocListDocTab()));
+            //add cafacss uploaded docs
+            citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCafcassUploadDocListDocTab()));
+            //add court staff uploaded docs
+            citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCourtStaffUploadDocListDocTab()));
+            //add citizen uploaded docs
+            citizenDocuments.addAll(addCitizenDocuments(caseData.getReviewDocuments().getCitizenUploadedDocListDocTab()));
+
+            //confidential docs uploaded by citizen
+            citizenDocuments.addAll(filterCitizenUploadedDocuments(caseData.getReviewDocuments().getConfidentialDocuments(),
+                                                                   userDetails));
+            //restricted docs uploaded by citizen
+            citizenDocuments.addAll(filterCitizenUploadedDocuments(caseData.getReviewDocuments().getRestrictedDocuments(),
+                                                                   userDetails));
+        }
+
+        //add citizen uploaded docs pending review
+        if (null != caseData.getDocumentManagementDetails()) {
+            citizenDocuments.addAll(filterCitizenUploadedDocuments(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList(),
+                                                                   userDetails));
+        }
+
+        return citizenDocuments;
+
+    }
+
+    private List<CitizenDocuments> filterCitizenUploadedDocuments(List<Element<QuarantineLegalDoc>> quarantineDocsList,
+                                                                  UserDetails userDetails) {
+        return nullSafeCollection(quarantineDocsList).stream()
+            .map(Element::getValue)
+            .filter(qDoc -> CITIZEN.equalsIgnoreCase(qDoc.getUploaderRole()))
+            .filter(qDoc -> null != userDetails
+                && userDetails.getId().equalsIgnoreCase(qDoc.getUploadedByIdamId()))
+            .map(this::createCitizenDocument)
+            .toList();
+    }
+
+    private List<CitizenDocuments> addCitizenDocuments(List<Element<QuarantineLegalDoc>> quarantineDocsList) {
+        return nullSafeCollection(quarantineDocsList).stream()
+                                      .map(Element::getValue)
+                                      .map(this::createCitizenDocument)
+                                      .toList();
+    }
+
+    private CitizenDocuments createCitizenDocument(QuarantineLegalDoc quarantineDoc) {
+        String attributeName = DocumentUtils.populateAttributeNameFromCategoryId(quarantineDoc.getCategoryId(), null);
+        Document existingDocument = objectMapper.convertValue(
+            objectMapper.convertValue(quarantineDoc, Map.class).get(attributeName),
+            Document.class
+        );
+        return CitizenDocuments.builder()
+            .partyType(quarantineDoc.getDocumentParty())
+            .categoryId(quarantineDoc.getCategoryId())
+            .uploadedBy(quarantineDoc.getUploadedBy())
+            .uploadedDate(quarantineDoc.getDocumentUploadedDate())
+            .document(existingDocument)
+            .build();
     }
 }
