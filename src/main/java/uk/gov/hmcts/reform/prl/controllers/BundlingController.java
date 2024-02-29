@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.ccd.client.model.AboutToStartOrSubmitCallbackResponse
 import uk.gov.hmcts.reform.ccd.client.model.CallbackRequest;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.Bundle;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleCreateResponse;
-import uk.gov.hmcts.reform.prl.models.dto.bundle.BundleDetails;
 import uk.gov.hmcts.reform.prl.models.dto.bundle.BundlingInformation;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
@@ -73,6 +72,7 @@ public class BundlingController extends AbstractCallbackController {
                 callbackRequest.getEventId(),
                 authorization
             );
+            log.info("Bundle create response is : {}", bundleCreateResponse);
             if (null != bundleCreateResponse && null != bundleCreateResponse.getData() && null != bundleCreateResponse.getData().getCaseBundles()) {
                 caseDataUpdated.put(
                     "bundleInformation",
@@ -107,13 +107,15 @@ public class BundlingController extends AbstractCallbackController {
             }
             if (nonNull(existingBundleInformation.getCaseBundles())) {
                 List<Bundle> existingCaseBundles = existingBundleInformation.getCaseBundles();
-                existingCaseBundles.forEach(existingBundle ->
-                    existingBundle.toBuilder().value(BundleDetails.builder()
-                                                         .historicalStitchedDocument(existingBundle.getValue().getStitchedDocument())
-                                                         .stitchedDocument(null).build()).build()
+                log.info("The existing Bundles are {}",existingCaseBundles);
 
+                existingCaseBundles.stream().forEach(existingBundle ->
+                    existingBundle.getValue().toBuilder()
+                        .historicalStitchedDocument(existingBundle.getValue().getStitchedDocument())
+                        .stitchedDocument(null).build()
                 );
                 historicalBundles.addAll(existingCaseBundles);
+                log.info("The historical bundles are {}",historicalBundles);
             }
             existingBundleInformation.setHistoricalBundles(historicalBundles);
             existingBundleInformation.setCaseBundles(null);
