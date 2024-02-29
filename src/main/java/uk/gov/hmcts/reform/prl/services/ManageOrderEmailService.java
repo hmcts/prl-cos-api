@@ -447,14 +447,15 @@ public class ManageOrderEmailService {
         } else {
             caseData.getApplicants().forEach(party -> {
                 log.info("party name ====> " + party.getValue().getFirstName());
-                /*if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
-                    && isPartyProvidedWithEmail(party.getValue())) {*/
-                if (true) {
-                    log.info("=====  CA serving unrepresented applicant via email ====");
+                if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+                    && isPartyProvidedWithEmail(party.getValue())) {
+
+                    log.info("=====  CA serving unrepresented applicant via email ===="+party.getValue());
                     /*sendEmailToPartyforServedOrder("anshika.nigam1@hmcts.net",  caseData,  authorisation,orderDocuments,
                                       party.getValue().getFirstName());*/
+                    log.info("=====  CA serving unrepresented applicant via email ===="+party.getValue().getEmail());
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-                    sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData, "anshika.nigam1@hmcts.net",
+                    sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData,  party.getValue().getEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL
                     );
                 } else {
