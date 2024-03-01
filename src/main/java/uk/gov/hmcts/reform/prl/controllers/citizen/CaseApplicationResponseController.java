@@ -82,8 +82,8 @@ public class CaseApplicationResponseController {
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
 
-        CaseDetails caseDetailsReturn = caseApplicationResponseService.generateCitizenResponseFinalDocuments(caseData,
-            caseDetails, authorisation, partyId, caseId, s2sToken);
+        CaseDetails caseDetailsReturn = caseApplicationResponseService.generateCitizenResponseFinalDocuments(caseData, caseDetails,
+            authorisation, partyId, caseId, s2sToken);
 
         if (caseDetailsReturn != null) {
             log.info("generateC7FinalDocument:: sending notification to applicant solicitor");
