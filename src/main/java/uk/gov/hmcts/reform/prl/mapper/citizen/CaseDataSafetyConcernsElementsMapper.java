@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.ChildAbuseEnum;
 import uk.gov.hmcts.reform.prl.enums.NewPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.TypeOfAbuseEnum;
@@ -28,6 +29,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.EMPTY_SPACE_STRING;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 
+@Slf4j
 public class CaseDataSafetyConcernsElementsMapper {
 
     private static final String APPLICANT = "applicant";
@@ -190,6 +192,7 @@ public class CaseDataSafetyConcernsElementsMapper {
     }
 
     private static List<ChildAbuseEnum> getChildAbuses(String[] citizenChildAbuses) {
+        log.info("citizenChildAbuses inside mapper {}", citizenChildAbuses);
         return Arrays.stream(citizenChildAbuses)
             .map(abuse -> {
                 if (ChildAbuseEnum.physicalAbuse.getId().equals(abuse)) {

@@ -35,11 +35,11 @@ public class AllegationOfHarmRevisedService {
     public static final String CASE_FIELD_WHICH_CHILDREN_ARE_RISK = "whichChildrenAreRisk";
 
     public CaseData updateChildAbusesForDocmosis(CaseData caseData) {
-
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised = Optional.ofNullable(caseData.getAllegationOfHarmRevised());
 
         if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
+            log.info("child Abuses list {}", allegationOfHarmRevised.get().getChildAbuses());
             Optional<ChildAbuse> childPhysicalAbuse =
                     ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
 
@@ -106,6 +106,7 @@ public class AllegationOfHarmRevisedService {
 
     private static CaseData cleardDataForAllegationOfHarmForNoSelection(CaseData caseData,
                                                                         Optional<AllegationOfHarmRevised> allegationOfHarmRevised) {
+        log.info("child Abuses list {}", allegationOfHarmRevised.get().getChildAbuses());
         log.info("Inside no condition <<<<<<<<<<>>>>>>>>");
         log.info("getChildPhysicalAbuse {}", allegationOfHarmRevised.get().getChildPhysicalAbuse());
         log.info("getChildFinancialAbuse {}", allegationOfHarmRevised.get().getChildFinancialAbuse());
