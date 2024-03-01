@@ -30,6 +30,9 @@ import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.FlagDetailRequest;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
@@ -61,6 +64,7 @@ import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
@@ -74,6 +78,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSI
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -98,6 +103,7 @@ public class CaseService {
     public static final String CASE_STATUS = "caseStatus";
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
     private final CoreCaseDataApi coreCaseDataApi;
+
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
@@ -138,6 +144,12 @@ public class CaseService {
             updatedCaseData.setAllPartyFlags(caseDataPartyFlags.getAllPartyFlags());
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
+        if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
+            && isEmpty(caseData.getApplicantCaseName())) {
+            caseData = caseData.toBuilder()
+                .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
+                .build();
+        }
 
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
@@ -164,6 +176,38 @@ public class CaseService {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    public String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
+        C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+        ObjectMapper mapper = new ObjectMapper();
+        C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
+        C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
+        if (null != c100RebuildData) {
+            if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
+                c100RebuildApplicantDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
+            }
+
+            if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+                c100RebuildRespondentDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+            }
+        }
+        return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
+    }
+
+
+    private String buildCaseName(C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
+                                 C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
+        String caseName = null;
+        if (null != c100RebuildApplicantDetailsElements
+            && null != c100RebuildRespondentDetailsElements.getRespondentDetails()) {
+            caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
+                + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
+        }
+
+        return caseName;
     }
 
     private CaseData handleCitizenStatementOfService(CaseData caseData,PartyDetails partyDetails, PartyEnum partyType) {
