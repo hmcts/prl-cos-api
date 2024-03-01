@@ -34,6 +34,7 @@ import java.util.Map;
 
 import static org.apache.commons.lang3.RandomUtils.nextLong;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
@@ -423,7 +424,7 @@ public class CaseEventHandlerTest {
 
         caseEventHandler.getRespondentTaskList(caseData, "A");
 
-        verify(respondentSolicitorTaskListRenderer).render(Mockito.anyList(), Mockito.anyList(), Mockito.anyString(),
+        verify(respondentSolicitorTaskListRenderer).render(Mockito.anyList(), any(), Mockito.anyString(),
                 Mockito.anyString(), Mockito.anyBoolean(), Mockito.any()
         );
 
