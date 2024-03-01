@@ -2415,7 +2415,7 @@ public class ManageOrderServiceTest {
             "caseworker-privatelaw-solicitor");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .id("123")
-                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+                                                                     .roles(List.of(Roles.SOLICITOR.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
@@ -2443,7 +2443,7 @@ public class ManageOrderServiceTest {
             "caseworker-privatelaw-systemupdate");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .id("123")
-                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+                                                                     .roles(List.of(Roles.SYSTEM_UPDATE.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
@@ -2457,7 +2457,7 @@ public class ManageOrderServiceTest {
         RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .id("123")
-                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+                                                                     .roles(List.of(Roles.CITIZEN.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
