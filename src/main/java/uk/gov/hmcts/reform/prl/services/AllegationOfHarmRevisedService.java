@@ -37,7 +37,6 @@ public class AllegationOfHarmRevisedService {
     public CaseData updateChildAbusesForDocmosis(CaseData caseData) {
 
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised = Optional.ofNullable(caseData.getAllegationOfHarmRevised());
-
         if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
             Optional<ChildAbuse> childPhysicalAbuse =
@@ -96,33 +95,9 @@ public class AllegationOfHarmRevisedService {
             return caseData.toBuilder().allegationOfHarmRevised(allegationOfHarmRevised.get()
                     .toBuilder().childAbuseBehavioursDocmosis(childAbuseBehaviourList).build()).build();
 
-        } else if (YesOrNo.No.equals(caseData.getAllegationOfHarmRevised()
-                          .getNewAllegationsOfHarmChildAbuseYesNo())) {
-            return cleardDataForAllegationOfHarmForNoSelection(caseData, allegationOfHarmRevised);
         }
 
         return caseData;
-    }
-
-    private static CaseData cleardDataForAllegationOfHarmForNoSelection(CaseData caseData,
-                                                                        Optional<AllegationOfHarmRevised> allegationOfHarmRevised) {
-        log.info("Inside no condition <<<<<<<<<<>>>>>>>>");
-        log.info("getChildPhysicalAbuse {}", allegationOfHarmRevised.get().getChildPhysicalAbuse());
-        log.info("getChildFinancialAbuse {}", allegationOfHarmRevised.get().getChildFinancialAbuse());
-        log.info("getChildPsychologicalAbuse {}", allegationOfHarmRevised.get().getChildPsychologicalAbuse());
-        log.info("getChildSexualAbuse {}", allegationOfHarmRevised.get().getChildSexualAbuse());
-        log.info("getChildEmotionalAbuse {}", allegationOfHarmRevised.get().getChildEmotionalAbuse());
-        AllegationOfHarmRevised clearedAllegationOfHarmRevised = allegationOfHarmRevised.get().toBuilder()
-            .childPhysicalAbuse(null)
-            .childPsychologicalAbuse(null)
-            .childFinancialAbuse(null)
-            .childSexualAbuse(null)
-            .childEmotionalAbuse(null)
-            .build();
-
-        return caseData.toBuilder()
-            .allegationOfHarmRevised(clearedAllegationOfHarmRevised)
-            .build();
     }
 
     private void checkAndAddChildAbuse(AllegationOfHarmRevised allegationOfHarmRevised, List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList,
