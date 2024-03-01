@@ -451,7 +451,7 @@ public class ManageOrderEmailService {
                     log.info("Contact preference set as email" + party.getValue().getEmail());
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
                     dynamicData.put("name",party.getValue().getFirstName());
-                    sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData,  "anshika.nigam1@hmcts.net",
+                    sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData,  party.getValue().getEmail(),
                                          SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL
                     );
                 } else {
