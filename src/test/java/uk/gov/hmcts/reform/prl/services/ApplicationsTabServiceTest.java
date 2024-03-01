@@ -73,6 +73,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Applicant;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.AttendingTheHearing;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.ChildDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Applicant;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.FL401Respondent;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401OtherProceedingsDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.Fl401TypeOfApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.HearingUrgency;
@@ -1186,7 +1187,7 @@ public class ApplicationsTabServiceTest {
     }
 
     @Test
-    @Ignore("Ignoring temporarily")
+    //@Ignore("Ignoring temporarily")
     public void testGetFl401RespondentTable() {
 
         partyDetails = PartyDetails.builder()
@@ -1216,7 +1217,20 @@ public class ApplicationsTabServiceTest {
                                               "isAddressConfidential",
                                               THIS_INFORMATION_IS_CONFIDENTIAL
         );
+
+
+        FL401Respondent expectedRespondent = FL401Respondent.builder()
+            .firstName("testUser")
+            .lastName("last test")
+            .solicitorEmail("testing@courtadmin.com")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .build();
+        when(objectMapper.convertValue(Mockito.any(), Mockito.eq(FL401Respondent.class))).thenReturn(expectedRespondent);
         when(objectMapper.convertValue(Mockito.any(), Mockito.eq(Map.class))).thenReturn(expected);
+
+        //when(applicationsTabService.maskFl401ConfidentialDetails(caseDataWithParties.getRespondentsFL401())).thenReturn(partyDetails);
+        //when(objectMapper.convertValue(partyDetails, FL401Respondent.class)).thenReturn(expectedRespondent);
+
         Map<String, Object> result = applicationsTabService.getFl401RespondentTable(caseDataWithParties);
         assertEquals(expected, result);
     }
