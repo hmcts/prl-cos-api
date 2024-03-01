@@ -74,36 +74,36 @@ public class CaseEventHandler {
         final String respondentTaskListE = getRespondentTaskList(caseData, C100_RESPONDENT_EVENTS_E);
 
         coreCaseDataService.triggerEvent(
-            JURISDICTION,
-            CASE_TYPE,
-            caseData.getId(),
-            INTERNAL_UPDATE_TASK_LIST,
-            Map.of(
-                TASK_LIST,
-                taskList,
-                C100_RESPONDENT_TASK_LIST,
-                "",
-                C100_RESPONDENT_TASK_LIST_A,
-                respondentTaskListA,
-                C100_RESPONDENT_TASK_LIST_B,
-                respondentTaskListB,
-                C100_RESPONDENT_TASK_LIST_C,
-                respondentTaskListC,
-                C100_RESPONDENT_TASK_LIST_D,
-                respondentTaskListD,
-                C100_RESPONDENT_TASK_LIST_E,
-                respondentTaskListE,
-                ID,
-                String.valueOf(caseData.getId())
-            )
+                JURISDICTION,
+                CASE_TYPE,
+                caseData.getId(),
+                INTERNAL_UPDATE_TASK_LIST,
+                Map.of(
+                        TASK_LIST,
+                        taskList,
+                        C100_RESPONDENT_TASK_LIST,
+                        "",
+                        C100_RESPONDENT_TASK_LIST_A,
+                        respondentTaskListA,
+                        C100_RESPONDENT_TASK_LIST_B,
+                        respondentTaskListB,
+                        C100_RESPONDENT_TASK_LIST_C,
+                        respondentTaskListC,
+                        C100_RESPONDENT_TASK_LIST_D,
+                        respondentTaskListD,
+                        C100_RESPONDENT_TASK_LIST_E,
+                        respondentTaskListE,
+                        ID,
+                        String.valueOf(caseData.getId())
+                )
         );
     }
 
     public String getUpdatedTaskList(CaseData caseData) {
         String taskList = "";
         if (caseData.getState() != null
-            && (caseData.getState().equals(State.AWAITING_SUBMISSION_TO_HMCTS)
-            || caseData.getState().equals(State.AWAITING_RESUBMISSION_TO_HMCTS))) {
+                && (caseData.getState().equals(State.AWAITING_SUBMISSION_TO_HMCTS)
+                || caseData.getState().equals(State.AWAITING_RESUBMISSION_TO_HMCTS))) {
             taskErrorService.clearErrors();
             final List<Task> tasks = taskListService.getTasksForOpenCase(caseData);
             List<EventValidationErrors> eventErrors = taskErrorService.getEventErrors(caseData);
@@ -118,12 +118,12 @@ public class CaseEventHandler {
             }
 
             taskList = taskListRenderer
-                .render(
-                    tasks,
-                    eventErrors,
-                    caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE),
-                    caseData
-                );
+                    .render(
+                            tasks,
+                            eventErrors,
+                            caseData.getCaseTypeOfApplication().equalsIgnoreCase(C100_CASE_TYPE),
+                            caseData
+                    );
         }
         return taskList;
     }
@@ -131,43 +131,44 @@ public class CaseEventHandler {
     public String getRespondentTaskList(CaseData caseData, String respondent) {
         String respondentTaskList = "";
         if (caseData.getRespondents() != null
-            && !caseData.getRespondents().isEmpty()) {
+                && !caseData.getRespondents().isEmpty()) {
             Optional<SolicitorRole> solicitorRole = SolicitorRole.from(respondent);
             if (solicitorRole.isPresent() && caseData.getRespondents().size() > solicitorRole.get().getIndex()) {
                 Element<PartyDetails> respondingParty = caseData.getRespondents().get(solicitorRole.get().getIndex());
                 if (respondingParty.getValue() != null
-                    && respondingParty.getValue().getUser() != null
-                    && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())
-                    && respondingParty.getValue().getResponse() != null) {
+                        && respondingParty.getValue().getUser() != null
+                        && YesOrNo.Yes.equals(respondingParty.getValue().getUser().getSolicitorRepresented())
+                        && respondingParty.getValue().getResponse() != null) {
                     final boolean hasSubmitted = YesOrNo.Yes.equals(respondingParty.getValue().getResponse().getC7ResponseSubmitted());
                     String representedRespondentName = respondingParty.getValue().getLabelForDynamicList();
                     if (hasSubmitted) {
                         return respondentSolicitorTaskListRenderer
-                            .render(
-                                null,
-                                null,
-                                respondent,
-                                representedRespondentName,
-                                hasSubmitted,
-                                caseData.getId()
-                            );
+                                .render(
+                                        null,
+                                        null,
+                                        respondent,
+                                        representedRespondentName,
+                                        hasSubmitted,
+                                        caseData
+                                );
                     } else {
                         respondentTaskErrorService.clearErrors();
-                        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue());
+                        final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue(),caseData);
+                        log.info("Tasks are as : {} ", tasks);
+                        List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(caseData);
 
-                        List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors();
-
-                        List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents();
+                        List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents(caseData);
+                        log.info("Events  are as : {} ", events);
                         eventErrors.removeIf(e -> !events.contains(e.getEvent()));
                         return respondentSolicitorTaskListRenderer
-                            .render(
-                                tasks,
-                                eventErrors,
-                                respondent,
-                                representedRespondentName,
-                                hasSubmitted,
-                                caseData.getId()
-                            );
+                                .render(
+                                        tasks,
+                                        eventErrors,
+                                        respondent,
+                                        representedRespondentName,
+                                        hasSubmitted,
+                                        caseData
+                                );
                     }
                 }
             }
@@ -175,4 +176,3 @@ public class CaseEventHandler {
         return respondentTaskList;
     }
 }
-
