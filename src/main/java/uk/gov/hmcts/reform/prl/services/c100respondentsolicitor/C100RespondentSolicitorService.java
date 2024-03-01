@@ -901,22 +901,19 @@ public class C100RespondentSolicitorService {
 
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
-        Document c7FinalDocument = null;
-        Document c7WelshFinalDocument = null;
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
 
         if (documentLanguage.isGenWelsh()) {
-            c7WelshFinalDocument = documentGenService.generateSingleDocument(
+            Document c7WelshFinalDocument = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
                 SOLICITOR_C7_FINAL_DOCUMENT,
                 true,
                 dataMap
             );
-            updatedCaseData.put("finalC7WelshResponseDoc", c7WelshFinalDocument);
         }
 
-        c7FinalDocument = documentGenService.generateSingleDocument(
+        Document c7FinalDocument = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             SOLICITOR_C7_FINAL_DOCUMENT,
@@ -925,22 +922,6 @@ public class C100RespondentSolicitorService {
         );
         UserDetails userDetails = userService.getUserDetails(authorisation);
         quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
-
-        if (null != c7WelshFinalDocument) {
-            respondentDocs = respondentDocs
-                .toBuilder()
-                .c7WelshDocument(ResponseDocuments
-                    .builder()
-                    .partyName(party)
-                    .createdBy(createdBy)
-                    .dateCreated(LocalDate.now())
-                    .citizenDocument(c7WelshFinalDocument)
-                    .build()
-                )
-                .build();
-        }
-
-        Document c1aFinalDocument = null;
 
         if (representedRespondent.getValue().getResponse() != null
                 && representedRespondent.getValue().getResponse().getRespondentAllegationsOfHarmData() != null
