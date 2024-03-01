@@ -902,6 +902,7 @@ public class C100RespondentSolicitorService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         Map<String, Object> dataMap = populateDataMap(callbackRequest, representedRespondent);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
 
         if (documentLanguage.isGenWelsh()) {
             Document c7WelshFinalDocument = documentGenService.generateSingleDocument(
@@ -911,6 +912,7 @@ public class C100RespondentSolicitorService {
                 true,
                 dataMap
             );
+            quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails, c7WelshFinalDocument));
         }
 
         Document c7FinalDocument = documentGenService.generateSingleDocument(
@@ -920,7 +922,6 @@ public class C100RespondentSolicitorService {
             false,
             dataMap
         );
-        UserDetails userDetails = userService.getUserDetails(authorisation);
         quarantineLegalDocList.add(getC7QuarantineLegalDoc(userDetails,c7FinalDocument));
 
         if (representedRespondent.getValue().getResponse() != null
