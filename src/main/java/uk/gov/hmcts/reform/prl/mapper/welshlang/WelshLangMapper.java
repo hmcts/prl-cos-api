@@ -11,6 +11,7 @@ import uk.gov.hmcts.reform.prl.enums.DontKnow;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
 import uk.gov.hmcts.reform.prl.enums.Gender;
+import uk.gov.hmcts.reform.prl.enums.HearingChannelsEnum;
 import uk.gov.hmcts.reform.prl.enums.LanguagePreference;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
@@ -652,6 +653,10 @@ public class WelshLangMapper {
             SdoHearingUrgentCheckListEnum.leaveTheJurisdiction.getDisplayedValue(),
             "Mae tystiolaeth i awgrymu y gall yr atebydd geisio gadael yr awdurdodaeth gyda'r plentyn (plant) os na wrandewir y cais ar frys"
         );
+        welshMap.put(
+            SdoHearingUrgentCheckListEnum.other.getDisplayedValue(),
+            "Rheswm arall nad yw wedi’i restru"
+        );
 
         welshMap.put(
             SdoTransferApplicationReasonEnum.courtInAreaChildLives.getDisplayedValue(),
@@ -660,6 +665,19 @@ public class WelshLangMapper {
         welshMap.put(
             SdoTransferApplicationReasonEnum.ongoingProceedings.getDisplayedValue(),
             "Mae achosion parhaus mewn llys arall"
+        );
+
+        welshMap.put(
+            HearingChannelsEnum.VID.getDisplayedValue(),
+            "Drwy fideo"
+        );
+        welshMap.put(
+            HearingChannelsEnum.TEL.getDisplayedValue(),
+            "Dros y ffôn"
+        );
+        welshMap.put(
+            HearingChannelsEnum.ONPPRS.getDisplayedValue(),
+            "Ar bapur"
         );
 
         return welshMap;
