@@ -2396,30 +2396,37 @@ public class ManageOrderServiceTest {
 
     @Test
     public void testGetLoggedInUserTypeCourtAdminFromAmRoleAssignment() {
-        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
-        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
-        roleAssignmentResponse.setRoleName("hearing-centre-admin");
-        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
-        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "hearing-centre-admin");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
                                                                      .id("123")
                                                                      .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
         when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
         when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
 
-        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(roleAssignmentServiceResponse);
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
         assertEquals(UserRoles.COURT_ADMIN.name(), manageOrderService.getLoggedInUserType("test"));
     }
 
     @Test
+    public void testGetLoggedInUserTypeSolicitorFromIdam() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-solicitor");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.SOLICITOR.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
     public void testGetLoggedInUserTypeJudgeFromAmRoleAssignment() {
-        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
-        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
-        roleAssignmentResponse.setRoleName("circuit-judge");
-        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
-        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
-        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("circuit-judge");
         when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
             .id("123")
                                                                      .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
@@ -2428,6 +2435,45 @@ public class ManageOrderServiceTest {
 
         when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(roleAssignmentServiceResponse);
         assertEquals(UserRoles.JUDGE.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeForSystemUpdateFromIdam() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse(
+            "caseworker-privatelaw-systemupdate");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.SYSTEM_UPDATE.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    @Test
+    public void testGetLoggedInUserTypeForCitizenFromIdam() {
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = setAndGetRoleAssignmentServiceResponse("citizen");
+        when(userService.getUserDetails(anyString())).thenReturn(UserDetails.builder()
+                                                                     .id("123")
+                                                                     .roles(List.of(Roles.LEGAL_ADVISER.getValue())).build());
+        when(authTokenGenerator.generate()).thenReturn("serviceAuthToken");
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(true);
+
+        when(roleAssignmentApi.getRoleAssignments("test", authTokenGenerator.generate(), null, "123")).thenReturn(
+            roleAssignmentServiceResponse);
+        assertEquals(UserRoles.CITIZEN.name(), manageOrderService.getLoggedInUserType("test"));
+    }
+
+    private RoleAssignmentServiceResponse setAndGetRoleAssignmentServiceResponse(String roleName) {
+        List<RoleAssignmentResponse> listOfRoleAssignmentResponses = new ArrayList<>();
+        RoleAssignmentResponse roleAssignmentResponse = new RoleAssignmentResponse();
+        roleAssignmentResponse.setRoleName(roleName);
+        listOfRoleAssignmentResponses.add(roleAssignmentResponse);
+        RoleAssignmentServiceResponse roleAssignmentServiceResponse = new RoleAssignmentServiceResponse();
+        roleAssignmentServiceResponse.setRoleAssignmentResponse(listOfRoleAssignmentResponses);
+        return roleAssignmentServiceResponse;
     }
 
 
