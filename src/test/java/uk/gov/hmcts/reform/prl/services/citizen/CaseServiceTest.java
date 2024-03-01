@@ -67,10 +67,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TEST_UUID;
@@ -999,5 +1001,60 @@ public class CaseServiceTest {
         assertNotNull(citizenDocuments);
         assertFalse(citizenDocuments.isEmpty());
         assertEquals(7, citizenDocuments.size());
+    }
+
+    @Test
+    public void testEmptyCitizenDocumentsWhenNoDocs() {
+        //Given
+        caseData = caseData.toBuilder().build();
+        userDetails = UserDetails.builder()
+            .id("00000000-0000-0000-0000-000000000000")
+            .roles(List.of(Roles.CITIZEN.getValue())).build();
+        Map<String, Object> map = new HashMap<>();
+
+        //When
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+
+        //Action
+        List<CitizenDocuments> citizenDocuments = caseService.getCitizenDocuments(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocuments);
+        assertTrue(citizenDocuments.isEmpty());
+    }
+
+    @Test
+    public void testFilterNonAccessibleCitizenDocuments() {
+        //Given
+        QuarantineLegalDoc cafcassDoc = QuarantineLegalDoc.builder()
+            .uploaderRole(CAFCASS)
+            .build();
+        QuarantineLegalDoc otherPartyDoc = QuarantineLegalDoc.builder()
+            .uploaderRole(CITIZEN)
+            .uploadedByIdamId("00000000-0000-0000-0000-000000000001")
+            .build();
+        caseData = caseData.toBuilder()
+            .reviewDocuments(ReviewDocuments.builder()
+                                 .confidentialDocuments(List.of(element(otherPartyDoc)))
+                                 .restrictedDocuments(List.of(element(cafcassDoc)))
+                                 .build())
+            .documentManagementDetails(DocumentManagementDetails.builder()
+                                           .citizenQuarantineDocsList(List.of(element(otherPartyDoc)))
+                                           .build())
+            .build();
+        userDetails = UserDetails.builder()
+            .id("00000000-0000-0000-0000-000000000000")
+            .roles(List.of(Roles.CITIZEN.getValue()))
+            .build();
+
+        //When
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+
+        //Action
+        List<CitizenDocuments> citizenDocuments = caseService.getCitizenDocuments(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocuments);
+        assertTrue(citizenDocuments.isEmpty());
     }
 }
