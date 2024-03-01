@@ -446,7 +446,8 @@ public class ManageOrderEmailService {
             });
         } else {
             caseData.getApplicants().forEach(party -> {
-                if (true) {
+                if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+                    && isPartyProvidedWithEmail(party.getValue())) {
                     log.info("Contact preference set as email" + party.getValue().getEmail());
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
                     dynamicData.put("name",party.getValue().getFirstName());
@@ -546,25 +547,6 @@ public class ManageOrderEmailService {
         }
     }
 
-    /*private void sendEmailToPartyforServedOrder(String emailAddress, CaseData caseData, String authorisation,
-                                   List<Document> orderDocuments, String serveParty) {
-        Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
-        dynamicData.put("name",serveParty);
-        try {
-            sendgridService.sendEmailUsingTemplateWithAttachments(
-                SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL,
-                authorisation,
-                SendgridEmailConfig.builder().toEmailAddress(
-                    emailAddress).dynamicTemplateData(
-                    dynamicData).listOfAttachments(
-                    orderDocuments).languagePreference(LanguagePreference.english).build()
-            );
-        } catch (IOException e) {
-            log.error("there is a failure in sending email for email {} with exception {}",
-                      emailAddress, e.getMessage()
-            );
-        }
-    }*/
 
     private void sendPersonalServiceNotifications(String solicitorEmail,
                                                   String respondentOption,
