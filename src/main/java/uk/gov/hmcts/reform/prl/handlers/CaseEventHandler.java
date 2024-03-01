@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole;
 import uk.gov.hmcts.reform.prl.events.CaseDataChanged;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.EventValidationErrors;
-import uk.gov.hmcts.reform.prl.models.c100respondentsolicitor.RespondentEventValidationErrors;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.RespondentTask;
@@ -155,15 +154,15 @@ public class CaseEventHandler {
                         respondentTaskErrorService.clearErrors();
                         final List<RespondentTask> tasks = taskListService.getRespondentSolicitorTasks(respondingParty.getValue(),caseData);
                         log.info("Tasks are as : {} ", tasks);
-                        List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(caseData);
+                        //List<RespondentEventValidationErrors> eventErrors = respondentTaskErrorService.getEventErrors(caseData);
 
                         List<RespondentSolicitorEvents> events = taskListService.getRespondentsEvents(caseData);
                         log.info("Events  are as : {} ", events);
-                        eventErrors.removeIf(e -> !events.contains(e.getEvent()));
+                        //eventErrors.removeIf(e -> !events.contains(e.getEvent()));
                         return respondentSolicitorTaskListRenderer
                                 .render(
                                         tasks,
-                                        eventErrors,
+                                        null,
                                         respondent,
                                         representedRespondentName,
                                         hasSubmitted,
