@@ -122,4 +122,24 @@ public class CaseApplicationResponseControllerTest {
             .generateC7DraftDocument(caseId, partyId, authToken, servAuthToken);
         assertNotNull(document);
     }
+
+    @Test
+    public void testGenerateC7FinalDocument() throws Exception {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(objectMapper.convertValue(caseData, CaseData.class)).thenReturn(caseData);
+        CaseData returnedCaseData = caseApplicationResponseController
+            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
+        assertNotNull(returnedCaseData);
+    }
+
+    @Test
+    public void testGenerateC7FinalDocumentCaseDetailsNotNull() throws Exception {
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(caseApplicationResponseService.generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken))
+            .thenReturn(caseDetails);
+        when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
+        CaseData returnedCaseData = caseApplicationResponseController
+            .generateC7FinalDocument(caseId, partyId, authToken, servAuthToken);
+        assertNotNull(returnedCaseData);
+    }
 }
