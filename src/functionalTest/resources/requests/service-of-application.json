@@ -69,9 +69,9 @@
             "representativeFirstName": "repFirstName",
             "representativeLastName": "repLastName",
             "isAtAddressLessThan5YearsWithDontKnow": null,
-            "doTheyHaveLegalRepresentation": null,
+            "doTheyHaveLegalRepresentation": "yes",
             "sendSignUpLink": null,
-            "solicitorEmail": null
+            "solicitorEmail": "test@test.com"
           }
         }
       ],

@@ -22,6 +22,7 @@ import uk.gov.hmcts.reform.ccd.client.model.Category;
 import uk.gov.hmcts.reform.ccd.client.model.SubmittedCallbackResponse;
 import uk.gov.hmcts.reform.prl.config.templates.Templates;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.ContactPreferences;
 import uk.gov.hmcts.reform.prl.enums.Event;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
@@ -909,11 +910,11 @@ public class ServiceOfApplicationService {
         caseDataMap.putAll(setSoaOrConfidentialWaFields(caseData, callbackRequest.getEventId()));
         String isAllApplicantsAreLiP = (String) caseDataMap.get(WA_IS_APPLICANT_REPRESENTED);
         log.info("isAllApplicantsAreLiP==> {}", isAllApplicantsAreLiP);
-        if (null == isAllApplicantsAreLiP) {
-            log.info("isAllApplicantsAreLiP==>FT {}", isAllApplicantsAreLiP);
+        if (StringUtils.isEmpty(isAllApplicantsAreLiP)) {
+            log.info("isAllApplicantsAreLiP==>FirstTTTTT {}", isAllApplicantsAreLiP);
             caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, isApplicantRepresented(caseData) ? YES : NO);
         } else if (!EMPTY_STRING.equals(isAllApplicantsAreLiP)) {
-            log.info("isAllApplicantsAreLiP==> CT {}", isAllApplicantsAreLiP);
+            log.info("isAllApplicantsAreLiP==> SubTTTTT {}", isAllApplicantsAreLiP);
             caseDataMap.put(WA_IS_APPLICANT_REPRESENTED, EMPTY_STRING);
         }
         return caseDataMap;
@@ -1931,10 +1932,15 @@ public class ServiceOfApplicationService {
     }
 
     private boolean isApplicantRepresented(CaseData caseData) {
-
-        if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+        log.info("isApplicantRepresented 1930 ");
+        if (CaseCreatedBy.CITIZEN.equals(caseData.getCaseCreatedBy()) || Yes.equals(caseData.getIsCourtNavCase())) {
+            log.info("isApplicantRepresented CITIZEN ");
+            return false;
+        } else if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
+            log.info("isApplicantRepresented C100 ");
             return isCaApplicantRepresented(caseData);
         } else {
+            log.info("isApplicantRepresented DA ");
             return isDaApplicantRepresented(caseData);
         }
     }
@@ -1946,16 +1952,10 @@ public class ServiceOfApplicationService {
             List<PartyDetails> applicants = applicantsWrapped.get()
                 .stream()
                 .map(Element::getValue).toList();
+            List<PartyDetails> applicantsRepBySolicitor = applicants.stream()
+                .filter(CaseUtils::hasLegalRepresentation).toList();
 
-            List<PartyDetails> unRepresentedApplicants = applicants.stream()
-                .filter(
-                    applicant -> (
-                        null != applicant.getUser().getSolicitorRepresented()
-                        && No.equals(applicant.getUser().getSolicitorRepresented())
-                    )
-                ).toList();
-
-            return unRepresentedApplicants.size() != applicants.size();
+            return !applicantsRepBySolicitor.isEmpty();
         }
         return false;
     }
@@ -1964,8 +1964,7 @@ public class ServiceOfApplicationService {
         Optional<PartyDetails> flApplicants = ofNullable(caseData.getApplicantsFL401());
         if (flApplicants.isPresent()) {
             PartyDetails partyDetails = flApplicants.get();
-            return null == partyDetails.getUser().getSolicitorRepresented()
-                || !partyDetails.getUser().getSolicitorRepresented().equals(No);
+            return CaseUtils.hasLegalRepresentation(partyDetails);
         }
         return false;
     }
