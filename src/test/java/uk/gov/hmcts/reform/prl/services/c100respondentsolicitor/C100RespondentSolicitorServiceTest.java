@@ -1050,7 +1050,6 @@ public class C100RespondentSolicitorServiceTest {
     }
 
     @Test
-    @Ignore
     public void submitC7ResponseForActiveRespondentWelshTest() throws Exception {
         GeneratedDocumentInfo generatedDocumentInfo = GeneratedDocumentInfo.builder()
             .url("TestUrl")
@@ -1078,6 +1077,7 @@ public class C100RespondentSolicitorServiceTest {
             .documentBinaryUrl(generatedDocumentInfo.getBinaryUrl())
             .documentHash(generatedDocumentInfo.getHashToken())
             .documentFileName("solicitorC1AFinalTemplate")
+            .documentCreatedOn(new Date())
             .build();
 
         DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(true).isGenWelsh(true).build();
@@ -1090,6 +1090,10 @@ public class C100RespondentSolicitorServiceTest {
             Mockito.anyBoolean(),
             Mockito.any(HashMap.class)
         )).thenReturn(document2);
+        UserDetails userDetails = UserDetails.builder().forename("test")
+            .roles(Arrays.asList("caseworker-privatelaw-solicitor")).build();
+
+        when(userService.getUserDetails(any(String.class))).thenReturn(userDetails);
 
         callbackRequest.setEventId("c100ResSolConsentingToApplicationA");
 
