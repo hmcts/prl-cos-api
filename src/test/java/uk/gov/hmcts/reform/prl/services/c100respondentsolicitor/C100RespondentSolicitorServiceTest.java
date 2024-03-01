@@ -1168,6 +1168,7 @@ public class C100RespondentSolicitorServiceTest {
                             .data(stringObjectMap)
                             .build())
                     .build();
+
             String event = eventsAndResp.split(HYPHEN_SEPARATOR)[0];
             String respondent = eventsAndResp.split(HYPHEN_SEPARATOR)[1];
             callbackRequest.setEventId(event);
