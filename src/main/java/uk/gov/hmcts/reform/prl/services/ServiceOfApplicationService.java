@@ -386,15 +386,17 @@ public class ServiceOfApplicationService {
                 List<Document> docsForLa = getDocsToBeServedToLa(authorization, caseData);
                 if (!docsForLa.isEmpty()) {
                     try {
-                        emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                                 .sendEmailNotificationToLocalAuthority(
-                                                                     authorization,
-                                                                     caseData,
-                                                                     caseData.getServiceOfApplication()
-                                                                         .getSoaLaEmailAddress(),
-                                                                     docsForLa,
-                                                                     PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY
-                                                                 )));
+                        EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
+                            .sendEmailNotificationToLocalAuthority(
+                                authorization,
+                                caseData,
+                                caseData.getServiceOfApplication()
+                                    .getSoaLaEmailAddress(),
+                                docsForLa,
+                                PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY);
+                        if (null != emailNotification) {
+                            emailNotificationDetails.add(element(emailNotification));
+                        }
                     } catch (IOException e) {
                         log.error("Failed to serve email to Local Authority");
                     }
@@ -503,14 +505,17 @@ public class ServiceOfApplicationService {
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 dynamicData.put("eng", documentLanguage.isGenEng());
                 dynamicData.put("wel", documentLanguage.isGenWelsh());
-                emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                         .sendEmailUsingTemplateWithAttachments(
-                                                             authorization, caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
-                                                             packHiDocs,
-                                                             SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
-                                                             dynamicData,
-                                                             SERVED_PARTY_APPLICANT_SOLICITOR
-                                                         )));
+                EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
+                    .sendEmailUsingTemplateWithAttachments(
+                        authorization, caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
+                        packHiDocs,
+                        SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
+                        dynamicData,
+                        SERVED_PARTY_APPLICANT_SOLICITOR
+                    );
+                if (null != emailNotification) {
+                    emailNotificationDetails.add(element(emailNotification));
+                }
             } else if (SoaSolicitorServingRespondentsEnum.courtBailiff
                 .equals(caseData.getServiceOfApplication().getSoaServingRespondentsOptionsCA())
                 || SoaSolicitorServingRespondentsEnum.courtAdmin
@@ -815,14 +820,17 @@ public class ServiceOfApplicationService {
                         dynamicData.put("eng", documentLanguage.isGenEng());
                         dynamicData.put("wel", documentLanguage.isGenWelsh());
                         List<Document> finalDocs = removeCoverLettersFromThePacks(packSdocs);
-                        emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                        EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                             authorization,
                             party.get().getValue().getSolicitorEmail(),
                             finalDocs,
                             SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
                             dynamicData,
                             PrlAppsConstants.SERVED_PARTY_RESPONDENT_SOLICITOR
-                        )));
+                        );
+                        if (null != emailNotification) {
+                            emailNotificationDetails.add(element(emailNotification));
+                        }
                     } catch (Exception e) {
                         throw new RuntimeException(e);
                     }
@@ -1330,14 +1338,17 @@ public class ServiceOfApplicationService {
                 DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                 dynamicData.put("eng", documentLanguage.isGenEng());
                 dynamicData.put("wel", documentLanguage.isGenWelsh());
-                emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
                     caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
                     packHiDocs,
                     SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
                     dynamicData,
                     SERVED_PARTY_APPLICANT_SOLICITOR
-                )));
+                );
+                if (null != emailNotification) {
+                    emailNotificationDetails.add(element(emailNotification));
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -1368,14 +1379,17 @@ public class ServiceOfApplicationService {
                     getCoverLettersAndRespondentPacksForDaApplicantSolicitor(caseData, authorization,
                                                                              packA, packB, attachLetters
                     ));
-                emailNotificationDetails.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                EmailNotificationDetails emailNotification = serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                     authorization,
                     caseData.getApplicantsFL401().getSolicitorEmail(),
                     finalDocumentList,
                     SendgridEmailTemplateNames.SOA_PERSONAL_CA_DA_APPLICANT_LEGAL_REP,
                     dynamicData,
                     SERVED_PARTY_APPLICANT_SOLICITOR
-                )));
+                );
+                if (null != emailNotification) {
+                    emailNotificationDetails.add(element(emailNotification));
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -1402,7 +1416,6 @@ public class ServiceOfApplicationService {
                                            .id(caseData.getApplicantsFL401().getPartyId())
                                            .value(caseData.getApplicantsFL401()).build());
         }
-
         selectedApplicants.forEach(applicant -> {
             Optional<Element<PartyDetails>> party = getParty(applicant.getCode(), applicantsInCase);
             if (party.isPresent() && party.get().getValue().getSolicitorEmail() != null) {
@@ -1417,14 +1430,17 @@ public class ServiceOfApplicationService {
                     DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
                     dynamicData.put("eng", documentLanguage.isGenEng());
                     dynamicData.put("wel", documentLanguage.isGenWelsh());
-                    emailNotificationDetails.add(element(serviceOfApplicationEmailService
-                                                             .sendEmailUsingTemplateWithAttachments(
-                                                                 authorization, party.get().getValue().getSolicitorEmail(),
-                                                                 packQ,
-                                                                 SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
-                                                                 dynamicData,
-                                                                 servedParty
-                                                             )));
+                    EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
+                        .sendEmailUsingTemplateWithAttachments(
+                            authorization, party.get().getValue().getSolicitorEmail(),
+                            packQ,
+                            SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                            dynamicData,
+                            servedParty
+                        );
+                    if (null != emailNotification) {
+                        emailNotificationDetails.add(element(emailNotification));
+                    }
                 } catch (Exception e) {
                     throw new RuntimeException(e);
                 }
@@ -2581,13 +2597,16 @@ public class ServiceOfApplicationService {
         final SoaPack unServedLaPack = caseData.getServiceOfApplication().getUnServedLaPack();
         if (!ObjectUtils.isEmpty(unServedLaPack) && CollectionUtils.isNotEmpty(unServedLaPack.getPartyIds())) {
             try {
-                emailNotificationDetails.add(element(serviceOfApplicationEmailService
+                EmailNotificationDetails emailNotification = serviceOfApplicationEmailService
                     .sendEmailNotificationToLocalAuthority(
                         authorization,
                         caseData,
                         unServedLaPack.getPartyIds().get(0).getValue(),
                         ElementUtils.unwrapElements(unServedLaPack.getPackDocument()),
-                        PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY)));
+                        PrlAppsConstants.SERVED_PARTY_LOCAL_AUTHORITY);
+                if (null != emailNotification) {
+                    emailNotificationDetails.add(element(emailNotification));
+                }
             } catch (IOException e) {
                 log.error("Failed to serve application via email notification to La {}", e.getMessage());
             }
