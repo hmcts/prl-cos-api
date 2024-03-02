@@ -66,7 +66,6 @@ public class CourtNavCaseService {
 
     public CaseDetails createCourtNavCase(String authToken, CaseData caseData) {
         Map<String, Object> caseDataMap = caseData.toMap(CcdObjectMapper.getObjectMapper());
-        caseDataMap.putAll(partyLevelCaseFlagsService.generatePartyCaseFlags(caseData));
         EventRequestData eventRequestData = coreCaseDataService.eventRequest(
             CaseEvent.COURTNAV_CASE_CREATION,
             idamClient.getUserInfo(authToken).getUid()
@@ -229,7 +228,6 @@ public class CourtNavCaseService {
                                                                                 true
         );
 
-        CaseDataContent caseDataContent = null;
         Map<String, Object> caseDataMap = startEventResponse.getCaseDetails().getData();
         caseDataMap.put("id", String.valueOf(id));
         caseDataMap.putAll(documentGenService.generateDocuments(
