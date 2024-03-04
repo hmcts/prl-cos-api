@@ -446,7 +446,8 @@ public class ManageOrderEmailService {
             });
         } else {
             caseData.getApplicants().forEach(party -> {
-                if (true) {
+                if (ContactPreferences.email.equals(party.getValue().getContactPreferences())
+                    && isPartyProvidedWithEmail(party.getValue())) {
                     log.info("Contact preference set as email" + party.getValue().getEmail());
                     Map<String, Object> dynamicData = getDynamicDataForEmail(caseData);
                     dynamicData.put("name",party.getValue().getFirstName());

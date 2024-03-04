@@ -2738,7 +2738,7 @@ public class ManageOrderEmailServiceTest {
         assertEquals(new ArrayList<>(), orderCollection.get(0).getValue().getBulkPrintOrderDetails());
     }
 
-    //@Test
+    @Test
     public void testServeOrderDocsToUnrepresentedApplicantViaPostC100() throws Exception {
         //Given
         PartyDetails applicant = PartyDetails.builder()
