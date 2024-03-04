@@ -52,16 +52,13 @@ public class AllegationOfHarmRevisedService {
                 log.info("Inside createOrClearChildAbuseBasedOnMultiSelectOption if condition true");
                 childPhysicalAbuse = ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
             } else if (ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse()).isPresent()) {
-
                 AllegationOfHarmRevised  allegationOfHarmRevisedChildAbuse = allegationOfHarmRevised.get()
                     .toBuilder()
                     .childPhysicalAbuse(null)
                     .build();
-                log.info("updated allegationOfHarm {}", allegationOfHarmRevisedChildAbuse);
                 caseData = caseData.toBuilder()
                     .allegationOfHarmRevised(allegationOfHarmRevisedChildAbuse)
                     .build();
-                log.info("Post update {}", caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
             }
 
             if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.psychologicalAbuse)) {
@@ -69,7 +66,7 @@ public class AllegationOfHarmRevisedService {
                     ofNullable(allegationOfHarmRevised.get().getChildPsychologicalAbuse());
             } else if (ofNullable(allegationOfHarmRevised.get().getChildPsychologicalAbuse()).isPresent()) {
                 caseData = caseData.toBuilder()
-                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                    .allegationOfHarmRevised(allegationOfHarmRevised.get()
                                                  .toBuilder()
                                                  .childPsychologicalAbuse(null)
                                                  .build())
@@ -81,7 +78,7 @@ public class AllegationOfHarmRevisedService {
                     ofNullable(allegationOfHarmRevised.get().getChildEmotionalAbuse());
             } else if (ofNullable(allegationOfHarmRevised.get().getChildEmotionalAbuse()).isPresent()) {
                 caseData = caseData.toBuilder()
-                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                    .allegationOfHarmRevised(allegationOfHarmRevised.get()
                                                  .toBuilder()
                                                  .childEmotionalAbuse(null)
                                                  .build())
@@ -93,7 +90,7 @@ public class AllegationOfHarmRevisedService {
                     ofNullable(allegationOfHarmRevised.get().getChildSexualAbuse());
             } else if (ofNullable(allegationOfHarmRevised.get().getChildSexualAbuse()).isPresent()) {
                 caseData = caseData.toBuilder()
-                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                    .allegationOfHarmRevised(allegationOfHarmRevised.get()
                                                  .toBuilder()
                                                  .childSexualAbuse(null)
                                                  .build())
@@ -113,15 +110,16 @@ public class AllegationOfHarmRevisedService {
             }
 
             List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
-
+            log.info("Post update BEFORE {}", caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
             for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuses()) {
 
                 switch (eachBehavior.name()) {
-                    case PHYSICAL_ABUSE : childPhysicalAbuse.ifPresent(abuse ->
+                    case PHYSICAL_ABUSE :
+                        log.info("child abuse null or not: {}", childPhysicalAbuse.isPresent());
+                        childPhysicalAbuse.ifPresent(abuse ->
                                 checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
-
-                    );
-                    break;
+                        );
+                        break;
                     case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
                                 checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
 
