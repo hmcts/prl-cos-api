@@ -20,6 +20,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.safetyconcerns.SafetyConcerns;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
@@ -123,6 +124,33 @@ public class CaseApplicantResponseServiceTest {
         when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
+        CaseDetails responseCaseDetails = caseApplicationResponseService
+            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
+        assertNotNull(responseCaseDetails);
+    }
+
+    @Test
+    public void testGenerateC7finalDocumentForRespondent1() throws Exception {
+        Element partyDetails1 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .currentRespondent(YesOrNo.Yes)
+                .response(Response.builder().safetyConcerns(
+                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+        List<Element<PartyDetails>> elementList = new ArrayList<>();
+        elementList.add(partyDetails1);
+        caseData = caseData.toBuilder()
+            .respondents(elementList).build();
+
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
+        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
+            Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
+            Document.builder().build());
+        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
+            Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
+            Document.builder().build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         CaseDetails responseCaseDetails = caseApplicationResponseService
             .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
         assertNotNull(responseCaseDetails);
@@ -333,6 +361,69 @@ public class CaseApplicantResponseServiceTest {
         elementList.add(partyDetails4);
         elementList.add(partyDetails5);
         caseData = caseData.toBuilder()
+            .respondents(elementList).build();
+
+        when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
+        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
+            Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
+            Document.builder().build());
+        when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
+            Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
+            Document.builder().build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        CaseDetails responseCaseDetails = caseApplicationResponseService
+            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
+        assertNotNull(responseCaseDetails);
+    }
+
+    @Test
+    public void testGenerateC7finalDocumentTriggersDefault() throws Exception {
+        Element partyDetails1 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .response(Response.builder().safetyConcerns(
+                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+        Element partyDetails2 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .response(Response.builder().safetyConcerns(
+                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+        Element partyDetails3 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .response(Response.builder().safetyConcerns(
+                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+        Element partyDetails4 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .response(Response.builder().safetyConcerns(
+                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+        Element partyDetails5 =  Element.<PartyDetails>builder()
+            .id(UUID.fromString(partyId))
+            .value(PartyDetails.builder().firstName("a").isAddressConfidential(YesOrNo.Yes)
+                .response(Response.builder().safetyConcerns(
+                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+        Element partyDetails6 =  Element.<PartyDetails>builder()
+            .id(UUID.fromString(partyId))
+            .value(PartyDetails.builder().firstName("a").isAddressConfidential(YesOrNo.Yes)
+                .currentRespondent(YesOrNo.Yes)
+                .response(Response.builder().safetyConcerns(
+                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+        List<Element<PartyDetails>> elementList = new ArrayList<>();
+        elementList.add(partyDetails1);
+        elementList.add(partyDetails2);
+        elementList.add(partyDetails3);
+        elementList.add(partyDetails4);
+        elementList.add(partyDetails5);
+        elementList.add(partyDetails6);
+        caseData = caseData.toBuilder()
+            .citizenResponseDocuments(CitizenResponseDocuments.builder().build())
             .respondents(elementList).build();
 
         when(c100RespondentSolicitorService.populateDataMap(Mockito.any(CallbackRequest.class), Mockito.any(Element.class))).thenReturn(dataMap);
