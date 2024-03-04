@@ -355,4 +355,11 @@ public class CaseApplicantResponseServiceTest {
             .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
         assertNull(responseCaseDetails);
     }
+
+    @Test
+    public void testGenerateC7DraftDocument() throws Exception {
+        Document document = caseApplicationResponseService
+            .generateC7DraftDocument(authToken, caseData);
+        assertNotNull(document);
+    }
 }
