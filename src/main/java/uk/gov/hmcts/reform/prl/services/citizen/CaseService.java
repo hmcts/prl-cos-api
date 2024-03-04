@@ -127,14 +127,15 @@ public class CaseService {
                                           .courtName(C100_DEFAULT_COURT_NAME)
                                           .taskListVersion(TASK_LIST_VERSION_V2)
                                           .build());
-            return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
+            throw new JsonParseException("Error at citizen-case-submit");
+            //return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
             && isEmpty(caseData.getApplicantCaseName())) {
             caseData = caseData.toBuilder()
                 .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
                 .build();
-            throw new JsonParseException("Error at citizen-case-update");
+            //throw new JsonParseException("Error at citizen-case-update");
         }
 
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
