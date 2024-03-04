@@ -56,21 +56,21 @@ public class AllegationOfHarmRevisedService {
                     .toBuilder()
                     .childPhysicalAbuse(null)
                     .build();
-                log.info("Inside the condition -1 {}", allegationOfHarmRevisedChildAbuse.getChildAbuses());
+                log.info("Inside the condition -1 {}", allegationOfHarmRevisedChildAbuse.getChildPhysicalAbuse());
                 caseData = caseData.toBuilder()
                     .allegationOfHarmRevised(allegationOfHarmRevisedChildAbuse)
                     .build();
-                log.info("Inside the condition -2 {}", caseData.getAllegationOfHarmRevised().getChildAbuses());
+                log.info("Inside the condition -2 {}", caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
                 caseData = caseData.toBuilder()
                     .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
                                                  .toBuilder()
                                                  .childPhysicalAbuse(null)
                                                  .build())
                     .build();
-                log.info("Inside the condition- 3 {}", caseData.getAllegationOfHarmRevised().getChildAbuses());
+                log.info("Inside the condition- 3 {}", caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
             }
 
-            log.info("Outside the condition {}", caseData.getAllegationOfHarmRevised().getChildAbuses());
+            log.info("Outside the condition {}", caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
 
             if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.psychologicalAbuse)) {
                 childPsychologicalAbuse =
