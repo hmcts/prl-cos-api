@@ -40,23 +40,76 @@ public class AllegationOfHarmRevisedService {
         if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
             log.info("child Abuses list {}", allegationOfHarmRevised.get().getChildAbuses());
-            Optional<ChildAbuse> childPhysicalAbuse =
-                    ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
 
-            Optional<ChildAbuse> childPsychologicalAbuse =
+            Optional<ChildAbuse> childPhysicalAbuse = Optional.empty();
+            Optional<ChildAbuse> childPsychologicalAbuse = Optional.empty();
+            Optional<ChildAbuse> childEmotionalAbuse = Optional.empty();
+            Optional<ChildAbuse> childSexualAbuse = Optional.empty();
+            Optional<ChildAbuse> childFinancialAbuse = Optional.empty();
+
+            if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.physicalAbuse)) {
+                childPhysicalAbuse = ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
+            } else if (ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse()).isPresent()) {
+                caseData = caseData.toBuilder()
+                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                                                 .toBuilder()
+                                                 .childPhysicalAbuse(null)
+                                                 .build())
+                        .build();
+
+            }
+
+            if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.psychologicalAbuse)) {
+                childPsychologicalAbuse =
                     ofNullable(allegationOfHarmRevised.get().getChildPsychologicalAbuse());
+            } else if (ofNullable(allegationOfHarmRevised.get().getChildPsychologicalAbuse()).isPresent()) {
+                caseData = caseData.toBuilder()
+                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                                                 .toBuilder()
+                                                 .childPsychologicalAbuse(null)
+                                                 .build())
+                    .build();
 
+            }
 
-            Optional<ChildAbuse> childEmotionalAbuse =
+            if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.emotionalAbuse)) {
+                childEmotionalAbuse =
                     ofNullable(allegationOfHarmRevised.get().getChildEmotionalAbuse());
+            } else if (ofNullable(allegationOfHarmRevised.get().getChildEmotionalAbuse()).isPresent()) {
+                caseData = caseData.toBuilder()
+                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                                                 .toBuilder()
+                                                 .childEmotionalAbuse(null)
+                                                 .build())
+                    .build();
 
+            }
 
-            Optional<ChildAbuse> childSexualAbuse =
+            if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.sexualAbuse)) {
+                childSexualAbuse =
                     ofNullable(allegationOfHarmRevised.get().getChildSexualAbuse());
+            } else if (ofNullable(allegationOfHarmRevised.get().getChildSexualAbuse()).isPresent()) {
+                caseData = caseData.toBuilder()
+                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                                                 .toBuilder()
+                                                 .childSexualAbuse(null)
+                                                 .build())
+                    .build();
 
+            }
 
-            Optional<ChildAbuse> childFinancialAbuse =
+            if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.financialAbuse)) {
+                childFinancialAbuse =
                     ofNullable(allegationOfHarmRevised.get().getChildFinancialAbuse());
+            } else if (ofNullable(allegationOfHarmRevised.get().getChildFinancialAbuse()).isPresent()) {
+                caseData = caseData.toBuilder()
+                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                                                 .toBuilder()
+                                                 .childFinancialAbuse(null)
+                                                 .build())
+                    .build();
+
+            }
 
             List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
 
