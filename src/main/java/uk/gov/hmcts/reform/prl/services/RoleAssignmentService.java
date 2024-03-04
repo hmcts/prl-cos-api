@@ -74,22 +74,22 @@ public class RoleAssignmentService {
                 .build();
             String actorIdForService = actorId.split(UNDERSCORE)[0];
             List<RequestedRoles> requestedRoles = List.of(RequestedRoles.requestedRoles()
-                .actorIdType("IDAM")
-                .actorId(actorIdForService)
-                .roleType(RoleType.CASE.name())
-                .roleName(roleName)
-                .classification(Classification.RESTRICTED.name())
-                .grantType(GrantType.SPECIFIC.name())
-                .roleCategory(roleCategory)
-                .readOnly(false)
-                .beginTime(Instant.now())
-                .attributes(Attributes.attributes()
-                    .jurisdiction(caseDetails.getJurisdiction())
-                    .caseType(caseDetails.getCaseTypeId())
-                    .caseId(caseDetails.getId().toString())
-                    .build())
+                                                              .actorIdType("IDAM")
+                                                              .actorId(actorIdForService)
+                                                              .roleType(RoleType.CASE.name())
+                                                              .roleName(roleName)
+                                                              .classification(Classification.RESTRICTED.name())
+                                                              .grantType(GrantType.SPECIFIC.name())
+                                                              .roleCategory(roleCategory)
+                                                              .readOnly(false)
+                                                              .beginTime(Instant.now())
+                                                              .attributes(Attributes.attributes()
+                                                                              .jurisdiction(caseDetails.getJurisdiction())
+                                                                              .caseType(caseDetails.getCaseTypeId())
+                                                                              .caseId(caseDetails.getId().toString())
+                                                                              .build())
 
-                .build());
+                                                              .build());
 
             RoleAssignmentRequest assignmentRequest = RoleAssignmentRequest.roleAssignmentRequest()
                 .roleRequest(roleRequest)
