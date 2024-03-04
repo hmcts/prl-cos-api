@@ -453,7 +453,7 @@ public class ManageOrderEmailService {
                     dynamicData.put("name",party.getValue().getFirstName());
                     dynamicData.put("dashBoardLink",citizenDashboardUrl);
                     sendEmailViaSendGrid(authorisation, orderDocuments, dynamicData, party.getValue().getEmail(),
-                                         SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL
+                                         SendgridEmailTemplateNames.SERVE_ORDER_CA_PERSONAL_APPLICANT_LIP
                     );
                 } else {
                     if (isNotEmpty(party.getValue().getAddress())
