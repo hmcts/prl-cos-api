@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.citizen;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -133,6 +134,7 @@ public class CaseService {
             caseData = caseData.toBuilder()
                 .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
                 .build();
+            throw new JsonParseException("Error at citizen-case-update");
         }
 
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
