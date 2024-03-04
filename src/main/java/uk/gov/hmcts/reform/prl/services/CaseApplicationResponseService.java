@@ -28,6 +28,7 @@ import java.util.Optional;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -65,7 +66,7 @@ public class CaseApplicationResponseService {
             .findFirst();
 
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        CaseDetails caseDetailsReturn = null;
+        CaseDetails caseDetailsReturn;
 
         log.info(" Generating C7 Final document for respondent ");
         Document document = generateFinalC7(caseData, authorisation);
@@ -215,9 +216,22 @@ public class CaseApplicationResponseService {
                     .respondentDc8(c8ResponseDocuments).build());
                 case 4 -> caseData.toBuilder().citizenResponseDocuments(CitizenResponseDocuments.builder()
                     .respondentEc8(c8ResponseDocuments).build());
-                default -> {
-                }
+                default -> caseData.toBuilder().build();
             }
         }
+    }
+
+    public Document generateC7DraftDocument(String authorisation, CaseData caseData) throws Exception {
+
+        log.info(" Generating C7 draft document for respondent ");
+        Document document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            DOCUMENT_C7_DRAFT_HINT,
+            false
+        );
+        log.info("C7 draft document generated successfully for respondent ");
+
+        return document;
     }
 }

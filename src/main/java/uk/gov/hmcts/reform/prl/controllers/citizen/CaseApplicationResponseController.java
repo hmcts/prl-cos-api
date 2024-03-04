@@ -25,7 +25,6 @@ import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 
 @Slf4j
 @RestController
@@ -53,17 +52,9 @@ public class CaseApplicationResponseController {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
-        caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        log.info(" Generating C7 draft document for respondent ");
 
-        Document document = documentGenService.generateSingleDocument(
-            authorisation,
-            caseData,
-            DOCUMENT_C7_DRAFT_HINT,
-            false
-        );
-        log.info("C7 draft document generated successfully for respondent ");
-        return document;
+        caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        return caseApplicationResponseService.generateC7DraftDocument(authorisation, caseData);
     }
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
