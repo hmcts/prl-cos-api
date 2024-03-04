@@ -40,24 +40,15 @@ public class AllegationOfHarmRevisedService {
         if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
             log.info("child Abuses list {}", allegationOfHarmRevised.get().getChildAbuses());
-
-            Optional<ChildAbuse> childPhysicalAbuse = Optional.empty();
+            log.info("getChildAbuses contain {}", allegationOfHarmRevised.get().getChildAbuses()
+                .contains(ChildAbuseEnum.physicalAbuse) ? true : false);
+            Optional<ChildAbuse> childPhysicalAbuse = createOrClearChildAbuseBasedOnMultiSelectOption(allegationOfHarmRevised,
+                                                                                                      caseData);
+            log.info("child Abuse value BEFORE {}", caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
             Optional<ChildAbuse> childPsychologicalAbuse = Optional.empty();
             Optional<ChildAbuse> childEmotionalAbuse = Optional.empty();
             Optional<ChildAbuse> childSexualAbuse = Optional.empty();
             Optional<ChildAbuse> childFinancialAbuse = Optional.empty();
-
-            if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.physicalAbuse)) {
-                childPhysicalAbuse = ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
-            } else if (ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse()).isPresent()) {
-                caseData = caseData.toBuilder()
-                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
-                                                 .toBuilder()
-                                                 .childPhysicalAbuse(null)
-                                                 .build())
-                        .build();
-
-            }
 
             if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.psychologicalAbuse)) {
                 childPsychologicalAbuse =
@@ -146,6 +137,7 @@ public class AllegationOfHarmRevisedService {
                     }
                 }
             }
+            log.info("child Abuse value AFTER {}", caseData.getAllegationOfHarmRevised().getChildPhysicalAbuse());
             return caseData.toBuilder().allegationOfHarmRevised(allegationOfHarmRevised.get()
                     .toBuilder().childAbuseBehavioursDocmosis(childAbuseBehaviourList).build()).build();
 
@@ -157,15 +149,30 @@ public class AllegationOfHarmRevisedService {
         return caseData;
     }
 
+    private Optional<ChildAbuse> createOrClearChildAbuseBasedOnMultiSelectOption(Optional<AllegationOfHarmRevised> allegationOfHarmRevised,
+                                                                             CaseData caseData) {
+
+        log.info("getChildPhysicalAbuse createOrClearChildAbuseBasedOnMultiSelectOption {}",
+                 allegationOfHarmRevised.get().getChildPhysicalAbuse());
+        if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.physicalAbuse)) {
+            log.info("Inside createOrClearChildAbuseBasedOnMultiSelectOption if condition true");
+            return ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
+        } else if (ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse()).isPresent()) {
+            log.info("Inside createOrClearChildAbuseBasedOnMultiSelectOption else condition true");
+            caseData = caseData.toBuilder()
+                .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                                             .toBuilder()
+                                             .childPhysicalAbuse(null)
+                                             .build())
+                .build();
+
+        }
+        log.info("Inside createOrClearChildAbuseBasedOnMultiSelectOption return empty optional");
+        return Optional.empty();
+    }
+
     private static CaseData cleardDataForAllegationOfHarmForNoSelection(CaseData caseData,
                                                                         Optional<AllegationOfHarmRevised> allegationOfHarmRevised) {
-        log.info("child Abuses list {}", allegationOfHarmRevised.get().getChildAbuses());
-        log.info("Inside no condition <<<<<<<<<<>>>>>>>>");
-        log.info("getChildPhysicalAbuse {}", allegationOfHarmRevised.get().getChildPhysicalAbuse());
-        log.info("getChildFinancialAbuse {}", allegationOfHarmRevised.get().getChildFinancialAbuse());
-        log.info("getChildPsychologicalAbuse {}", allegationOfHarmRevised.get().getChildPsychologicalAbuse());
-        log.info("getChildSexualAbuse {}", allegationOfHarmRevised.get().getChildSexualAbuse());
-        log.info("getChildEmotionalAbuse {}", allegationOfHarmRevised.get().getChildEmotionalAbuse());
         AllegationOfHarmRevised clearedAllegationOfHarmRevised = allegationOfHarmRevised.get().toBuilder()
             .childPhysicalAbuse(null)
             .childPsychologicalAbuse(null)
