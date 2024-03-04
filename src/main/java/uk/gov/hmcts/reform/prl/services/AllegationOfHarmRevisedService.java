@@ -56,10 +56,21 @@ public class AllegationOfHarmRevisedService {
                     .toBuilder()
                     .childPhysicalAbuse(null)
                     .build();
+                log.info("Inside the condition -1 {}", allegationOfHarmRevisedChildAbuse.getChildAbuses());
                 caseData = caseData.toBuilder()
                     .allegationOfHarmRevised(allegationOfHarmRevisedChildAbuse)
                     .build();
+                log.info("Inside the condition -2 {}", caseData.getAllegationOfHarmRevised().getChildAbuses());
+                caseData = caseData.toBuilder()
+                    .allegationOfHarmRevised(caseData.getAllegationOfHarmRevised()
+                                                 .toBuilder()
+                                                 .childPhysicalAbuse(null)
+                                                 .build())
+                    .build();
+                log.info("Inside the condition- 3 {}", caseData.getAllegationOfHarmRevised().getChildAbuses());
             }
+
+            log.info("Outside the condition {}", caseData.getAllegationOfHarmRevised().getChildAbuses());
 
             if (allegationOfHarmRevised.get().getChildAbuses().contains(ChildAbuseEnum.psychologicalAbuse)) {
                 childPsychologicalAbuse =
@@ -115,16 +126,17 @@ public class AllegationOfHarmRevisedService {
 
                 switch (eachBehavior.name()) {
                     case PHYSICAL_ABUSE :
-                        log.info("child abuse null or not: {}", childPhysicalAbuse.isPresent());
                         childPhysicalAbuse.ifPresent(abuse ->
                                 checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
                         );
                         break;
-                    case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
+                    case PSYCHOLOGICAL_ABUSE :
+                        log.info("child abuse null or not: {}", childPhysicalAbuse.isPresent());
+                        childPsychologicalAbuse.ifPresent(abuse ->
                                 checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
 
-                    );
-                    break;
+                        );
+                        break;
                     case SEXUAL_ABUSE : childSexualAbuse.ifPresent(abuse ->
                                 checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
 
