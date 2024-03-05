@@ -112,7 +112,6 @@ public class ServiceOfApplicationEmailService {
                                                                       caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
                                                         partyDetails.getEmail(), docs, servedParty);
-
     }
 
     public EmailNotificationDetails sendEmailUsingTemplateWithAttachments(String authorization,
