@@ -157,7 +157,6 @@ public class CaseApplicationResponseService {
                     false,
                     dataMap
                 );
-                responseDocs.add(element(c8FinalDocument));
             }
 
             if (null != c1aFinalDocument) {
@@ -198,8 +197,8 @@ public class CaseApplicationResponseService {
 
             List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
             if (null != caseData.getDocumentManagementDetails() && null != caseData
-                .getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
-                quarantineDocs = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
+                .getDocumentManagementDetails().getCitizenQuarantineDocsList()) {
+                quarantineDocs = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList();
             }
 
             quarantineDocs.addAll(responseDocs.stream().map(element -> Element.<QuarantineLegalDoc>builder()
@@ -212,13 +211,14 @@ public class CaseApplicationResponseService {
 
             log.info("quarantineDocs is {}", quarantineDocs);
             if (null != caseData.getDocumentManagementDetails()) {
-                caseData.getDocumentManagementDetails().setLegalProfQuarantineDocsList(quarantineDocs);
+                caseData.getDocumentManagementDetails().setCitizenQuarantineDocsList(quarantineDocs);
             } else {
                 caseData.setDocumentManagementDetails(DocumentManagementDetails
                     .builder()
-                    .legalProfQuarantineDocsList(quarantineDocs)
+                    .citizenQuarantineDocsList(quarantineDocs)
                     .build());
             }
+            log.info("quarantineDocs is {}", caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList());
 
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
         }
