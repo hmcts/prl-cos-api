@@ -1862,7 +1862,6 @@ public class ServiceOfApplicationService {
                                                                                                String.valueOf(caseData.getId())));
         }
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
-        log.info("CCCCC {}", caseDataUpdated);
         caseDataUpdated.put(
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)
@@ -1932,12 +1931,9 @@ public class ServiceOfApplicationService {
     }
 
     private boolean isApplicantRepresented(CaseData caseData) {
-        log.info("isApplicantRepresented 1930 ");
         if (PrlAppsConstants.C100_CASE_TYPE.equals(CaseUtils.getCaseTypeOfApplication(caseData))) {
-            log.info("isApplicantRepresented C100 ");
             return isCaApplicantRepresented(caseData);
         } else {
-            log.info("isApplicantRepresented DA ");
             return isDaApplicantRepresented(caseData);
         }
     }

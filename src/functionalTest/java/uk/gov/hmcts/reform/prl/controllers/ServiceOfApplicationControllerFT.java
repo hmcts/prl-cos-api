@@ -54,8 +54,6 @@ public class ServiceOfApplicationControllerFT {
 
     private static final String VALID_REQUEST_BODY = "requests/service-of-application.json";
 
-    private static final String VALID_REQUEST_BODY_BOTH = "requests/service-of-application-mix.json";
-
     private static final String VALID_REQUEST_BODY_WITHOUT_OTHER_PEOPLE = "requests/soa-with-out-other-people.json";
 
     private static final String BODY_FOR_CITIZEN_CREATED_CASE = "requests/soa-for-citizen-case.json";
@@ -407,29 +405,4 @@ public class ServiceOfApplicationControllerFT {
             .extract().as(AboutToStartOrSubmitCallbackResponse.class);
 
     }
-
-    /**
-     * Service of Application journey.
-     * When Soa being done for first time with any of the applicant has Representative
-     * Then isApplicantRepresented should be 'Yes'.
-     */
-    @Test
-    public void givenRequestWithCaseData_Response_isApplicantRepresented_firstTimeWithRep1111() throws Exception {
-
-        String requestBody = ResourceLoader.loadJson(VALID_REQUEST_BODY_BOTH);
-        request
-            .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
-            .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(requestBody)
-            .when()
-            .contentType("application/json")
-            .post("/service-of-application/about-to-submit")
-            .then()
-            .body("data.isApplicantRepresented", equalTo("Yes"))
-            .extract().as(AboutToStartOrSubmitCallbackResponse.class);
-
-    }
-
-
-
 }
