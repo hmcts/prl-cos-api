@@ -11,8 +11,8 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -132,6 +132,8 @@ public class CaseApplicationResponseService {
                 currentRespondent.get()
             );
 
+            List<Element<Document>> responseDocs = new ArrayList<>();
+
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())
                 && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
                 && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
@@ -142,14 +144,10 @@ public class CaseApplicationResponseService {
                     false,
                     dataMap
                 );
+                responseDocs.add(element(c1aFinalDocument));
             }
 
             RespondentDocs respondentDocs = RespondentDocs.builder().build();
-
-            List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList = new ArrayList<>();
-            if (null != caseData.getDocumentManagementDetails()) {
-                citizenUploadQuarantineDocsList = caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList();
-            }
 
             if (dataMap.containsKey("isConfidentialDataPresent")) {
                 c8FinalDocument = documentGenService.generateSingleDocument(
@@ -159,33 +157,10 @@ public class CaseApplicationResponseService {
                     false,
                     dataMap
                 );
-                Element<UploadedDocuments> uploadedDocsElement =
-                    element(UploadedDocuments.builder()
-                        .dateCreated(LocalDate.now())
-                        .partyName(partyName)
-                        .citizenDocument(Document.builder()
-                            .documentUrl(c8FinalDocument.getDocumentUrl())
-                            .documentBinaryUrl(c8FinalDocument.getDocumentBinaryUrl())
-                            .documentHash(c8FinalDocument.getDocumentHash())
-                            .documentFileName(c8FinalDocument.getDocumentFileName())
-                            .build())
-                        .build());
-                citizenUploadQuarantineDocsList.add(uploadedDocsElement);
+                responseDocs.add(element(c8FinalDocument));
             }
 
             if (null != c1aFinalDocument) {
-                Element<UploadedDocuments> uploadedDocsElement =
-                    element(UploadedDocuments.builder()
-                        .dateCreated(LocalDate.now())
-                        .partyName(partyName)
-                        .citizenDocument(Document.builder()
-                            .documentUrl(c1aFinalDocument.getDocumentUrl())
-                            .documentBinaryUrl(c1aFinalDocument.getDocumentBinaryUrl())
-                            .documentHash(c1aFinalDocument.getDocumentHash())
-                            .documentFileName(c1aFinalDocument.getDocumentFileName())
-                            .build())
-                        .build());
-                citizenUploadQuarantineDocsList.add(uploadedDocsElement);
 
                 respondentDocs = respondentDocs
                     .toBuilder()
@@ -212,19 +187,7 @@ public class CaseApplicationResponseService {
                         .build()
                     )
                     .build();
-
-                Element<UploadedDocuments> uploadedDocsElement =
-                    element(UploadedDocuments.builder()
-                        .dateCreated(LocalDate.now())
-                        .partyName(partyName)
-                        .citizenDocument(Document.builder()
-                            .documentUrl(document.getDocumentUrl())
-                            .documentBinaryUrl(document.getDocumentBinaryUrl())
-                            .documentHash(document.getDocumentHash())
-                            .documentFileName(document.getDocumentFileName())
-                            .build())
-                        .build());
-                citizenUploadQuarantineDocsList.add(uploadedDocsElement);
+                responseDocs.add(element(document));
             }
 
             if (null != caseData.getRespondentDocsList()) {
@@ -233,12 +196,24 @@ public class CaseApplicationResponseService {
                 caseData.setRespondentDocsList(List.of(element(respondentDocs)));
             }
 
+            List<Element<QuarantineLegalDoc>> quarantineDocs = caseData.getDocumentManagementDetails() != null
+                ? caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList()
+                : DocumentManagementDetails.builder().legalProfQuarantineDocsList(new ArrayList<>()).build().getLegalProfQuarantineDocsList();
+
+            quarantineDocs.addAll(responseDocs.stream().map(element -> Element.<QuarantineLegalDoc>builder()
+                    .value(QuarantineLegalDoc
+                        .builder()
+                        .citizenQuarantineDocument(element.getValue())
+                        .build())
+                    .id(element.getId()).build())
+                .toList());
+
             if (null != caseData.getDocumentManagementDetails()) {
-                caseData.getDocumentManagementDetails().setCitizenUploadQuarantineDocsList(citizenUploadQuarantineDocsList);
+                caseData.getDocumentManagementDetails().setLegalProfQuarantineDocsList(quarantineDocs);
             } else {
                 caseData.setDocumentManagementDetails(DocumentManagementDetails
                     .builder()
-                    .citizenUploadQuarantineDocsList(citizenUploadQuarantineDocsList)
+                    .legalProfQuarantineDocsList(quarantineDocs)
                     .build());
             }
 
