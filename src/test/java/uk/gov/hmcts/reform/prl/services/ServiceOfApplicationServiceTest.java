@@ -2745,6 +2745,10 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(c100CaseInviteService.generateCaseInvite(any(),any()))
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
