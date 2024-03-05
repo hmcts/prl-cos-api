@@ -5641,7 +5641,6 @@
               "roleOnCase": "Applicant"
             },
             "sendSignUpLink": null,
-            "solicitorEmail": "legal.solicitor@example.net",
             "isAddressUnknown": null,
             "solicitorAddress": {
               "County": null,
@@ -6132,7 +6131,6 @@
               "roleOnCase": "Applicant"
             },
             "sendSignUpLink": null,
-            "solicitorEmail": "legal.solicitorjr@example.net",
             "isAddressUnknown": null,
             "solicitorAddress": {
               "County": null,
@@ -6623,7 +6621,6 @@
               "roleOnCase": "Applicant"
             },
             "sendSignUpLink": null,
-            "solicitorEmail": "legal.solicitorsr@example.net",
             "isAddressUnknown": null,
             "solicitorAddress": {
               "County": null,
