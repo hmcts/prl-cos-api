@@ -26,14 +26,22 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRes
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
+import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
 import uk.gov.hmcts.reform.prl.utils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.prl.utils.ServiceAuthenticationGenerator;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -66,6 +74,9 @@ public class ManageOrdersControllerFunctionalTest {
 
     @MockBean
     private HearingService hearingService;
+
+    @MockBean
+    private CoreCaseDataService coreCaseDataService;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
@@ -135,7 +146,10 @@ public class ManageOrdersControllerFunctionalTest {
     private static final String JUDGE_DRAFT_SDO_ORDER_BODY = "requests/judge-draft-order-request.json";
 
     @Before
-    public void setup(){
+    public void setup() {
+        caseDetails = CaseDetails.builder()
+            .id(1708388034079121L)
+            .build();
     }
 
     @Test
@@ -178,7 +192,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_whenPostRequestToPopulateSendManageOrderEmail() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON);
 
@@ -240,13 +253,16 @@ public class ManageOrdersControllerFunctionalTest {
 
     }
 
-
     @Test
-    @Ignore
     public void givenRequestBody_WhenServeOrderTestSendEmailToApplicantOrRespLip() throws Exception {
-
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("id", caseDetails.getId().toString());
+        caseDetails = caseDetails.toBuilder()
+            .data(caseData)
+            .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
-            .caseDetails(caseDetails).build();
+            .caseDetails(caseDetails)
+            .build();
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
@@ -255,7 +271,7 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/case-order-email-notification")
             .then()
-            .body("data.id", equalTo(caseDetails.getData().get("id")))
+            .body("data.id", equalTo(caseDetails.getId().toString()))
             .assertThat().statusCode(200);
     }
 
@@ -458,7 +474,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -478,15 +493,24 @@ public class ManageOrdersControllerFunctionalTest {
         Assert.assertNotNull(caseDetails.getId());
     }
 
-    @Ignore
     @Test
-    public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() {
+    @Ignore
+    public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() throws Exception {
+        Map<String, Object> caseData = new HashMap<>();
+        caseData.put("cafcassCymruEmail", "test@hmcts.net");
+        doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(), anyLong(), anyString(), anyMap());
+        caseDetails = caseDetails.toBuilder()
+            .data(caseData)
+            .build();
         CallbackRequest callbackRequest = CallbackRequest.builder()
             .caseDetails(caseDetails).build();
+        String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
+        String requestBodyRevised = requestBody
+            .replace("1706997775517206", caseDetails.getId().toString());
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
-            .body(callbackRequest)
+            .body(requestBodyRevised)
             .when()
             .contentType("application/json")
             .post("/case-order-email-notification")
@@ -543,7 +567,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_ForPersonalServiceWhenCourtAdminSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
 
@@ -566,7 +589,6 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_ForPersonalServiceWhenBailiffSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
 
@@ -592,7 +614,6 @@ public class ManageOrdersControllerFunctionalTest {
      * Court Admin manageOrders journey - creates the sdo order with one hearing with no approval required.
      */
     @Test
-    @Ignore
     public void givenRequestBody_courtArdmin_noapproval_required_sdo() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_NO_NEED_JUDGE_APPROVAL);
 
