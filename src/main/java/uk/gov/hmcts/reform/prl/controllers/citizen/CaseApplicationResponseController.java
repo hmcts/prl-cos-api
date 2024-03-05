@@ -48,13 +48,14 @@ public class CaseApplicationResponseController {
         @PathVariable("caseId") String caseId,
         @PathVariable("partyId") String partyId,
         @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader("isWelsh") boolean isWelsh,
         @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
 
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
 
         caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        return caseApplicationResponseService.generateC7DraftDocument(authorisation, caseData);
+        return caseApplicationResponseService.generateC7DraftDocument(authorisation, caseData,isWelsh);
     }
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document-final", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)

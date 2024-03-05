@@ -450,7 +450,7 @@ public class CaseApplicantResponseServiceTest {
     @Test
     public void testGenerateC7DraftDocument() throws Exception {
         Document document = caseApplicationResponseService
-            .generateC7DraftDocument(authToken, caseData);
+            .generateC7DraftDocument(authToken, caseData,false);
         assertNotNull(document);
     }
 }

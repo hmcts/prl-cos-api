@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
@@ -113,7 +113,7 @@ public class CaseApplicationResponseService {
         return documentGenService.generateSingleDocument(
             authorisation,
             caseData,
-            C7_FINAL_ENGLISH,
+            C7_FINAL_RESPONDENT,
             false
         );
     }
@@ -221,14 +221,14 @@ public class CaseApplicationResponseService {
         }
     }
 
-    public Document generateC7DraftDocument(String authorisation, CaseData caseData) throws Exception {
+    public Document generateC7DraftDocument(String authorisation, CaseData caseData, boolean isWelsh) throws Exception {
 
         log.info(" Generating C7 draft document for respondent ");
         Document document = documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             DOCUMENT_C7_DRAFT_HINT,
-            false
+            isWelsh
         );
         log.info("C7 draft document generated successfully for respondent ");
 
