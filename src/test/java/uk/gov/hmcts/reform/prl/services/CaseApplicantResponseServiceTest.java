@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.safetyconcer
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
@@ -66,6 +67,9 @@ public class CaseApplicantResponseServiceTest {
 
     @Mock
     C100RespondentSolicitorService c100RespondentSolicitorService;
+
+    @Mock
+    DocumentLanguageService documentLanguageService;
 
     private CaseData caseData;
     private CaseDetails caseDetails;
@@ -123,6 +127,11 @@ public class CaseApplicantResponseServiceTest {
         when(documentGenService.generateSingleDocument(Mockito.anyString(), Mockito.any(CaseData.class),
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage
+                                                                               .builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
             .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
         assertNotNull(responseCaseDetails);
@@ -150,6 +159,11 @@ public class CaseApplicantResponseServiceTest {
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage
+                                                                               .builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
             .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
         assertNotNull(responseCaseDetails);
@@ -205,6 +219,11 @@ public class CaseApplicantResponseServiceTest {
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage
+                                                                               .builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
             .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
         assertNotNull(responseCaseDetails);
@@ -260,6 +279,11 @@ public class CaseApplicantResponseServiceTest {
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage
+                                                                               .builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
             .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
         assertNotNull(responseCaseDetails);
@@ -315,6 +339,11 @@ public class CaseApplicantResponseServiceTest {
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage
+                                                                               .builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
             .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
         assertNotNull(responseCaseDetails);
@@ -370,6 +399,11 @@ public class CaseApplicantResponseServiceTest {
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage
+                                                                               .builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
             .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
         assertNotNull(responseCaseDetails);
@@ -433,6 +467,11 @@ public class CaseApplicantResponseServiceTest {
             Mockito.anyString(), Mockito.anyBoolean(), Mockito.anyMap())).thenReturn(
             Document.builder().build());
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(documentLanguageService.docGenerateLang(caseData)).thenReturn(DocumentLanguage
+                                                                               .builder()
+                                                                               .isGenEng(true)
+                                                                               .isGenWelsh(true)
+                                                                               .build());
         CaseDetails responseCaseDetails = caseApplicationResponseService
             .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
         assertNotNull(responseCaseDetails);
