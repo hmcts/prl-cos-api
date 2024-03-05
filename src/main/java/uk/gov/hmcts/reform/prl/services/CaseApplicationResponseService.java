@@ -197,9 +197,11 @@ public class CaseApplicationResponseService {
             }
 
             List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
-            if (null != caseData.getDocumentManagementDetails()) {
+            if (null != caseData.getDocumentManagementDetails() && null != caseData
+                .getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
                 quarantineDocs = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
             }
+            log.info("quarantineDocs is {}", quarantineDocs);
 
             quarantineDocs.addAll(responseDocs.stream().map(element -> Element.<QuarantineLegalDoc>builder()
                     .value(QuarantineLegalDoc
