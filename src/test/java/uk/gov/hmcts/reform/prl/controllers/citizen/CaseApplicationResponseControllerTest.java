@@ -118,9 +118,9 @@ public class CaseApplicationResponseControllerTest {
 
     @Test
     public void testGenerateC7DraftDocument() throws Exception {
-        when(caseApplicationResponseService.generateC7DraftDocument(authToken, caseData)).thenReturn(Document.builder().build());
+        when(caseApplicationResponseService.generateC7DraftDocument(authToken, caseData,false)).thenReturn(Document.builder().build());
         Document document = caseApplicationResponseController
-            .generateC7DraftDocument(caseId, partyId, authToken, servAuthToken);
+            .generateC7DraftDocument(caseId, partyId, authToken,false,servAuthToken);
         assertNotNull(document);
     }
 
