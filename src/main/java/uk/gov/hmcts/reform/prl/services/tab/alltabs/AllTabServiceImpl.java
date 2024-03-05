@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services.tab.alltabs;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -177,6 +178,18 @@ public class AllTabServiceImpl implements AllTabsService {
             combinedFieldsMap.put(COURT_ID_FIELD, caseData.getCourtId());
         }
         getDocumentsMap(caseData, combinedFieldsMap);
+
+        try {
+            log.info("caseData.getAllPartyFlags():: " + objectMapper.writeValueAsString(caseData.getAllPartyFlags()));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
+        try {
+            log.info("applicationsTabService.toMap(caseData.getAllPartyFlags()):: " + objectMapper.writeValueAsString(
+                applicationsTabService.toMap(caseData.getAllPartyFlags())));
+        } catch (JsonProcessingException e) {
+            log.info("error");
+        }
         combinedFieldsMap.putAll(applicationsTabService.toMap(caseData.getAllPartyFlags()));
         return combinedFieldsMap;
     }

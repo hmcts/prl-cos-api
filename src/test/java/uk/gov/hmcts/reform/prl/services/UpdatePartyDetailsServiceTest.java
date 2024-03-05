@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.RespondentC8Document;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -59,6 +60,9 @@ public class UpdatePartyDetailsServiceTest {
     public static final String BEARER_TOKEN = "Bearer token";
     @Mock
     NoticeOfChangePartiesService noticeOfChangePartiesService;
+
+    @Mock
+    PartyLevelCaseFlagsService partyLevelCaseFlagsService;
 
     @Mock
     ObjectMapper objectMapper;
@@ -147,6 +151,10 @@ public class UpdatePartyDetailsServiceTest {
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L)
+                                   .data(stringObjectMap)
+                                   .build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -175,6 +183,10 @@ public class UpdatePartyDetailsServiceTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L)
+                                   .data(stringObjectMap)
+                                   .build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -232,6 +244,10 @@ public class UpdatePartyDetailsServiceTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L)
+                                   .data(stringObjectMap)
+                                   .build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -291,6 +307,10 @@ public class UpdatePartyDetailsServiceTest {
         )).thenReturn(caseData);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L)
+                                   .data(stringObjectMap)
+                                   .build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -374,6 +394,10 @@ public class UpdatePartyDetailsServiceTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L)
+                                   .data(stringObjectMap)
+                                   .build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -495,6 +519,10 @@ public class UpdatePartyDetailsServiceTest {
 
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L)
+                                   .data(stringObjectMap)
+                                   .build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -598,6 +626,10 @@ public class UpdatePartyDetailsServiceTest {
         when(caseSummaryTabService.updateTab(caseData)).thenReturn(summaryTabFields);
         CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
             .CallbackRequest.builder()
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L)
+                                   .data(stringObjectMap)
+                                   .build())
             .caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
                              .id(123L)
                              .data(stringObjectMap)
@@ -690,6 +722,10 @@ public class UpdatePartyDetailsServiceTest {
                              .id(123L)
                              .data(stringObjectMap)
                              .build())
+            .caseDetailsBefore(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder()
+                                   .id(123L)
+                                   .data(stringObjectMap)
+                                   .build())
             .build();
         updatePartyDetailsService.updateApplicantRespondentAndChildData(callbackRequest, BEARER_TOKEN);
         assertNotNull("respondents");
@@ -1198,6 +1234,9 @@ public class UpdatePartyDetailsServiceTest {
         CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(CaseDetails.builder()
                 .data(objectMap)
                 .build())
+            .caseDetailsBefore(CaseDetails.builder()
+                                   .data(objectMap)
+                                   .build())
                 .build();
         when(confidentialDetailsMapper.mapConfidentialData(
                 Mockito.any(CaseData.class),

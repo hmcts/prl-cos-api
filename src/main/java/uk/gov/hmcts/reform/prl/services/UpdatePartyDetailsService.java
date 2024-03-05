@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDoc
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
+import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
 import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
@@ -65,6 +67,7 @@ public class UpdatePartyDetailsService {
     public static final String C_8_OF = "C8 of ";
     private final ObjectMapper objectMapper;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final DocumentGenService documentGenService;
@@ -77,7 +80,7 @@ public class UpdatePartyDetailsService {
     public Map<String, Object> updateApplicantRespondentAndChildData(CallbackRequest callbackRequest,
                                                                      String authorisation) {
         Map<String, Object> updatedCaseData = callbackRequest.getCaseDetails().getData();
-        log.info("*** UpdatedCasedata applicants *** {}", updatedCaseData.get("applicants"));
+
         CaseData caseData = objectMapper.convertValue(updatedCaseData, CaseData.class);
 
         CaseData caseDataTemp = confidentialDetailsMapper.mapConfidentialData(caseData, false);
@@ -93,7 +96,11 @@ public class UpdatePartyDetailsService {
                 .getApplicantsFL401();
             PartyDetails fl401respondent = caseData
                 .getRespondentsFL401();
-
+            try {
+                log.info("updatedCaseData is:: " + objectMapper.writeValueAsString(updatedCaseData));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             setFl401PartyNames(fl401Applicant, caseData, updatedCaseData, fl401respondent);
             setApplicantOrganisationPolicyIfOrgEmpty(updatedCaseData, caseData.getApplicantsFL401());
             try {
@@ -128,6 +135,9 @@ public class UpdatePartyDetailsService {
                 log.error("Failed to generate C8 document for C100 case {}", e.getMessage());
             }
         }
+        Map<String, Object> oldCaseDataMap = callbackRequest.getCaseDetailsBefore().getData();
+        partyLevelCaseFlagsService.amendPartyFlagsForName(oldCaseDataMap, updatedCaseData);
+
         cleanUpCaseDataBasedOnYesNoSelection(updatedCaseData, caseData);
         return updatedCaseData;
     }
