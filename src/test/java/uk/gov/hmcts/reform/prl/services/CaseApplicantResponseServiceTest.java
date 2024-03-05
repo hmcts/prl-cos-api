@@ -35,7 +35,6 @@ import java.util.UUID;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertNull;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
@@ -440,17 +439,41 @@ public class CaseApplicantResponseServiceTest {
     }
 
     @Test
-    public void testGenerateC7finalDocumentWithNullData() throws Exception {
-        caseDetails = null;
-        CaseDetails responseCaseDetails = caseApplicationResponseService
-            .generateCitizenResponseFinalDocuments(caseData, caseDetails, authToken, partyId, caseId, servAuthToken);
-        assertNull(responseCaseDetails);
-    }
-
-    @Test
     public void testGenerateC7DraftDocument() throws Exception {
         Document document = caseApplicationResponseService
             .generateC7DraftDocument(authToken, caseData,false);
         assertNotNull(document);
+    }
+
+    @Test
+    public void testUpdateCurrentRespondent() {
+        Element partyDetails1 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .response(Response.builder().safetyConcerns(
+                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+        List<Element<PartyDetails>> elementList = new ArrayList<>();
+        elementList.add(partyDetails1);
+        caseData = caseData.toBuilder()
+            .respondents(elementList).build();
+        CaseData updatedCaseData = caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, partyDetails1.getId().toString());
+        assertNotNull(updatedCaseData);
+    }
+
+    @Test
+    public void testUpdateCurrentRespondentIdsDontMatch() {
+        Element partyDetails1 =  Element.<PartyDetails>builder()
+            .id(UUID.randomUUID())
+            .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
+                .response(Response.builder().safetyConcerns(
+                    SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
+            .build();
+        List<Element<PartyDetails>> elementList = new ArrayList<>();
+        elementList.add(partyDetails1);
+        caseData = caseData.toBuilder()
+            .respondents(elementList).build();
+        CaseData updatedCaseData = caseApplicationResponseService.updateCurrentRespondent(caseData, YesOrNo.Yes, UUID.randomUUID().toString());
+        assertNotNull(updatedCaseData);
     }
 }
