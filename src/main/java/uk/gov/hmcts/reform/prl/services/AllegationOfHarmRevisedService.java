@@ -36,28 +36,28 @@ public class AllegationOfHarmRevisedService {
     public static final String CASE_FIELD_WHICH_CHILDREN_ARE_RISK = "whichChildrenAreRisk";
 
     public CaseData updateChildAbusesForDocmosis(CaseData caseData) {
+
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised = Optional.ofNullable(caseData.getAllegationOfHarmRevised());
 
         if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
             Optional<ChildAbuse> childPhysicalAbuse =
-                ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
+                    ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse());
 
             Optional<ChildAbuse> childPsychologicalAbuse =
-                ofNullable(allegationOfHarmRevised.get().getChildPsychologicalAbuse());
+                    ofNullable(allegationOfHarmRevised.get().getChildPsychologicalAbuse());
 
 
             Optional<ChildAbuse> childEmotionalAbuse =
-                ofNullable(allegationOfHarmRevised.get().getChildEmotionalAbuse());
+                    ofNullable(allegationOfHarmRevised.get().getChildEmotionalAbuse());
 
 
             Optional<ChildAbuse> childSexualAbuse =
-                ofNullable(allegationOfHarmRevised.get().getChildSexualAbuse());
+                    ofNullable(allegationOfHarmRevised.get().getChildSexualAbuse());
 
 
             Optional<ChildAbuse> childFinancialAbuse =
-                ofNullable(allegationOfHarmRevised.get().getChildFinancialAbuse());
-
+                    ofNullable(allegationOfHarmRevised.get().getChildFinancialAbuse());
 
             List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
             for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuses()) {
@@ -300,7 +300,7 @@ public class AllegationOfHarmRevisedService {
         return caseDataMap;
     }
 
-    public Map<String,?> getPrePopulatedChildAbuseData(CaseData caseData) {
+    public Map<String, Object> getPrePopulatedChildAbuseData(CaseData caseData) {
         Map<String, Object> caseDataMap = new HashMap<>();
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised = Optional.ofNullable(caseData.getAllegationOfHarmRevised());
 
