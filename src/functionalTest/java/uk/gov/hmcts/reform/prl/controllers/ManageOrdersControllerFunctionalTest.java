@@ -8,7 +8,6 @@ import org.hamcrest.Matchers;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.FixMethodOrder;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
@@ -26,7 +25,6 @@ import uk.gov.hmcts.reform.prl.enums.serviceofapplication.SoaSolicitorServingRes
 import uk.gov.hmcts.reform.prl.models.cafcass.hearing.Hearings;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentRequest;
 import uk.gov.hmcts.reform.prl.models.roleassignment.addroleassignment.RoleAssignmentResponse;
-import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.ManageOrderService;
 import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.cafcass.HearingService;
@@ -38,10 +36,6 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 @Slf4j
@@ -74,9 +68,6 @@ public class ManageOrdersControllerFunctionalTest {
 
     @MockBean
     private HearingService hearingService;
-
-    @MockBean
-    private CoreCaseDataService coreCaseDataService;
 
     private static final String VALID_INPUT_JSON = "CallBackRequest.json";
 
@@ -148,7 +139,7 @@ public class ManageOrdersControllerFunctionalTest {
     @Before
     public void setup() {
         caseDetails = CaseDetails.builder()
-            .id(1708388034079121L)
+            .id(1709662358269545L)
             .build();
     }
 
@@ -494,11 +485,10 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
-    @Ignore
     public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() throws Exception {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("cafcassCymruEmail", "test@hmcts.net");
-        doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(), anyLong(), anyString(), anyMap());
+        //doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(), anyLong(), anyString(), anyMap());
         caseDetails = caseDetails.toBuilder()
             .data(caseData)
             .build();
@@ -506,7 +496,7 @@ public class ManageOrdersControllerFunctionalTest {
             .caseDetails(caseDetails).build();
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
         String requestBodyRevised = requestBody
-            .replace("1706997775517206", caseDetails.getId().toString());
+            .replace("1703068453862935", caseDetails.getId().toString());
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
             .header("ServiceAuthorization", serviceAuthenticationGenerator.generateTokenForCcd())
