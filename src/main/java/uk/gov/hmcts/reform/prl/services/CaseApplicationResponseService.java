@@ -201,7 +201,6 @@ public class CaseApplicationResponseService {
                 .getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
                 quarantineDocs = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
             }
-            log.info("quarantineDocs is {}", quarantineDocs);
 
             quarantineDocs.addAll(responseDocs.stream().map(element -> Element.<QuarantineLegalDoc>builder()
                     .value(QuarantineLegalDoc
@@ -211,6 +210,7 @@ public class CaseApplicationResponseService {
                     .id(element.getId()).build())
                 .toList());
 
+            log.info("quarantineDocs is {}", quarantineDocs);
             if (null != caseData.getDocumentManagementDetails()) {
                 caseData.getDocumentManagementDetails().setLegalProfQuarantineDocsList(quarantineDocs);
             } else {
@@ -220,6 +220,7 @@ public class CaseApplicationResponseService {
                     .build());
             }
 
+            log.info("casaData is {}",  caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList());
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
         }
         return caseData;
