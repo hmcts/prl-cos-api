@@ -3892,6 +3892,7 @@ public class ServiceOfApplicationServiceTest {
 
         PartyDetails testParty = PartyDetails.builder()
             .firstName(testString).lastName(testString)
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .user(User.builder().solicitorRepresented(null).build())
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
@@ -4033,7 +4034,7 @@ public class ServiceOfApplicationServiceTest {
 
         PartyDetails testParty = PartyDetails.builder()
             .firstName(testString).lastName(testString).representativeFirstName(testString)
-            .representativeLastName(testString)
+            .representativeLastName(testString).doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
             .user(User.builder().solicitorRepresented(null).build())
             .response(Response.builder().citizenFlags(CitizenFlags.builder().build()).build())
             .build();
