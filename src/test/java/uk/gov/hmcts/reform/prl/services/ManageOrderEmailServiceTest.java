@@ -1157,9 +1157,9 @@ public class ManageOrderEmailServiceTest {
             .build();
         Map<String, Object> dataMap = new HashMap<>();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class));
+                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         Mockito.verifyNoInteractions(emailService);
@@ -1224,9 +1224,9 @@ public class ManageOrderEmailServiceTest {
             .build();
         Map<String, Object> dataMap = new HashMap<>();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class));
+                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
         Mockito.verifyNoInteractions(emailService);
     }
@@ -1282,9 +1282,9 @@ public class ManageOrderEmailServiceTest {
             .build();
         Map<String, Object> dataMap = new HashMap<>();
         when(emailService.getCaseData(caseDetails)).thenReturn(caseData);
-        doNothing().when(sendgridService).sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
+        when(sendgridService.sendEmailUsingTemplateWithAttachments(any(SendgridEmailTemplateNames.class),
                                                                                 anyString(),
-                                                                                any(SendgridEmailConfig.class));
+                                                                                any(SendgridEmailConfig.class))).thenReturn(true);
         manageOrderEmailService.sendEmailWhenOrderIsServed("tesAuth", caseData, dataMap);
 
         Mockito.verifyNoInteractions(emailService);
