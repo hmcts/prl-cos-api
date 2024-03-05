@@ -20,11 +20,15 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
+import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.caseflags.PartyRole;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
+import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildRespondentDetailsElements;
 import uk.gov.hmcts.reform.prl.models.caseflags.Flags;
 import uk.gov.hmcts.reform.prl.models.caseflags.flagdetails.FlagDetail;
 import uk.gov.hmcts.reform.prl.models.caseflags.request.CitizenPartyFlagsRequest;
@@ -35,6 +39,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetailsMeta;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
@@ -42,9 +47,11 @@ import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
 import uk.gov.hmcts.reform.prl.models.user.UserInfo;
 import uk.gov.hmcts.reform.prl.repositories.CaseRepository;
+import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.SystemUserService;
 import uk.gov.hmcts.reform.prl.services.caseflags.PartyLevelCaseFlagsService;
 import uk.gov.hmcts.reform.prl.services.noticeofchange.NoticeOfChangePartiesService;
+import uk.gov.hmcts.reform.prl.services.tab.summary.CaseSummaryTabService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.ArrayList;
@@ -57,6 +64,7 @@ import java.util.UUID;
 
 import static java.util.Optional.ofNullable;
 import static org.apache.commons.collections.MapUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_DEFAULT_COURT_NAME;
@@ -65,9 +73,12 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.WITHDRAWN_STATE;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT;
 import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_SUBMIT_WITH_HWF;
+import static uk.gov.hmcts.reform.prl.enums.CaseEvent.CITIZEN_CASE_UPDATE;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CAAPPLICANT;
 import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Representing.CARESPONDENT;
@@ -76,6 +87,8 @@ import static uk.gov.hmcts.reform.prl.enums.noticeofchange.SolicitorRole.Represe
 import static uk.gov.hmcts.reform.prl.utils.CaseUtils.getPartyDetailsMeta;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.wrapElements;
+
+
 
 @Slf4j
 @Service
@@ -87,7 +100,10 @@ public class CaseService {
     public static final String LINKED = "Linked";
     public static final String YES = "Yes";
     public static final String CASE_INVITES = "caseInvites";
+    public static final String CASE_STATUS = "caseStatus";
+    public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
     private final CoreCaseDataApi coreCaseDataApi;
+
     private final CaseRepository caseRepository;
     private final IdamClient idamClient;
     private final ObjectMapper objectMapper;
@@ -95,6 +111,8 @@ public class CaseService {
     private final CaseDataMapper caseDataMapper;
     private final CcdCoreCaseDataService coreCaseDataService;
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
+    private final CaseSummaryTabService caseSummaryTab;
+    private final RoleAssignmentService roleAssignmentService;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     private final PartyLevelCaseFlagsService partyLevelCaseFlagsService;
@@ -127,6 +145,12 @@ public class CaseService {
             );
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
+        if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
+            && isEmpty(caseData.getApplicantCaseName())) {
+            caseData = caseData.toBuilder()
+                .applicantCaseName(buildApplicantAndRespondentForCaseName(caseData))
+                .build();
+        }
 
         return caseRepository.updateCase(authToken, caseId, caseData, CaseEvent.fromValue(eventId));
     }
@@ -153,6 +177,38 @@ public class CaseService {
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
+    }
+
+    public String buildApplicantAndRespondentForCaseName(CaseData caseData) throws JsonProcessingException {
+        C100RebuildData c100RebuildData = caseData.getC100RebuildData();
+        ObjectMapper mapper = new ObjectMapper();
+        C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements = null;
+        C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements = null;
+        if (null != c100RebuildData) {
+            if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildApplicantDetails())) {
+                c100RebuildApplicantDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildApplicantDetails(), C100RebuildApplicantDetailsElements.class);
+            }
+
+            if (StringUtils.isNotEmpty(c100RebuildData.getC100RebuildRespondentDetails())) {
+                c100RebuildRespondentDetailsElements = mapper
+                    .readValue(c100RebuildData.getC100RebuildRespondentDetails(), C100RebuildRespondentDetailsElements.class);
+            }
+        }
+        return buildCaseName(c100RebuildApplicantDetailsElements, c100RebuildRespondentDetailsElements);
+    }
+
+
+    private String buildCaseName(C100RebuildApplicantDetailsElements c100RebuildApplicantDetailsElements,
+                                 C100RebuildRespondentDetailsElements c100RebuildRespondentDetailsElements) {
+        String caseName = null;
+        if (null != c100RebuildApplicantDetailsElements
+            && null != c100RebuildRespondentDetailsElements.getRespondentDetails()) {
+            caseName = c100RebuildApplicantDetailsElements.getApplicants().get(0).getApplicantLastName() + " V "
+                + c100RebuildRespondentDetailsElements.getRespondentDetails().get(0).getLastName();
+        }
+
+        return caseName;
     }
 
     private CaseData handleCitizenStatementOfService(CaseData caseData,PartyDetails partyDetails, PartyEnum partyType) {
@@ -457,21 +513,37 @@ public class CaseService {
         return caseRepository.createCase(authToken, caseData);
     }
 
-    public CaseDetails withdrawCase(CaseData caseData, String caseId, String authToken) {
+    public CaseDetails withdrawCase(CaseData oldCaseData, String caseId, String authToken) {
+        CaseEvent caseEvent = CaseEvent.CITIZEN_CASE_WITHDRAW;
+        UserDetails userDetails = idamClient.getUserDetails(authToken);
+        EventRequestData eventRequestData = coreCaseDataService.eventRequest(caseEvent, userDetails.getId());
+        StartEventResponse startEventResponse =
+            coreCaseDataService.startUpdate(
+                authToken,
+                eventRequestData,
+                caseId,
+                false
+            );
+        Map<String, Object> updatedCaseData = startEventResponse.getCaseDetails().getData();
 
-        WithdrawApplication withDrawApplicationData = caseData.getWithDrawApplicationData();
+        WithdrawApplication withDrawApplicationData = oldCaseData.getWithDrawApplicationData();
         Optional<YesOrNo> withdrawApplication = ofNullable(withDrawApplicationData.getWithDrawApplication());
-        CaseDetails caseDetails = getCase(authToken, caseId);
-        CaseData updatedCaseData = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
-            .toBuilder().id(caseDetails.getId()).build();
-
         if ((withdrawApplication.isPresent() && Yes.equals(withdrawApplication.get()))) {
-            updatedCaseData = updatedCaseData.toBuilder()
-                .withDrawApplicationData(withDrawApplicationData)
-                .build();
+            updatedCaseData.put(WITHDRAW_APPLICATION_DATA, withDrawApplicationData);
+            updatedCaseData.put(STATE, WITHDRAWN_STATE);
+            updatedCaseData.put(CASE_STATUS, CaseStatus.builder().state(State.CASE_WITHDRAWN.getLabel()).build());
         }
-
-        return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.CITIZEN_CASE_WITHDRAW);
+        CaseDataContent caseDataContent = coreCaseDataService.createCaseDataContent(
+            startEventResponse,
+            updatedCaseData
+        );
+        return coreCaseDataService.submitUpdate(
+            authToken,
+            eventRequestData,
+            caseDataContent,
+            caseId,
+            false
+        );
     }
 
     public Flags getPartyCaseFlags(String authToken, String caseId, String partyId) {
@@ -669,5 +741,9 @@ public class CaseService {
         }
 
         return partyExternalCaseFlagField;
+    }
+
+    public Map<String, String> fetchIdamAmRoles(String authorisation, String emailId) {
+        return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
     }
 }

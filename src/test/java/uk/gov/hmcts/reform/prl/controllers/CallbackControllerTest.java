@@ -2359,6 +2359,289 @@ public class CallbackControllerTest {
     }
 
     @Test
+    public void testSendToGatekeeperChangesJudgeIsNull() {
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        Address address = Address.builder()
+            .addressLine1("address")
+            .postTown("London")
+            .build();
+        List<Element<ApplicantConfidentialityDetails>> applicants = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                .value(ApplicantConfidentialityDetails.builder()
+                    .firstName("ABC 1")
+                    .lastName("XYZ 2")
+                    .email("abc1@xyz.com")
+                    .phoneNumber("09876543211")
+                    .address(address)
+                    .build()).build());
+
+        List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
+            Element.<ChildConfidentialityDetails>builder()
+                .value(ChildConfidentialityDetails
+                    .builder()
+                    .firstName("Test")
+                    .lastName("Name")
+                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                        OtherPersonConfidentialityDetails.builder()
+                            .firstName("Confidential First Name")
+                            .lastName("Confidential Last Name")
+                            .relationshipToChildDetails("test")
+                            .address(address)
+                            .build()).build()))
+                    .build()).build());
+        CaseData caseData = CaseData.builder()
+            .children(listOfChildren)
+            .applicants(applicantList)
+            .consentOrder(Yes)
+            .id(123L)
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(false).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap).build()).build();
+        String[] personalCodes = new String[3];
+        personalCodes[0] = "123456";
+        List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
+        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname").build());
+        stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
+            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+        GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
+            .isSpecificGateKeeperNeeded(Yes)
+            .judgeName(JudicialUser.builder()
+                .idamId("testId")
+                .personalCode("testCode")
+                .build())
+            .build();
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
+            refDataUserService)).thenReturn(gatekeepingDetails);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
+
+    }
+
+    @Test
+    public void testSendToGatekeeperChangesJudgeNameNull() {
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        Address address = Address.builder()
+            .addressLine1("address")
+            .postTown("London")
+            .build();
+        List<Element<ApplicantConfidentialityDetails>> applicants = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                .value(ApplicantConfidentialityDetails.builder()
+                    .firstName("ABC 1")
+                    .lastName("XYZ 2")
+                    .email("abc1@xyz.com")
+                    .phoneNumber("09876543211")
+                    .address(address)
+                    .build()).build());
+
+        List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
+            Element.<ChildConfidentialityDetails>builder()
+                .value(ChildConfidentialityDetails
+                    .builder()
+                    .firstName("Test")
+                    .lastName("Name")
+                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                        OtherPersonConfidentialityDetails.builder()
+                            .firstName("Confidential First Name")
+                            .lastName("Confidential Last Name")
+                            .relationshipToChildDetails("test")
+                            .address(address)
+                            .build()).build()))
+                    .build()).build());
+        CaseData caseData = CaseData.builder()
+            .children(listOfChildren)
+            .applicants(applicantList)
+            .consentOrder(Yes)
+            .id(123L)
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(false).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap).build()).build();
+        String[] personalCodes = new String[3];
+        personalCodes[0] = "123456";
+        List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
+        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname").build());
+        stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
+        stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
+            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+        GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
+            .isSpecificGateKeeperNeeded(Yes)
+            .isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge)
+            .build();
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
+            refDataUserService)).thenReturn(gatekeepingDetails);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
+        assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
+
+    }
+
+    @Test
+    public void testSendToGatekeeperChangesLegalAdvisorListNotNull() {
+        PartyDetails applicant = PartyDetails.builder().representativeFirstName("Abc")
+            .representativeLastName("Xyz")
+            .gender(Gender.male)
+            .email("abc@xyz.com")
+            .phoneNumber("1234567890")
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .isEmailAddressConfidential(YesOrNo.Yes)
+            .isPhoneNumberConfidential(YesOrNo.Yes)
+            .solicitorOrg(Organisation.builder().organisationID("ABC").organisationName("XYZ").build())
+            .solicitorAddress(Address.builder().addressLine1("ABC").postCode("AB1 2MN").build())
+            .doTheyHaveLegalRepresentation(YesNoDontKnow.yes)
+            .build();
+        Element<PartyDetails> wrappedApplicant = Element.<PartyDetails>builder().value(applicant).build();
+        List<Element<PartyDetails>> applicantList = Collections.singletonList(wrappedApplicant);
+
+        Child child = Child.builder()
+            .firstName("Test")
+            .lastName("Name")
+            .gender(female)
+            .orderAppliedFor(Collections.singletonList(childArrangementsOrder))
+            .applicantsRelationshipToChild(specialGuardian)
+            .respondentsRelationshipToChild(father)
+            .childLiveWith(Collections.singletonList(anotherPerson))
+            .parentalResponsibilityDetails("test")
+            .build();
+
+        Element<Child> wrappedChildren = Element.<Child>builder().value(child).build();
+        List<Element<Child>> listOfChildren = Collections.singletonList(wrappedChildren);
+        Address address = Address.builder()
+            .addressLine1("address")
+            .postTown("London")
+            .build();
+        List<Element<ApplicantConfidentialityDetails>> applicants = List
+            .of(Element.<ApplicantConfidentialityDetails>builder()
+                .value(ApplicantConfidentialityDetails.builder()
+                    .firstName("ABC 1")
+                    .lastName("XYZ 2")
+                    .email("abc1@xyz.com")
+                    .phoneNumber("09876543211")
+                    .address(address)
+                    .build()).build());
+
+        List<Element<ChildConfidentialityDetails>> childConfidentialityDetails = List.of(
+            Element.<ChildConfidentialityDetails>builder()
+                .value(ChildConfidentialityDetails
+                    .builder()
+                    .firstName("Test")
+                    .lastName("Name")
+                    .otherPerson(List.of(Element.<OtherPersonConfidentialityDetails>builder().value(
+                        OtherPersonConfidentialityDetails.builder()
+                            .firstName("Confidential First Name")
+                            .lastName("Confidential Last Name")
+                            .relationshipToChildDetails("test")
+                            .address(address)
+                            .build()).build()))
+                    .build()).build());
+        CaseData caseData = CaseData.builder()
+            .children(listOfChildren)
+            .applicants(applicantList)
+            .consentOrder(Yes)
+            .id(123L)
+            .build();
+
+        DocumentLanguage documentLanguage = DocumentLanguage.builder().isGenEng(false).isGenWelsh(false).build();
+
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        final uk.gov.hmcts.reform.ccd.client.model.CallbackRequest callbackRequest = uk.gov.hmcts.reform.ccd.client.model
+            .CallbackRequest.builder().caseDetails(uk.gov.hmcts.reform.ccd.client.model.CaseDetails.builder().id(123L)
+                .data(stringObjectMap).build()).build();
+        String[] personalCodes = new String[3];
+        personalCodes[0] = "123456";
+        List<JudicialUsersApiResponse> apiResponseList = new ArrayList<>();
+        apiResponseList.add(JudicialUsersApiResponse.builder().personalCode("123456").emailId("test@Email.com").surname("testSurname").build());
+        stringObjectMap.put("isJudgeOrLegalAdviserGatekeeping", SendToGatekeeperTypeEnum.judge);
+        stringObjectMap.put("judgeName", JudicialUser.builder().idamId("123").personalCode("123456").build());
+        when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
+        when(refDataUserService.getAllJudicialUserDetails(JudicialUsersApiRequest.builder().ccdServiceName(null)
+            .personalCode(personalCodes).build())).thenReturn(apiResponseList);
+        DynamicList legalAdviserList = DynamicList.builder().value(DynamicListElement.builder()
+            .code("test1(test1@test.com)").label("test1(test1@test.com)").build()).build();
+        GatekeepingDetails gatekeepingDetails = GatekeepingDetails.builder()
+            .isSpecificGateKeeperNeeded(Yes)
+            .legalAdviserList(legalAdviserList)
+            .isJudgeOrLegalAdviserGatekeeping(SendToGatekeeperTypeEnum.judge)
+            .build();
+        when(gatekeepingDetailsService.getGatekeepingDetails(stringObjectMap, null,
+            refDataUserService)).thenReturn(gatekeepingDetails);
+        Mockito.when(authorisationService.isAuthorized(authToken, s2sToken)).thenReturn(true);
+        AboutToStartOrSubmitCallbackResponse response = callbackController.sendToGatekeeper(authToken,s2sToken,callbackRequest);
+        assertEquals(SendToGatekeeperTypeEnum.judge,gatekeepingDetails.getIsJudgeOrLegalAdviserGatekeeping());
+        assertEquals(gatekeepingDetails,response.getData().get("gatekeepingDetails"));
+
+    }
+
+    @Test
     public void testExceptionForValidateApplicationConsiderationTimetable() throws Exception {
 
         CaseData caseData = CaseData.builder().build();

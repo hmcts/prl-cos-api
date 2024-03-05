@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.prl.services.hearings.HearingService;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 
 import java.util.List;
+import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -247,6 +248,24 @@ public class CaseController {
         @PathVariable("caseId") String caseId) {
         if (isAuthorized(authorisation, s2sToken)) {
             return hearingService.getHearings(authorisation, caseId);
+        } else {
+            throw (new RuntimeException(INVALID_CLIENT));
+        }
+    }
+
+    @GetMapping(value = "/fetchIdam-Am-roles/{emailId}", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
+    @Operation(description = "Get hearing details for a case")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "success"),
+        @ApiResponse(responseCode = "401", description = "Provided Authorization token is missing or invalid"),
+        @ApiResponse(responseCode = "500", description = "Internal Server Error")
+    })
+    public Map<String, String> fetchIdamAmRoles(
+        @RequestHeader(AUTHORIZATION) String authorisation,
+        @PathVariable("emailId") String emailId) {
+        boolean isAuthorised = authorisationService.authoriseUser(authorisation);
+        if (isAuthorised) {
+            return caseService.fetchIdamAmRoles(authorisation, emailId);
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
         }
