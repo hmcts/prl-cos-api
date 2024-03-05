@@ -4,7 +4,6 @@ package uk.gov.hmcts.reform.prl.services;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -2666,6 +2665,10 @@ public class ServiceOfApplicationServiceTest {
         when(objectMapper.convertValue(caseDetails, CaseData.class)).thenReturn(caseData);
         when(c100CaseInviteService.generateCaseInvite(any(),any()))
             .thenReturn(CaseInvite.builder().partyId(UUID.randomUUID()).build());
+        when(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(Mockito.anyString(),Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
         CaseData updatedcaseData = serviceOfApplicationService
             .sendNotificationsForUnServedPacks(caseData, authorization, new HashMap());
         assertNotNull(updatedcaseData.getFinalServedApplicationDetailsList());
@@ -2674,7 +2677,6 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
-    @Ignore
     @Test
     public void testSendNotificationsWhenUnServedPackC100Personal() {
 
@@ -3555,7 +3557,6 @@ public class ServiceOfApplicationServiceTest {
         assertNotNull(serviceOfApplicationService.sendNotificationsForUnServedPacks(caseData, authorization, new HashMap()));
     }
 
-    @Ignore
     @Test
     public void testSendNotificationForLa() throws Exception {
         PartyDetails partyDetails = PartyDetails.builder().representativeFirstName("repFirstName")
@@ -3575,8 +3576,7 @@ public class ServiceOfApplicationServiceTest {
 
 
         List<Element<PartyDetails>> applicants = new ArrayList<>();
-        Element applicantElement = element(partyDetails);
-        applicants.add(applicantElement);
+        applicants.add(element(partyDetails));
         List<Element<ResponseDocuments>> c8Docs = List.of(Element.<ResponseDocuments>builder()
                                                               .value(ResponseDocuments.builder().build())
             .build());
@@ -3618,7 +3618,10 @@ public class ServiceOfApplicationServiceTest {
         when(userService.getUserDetails(TEST_AUTH)).thenReturn(UserDetails.builder()
                                                                    .forename("first")
                                                                    .surname("test").build());
-
+        when(serviceOfApplicationEmailService.sendEmailNotificationToLocalAuthority(Mockito.anyString(),
+                                                                                    Mockito.any(),Mockito.any(),Mockito.any(),
+                                                                                    Mockito.anyString()))
+            .thenReturn(EmailNotificationDetails.builder().build());
         final ServedApplicationDetails servedApplicationDetails = serviceOfApplicationService.sendNotificationForServiceOfApplication(
             caseData,
             TEST_AUTH,
