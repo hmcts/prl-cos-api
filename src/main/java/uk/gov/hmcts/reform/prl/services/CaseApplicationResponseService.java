@@ -12,15 +12,18 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -143,6 +146,11 @@ public class CaseApplicationResponseService {
 
             RespondentDocs respondentDocs = RespondentDocs.builder().build();
 
+            List<Element<UploadedDocuments>> citizenUploadQuarantineDocsList = new ArrayList<>();
+            if (null != caseData.getDocumentManagementDetails()) {
+                citizenUploadQuarantineDocsList = caseData.getDocumentManagementDetails().getCitizenUploadQuarantineDocsList();
+            }
+
             if (dataMap.containsKey("isConfidentialDataPresent")) {
                 c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
@@ -151,9 +159,34 @@ public class CaseApplicationResponseService {
                     false,
                     dataMap
                 );
+                Element<UploadedDocuments> uploadedDocsElement =
+                    element(UploadedDocuments.builder()
+                        .dateCreated(LocalDate.now())
+                        .partyName(partyName)
+                        .citizenDocument(Document.builder()
+                            .documentUrl(c8FinalDocument.getDocumentUrl())
+                            .documentBinaryUrl(c8FinalDocument.getDocumentBinaryUrl())
+                            .documentHash(c8FinalDocument.getDocumentHash())
+                            .documentFileName(c8FinalDocument.getDocumentFileName())
+                            .build())
+                        .build());
+                citizenUploadQuarantineDocsList.add(uploadedDocsElement);
             }
 
             if (null != c1aFinalDocument) {
+                Element<UploadedDocuments> uploadedDocsElement =
+                    element(UploadedDocuments.builder()
+                        .dateCreated(LocalDate.now())
+                        .partyName(partyName)
+                        .citizenDocument(Document.builder()
+                            .documentUrl(c1aFinalDocument.getDocumentUrl())
+                            .documentBinaryUrl(c1aFinalDocument.getDocumentBinaryUrl())
+                            .documentHash(c1aFinalDocument.getDocumentHash())
+                            .documentFileName(c1aFinalDocument.getDocumentFileName())
+                            .build())
+                        .build());
+                citizenUploadQuarantineDocsList.add(uploadedDocsElement);
+
                 respondentDocs = respondentDocs
                     .toBuilder()
                     .c1aDocument(ResponseDocuments
@@ -179,12 +212,34 @@ public class CaseApplicationResponseService {
                         .build()
                     )
                     .build();
+
+                Element<UploadedDocuments> uploadedDocsElement =
+                    element(UploadedDocuments.builder()
+                        .dateCreated(LocalDate.now())
+                        .partyName(partyName)
+                        .citizenDocument(Document.builder()
+                            .documentUrl(document.getDocumentUrl())
+                            .documentBinaryUrl(document.getDocumentBinaryUrl())
+                            .documentHash(document.getDocumentHash())
+                            .documentFileName(document.getDocumentFileName())
+                            .build())
+                        .build());
+                citizenUploadQuarantineDocsList.add(uploadedDocsElement);
             }
 
             if (null != caseData.getRespondentDocsList()) {
                 caseData.getRespondentDocsList().add(element(respondentDocs));
             } else {
                 caseData.setRespondentDocsList(List.of(element(respondentDocs)));
+            }
+
+            if (null != caseData.getDocumentManagementDetails()) {
+                caseData.getDocumentManagementDetails().setCitizenUploadQuarantineDocsList(citizenUploadQuarantineDocsList);
+            } else {
+                caseData.setDocumentManagementDetails(DocumentManagementDetails
+                    .builder()
+                    .citizenUploadQuarantineDocsList(citizenUploadQuarantineDocsList)
+                    .build());
             }
 
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
