@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -27,7 +29,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ConfidentialDetailsMapper {
     private final AllTabServiceImpl allTabsService;
-
+    private final ObjectMapper objectMapper;
     public CaseData mapConfidentialData(CaseData caseData, boolean updateTabs) {
         List<Element<ApplicantConfidentialityDetails>> respondentsConfidentialDetails = new ArrayList<>();
         if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
@@ -38,6 +40,11 @@ public class ConfidentialDetailsMapper {
                     .map(Element::getValue)
                     .toList();
                 respondentsConfidentialDetails = getRespondentConfidentialDetails(respondents);
+                try {
+                    log.info("respondentsConfidentialDetails ===>" + objectMapper.writeValueAsString(respondentsConfidentialDetails));
+                } catch (JsonProcessingException e) {
+                    log.info("error");
+                }
             }
 
             caseData = caseData.toBuilder()
@@ -49,7 +56,11 @@ public class ConfidentialDetailsMapper {
                 List<PartyDetails> fl401Respondent = List.of(caseData.getRespondentsFL401());
                 respondentsConfidentialDetails = getRespondentConfidentialDetails(fl401Respondent);
             }
-
+            try {
+                log.info("respondentsConfidentialDetails ===>" + objectMapper.writeValueAsString(respondentsConfidentialDetails));
+            } catch (JsonProcessingException e) {
+                log.info("error");
+            }
             caseData = caseData.toBuilder()
                 .respondentConfidentialDetails(respondentsConfidentialDetails)
                 .build();
