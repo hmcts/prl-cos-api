@@ -21,6 +21,7 @@ import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildApplicantDetailsElements;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
@@ -35,6 +36,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseSt
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
@@ -66,6 +68,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_RESPONDENT
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_APPLICANTS;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_RESPONDENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JURISDICTION;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE;
@@ -538,10 +541,19 @@ public class CaseService {
         return roleAssignmentService.fetchIdamAmRoles(authorisation, emailId);
     }
 
-    public List<CitizenDocuments> getCitizenDocuments(String authToken,
+    public CitizenDocumentsManagement getAllCitizenDocumentsOrders(String authToken,
+                                                                   CaseData caseData) {
+        UserDetails userDetails = userService.getUserDetails(authToken);
+
+        return CitizenDocumentsManagement.builder()
+            .citizenDocuments(getCitizenDocuments(userDetails, caseData))
+            .citizenOrders(getCitizenOrders(userDetails, caseData))
+            .build();
+    }
+
+    private List<CitizenDocuments> getCitizenDocuments(UserDetails userDetails,
                                                       CaseData caseData) {
         List<CitizenDocuments> citizenDocuments = new ArrayList<>();
-        UserDetails userDetails = userService.getUserDetails(authToken);
 
         if (null != caseData.getReviewDocuments()) {
             //add solicitor uploaded docs
@@ -568,7 +580,6 @@ public class CaseService {
         }
 
         return citizenDocuments;
-
     }
 
     private List<CitizenDocuments> filterCitizenUploadedDocuments(List<Element<QuarantineLegalDoc>> quarantineDocsList,
@@ -602,5 +613,77 @@ public class CaseService {
             .uploadedDate(quarantineDoc.getDocumentUploadedDate())
             .document(existingDocument)
             .build();
+    }
+
+    private List<CitizenDocuments> getCitizenOrders(UserDetails userDetails, CaseData caseData) {
+
+        String partyId = findPartyId(caseData, userDetails);
+        log.info("*** partyId from idamId {}", partyId);
+        return new ArrayList<>(getCitizenOrdersForParty(caseData, partyId));
+    }
+
+    private List<CitizenDocuments> getCitizenOrdersForParty(CaseData caseData,
+                                                            String partyId) {
+        return nullSafeCollection(caseData.getOrderCollection()).stream()
+            .map(Element::getValue)
+            .filter(order -> isOrderServedForParty(order, partyId))
+            .map(this::createCitizenOrder)
+            .toList();
+    }
+
+    private CitizenDocuments createCitizenOrder(OrderDetails order) {
+        return CitizenDocuments.builder()
+            .partyType(order.getOrderType())
+            //.categoryId(quarantineDoc.getCategoryId())
+            .uploadedBy(order.getOtherDetails().getCreatedBy())
+            .uploadedDate(order.getDateCreated())
+            .document(order.getOrderDocument())
+            .documentWelsh(order.getOrderDocumentWelsh())
+            .build();
+    }
+
+    private boolean isOrderServedForParty(OrderDetails order,
+                                          String partyId) {
+        return nullSafeCollection(order.getServeOrderDetails().getServedParties()).stream()
+            .map(Element::getValue)
+            .anyMatch(servedParty -> servedParty.getPartyId().equalsIgnoreCase(partyId));
+    }
+
+    private String findPartyId(CaseData caseData,
+                               UserDetails userDetails) {
+        log.info("*** Inside find partyId method ***");
+        if (C100_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("*** C100 case type");
+            Optional<Element<PartyDetails>> applicantOptional = getParty(caseData.getApplicants(), userDetails);
+            if (applicantOptional.isPresent()) {
+                return String.valueOf(applicantOptional.get().getId());
+            }
+
+            Optional<Element<PartyDetails>> respondentOptional = getParty(caseData.getRespondents(), userDetails);
+            if (respondentOptional.isPresent()) {
+                return String.valueOf(respondentOptional.get().getId());
+            }
+
+        } else if (FL401_CASE_TYPE.equalsIgnoreCase(caseData.getCaseTypeOfApplication())) {
+            log.info("*** FL401 case type");
+            if (null != caseData.getApplicantsFL401().getUser()
+                && userDetails.getId().equalsIgnoreCase(caseData.getApplicantsFL401().getUser().getIdamId())) {
+                return String.valueOf(caseData.getApplicantsFL401().getPartyId());
+            }
+            if (null != caseData.getRespondentsFL401().getUser()
+                && userDetails.getId().equalsIgnoreCase(caseData.getRespondentsFL401().getUser().getIdamId())) {
+                return String.valueOf(caseData.getRespondentsFL401().getPartyId());
+            }
+        }
+
+        return null;
+    }
+
+    private Optional<Element<PartyDetails>> getParty(List<Element<PartyDetails>> parties,
+                                                       UserDetails userDetails) {
+        return nullSafeCollection(parties).stream()
+            .filter(element -> null != element.getValue().getUser()
+                && userDetails.getId().equalsIgnoreCase(element.getValue().getUser().getIdamId()))
+            .findFirst();
     }
 }

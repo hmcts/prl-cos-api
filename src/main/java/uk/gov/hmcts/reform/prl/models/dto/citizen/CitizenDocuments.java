@@ -22,5 +22,6 @@ public class CitizenDocuments {
     private LocalDateTime uploadedDate;
     private LocalDateTime reviewedDate;
     private Document document;
+    private Document documentWelsh;
 
 }

@@ -27,6 +27,9 @@ import uk.gov.hmcts.reform.prl.enums.Roles;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.mapper.citizen.CaseDataMapper;
 import uk.gov.hmcts.reform.prl.models.Element;
+import uk.gov.hmcts.reform.prl.models.OrderDetails;
+import uk.gov.hmcts.reform.prl.models.OtherOrderDetails;
+import uk.gov.hmcts.reform.prl.models.ServeOrderDetails;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.c100rebuild.C100RebuildData;
 import uk.gov.hmcts.reform.prl.models.caseinvite.CaseInvite;
@@ -35,11 +38,12 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.User;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ReviewDocuments;
-import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocuments;
+import uk.gov.hmcts.reform.prl.models.dto.citizen.CitizenDocumentsManagement;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.CitizenSos;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StatementOfService;
 import uk.gov.hmcts.reform.prl.models.serviceofapplication.StmtOfServiceAddRecipient;
@@ -995,12 +999,12 @@ public class CaseServiceTest {
             .thenReturn(quarantineLegalDoc.getMiamCertificateDocument());
 
         //Action
-        List<CitizenDocuments> citizenDocuments = caseService.getCitizenDocuments(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
 
         //Assert
-        assertNotNull(citizenDocuments);
-        assertFalse(citizenDocuments.isEmpty());
-        assertEquals(7, citizenDocuments.size());
+        assertNotNull(citizenDocumentsManagement);
+        assertFalse(citizenDocumentsManagement.getCitizenDocuments().isEmpty());
+        assertEquals(7, citizenDocumentsManagement.getCitizenDocuments().size());
     }
 
     @Test
@@ -1016,11 +1020,11 @@ public class CaseServiceTest {
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         //Action
-        List<CitizenDocuments> citizenDocuments = caseService.getCitizenDocuments(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
 
         //Assert
-        assertNotNull(citizenDocuments);
-        assertTrue(citizenDocuments.isEmpty());
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(citizenDocumentsManagement.getCitizenDocuments().isEmpty());
     }
 
     @Test
@@ -1051,10 +1055,169 @@ public class CaseServiceTest {
         when(userService.getUserDetails(authToken)).thenReturn(userDetails);
 
         //Action
-        List<CitizenDocuments> citizenDocuments = caseService.getCitizenDocuments(authToken, caseData);
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
 
         //Assert
-        assertNotNull(citizenDocuments);
-        assertTrue(citizenDocuments.isEmpty());
+        assertNotNull(citizenDocumentsManagement);
+        assertTrue(citizenDocumentsManagement.getCitizenDocuments().isEmpty());
+    }
+
+    @Test
+    public void testGetCitizenApplicantOrdersC100() {
+        //Given
+        ServedParties servedParties = ServedParties.builder()
+            .partyId("00000000-0000-0000-0000-000000000000")
+            .build();
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(Document.builder().build())
+            .orderDocumentWelsh(Document.builder().build())
+            .serveOrderDetails(ServeOrderDetails.builder()
+                                   .servedParties(List.of(element(servedParties)))
+                                   .build())
+            .otherDetails(OtherOrderDetails.builder().createdBy("test").build())
+            .build();
+        partyDetails = partyDetails.toBuilder()
+            .user(User.builder()
+                      .idamId("00000000-0000-0000-0000-000000000000").build())
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .orderCollection(List.of(element(orderDetails)))
+            .applicants(List.of(element(testUuid, partyDetails)))
+            .build();
+        userDetails = UserDetails.builder()
+            .id("00000000-0000-0000-0000-000000000000")
+            .roles(List.of(Roles.CITIZEN.getValue())).build();
+
+        //When
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+    }
+
+    @Test
+    public void testGetCitizenRespondentOrdersC100() {
+        //Given
+        ServedParties servedParties = ServedParties.builder()
+            .partyId("00000000-0000-0000-0000-000000000000")
+            .build();
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(Document.builder().build())
+            .orderDocumentWelsh(Document.builder().build())
+            .serveOrderDetails(ServeOrderDetails.builder()
+                                   .servedParties(List.of(element(servedParties)))
+                                   .build())
+            .otherDetails(OtherOrderDetails.builder().createdBy("test").build())
+            .build();
+        partyDetails = partyDetails.toBuilder()
+            .user(User.builder()
+                      .idamId("00000000-0000-0000-0000-000000000000").build())
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("C100")
+            .orderCollection(List.of(element(orderDetails)))
+            .respondents(List.of(element(testUuid, partyDetails)))
+            .build();
+        userDetails = UserDetails.builder()
+            .id("00000000-0000-0000-0000-000000000000")
+            .roles(List.of(Roles.CITIZEN.getValue())).build();
+
+        //When
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+    }
+
+    @Test
+    public void testGetCitizenApplicantOrdersFL401() {
+        //Given
+        ServedParties servedParties = ServedParties.builder()
+            .partyId("00000000-0000-0000-0000-000000000000")
+            .build();
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(Document.builder().build())
+            .orderDocumentWelsh(Document.builder().build())
+            .serveOrderDetails(ServeOrderDetails.builder()
+                                   .servedParties(List.of(element(servedParties)))
+                                   .build())
+            .otherDetails(OtherOrderDetails.builder().createdBy("test").build())
+            .build();
+        partyDetails = partyDetails.toBuilder()
+            .partyId(testUuid)
+            .user(User.builder()
+                      .idamId("00000000-0000-0000-0000-000000000000").build())
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .orderCollection(List.of(element(orderDetails)))
+            .applicantsFL401(partyDetails)
+            .build();
+        userDetails = UserDetails.builder()
+            .id("00000000-0000-0000-0000-000000000000")
+            .roles(List.of(Roles.CITIZEN.getValue())).build();
+
+        //When
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
+    }
+
+    @Test
+    public void testGetCitizenRespondentOrdersFL401() {
+        //Given
+        ServedParties servedParties = ServedParties.builder()
+            .partyId("00000000-0000-0000-0000-000000000000")
+            .build();
+        OrderDetails orderDetails = OrderDetails.builder()
+            .orderDocument(Document.builder().build())
+            .orderDocumentWelsh(Document.builder().build())
+            .serveOrderDetails(ServeOrderDetails.builder()
+                                   .servedParties(List.of(element(servedParties)))
+                                   .build())
+            .otherDetails(OtherOrderDetails.builder().createdBy("test").build())
+            .build();
+        partyDetails = partyDetails.toBuilder()
+            .partyId(testUuid)
+            .user(User.builder()
+                      .idamId("00000000-0000-0000-0000-000000000000").build())
+            .build();
+        caseData = caseData.toBuilder()
+            .caseTypeOfApplication("FL401")
+            .orderCollection(List.of(element(orderDetails)))
+            .applicantsFL401(PartyDetails.builder().build())
+            .respondentsFL401(partyDetails)
+            .build();
+        userDetails = UserDetails.builder()
+            .id("00000000-0000-0000-0000-000000000000")
+            .roles(List.of(Roles.CITIZEN.getValue())).build();
+
+        //When
+        when(userService.getUserDetails(authToken)).thenReturn(userDetails);
+
+        //Action
+        CitizenDocumentsManagement citizenDocumentsManagement = caseService.getAllCitizenDocumentsOrders(authToken, caseData);
+
+        //Assert
+        assertNotNull(citizenDocumentsManagement);
+        assertFalse(citizenDocumentsManagement.getCitizenOrders().isEmpty());
+        assertEquals(1, citizenDocumentsManagement.getCitizenOrders().size());
     }
 }

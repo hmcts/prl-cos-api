@@ -64,7 +64,7 @@ public class CaseController {
             CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             return caseData.toBuilder().noOfDaysRemainingToSubmitCase(
                 CaseUtils.getRemainingDaysSubmitCase(caseData))
-                .citizenDocuments(caseService.getCitizenDocuments(userToken, caseData))
+                .citizenDocumentsManagement(caseService.getAllCitizenDocumentsOrders(userToken, caseData))
                 .build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
