@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
@@ -46,6 +47,7 @@ public class CaseApplicationResponseService {
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final CaseService caseService;
     private final IdamClient idamClient;
+    private final DocumentLanguageService documentLanguageService;
 
     public CaseData updateCurrentRespondent(CaseData caseData, YesOrNo currentRespondent, String partyId) {
 
@@ -62,10 +64,14 @@ public class CaseApplicationResponseService {
                                                              String caseId, String s2sToken) throws Exception {
 
         List<Element<Document>> responseDocs = new ArrayList<>();
-
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
         log.info(" Generating C7 Final document for respondent ");
-        Document document = generateFinalC7(caseData, authorisation);
-        responseDocs.add(element(document));
+        if (documentLanguage.isGenEng()) {
+            responseDocs.add(element(generateFinalC7(caseData, authorisation, false)));
+        }
+        if (documentLanguage.isGenWelsh()) {
+            responseDocs.add(element(generateFinalC7(caseData, authorisation, true)));
+        }
         log.info("C7 Final document generated successfully for respondent ");
 
         Optional<Element<PartyDetails>> currentRespondent
@@ -165,13 +171,13 @@ public class CaseApplicationResponseService {
         );
     }
 
-    private Document generateFinalC7(CaseData caseData, String authorisation) throws Exception {
+    private Document generateFinalC7(CaseData caseData, String authorisation, boolean isWelsh) throws Exception {
 
         return documentGenService.generateSingleDocument(
             authorisation,
             caseData,
             C7_FINAL_RESPONDENT,
-            false
+            isWelsh
         );
     }
 
