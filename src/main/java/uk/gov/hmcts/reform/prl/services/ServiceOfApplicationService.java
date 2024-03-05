@@ -1863,6 +1863,7 @@ public class ServiceOfApplicationService {
                                                                                                String.valueOf(caseData.getId())));
         }
         caseDataUpdated.put(CASE_CREATED_BY, CaseUtils.isCaseCreatedByCitizen(caseData) ? SOA_CITIZEN : SOA_SOLICITOR);
+        log.info("CCCCC {}", caseDataUpdated);
         caseDataUpdated.put(
             MISSING_ADDRESS_WARNING_TEXT,
             checkIfPostalAddressMissedForRespondentAndOtherParties(caseData)

@@ -47,7 +47,11 @@ public class ServiceOfApplicationController {
         @RequestHeader("Authorization") @Parameter(hidden = true) String authorisation,
         @RequestHeader(PrlAppsConstants.SERVICE_AUTHORIZATION_HEADER) String s2sToken,
         @RequestBody CallbackRequest callbackRequest
-    ) {
+    ) throws JsonProcessingException {
+        ObjectMapper om = new ObjectMapper();
+        om.registerModule(new JavaTimeModule());
+        String result = om.writeValueAsString(callbackRequest.getCaseDetails().getData());
+        log.info("ABOUTTTTTT == {}", result);
         if (authorisationService.isAuthorized(authorisation,s2sToken)) {
             return AboutToStartOrSubmitCallbackResponse.builder().data(serviceOfApplicationService
                                                                            .getSoaCaseFieldsMap(authorisation,
