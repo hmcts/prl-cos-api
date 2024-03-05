@@ -105,13 +105,21 @@ public class ServiceOfApplicationEmailService {
     public EmailNotificationDetails sendEmailNotificationToApplicant(String authorization, CaseData caseData,
                                                                       PartyDetails partyDetails,
                                                                       List<Document> docs,String servedParty) throws IOException {
-        return sendgridService.sendEmailWithAttachments(authorization,
+        /*return sendgridService.sendEmailWithAttachments(authorization,
                                                         EmailUtils.getEmailProps(null, false,
                                                                                  partyDetails.getFirstName() + " "
                                                                           + partyDetails.getLastName(),null,
                                                                       caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
-                                                        partyDetails.getEmail(), docs, servedParty);
+                                                        partyDetails.getEmail(), docs, servedParty);*/
+
+        return sendgridService.sendEmailWithAttachments(authorization,
+                                                        EmailUtils.getEmailProps(null, false,
+                                                                                 partyDetails.getFirstName() + " "
+                                                                                     + partyDetails.getLastName(),null,
+                                                                                 caseData.getApplicantCaseName(),
+                                                                                 String.valueOf(caseData.getId())),
+                                                        "anshika.nigam1@hmcts.net", docs, servedParty);
     }
 
     public EmailNotificationDetails sendEmailUsingTemplateWithAttachments(String authorization,
