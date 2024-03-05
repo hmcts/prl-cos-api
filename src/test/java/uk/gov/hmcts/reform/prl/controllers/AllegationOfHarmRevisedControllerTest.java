@@ -67,4 +67,34 @@ public class AllegationOfHarmRevisedControllerTest {
 
     }
 
+    @Test
+    public void testPrepopulateChildAbuseData() {
+        CaseData caseData = CaseData.builder()
+            .id(123L)
+            .build();
+        Map<String, Object> stringObjectMap = caseData.toMap(new ObjectMapper());
+        caseDetails = CaseDetails.builder()
+            .id(123L)
+            .data(stringObjectMap)
+            .state("CASE_ISSUED")
+            .createdDate(LocalDateTime.now())
+            .lastModified(LocalDateTime.now())
+            .build();
+        CallbackRequest callbackRequest = CallbackRequest.builder()
+            .caseDetails(caseDetails)
+            .build();
+        String authorisation = "authorisation";
+        when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
+
+        CaseData caseData1 = objectMapper.convertValue(caseDetails.getData(), CaseData.class)
+            .toBuilder()
+            .id(caseDetails.getId())
+            .state(State.valueOf(caseDetails.getState()))
+            .build();
+
+        allegationOfHarmRevisedController.prePopulateChildAbuseData(authorisation, callbackRequest);
+        verify(allegationOfHarmRevisedService, times(1))
+            .getPrePopulatedChildAbuseData(caseData1);
+    }
+
 }

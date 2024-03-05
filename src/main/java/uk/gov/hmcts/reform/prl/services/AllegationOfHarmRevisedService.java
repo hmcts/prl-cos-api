@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.ChildAbuseBehaviour;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,7 @@ public class AllegationOfHarmRevisedService {
     public CaseData updateChildAbusesForDocmosis(CaseData caseData) {
 
         Optional<AllegationOfHarmRevised> allegationOfHarmRevised = Optional.ofNullable(caseData.getAllegationOfHarmRevised());
+
         if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
                                                                           .getNewAllegationsOfHarmChildAbuseYesNo())) {
             Optional<ChildAbuse> childPhysicalAbuse =
@@ -58,13 +60,11 @@ public class AllegationOfHarmRevisedService {
                     ofNullable(allegationOfHarmRevised.get().getChildFinancialAbuse());
 
             List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList = new ArrayList<>();
-
             for (ChildAbuseEnum eachBehavior : allegationOfHarmRevised.get().getChildAbuses()) {
 
                 switch (eachBehavior.name()) {
                     case PHYSICAL_ABUSE : childPhysicalAbuse.ifPresent(abuse ->
                                 checkAndAddChildAbuse(allegationOfHarmRevised.get(), childAbuseBehaviourList, eachBehavior, abuse)
-
                     );
                     break;
                     case PSYCHOLOGICAL_ABUSE : childPsychologicalAbuse.ifPresent(abuse ->
@@ -98,6 +98,16 @@ public class AllegationOfHarmRevisedService {
         }
 
         return caseData;
+    }
+
+    private static Map<String, Object> cleardDataForAllegationOfHarmForNoSelection(Map<String, Object> caseDataMap) {
+        caseDataMap.put("childPhysicalAbuse", null);
+        caseDataMap.put("childPsychologicalAbuse", null);
+        caseDataMap.put("childSexualAbuse", null);
+        caseDataMap.put("childEmotionalAbuse", null);
+        caseDataMap.put("childFinancialAbuse", null);
+
+        return caseDataMap;
     }
 
     private void checkAndAddChildAbuse(AllegationOfHarmRevised allegationOfHarmRevised, List<Element<ChildAbuseBehaviour>> childAbuseBehaviourList,
@@ -287,6 +297,57 @@ public class AllegationOfHarmRevisedService {
         }
 
 
+        return caseDataMap;
+    }
+
+    public Map<String, Object> getPrePopulatedChildAbuseData(CaseData caseData) {
+        Map<String, Object> caseDataMap = new HashMap<>();
+        Optional<AllegationOfHarmRevised> allegationOfHarmRevised = Optional.ofNullable(caseData.getAllegationOfHarmRevised());
+
+        if (allegationOfHarmRevised.isPresent() && YesOrNo.Yes.equals(caseData.getAllegationOfHarmRevised()
+                                                                          .getNewAllegationsOfHarmChildAbuseYesNo())) {
+
+            Map<String, Object> finalCaseDataMap = new HashMap<>();
+            Arrays.stream(ChildAbuseEnum.values())
+                .forEach(abuseType -> {
+                    switch (abuseType.name()) {
+                        case PHYSICAL_ABUSE:
+                            if (!allegationOfHarmRevised.get().getChildAbuses().contains(abuseType)
+                                && ofNullable(allegationOfHarmRevised.get().getChildPhysicalAbuse()).isPresent()) {
+                                finalCaseDataMap.put("childPhysicalAbuse", null);
+                            }
+                            break;
+                        case PSYCHOLOGICAL_ABUSE:
+                            if (!allegationOfHarmRevised.get().getChildAbuses().contains(abuseType)
+                                && ofNullable(allegationOfHarmRevised.get().getChildPsychologicalAbuse()).isPresent()) {
+                                finalCaseDataMap.put("childPsychologicalAbuse", null);
+                            }
+                            break;
+                        case SEXUAL_ABUSE:
+                            if (!allegationOfHarmRevised.get().getChildAbuses().contains(abuseType)
+                                && ofNullable(allegationOfHarmRevised.get().getChildSexualAbuse()).isPresent()) {
+                                finalCaseDataMap.put("childSexualAbuse", null);
+                            }
+                            break;
+                        case EMOTIONAL_ABUSE:
+                            if (!allegationOfHarmRevised.get().getChildAbuses().contains(abuseType)
+                                && ofNullable(allegationOfHarmRevised.get().getChildEmotionalAbuse()).isPresent()) {
+                                finalCaseDataMap.put("childEmotionalAbuse", null);
+                            }
+                            break;
+                        case FINANCIAL_ABUSE:
+                            if (!allegationOfHarmRevised.get().getChildAbuses().contains(abuseType)
+                                && ofNullable(allegationOfHarmRevised.get().getChildFinancialAbuse()).isPresent()) {
+                                finalCaseDataMap.put("childFinancialAbuse", null);
+                            }
+                            break;
+                        default:
+                    }
+                });
+            caseDataMap.putAll(finalCaseDataMap);
+        } else if (YesOrNo.No.equals(caseData.getAllegationOfHarmRevised().getNewAllegationsOfHarmChildAbuseYesNo())) {
+            caseDataMap = cleardDataForAllegationOfHarmForNoSelection(caseDataMap);
+        }
         return caseDataMap;
     }
 }

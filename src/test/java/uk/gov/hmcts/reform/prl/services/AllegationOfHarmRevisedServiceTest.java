@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.prl.models.dto.ccd.AllegationOfHarmRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -214,5 +215,70 @@ public class AllegationOfHarmRevisedServiceTest {
 
     }
 
+    @Test
+    public void testPrePopulateChildPsychologicalAbuseData() {
+
+        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+            .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+            .childAbuses(Arrays.asList(ChildAbuseEnum.psychologicalAbuse))
+            .childPhysicalAbuse(ChildAbuse.builder()
+                                    .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
+                                    .build())
+            .childPsychologicalAbuse(ChildAbuse.builder()
+                                    .typeOfAbuse(ChildAbuseEnum.psychologicalAbuse)
+                                    .build())
+            .childSexualAbuse(ChildAbuse.builder()
+                                  .typeOfAbuse(ChildAbuseEnum.sexualAbuse)
+                                  .build())
+            .childFinancialAbuse(ChildAbuse.builder()
+                                     .typeOfAbuse(ChildAbuseEnum.financialAbuse)
+                                     .build())
+            .childEmotionalAbuse(ChildAbuse.builder()
+                                     .typeOfAbuse(ChildAbuseEnum.emotionalAbuse)
+                                     .build())
+            .build();
+
+        Map<String, Object> caseDataMap = allegationOfHarmService
+            .getPrePopulatedChildAbuseData(CaseData.builder()
+                                               .allegationOfHarmRevised(allegationOfHarmRevised)
+                                               .build());
+        Assert.assertNotNull(caseDataMap);
+    }
+
+    @Test
+    public void testPrePopulateChildPhysicalAbuseData() {
+
+        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+            .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.Yes)
+            .childAbuses(Arrays.asList(ChildAbuseEnum.physicalAbuse))
+            .childPhysicalAbuse(ChildAbuse.builder()
+                                    .typeOfAbuse(ChildAbuseEnum.physicalAbuse)
+                                    .build())
+            .childPsychologicalAbuse(ChildAbuse.builder()
+                                         .typeOfAbuse(ChildAbuseEnum.psychologicalAbuse)
+                                         .build())
+            .build();
+
+        Map<String, Object> caseDataMap = allegationOfHarmService
+            .getPrePopulatedChildAbuseData(CaseData.builder()
+                                               .allegationOfHarmRevised(allegationOfHarmRevised)
+                                               .build());
+        Assert.assertNotNull(caseDataMap);
+    }
+
+    @Test
+    public void testPrePopulateChildDataForNoSelection() {
+
+        AllegationOfHarmRevised allegationOfHarmRevised = AllegationOfHarmRevised.builder()
+            .newAllegationsOfHarmChildAbuseYesNo(YesOrNo.No)
+            .childAbuses(Arrays.asList(ChildAbuseEnum.physicalAbuse))
+            .build();
+
+        Map<String, Object> caseDataMap = allegationOfHarmService
+            .getPrePopulatedChildAbuseData(CaseData.builder()
+                                               .allegationOfHarmRevised(allegationOfHarmRevised)
+                                               .build());
+        Assert.assertNotNull(caseDataMap);
+    }
 
 }
