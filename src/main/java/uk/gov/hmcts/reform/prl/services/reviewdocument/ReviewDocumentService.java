@@ -279,7 +279,7 @@ public class ReviewDocumentService {
                     processDocumentsAfterReviewNew(
                         caseData,
                         caseDataUpdated,
-                        quarantineLegalDocElementOptional,
+                        quarantineLegalDocElementOptional.get(),
                         UserDetails.builder().roles(List.of(Roles.BULK_SCAN.getValue())).build(),
                         BULK_SCAN
                     );
@@ -307,54 +307,38 @@ public class ReviewDocumentService {
             processDocumentsAfterReviewNew(
                 caseData,
                 caseDataUpdated,
-                quarantineLegalDocElementOptional,
+                quarantineLegalDocElementOptional.get(),
                 userDetails,
                 userRole
             );
-            //remove doc from quarantine
-            removeDocumentFromQuarantineList(
-                quarantineDocsList,
-                uuid,
-                caseDataUpdated,
-                quarantineDocsListToBeModified
-            );
+
+            //remove document from quarantine
+            quarantineDocsList.remove(quarantineLegalDocElementOptional.get());
+            caseDataUpdated.put(quarantineDocsListToBeModified, quarantineDocsList);
         }
         return isDocumentFound;
     }
 
-    private void removeDocumentFromQuarantineList(List<Element<QuarantineLegalDoc>> quarantineList, UUID uuid,
-                                                  Map<String, Object> caseDataUpdated, String caseDataObjectToBeModified) {
-        //new changes done
-        Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional =
-            getQuarantineDocumentById(quarantineList, uuid);
-        if (quarantineLegalDocElementOptional.isPresent()) {
-            Element<QuarantineLegalDoc> quarantineLegalDocElement = quarantineLegalDocElementOptional.get();
-            //remove document from quarantine
-            quarantineList.remove(quarantineLegalDocElement);
-            caseDataUpdated.put(caseDataObjectToBeModified, quarantineList);
+    private void processDocumentsAfterReviewNew(CaseData caseData,
+                                                Map<String, Object> caseDataUpdated,
+                                                Element<QuarantineLegalDoc> quarantineLegalDocElement,
+                                                UserDetails userDetails,
+                                                String userRole) {
+        QuarantineLegalDoc tempQuarantineDoe = quarantineLegalDocElement.getValue();
+        if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
+            tempQuarantineDoe = tempQuarantineDoe.toBuilder()
+                .isConfidential(null)
+                .isRestricted(null)
+                .restrictedDetails(null)
+                .build();
         }
-    }
-
-    private void processDocumentsAfterReviewNew(CaseData caseData, Map<String, Object> caseDataUpdated,
-                                                Optional<Element<QuarantineLegalDoc>> quarantineLegalDocElementOptional,
-                                                UserDetails userDetails, String userRole) {
-        if (quarantineLegalDocElementOptional.isPresent()) {
-            QuarantineLegalDoc tempQuarantineDoe = quarantineLegalDocElementOptional.get().getValue();
-            if (YesNoNotSure.no.equals(caseData.getReviewDocuments().getReviewDecisionYesOrNo())) {
-                tempQuarantineDoe = tempQuarantineDoe.toBuilder()
-                    .isConfidential(null)
-                    .isRestricted(null)
-                    .restrictedDetails(null)
-                    .build();
-            }
-            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
-                tempQuarantineDoe,
-                userDetails,
-                caseData,
-                caseDataUpdated,
-                userRole
-            );
-        }
+        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(
+            tempQuarantineDoe,
+            userDetails,
+            caseData,
+            caseDataUpdated,
+            userRole
+        );
     }
 
     private void removeFromScannedDocumentListAfterReview(Map<String, Object> caseDataUpdated,
