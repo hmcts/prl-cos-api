@@ -60,6 +60,14 @@ public class CaseApplicationResponseService {
 
     public CaseDetails generateCitizenResponseFinalDocuments(CaseData caseData, CaseDetails caseDetails, String authorisation, String partyId,
                                                              String caseId, String s2sToken) throws Exception {
+
+        List<Element<Document>> responseDocs = new ArrayList<>();
+
+        log.info(" Generating C7 Final document for respondent ");
+        Document document = generateFinalC7(caseData, authorisation);
+        responseDocs.add(element(document));
+        log.info("C7 Final document generated successfully for respondent ");
+
         Optional<Element<PartyDetails>> currentRespondent
             = caseData.getRespondents()
             .stream()
@@ -67,15 +75,23 @@ public class CaseApplicationResponseService {
                 respondent -> YesOrNo.Yes.equals(
                     respondent.getValue().getCurrentRespondent()))
             .findFirst();
+        if (currentRespondent.isPresent()) {
+            CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+            Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
+                callbackRequest,
+                currentRespondent.get()
+            );
 
-        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
-        CaseDetails caseDetailsReturn;
 
-        log.info(" Generating C7 Final document for respondent ");
-        Document document = generateFinalC7(caseData, authorisation);
-        log.info("C7 Final document generated successfully for respondent ");
+            if (isNotEmpty(currentRespondent.get().getValue().getResponse())
+                && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
+                && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
+                log.info(" Generating C1A Final document for respondent ");
+                Document c1aFinalDocument = generateFinalC1A(caseData, authorisation, dataMap);
+                responseDocs.add(element(c1aFinalDocument));
+                log.info("C1A Final document generated successfully for respondent ");
+            }
 
-        if (document != null && null != caseDetails) {
             String partyName = caseData.getRespondents()
                 .stream()
                 .filter(element -> element.getId()
@@ -87,28 +103,66 @@ public class CaseApplicationResponseService {
                 .orElse("");
 
             UserDetails userDetails = idamClient.getUserDetails(authorisation);
-            caseData = generateOtherC1aAndC8Documents(
+            caseData = generateC8Document(
                 authorisation,
                 caseData,
                 currentRespondent,
-                callbackRequest,
-                document,
+                dataMap,
                 partyName,
                 userDetails
             );
-            log.info("C1A and C8 Final document generated successfully for respondent ");
-
-            caseDetailsReturn = caseService.updateCase(
-                caseData,
-                authorisation,
-                s2sToken,
-                caseId,
-                REVIEW_AND_SUBMIT,
-                null
-            );
-            return caseDetailsReturn;
         }
-        return caseDetails;
+
+        caseData = addCitizenDocumentsToTheQurantineList(caseData, responseDocs);
+
+        CaseDetails caseDetailsReturn;
+        caseDetailsReturn = caseService.updateCase(
+            caseData,
+            authorisation,
+            s2sToken,
+            caseId,
+            REVIEW_AND_SUBMIT,
+            null
+        );
+        return caseDetailsReturn;
+    }
+
+    private CaseData addCitizenDocumentsToTheQurantineList(CaseData caseData, List<Element<Document>> responseDocs) {
+        List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
+        if (null != caseData.getDocumentManagementDetails() && null != caseData
+            .getDocumentManagementDetails().getCitizenQuarantineDocsList()) {
+            quarantineDocs = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList();
+        }
+
+        quarantineDocs.addAll(responseDocs.stream().map(element -> Element.<QuarantineLegalDoc>builder()
+                .value(QuarantineLegalDoc
+                    .builder()
+                    .citizenQuarantineDocument(element.getValue())
+                    .build())
+                .id(element.getId()).build())
+            .toList());
+
+        log.info("quarantineDocs is {}", quarantineDocs);
+        if (null != caseData.getDocumentManagementDetails()) {
+            caseData.getDocumentManagementDetails().setCitizenQuarantineDocsList(quarantineDocs);
+        } else {
+            caseData.setDocumentManagementDetails(DocumentManagementDetails
+                .builder()
+                .citizenQuarantineDocsList(quarantineDocs)
+                .build());
+        }
+        log.info("quarantineDocs is {}", caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList());
+        return caseData;
+    }
+
+    private Document generateFinalC1A(CaseData caseData, String authorisation, Map<String, Object> dataMap) throws Exception {
+        return documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            SOLICITOR_C1A_FINAL_DOCUMENT,
+            false,
+            dataMap
+        );
     }
 
     private Document generateFinalC7(CaseData caseData, String authorisation) throws Exception {
@@ -121,35 +175,16 @@ public class CaseApplicationResponseService {
         );
     }
 
-    private CaseData generateOtherC1aAndC8Documents(String authorisation, CaseData caseData, Optional<Element<PartyDetails>> currentRespondent,
-                                                    CallbackRequest callbackRequest, Document document, String partyName,
+    private CaseData generateC8Document(String authorisation, CaseData caseData, Optional<Element<PartyDetails>> currentRespondent,
+                                                    Map<String, Object> dataMap, String partyName,
                                                     UserDetails userDetails) throws Exception {
-        Document c1aFinalDocument = null;
         Document c8FinalDocument = null;
         if (currentRespondent.isPresent()) {
-            Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
-                callbackRequest,
-                currentRespondent.get()
-            );
-
-            List<Element<Document>> responseDocs = new ArrayList<>();
-
-            if (isNotEmpty(currentRespondent.get().getValue().getResponse())
-                && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
-                && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
-                c1aFinalDocument = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    SOLICITOR_C1A_FINAL_DOCUMENT,
-                    false,
-                    dataMap
-                );
-                responseDocs.add(element(c1aFinalDocument));
-            }
 
             RespondentDocs respondentDocs = RespondentDocs.builder().build();
 
             if (dataMap.containsKey("isConfidentialDataPresent")) {
+                log.info(" Generating C8 Final document for respondent ");
                 c8FinalDocument = documentGenService.generateSingleDocument(
                     authorisation,
                     caseData,
@@ -157,36 +192,7 @@ public class CaseApplicationResponseService {
                     false,
                     dataMap
                 );
-            }
-
-            if (null != c1aFinalDocument) {
-
-                respondentDocs = respondentDocs
-                    .toBuilder()
-                    .c1aDocument(ResponseDocuments
-                        .builder()
-                        .partyName(partyName)
-                        .createdBy(userDetails.getFullName())
-                        .dateCreated(LocalDate.now())
-                        .citizenDocument(c1aFinalDocument)
-                        .build()
-                    )
-                    .build();
-            }
-
-            if (null != document) {
-                respondentDocs = respondentDocs
-                    .toBuilder()
-                    .c7Document(ResponseDocuments
-                        .builder()
-                        .partyName(partyName)
-                        .createdBy(userDetails.getFullName())
-                        .dateCreated(LocalDate.now())
-                        .citizenDocument(document)
-                        .build()
-                    )
-                    .build();
-                responseDocs.add(element(document));
+                log.info("C8 Final document generated successfully for respondent ");
             }
 
             if (null != caseData.getRespondentDocsList()) {
@@ -194,31 +200,6 @@ public class CaseApplicationResponseService {
             } else {
                 caseData.setRespondentDocsList(List.of(element(respondentDocs)));
             }
-
-            List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
-            if (null != caseData.getDocumentManagementDetails() && null != caseData
-                .getDocumentManagementDetails().getCitizenQuarantineDocsList()) {
-                quarantineDocs = caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList();
-            }
-
-            quarantineDocs.addAll(responseDocs.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                    .value(QuarantineLegalDoc
-                        .builder()
-                        .citizenQuarantineDocument(element.getValue())
-                        .build())
-                    .id(element.getId()).build())
-                .toList());
-
-            log.info("quarantineDocs is {}", quarantineDocs);
-            if (null != caseData.getDocumentManagementDetails()) {
-                caseData.getDocumentManagementDetails().setCitizenQuarantineDocsList(quarantineDocs);
-            } else {
-                caseData.setDocumentManagementDetails(DocumentManagementDetails
-                    .builder()
-                    .citizenQuarantineDocsList(quarantineDocs)
-                    .build());
-            }
-            log.info("quarantineDocs is {}", caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList());
 
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
         }
