@@ -11,19 +11,16 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
-import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
-import uk.gov.hmcts.reform.prl.models.dto.ccd.DocumentManagementDetails;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -132,8 +129,6 @@ public class CaseApplicationResponseService {
                 currentRespondent.get()
             );
 
-            List<Element<Document>> responseDocs = new ArrayList<>();
-
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())
                 && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
                 && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
@@ -144,7 +139,6 @@ public class CaseApplicationResponseService {
                     false,
                     dataMap
                 );
-                responseDocs.add(element(c1aFinalDocument));
             }
 
             RespondentDocs respondentDocs = RespondentDocs.builder().build();
@@ -157,7 +151,6 @@ public class CaseApplicationResponseService {
                     false,
                     dataMap
                 );
-                responseDocs.add(element(c8FinalDocument));
             }
 
             if (null != c1aFinalDocument) {
@@ -187,37 +180,12 @@ public class CaseApplicationResponseService {
                         .build()
                     )
                     .build();
-                responseDocs.add(element(document));
             }
 
             if (null != caseData.getRespondentDocsList()) {
                 caseData.getRespondentDocsList().add(element(respondentDocs));
             } else {
                 caseData.setRespondentDocsList(List.of(element(respondentDocs)));
-            }
-
-            List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
-            if (null != caseData.getDocumentManagementDetails() && null != caseData
-                .getDocumentManagementDetails().getLegalProfQuarantineDocsList()) {
-                quarantineDocs = caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList();
-            }
-
-            quarantineDocs.addAll(responseDocs.stream().map(element -> Element.<QuarantineLegalDoc>builder()
-                    .value(QuarantineLegalDoc
-                        .builder()
-                        .citizenQuarantineDocument(element.getValue())
-                        .build())
-                    .id(element.getId()).build())
-                .toList());
-
-            log.info("quarantineDocs is {}", quarantineDocs);
-            if (null != caseData.getDocumentManagementDetails()) {
-                caseData.getDocumentManagementDetails().setLegalProfQuarantineDocsList(quarantineDocs);
-            } else {
-                caseData.setDocumentManagementDetails(DocumentManagementDetails
-                    .builder()
-                    .legalProfQuarantineDocsList(quarantineDocs)
-                    .build());
             }
 
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
