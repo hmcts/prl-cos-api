@@ -28,7 +28,6 @@ import uk.gov.hmcts.reform.prl.services.AddCaseNoteService;
 import uk.gov.hmcts.reform.prl.services.AuthorisationService;
 import uk.gov.hmcts.reform.prl.services.CoreCaseDataService;
 import uk.gov.hmcts.reform.prl.services.RefDataUserService;
-import uk.gov.hmcts.reform.prl.services.RoleAssignmentService;
 import uk.gov.hmcts.reform.prl.services.UserService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.AllocatedJudgeService;
 import uk.gov.hmcts.reform.prl.services.gatekeeping.ListOnNoticeService;
@@ -38,7 +37,6 @@ import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ALLOCATE_JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_NOTES;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.INVALID_CLIENT;
@@ -61,7 +59,6 @@ public class ListOnNoticeController {
     private final CaseSummaryTabService caseSummaryTabService;
     private final UserService userService;
     private final AuthorisationService authorisationService;
-    private final RoleAssignmentService roleAssignmentService;
     private final CoreCaseDataService coreCaseDataService;
 
     @PostMapping(path = "/listOnNotice/reasonUpdation/mid-event", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
@@ -143,13 +140,6 @@ public class ListOnNoticeController {
             );
             caseData = caseData.toBuilder().allocatedJudge(allocatedJudge).build();
             caseDataUpdated.putAll(caseSummaryTabService.updateTab(caseData));
-
-            roleAssignmentService.createRoleAssignment(
-                authorisation,
-                callbackRequest.getCaseDetails(),
-                false,
-                ALLOCATE_JUDGE_ROLE
-            );
 
             CaseUtils.setCaseState(callbackRequest, caseDataUpdated);
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
