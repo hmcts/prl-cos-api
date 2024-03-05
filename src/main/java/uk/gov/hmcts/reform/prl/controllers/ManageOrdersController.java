@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.prl.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -244,12 +243,6 @@ public class ManageOrdersController {
             //SNI-4330 fix - this will set state in caseData
             //updating state in caseData so that caseSummaryTab is updated with latest state
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
-            try {
-                log.info("caseData =========================== BEFORE ========================={}",
-                         objectMapper.writeValueAsString(caseData));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
 
             if (Yes.equals(caseData.getManageOrders().getMarkedToServeEmailNotification())) {
                 manageOrderEmailService.sendEmailWhenOrderIsServed(authorisation, caseData, caseDataUpdated);
@@ -269,13 +262,6 @@ public class ManageOrdersController {
                 "internal-update-all-tabs",
                 caseDataUpdated
             );
-            try {
-                CaseData updatedCaseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
-                log.info("caseData ========================== AFTER ========================={}",
-                         objectMapper.writeValueAsString(updatedCaseData));
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
             throw (new RuntimeException(INVALID_CLIENT));
