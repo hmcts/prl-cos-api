@@ -21,7 +21,6 @@ import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.mapper.citizen.ReasonableAdjustmentsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.Address;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -74,8 +73,7 @@ public class CaseControllerTest {
 
     @Mock
     ConfidentialDetailsMapper confidentialDetailsMapper;
-    @Mock
-    ReasonableAdjustmentsMapper reasonableAdjustmentsMapper;
+
     @Mock
     HearingService hearingService;
 
@@ -164,8 +162,6 @@ public class CaseControllerTest {
         String eventId = "e3ceb507-0137-43a9-8bd3-85dd23720648";
         when(objectMapper.convertValue(stringObjectMap, CaseData.class)).thenReturn(caseData);
         when(confidentialDetailsMapper.mapConfidentialData(caseData, true)).thenReturn(updatedCasedata);
-        when(reasonableAdjustmentsMapper.mapRAforC100MainApplicant("", updatedCasedata, eventId, authToken)).thenReturn(
-            updatedCasedata);
         when(authTokenGenerator.generate()).thenReturn("TestToken");
         when(authorisationService.authoriseUser(authToken)).thenReturn(true);
         when(authorisationService.authoriseService(servAuthToken)).thenReturn(true);

@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.ccd.client.model.CaseDetails;
 import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
-import uk.gov.hmcts.reform.prl.mapper.citizen.ReasonableAdjustmentsMapper;
 import uk.gov.hmcts.reform.prl.mapper.citizen.confidentialdetails.ConfidentialDetailsMapper;
 import uk.gov.hmcts.reform.prl.models.UpdateCaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -51,7 +50,6 @@ public class CaseController {
     private final AuthorisationService authorisationService;
     private final ConfidentialDetailsMapper confidentialDetailsMapper;
     private final AuthTokenGenerator authTokenGenerator;
-    private final ReasonableAdjustmentsMapper reasonableAdjustmentsMapper;
     private static final String INVALID_CLIENT = "Invalid Client";
     private static final String CASE_LINKING_FAILED = "Case Linking has failed";
 
@@ -101,12 +99,6 @@ public class CaseController {
             );
             CaseData updatedCaseData = CaseUtils.getCaseData(caseDetails, objectMapper);
             updatedCaseData = confidentialDetailsMapper.mapConfidentialData(updatedCaseData, true);
-            updatedCaseData = reasonableAdjustmentsMapper.mapRAforC100MainApplicant(
-                caseData.getC100RebuildData().getC100RebuildApplicantDetails(),
-                updatedCaseData,
-                eventId,
-                authorisation
-            );
 
             return updatedCaseData
                 .toBuilder().id(caseDetails.getId()).build();

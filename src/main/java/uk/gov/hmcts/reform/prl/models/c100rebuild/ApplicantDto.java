@@ -1,15 +1,12 @@
 package uk.gov.hmcts.reform.prl.models.c100rebuild;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
-import uk.gov.hmcts.reform.prl.models.caseflags.request.C100FlagDetailRequest;
 
-import java.util.List;
 
 @Data
 @Builder(toBuilder = true)
@@ -38,6 +35,4 @@ public class ApplicantDto {
     private String detailsKnown;
     private String start;
     private String startAlternative;
-    @JsonProperty("reasonableAdjustmentsFlags")
-    private List<C100FlagDetailRequest> reasonableAdjustmentsFlags;
 }

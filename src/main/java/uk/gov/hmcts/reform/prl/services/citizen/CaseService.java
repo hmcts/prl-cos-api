@@ -139,9 +139,7 @@ public class CaseService {
                                           .courtName(C100_DEFAULT_COURT_NAME)
                                           .taskListVersion(TASK_LIST_VERSION_V2)
                                           .build());
-            CaseData caseDataPartyFlags = objectMapper.convertValue(partyLevelCaseFlagsService.generatePartyCaseFlags(
-                updatedCaseData), CaseData.class);
-            updatedCaseData.setAllPartyFlags(caseDataPartyFlags.getAllPartyFlags());
+
             return caseRepository.updateCase(authToken, caseId, updatedCaseData, CaseEvent.fromValue(eventId));
         }
         if (CITIZEN_CASE_UPDATE.getValue().equalsIgnoreCase(eventId)
