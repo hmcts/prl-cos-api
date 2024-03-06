@@ -1257,7 +1257,7 @@ public class ServiceOfApplicationService {
                                     CaseData caseData, Element<PartyDetails> applicant,
                                     List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
         try {
-
+            log.info("inside sendEmailToCitizen  {}");
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
             dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
@@ -2569,12 +2569,12 @@ public class ServiceOfApplicationService {
                 packDocs
             ));
         } else {
-            emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
+            emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
+                caseData,
                 authorization,
                 applicantList,
-                caseData,
-                bulkPrintDetails,
-                packDocs
+                packDocs,
+                SERVED_PARTY_APPLICANT_SOLICITOR
             ));
         }
     }
