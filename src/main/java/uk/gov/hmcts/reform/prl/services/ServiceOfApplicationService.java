@@ -1263,9 +1263,9 @@ public class ServiceOfApplicationService {
             dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
                 authorization,
-                caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
+                "anshika.nigam1@hmcts.net",
                 docs,
-                SendgridEmailTemplateNames.APPLICATION_SERVED,
+                SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                 dynamicData,
                 SERVED_PARTY_APPLICANT_SOLICITOR
             )));
@@ -2558,6 +2558,7 @@ public class ServiceOfApplicationService {
         final List<DynamicMultiselectListElement> applicantList = createPartyDynamicMultiSelectListElement(
             partyIds);
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
+        log.info(" CaseUtils.isCaseCreatedByCitizen(caseData) ******** " + CaseUtils.isCaseCreatedByCitizen(caseData));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
             //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
@@ -2711,7 +2712,7 @@ public class ServiceOfApplicationService {
                 }
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                    if (true) {
                         sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
