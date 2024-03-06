@@ -94,6 +94,7 @@ public class CaseService {
     public static final String CASE_INVITES = "caseInvites";
     public static final String CASE_STATUS = "caseStatus";
     public static final String WITHDRAW_APPLICATION_DATA = "withDrawApplicationData";
+    public static final String CITIZEN_ALLOW_DA_JOURNEY = "citizen-allow-da-journey";
     private final CoreCaseDataApi coreCaseDataApi;
 
     private final CaseRepository caseRepository;
@@ -470,39 +471,26 @@ public class CaseService {
 
     private String findAccessCodeStatus(String accessCode, CaseData caseData) {
         String accessCodeStatus = INVALID;
-        boolean isEnabled = false;
-        isEnabled = toggleFeature(caseData, isEnabled);
-        if (isEnabled) {
-            if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()) {
-                return accessCodeStatus;
-            }
-            List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
-                .stream()
-                .map(Element::getValue)
-                .filter(x -> accessCode.equals(x.getAccessCode()))
-                .toList();
+        if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()
+            || (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase(CaseUtils.getCaseTypeOfApplication(caseData))
+            && !launchDarklyClient.isFeatureEnabled(CITIZEN_ALLOW_DA_JOURNEY))) {
+            return accessCodeStatus;
+        }
+        List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
+            .stream()
+            .map(Element::getValue)
+            .filter(x -> accessCode.equals(x.getAccessCode()))
+            .toList();
 
-            if (!matchingCaseInvite.isEmpty()) {
-                accessCodeStatus = VALID;
-                for (CaseInvite caseInvite : matchingCaseInvite) {
-                    if (YES.equals(caseInvite.getHasLinked())) {
-                        accessCodeStatus = LINKED;
-                    }
+        if (!matchingCaseInvite.isEmpty()) {
+            accessCodeStatus = VALID;
+            for (CaseInvite caseInvite : matchingCaseInvite) {
+                if (YES.equals(caseInvite.getHasLinked())) {
+                    accessCodeStatus = LINKED;
                 }
             }
         }
         return accessCodeStatus;
-    }
-
-    private boolean toggleFeature(CaseData caseData, boolean isEnabled) {
-        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase( CaseUtils.getCaseTypeOfApplication(caseData))) {
-            if (launchDarklyClient.isFeatureEnabled("citizen-allow-da-journey")) {
-                isEnabled = true;
-            }
-        } else {
-            isEnabled = true;
-        }
-        return isEnabled;
     }
 
     public CaseDetails getCase(String authToken, String caseId) {
