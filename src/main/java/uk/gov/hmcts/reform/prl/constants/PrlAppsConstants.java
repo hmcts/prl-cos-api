@@ -963,4 +963,7 @@ public class PrlAppsConstants {
 
     public static final String CITIZEN = "Citizen";
     public static final String SUCCESS = "Success";
+
+    public static final String SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT = "SOLICITOR_C1A_WELSH_DRAFT";
+    public static final String SOLICITOR_C1A_WELSH_FINAL_DOCUMENT = "SOLICITOR_C1A_WELSH_FINAL";
 }
