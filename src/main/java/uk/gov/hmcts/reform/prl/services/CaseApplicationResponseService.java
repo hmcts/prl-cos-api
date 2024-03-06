@@ -69,9 +69,11 @@ public class CaseApplicationResponseService {
                                                              String caseId, String s2sToken) throws Exception {
 
         List<Element<Document>> responseDocs = new ArrayList<>();
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
 
         log.info(" Generating C7 Final document for respondent ");
         Document document = generateFinalC7(caseData, authorisation);
+        caseData = addC7ToRespondentDocs(document, partyId, userDetails, caseData);
         responseDocs.add(element(document));
         log.info("C7 Final document generated successfully for respondent ");
 
@@ -109,7 +111,6 @@ public class CaseApplicationResponseService {
                 .map(PartyDetails::getLabelForDynamicList)
                 .orElse("");
 
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
             caseData = generateC8Document(
                 authorisation,
                 caseData,
@@ -120,8 +121,7 @@ public class CaseApplicationResponseService {
             );
         }
 
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        caseData = addCitizenDocumentsToTheQurantineList(caseData, responseDocs, userDetails);
+        caseData = addCitizenDocumentsToTheQuarantineList(caseData, responseDocs, userDetails);
 
         CaseDetails caseDetailsReturn;
         caseDetailsReturn = caseService.updateCase(
@@ -135,7 +135,7 @@ public class CaseApplicationResponseService {
         return caseDetailsReturn;
     }
 
-    private CaseData addCitizenDocumentsToTheQurantineList(CaseData caseData, List<Element<Document>> responseDocs,
+    private CaseData addCitizenDocumentsToTheQuarantineList(CaseData caseData, List<Element<Document>> responseDocs,
                                                            UserDetails userDetails) {
 
         List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
@@ -193,13 +193,37 @@ public class CaseApplicationResponseService {
         );
     }
 
+    private CaseData addC7ToRespondentDocs(Document document, String partyName, UserDetails userDetails,
+                                           CaseData caseData) {
+        RespondentDocs respondentDocs = RespondentDocs.builder().build();
+        if (null != document) {
+            respondentDocs = respondentDocs
+                .toBuilder()
+                .c7Document(ResponseDocuments
+                    .builder()
+                    .partyName(partyName)
+                    .createdBy(userDetails.getFullName())
+                    .dateCreated(LocalDate.now())
+                    .citizenDocument(document)
+                    .build()
+                )
+                .build();
+        }
+
+        if (null != caseData.getRespondentDocsList()) {
+            caseData.getRespondentDocsList().add(element(respondentDocs));
+        } else {
+            caseData.setRespondentDocsList(List.of(element(respondentDocs)));
+        }
+
+        return caseData;
+    }
+
     private CaseData generateC8Document(String authorisation, CaseData caseData, Optional<Element<PartyDetails>> currentRespondent,
                                                     Map<String, Object> dataMap, String partyName,
                                                     UserDetails userDetails) throws Exception {
         Document c8FinalDocument = null;
         if (currentRespondent.isPresent()) {
-
-            RespondentDocs respondentDocs = RespondentDocs.builder().build();
 
             if (dataMap.containsKey("isConfidentialDataPresent")) {
                 log.info(" Generating C8 Final document for respondent ");
@@ -211,12 +235,6 @@ public class CaseApplicationResponseService {
                     dataMap
                 );
                 log.info("C8 Final document generated successfully for respondent ");
-            }
-
-            if (null != caseData.getRespondentDocsList()) {
-                caseData.getRespondentDocsList().add(element(respondentDocs));
-            } else {
-                caseData.setRespondentDocsList(List.of(element(respondentDocs)));
             }
 
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
