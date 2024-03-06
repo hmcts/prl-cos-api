@@ -1257,12 +1257,19 @@ public class ServiceOfApplicationService {
                                     CaseData caseData, Element<PartyDetails> applicant,
                                     List<Element<EmailNotificationDetails>> notificationList, List<Document> docs) {
         try {
-            notificationList.add(element(serviceOfApplicationEmailService
-                                             .sendEmailNotificationToApplicant(
-                                                 authorization, caseData, applicant.getValue(),
-                                                 docs,
-                                                 SERVED_PARTY_APPLICANT
-                                             )));
+
+            Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+            dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
+            dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+            notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
+                authorization,
+                caseData.getApplicants().get(0).getValue().getSolicitorEmail(),
+                docs,
+                SendgridEmailTemplateNames.APPLICATION_SERVED,
+                dynamicData,
+                SERVED_PARTY_APPLICANT_SOLICITOR
+            )));
+
         } catch (Exception e) {
             log.error("Failed to send notification to applicant {}", e.getMessage());
         }
