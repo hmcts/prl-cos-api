@@ -2710,7 +2710,7 @@ public class ServiceOfApplicationService {
                     caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                     caseInvites.add(element(caseInvite));
                 }
-                if (isAccessEnabled(selectedApplicant)) {
+                if (true) {
                     log.info("Access already enabled");
                     if (true) {
                         sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
