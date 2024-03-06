@@ -111,7 +111,7 @@ public class ServiceOfApplicationEmailService {
                                                                           + partyDetails.getLastName(),null,
                                                                       caseData.getApplicantCaseName(),
                                                                       String.valueOf(caseData.getId())),
-                                                        "anshika.nigam1@hmcts.net", docs, servedParty);
+                                                        partyDetails.getEmail(), docs, servedParty);
     }
 
     public EmailNotificationDetails sendEmailUsingTemplateWithAttachments(String authorization,
