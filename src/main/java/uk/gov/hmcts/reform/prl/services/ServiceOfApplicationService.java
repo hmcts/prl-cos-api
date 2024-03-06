@@ -1176,11 +1176,18 @@ public class ServiceOfApplicationService {
                     caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                     caseInvites.add(element(caseInvite));
                 }
+                Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+                dynamicData.put("name", selectedApplicant.getValue().getFirstName() + " "
+                    + selectedApplicant.getValue().getLastName());
+                dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
                         List<Document> docs = getNotificationPack(caseData, PrlAppsConstants.P, staticDocs);
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+                        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
+                                               selectedApplicant.getValue().getEmail(), docs,
+                                               SendgridEmailTemplateNames.SOA_NON_PERSONAL_CA,
+                                               dynamicData, SERVED_PARTY_APPLICANT);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, staticDocs),
@@ -1193,8 +1200,10 @@ public class ServiceOfApplicationService {
                                                                       Templates.AP6_LETTER);
                         List<Document> docs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P, staticDocs));
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant,
-                                                                           emailNotificationDetails, docs);
+                        serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
+                                               selectedApplicant.getValue().getEmail(), docs,
+                                               SendgridEmailTemplateNames.SOA_NON_PERSONAL_CA,
+                                               dynamicData, SERVED_PARTY_APPLICANT);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, staticDocs),
