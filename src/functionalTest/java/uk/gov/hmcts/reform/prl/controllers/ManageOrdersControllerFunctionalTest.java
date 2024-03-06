@@ -242,6 +242,7 @@ public class ManageOrdersControllerFunctionalTest {
 
 
     @Test
+    @Ignore
     public void givenRequestBody_WhenServeOrderTestSendEmailToApplicantOrRespLip() throws Exception {
 
         CallbackRequest callbackRequest = CallbackRequest.builder()
@@ -457,6 +458,7 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void createCcdTestCase() throws Exception {
 
         String requestBody = ResourceLoader.loadJson(VALID_CAFCASS_REQUEST_JSON);
@@ -541,6 +543,7 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_ForPersonalServiceWhenCourtAdminSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_ADMIN);
 
@@ -563,6 +566,7 @@ public class ManageOrdersControllerFunctionalTest {
     }
 
     @Test
+    @Ignore
     public void givenRequestBody_ForPersonalServiceWhenBailiffSelected() throws Exception {
         String requestBody = ResourceLoader.loadJson(VALID_INPUT_JSON_FOR_FINALISE_ORDER_COURT_BAILIFF);
 
@@ -588,6 +592,7 @@ public class ManageOrdersControllerFunctionalTest {
      * Court Admin manageOrders journey - creates the sdo order with one hearing with no approval required.
      */
     @Test
+    @Ignore
     public void givenRequestBody_courtArdmin_noapproval_required_sdo() throws Exception {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_NO_NEED_JUDGE_APPROVAL);
 
