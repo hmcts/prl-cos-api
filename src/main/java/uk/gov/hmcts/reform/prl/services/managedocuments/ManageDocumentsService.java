@@ -289,7 +289,6 @@ public class ManageDocumentsService {
             .exceptionRecordReference(quarantineLegalDoc.getExceptionRecordReference())
             .scannedDate(quarantineLegalDoc.getScannedDate())
             .deliveryDate(quarantineLegalDoc.getDeliveryDate())
-            .partyDetails(quarantineLegalDoc.getPartyDetails())
             .build();
 
     }
@@ -325,6 +324,7 @@ public class ManageDocumentsService {
         if (CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCourtStaffQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCafcassQuarantineDocsList())
             || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getLegalProfQuarantineDocsList())
+            || CollectionUtils.isNotEmpty(caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList())
             || (CollectionUtils.isNotEmpty(caseData.getScannedDocuments())
             && caseData.getScannedDocuments().size() > 1)) {
             caseDataUpdated.remove(MANAGE_DOCUMENTS_TRIGGERED_BY);
