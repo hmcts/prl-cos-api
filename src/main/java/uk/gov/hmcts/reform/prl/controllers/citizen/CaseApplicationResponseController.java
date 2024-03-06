@@ -42,6 +42,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_ENGLISH;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C1A_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
@@ -77,7 +78,7 @@ public class CaseApplicationResponseController {
         CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
         CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
         updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
-        log.info(" Generating C7 draft document for respondent ");
+        log.info(" Generating C7 draft document for respondent........ ");
 
         Document document = documentGenService.generateSingleDocument(
             authorisation,
@@ -299,6 +300,35 @@ public class CaseApplicationResponseController {
             }
         }
         return caseData;
+    }
+
+    @PostMapping(path = "/{caseId}/{partyId}/generate-c1a-document/{isWelsh}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Document generated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public Document generateC1ADraftDocument(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("partyId") String partyId,
+        @PathVariable("isWelsh") String isWelsh,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+
+        log.info("VVVVVV {}",isWelsh);
+        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        log.info(" Generating C1A draft document for respondenttttttt........");
+
+        Document document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            DOCUMENT_C1A_DRAFT_HINT,
+            false
+        );
+        log.info("C1A draft document generated successfully for respondent ");
+        return document;
     }
 }
 
