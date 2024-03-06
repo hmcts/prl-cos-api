@@ -2752,8 +2752,11 @@ public class ServiceOfApplicationService {
 
             if (null != caseData.getOrderCollection()) {
                 c6aOrderIds = caseData.getOrderCollection().stream()
-                    .filter(element -> element.getValue() != null && element.getValue().getOrderTypeId().equals(
-                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString()))
+                    .filter(element -> element.getValue() != null && (element.getValue().getOrderTypeId().equals(
+                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.toString())
+                        || element.getValue().getOrderTypeId().equals(
+                        CreateSelectOrderOptionsEnum.noticeOfProceedingsNonParties.getDisplayedValue())
+                    ))
                     .map(s -> s.getId().toString()).toList();
             }
 
