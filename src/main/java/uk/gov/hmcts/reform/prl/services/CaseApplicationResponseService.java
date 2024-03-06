@@ -24,7 +24,11 @@ import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.document.DocumentGenService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -32,7 +36,9 @@ import java.util.Optional;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C7_FINAL_RESPONDENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C8_RESP_FINAL_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CITIZEN;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRAFT_HINT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.LONDON_TIME_ZONE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
@@ -48,6 +54,7 @@ public class CaseApplicationResponseService {
     private final CaseService caseService;
     private final IdamClient idamClient;
     private final DocumentLanguageService documentLanguageService;
+    private final UserService userService;
 
     public CaseData updateCurrentRespondent(CaseData caseData, YesOrNo currentRespondent, String partyId) {
 
@@ -119,7 +126,8 @@ public class CaseApplicationResponseService {
             );
         }
 
-        caseData = addCitizenDocumentsToTheQurantineList(caseData, responseDocs);
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        caseData = addCitizenDocumentsToTheQurantineList(caseData, responseDocs, userDetails);
 
         CaseDetails caseDetailsReturn;
         caseDetailsReturn = caseService.updateCase(
@@ -133,7 +141,9 @@ public class CaseApplicationResponseService {
         return caseDetailsReturn;
     }
 
-    private CaseData addCitizenDocumentsToTheQurantineList(CaseData caseData, List<Element<Document>> responseDocs) {
+    private CaseData addCitizenDocumentsToTheQurantineList(CaseData caseData, List<Element<Document>> responseDocs,
+                                                           UserDetails userDetails) {
+
         List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
         if (null != caseData.getDocumentManagementDetails() && null != caseData
             .getDocumentManagementDetails().getCitizenQuarantineDocsList()) {
@@ -143,7 +153,15 @@ public class CaseApplicationResponseService {
         quarantineDocs.addAll(responseDocs.stream().map(element -> Element.<QuarantineLegalDoc>builder()
                 .value(QuarantineLegalDoc
                     .builder()
-                    .citizenQuarantineDocument(element.getValue())
+                    .citizenQuarantineDocument(element.getValue()
+                        .toBuilder()
+                        .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
+                            .toInstant()))
+                        .build())
+                    .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
+                    .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
+                    .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
+                    .uploaderRole(CITIZEN)
                     .build())
                 .id(element.getId()).build())
             .toList());

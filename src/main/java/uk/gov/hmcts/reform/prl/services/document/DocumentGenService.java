@@ -29,7 +29,6 @@ import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.DocumentDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.UploadedDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.manageorders.ServedParties;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.documents.DocumentResponse;
 import uk.gov.hmcts.reform.prl.models.dto.GenerateDocumentRequest;
@@ -1347,33 +1346,35 @@ public class DocumentGenService {
             && CollectionUtils.isNotEmpty(documentRequest.getDocuments())) {
 
             DocumentCategory category = DocumentCategory.getValue(documentRequest.getCategoryId());
-            ServedParties servedParties = ServedParties.builder()
-                .partyId(documentRequest.getPartyId())
-                .partyName(documentRequest.getPartyName())
-                .build();
 
             //move all documents to citizen quarantine
-            for (Document document : documentRequest.getDocuments()) {
-                QuarantineLegalDoc quarantineLegalDoc = getCitizenQuarantineDocument(document,
-                                                                                     documentRequest,
-                                                                                     category,
-                                                                                     servedParties,
-                                                                                     userDetails);
-                //if marked as confidential/restricted
-                if (Yes.equals(documentRequest.getIsConfidential())
-                    || Yes.equals(documentRequest.getIsRestricted())) {
-                    //confidential/restricted - move documents to quarantine
-                    caseData = moveCitizenDocumentsToQuarantineTab(quarantineLegalDoc,
-                                                                   caseData,
-                                                                   caseDataUpdated);
+            List<QuarantineLegalDoc> quarantineLegalDocs = documentRequest.getDocuments().stream()
+                .map(document -> getCitizenQuarantineDocument(document,
+                                                              documentRequest,
+                                                              category,
+                                                              userDetails))
+                .toList();
 
-                } else {
-                    //non-confidential, move to respective category & case documents tab
-                    caseData = moveCitizenDocumentsToCaseDocumentsTab(quarantineLegalDoc,
-                                                                      caseData,
-                                                                      caseDataUpdated,
-                                                                      userDetails);
-                }
+            //if marked as confidential/restricted
+            if (Yes.equals(documentRequest.getIsConfidential())
+                || Yes.equals(documentRequest.getIsRestricted())) {
+                //create WA task
+                manageDocumentsService.setFlagsForWaTask(caseData, caseDataUpdated, CITIZEN, quarantineLegalDocs.get(0));
+                //confidential/restricted - move documents to quarantine
+                caseData = moveCitizenDocumentsToQuarantineTab(
+                    quarantineLegalDocs,
+                    caseData,
+                    caseDataUpdated
+                );
+
+            } else {
+                //non-confidential, move to respective category & case documents tab
+                caseData = moveCitizenDocumentsToCaseDocumentsTab(
+                    quarantineLegalDocs,
+                    caseData,
+                    caseDataUpdated,
+                    userDetails
+                );
             }
 
             return caseService.updateCase(caseData, authorisation, authTokenGenerator.generate(), caseId, CITIZEN_CASE_UPDATE.getValue(), null);
@@ -1382,38 +1383,44 @@ public class DocumentGenService {
         return null;
     }
 
-    private CaseData moveCitizenDocumentsToQuarantineTab(QuarantineLegalDoc quarantineLegalDoc,
+    private CaseData moveCitizenDocumentsToQuarantineTab(List<QuarantineLegalDoc> quarantineLegalDocs,
                                                          CaseData caseData,
                                                          Map<String, Object> caseDataUpdated) {
-        //invoke common manage docs
-        manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc, caseData, caseDataUpdated, CITIZEN);
-
-        return objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
+            //invoke common manage docs
+            manageDocumentsService.moveDocumentsToQuarantineTab(quarantineLegalDoc,
+                                                                caseData,
+                                                                caseDataUpdated,
+                                                                CITIZEN);
+            caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        }
+        return caseData;
     }
 
-    private CaseData moveCitizenDocumentsToCaseDocumentsTab(QuarantineLegalDoc quarantineLegalDoc,
+    private CaseData moveCitizenDocumentsToCaseDocumentsTab(List<QuarantineLegalDoc> quarantineLegalDocs,
                                                             CaseData caseData,
                                                             Map<String, Object> caseDataUpdated,
                                                             UserDetails userDetails) {
-        quarantineLegalDoc = quarantineLegalDoc.toBuilder()
-            .isConfidential(null)
-            .isRestricted(null)
-            .restrictedDetails(null)
-            .build();
-        //invoke common manage docs
-        manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc,
-                                                                      userDetails,
-                                                                      caseData,
-                                                                      caseDataUpdated,
-                                                                      CITIZEN);
-
-        return objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        for (QuarantineLegalDoc quarantineLegalDoc : quarantineLegalDocs) {
+            quarantineLegalDoc = quarantineLegalDoc.toBuilder()
+                .isConfidential(null)
+                .isRestricted(null)
+                .restrictedDetails(null)
+                .build();
+            //invoke common manage docs
+            manageDocumentsService.moveDocumentsToRespectiveCategoriesNew(quarantineLegalDoc,
+                                                                          userDetails,
+                                                                          caseData,
+                                                                          caseDataUpdated,
+                                                                          CITIZEN);
+            caseData = objectMapper.convertValue(caseDataUpdated, CaseData.class);
+        }
+        return caseData;
     }
 
     private QuarantineLegalDoc getCitizenQuarantineDocument(Document document,
                                                                   DocumentRequest documentRequest,
                                                                   DocumentCategory category,
-                                                                  ServedParties servedParties,
                                                                   UserDetails userDetails) {
         return QuarantineLegalDoc.builder()
             .citizenQuarantineDocument(document.toBuilder()
@@ -1426,7 +1433,6 @@ public class DocumentGenService {
             .isConfidential(documentRequest.getIsConfidential())
             .isRestricted(documentRequest.getIsRestricted())
             .restrictedDetails(documentRequest.getRestrictDocumentDetails())
-            .partyDetails(servedParties)
             .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
             .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
             .uploaderRole(CITIZEN)
