@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
-import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents.RespondentDocs;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
@@ -72,6 +71,8 @@ public class CaseApplicationResponseService {
 
         List<Element<Document>> responseDocs = new ArrayList<>();
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        UserDetails userDetails = idamClient.getUserDetails(authorisation);
+
         log.info(" Generating C7 Final document for respondent ");
         if (documentLanguage.isGenEng()) {
             responseDocs.add(element(generateFinalC7(caseData, authorisation, false)));
@@ -115,7 +116,6 @@ public class CaseApplicationResponseService {
                 .map(PartyDetails::getLabelForDynamicList)
                 .orElse("");
 
-            UserDetails userDetails = idamClient.getUserDetails(authorisation);
             caseData = generateC8Document(
                 authorisation,
                 caseData,
@@ -126,8 +126,7 @@ public class CaseApplicationResponseService {
             );
         }
 
-        UserDetails userDetails = userService.getUserDetails(authorisation);
-        caseData = addCitizenDocumentsToTheQurantineList(caseData, responseDocs, userDetails);
+        caseData = addCitizenDocumentsToTheQuarantineList(caseData, responseDocs, userDetails);
 
         CaseDetails caseDetailsReturn;
         caseDetailsReturn = caseService.updateCase(
@@ -141,7 +140,7 @@ public class CaseApplicationResponseService {
         return caseDetailsReturn;
     }
 
-    private CaseData addCitizenDocumentsToTheQurantineList(CaseData caseData, List<Element<Document>> responseDocs,
+    private CaseData addCitizenDocumentsToTheQuarantineList(CaseData caseData, List<Element<Document>> responseDocs,
                                                            UserDetails userDetails) {
 
         List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
@@ -180,6 +179,7 @@ public class CaseApplicationResponseService {
     }
 
     private Document generateFinalC1A(CaseData caseData, String authorisation, Map<String, Object> dataMap) throws Exception {
+
         return documentGenService.generateSingleDocument(
             authorisation,
             caseData,
@@ -202,11 +202,10 @@ public class CaseApplicationResponseService {
     private CaseData generateC8Document(String authorisation, CaseData caseData, Optional<Element<PartyDetails>> currentRespondent,
                                                     Map<String, Object> dataMap, String partyName,
                                                     UserDetails userDetails) throws Exception {
+
         Document c8FinalDocument = null;
+
         if (currentRespondent.isPresent()) {
-
-            RespondentDocs respondentDocs = RespondentDocs.builder().build();
-
             if (dataMap.containsKey("isConfidentialDataPresent")) {
                 log.info(" Generating C8 Final document for respondent ");
                 c8FinalDocument = documentGenService.generateSingleDocument(
@@ -219,12 +218,6 @@ public class CaseApplicationResponseService {
                 log.info("C8 Final document generated successfully for respondent ");
             }
 
-            if (null != caseData.getRespondentDocsList()) {
-                caseData.getRespondentDocsList().add(element(respondentDocs));
-            } else {
-                caseData.setRespondentDocsList(List.of(element(respondentDocs)));
-            }
-
             populateC8Documents(caseData, currentRespondent.get(), partyName, userDetails, c8FinalDocument);
         }
         return caseData;
@@ -232,7 +225,9 @@ public class CaseApplicationResponseService {
 
     private static void populateC8Documents(CaseData caseData, Element<PartyDetails> currentRespondent, String partyName,
                                             UserDetails userDetails, Document c8FinalDocument) {
+
         int partyIndex = caseData.getRespondents().indexOf(currentRespondent);
+
         if (null != c8FinalDocument && partyIndex >= 0) {
             ResponseDocuments c8ResponseDocuments = ResponseDocuments.builder()
                 .partyName(partyName)
@@ -243,6 +238,7 @@ public class CaseApplicationResponseService {
             if (caseData.getCitizenResponseDocuments() == null) {
                 caseData.setCitizenResponseDocuments(CitizenResponseDocuments.builder().build());
             }
+
             switch (partyIndex) {
                 case 0 -> caseData.toBuilder().citizenResponseDocuments(CitizenResponseDocuments.builder()
                     .respondentAc8(c8ResponseDocuments).build());

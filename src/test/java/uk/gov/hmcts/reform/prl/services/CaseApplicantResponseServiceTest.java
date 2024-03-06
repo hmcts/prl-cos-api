@@ -60,9 +60,6 @@ public class CaseApplicantResponseServiceTest {
     DocumentGenService documentGenService;
 
     @Mock
-    UserService userServices;
-
-    @Mock
     CitizenResponseNotificationEmailService solicitorNotificationService;
 
     @Mock
