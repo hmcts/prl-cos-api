@@ -86,6 +86,7 @@ public class DgsService {
                                                        Map<String, Object> dataMap) throws Exception {
 
         dataMap.forEach((k, v) -> {
+            log.info("v value is {}", v);
             if (v != null) {
                 Object updatedWelshObj = WelshLangMapper.applyWelshTranslation(k, v,
                                                                                PrlAppsConstants.C100_CASE_TYPE
@@ -93,6 +94,7 @@ public class DgsService {
                                                                                        caseTypeOfApplication)
                 );
                 dataMap.put(k, updatedWelshObj);
+                log.info("v value is {}", updatedWelshObj);
             }
         });
 

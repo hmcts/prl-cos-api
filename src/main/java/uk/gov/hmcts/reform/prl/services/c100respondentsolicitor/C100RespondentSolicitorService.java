@@ -1298,6 +1298,7 @@ public class C100RespondentSolicitorService {
         DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
         if (documentLanguage.isGenWelsh()) {
+            log.info("dataMap inside c100respondentsolicitorservice is: {}", dataMap);
             document = documentGenService.generateSingleDocument(
                 authorisation,
                 caseData,
