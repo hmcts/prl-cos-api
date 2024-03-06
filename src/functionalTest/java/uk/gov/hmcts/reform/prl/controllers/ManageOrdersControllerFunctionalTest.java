@@ -139,7 +139,7 @@ public class ManageOrdersControllerFunctionalTest {
     @Before
     public void setup() {
         caseDetails = CaseDetails.builder()
-            .id(1709662358269545L)
+            .id(1709725524296690L)
             .build();
     }
 
@@ -300,7 +300,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED);
 
         String requestBodyRevised = requestBody
-            .replace("1702636092071141", "1708388034079121");
+            .replace("1702636092071141", caseDetails.getId().toString());
 
         AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -345,7 +345,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_ORDER_JUDGE_APPROVAL_REQUIRED_MANY_HEARING);
 
         String requestBodyRevised = requestBody
-            .replace("1702636092071141", "1708388034079121");
+            .replace("1702636092071141", caseDetails.getId().toString());
 
         request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
@@ -634,7 +634,7 @@ public class ManageOrdersControllerFunctionalTest {
         String requestBody = ResourceLoader.loadJson(COURT_ADMIN_DRAFT_SDO_ORDER_JUDGE_APPROVAL_REQUIRED);
 
         String requestBodyRevised = requestBody
-            .replace("1706997775517206", "1708388034079121");
+            .replace("1706997775517206", caseDetails.getId().toString());
 
         AboutToStartOrSubmitCallbackResponse resp = request
             .header("Authorization", idamTokenGenerator.generateIdamTokenForSystem())
