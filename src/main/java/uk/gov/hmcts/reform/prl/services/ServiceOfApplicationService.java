@@ -2569,12 +2569,12 @@ public class ServiceOfApplicationService {
                 packDocs
             ));
         } else {
-            emailNotificationDetails.addAll(sendNotificationToApplicantSolicitor(
-                caseData,
+            emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
                 authorization,
                 applicantList,
-                packDocs,
-                SERVED_PARTY_APPLICANT_SOLICITOR
+                caseData,
+                bulkPrintDetails,
+                packDocs
             ));
         }
     }
