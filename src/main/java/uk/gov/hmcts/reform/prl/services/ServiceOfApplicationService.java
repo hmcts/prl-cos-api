@@ -2729,6 +2729,8 @@ public class ServiceOfApplicationService {
                         combinedDocs.addAll(docs);
                         sendEmailToCitizen(authorization, caseData, selectedApplicant,
                                            emailNotificationDetails, combinedDocs);
+                        sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
                                                             getNotificationPack(caseData, PrlAppsConstants.R, docs),
