@@ -73,7 +73,6 @@ public class CaseApplicationResponseService {
 
         log.info(" Generating C7 Final document for respondent ");
         Document document = generateFinalC7(caseData, authorisation);
-        caseData = addC7ToRespondentDocs(document, partyId, userDetails, caseData);
         responseDocs.add(element(document));
         log.info("C7 Final document generated successfully for respondent ");
 
@@ -191,32 +190,6 @@ public class CaseApplicationResponseService {
             C7_FINAL_ENGLISH,
             false
         );
-    }
-
-    private CaseData addC7ToRespondentDocs(Document document, String partyName, UserDetails userDetails,
-                                           CaseData caseData) {
-        RespondentDocs respondentDocs = RespondentDocs.builder().build();
-        if (null != document) {
-            respondentDocs = respondentDocs
-                .toBuilder()
-                .c7Document(ResponseDocuments
-                    .builder()
-                    .partyName(partyName)
-                    .createdBy(userDetails.getFullName())
-                    .dateCreated(LocalDate.now())
-                    .citizenDocument(document)
-                    .build()
-                )
-                .build();
-        }
-
-        if (null != caseData.getRespondentDocsList()) {
-            caseData.getRespondentDocsList().add(element(respondentDocs));
-        } else {
-            caseData.setRespondentDocsList(List.of(element(respondentDocs)));
-        }
-
-        return caseData;
     }
 
     private CaseData generateC8Document(String authorisation, CaseData caseData, Optional<Element<PartyDetails>> currentRespondent,
