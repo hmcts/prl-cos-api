@@ -310,12 +310,12 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-orders/about-to-submit")
             .then()
-            .body(/*"data.isHearingTaskNeeded", equalTo("No"),
+            .body("data.isHearingTaskNeeded", equalTo("No"),
                   "data.isMultipleHearingSelected", equalTo("No"),
-                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),*/
+                  "data.hearingOptionSelected", equalTo("dateReservedWithListAssit"),
                   "data.isOrderApproved", equalTo(null),
-                  "data.whoApprovedTheOrder", equalTo(null)/*,
-                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck")*/)
+                  "data.whoApprovedTheOrder", equalTo(null),
+                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
         System.out.println("givenRequestBody_courtArdmin_judge_approval"
@@ -356,12 +356,12 @@ public class ManageOrdersControllerFunctionalTest {
             .contentType("application/json")
             .post("/manage-orders/about-to-submit")
             .then()
-            .body(/*"data.isHearingTaskNeeded", equalTo("No"),// shud be no
+            .body("data.isHearingTaskNeeded", equalTo("No"),// shud be no
                   "data.isMultipleHearingSelected", equalTo("Yes"),
-                  "data.hearingOptionSelected", equalTo("multipleOptionSelected"),*/
+                  "data.hearingOptionSelected", equalTo("multipleOptionSelected"),
                   "data.isOrderApproved", equalTo(null),
-                  "data.whoApprovedTheOrder", equalTo(null)/*,
-                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck")*/)
+                  "data.whoApprovedTheOrder", equalTo(null),
+                  "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
         System.out.println("givenRequestBody_courtArdmin_judge"
