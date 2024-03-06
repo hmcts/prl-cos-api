@@ -15,6 +15,9 @@ import uk.gov.hmcts.reform.ccd.client.model.StartEventResponse;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import uk.gov.hmcts.reform.prl.clients.ccd.CcdCoreCaseDataService;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
+import uk.gov.hmcts.reform.prl.constants.PrlAppsConstants;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.CaseEvent;
 import uk.gov.hmcts.reform.prl.enums.PartyEnum;
 import uk.gov.hmcts.reform.prl.enums.State;
@@ -102,6 +105,7 @@ public class CaseService {
     private final NoticeOfChangePartiesService noticeOfChangePartiesService;
     private final CaseSummaryTabService caseSummaryTab;
     private final RoleAssignmentService roleAssignmentService;
+    private final LaunchDarklyClient launchDarklyClient;
     private static final String INVALID_CLIENT = "Invalid Client";
 
     public CaseDetails updateCase(CaseData caseData, String authToken, String s2sToken,
@@ -466,24 +470,39 @@ public class CaseService {
 
     private String findAccessCodeStatus(String accessCode, CaseData caseData) {
         String accessCodeStatus = INVALID;
-        if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()) {
-            return accessCodeStatus;
-        }
-        List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
-            .stream()
-            .map(Element::getValue)
-            .filter(x -> accessCode.equals(x.getAccessCode()))
-            .toList();
+        boolean isEnabled = false;
+        isEnabled = toggleFeature(caseData, isEnabled);
+        if (isEnabled) {
+            if (null == caseData.getCaseInvites() || caseData.getCaseInvites().isEmpty()) {
+                return accessCodeStatus;
+            }
+            List<CaseInvite> matchingCaseInvite = caseData.getCaseInvites()
+                .stream()
+                .map(Element::getValue)
+                .filter(x -> accessCode.equals(x.getAccessCode()))
+                .toList();
 
-        if (!matchingCaseInvite.isEmpty()) {
-            accessCodeStatus = VALID;
-            for (CaseInvite caseInvite : matchingCaseInvite) {
-                if (YES.equals(caseInvite.getHasLinked())) {
-                    accessCodeStatus = LINKED;
+            if (!matchingCaseInvite.isEmpty()) {
+                accessCodeStatus = VALID;
+                for (CaseInvite caseInvite : matchingCaseInvite) {
+                    if (YES.equals(caseInvite.getHasLinked())) {
+                        accessCodeStatus = LINKED;
+                    }
                 }
             }
         }
         return accessCodeStatus;
+    }
+
+    private boolean toggleFeature(CaseData caseData, boolean isEnabled) {
+        if (PrlAppsConstants.FL401_CASE_TYPE.equalsIgnoreCase( CaseUtils.getCaseTypeOfApplication(caseData))) {
+            if (launchDarklyClient.isFeatureEnabled("citizen-allow-da-journey")) {
+                isEnabled = true;
+            }
+        } else {
+            isEnabled = true;
+        }
+        return isEnabled;
     }
 
     public CaseDetails getCase(String authToken, String caseId) {
