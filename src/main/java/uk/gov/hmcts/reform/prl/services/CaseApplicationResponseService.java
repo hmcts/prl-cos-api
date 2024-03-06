@@ -128,6 +128,7 @@ public class CaseApplicationResponseService {
     }
 
     private CaseData addCitizenDocumentsToTheQurantineList(CaseData caseData, List<Element<Document>> responseDocs) {
+
         List<Element<QuarantineLegalDoc>> quarantineDocs = new ArrayList<>();
         if (null != caseData.getDocumentManagementDetails() && null != caseData
             .getDocumentManagementDetails().getCitizenQuarantineDocsList()) {
@@ -137,7 +138,8 @@ public class CaseApplicationResponseService {
         quarantineDocs.addAll(responseDocs.stream().map(element -> Element.<QuarantineLegalDoc>builder()
                 .value(QuarantineLegalDoc
                     .builder()
-                    .citizenQuarantineDocument(element.getValue())
+                    .categoryId(element.getValue().getCategoryId())
+                    .document(element.getValue())
                     .build())
                 .id(element.getId()).build())
             .toList());
