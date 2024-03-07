@@ -95,10 +95,11 @@ public class DgsService {
                 );
                 dataMap.put(k, updatedWelshObj);
                 log.info("returned v value is {}", updatedWelshObj);
-                log.info("break");
-                log.info("returned datatMap is {}", dataMap);
             }
         });
+
+        log.info("break");
+        log.info("returned datatMap is {}", dataMap);
 
         return generateDocument(authorisation, caseId, templateName,
                                 dataMap

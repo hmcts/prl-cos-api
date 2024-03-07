@@ -620,7 +620,6 @@ public class DocumentGenService {
         GeneratedDocumentInfo generatedDocumentInfo = null;
         caseData = caseData.toBuilder().isDocumentGenerated("No").build();
         if (isWelsh) {
-            log.info("inside is welsh generating doc");
             generatedDocumentInfo = dgsService.generateWelshDocument(
                 authorisation,
                 String.valueOf(caseData.getId()),
