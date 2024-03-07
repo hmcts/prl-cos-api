@@ -1019,8 +1019,6 @@ public class C100RespondentSolicitorService {
             dataMap.put("respondent", solicitorRepresentedRespondent.getValue());
             Response response = solicitorRepresentedRespondent.getValue().getResponse();
 
-            log.info("res---getResponseToAllegationsOfHarm--> {}", response.getResponseToAllegationsOfHarm());
-
             log.info("res---getRespondentAllegationsOfHarmData-> {}", response.getRespondentAllegationsOfHarmData());
 
             log.info("res---getSafetyConcerns--> {}", response.getSafetyConcerns());
