@@ -6,9 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.prl.utils.CommonUtils;
+import lombok.extern.slf4j.Slf4j;
 
-import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_UUUU;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.Locale;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +19,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.D_MMMM_UUUU;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder(toBuilder = true)
+@Slf4j
 public class OtherDetails {
 
     public String createdBy;
@@ -24,12 +28,53 @@ public class OtherDetails {
     public String orderCreatedDate;
 
     public void setOrderCreatedDate(String orderCreatedDate) {
-        this.orderCreatedDate = CommonUtils.getFormattedStringDate(orderCreatedDate, D_MMMM_UUUU);
+        if (orderCreatedDate != null) {
+            LocalDate dateTime = null;
+            try {
+                dateTime = LocalDate.parse(orderCreatedDate, DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK));
+            } catch (DateTimeParseException dateTimeParseException) {
+                try {
+                    dateTime = LocalDate.parse(orderCreatedDate, DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK));
+                } catch (DateTimeParseException e) {
+                    try {
+                        dateTime = LocalDate.parse(
+                            orderCreatedDate,
+                            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+                        );
+                    } catch (DateTimeParseException exception) {
+                        log.info("orderCreatedDate received {}", orderCreatedDate);
+                    }
+                }
+            }
+            this.orderCreatedDate = dateTime.toString();
+            if (this.orderMadeDate == null) {
+                this.orderMadeDate = this.orderCreatedDate;
+            }
+        }
     }
 
     public String orderMadeDate;
 
     public void setOrderMadeDate(String orderMadeDate) {
-        this.orderMadeDate =  CommonUtils.getFormattedStringDate(orderMadeDate, D_MMMM_UUUU);;
+        if (orderMadeDate != null) {
+            LocalDate dateTime = null;
+            try {
+                dateTime = LocalDate.parse(orderMadeDate, DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.UK));
+            } catch (DateTimeParseException e) {
+                try {
+                    dateTime = LocalDate.parse(orderMadeDate, DateTimeFormatter.ofPattern("d MMM yyyy", Locale.UK));
+                } catch (DateTimeParseException ex) {
+                    try {
+                        dateTime = LocalDate.parse(
+                            orderMadeDate,
+                            DateTimeFormatter.ofPattern("d MMM yyyy", Locale.ENGLISH)
+                        );
+                    } catch (DateTimeParseException exception) {
+                        log.info("orderMadeDate received {}", orderMadeDate);
+                    }
+                }
+            }
+            this.orderMadeDate = dateTime.toString();
+        }
     }
 }

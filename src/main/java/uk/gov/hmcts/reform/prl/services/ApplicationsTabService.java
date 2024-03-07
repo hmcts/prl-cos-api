@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.prl.enums.ApplicantStopFromRespondentDoingToChildEnum
 import uk.gov.hmcts.reform.prl.enums.ChildArrangementOrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FL401OrderTypeEnum;
 import uk.gov.hmcts.reform.prl.enums.FamilyHomeEnum;
+import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.LiveWithEnum;
 import uk.gov.hmcts.reform.prl.enums.LivingSituationEnum;
 import uk.gov.hmcts.reform.prl.enums.MiamChildProtectionConcernChecklistEnum;
@@ -123,18 +124,9 @@ import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ApplicationsTabService implements TabService {
-
-    @Autowired
-    CoreCaseDataService coreCaseDataService;
-
-    @Autowired
-    ObjectMapper objectMapper;
-
-    @Autowired
-    ApplicationsTabServiceHelper applicationsTabServiceHelper;
-
-    @Autowired
-    AllegationOfHarmRevisedService allegationOfHarmRevisedService;
+    private final ObjectMapper objectMapper;
+    private final ApplicationsTabServiceHelper applicationsTabServiceHelper;
+    private final AllegationOfHarmRevisedService allegationOfHarmRevisedService;
 
     @Override
     public Map<String, Object> updateTab(CaseData caseData) {
@@ -353,7 +345,7 @@ public class ApplicationsTabService implements TabService {
         }
         List<Child> childList = caseData.getChildren().stream()
             .map(Element::getValue)
-            .collect(Collectors.toList());
+            .toList();
         for (Child child : childList) {
             ChildDetails c = mapChildDetails(child);
             Element<ChildDetails> res = Element.<ChildDetails>builder().value(c).build();
@@ -403,7 +395,7 @@ public class ApplicationsTabService implements TabService {
         if (nonNull(child.getPersonWhoLivesWithChild())) {
             List<OtherPersonWhoLivesWithChild> otherPersonList = child.getPersonWhoLivesWithChild().stream()
                     .map(Element::getValue)
-                    .collect(Collectors.toList());
+                    .toList();
 
             for (OtherPersonWhoLivesWithChild otherPersonWhoLivesWithChild : otherPersonList) {
                 otherPersonLiving.add(getOtherPersonWhoLivesWithChildDetails(otherPersonWhoLivesWithChild));
@@ -452,10 +444,12 @@ public class ApplicationsTabService implements TabService {
         }
 
         List<Element<PartyDetails>> currentApplicants = maskConfidentialDetails(caseData.getApplicants());
-        for (Element<PartyDetails> applicant : currentApplicants) {
-            Applicant a = objectMapper.convertValue(applicant.getValue(), Applicant.class);
-            Element<Applicant> app = Element.<Applicant>builder().id(applicant.getId()).value(a).build();
-            applicants.add(app);
+        for (Element<PartyDetails> currentApplicant : currentApplicants) {
+            Applicant applicant = objectMapper.convertValue(currentApplicant.getValue(), Applicant.class);
+            Element<Applicant> applicantElement = Element.<Applicant>builder().id(currentApplicant.getId())
+                .value(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build())
+                .build();
+            applicants.add(applicantElement);
         }
         return applicants;
     }
@@ -511,10 +505,19 @@ public class ApplicationsTabService implements TabService {
             return respondents;
         }
         List<Element<PartyDetails>> currentRespondents = maskConfidentialDetails(caseData.getRespondents());
-        for (Element<PartyDetails> respondent : currentRespondents) {
-            Respondent a = objectMapper.convertValue(respondent.getValue(), Respondent.class);
-            Element<Respondent> app = Element.<Respondent>builder().id(respondent.getId()).value(a).build();
-            respondents.add(app);
+        for (Element<PartyDetails> currentRespondent : currentRespondents) {
+            Respondent respondent = objectMapper.convertValue(currentRespondent.getValue(), Respondent.class);
+
+            Element<Respondent> respondentElement = Element.<Respondent>builder().id(currentRespondent.getId()).value(respondent.toBuilder()
+                .gender(respondent.getGender() != null ? Gender.getDisplayedValueFromEnumString(respondent.getGender()).getDisplayedValue() : null)
+                .isAtAddressLessThan5YearsWithDontKnow(respondent.getIsAtAddressLessThan5YearsWithDontKnow() != null
+                                                   ? YesNoDontKnow.getDisplayedValueIgnoreCase(
+                                                       respondent.getIsAtAddressLessThan5YearsWithDontKnow()).getDisplayedValue() : null)
+                .doTheyHaveLegalRepresentation(respondent.getDoTheyHaveLegalRepresentation() != null
+                                                   ? YesNoDontKnow.getDisplayedValueIgnoreCase(
+                                                       respondent.getDoTheyHaveLegalRepresentation()).getDisplayedValue() : null)
+                .build()).build();
+            respondents.add(respondentElement);
         }
         return respondents;
     }
@@ -554,7 +557,7 @@ public class ApplicationsTabService implements TabService {
         }
         List<String> ordersApplyingFor = caseData.getOrdersApplyingFor().stream()
             .map(OrderTypeEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         String typeOfChildArrangementsOrder = "";
         Optional<ChildArrangementOrderTypeEnum> childArrangementCheck = ofNullable(caseData.getTypeOfChildArrangementsOrder());
@@ -703,7 +706,7 @@ public class ApplicationsTabService implements TabService {
             return Collections.singletonList(other);
         }
         List<ProceedingDetails> proceedings = caseData.getExistingProceedings().stream()
-            .map(Element::getValue).collect(Collectors.toList());
+            .map(Element::getValue).toList();
         List<Element<OtherProceedingsDetails>> otherProceedingsDetailsList = new ArrayList<>();
 
         for (ProceedingDetails p : proceedings) {
@@ -742,7 +745,7 @@ public class ApplicationsTabService implements TabService {
             return getEmptyFl401OtherProceedings();
         }
         List<FL401Proceedings> proceedings = caseData.getFl401OtherProceedingDetails().getFl401OtherProceedings().stream()
-            .map(Element::getValue).collect(Collectors.toList());
+            .map(Element::getValue).toList();
         List<Element<Fl401OtherProceedingsDetails>> otherProceedingsDetailsList = new ArrayList<>();
 
         for (FL401Proceedings p : proceedings) {
@@ -1051,14 +1054,17 @@ public class ApplicationsTabService implements TabService {
             return otherPersonsInTheCase;
         }
 
-        List<PartyDetails> otherPeople = caseData.getOthersToNotify().stream().map(Element::getValue).collect(Collectors.toList());
+        List<PartyDetails> otherPeople = caseData.getOthersToNotify().stream().map(Element::getValue).toList();
 
-        for (PartyDetails p : otherPeople) {
-            OtherPersonInTheCase other = objectMapper.convertValue(p, OtherPersonInTheCase.class);
-            //field below is not mapping correctly with the object mapper
-            other.setRelationshipToChild(p.getOtherPersonRelationshipToChildren());
+        for (PartyDetails currentOtherPerson : otherPeople) {
+            OtherPersonInTheCase otherPerson = objectMapper.convertValue(currentOtherPerson, OtherPersonInTheCase.class);
             Element<OtherPersonInTheCase> wrappedPerson = Element.<OtherPersonInTheCase>builder()
-                .value(other).build();
+                .value(otherPerson.toBuilder()
+                           .relationshipToChild(currentOtherPerson.getOtherPersonRelationshipToChildren())
+                           .gender(otherPerson.getGender() != null
+                                       ? Gender.getDisplayedValueFromEnumString(otherPerson.getGender()).getDisplayedValue() : null)
+                           .build())
+                .build();
             otherPersonsInTheCase.add(wrappedPerson);
         }
         return otherPersonsInTheCase;
@@ -1095,7 +1101,7 @@ public class ApplicationsTabService implements TabService {
         if (caseData.getTypeOfApplicationOrders() != null) {
             List<String> ordersApplyingFor = caseData.getTypeOfApplicationOrders().getOrderType().stream()
                 .map(FL401OrderTypeEnum::getDisplayedValue)
-                .collect(Collectors.toList());
+                .toList();
 
             Fl401TypeOfApplication.Fl401TypeOfApplicationBuilder builder = Fl401TypeOfApplication.builder()
                 .ordersApplyingFor(String.join(", ", ordersApplyingFor));
@@ -1121,7 +1127,7 @@ public class ApplicationsTabService implements TabService {
                 List<String> reasonForOrderWithoutNoticeEnum = reason.getReasonForOrderWithoutGivingNotice() != null
                     ? reason.getReasonForOrderWithoutGivingNotice().stream()
                     .map(ReasonForOrderWithoutGivingNoticeEnum::getDisplayedValue)
-                    .collect(Collectors.toList()) : new ArrayList<>();
+                    .toList() : new ArrayList<>();
                 builder.reasonForOrderWithoutGivingNotice(String.join(", ",
                     reasonForOrderWithoutNoticeEnum)).futherDetails(reason.getFutherDetails());
             }
@@ -1143,9 +1149,8 @@ public class ApplicationsTabService implements TabService {
             return Collections.emptyMap();
         }
         PartyDetails currentApplicant = maskFl401ConfidentialDetails(caseData.getApplicantsFL401());
-        FL401Applicant a = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
-
-        return toMap(a);
+        FL401Applicant applicant = objectMapper.convertValue(currentApplicant, FL401Applicant.class);
+        return toMap(applicant.toBuilder().gender(Gender.getDisplayedValueFromEnumString(applicant.getGender()).getDisplayedValue()).build());
     }
 
     public Map<String, Object> getFl401ApplicantsSolictorDetailsTable(CaseData caseData) {
@@ -1175,13 +1180,13 @@ public class ApplicationsTabService implements TabService {
         RespondentBehaviourTable.RespondentBehaviourTableBuilder rs = RespondentBehaviourTable.builder();
         List<String> applicantStopFromRespondentDoingEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoing().stream()
             .map(ApplicantStopFromRespondentDoingEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> applicantStopFromRespondentDoingToChildEnum = new ArrayList<>();
         if (respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild() != null) {
             applicantStopFromRespondentDoingToChildEnum = respondentBehaviour.getApplicantWantToStopFromRespondentDoingToChild().stream()
                 .map(ApplicantStopFromRespondentDoingToChildEnum::getDisplayedValue)
-                .collect(Collectors.toList());
+                .toList();
         }
 
         rs.applicantWantToStopFromRespondentDoing(String.join(", ", applicantStopFromRespondentDoingEnum))
@@ -1226,15 +1231,15 @@ public class ApplicationsTabService implements TabService {
 
         List<String> peopleLivingAtThisAddressEnum = home.getPeopleLivingAtThisAddress().stream()
             .map(PeopleLivingAtThisAddressEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> familyHomeEnum = home.getFamilyHome().stream()
             .map(FamilyHomeEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         List<String> livingSituationEnum = home.getLivingSituation().stream()
             .map(LivingSituationEnum::getDisplayedValue)
-            .collect(Collectors.toList());
+            .toList();
 
         builder
             .address(home.getAddress())
@@ -1256,7 +1261,7 @@ public class ApplicationsTabService implements TabService {
 
             List<String> mortgageNameAft = mortgage.getMortgageNamedAfter().stream()
                 .map(MortgageNamedAfterEnum::getDisplayedValue)
-                .collect(Collectors.toList());
+                .toList();
 
             builder.mortgageAddress(mortgage.getAddress())
                 .mortgageNumber(mortgage.getMortgageNumber())
@@ -1268,7 +1273,7 @@ public class ApplicationsTabService implements TabService {
 
             List<String> landlordNamedAft = landlord.getMortgageNamedAfterList().stream()
                 .map(MortgageNamedAfterEnum::getDisplayedValue)
-                .collect(Collectors.toList());
+                .toList();
 
             builder.landlordAddress(landlord.getAddress())
                 .landlordName(landlord.getLandlordName())
@@ -1283,7 +1288,7 @@ public class ApplicationsTabService implements TabService {
         List<Element<ChildrenLiveAtAddress>> children = home.getChildren();
         if (isNotEmpty(children)) {
             List<ChildrenLiveAtAddress> eachChildren = children.stream()
-                .map(Element::getValue).collect(Collectors.toList());
+                .map(Element::getValue).toList();
             List<Element<HomeChild>> childList = new ArrayList<>();
             for (ChildrenLiveAtAddress eachChild : eachChildren) {
                 HomeChild.HomeChildBuilder builder =  HomeChild.builder()

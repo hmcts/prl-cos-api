@@ -12,7 +12,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.tasklist.Task;
 import uk.gov.hmcts.reform.prl.models.tasklist.TaskSection;
-import uk.gov.hmcts.reform.prl.services.validators.EventsChecker;
+import uk.gov.hmcts.reform.prl.services.validators.eventschecker.EventsChecker;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -25,7 +25,6 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ADD_ADDITIONAL_INFORMATION;
@@ -182,7 +181,7 @@ public class TaskListRenderer {
                             pdfApplication,
                             submit)
                     .filter(TaskSection::hasAnyTask)
-                    .collect(toList());
+                    .toList();
 
         }
 
@@ -236,7 +235,7 @@ public class TaskListRenderer {
                          pdfApplication,
                          submit)
             .filter(TaskSection::hasAnyTask)
-            .collect(toList());
+            .toList();
     }
 
     private List<String> renderSection(TaskSection sec, CaseData caseData) {
@@ -258,7 +257,7 @@ public class TaskListRenderer {
                         APPLICANT_DETAILS.equals(eachError.getEvent()) ? !(eventsChecker.hasMandatoryCompleted(eachError.getEvent(), caseData)
                                     || eventsChecker.isFinished(eachError.getEvent(), caseData))
                                 : !eventsChecker.isFinished(eachError.getEvent(), caseData)
-            ).collect(toList())));
+            ).toList()));
         }
         return section;
     }
@@ -318,7 +317,7 @@ public class TaskListRenderer {
             .flatMap(task -> task.getErrors()
                 .stream()
                 .map(error -> format("%s in %s", error, taskListRenderElements.renderLink(task.getEvent()))))
-            .collect(toList());
+            .toList();
 
         return taskListRenderElements.renderCollapsible("Why can't I submit my application?", errors);
     }
@@ -331,7 +330,7 @@ public class TaskListRenderer {
                 .flatMap(task -> task.getErrors()
                         .stream()
                         .map(error -> format("%s to %s", error, taskListRenderElements.renderLink(task.getEvent()))))
-                .collect(toList());
+                .toList();
 
         return taskListRenderElements.renderCollapsible("Why can't I enter relationship details?", errors);
     }
@@ -392,6 +391,6 @@ public class TaskListRenderer {
                          uploadDocuments,
                          checkAndSignApplication)
             .filter(TaskSection::hasAnyTask)
-            .collect(toList());
+            .toList();
     }
 }

@@ -2,73 +2,79 @@ package uk.gov.hmcts.reform.prl.enums.uploadadditionalapplication;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import uk.gov.hmcts.reform.prl.enums.CustomEnumSerializer;
 
 @RequiredArgsConstructor
 @JsonSerialize(using = CustomEnumSerializer.class)
+@Getter
 public enum OtherApplicationType {
 
-    @JsonProperty("C1_CHANGE_SURNAME_OR_REMOVE_FROM_JURISDICTION")
-    C1_CHANGE_SURNAME_OR_REMOVE_FROM_JURISDICTION(
-        "C1_CHANGE_SURNAME_OR_REMOVE_FROM_JURISDICTION",
-        "C1 - Change surname or remove from jurisdiction"
+    @JsonProperty("C1_CHILD_ORDER")
+    C1_CHILD_ORDER(
+        "C1_CHILD_ORDER",
+        "C1 - Apply for certain orders under the Children Act"
     ),
-
-    @JsonProperty("C1_APPOINTMENT_OF_A_GUARDIAN")
-    C1_APPOINTMENT_OF_A_GUARDIAN("C1_APPOINTMENT_OF_A_GUARDIAN", "C1 - Appointment of a guardian"),
-
-    @JsonProperty("C1_TERMINATION_OF_APPOINTMENT_OF_A_GUARDIAN")
-    C1_TERMINATION_OF_APPOINTMENT_OF_A_GUARDIAN(
-        "C1_TERMINATION_OF_APPOINTMENT_OF_A_GUARDIAN",
-        "C1 - Termination of appointment of a guardian"
+    @JsonProperty("C3_CHILD_ORDER")
+    C3_CHILD_ORDER(
+        "C3_CHILD_ORDER",
+        "C3 - Application for an order authorizing search and taking charge of a child"
     ),
-
-    @JsonProperty("C1_PARENTAL_RESPONSIBILITY")
-    C1_PARENTAL_RESPONSIBILITY("C1_PARENTAL_RESPONSIBILITY", "C1 - Parental responsibility"),
-
-    @JsonProperty("C1_WITH_SUPPLEMENT")
-    C1_WITH_SUPPLEMENT("C1_WITH_SUPPLEMENT", "C1 - With supplement"),
-
-    @JsonProperty("C3_SEARCH_TAKE_CHARGE_AND_DELIVERY_OF_A_CHILD")
-    C3_SEARCH_TAKE_CHARGE_AND_DELIVERY_OF_A_CHILD(
-        "C3_SEARCH_TAKE_CHARGE_AND_DELIVERY_OF_A_CHILD",
-        "C3 - Search, take charge and delivery of a child"
+    @JsonProperty("C4_CHILD_ORDER")
+    C4_CHILD_ORDER(
+        "C4_CHILD_ORDER",
+        "C4 - Application for an order for disclosure of a child’s whereabouts"
     ),
-
-    @JsonProperty("C4_WHEREABOUTS_OF_A_MISSING_CHILD")
-    C4_WHEREABOUTS_OF_A_MISSING_CHILD("C4_WHEREABOUTS_OF_A_MISSING_CHILD", "C4 - Whereabouts of a missing child"),
-
-    @JsonProperty("C12_WARRANT_TO_ASSIST_PERSON")
-    C12_WARRANT_TO_ASSIST_PERSON(
-        "C12_WARRANT_TO_ASSIST_PERSON",
-        "C12 - Warrant to assist person authorised by an emergency protection order"
+    @JsonProperty("C79_CHILD_ORDER")
+    C79_CHILD_ORDER(
+        "C79_CHILD_ORDER",
+        "C79 - Application to enforce a child arrangements order"
     ),
-
-    @JsonProperty("C17_EDUCATION_SUPERVISION_ORDER")
-    C17_EDUCATION_SUPERVISION_ORDER("C17_EDUCATION_SUPERVISION_ORDER", "C17 - Education supervision order (ESO)"),
-
-    @JsonProperty("C17A_EXTENSION_OF_ESO")
-    C17A_EXTENSION_OF_ESO("C17A_EXTENSION_OF_ESO", "C17a - Variation or extension of ESO"),
-
-    @JsonProperty("C19_WARRANT_TO_ASSISTANCE")
-    C19_WARRANT_TO_ASSISTANCE("C19_WARRANT_TO_ASSISTANCE", "C19 - Warrant of assistance"),
-
-    @JsonProperty("C63_DECLARATION_OF_PARENTAGE")
-    C63_DECLARATION_OF_PARENTAGE("C63_DECLARATION_OF_PARENTAGE", "C63 - Declaration of parentage"),
-
-    @JsonProperty("C100_CHILD_ARRANGEMENTS")
-    C100_CHILD_ARRANGEMENTS("C100_CHILD_ARRANGEMENTS", "C100 - Child arrangements, prohibited steps or specific issue");
+    @JsonProperty("EX740_CROSS_EXAMINATION_VICTIM")
+    EX740_CROSS_EXAMINATION_VICTIM(
+        "EX740_CROSS_EXAMINATION_VICTIM",
+        "EX740 - Application to prohibit cross examination (victim)"
+    ),
+    @JsonProperty("EX741_CROSS_EXAMINATION_PERPETRATOR")
+    EX741_CROSS_EXAMINATION_PERPETRATOR(
+        "EX741_CROSS_EXAMINATION_PERPETRATOR",
+        "EX741 - Application to prohibit cross examination (perpetrator)"
+    ),
+    @JsonProperty("FP25_WITNESS_SUMMONS")
+    FP25_WITNESS_SUMMONS(
+        "FP25_WITNESS_SUMMONS",
+        "FP25 - Witness summons"
+    ),
+    @JsonProperty("FC600_COMMITTAL_APPLICATION")
+    FC600_COMMITTAL_APPLICATION(
+        "FC600_COMMITTAL_APPLICATION",
+        "FC600 - Committal application"
+    ),
+    @JsonProperty("N161_APPELLANT_NOTICE")
+    N161_APPELLANT_NOTICE(
+        "N161_APPELLANT_NOTICE",
+        "N161 - Appellant’s notice"
+    ),
+    @JsonProperty("FL403_EXTEND_AN_ORDER")
+    FL403_EXTEND_AN_ORDER(
+        "FL403_EXTEND_AN_ORDER",
+                "FL403 - Application to vary, discharge or extend an order"
+    ),
+    @JsonProperty("FL407_ARREST_WARRANT")
+    FL407_ARREST_WARRANT(
+        "FL407_ARREST_WARRANT",
+                "FL407 - Application for a warrant of arrest"
+    ),
+    @JsonProperty("D89_COURT_BAILIFF")
+    D89_COURT_BAILIFF(
+        "D89_COURT_BAILIFF",
+        "D89 - Request for personal service by a court bailiff"
+    );
 
     private final String id;
     private final String displayedValue;
-
-    @JsonValue
-    public String getDisplayedValue() {
-        return displayedValue;
-    }
 
     @JsonCreator
     public static OtherApplicationType getValue(String key) {

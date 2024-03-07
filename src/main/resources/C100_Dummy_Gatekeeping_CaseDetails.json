@@ -474,7 +474,7 @@
           "isEmailAddressConfidential": "Yes",
           "applicantContactInstructions": null,
           "respondentLivedWithApplicant": null,
-          "doTheyHaveLegalRepresentation": null,
+          "doTheyHaveLegalRepresentation": "yes",
           "addressLivedLessThan5YearsDetails": null,
           "otherPersonRelationshipToChildren": [],
           "isRemoveLegalRepresentativeRequested": null,
@@ -1368,22 +1368,8 @@
         }
       }
     ],
-    "c8Document": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ee89b94f-75a1-4d90-82d5-e6792bc72000",
-      "document_filename": "C8Document.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ee89b94f-75a1-4d90-82d5-e6792bc72000/binary",
-      "document_creation_date": null
-    },
     "caseStatus": {
       "state": "Gatekeeping"
-    },
-    "c1ADocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c220585c-84e2-41b9-805b-4c92849196a3",
-      "document_filename": "C1A_Document.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/c220585c-84e2-41b9-805b-4c92849196a3/binary",
-      "document_creation_date": null
     },
     "childAbuses": [
       "physicalAbuse",
@@ -2741,13 +2727,6 @@
     },
     "dateSubmitted": "2023-09-04",
     "draftOrderDoc": null,
-    "finalDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/fc55d446-02f2-49aa-979e-1e2c7001a707",
-      "document_filename": "C100FinalDocument.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/fc55d446-02f2-49aa-979e-1e2c7001a707/binary",
-      "document_creation_date": null
-    },
     "isWelshDocGen": "Yes",
     "natureOfOrder": "Requesting for spending time with the child twice a week",
     "solicitorName": "AAT Solicitor",
@@ -2928,20 +2907,6 @@
     ],
     "urgencyDetails": {
       "urgencyStatus": "Not urgent"
-    },
-    "c8DraftDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0edee009-2bfc-453a-b0e3-b6ba2ecf99f0",
-      "document_filename": "C8DocumentDraft.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/0edee009-2bfc-453a-b0e3-b6ba2ecf99f0/binary",
-      "document_creation_date": null
-    },
-    "c8WelshDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7ff98482-fbe2-4dd7-830d-2d57e0dda82e",
-      "document_filename": "C8Document_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7ff98482-fbe2-4dd7-830d-2d57e0dda82e/binary",
-      "document_creation_date": null
     },
     "localCourtAdmin": [
       {
@@ -3189,20 +3154,6 @@
     ],
     "taskListVersion": "v2",
     "allegationOfHarm": {},
-    "c1ADraftDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a598c30a-b147-4911-8c19-7fe0dfd3023c",
-      "document_filename": "C1A_DocumentDraft.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a598c30a-b147-4911-8c19-7fe0dfd3023c/binary",
-      "document_creation_date": null
-    },
-    "c1AWelshDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b85a0efc-fb8e-4eb5-9996-2b4187aa23b6",
-      "document_filename": "C1A_Document_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/b85a0efc-fb8e-4eb5-9996-2b4187aa23b6/binary",
-      "document_creation_date": null
-    },
     "caseFromCourtNav": null,
     "dateOfSubmission": {
       "dateOfSubmission": "04 09 2023"
@@ -3285,13 +3236,6 @@
     ],
     "draftOrderDocWelsh": null,
     "familyMediatorMiam": "No",
-    "finalWelshDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ea6c4231-257b-4b55-a45f-8533008e329b",
-      "document_filename": "C100FinalDocumentWelsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/ea6c4231-257b-4b55-a45f-8533008e329b/binary",
-      "document_creation_date": null
-    },
     "gatekeepingDetails": {
       "judgeName": {},
       "legalAdviserList": null,
@@ -3364,13 +3308,6 @@
     "respondentTaskListC": "",
     "respondentTaskListD": "",
     "respondentTaskListE": "",
-    "c8WelshDraftDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2dd96c4d-720c-4eab-bf59-0e1b6347f4ae",
-      "document_filename": "C8Document_Draft_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/2dd96c4d-720c-4eab-bf59-0e1b6347f4ae/binary",
-      "document_creation_date": null
-    },
     "caseSolicitorOrgName": "FPRL-test-organisation",
     "childPassportDetails": {},
     "newOrdersRestraining": "No",
@@ -3384,13 +3321,6 @@
       "isSpecificJudgeOrLegalAdviserNeeded": null
     },
     "applicantAttendedMiam": "No",
-    "c1AWelshDraftDocument": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7e11629c-ef77-490c-b90c-65b603315b20",
-      "document_filename": "C1A_Document_Draft_Welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/7e11629c-ef77-490c-b90c-65b603315b20/binary",
-      "document_creation_date": null
-    },
     "caseNameHmctsInternal": "John Doe Vs Mary Richards v2",
     "caseTypeOfApplication": "C100",
     "claimingExemptionMiam": "Yes",
@@ -5211,13 +5141,6 @@
       "serviceRequestReference": "2023-1693818908073"
     },
     "requestToForeignAuthorityGiveReason": "Yes",
-    "submitAndPayDownloadApplicationLink": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/54703d77-77d0-402b-bbea-2caec57ef8f7",
-      "document_filename": "Draft_C100_application.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/54703d77-77d0-402b-bbea-2caec57ef8f7/binary",
-      "document_creation_date": null
-    },
     "welshLanguageRequirementApplication": "english",
     "childrenSubjectOfChildProtectionPlan": "no",
     "newOrdersUndertakingInPlaceCourtName": "SWAE",
@@ -5248,13 +5171,6 @@
     "newAllegationsOfHarmOtherConcernsDetails": "welfare",
     "newOrdersForcedMarriageProtectionCurrent": null,
     "newOrdersForcedMarriageProtectionEndDate": null,
-    "submitAndPayDownloadApplicationWelshLink": {
-      "category_id": null,
-      "document_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a88f5df9-0971-4574-946a-5a93e478b43d",
-      "document_filename": "Draft_C100_application_welsh.pdf",
-      "document_binary_url": "http://dm-store-aat.service.core-compute-aat.internal/documents/a88f5df9-0971-4574-946a-5a93e478b43d/binary",
-      "document_creation_date": null
-    },
     "allegationsOfHarmRevisedChildContactTable": {
       "newAgreeChildOtherContact": "No",
       "newAgreeChildSupervisedTime": "No",

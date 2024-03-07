@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndOtherPeopleRelatio
 import uk.gov.hmcts.reform.prl.models.complextypes.ChildrenAndRespondentRelation;
 import uk.gov.hmcts.reform.prl.models.complextypes.OtherChildrenNotInTheCase;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.applicationtab.OtherPersonInTheCaseRevised;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.Relations;
 
@@ -27,6 +28,7 @@ import java.util.List;
 
 import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.THIS_INFORMATION_IS_CONFIDENTIAL;
 import static uk.gov.hmcts.reform.prl.enums.Gender.female;
 import static uk.gov.hmcts.reform.prl.enums.OrderTypeEnum.childArrangementsOrder;
@@ -276,6 +278,89 @@ public class ApplicationsTabServiceHelperTest {
             .build();
 
         assertNotNull(applicationsTabService.getOtherPeopleInTheCaseRevisedTable(caseData));
+    }
+
+    @Test
+    public void testGetOtherPeopleWhenOtherPartyInTheCaseRevisedIsNotEmpty() {
+
+        PartyDetails partyDetails = PartyDetails.builder()
+            .firstName("Test")
+            .address(Address.builder()
+                         .addressLine1("address")
+                         .postTown("London")
+                         .build())
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(1999, 12, 10))
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .addressLivedLessThan5YearsDetails("test")
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .addressLivedLessThan5YearsDetails("Test")
+            .dxNumber("123456")
+            .gender(Gender.female)
+            .lastName("lastName")
+            .previousName("testPreviousname")
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.No)
+            .build();
+
+        Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> listOfParty = Collections.singletonList(partyWrapped);
+
+        OtherPersonInTheCaseRevised otherPerson = OtherPersonInTheCaseRevised.builder()
+            .firstName("Test")
+            .address(Address.builder()
+                         .addressLine1("address")
+                         .postTown("London")
+                         .build())
+            .isPlaceOfBirthKnown(YesOrNo.Yes)
+            .dateOfBirth(LocalDate.of(1999, 12, 10))
+            .canYouProvideEmailAddress(YesOrNo.Yes)
+            .canYouProvidePhoneNumber(YesOrNo.Yes)
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .addressLivedLessThan5YearsDetails("test")
+            .isAtAddressLessThan5Years(YesOrNo.Yes)
+            .addressLivedLessThan5YearsDetails("Test")
+            .gender("Female")
+            .lastName("lastName")
+            .previousName("testPreviousname")
+            .isDateOfBirthKnown(YesOrNo.Yes)
+            .isCurrentAddressKnown(YesOrNo.No)
+            .build();
+
+        Element<OtherPersonInTheCaseRevised> otherPersonWrapped = Element.<OtherPersonInTheCaseRevised>builder().value(otherPerson).build();
+        List<Element<OtherPersonInTheCaseRevised>> listOfOtherPerson = Collections.singletonList(otherPersonWrapped);
+
+        CaseData caseData = CaseData.builder()
+            .othersToNotify(listOfParty)
+            .otherPartyInTheCaseRevised(listOfParty)
+            .build();
+
+        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCaseRevised.class)).thenReturn(otherPerson);
+        assertNotNull(applicationsTabService.getOtherPeopleInTheCaseRevisedTable(caseData));
+        assertEquals(listOfOtherPerson, applicationsTabService.getOtherPeopleInTheCaseRevisedTable(caseData));
+    }
+
+    @Test
+    public void testGetOtherPeopleWhenOtherPartyInTheCaseRevisedIsNotEmptyAndGenderIsNotAdded() {
+
+        PartyDetails partyDetails = PartyDetails.builder().firstName("Test").build();
+        Element<PartyDetails> partyWrapped = Element.<PartyDetails>builder().value(partyDetails).build();
+        List<Element<PartyDetails>> listOfParty = Collections.singletonList(partyWrapped);
+
+        OtherPersonInTheCaseRevised otherPerson = OtherPersonInTheCaseRevised.builder().firstName("Test").build();
+        Element<OtherPersonInTheCaseRevised> otherPersonWrapped = Element.<OtherPersonInTheCaseRevised>builder().value(otherPerson).build();
+        List<Element<OtherPersonInTheCaseRevised>> listOfOtherPerson = Collections.singletonList(otherPersonWrapped);
+
+        CaseData caseData = CaseData.builder()
+            .othersToNotify(listOfParty)
+            .otherPartyInTheCaseRevised(listOfParty)
+            .build();
+
+        when(objectMapper.convertValue(partyDetails, OtherPersonInTheCaseRevised.class)).thenReturn(otherPerson);
+        assertNotNull(applicationsTabService.getOtherPeopleInTheCaseRevisedTable(caseData));
+        assertEquals(listOfOtherPerson, applicationsTabService.getOtherPeopleInTheCaseRevisedTable(caseData));
     }
 
     @Test

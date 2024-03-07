@@ -33,8 +33,22 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
     classes = {HearingApiClientConsumerApplication.class, IdamApiConsumerApplication.class}
 )
 @TestPropertySource(
-    properties = {"fis_hearing.api.url=http://localhost:8899", "idam.api.url=localhost:5000"}
+    properties = {"bundle.api.url=","idam.api.url=localhost:5000","commonData.api.url=localhost:5000",
+        "fis_hearing.api.url=http://localhost:8899",
+        "refdata.api.url=",
+        "courtfinder.api.url=",
+        "prl-dgs-api.url=",
+        "fees-register.api.url=",
+        "judicialUsers.api.url=",
+        "locationfinder.api.url=",
+        "rd_professional.api.url=",
+        "payments.api.url=",
+        "pba.validation.service.api.baseurl=",
+        "staffDetails.api.url=",
+        "amRoleAssignment.api.url="
+    }
 )
+
 @PactFolder("pacts")
 public class CaseLinedApiConsumerTest {
 

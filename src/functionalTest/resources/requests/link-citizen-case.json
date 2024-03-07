@@ -2744,10 +2744,10 @@
   "furtherDirectionsIfRequired": "string",
   "furtherInformationIfRequired": "string",
   "courtDeclares2": [
-    "Is entitled to occupy the address as their home"
+    "is entitled to occupy the address as their home"
   ],
   "theRespondent2": [
-    "Shall allow the applicant to occupy the address"
+    "shall allow the applicant to occupy the address"
   ],
   "childArrangementsOrdersToIssue": [
     "Child Arrangements Order"
