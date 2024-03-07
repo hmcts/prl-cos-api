@@ -2726,7 +2726,7 @@ public class ServiceOfApplicationService {
                     caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                     caseInvites.add(element(caseInvite));
                 }
-                if (isAccessEnabled(selectedApplicant)) {
+                if (true) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
                         log.info("inside contact preference");
