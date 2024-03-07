@@ -94,7 +94,9 @@ public class DgsService {
                                                                                        caseTypeOfApplication)
                 );
                 dataMap.put(k, updatedWelshObj);
-                log.info("v value is {}", updatedWelshObj);
+                log.info("returned v value is {}", updatedWelshObj);
+                log.info("break");
+                log.info("returned datatMap is {}", dataMap);
             }
         });
 
