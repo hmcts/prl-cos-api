@@ -87,8 +87,9 @@ public class ManageDocumentsController extends AbstractCallbackController {
         UserDetails updatedUserDetails = UserDetails.builder()
             .email(userDetails.getEmail())
             .id(userDetails.getId())
-            .surname(userDetails.getSurname().get())
-            .forename(userDetails.getForename())
+            .surname(userDetails.getSurname() != null
+                         && userDetails.getSurname().isPresent() ? userDetails.getSurname().get() : null)
+            .forename(userDetails.getForename() != null ? userDetails.getForename() : null)
             .roles(manageDocumentsService.getLoggedInUserType(authorisation))
             .build();
 
