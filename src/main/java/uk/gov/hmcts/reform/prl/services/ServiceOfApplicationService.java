@@ -1266,7 +1266,7 @@ public class ServiceOfApplicationService {
                 docs,
                 SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                 dynamicData,
-                SERVED_PARTY_APPLICANT_SOLICITOR
+                SERVED_PARTY_APPLICANT
             )));
 
         } catch (Exception e) {
