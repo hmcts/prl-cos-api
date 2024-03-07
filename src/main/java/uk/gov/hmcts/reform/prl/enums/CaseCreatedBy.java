@@ -7,5 +7,6 @@ import lombok.RequiredArgsConstructor;
 @JsonSerialize(using = CustomEnumSerializer.class)
 public enum CaseCreatedBy {
     SOLICITOR,
-    CITIZEN
+    CITIZEN,
+    COURT_ADMIN
 }

@@ -49,6 +49,7 @@ import uk.gov.hmcts.reform.prl.models.complextypes.OtherDocuments;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.TypeOfApplicationOrders;
 import uk.gov.hmcts.reform.prl.models.complextypes.WithdrawApplication;
+import uk.gov.hmcts.reform.prl.models.complextypes.tab.summarytab.summary.CaseStatus;
 import uk.gov.hmcts.reform.prl.models.court.Court;
 import uk.gov.hmcts.reform.prl.models.court.CourtEmailAddress;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -100,8 +101,10 @@ import static org.springframework.http.ResponseEntity.ok;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.APPLICANT_OR_RESPONDENT_CASE_NAME;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.C100_CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_CREATED_BY;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_DATE_AND_TIME_SUBMITTED_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE_OF_APPLICATION;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DRAFT_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.FL401_CASE_TYPE;
@@ -113,6 +116,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.IS_JUDGE_OR_LEG
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDICIAL_REVIEW_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.PENDING_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.RETURN_STATE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.STATE_FIELD;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SUBMITTED_STATE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.TASK_LIST_VERSION_V2;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.VERIFY_CASE_NUMBER_ADDED;
@@ -332,6 +336,11 @@ public class CallbackController {
                 if (launchDarklyClient.isFeatureEnabled("task-list-v2")) {
                     caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
                 }
+            } else if (CaseCreatedBy.COURT_ADMIN.equals(caseData.getCaseCreatedBy())) {
+                caseDataUpdated.put("caseStatus", CaseStatus.builder()
+                    .state(SUBMITTED_PAID.getLabel())
+                    .build());
+                caseDataUpdated.put(STATE_FIELD, SUBMITTED_PAID.getValue());
             } else {
                 PaymentServiceResponse paymentServiceResponse = paymentRequestService.createServiceRequestFromCcdCallack(
                     callbackRequest,
@@ -347,7 +356,6 @@ public class CallbackController {
                 .region(C100_DEFAULT_REGION_ID)
                 .baseLocation(C100_DEFAULT_BASE_LOCATION_ID).regionName(C100_DEFAULT_REGION_NAME)
                 .baseLocationName(C100_DEFAULT_BASE_LOCATION_NAME).build());
-
 
             return AboutToStartOrSubmitCallbackResponse.builder().data(caseDataUpdated).build();
         } else {
@@ -624,8 +632,9 @@ public class CallbackController {
                     caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
                 }
             }
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
+            populateCaseCreatedByField(authorisation,caseDataUpdated);
             // Saving the logged-in Solicitor and Org details for the docs..
+            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             return AboutToStartOrSubmitCallbackResponse.builder().data(getSolicitorDetails(
                 authorisation,
                 caseDataUpdated,
@@ -635,6 +644,8 @@ public class CallbackController {
             throw (new RuntimeException(INVALID_CLIENT));
         }
     }
+
+
 
     @PostMapping(path = "/fl401-add-case-number", consumes = APPLICATION_JSON, produces = APPLICATION_JSON)
     @Operation(description = "Callback for add case number submit event")
@@ -873,6 +884,13 @@ public class CallbackController {
                 "The selected user does not have right roles to assign this case")).build();
         }
         return AboutToStartOrSubmitCallbackResponse.builder().build();
+    }
+
+    private void populateCaseCreatedByField(String authorisation, Map<String, Object> caseDataUpdated) {
+        UserDetails userDetails = userService.getUserDetails(authorisation);
+        if (userDetails.getRoles() != null && userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
+            caseDataUpdated.put(CASE_CREATED_BY,CaseCreatedBy.COURT_ADMIN);
+        }
     }
 }
 

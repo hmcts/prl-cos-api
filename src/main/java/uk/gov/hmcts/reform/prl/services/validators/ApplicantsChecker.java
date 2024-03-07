@@ -2,8 +2,10 @@ package uk.gov.hmcts.reform.prl.services.validators;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.prl.enums.CaseCreatedBy;
 import uk.gov.hmcts.reform.prl.enums.Gender;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Address;
@@ -57,7 +59,8 @@ public class ApplicantsChecker implements EventChecker {
             Optional<String> dxNumber = ofNullable(applicant.getDxNumber());
             boolean mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(
                 applicant,
-                caseData.getCaseTypeOfApplication()
+                caseData.getCaseTypeOfApplication(),
+                caseData.getCaseCreatedBy()
             );
             boolean dxCompleted = (dxNumber.isPresent() && !(dxNumber.get().isBlank()));
 
@@ -109,7 +112,8 @@ public class ApplicantsChecker implements EventChecker {
             for (PartyDetails applicant : applicants) {
                 mandatoryCompleted = mandatoryApplicantFieldsAreCompleted(
                     applicant,
-                    caseData.getCaseTypeOfApplication()
+                    caseData.getCaseTypeOfApplication(),
+                    caseData.getCaseCreatedBy()
                 );
                 if (!mandatoryCompleted) {
                     break;
@@ -128,7 +132,8 @@ public class ApplicantsChecker implements EventChecker {
         return false;
     }
 
-    private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant, String caseTypeOfApplication) {
+    private boolean mandatoryApplicantFieldsAreCompleted(PartyDetails applicant, String caseTypeOfApplication,
+                                                         CaseCreatedBy caseCreatedBy) {
         List<Optional<?>> fields = new ArrayList<>();
         fields.add(ofNullable(applicant.getFirstName()));
         fields.add(ofNullable(applicant.getLastName()));
@@ -163,10 +168,8 @@ public class ApplicantsChecker implements EventChecker {
         }
         fields.add(ofNullable(applicant.getPhoneNumber()));
         fields.add(ofNullable(applicant.getIsPhoneNumberConfidential()));
-        fields.add(ofNullable(applicant.getRepresentativeFirstName()));
-        fields.add(ofNullable(applicant.getRepresentativeLastName()));
-        fields.add(ofNullable(applicant.getSolicitorEmail()));
-        if (addSolicitorAddressFields(applicant, fields)) {
+        addSolicitorFields(applicant, caseCreatedBy, fields);
+        if (addSolicitorAddressFields(applicant, fields,caseCreatedBy)) {
             return false;
         }
 
@@ -175,10 +178,37 @@ public class ApplicantsChecker implements EventChecker {
             && fields.stream().filter(Optional::isPresent).map(Optional::get).noneMatch(field -> field.equals(""));
     }
 
-    private boolean addSolicitorAddressFields(PartyDetails applicant, List<Optional<?>> fields) {
+    private void addSolicitorFields(PartyDetails applicant, CaseCreatedBy caseCreatedBy, List<Optional<?>> fields) {
+        if (CaseCreatedBy.COURT_ADMIN.equals(caseCreatedBy)) {
+            if (StringUtils.isNoneEmpty(applicant.getRepresentativeFirstName())) {
+                fields.add(ofNullable(applicant.getRepresentativeFirstName()));
+            }
+            if (StringUtils.isNoneEmpty(applicant.getRepresentativeLastName())) {
+                fields.add(ofNullable(applicant.getRepresentativeLastName()));
+            }
+            if (StringUtils.isNoneEmpty(applicant.getSolicitorEmail())) {
+                fields.add(ofNullable(applicant.getSolicitorEmail()));
+            }
+        } else {
+            fields.add(ofNullable(applicant.getRepresentativeFirstName()));
+            fields.add(ofNullable(applicant.getRepresentativeLastName()));
+            fields.add(ofNullable(applicant.getSolicitorEmail()));
+        }
+    }
+
+    private boolean addSolicitorAddressFields(PartyDetails applicant,
+                                              List<Optional<?>> fields,
+                                              CaseCreatedBy caseCreatedBy) {
         Optional<Organisation> solicitorOrg = ofNullable(applicant.getSolicitorOrg());
         if (solicitorOrg.isPresent() && (solicitorOrg.get().getOrganisationID() != null)) {
             fields.add(solicitorOrg);
+        } else if (CaseCreatedBy.COURT_ADMIN.equals(caseCreatedBy)) {
+            Optional<Address> solicitorAddress = ofNullable(applicant.getSolicitorAddress());
+            if (solicitorAddress.isPresent()
+                && (!ofNullable(solicitorAddress.get().getAddressLine1()).isEmpty()
+                && !ofNullable(solicitorAddress.get().getPostCode()).isEmpty())) {
+                fields.add(solicitorAddress);
+            }
         } else {
             Optional<Address> solicitorAddress = ofNullable(applicant.getSolicitorAddress());
             if (solicitorAddress.isPresent()

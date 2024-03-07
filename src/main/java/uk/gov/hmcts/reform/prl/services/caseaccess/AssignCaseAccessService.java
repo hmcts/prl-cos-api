@@ -9,7 +9,10 @@ import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.models.caseaccess.AssignCaseAccessRequest;
 import uk.gov.hmcts.reform.prl.services.UserService;
 
+import java.util.List;
+
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CASE_TYPE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.ROLES;
 
 
 @Service
@@ -28,18 +31,21 @@ public class AssignCaseAccessService {
 
         if (launchDarklyClient.isFeatureEnabled("share-a-case")) {
             UserDetails userDetails = userService.getUserDetails(authorisation);
-
+            List<String> roles = userDetails.getRoles();
+            boolean isCourtStaff = roles.stream().anyMatch(ROLES::contains);
             String userId = userDetails.getId();
 
             log.info("CaseId: {} of type {} assigning case access to user {}", caseId, CASE_TYPE, userId);
 
-            String serviceToken = authTokenGenerator.generate();
-            assignCaseAccessClient.assignCaseAccess(
-                authorisation,
-                serviceToken,
-                true,
-                buildAssignCaseAccessRequest(caseId, userId, CASE_TYPE)
-            );
+            if (!isCourtStaff) {
+                String serviceToken = authTokenGenerator.generate();
+                assignCaseAccessClient.assignCaseAccess(
+                    authorisation,
+                    serviceToken,
+                    true,
+                    buildAssignCaseAccessRequest(caseId, userId, CASE_TYPE)
+                );
+            }
             ccdDataStoreService.removeCreatorRole(caseId, authorisation);
 
             log.info("CaseId: {} assigned case access to user {}", caseId, userId);
