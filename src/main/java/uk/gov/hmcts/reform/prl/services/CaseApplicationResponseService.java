@@ -88,6 +88,10 @@ public class CaseApplicationResponseService {
                 currentRespondent.get()
             );
 
+            if (isNotEmpty(currentRespondent.get().getValue().getResponse())) {
+                log.info("response is {}", currentRespondent.get().getValue().getResponse());
+            }
+
 
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())
                 && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
