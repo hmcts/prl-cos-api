@@ -139,7 +139,7 @@ public class ManageOrdersControllerFunctionalTest {
     @Before
     public void setup() {
         caseDetails = CaseDetails.builder()
-            .id(1709725524296690L)
+            .id(1709662358269545L)
             .build();
     }
 
@@ -318,9 +318,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        System.out.println("givenRequestBody_courtArdmin_judge_approval"
-                               + "_required Response ===================== " + resp.getData());
-
     }
 
     @Test
@@ -364,8 +361,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        System.out.println("givenRequestBody_courtArdmin_judge"
-                               + "_approval_requiredMultiple response =================== " + resp.getData());
 
     }
 
@@ -490,7 +485,6 @@ public class ManageOrdersControllerFunctionalTest {
     public void givenRequestBody_WhenPostRequestTestSendCafcassCymruOrderEmail() throws Exception {
         Map<String, Object> caseData = new HashMap<>();
         caseData.put("cafcassCymruEmail", "test@hmcts.net");
-        //doNothing().when(coreCaseDataService).triggerEvent(anyString(), anyString(), anyLong(), anyString(), anyMap());
         caseDetails = caseDetails.toBuilder()
             .data(caseData)
             .build();
@@ -654,9 +648,6 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo("judgeOrLegalAdvisorCheck"))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-        System.out.println("givenRequestBody_courtArdmin_"
-                               + "judge_approval_required_sdo Response ======================== " + resp.getData());
-
     }
 
 
@@ -683,6 +674,5 @@ public class ManageOrdersControllerFunctionalTest {
                   "data.judgeLaManagerReviewRequired", equalTo(null))
             .extract()
             .as(AboutToStartOrSubmitCallbackResponse.class);
-
     }
 }

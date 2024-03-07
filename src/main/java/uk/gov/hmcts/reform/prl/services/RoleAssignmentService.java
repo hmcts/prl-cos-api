@@ -47,9 +47,6 @@ public class RoleAssignmentService {
     private final ObjectMapper objectMapper;
     private final SystemUserService systemUserService;
 
-    @Value("${amRoleAssignment.api.url}")
-    String amRoleAssignmentUrl;
-
     public void createRoleAssignment(String authorization,
                                      CaseDetails caseDetails,
                                      RoleAssignmentDto roleAssignmentDto,
@@ -98,7 +95,6 @@ public class RoleAssignmentService {
                 .requestedRoles(requestedRoles)
                 .build();
 
-            log.info("amRoleAssignmentURL {}", amRoleAssignmentUrl);
             roleAssignmentApi.updateRoleAssignment(
                 systemUserToken,
                 authTokenGenerator.generate(),
