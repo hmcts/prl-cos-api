@@ -46,6 +46,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.DOCUMENT_C7_DRA
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBMIT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -351,19 +352,20 @@ public class CaseApplicationResponseController {
                     dataMap
                 );
             }
+            if (Boolean.TRUE.equals(isWelsh)) {
+                log.info(" isWelsh..WEL......{}",isWelsh);
+                return documentGenService.generateSingleDocument(
+                    authorisation,
+                    caseData,
+                    SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT,
+                    true,
+                    dataMap
+                );
+            }
+
         }
 
 
-        //                if (Boolean.TRUE.equals(isWelsh)) {
-        //                    log.info(" isWelsh..WEL......{}",isWelsh);
-        //                    return documentGenService.generateSingleDocument(
-        //                        authorisation,
-        //                        caseData,
-        //                        CITIZEN_C1A_WELSH_DRAFT_DOCUMENT,
-        //                        true,
-        //                        dataMap
-        //                    );
-        //                }
 
         log.info("C1A draft document generated successfully for respondent ");
         return null;
