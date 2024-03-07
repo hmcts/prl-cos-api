@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.ccd.document.am.feign.CaseDocumentClientApi;
 import uk.gov.hmcts.reform.ccd.document.am.model.UploadResponse;
 import uk.gov.hmcts.reform.ccd.document.am.util.InMemoryMultipartFile;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import uk.gov.hmcts.reform.prl.config.launchdarkly.LaunchDarklyClient;
 import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.enums.managedocuments.DocumentPartyEnum;
 import uk.gov.hmcts.reform.prl.models.Element;
@@ -69,6 +70,7 @@ import static org.springframework.http.MediaType.APPLICATION_PDF_VALUE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CAFCASS_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.CONFIDENTIAL_DOCUMENTS;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_ADMIN_ROLE;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.COURT_STAFF;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.JUDGE_ROLE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOA_MULTIPART_FILE;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_ROLE;
@@ -83,6 +85,9 @@ public class ManageDocumentsServiceTest {
 
     @Mock
     private ObjectMapper objectMapper;
+
+    @Mock
+    private LaunchDarklyClient launchDarklyClient;
 
     @Mock
     private CoreCaseDataApi coreCaseDataApi;
@@ -202,7 +207,7 @@ public class ManageDocumentsServiceTest {
         userDetailsCourtAdminRole = UserDetails.builder()
             .forename("test")
             .surname("test")
-            .roles(Collections.singletonList(COURT_ADMIN_ROLE))
+            .roles(List.of(COURT_ADMIN_ROLE, COURT_STAFF))
             .build();
         userDetailsCourtStaffRoleExpectAdmin = UserDetails.builder()
             .forename("test")
@@ -467,7 +472,7 @@ public class ManageDocumentsServiceTest {
 
     @Test
     public void testCopyDocumentIfRestrictedWithCourtAdminRoleOld() {
-
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
             .documentCategories(DynamicList.builder().value(DynamicListElement.builder().code("test").build()).build())
@@ -570,6 +575,8 @@ public class ManageDocumentsServiceTest {
 
     @Test
     public void testCopyDocumentIfRestrictedWithCafcassRoleWithNonEmptyCafcassUploadDocListDocTab() {
+
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
 
         ManageDocuments manageDocuments = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.CAFCASS_CYMRU)
@@ -916,7 +923,7 @@ public class ManageDocumentsServiceTest {
     @Test
     public void returnTrueIfUserIsCourtStaff() {
         when(userService.getUserDetails(auth)).thenReturn(userDetailsCourtAdminRole);
-
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
         Assert.assertTrue(manageDocumentsService.checkIfUserIsCourtStaff(userDetailsCourtAdminRole));
     }
 
@@ -1121,6 +1128,7 @@ public class ManageDocumentsServiceTest {
 
     @Test
     public void validateCourtUser() {
+        when(launchDarklyClient.isFeatureEnabled("role-assignment-api-in-orders-journey")).thenReturn(false);
         ManageDocuments manageDocument = ManageDocuments.builder()
             .documentParty(DocumentPartyEnum.COURT)
             .documentCategories(dynamicList)
@@ -1140,7 +1148,7 @@ public class ManageDocumentsServiceTest {
 
         when(objectMapper.convertValue(caseDetails.getData(), CaseData.class)).thenReturn(caseData);
         when(caseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper)).thenReturn(caseData);
-        UserDetails userDetails = UserDetails.builder().roles(List.of(COURT_ADMIN_ROLE)).build();
+        UserDetails userDetails = UserDetails.builder().roles(List.of(COURT_STAFF)).build();
         when(objectMapper.convertValue(callbackRequest.getCaseDetails(), CaseData.class)).thenReturn(caseData);
         List<String> list = manageDocumentsService.validateCourtUser(callbackRequest, userDetails);
         Assert.assertTrue(list.isEmpty());
