@@ -184,7 +184,7 @@ public class CaseApplicationResponseService {
                         .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                             .toInstant()))
                         .build())
-                    .categoryId("")
+                    .categoryId(getCategoryId(element))
                     .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                     .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
                     .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
@@ -202,6 +202,21 @@ public class CaseApplicationResponseService {
                 .build());
         }
         return caseData;
+    }
+
+    private String getCategoryId(Element<Document> element) {
+
+        if (null != element.getValue().getDocumentFileName()) {
+            if (element.getValue().getDocumentFileName().equalsIgnoreCase("C7_Document.pdf")) {
+                return "respondentApplication";
+            } else if (element.getValue().getDocumentFileName().equalsIgnoreCase("C1A_allegation_of_harm.pdf")) {
+                return "respondentC1AApplication";
+            } else {
+                return "ordersFromOtherProceedings";
+            }
+        }
+
+        return "";
     }
 
     private Document generateFinalC1A(CaseData caseData, String authorisation, Map<String, Object> dataMap) throws Exception {
