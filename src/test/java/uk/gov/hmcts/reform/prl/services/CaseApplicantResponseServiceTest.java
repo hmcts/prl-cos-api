@@ -17,6 +17,9 @@ import uk.gov.hmcts.reform.prl.enums.YesOrNo;
 import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.Response;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.CurrentOrPreviousProceedings;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.OtherProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.safetyconcerns.SafetyConcerns;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
@@ -36,6 +39,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService.IS_CONFIDENTIAL_DATA_PRESENT;
+import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class CaseApplicantResponseServiceTest {
@@ -130,11 +134,21 @@ public class CaseApplicantResponseServiceTest {
 
     @Test
     public void testGenerateC7finalDocumentForRespondent1() throws Exception {
+        List<Element<OtherProceedingDetails>> proceedingsDetailsList = new ArrayList<>();
+        OtherProceedingDetails proceedingDetails = OtherProceedingDetails
+            .builder().orderDocument(Document.builder().build()).build();
+        proceedingsDetailsList.add(element(proceedingDetails));
+        List<Element<Proceedings>> proceedingsList = new ArrayList<>();
+        Proceedings proceedings = Proceedings.builder().proceedingDetails(proceedingsDetailsList).build();
+        proceedingsList.add(element(proceedings));
+
         Element partyDetails1 =  Element.<PartyDetails>builder()
             .id(UUID.randomUUID())
             .value(PartyDetails.builder().firstName("test").isAddressConfidential(YesOrNo.Yes)
                 .currentRespondent(YesOrNo.Yes)
-                .response(Response.builder().safetyConcerns(
+                .response(Response.builder()
+                    .currentOrPreviousProceedings(CurrentOrPreviousProceedings
+                        .builder().proceedingsList(proceedingsList).build()).safetyConcerns(
                     SafetyConcerns.builder().haveSafetyConcerns(YesOrNo.Yes).build()).build()).build())
             .build();
         List<Element<PartyDetails>> elementList = new ArrayList<>();
