@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.prl.mapper.welshlang;
 
+import lombok.extern.slf4j.Slf4j;
 import uk.gov.hmcts.reform.prl.enums.AbductionChildPassportPossessionEnum;
 import uk.gov.hmcts.reform.prl.enums.ApplicantOrChildren;
 import uk.gov.hmcts.reform.prl.enums.ApplicantRelationshipEnum;
@@ -38,6 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 
+@Slf4j
 public class WelshLangMapper {
 
     public static final String WELSH_NO = "Nac ydy";
@@ -74,14 +76,17 @@ public class WelshLangMapper {
      */
     public static Object applyWelshTranslation(Object key, Object obj, boolean isCA) {
         if (obj instanceof String) {
+            log.info("object is instant of string");
             obj = getValueFromMap(key, obj, isCA);
         } else if (obj instanceof List) {
             List<Object> list = (List<Object>) obj;
+            log.info("object is instant of list");
             for (int i = 0; i < list.size(); i++) {
                 Object eachObj = list.get(i);
                 list.set(i, applyWelshTranslation(null, eachObj, isCA));
             }
         } else if (obj instanceof Map) {
+            log.info("object is instant of map");
             Map<String, Object> innerMap = (Map<String, Object>) obj;
             innerMap.forEach((k, v) -> {
                 if (v != null) {
