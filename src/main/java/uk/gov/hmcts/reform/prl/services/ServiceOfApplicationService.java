@@ -2740,7 +2740,7 @@ public class ServiceOfApplicationService {
                                                                       Templates.AP6_LETTER);
                         List<Document> combinedDocs = new ArrayList<>(Collections.singletonList(ap6Letter));
                         combinedDocs.addAll(docs);
-                        sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
+                        sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, combinedDocs);
 
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
