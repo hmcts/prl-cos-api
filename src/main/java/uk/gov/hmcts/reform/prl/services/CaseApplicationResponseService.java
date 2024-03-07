@@ -13,6 +13,8 @@ import uk.gov.hmcts.reform.prl.models.Element;
 import uk.gov.hmcts.reform.prl.models.complextypes.PartyDetails;
 import uk.gov.hmcts.reform.prl.models.complextypes.QuarantineLegalDoc;
 import uk.gov.hmcts.reform.prl.models.complextypes.citizen.documents.ResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.OtherProceedingDetails;
+import uk.gov.hmcts.reform.prl.models.complextypes.citizen.response.proceedings.Proceedings;
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
@@ -96,14 +98,17 @@ public class CaseApplicationResponseService {
                 currentRespondent.get()
             );
 
+            if (isNotEmpty(currentRespondent.get().getValue().getResponse())) {
 
-            if (isNotEmpty(currentRespondent.get().getValue().getResponse())
-                && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
-                && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
-                log.info(" Generating C1A Final document for respondent ");
-                Document c1aFinalDocument = generateFinalC1A(caseData, authorisation, dataMap);
-                responseDocs.add(element(c1aFinalDocument));
-                log.info("C1A Final document generated successfully for respondent ");
+                responseDocs = checkPreviousProceedings(responseDocs, currentRespondent);
+
+                if (isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
+                    && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
+                    log.info(" Generating C1A Final document for respondent ");
+                    Document c1aFinalDocument = generateFinalC1A(caseData, authorisation, dataMap);
+                    responseDocs.add(element(c1aFinalDocument));
+                    log.info("C1A Final document generated successfully for respondent ");
+                }
             }
 
             String partyName = caseData.getRespondents()
@@ -140,6 +145,34 @@ public class CaseApplicationResponseService {
         return caseDetailsReturn;
     }
 
+    private List<Element<Document>> checkPreviousProceedings(List<Element<Document>> responseDocs,
+                                                             Optional<Element<PartyDetails>> currentRespondent) {
+        if (currentRespondent.isPresent()
+            && isNotEmpty(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings())
+            && isNotEmpty(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings().getProceedingsList())) {
+
+            List<Proceedings> proceedingsList = new ArrayList<>();
+            for (Element<Proceedings> elementProceedings : currentRespondent.get()
+                .getValue().getResponse().getCurrentOrPreviousProceedings()
+                .getProceedingsList()) {
+                proceedingsList.add(elementProceedings.getValue());
+            }
+
+            for (Proceedings proceedings : proceedingsList) {
+                if (null != proceedings.getProceedingDetails()) {
+                    for (Element<OtherProceedingDetails> otherProceedingDetailsElement : proceedings.getProceedingDetails()) {
+                        if (isNotEmpty(otherProceedingDetailsElement.getValue())
+                            && null != otherProceedingDetailsElement.getValue().getOrderDocument()) {
+                            responseDocs.add(element(otherProceedingDetailsElement.getValue().getOrderDocument()));
+                        }
+                    }
+                }
+            }
+        }
+
+        return responseDocs;
+    }
+
     private CaseData addCitizenDocumentsToTheQuarantineList(CaseData caseData, List<Element<Document>> responseDocs,
                                                            UserDetails userDetails) {
 
@@ -157,6 +190,7 @@ public class CaseApplicationResponseService {
                         .documentCreatedOn(Date.from(ZonedDateTime.now(ZoneId.of(LONDON_TIME_ZONE))
                             .toInstant()))
                         .build())
+                    .categoryId(getCategoryId(element))
                     .documentUploadedDate(LocalDateTime.now(ZoneId.of(LONDON_TIME_ZONE)))
                     .uploadedBy(null != userDetails ? userDetails.getFullName() : null)
                     .uploadedByIdamId(null != userDetails ? userDetails.getId() : null)
@@ -165,7 +199,8 @@ public class CaseApplicationResponseService {
                 .id(element.getId()).build())
             .toList());
 
-        log.info("quarantineDocs is {}", quarantineDocs);
+        log.info("QuarantineDocs are {}", quarantineDocs);
+
         if (null != caseData.getDocumentManagementDetails()) {
             caseData.getDocumentManagementDetails().setCitizenQuarantineDocsList(quarantineDocs);
         } else {
@@ -174,8 +209,22 @@ public class CaseApplicationResponseService {
                 .citizenQuarantineDocsList(quarantineDocs)
                 .build());
         }
-        log.info("quarantineDocs is {}", caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList());
         return caseData;
+    }
+
+    private String getCategoryId(Element<Document> element) {
+
+        if (null != element.getValue().getDocumentFileName()) {
+            if (element.getValue().getDocumentFileName().equalsIgnoreCase("C7_Document.pdf")) {
+                return "respondentApplication";
+            } else if (element.getValue().getDocumentFileName().equalsIgnoreCase("C1A_allegation_of_harm.pdf")) {
+                return "respondentC1AApplication";
+            } else {
+                return "ordersFromOtherProceedings";
+            }
+        }
+
+        return "";
     }
 
     private Document generateFinalC1A(CaseData caseData, String authorisation, Map<String, Object> dataMap) throws Exception {
