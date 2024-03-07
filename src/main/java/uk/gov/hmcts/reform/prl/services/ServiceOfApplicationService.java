@@ -1259,6 +1259,7 @@ public class ServiceOfApplicationService {
         try {
             log.info("inside sendEmailToCitizen  {}");
             Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+            log.info(dynamicData);
             dynamicData.put("name", caseData.getApplicants().get(0).getValue().getRepresentativeFullName());
             dynamicData.put(DASH_BOARD_LINK,citizenUrl);
             notificationList.add(element(serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(
