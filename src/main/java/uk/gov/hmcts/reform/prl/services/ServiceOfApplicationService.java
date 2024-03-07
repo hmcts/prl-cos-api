@@ -1186,7 +1186,7 @@ public class ServiceOfApplicationService {
                         List<Document> docs = getNotificationPack(caseData, PrlAppsConstants.P, staticDocs);
                         serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                selectedApplicant.getValue().getEmail(), docs,
-                                               SendgridEmailTemplateNames.SOA_NON_PERSONAL_CA,
+                                               SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                                                dynamicData, SERVED_PARTY_APPLICANT);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
@@ -1202,7 +1202,7 @@ public class ServiceOfApplicationService {
                         docs.addAll(getNotificationPack(caseData, PrlAppsConstants.P, staticDocs));
                         serviceOfApplicationEmailService.sendEmailUsingTemplateWithAttachments(authorization,
                                                selectedApplicant.getValue().getEmail(), docs,
-                                               SendgridEmailTemplateNames.SOA_NON_PERSONAL_CA,
+                                               SendgridEmailTemplateNames.SOA_CA_NON_PERSONAL_SERVICE_APPLICANT_LIP,
                                                dynamicData, SERVED_PARTY_APPLICANT);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
