@@ -27,6 +27,8 @@ import uk.gov.hmcts.reform.prl.models.complextypes.respondentsolicitor.documents
 import uk.gov.hmcts.reform.prl.models.documents.Document;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CaseData;
 import uk.gov.hmcts.reform.prl.models.dto.ccd.CitizenResponseDocuments;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
+import uk.gov.hmcts.reform.prl.services.DocumentLanguageService;
 import uk.gov.hmcts.reform.prl.services.c100respondentsolicitor.C100RespondentSolicitorService;
 import uk.gov.hmcts.reform.prl.services.citizen.CaseService;
 import uk.gov.hmcts.reform.prl.services.citizen.CitizenResponseNotificationEmailService;
@@ -47,6 +49,7 @@ import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.REVIEW_AND_SUBM
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_DRAFT_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_DRAFT_DOCUMENT;
+import static uk.gov.hmcts.reform.prl.constants.PrlAppsConstants.SOLICITOR_C1A_WELSH_FINAL_DOCUMENT;
 import static uk.gov.hmcts.reform.prl.enums.YesOrNo.Yes;
 import static uk.gov.hmcts.reform.prl.utils.ElementUtils.element;
 
@@ -62,6 +65,7 @@ public class CaseApplicationResponseController {
     private final CitizenResponseNotificationEmailService citizenResponseNotificationEmailService;
     private final C100RespondentSolicitorService c100RespondentSolicitorService;
     private final IdamClient idamClient;
+    private final DocumentLanguageService documentLanguageService;
 
 
     @PostMapping(path = "/{caseId}/{partyId}/generate-c7document", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
@@ -182,23 +186,48 @@ public class CaseApplicationResponseController {
                                                     CallbackRequest callbackRequest, Document document, String partyName,
                                                     UserDetails userDetails) throws Exception {
         Document c1aFinalDocument = null;
+        Document c1aFinalDocumentWelsh = null;
         Document c8FinalDocument = null;
         if (currentRespondent.isPresent()) {
             Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
                 callbackRequest,
                 currentRespondent.get()
             );
+            DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
 
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())
                 && isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
                 && Yes.equals(currentRespondent.get().getValue().getResponse().getSafetyConcerns().getHaveSafetyConcerns())) {
-                c1aFinalDocument = documentGenService.generateSingleDocument(
-                    authorisation,
-                    caseData,
-                    SOLICITOR_C1A_FINAL_DOCUMENT,
-                    false,
-                    dataMap
-                );
+                log.info("Insidee -->");
+                //                c1aFinalDocument = documentGenService.generateSingleDocument(
+                //                    authorisation,
+                //                    caseData,
+                //                    SOLICITOR_C1A_FINAL_DOCUMENT,
+                //                    false,
+                //                    dataMap
+                //                );
+
+                if (documentLanguage.isGenEng()) {
+                    log.info("Insidee  ENG-->");
+                    c1aFinalDocument = documentGenService.generateSingleDocument(
+                        authorisation,
+                        caseData,
+                        SOLICITOR_C1A_FINAL_DOCUMENT,
+                        false,
+                        dataMap
+                    );
+                }
+
+                if (documentLanguage.isGenWelsh()) {
+                    log.info("Insidee  WELSH-->");
+                    c1aFinalDocumentWelsh = documentGenService.generateSingleDocument(
+                        authorisation,
+                        caseData,
+                        SOLICITOR_C1A_WELSH_FINAL_DOCUMENT,
+                        true,
+                        dataMap
+                    );
+                }
             }
 
             RespondentDocs respondentDocs = RespondentDocs.builder().build();
@@ -222,6 +251,20 @@ public class CaseApplicationResponseController {
                                      .createdBy(userDetails.getFullName())
                                      .dateCreated(LocalDate.now())
                                      .citizenDocument(c1aFinalDocument)
+                                     .build()
+                    )
+                    .build();
+            }
+
+            if (null != c1aFinalDocumentWelsh) {
+                respondentDocs = respondentDocs
+                    .toBuilder()
+                    .c1aDocumentWelsh(ResponseDocuments
+                                     .builder()
+                                     .partyName(partyName)
+                                     .createdBy(userDetails.getFullName())
+                                     .dateCreated(LocalDate.now())
+                                     .citizenDocument(c1aFinalDocumentWelsh)
                                      .build()
                     )
                     .build();
