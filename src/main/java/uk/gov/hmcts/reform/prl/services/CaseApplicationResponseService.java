@@ -123,8 +123,6 @@ public class CaseApplicationResponseService {
             );
         }
 
-        log.info("responseDocs are {}", responseDocs);
-
         caseData = addCitizenDocumentsToTheQuarantineList(caseData, responseDocs, userDetails);
 
         CaseDetails caseDetailsReturn;
@@ -192,6 +190,8 @@ public class CaseApplicationResponseService {
                     .build())
                 .id(element.getId()).build())
             .toList());
+
+        log.info("QuarantineDocs are {}", quarantineDocs);
 
         if (null != caseData.getDocumentManagementDetails()) {
             caseData.getDocumentManagementDetails().setCitizenQuarantineDocsList(quarantineDocs);
