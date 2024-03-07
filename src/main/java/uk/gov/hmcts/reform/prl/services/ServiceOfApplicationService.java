@@ -2728,7 +2728,7 @@ public class ServiceOfApplicationService {
                 }
                 if (true) {
                     log.info("Access already enabled");
-                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
+                    if (true) {
                         log.info("inside contact preference");
                         sendEmailToCitizenApplicationServedConf(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
