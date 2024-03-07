@@ -138,6 +138,9 @@ public class CaseApplicantResponseServiceTest {
         OtherProceedingDetails proceedingDetails = OtherProceedingDetails
             .builder().orderDocument(Document.builder().build()).build();
         proceedingsDetailsList.add(element(proceedingDetails));
+        proceedingsDetailsList.add(element(proceedingDetails));
+        proceedingsDetailsList.add(element(proceedingDetails));
+
         List<Element<Proceedings>> proceedingsList = new ArrayList<>();
         Proceedings proceedings = Proceedings.builder().proceedingDetails(proceedingsDetailsList).build();
         proceedingsList.add(element(proceedings));

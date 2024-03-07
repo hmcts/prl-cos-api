@@ -144,16 +144,23 @@ public class CaseApplicationResponseService {
         if (currentRespondent.isPresent()
             && isNotEmpty(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings())
             && isNotEmpty(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings().getProceedingsList())) {
+
             List<Proceedings> proceedingsList = new ArrayList<>();
             proceedingsList.add(currentRespondent.get().getValue().getResponse().getCurrentOrPreviousProceedings()
                 .getProceedingsList().stream().iterator().next().getValue());
+
+            List<Element<OtherProceedingDetails>> proceedingsDetailsElementList = new ArrayList<>();
             for (Proceedings proceedings : proceedingsList) {
-                if (isNotEmpty(proceedings.getProceedingDetails())) {
-                    List<Element<OtherProceedingDetails>> proceedingsDetailsElementList = proceedings.getProceedingDetails();
-                    if (isNotEmpty(proceedingsDetailsElementList)) {
-                        List<OtherProceedingDetails> proceedingsDetailsList = new ArrayList<>();
-                        proceedingsDetailsList.add(proceedingsDetailsElementList.stream().iterator().next().getValue());
-                        responseDocs.add(element(proceedingsDetailsList.stream().iterator().next().getOrderDocument()));
+                if (null != proceedings.getProceedingDetails()) {
+                    proceedingsDetailsElementList = proceedings.getProceedingDetails();
+                }
+            }
+
+            if (isNotEmpty(proceedingsDetailsElementList)) {
+                for (Element<OtherProceedingDetails> proceedingsDetailsList : proceedingsDetailsElementList) {
+                    if (isNotEmpty(proceedingsDetailsList.getValue())
+                        && null != proceedingsDetailsList.getValue().getOrderDocument()) {
+                        responseDocs.add(element(proceedingsDetailsList.getValue().getOrderDocument()));
                     }
                 }
             }
