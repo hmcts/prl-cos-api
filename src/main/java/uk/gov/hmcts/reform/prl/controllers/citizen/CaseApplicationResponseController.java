@@ -300,5 +300,76 @@ public class CaseApplicationResponseController {
         }
         return caseData;
     }
+
+    @PostMapping(path = "/{caseId}/{partyId}/generate-c1a-document/{isWelsh}", produces = APPLICATION_JSON_VALUE, consumes = APPLICATION_JSON_VALUE)
+    @Operation(description = "Generate a PDF for citizen as part of Respond to the Application")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Document generated"),
+        @ApiResponse(responseCode = "400", description = "Bad Request"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")})
+    public Document generateC1ADraftDocument(
+        @PathVariable("caseId") String caseId,
+        @PathVariable("partyId") String partyId,
+        @PathVariable("isWelsh") Boolean isWelsh,
+        @RequestHeader(HttpHeaders.AUTHORIZATION) @Parameter(hidden = true) String authorisation,
+        @RequestHeader("serviceAuthorization") String s2sToken) throws Exception {
+
+        log.info("VVVVVV {}",isWelsh);
+        CaseDetails caseDetails = coreCaseDataApi.getCase(authorisation, s2sToken, caseId);
+        CaseData caseData = CaseUtils.getCaseData(caseDetails, objectMapper);
+        updateCurrentRespondent(caseData, YesOrNo.Yes, partyId);
+        Optional<Element<PartyDetails>> currentRespondent
+            = caseData.getRespondents()
+            .stream()
+            .filter(
+                respondent -> YesOrNo.Yes.equals(
+                    respondent.getValue().getCurrentRespondent()))
+            .findFirst();
+
+        CallbackRequest callbackRequest = CallbackRequest.builder().caseDetails(caseDetails).build();
+        log.info(" Generating C1A draft document for respondenttttttt........");
+
+        Document document = documentGenService.generateSingleDocument(
+            authorisation,
+            caseData,
+            DOCUMENT_C7_DRAFT_HINT,
+            false
+        );
+
+
+
+        Map<String, Object> dataMap = c100RespondentSolicitorService.populateDataMap(
+            callbackRequest,
+            currentRespondent.get()
+        );
+
+        log.info(" dataMap........{}",dataMap);
+
+        //        if (Boolean.FALSE.equals(isWelsh)) {
+        //            log.info(" isWelsh..ENG......{}",isWelsh);
+        //            return documentGenService.generateSingleDocument(
+        //                authorisation,
+        //                caseData,
+        //                CITIZEN_C1A_DRAFT_DOCUMENT,
+        //                false,
+        //                dataMap
+        //            );
+        //        }
+        //
+        //        if (Boolean.TRUE.equals(isWelsh)) {
+        //            log.info(" isWelsh..WEL......{}",isWelsh);
+        //            return documentGenService.generateSingleDocument(
+        //                authorisation,
+        //                caseData,
+        //                CITIZEN_C1A_WELSH_DRAFT_DOCUMENT,
+        //                true,
+        //                dataMap
+        //            );
+        //        }
+
+        log.info("C1A draft document generated successfully for respondent ");
+        return document;
+    }
+
 }
 
