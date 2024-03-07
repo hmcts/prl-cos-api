@@ -215,7 +215,8 @@ public class CaseApplicationResponseService {
     private String getCategoryId(Element<Document> element) {
 
         if (null != element.getValue().getDocumentFileName()) {
-            if (element.getValue().getDocumentFileName().equalsIgnoreCase("C7_Document.pdf")) {
+            if (element.getValue().getDocumentFileName().equalsIgnoreCase("C7_Document.pdf")
+            || element.getValue().getDocumentFileName().equalsIgnoreCase("Final_C7_response_Welsh.pdf")) {
                 return "respondentApplication";
             } else if (element.getValue().getDocumentFileName().equalsIgnoreCase("C1A_allegation_of_harm.pdf")) {
                 return "respondentC1AApplication";
