@@ -632,7 +632,6 @@ public class CallbackController {
                     caseDataUpdated.put("taskListVersion", TASK_LIST_VERSION_V2);
                 }
             }
-            CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
             populateCaseCreatedByField(authorisation,caseDataUpdated);
             // Saving the logged-in Solicitor and Org details for the docs..
             CaseData caseData = CaseUtils.getCaseData(callbackRequest.getCaseDetails(), objectMapper);
@@ -886,6 +885,7 @@ public class CallbackController {
         }
         return AboutToStartOrSubmitCallbackResponse.builder().build();
     }
+
     private void populateCaseCreatedByField(String authorisation, Map<String, Object> caseDataUpdated) {
         UserDetails userDetails = userService.getUserDetails(authorisation);
         if (userDetails.getRoles() != null && userDetails.getRoles().contains(COURT_ADMIN_ROLE)) {
