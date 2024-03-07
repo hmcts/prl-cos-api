@@ -92,6 +92,9 @@ public class CaseApplicationResponseService {
 
             if (isNotEmpty(currentRespondent.get().getValue().getResponse())) {
 
+                log.info("response is {}", currentRespondent.get().getValue().getResponse()
+                    .getCurrentOrPreviousProceedings().getProceedingsList());
+
                 responseDocs = checkPreviousProceedings(responseDocs, currentRespondent);
 
                 if (isNotEmpty(currentRespondent.get().getValue().getResponse().getSafetyConcerns())
@@ -195,7 +198,6 @@ public class CaseApplicationResponseService {
                 .id(element.getId()).build())
             .toList());
 
-        log.info("quarantineDocs is {}", quarantineDocs);
         if (null != caseData.getDocumentManagementDetails()) {
             caseData.getDocumentManagementDetails().setCitizenQuarantineDocsList(quarantineDocs);
         } else {
@@ -204,7 +206,6 @@ public class CaseApplicationResponseService {
                 .citizenQuarantineDocsList(quarantineDocs)
                 .build());
         }
-        log.info("quarantineDocs is {}", caseData.getDocumentManagementDetails().getCitizenQuarantineDocsList());
         return caseData;
     }
 
