@@ -2573,7 +2573,6 @@ public class ServiceOfApplicationService {
             partyIds);
         List<Document> packDocs = new ArrayList<>(unwrapElements(unServedApplicantPack.getPackDocument()));
         if (CaseUtils.isCaseCreatedByCitizen(caseData)) {
-            log.info("inside citizen case data ");
             //#SOA TO DO... Add a new method to handle after check emails
             emailNotificationDetails.addAll(sendNotificationsAfterConfCheckToCitizenApplicantsC100(
                 authorization,
@@ -2724,10 +2723,9 @@ public class ServiceOfApplicationService {
                     caseInvite = c100CaseInviteService.generateCaseInvite(selectedApplicant, Yes);
                     caseInvites.add(element(caseInvite));
                 }
-                if (true) {
+                if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
-                    if (true) {
-                        log.info("inside contact preference");
+                    if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
                         sendEmailToCitizen(authorization, caseData, selectedApplicant,
                                            emailNotificationDetails, docs);
                         sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);

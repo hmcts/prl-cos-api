@@ -2524,7 +2524,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
-    //@Test
+    @Test
     public void testSendNotificationsWhenUnServedPackPresentAndContactPreferenceIsPost() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
@@ -2601,7 +2601,7 @@ public class ServiceOfApplicationServiceTest {
         assertEquals("Court", updatedcaseData.getFinalServedApplicationDetailsList().get(0).getValue().getWhoIsResponsible());
     }
 
-    //@Test
+    @Test
     public void testSendNotificationsWhenUnServedPackPresentAndNoCasInvitesPresent() {
 
         PartyDetails partyDetails1 = PartyDetails.builder()
