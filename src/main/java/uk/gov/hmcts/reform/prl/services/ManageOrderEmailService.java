@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.prl.models.dto.notify.serviceofapplication.Respondent
 import uk.gov.hmcts.reform.prl.models.email.EmailTemplateNames;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailConfig;
 import uk.gov.hmcts.reform.prl.models.email.SendgridEmailTemplateNames;
+import uk.gov.hmcts.reform.prl.models.language.DocumentLanguage;
 import uk.gov.hmcts.reform.prl.services.time.Time;
 import uk.gov.hmcts.reform.prl.utils.CaseUtils;
 import uk.gov.hmcts.reform.prl.utils.EmailUtils;
@@ -97,6 +98,9 @@ public class ManageOrderEmailService {
     private final SendgridService sendgridService;
     private final Time dateTime;
     private final CourtFinderService courtLocatorService;
+    private final DocumentLanguageService documentLanguageService;
+    public static final String ENGLISH_EMAIL = "english";
+    public static final String WELSH_EMAIL = "welsh";
 
     public void sendEmail(CaseDetails caseDetails) {
         List<String> emailList = new ArrayList<>();
@@ -341,6 +345,9 @@ public class ManageOrderEmailService {
         log.info("inside SendEmailWhenOrderIsServed**");
         log.info("*** Personal service option selected {}",manageOrders.getServingRespondentsOptionsCA());
         Map<String,Object> dynamicDataForEmail = getDynamicDataForEmail(caseData);
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        dynamicDataForEmail.put(ENGLISH_EMAIL, documentLanguage.isGenEng());
+        dynamicDataForEmail.put(WELSH_EMAIL, documentLanguage.isGenWelsh());
         if (caseTypeofApplication.equalsIgnoreCase(PrlAppsConstants.C100_CASE_TYPE)) {
             if (YesOrNo.No.equals(manageOrders.getServeToRespondentOptions())) {
                 log.info("*** CA non personal service email notifications ***");
@@ -412,6 +419,8 @@ public class ManageOrderEmailService {
                                                     List<Document> orderDocuments,
                                                     Map<String, Object> dynamicDataForEmail,
                                                     SoaSolicitorServingRespondentsEnum respondentOption) {
+        log.info("CA personal service email notifications: handlePersonalServiceNotifications: dynamicDataForEmail: {}",
+                 dynamicDataForEmail);
         String caseTypeOfApplication = CaseUtils.getCaseTypeOfApplication(caseData);
         if (C100_CASE_TYPE.equalsIgnoreCase(caseTypeOfApplication)) {
             nullSafeCollection(caseData.getApplicants()).stream().findFirst().ifPresent(party -> {
@@ -449,7 +458,7 @@ public class ManageOrderEmailService {
         } else if (null != solicitorEmail && (SoaSolicitorServingRespondentsEnum.courtAdmin.equals(respondentOption)
             || SoaSolicitorServingRespondentsEnum.courtBailiff.equals(respondentOption))) {
             sendEmailViaSendGrid(authorisation, orderDocuments, dynamicDataForEmail, solicitorEmail,
-                                 SendgridEmailTemplateNames.SERVE_ORDER_PERSONAL_APPLICANT_ADMIN_BAILIFF
+                                 SendgridEmailTemplateNames.SERVE_ORDER_NON_PERSONAL_SOLLICITOR
             );
         }
     }
@@ -501,6 +510,8 @@ public class ManageOrderEmailService {
     private void handleNonPersonalServiceNotifications(String authorisation, CaseData caseData, ManageOrders manageOrders,
                                                        List<Element<BulkPrintOrderDetail>> bulkPrintOrderDetails,
                                                        List<Document> orderDocuments, Map<String, Object> dynamicDataForEmail) {
+        log.info("CA non-personal service email notifications: handlePersonalServiceNotifications: dynamicDataForEmail: {}",
+                 dynamicDataForEmail);
         DynamicMultiSelectList recipientsOptions = manageOrders.getRecipientsOptions();
         SelectTypeOfOrderEnum isFinalOrder = isOrderFinal(caseData);
         if (recipientsOptions != null) {
