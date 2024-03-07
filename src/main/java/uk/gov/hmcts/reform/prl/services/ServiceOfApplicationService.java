@@ -370,7 +370,8 @@ public class ServiceOfApplicationService {
                     caseData,
                     authorization,
                     emailNotificationDetails,
-                    bulkPrintDetails
+                    bulkPrintDetails,
+                    caseDataMap
                 );
             } else {
                 whoIsResponsibleForServing = handleNotificationsCaSolicitorCreatedCase(
@@ -409,7 +410,8 @@ public class ServiceOfApplicationService {
                 whoIsResponsibleForServing = handleNotificationsForCitizenCreatedCase(caseData,
                                                                                       authorization,
                                                                                       emailNotificationDetails,
-                                                                                      bulkPrintDetails
+                                                                                      bulkPrintDetails,
+                                                                                      caseDataMap
                 );
             } else {
                 whoIsResponsibleForServing = handleNotificationsDaSolicitorCreatedCase(
@@ -432,8 +434,9 @@ public class ServiceOfApplicationService {
     }
 
     private String handleNotificationsForCitizenCreatedCase(CaseData caseData, String authorization,
-                                                          List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                          List<Element<BulkPrintDetails>> bulkPrintDetails) {
+                                                            List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                            List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                            Map<String, Object> caseDataMap) {
         //CITIZEN SCENARIO
         String whoIsResponsibleForServing = COURT;
         List<Document> c100StaticDocs = serviceOfApplicationPostService.getStaticDocs(authorization, CaseUtils.getCaseTypeOfApplication(caseData));
@@ -445,8 +448,10 @@ public class ServiceOfApplicationService {
                 handleNonPersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
                                                    bulkPrintDetails, c100StaticDocs);
             } else {
-                handlePersonalServiceForCitizenC100(caseData, authorization, emailNotificationDetails,
-                                                   bulkPrintDetails, c100StaticDocs);
+                handlePersonalServiceForCitizenC100(caseData, authorization,
+                                                    emailNotificationDetails,
+                                                    bulkPrintDetails, c100StaticDocs,
+                                                    caseDataMap);
             }
             //serving other people in case
             if (null != caseData.getServiceOfApplication().getSoaOtherParties()
@@ -739,6 +744,7 @@ public class ServiceOfApplicationService {
         }
     }
 
+    //RENAME METHOD
     private List<Document> getDocumentsForCaOrBailiffToServeApplicantSolcitor(CaseData caseData, String authorization,
                                                                               List<Document> c100StaticDocs, boolean attachLetters) {
         List<Document> ap8Letters = new ArrayList<>();
@@ -888,11 +894,13 @@ public class ServiceOfApplicationService {
     }
 
     private void handlePersonalServiceForCitizenC100(CaseData caseData, String authorization,
-
-                                                        List<Element<EmailNotificationDetails>> emailNotificationDetails,
-                                                        List<Element<BulkPrintDetails>> bulkPrintDetails,
-                                                        List<Document> c100StaticDocs) {
+                                                     List<Element<EmailNotificationDetails>> emailNotificationDetails,
+                                                     List<Element<BulkPrintDetails>> bulkPrintDetails,
+                                                     List<Document> c100StaticDocs,
+                                                     Map<String, Object> caseDataMap) {
         //Suppressed java:S1172 as emailNotificationDetails not used, but will be used when citizen journey comes into the picture.
+        log.info("Service of application, unrepresented applicant/citizen case");
+        log.info("Personal service options {}", caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA());
         if (SoaCitizenServingRespondentsEnum.unrepresentedApplicant
             .equals(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA())) {
             getNotificationPack(caseData, PrlAppsConstants.L, c100StaticDocs);
@@ -911,9 +919,65 @@ public class ServiceOfApplicationService {
                 }
             }
         } else {
-            getNotificationPack(caseData, PrlAppsConstants.J, c100StaticDocs);
-            getNotificationPack(caseData, PrlAppsConstants.K, c100StaticDocs);
+            log.info("personal service - court bailiff/court admin");
+            List<Document> packjDocs = getDocumentsForCaOrBailiffToServeApplicantSolcitor(caseData, authorization, c100StaticDocs,
+                                                                                          true);
+            //Notify applicants based on contact preference
+            caseData.getApplicants().forEach(applicant -> {
+                if (ContactPreferences.digital.equals(applicant.getValue().getContactPreferences())
+                    && YesOrNo.Yes.equals(applicant.getValue().getCanYouProvideEmailAddress())) {
+                    //Email packs to applicants
+                    emailNotificationDetails.add(element(sendSoaPacksToPartyViaEmail(authorization, caseData, packjDocs, applicant)));
+                } else {
+                    //Post packs to applicants
+                    bulkPrintDetails.add(element(sendSoaPacksToPartyViaPost(authorization, caseData, packjDocs, applicant)));
+                }
+            });
+
+            List<Document> packkDocs = getDocumentsForCaorBailiffToServeRespondents(caseData, authorization, c100StaticDocs, false);
+            final SoaPack unservedRespondentPack = SoaPack.builder()
+                .packDocument(wrapElements(packkDocs))
+                .partyIds(CaseUtils.getPartyIdList(caseData.getRespondents()))
+                .servedBy(PRL_COURT_ADMIN)
+                .packCreatedDate(DateTimeFormatter.ofPattern(DD_MMM_YYYY_HH_MM_SS).format(ZonedDateTime.now(ZoneId.of(EUROPE_LONDON_TIME_ZONE))))
+                .personalServiceBy(caseData.getServiceOfApplication().getSoaCitizenServingRespondentsOptionsCA().toString())
+                .build();
+            caseDataMap.put(UNSERVED_RESPONDENT_PACK, unservedRespondentPack);
         }
+    }
+
+    private EmailNotificationDetails sendSoaPacksToPartyViaEmail(String authorization,
+                                                                 CaseData caseData,
+                                                                 List<Document> packDocs,
+                                                                 Element<PartyDetails> party) {
+
+        Map<String, Object> dynamicData = EmailUtils.getCommonSendgridDynamicTemplateData(caseData);
+        dynamicData.put("name", party.getValue().getLabelForDynamicList());
+        //ADD CITIZEN DASHBOARD URL
+        //dynamicData.put(DASH_BOARD_LINK, manageCaseUrl + PrlAppsConstants.URL_STRING + caseData.getId());
+        DocumentLanguage documentLanguage = documentLanguageService.docGenerateLang(caseData);
+        dynamicData.put("eng", documentLanguage.isGenEng());
+        dynamicData.put("wel", documentLanguage.isGenWelsh());
+
+        return serviceOfApplicationEmailService
+            .sendEmailUsingTemplateWithAttachments(authorization,
+                                                   party.getValue().getEmail(),
+                                                   packDocs,
+                                                   SendgridEmailTemplateNames.SOA_SERVE_APPLICANT_SOLICITOR_NONPER_PER_CA_CB,
+                                                   dynamicData,
+                                                   PRL_COURT_ADMIN
+            );
+    }
+
+    private BulkPrintDetails sendSoaPacksToPartyViaPost(String authorization,
+                                                        CaseData caseData,
+                                                        List<Document> packDocs,
+                                                        Element<PartyDetails> party) {
+        return serviceOfApplicationPostService.sendPostNotificationToParty(caseData,
+                                                                           authorization,
+                                                                           party.getValue(),
+                                                                           packDocs,
+                                                                           SERVED_PARTY_APPLICANT);
     }
 
     public Map<String, Object> handleAboutToSubmit(CallbackRequest callbackRequest) {
