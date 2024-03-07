@@ -2726,8 +2726,7 @@ public class ServiceOfApplicationService {
                 if (isAccessEnabled(selectedApplicant)) {
                     log.info("Access already enabled");
                     if (ContactPreferences.digital.equals(selectedApplicant.getValue().getContactPreferences())) {
-                        sendEmailToCitizen(authorization, caseData, selectedApplicant,
-                                           emailNotificationDetails, docs);
+                        sendEmailToCitizen(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                         sendEmailToCitizenApplicationSendgrid(authorization, caseData, selectedApplicant, emailNotificationDetails, docs);
                     } else {
                         sendPostWithAccessCodeLetterToParty(caseData, authorization,
