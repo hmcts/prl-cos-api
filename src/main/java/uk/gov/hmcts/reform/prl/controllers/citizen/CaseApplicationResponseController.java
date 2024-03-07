@@ -402,8 +402,9 @@ public class CaseApplicationResponseController {
                                                                                           ).build()).build();
 
             PartyDetails p = (PartyDetails)dataMap.get("respondent");
-
-            dataMap.put("respondent",p.toBuilder().response(response1).build());
+            p.setResponse(response1);
+            //dataMap.put("respondent",p.toBuilder().response(response1).build());
+            dataMap.put("respondent",p);
 
             if (Boolean.FALSE.equals(isWelsh)) {
                 log.info(" isWelsh..ENG......{}", isWelsh);
